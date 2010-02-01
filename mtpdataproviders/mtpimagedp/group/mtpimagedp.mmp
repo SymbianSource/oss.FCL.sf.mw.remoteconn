@@ -1,0 +1,103 @@
+// Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+// All rights reserved.
+// This component and the accompanying materials are made available
+// under the terms of "Eclipse Public License v1.0"
+// which accompanies this distribution, and is available
+// at the URL "http://www.eclipse.org/legal/epl-v10.html".
+//
+// Initial Contributors:
+// Nokia Corporation - initial contribution.
+//
+// Contributors:
+//
+// Description:
+//
+
+/**
+ @file
+ @internalTechnology
+*/
+
+#include <comms-infras/commsdebugutility.mmh> 
+
+TARGET          mtpimagedp.dll
+TARGETTYPE      PLUGIN
+UID             0x10009D8D 0x2001FCA2
+VENDORID        0x70000001
+
+CAPABILITY      CommDD PowerMgmt ReadDeviceData WriteDeviceData TrustedUI ProtServ NetworkControl NetworkServices LocalServices ReadUserData WriteUserData
+epocstacksize   0x5000 
+
+MW_LAYER_SYSTEMINCLUDE
+
+USERINCLUDE     ../inc
+USERINCLUDE     ../../../mtpfws/mtpfw/dataproviders/dputility/inc
+USERINCLUDE     ../../../mtpfws/mtpfw/common/inc
+USERINCLUDE     ../../../mtpfws/mtpfw/inc
+USERINCLUDE     ../../../mtpfws/mtpfw/datatypes/inc
+USERINCLUDE     ../../../mtpfws/mtpfw/transports/transportapi/inc
+USERINCLUDE     ../mediasyncserver/inc/
+
+SOURCEPATH      ../src
+
+SOURCE          cmtpimagedp.cpp
+SOURCE          mtpimagedpimplementations.cpp
+
+SOURCE          cmtpimagedpgetobjectproplist.cpp
+SOURCE          cmtpimagedpgetobjectpropssupported.cpp
+SOURCE          cmtpimagedpgetobjectpropdesc.cpp
+SOURCE          cmtpimagedpobjectpropertymgr.cpp
+SOURCE          cmtpimagedpgetobject.cpp
+SOURCE          cmtpimagedpgetobjectreferences.cpp
+SOURCE          cmtpimagedpgetpartialobject.cpp
+SOURCE          cmtpimagedpgetobjectinfo.cpp
+SOURCE          cmtpimagedpgetobjectpropvalue.cpp
+SOURCE          cmtpimagedpgetthumb.cpp
+SOURCE          cmtpimagedpthumbnailcreator.cpp
+SOURCE          cmtpimagedpsendobjectinfo.cpp
+SOURCE          cmtpimagedpdeleteobject.cpp
+SOURCE          cmtpimagedpmoveobject.cpp
+SOURCE          cmtpimagedpcopyobject.cpp
+SOURCE          cmtpimagedpsetobjectpropvalue.cpp
+SOURCE          cmtpimagedpsetobjectproplist.cpp
+SOURCE          cmtpimagedpmdeobserver.cpp
+SOURCE          mtpimagedputilits.cpp
+SOURCE          mtpimagedpgetformatcapabilities.cpp
+SOURCE          cmtpimagedpsetobjectreferences.cpp
+SOURCE          mtpimagedprequestprocessor.cpp 
+SOURCE          cmtpimagedpsetobjectprotection.cpp
+SOURCE          cmtpimagedprenameobject.cpp
+
+// ECOM resource
+START RESOURCE     mtpimagedp.rss    
+TARGET             mtpimagedp.rsc
+END
+
+// Data provider configuration resource file. 
+// The target filename corresponds to the implementation UID.
+START RESOURCE      mtpimagedp_config.rss   
+TARGETPATH          /resource/mtp
+TARGET              2001fcae.rsc
+END
+
+LIBRARY             mtpdataproviderapi.lib
+LIBRARY             mtpdataproviderutility.lib
+LIBRARY             mtpdatatypes.lib
+
+LIBRARY             centralrepository.lib
+LIBRARY		        euser.lib  
+LIBRARY             bafl.lib        // BaflUtils
+LIBRARY		        efsrv.lib 
+LIBRARY             estor.lib       // CFileStore
+LIBRARY             platformenv.lib // PathInfo
+
+// for thumbnail creation related things
+LIBRARY             imageconversion.lib
+LIBRARY             bitmaptransforms.lib
+LIBRARY             fbscli.lib  
+LIBRARY             sysutil.lib
+LIBRARY             mdeclient.lib
+LIBRARY             thumbnailmanager.lib
+LIBRARY             rmediasyncserver.lib
+
+SMPSAFE

@@ -1,0 +1,50 @@
+// Copyright (c) 2005-2009 Nokia Corporation and/or its subsidiary(-ies).
+// All rights reserved.
+// This component and the accompanying materials are made available
+// under the terms of "Eclipse Public License v1.0"
+// which accompanies this distribution, and is available
+// at the URL "http://www.eclipse.org/legal/epl-v10.html".
+//
+// Initial Contributors:
+// Nokia Corporation - initial contribution.
+//
+// Contributors:
+//
+// Description:
+//
+
+/**
+
+bld.inf for BURTestServer
+
+*/
+
+PRJ_TESTEXPORTS
+burtestserver.iby              /epoc32/rom/include/burtestserver.iby
+../testscripts/test.ini        z:/testdata/scripts/sbetestdata/test.ini
+../testscripts/sbeconfig.xml   z:/testdata/scripts/sbetestdata/sbeconfig.xml
+../testscripts/backup_registration.xml   z:/testdata/scripts/sbetestdata/backup_registration.xml
+../testscripts/increamenttest.xml        z:/testdata/scripts/sbetestdata/increamenttest.xml
+../testscripts/test_registration.xml     z:/testdata/scripts/sbetestdata/test_registration.xml
+../testscripts/public_file1.dat          z:/testdata/scripts/sbetestdata/public_file1.dat
+../testscripts/public_file2.dat          z:/testdata/scripts/sbetestdata/public_file2.dat
+../testscripts/private_file1.dat         z:/testdata/scripts/sbetestdata/private_file1.dat
+../testscripts/invalidproxymgr.xml       z:/testdata/scripts/sbetestdata/invalidproxymgr.xml
+../testscripts/testbigfile.dat           z:/testdata/scripts/sbetestdata/testbigfile.dat
+
+../testscripts/test_backuprestore.script        z:/testdata/scripts/sbetestdata/test_backuprestore.script
+../testscripts/test_backuprestoreasync.script   z:/testdata/scripts/sbetestdata/test_backuprestoreasync.script
+../testscripts/test_backupinvalid.script        z:/testdata/scripts/sbetestdata/test_backupinvalid.script
+../testscripts/test_activebackuprestore.script  z:/testdata/scripts/sbetestdata/test_activebackuprestore.script
+../testscripts/test_backuppackage.script        z:/testdata/scripts/sbetestdata/test_backuppackage.script
+../testscripts/test_restorepackage.script       z:/testdata/scripts/sbetestdata/test_restorepackage.script
+../testscripts/test_increament.script           z:/testdata/scripts/sbetestdata/test_increament.script
+
+../testscripts/sbeconfig.xml                /epoc32/release/winscw/udeb/z/private/10202d56/sbeconfig.xml
+../testscripts/sbeconfig.xml                /epoc32/release/winscw/urel/z/private/10202d56/sbeconfig.xml
+
+PRJ_TESTMMPFILES
+    burtestserver.mmp
+
+PRJ_PLATFORMS
+    DEFAULT

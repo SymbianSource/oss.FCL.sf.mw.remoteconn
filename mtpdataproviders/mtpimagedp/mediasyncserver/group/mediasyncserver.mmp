@@ -1,0 +1,50 @@
+// Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+// All rights reserved.
+// This component and the accompanying materials are made available
+// under the terms of "Eclipse Public License v1.0"
+// which accompanies this distribution, and is available
+// at the URL "http://www.eclipse.org/legal/epl-v10.html".
+//
+// Initial Contributors:
+// Nokia Corporation - initial contribution.
+//
+// Contributors:
+//
+// Description:
+//
+
+/**
+ @file
+ @internalTechnology
+*/
+
+#include <comms-infras/commsdebugutility.mmh>
+#include "defaultcaps.hrh"
+
+TARGET        	mediasyncserver.exe
+TARGETTYPE      EXE
+UID             0 0x20024331
+CAPABILITY 	    CAP_SERVER
+VENDORID 	    VID_DEFAULT
+
+SOURCEPATH      ../src
+SOURCE          main.cpp
+SOURCE          cmediasyncserver.cpp
+SOURCE			cmediasyncserversession.cpp 
+SOURCE          cmediasyncobserver.cpp 
+SOURCE          cmediasyncdatabase.cpp
+SOURCE          cmediasyncdatawriter.cpp
+
+USERINCLUDE		  ../inc
+
+MW_LAYER_SYSTEMINCLUDE
+
+LIBRARY		euser.lib
+LIBRARY		edbms.lib
+LIBRARY		efsrv.lib
+LIBRARY		bafl.lib
+LIBRARY		mdeclient.lib
+LIBRARY     ecom.lib
+LIBRARY     flogger.lib     // RFileLogger
+
+SMPSAFE

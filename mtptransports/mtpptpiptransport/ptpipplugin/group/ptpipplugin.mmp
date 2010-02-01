@@ -1,0 +1,69 @@
+// Copyright (c) 2007-2009 Nokia Corporation and/or its subsidiary(-ies).
+// All rights reserved.
+// This component and the accompanying materials are made available
+// under the terms of "Eclipse Public License v1.0"
+// which accompanies this distribution, and is available
+// at the URL "http://www.eclipse.org/legal/epl-v10.html".
+//
+// Initial Contributors:
+// Nokia Corporation - initial contribution.
+//
+// Contributors:
+//
+// Description:
+// ptpipplugin.dll MTP transport plug-in for ptpip
+// 
+//
+
+/**
+ @file
+*/
+
+#include <comms-infras/commsdebugutility.mmh>
+
+
+TARGETTYPE PLUGIN
+TARGET ptpipplugin.dll
+
+UID 0x10009D8D 0xA0004A61
+VENDORID 			0x70000001
+
+CAPABILITY          CommDD PowerMgmt ReadDeviceData WriteDeviceData TrustedUI ProtServ NetworkControl NetworkServices LocalServices ReadUserData WriteUserData
+
+MW_LAYER_SYSTEMINCLUDE_SYMBIAN
+
+USERINCLUDE         ../inc/ 
+USERINCLUDE         ../../ptpipdatatypes/inc
+USERINCLUDE			../../common/inc/
+USERINCLUDE         ../../../../mtpfws/mtpfw/transports/transportapi/inc
+USERINCLUDE         ../../../../mtpfws/mtpfw/common/inc
+
+
+SOURCEPATH 			../src/
+SOURCE 				cptpiptransport.cpp 
+SOURCE 				cptpipconnection.cpp
+SOURCE				cptpipsockhandlerbase.cpp
+SOURCE				cptpipcommandhandler.cpp
+SOURCE				cptpipeventhandler.cpp
+
+
+
+LIBRARY             euser.lib
+
+LIBRARY             mtpdatatypes.lib 
+LIBRARY             mtptransportapi.lib
+LIBRARY				ptpipdatatypes.lib
+LIBRARY				esock.lib 
+LIBRARY				commdb.lib 
+LIBRARY				insock.lib 
+
+
+
+
+
+START RESOURCE      ptpipplugin.rss    
+TARGET              ptpipplugin.rsc
+
+END
+
+SMPSAFE

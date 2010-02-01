@@ -1,0 +1,45 @@
+// Copyright (c) 2006-2009 Nokia Corporation and/or its subsidiary(-ies).
+// All rights reserved.
+// This component and the accompanying materials are made available
+// under the terms of "Eclipse Public License v1.0"
+// which accompanies this distribution, and is available
+// at the URL "http://www.eclipse.org/legal/epl-v10.html".
+//
+// Initial Contributors:
+// Nokia Corporation - initial contribution.
+//
+// Contributors:
+//
+// Description:
+// mtpdevdpextnapi.dll MTP device dp extension data provider API.
+// 
+//
+
+/**
+ @file
+*/
+
+TARGET              mtpdevdpextnapi.dll
+TARGETTYPE          DLL
+UID                 0x1000008D 0x20010ADE
+VENDORID 	        0x70000001
+
+CAPABILITY          CommDD PowerMgmt ReadDeviceData WriteDeviceData TrustedUI ProtServ NetworkControl NetworkServices LocalServices ReadUserData WriteUserData
+
+//CAPABILITY ALL - TCB
+
+MW_LAYER_SYSTEMINCLUDE_SYMBIAN
+USERINCLUDE         ../interface
+USERINCLUDE         ../../inc
+
+SOURCEPATH          ../src 
+SOURCE              cmtpdevdpextn.cpp
+
+
+
+LIBRARY             ecom.lib
+LIBRARY             euser.lib
+
+
+
+SMPSAFE

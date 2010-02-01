@@ -1,0 +1,39 @@
+// Copyright (c) 2006-2009 Nokia Corporation and/or its subsidiary(-ies).
+// All rights reserved.
+// This component and the accompanying materials are made available
+// under the terms of "Eclipse Public License v1.0"
+// which accompanies this distribution, and is available
+// at the URL "http://www.eclipse.org/legal/epl-v10.html".
+//
+// Initial Contributors:
+// Nokia Corporation - initial contribution.
+//
+// Contributors:
+//
+// Description:
+// bld.inf for mtpdevicedp
+// Media Transfer Protocol device data provider
+// 
+//
+
+/**
+ @file
+ @internalTechnology
+*/
+
+
+PRJ_PLATFORMS
+
+PRJ_EXPORTS
+#ifdef SYMBIAN_OLD_EXPORT_LOCATION
+../inc/mextndevplugincallback.h
+#endif
+
+mtpdevice.ico /epoc32/data/z/private/102827a2/mtpdevice.ico
+mtpdevice.ico /epoc32/winscw/c/private/102827a2/mtpdevice.ico
+../inc/mtpdevicedp_config.rh SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(mtp/mtpdevicedp_config.rh)
+
+mtp_devicedp.iby   /epoc32/rom/include/mtp_devicedp.iby
+
+PRJ_MMPFILES 
+mtpdevicedp.mmp

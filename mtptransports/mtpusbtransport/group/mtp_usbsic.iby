@@ -1,0 +1,35 @@
+// Copyright (c) 2005-2009 Nokia Corporation and/or its subsidiary(-ies).
+// All rights reserved.
+// This component and the accompanying materials are made available
+// under the terms of "Eclipse Public License v1.0"
+// which accompanies this distribution, and is available
+// at the URL "http://www.eclipse.org/legal/epl-v10.html".
+//
+// Initial Contributors:
+// Nokia Corporation - initial contribution.
+//
+// Contributors:
+//
+// Description:
+//
+
+#ifndef MTP_USBSIC_IBY
+#define MTP_USBSIC_IBY
+
+#if !defined (SYMBIAN_EXCLUDE_MTP) && !defined(SYMBIAN_EXCLUDE_USB)
+
+#include <mtp_framework.iby>
+
+//MTP USB Data Types Library
+file=ABI_DIR\BUILD_DIR\mtpusbdatatypes.dll				system\libs\mtpusbdatatypes.dll
+
+//MTP USB Still Image Class Controller
+ECOM_PLUGIN(mtpusbsiccc.dll, mtpusbsiccc.rsc)
+
+//MTP USB SIC transport plugin
+ECOM_PLUGIN(mtpusbsicimp.dll, mtpusbsicimp.rsc)
+
+#endif // SYMBIAN_EXCLUDE_MTP
+
+#endif // MTP_USBSIC_IBY
+

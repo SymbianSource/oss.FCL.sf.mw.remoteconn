@@ -1,0 +1,517 @@
+// Copyright (c) 2006-2009 Nokia Corporation and/or its subsidiary(-ies).
+// All rights reserved.
+// This component and the accompanying materials are made available
+// under the terms of "Eclipse Public License v1.0"
+// which accompanies this distribution, and is available
+// at the URL "http://www.eclipse.org/legal/epl-v10.html".
+//
+// Initial Contributors:
+// Nokia Corporation - initial contribution.
+//
+// Contributors:
+//
+// Description:
+//
+
+#include "mtpserviceconfig.rh"
+
+
+//main resource header
+//MTP_SUPPORTED_SERVICES.guid must not be duplicate
+RESOURCE ELEMENTSARRAY mtp_supported_services
+    {
+        elements=
+        {
+        // Full Enumeration Sync Service
+        MTP_SUPPORTED_SERVICES
+            {
+            guid  = { 0x102827A1 , 0x00000001 , 0x00000000, 0x00000000 };
+            svctype = 1;
+            r_serviceinfo = r_elements_fullsync;
+            },
+                
+        //Anchor Sync Service
+        MTP_SUPPORTED_SERVICES
+            {
+            guid = { 0x102827A1 , 0x00000002 , 0x00000000, 0x00000000 };
+            svctype = 1;
+            r_serviceinfo = r_elements_anchorsync;
+            }
+                    
+        };
+    }
+
+
+//---------------Begin ----------Full Sync Service--------------------------------------------------------------------------------------------------    
+
+RESOURCE MTP_SERVICE_INFO r_elements_fullsync
+    {
+    pguid = { 0x102827A1 , 0x00000001 , 0x00000000, 0x00000000 };
+    
+    version = 100;
+    
+    svcguid =  { 0x28d3aac9, 0xc07544be,  0x888165f3, 0x8d305909 };
+    
+    
+    servicename = "FullEnumSync";
+    servicetype = 1;
+    base_serviceid = 0;
+    
+    use_service_guids = r_elements_fullsync_usedguids;
+    
+    svc_property_namespaces = r_elements_fullsync_property_namespaces;
+    svc_properties = r_elements_fullsync_properties;
+    svc_formats = r_elements_fullsync_formats;
+    svc_methods = r_elements_fullsync_methods;
+    svc_events = r_elements_fullsync_events;
+    svc_datablock = r_elements_fullsync_datablock;
+    }
+
+//SVC_GUID must not be duplicate
+RESOURCE ELEMENTSARRAY r_elements_fullsync_usedguids
+    {
+    elements =
+        {      
+//        SVC_GUID
+//            {
+//            }
+            
+        };
+    }
+
+//SVC_GUID must not be duplicate
+RESOURCE ELEMENTSARRAY r_elements_fullsync_property_namespaces
+    {
+    elements =
+        {      
+        SVC_GUID
+            {
+            guid = { 0x63b10e6c, 0x4f3a456d, 0x95cb9894, 0xedec9fa5 };
+            },
+        SVC_GUID
+            {
+            guid = { 0x703d392c, 0x532c4607, 0x91589cea, 0x742f3a16 };
+            }    
+        };
+    }
+
+//(SVC_PROPERTY.namespaceid + SVC_PROPERTY.pkid) must not be duplicate
+RESOURCE ELEMENTSARRAY r_elements_fullsync_properties
+    {
+    elements =
+        {
+
+        SVC_PROPERTY
+            {
+            namespaceid = 0;
+            pkid  = 3;
+            name = "FullEnumVersionProps";
+            datatype = 0x00004002;
+            getset = 0x00;
+            formflag = 0x00;
+            },
+                        
+        SVC_PROPERTY
+            {
+            namespaceid = 0;
+            pkid  = 4;
+            name  = "FullEnumReplicaID";
+            datatype = 0x0000000A;
+            getset = 0x01;
+            formflag = 0x00;
+            },
+            
+        SVC_PROPERTY
+            {
+            namespaceid = 0;
+            pkid  = 7;
+            name  = "FullEnumKnowledgeObjectID";
+            datatype = 0x00000006;
+            getset = 0x00;
+            formflag = 0x00;
+            }, 
+            
+        SVC_PROPERTY
+            {
+            namespaceid = 0;
+            pkid  = 8;
+            name  = "FullEnumLastSyncProxyID";
+            datatype = 0x0000000A;
+            getset = 0x01;
+            formflag = 0x00;
+            },
+            
+        SVC_PROPERTY
+            {
+            namespaceid = 0;
+            pkid  = 9;
+            name  = "FullEnumProviderVersion";
+            datatype = 0x00000004;
+            getset = 0x00;
+            formflag = 0x00;
+            },
+            
+        SVC_PROPERTY
+            {
+            namespaceid = 1;
+            pkid  = 2;
+            name  = "SyncFormat";
+            datatype = 0x0000000A;
+            getset = 0x00;
+            formflag = 0x00;
+            },
+            
+        SVC_PROPERTY
+            {
+            namespaceid = 1;
+            pkid  = 3;
+            name  = "LocalOnlyDelete";
+            datatype = 0x00000002;
+            getset = 0x01;
+            formflag = 0x02;
+            }, 
+            
+        SVC_PROPERTY
+            {
+            namespaceid = 1;
+            pkid  = 4;
+            name  = "FilterType";
+            datatype = 0x00000002;
+            getset = 0x01;
+            formflag = 0x00;
+            },      
+
+        SVC_PROPERTY
+            {
+            namespaceid = 1;
+            pkid  = 5;
+            name  = "SyncObjectReferences";
+            datatype = 0x00000002;
+            getset = 0x00;
+            formflag = 0x02;
+            }
+        };
+    }
+
+//SVC_FORMAT.guid must not be duplicate    
+RESOURCE ELEMENTSARRAY r_elements_fullsync_formats
+    {
+    elements =
+        {
+        
+        SVC_FORMAT
+            {
+            guid = { 0x221bce32, 0x221b4f45, 0xb48b80de, 0x9a93a44a };
+            name = "FullEnumSyncKnowledge";
+            mimetype1 = "";
+            baseformatcode1 = 0;
+            }
+        
+        };
+    }
+
+//SVC_METHOD.guid must not be duplicate    
+RESOURCE ELEMENTSARRAY r_elements_fullsync_methods
+    {
+    elements =
+        {
+        SVC_METHOD
+            {
+            guid = { 0x63803e07, 0xc71345d3, 0x81193479, 0xb31d3592 };
+            name = "BeginSync";
+            obj_ass_formatcode1 = 0;
+            },
+            
+        SVC_METHOD
+            {
+            guid = { 0x40f3f0f7, 0xa539422e, 0x98ddfd8d, 0x385c8849 };
+            name = "EndSync";
+            obj_ass_formatcode1 = 0;
+            }
+        };
+    }   
+
+//SVC_EVENT.guid must not be duplicate  
+RESOURCE ELEMENTSARRAY r_elements_fullsync_events
+    {
+    elements =
+        {
+//        SVC_EVENT
+//            {
+//            datacode = 0xC303 ;
+//            guid = { 0x00000000, 0x00000000, 0x00000000, 0x00000000 };
+//            name = "ServicePropChanged";
+//            },
+//            
+//        SVC_EVENT
+//            {
+//            datacode = 0xC304;
+//            guid = { 0x00000000, 0x00000000, 0x00000000, 0x00000000 };
+//            name = "MethodComplete";
+//            }
+        };
+    }
+
+//SVC_GUID must not be duplicate  
+RESOURCE ELEMENTSARRAY r_elements_fullsync_datablock
+    {
+    elements =
+        {      
+//        SVC_GUID
+//            {
+//            }
+            
+        };
+    }
+
+//---------------End ----------Full Sync Service--------------------------------------------------------------------------------------------------  
+
+
+
+//---------------Begin ----------Anchor Sync Service--------------------------------------------------------------------------------------------------    
+
+RESOURCE MTP_SERVICE_INFO r_elements_anchorsync
+    {
+    pguid = { 0x102827A1 , 0x00000002 , 0x00000000, 0x00000000 };
+    
+    version = 100;
+    
+    svcguid = { 0x056d8b9e, 0xad7a44fc, 0x946f1d63, 0xa25cda9a } ;
+    
+    
+    servicename = "AnchorSync";
+    servicetype = 1;
+    base_serviceid = 0;
+    
+    use_service_guids = r_elements_anchorsync_usedguids;
+    
+    svc_property_namespaces = r_elements_anchorsync_property_namespaces;
+    svc_properties = r_elements_anchorsync_properties;
+    svc_formats = r_elements_anchorsync_formats;
+    svc_methods = r_elements_anchorsync_methods;
+    svc_events = r_elements_anchorsync_events;
+    svc_datablock = r_elements_anchorsync_datablock;
+    }
+
+//SVC_GUID  must not be duplicate
+RESOURCE ELEMENTSARRAY r_elements_anchorsync_usedguids
+    {
+    elements =
+        {      
+//        SVC_GUID
+//            {            
+//            };
+        };
+    }
+
+//SVC_GUID  must not be duplicate
+RESOURCE ELEMENTSARRAY r_elements_anchorsync_property_namespaces
+    {
+    elements =
+        {      
+        SVC_GUID
+            {
+            guid ={0xe65b8fb7,0x8fc74278,0xb9a3ba14,0xc2db40fa};
+            },
+        SVC_GUID
+            {
+            guid ={0x703d392c,0x532c4607,0x91589cea,0x742f3a16};
+            }    
+        };
+    }
+
+//(SVC_PROPERTY.namespaceid + SVC_PROPERTY.pkid) must not be duplicate  
+RESOURCE ELEMENTSARRAY r_elements_anchorsync_properties
+    {
+    elements =
+        {
+
+        SVC_PROPERTY
+            {
+            namespaceid = 0;
+            pkid  = 2;
+            name = "AnchorVersionProps";
+            datatype = 0x00004002;
+            getset = 0x00;
+            formflag = 0x00;
+            },
+                        
+        SVC_PROPERTY
+            {
+            namespaceid = 0;
+            pkid  = 3;
+            name  = "AnchorReplicaID";
+            datatype = 0x0000000A;
+            getset = 0x01;
+            formflag = 0x00;
+            },
+            
+        SVC_PROPERTY
+            {
+            namespaceid = 0;
+            pkid  = 4;
+            name  = "AnchorKnowledgeObjectID";
+            datatype = 0x00000006;
+            getset = 0x00;
+            formflag = 0x00;
+            }, 
+            
+        SVC_PROPERTY
+            {
+            namespaceid = 0;
+            pkid  = 5;
+            name  = "AnchorLastSyncProxyID";
+            datatype = 0x0000000A;
+            getset = 0x01;
+            formflag = 0x00;
+            },
+            
+        SVC_PROPERTY
+            {
+            namespaceid = 0;
+            pkid  = 6;
+            name  = "AnchorCurrentAnchor";
+            datatype = 0x0000400A;
+            getset = 0x01;
+            formflag = 0x00;
+            },
+        SVC_PROPERTY
+            {
+            namespaceid = 0;
+            pkid  = 7;
+            name  = "AnchorProviderVersion";
+            datatype = 0x00000006;
+            getset = 0x00;
+            formflag = 0x00;
+            },
+            
+        SVC_PROPERTY
+            {
+            namespaceid = 1;
+            pkid  = 2;
+            name  = "SyncFormat";
+            datatype = 0x0000000A;
+            getset = 0x00;
+            formflag = 0x00;
+            },
+            
+        SVC_PROPERTY
+            {
+            namespaceid = 1;
+            pkid  = 3;
+            name  = "LocalOnlyDelete";
+            datatype = 0x00000002;
+            getset = 0x01;
+            formflag = 0x02;
+            }, 
+            
+        SVC_PROPERTY
+            {
+            namespaceid = 1;
+            pkid  = 4;
+            name  = "FilterType";
+            datatype = 0x00000002;
+            getset = 0x01;
+            formflag = 0x00;
+            },
+            
+        SVC_PROPERTY
+            {
+            namespaceid = 1;
+            pkid  = 5;
+            name  = "SyncObjectReferences";
+            datatype = 0x00000002;
+            getset = 0x01;
+            formflag = 0x02;
+            }
+            
+        };
+    }
+
+//SVC_FORMAT.guid must not be duplicate     
+RESOURCE ELEMENTSARRAY r_elements_anchorsync_formats
+    {
+    elements =
+        {
+        SVC_FORMAT
+            {
+            guid = { 0x37c550bc, 0xf2314727, 0xbbbc4cb3, 0x3a3f3ecd };
+            name = "AnchorKnowledge";
+            mimetype1 = "";
+            baseformatcode1 = 0;
+            },
+            
+        SVC_FORMAT
+            {
+            guid = { 0xf35527c1, 0xce4a487a, 0x9d299383, 0x3569321e };
+            name = "AnchorResults";
+            mimetype1 = "";
+            baseformatcode1 = 0;
+            }
+        };
+    }
+    
+//SVC_METHOD.guid must not be duplicate 
+RESOURCE ELEMENTSARRAY r_elements_anchorsync_methods
+    {
+    elements =
+        {
+        SVC_METHOD
+            {
+            guid = { 0x37c550bc, 0xf2314727, 0xbbbc4cb3, 0x3a3f3ecd };
+            name = "GetChangesSinceAnchor";
+            obj_ass_formatcode1 = 0;
+            },
+                
+        SVC_METHOD
+            {
+            guid = { 0x63803e07, 0xc71345d3, 0x81193479, 0xb31d3592 };
+            name = "BeginSync";
+            obj_ass_formatcode1 = 0;
+            },
+            
+        SVC_METHOD
+            {
+            guid = { 0x40f3f0f7, 0xa539422e, 0x98ddfd8d, 0x385c8849 };
+            name = "EndSync";
+            obj_ass_formatcode1 = 0;
+            }
+        };
+    }   
+
+//SVC_EVENT.guid must not be duplicate  
+RESOURCE ELEMENTSARRAY r_elements_anchorsync_events
+    {
+    elements =
+        {
+//        SVC_EVENT
+//            {
+//            datacode = 0xC303 ;
+//            guid = { 0, 0, 0, 0 };
+//            name = "ServicePropChanged";
+//            },
+//            
+//        SVC_EVENT
+//            {
+//            datacode = 0xC304;
+//            guid = { 0, 0, 0, 1 };
+//            name = "MethodComplete";
+//            }
+        };
+    }
+
+//SVC_GUID must not be duplicate  
+RESOURCE ELEMENTSARRAY r_elements_anchorsync_datablock
+    {
+    elements =
+        {      
+//        SVC_GUID
+//            {
+//            }
+            
+        };
+    }
+    
+//---------------End ----------Full Sync Service--------------------------------------------------------------------------------------------------  
+
+

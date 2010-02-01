@@ -1,0 +1,69 @@
+// Copyright (c) 2005-2009 Nokia Corporation and/or its subsidiary(-ies).
+// All rights reserved.
+// This component and the accompanying materials are made available
+// under the terms of "Eclipse Public License v1.0"
+// which accompanies this distribution, and is available
+// at the URL "http://www.eclipse.org/legal/epl-v10.html".
+//
+// Initial Contributors:
+// Nokia Corporation - initial contribution.
+//
+// Contributors:
+//
+// Description:
+#ifndef MTP_FRAMEWORK_IBY
+#define MTP_FRAMEWORK_IBY
+
+
+#include <mtp_devicedp.iby>
+
+
+#if !defined(SYMBIAN_EXCLUDE_MTP)
+
+ 
+// MTP Data Types Library
+file=ABI_DIR\BUILD_DIR\mtpdatatypes.dll    system\libs\mtpdatatypes.dll
+
+// MTP Framework Library
+file=ABI_DIR\BUILD_DIR\mtpframework.dll    			system\libs\mtpframework.dll
+
+// MTP SERVER
+file=ABI_DIR\BUILD_DIR\mtpserver.exe    system\libs\mtpserver.exe
+
+// MTP Client
+file=ABI_DIR\BUILD_DIR\mtpclient.dll    system\libs\mtpclient.dll
+
+// MTP Generic Transport API
+file=ABI_DIR\DEBUG_DIR\mtptransportapi.dll  system\libs\mtptransportapi.dll
+
+// MTP Data Provider API
+file=ABI_DIR\BUILD_DIR\mtpdataproviderapi.dll    system\libs\mtpdataproviderapi.dll
+
+// MTP Device Data Provider Extension API
+file=ABI_DIR\BUILD_DIR\mtpdevdpextnapi.dll    system\libs\mtpdevdpextnapi.dll
+
+// MTP Data Provider Utility
+file=ABI_DIR\BUILD_DIR\mtpdataproviderutility.dll    system\libs\mtpdataproviderutility.dll
+
+
+// MTP Proxy Data Provider
+ECOM_PLUGIN(mtpproxydp.dll, mtpproxydp.rsc)
+
+// MTP plugin registration resource file
+data=EPOCROOT##epoc32\data\Z\resource\mtp\102827B1.rsc  resource\mtp\102827B1.rsc 
+
+// MTP dummydp resource file
+data=EPOCROOT##epoc32\data\Z\resource\mtp\dummydp.rsc  resource\mtp\dummydp.rsc 
+
+// MTP Service Config resource file
+data=EPOCROOT##epoc32\data\Z\resource\mtp\services.rsc  resource\mtp\services.rsc 
+
+// MTP Backup registration file
+data=EPOCROOT##epoc32\data\Z\private\102827a2\backup_registration.xml  private\102827a2\backup_registration.xml
+
+//MTP device icon property file 
+data=EPOCROOT##epoc32\data\Z\private\102827a2\mtpdevice.ico  private\102827a2\mtpdevice.ico
+
+#endif // SYMBIAN_EXCLUDE_MTP
+
+#endif // MTP_FRAMEWORK_IBY

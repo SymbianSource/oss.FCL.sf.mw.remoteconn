@@ -1,0 +1,36 @@
+// Copyright (c) 2006-2009 Nokia Corporation and/or its subsidiary(-ies).
+// All rights reserved.
+// This component and the accompanying materials are made available
+// under the terms of "Eclipse Public License v1.0"
+// which accompanies this distribution, and is available
+// at the URL "http://www.eclipse.org/legal/epl-v10.html".
+//
+// Initial Contributors:
+// Nokia Corporation - initial contribution.
+//
+// Contributors:
+//
+// Description:
+// Build options for MTP
+// Special build flag, capture request, data phase and responses to disk.
+// 
+//
+
+/**
+ @file
+ @internalComponent
+*/
+//#define MTP_CAPTURE_TEST_DATA 1
+
+/**
+Special build flag, enable this macro will make only "c:\mtptest" and 
+"z:\mtptest" visible to the file dp.
+*/
+#define MTP_PROXY_TEST_TRANSPORT 1
+
+
+/**
+Build flag to enable/disable Flogger __FLOG_HEXDUMP within the USB transport, UDEB builds only
+Note: When enabled this flag may cause lockups when transferring large (1024KB+ files) over USB.
+*/
+//#define MTP_DEBUG_FLOG_HEX_DUMP 1

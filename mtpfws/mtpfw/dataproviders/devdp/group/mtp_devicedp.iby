@@ -1,0 +1,35 @@
+// Copyright (c) 2005-2009 Nokia Corporation and/or its subsidiary(-ies).
+// All rights reserved.
+// This component and the accompanying materials are made available
+// under the terms of "Eclipse Public License v1.0"
+// which accompanies this distribution, and is available
+// at the URL "http://www.eclipse.org/legal/epl-v10.html".
+//
+// Initial Contributors:
+// Nokia Corporation - initial contribution.
+//
+// Contributors:
+//
+// Description:
+//
+
+
+#ifndef MTP_DEVICEDP_IBY
+#define MTP_DEVICEDP_IBY
+
+#if !defined(SYMBIAN_EXCLUDE_MTP)
+
+
+// MTP Device Data Provider
+ECOM_PLUGIN(mtpdevicedp.dll, mtpdevicedp.rsc)
+
+// MTP plugin registration resource file
+data=EPOCROOT##epoc32\data\Z\resource\mtp\102827AF.rsc  resource\mtp\102827AF.rsc 
+
+
+
+
+
+#endif //SYMBIAN_EXCLUDE_MTP
+
+#endif  //MTP_DEVICEDP_IBY

@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<relnotes name="OBEX Protocol">
+  <purpose>
+    OBEX session protocol over IrDA, Bluetooth, and USB transports, supporting connections from simple beaming all the way to full-fledged synchronisation technologies such as SyncML and IrMC (note: Obex can support IrMC, but it is not actually supported in the OS at the moment).
+  </purpose>
+
+  <defect number="DEF141510" title="Missing distribution.policy.s60 files " revision="032">
+    Added source \sf\mw\remoteconn\obex\obexprotocol in obex.mrp file 
+  </defect>
+
+  <defect number="PDEF139836" title=".esk and .cmi files do not have header" revision="031">
+    Added copyright headers
+  </defect>
+  
+  <deliverystep number="1657" name="Remove IrDA" osproject="SymTB9.2" revision="001">
+	  <preq number="2613" title="Remove IrDA"/>
+  </deliverystep>
+  <milestone project="GT0418" number="3.3"/>
+
+  <defect number="DEF133406" title="Obex def files changes for armv7 " revision="030">
+    Remove IMPORT_C from CObexServer::~CObexServer and the entry in mark bwins def file absent.
+  </defect>
+
+  <defect number="DEF132890" title="[ONB Coverity] CHECKED_RETURN error in TObex " revision="029">
+    Static analysis failures corrected.
+  </defect>
+
+  <defect number="DEF130710" title="Remove filename case check test code errors from OBEX" revision="028">
+    Static analysis failures corrected.
+  </defect>
+
+  <defect number="DEF130790" title="[Coverity]-MISSING_BREAK -obex/obextransport" revision="027">
+    Static analysis failures corrected.
+  </defect>
+
+  <defect number="DEF128204" title="errors in IM tagging in shortlink" revision="026">
+    Correct the IM tagging.
+  </defect>
+
+  <defect number="PDEF126953" title="It is often useful to call RFile::Flush() before a file is closed" revision="025">
+     Invoke RFile::Flush() when final file write is finished.
+  </defect>
+
+  <defect number="DEF126185" title="Extra member qualifications" revision="024">
+    'CObex::' removed from member function CancelObexConnection declaration.
+  </defect>
+
+  <defect number="DEF124961" title="[Coverity]CHECKED_RETURN failure in TObexInternalHeader" revision="023">
+    If GetHVText returns an error, the number of bytes actually written by WriteOut is 0.
+  </defect>
+
+  <defect number="DEF124960" title="[Coverity]4 CHECKED_RETURN failures in CObexClient" revision="022">
+    Check returned value from InsertData and leave if not enough space to insert data.
+  </defect>
+
+  <defect number="DEF124958" title="[Coverity]FORWARD_NULL failure in CObexBaseObject" revision="021">
+	The "if is null" statements were not necessary. replaced with debug assertions.     
+  </defect>
+
+  <defect number="DEF124957" title="[Coverity]FORWARD_NULL failure in CObexBufObject" revision="020">
+    Added two assertions to avoid calling the methods on an invalid pointer.
+  </defect>
+
+  <defect number="DEF124956" title="[Coverity] REVERSE_INULL failure in CObexServer" revision="019">
+    put some assertions to be sure that this pointer is not null (it must be valid)
+  </defect>
+
+  <defect number="DEF121787" title="Changes required to match fix made in Base USB Peripheral driver" revision="018">
+    Add indication that no control transfers are expected on either obex interface.
+  </defect>
+
+  <defect number="PDEF119945" title="Configuring L2CAP MTU for optimum performance " revision="017">
+    Changes to accomodate MTU size changes.
+  </defect>
+
+  <defect number="DEF119732" title="OBEX logger's LEAVEIFERRORL sometimes leaves if not error" revision="016">
+    OBEX logger's LEAVEIFERRORL did not leave from User::LeaveIfError if you pass it a positive value.
+  </defect>
+
+  <defect number="DEF117240" title="Correct LeaveScan error in emptyheaderstest.cpp" revision="015">
+    Changed methods names according to coding standard due to avoid LeaveScan error.
+  </defect>
+
+  <defect number="DEF117239" title="Correct LeaveScan error in IrOBEXUtil" revision="014">
+    Changed code to avoid LeaveScan reporting error.
+  </defect>
+
+  <defect number="PDEF114506" title="Klocwork issues in obex" revision="013">
+    Initialise max send/recv packet sizes to the maximum size of an IrDA packet before GetOpt is called.
+  </defect>
+
+  <defect number="PDEF113644" title="Obex needs to ignore malformed time Headers " revision="012">
+    Modified function CObexBaseObject::ParseNextReceivePacket so that, instead of interrupting the parsing and returning an error when there are problems with the TIME header, it ignores the header and continues parsing the packet.
+  </defect>
+
+  <defect number="PDEF112614" title="TObex panics if it gets a large name header when acting as FTP server" revision="011">
+    TObex will now truncate filename of an object that is PUT on the server if its complete path is too long to fit within the OS limit (256 chars).
+  </defect>
+
+  <defect number="PDEF112489" title="Misleading Obex error code" revision="010">
+    Rename error code to EUnexpectedChallengeResponse.
+  </defect>
+
+  <defect number="PDEF107489" title="Obex server error handling problem" revision="009">
+    ERespUnauthorized will be treated as a valid response to connect request, because this can be originated from obex packet access extension.
+  </defect>
+
+  <defect number="PDEF106896" title="TTG:Unexpected response to PUT/GET Requests with Auth'n Challenge" revision="008">
+    Alter Obex response to Put, Get and SetPath requests that contain an authentication challenge. These now respond with the "Unauthorized" opcode.
+  </defect>
+
+  <minorchange revision="007">
+    PDEF106501: Correctly set final bit flag on EOB header response for empty objects.
+  </minorchange>
+
+  <defect number="DEF101319" title="Filename case check failures in source build and test" revision="006">
+    Corrected filenames to enable building of Symbian OS in Linux
+  </defect>
+
+  <defect number="PDEF103383" title="?P903i? could not receive Contact data via Infrared" revision="005">
+    Workaround for interop with P903i and others whose servers return opcode success (instead of continue) in response to a Put request.
+  </defect>
+
+  <defect number="PDEF101514" title="TTG:OBEX server respond improper response instead of Bad Request(0xC0)" revision="004">
+    Upgrade the Obex server so that if an Abort command is received whilst an Obex Session his being Connected or when it is not Connected then, instead of bringing the underlying transport down, the Obex server replies with success.
+  </defect>
+
+  <defect number="PDEF101048" title="Renameobex test files testDef094745.*" revision="003">
+    Renamed test files and menu items in the manual test Tobex so that they are based on the functionality being tested rather than using the numerical code for the defect that they were produced for.
+  </defect>
+
+  <defect number="PDEF100899" title="TTG:&lt;On receiving other than Other Response(OK(A0h), it cannot be disconnected &gt;" revision="002">
+    Fix to Obex to bring transport down if clean disconnection fails.
+  </defect>
+
+  <defect number="PDEF100845" title="Fix for PDEF091783 causes authentication regression" revision="001">
+    Authentication loophole removed
+  </defect>
+ </relnotes>

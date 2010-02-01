@@ -1,0 +1,43 @@
+// Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+// All rights reserved.
+// This component and the accompanying materials are made available
+// under the terms of "Eclipse Public License v1.0"
+// which accompanies this distribution, and is available
+// at the URL "http://www.eclipse.org/legal/epl-v10.html".
+//
+// Initial Contributors:
+// Nokia Corporation - initial contribution.
+//
+// Contributors:
+//
+// Description:
+//
+
+/**
+ @file
+ @internalTechnology
+*/
+
+#if !defined(GCCXML)  // NO GCCXML
+
+#include "../mediasyncserver/group/bld.inf"
+
+PRJ_PLATFORMS
+DEFAULT
+
+PRJ_MMPFILES
+../group/mtpimagedp.mmp
+
+PRJ_EXPORTS
+// Note: these files are exported for testing and techview only. Not used in a device
+2001FCA2.txt /epoc32/data/z/private/10202be9/2001FCA2.txt
+2001FCA2.txt /epoc32/release/winscw/udeb/z/private/10202be9/2001FCA2.txt
+2001FCA2.txt /epoc32/release/winscw/urel/z/private/10202be9/2001FCA2.txt
+
+../group/mtp_imagedp.iby  /epoc32/rom/include/mtp_imagedp.iby
+
+// ConfML files
+../conf/mtp_imagedp.confml          MW_LAYER_EXPORTS_CONFML(mtp_imagedp.confml)
+../conf/mtp_imagedp_2001fca2.crml   MW_LAYER_EXPORTS_CRML(mtp_imagedp_2001fca2.crml)
+
+#endif

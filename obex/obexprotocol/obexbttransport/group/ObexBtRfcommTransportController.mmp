@@ -1,0 +1,56 @@
+// Copyright (c) 2005-2009 Nokia Corporation and/or its subsidiary(-ies).
+// All rights reserved.
+// This component and the accompanying materials are made available
+// under the terms of "Eclipse Public License v1.0"
+// which accompanies this distribution, and is available
+// at the URL "http://www.eclipse.org/legal/epl-v10.html".
+//
+// Initial Contributors:
+// Nokia Corporation - initial contribution.
+//
+// Contributors:
+//
+// Description:
+// ObexBtRfcommTransportController.dll Part of the Obex BT RFCOMM 
+// Controller plugin, used to control the RFCOMM transport.
+// ObexBtRfcommTransportController.rsc Part of the Obex BT RFCOMM 
+// Controller plugin, used to control the RFCOMM transport.
+// 
+//
+
+/**
+ @file
+*/
+
+TARGET			obexbtrfcommtransportcontroller.dll //Recommended unpaged
+TARGETTYPE		PLUGIN
+// UID2 = 0x10009d8d for ECOM plugins.
+// UID3 = the 'DLL UID' (see resource file)
+UID             0x10009d8d 0x1020E043
+VENDORID		0x70000001
+CAPABILITY		All -Tcb
+
+SOURCEPATH		../src
+SOURCE			ObexBtRfcommImpCollection.cpp
+SOURCE			ObexBtRfcommTransportController.cpp
+SOURCE			ObexActiveRfcommConnector.cpp
+SOURCE			ObexListenerRfcommConnector.cpp
+SOURCE			ObexRfcommConnector.cpp
+
+START RESOURCE	1020E043.rss
+target obexbtrfcommtransportcontroller.rsc
+END
+
+USERINCLUDE		../inc
+USERINCLUDE		../../common
+
+MW_LAYER_SYSTEMINCLUDE_SYMBIAN
+
+LIBRARY			euser.lib 
+LIBRARY			obexcommontransport.lib
+LIBRARY			esock.lib
+LIBRARY 		bluetooth.lib
+
+NOEXPORTLIBRARY
+
+SMPSAFE

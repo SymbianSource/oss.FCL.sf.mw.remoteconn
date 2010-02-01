@@ -1,0 +1,91 @@
+// Copyright (c) 2006-2009 Nokia Corporation and/or its subsidiary(-ies).
+// All rights reserved.
+// This component and the accompanying materials are made available
+// under the terms of "Eclipse Public License v1.0"
+// which accompanies this distribution, and is available
+// at the URL "http://www.eclipse.org/legal/epl-v10.html".
+//
+// Initial Contributors:
+// Nokia Corporation - initial contribution.
+//
+// Contributors:
+//
+// Description:
+//
+
+#include <comms-infras/commsdebugutility.mmh>
+
+TARGET              mtpdevicedp.dll
+TARGETTYPE          PLUGIN
+UID                 0x10009D8D 0x102827A4
+VENDORID            0x70000001
+
+CAPABILITY          CommDD PowerMgmt ReadDeviceData WriteDeviceData TrustedUI ProtServ NetworkControl NetworkServices LocalServices ReadUserData WriteUserData
+
+MW_LAYER_SYSTEMINCLUDE_SYMBIAN
+USERINCLUDE         ../inc
+USERINCLUDE         ../../dputility/inc
+USERINCLUDE         ../../../common/inc 
+USERINCLUDE         ../../../inc
+USERINCLUDE         ../../../transports/transportapi/inc
+USERINCLUDE         ../devdpextnapi/interface
+
+SOURCEPATH          ../src 
+SOURCE              cmtpclosesession.cpp
+SOURCE				cmtpdevdpexclusionmgr.cpp
+SOURCE              cmtpdevicedatastore.cpp
+SOURCE              cmtpdevicedp.cpp
+SOURCE              cmtpdevicedpconfigmgr.cpp
+SOURCE 				cmtpdevrequestunknown.cpp
+SOURCE 				cmtpgetdeviceinfo.cpp
+SOURCE 				cmtpgetdevicepropdesc.cpp
+SOURCE 				cmtpgetdevicepropvalue.cpp
+SOURCE 				cmtpgetnumobjects.cpp
+SOURCE 				cmtpgetobjecthandles.cpp
+SOURCE 				cmtpgetstorageids.cpp
+SOURCE 				cmtpgetstorageinfo.cpp
+SOURCE 				cmtpopensession.cpp
+SOURCE 				cmtpresetdevice.cpp
+SOURCE 				cmtpsetdevicepropvalue.cpp
+SOURCE              cmtpstoragewatcher.cpp
+SOURCE          	cmtptypedeviceinfo.cpp
+SOURCE              mtpdevicedpimplementations.cpp
+SOURCE              mtpdevicedpprocessor.cpp
+SOURCE              rmtpdevicedpsingletons.cpp 
+SOURCE              cmtpdevdpextnmap.cpp
+SOURCE              cmtpresetdevicepropvalue.cpp 
+SOURCE				cmtpgetserviceinfo.cpp 
+SOURCE				cmtpgetserviceids.cpp 
+
+
+
+SOURCEPATH          ../src 
+START RESOURCE      mtpdevicedp.rss    
+TARGET              mtpdevicedp.rsc
+END
+
+// Data provider configuration resource file. 
+// The target filename corresponds to the implementation UID.
+START RESOURCE      mtpdevicedp_config.rss
+HEADER   
+TARGETPATH          /resource/mtp
+TARGET              102827af.rsc
+END
+
+LIBRARY             bafl.lib
+LIBRARY             efsrv.lib
+LIBRARY             etel3rdparty.lib 
+LIBRARY             estor.lib 
+LIBRARY             euser.lib
+LIBRARY             hal.lib 
+LIBRARY             edbms.lib
+LIBRARY      		centralrepository.lib
+
+LIBRARY             mtpdatatypes.lib
+LIBRARY             mtpdataproviderapi.lib
+LIBRARY             mtpframework.lib
+LIBRARY		        tzclient.lib 
+LIBRARY             mtpdataproviderutility.lib 
+LIBRARY             ecom.lib 
+LIBRARY             mtpdevdpextnapi.lib
+SMPSAFE

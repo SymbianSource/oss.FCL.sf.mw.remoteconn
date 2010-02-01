@@ -1,0 +1,61 @@
+// Copyright (c) 2005-2009 Nokia Corporation and/or its subsidiary(-ies).
+// All rights reserved.
+// This component and the accompanying materials are made available
+// under the terms of "Eclipse Public License v1.0"
+// which accompanies this distribution, and is available
+// at the URL "http://www.eclipse.org/legal/epl-v10.html".
+//
+// Initial Contributors:
+// Nokia Corporation - initial contribution.
+//
+// Contributors:
+//
+// Description:
+// obex common transport classes mmp file
+// ObexCommonTransport.dll Obex common transport classes
+// 
+//
+
+/**
+ @file
+*/
+
+target obexcommontransport.dll //Recommended unpaged
+
+CAPABILITY All -Tcb
+TARGETTYPE	dll
+
+uid			0x1000008d 0x1020dfff 
+
+SOURCEPATH 	../src
+SOURCE 		obextransportcontrollerbase.cpp
+SOURCE        	obexpacket.cpp
+SOURCE        	obexdata.cpp
+SOURCE 		obexinternalheader.cpp
+SOURCE 		obexconnectdata.cpp
+SOURCE         	ObexTransportUtil.cpp
+SOURCE 		obexconnector.cpp
+SOURCE        	obexactiverw.cpp
+SOURCE          mobextransportnotify.cpp
+SOURCE 		obexactivereader.cpp
+SOURCE 		obexactivewriter.cpp
+SOURCE          ObexReaderBase.cpp
+SOURCE 		ObexWriterBase.cpp
+
+// Logging functions
+SOURCE		logengine.cpp
+
+USERINCLUDE 	../inc
+USERINCLUDE		../../common
+
+MW_LAYER_SYSTEMINCLUDE_SYMBIAN
+
+library			euser.lib
+library			ecom.lib
+library 		esock.lib
+
+VENDORID 0x70000001
+
+#include <comms-infras/commsdebugutility.mmh>
+
+SMPSAFE

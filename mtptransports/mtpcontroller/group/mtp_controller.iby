@@ -1,0 +1,28 @@
+// Copyright (c) 2005-2009 Nokia Corporation and/or its subsidiary(-ies).
+// All rights reserved.
+// This component and the accompanying materials are made available
+// under the terms of "Eclipse Public License v1.0"
+// which accompanies this distribution, and is available
+// at the URL "http://www.eclipse.org/legal/epl-v10.html".
+//
+// Initial Contributors:
+// Nokia Corporation - initial contribution.
+//
+// Contributors:
+//
+// Description:
+//
+
+#ifndef MTP_CONTROLLER_IBY
+#define MTP_CONTROLLER_IBY
+
+#if !defined (SYMBIAN_EXCLUDE_MTP)
+
+#include <mtp_framework.iby>
+
+//MTP Controller LOCOD service plugin
+ECOM_PLUGIN(mtpcontroller.dll, mtpcontroller.rsc)
+
+#endif// SYMBIAN_EXCLUDE_MTP
+
+#endif// MTP_CONTROLLER_IBY

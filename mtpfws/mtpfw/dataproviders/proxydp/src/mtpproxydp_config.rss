@@ -1,0 +1,80 @@
+// Copyright (c) 2006-2009 Nokia Corporation and/or its subsidiary(-ies).
+// All rights reserved.
+// This component and the accompanying materials are made available
+// under the terms of "Eclipse Public License v1.0"
+// which accompanies this distribution, and is available
+// at the URL "http://www.eclipse.org/legal/epl-v10.html".
+//
+// Initial Contributors:
+// Nokia Corporation - initial contribution.
+//
+// Contributors:
+//
+// Description:
+//
+
+#include <mtp/mtpdataproviderconfig.rh>
+
+
+STRUCT ELEMENTSARRAY
+	{
+	STRUCT	elements[];
+	}
+
+STRUCT DP_FORMATCODE_CONFIG
+	{
+	LONG	dp_uid;	   //  DP UID
+	LTEXT	file_name[];   //  array of FileNames
+	}
+
+//
+
+
+//
+// Resources.  (*Append* new resources!!)
+//
+
+RESOURCE MTP_DATA_PROVIDER dpConfig
+    {
+    type = KMTPDataProviderTypeECOM;
+    major_version = 1;
+    object_enumeration_persistent = 0;
+    supported_modes = KMTPModeMTP;  
+    server_name = "";
+    server_image_name = "";
+    opaque_resource = r_elements_info;
+    }
+
+RESOURCE ELEMENTSARRAY r_elements_info
+	{
+        elements=
+		{
+		DP_FORMATCODE_CONFIG
+			{
+			dp_uid = 0x2001B137;
+			file_name  = {				
+					"san.ds",
+					"itor.ds" 
+					 }; 
+			},
+			
+		//*
+		//* [SP-Format-0x3002]Special processing for PictBridge DP which own 6 dps file with format 0x3002, 
+		//* but it does not really own the format 0x3002.
+		//* 
+		//* SendObjectInfo with one of the 3 files is directly routed to PictBridge DP.
+		//*	
+		DP_FORMATCODE_CONFIG
+			{
+			dp_uid = 0x2001fe3c;
+			file_name  = {
+					"hdiscvry.dps",
+					"hrequest.dps",
+					"hrsponse.dps"
+					 }; 
+			}
+		//ADD New Data Provider Uid's with the supported FileNames		
+		};
+	
+        }
+

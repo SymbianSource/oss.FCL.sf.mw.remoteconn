@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<relnotes name="OBEX Extension API">
+  <purpose>
+  </purpose>
+  
+  <defect number="PDEF139836" title=".esk and .cmi files do not have header" revision="001">
+    Added copyright headers
+  </defect>
+  
+</relnotes>

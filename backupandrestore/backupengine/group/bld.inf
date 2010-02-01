@@ -1,0 +1,41 @@
+// Copyright (c) 2005-2009 Nokia Corporation and/or its subsidiary(-ies).
+// All rights reserved.
+// This component and the accompanying materials are made available
+// under the terms of "Eclipse Public License v1.0"
+// which accompanies this distribution, and is available
+// at the URL "http://www.eclipse.org/legal/epl-v10.html".
+//
+// Initial Contributors:
+// Nokia Corporation - initial contribution.
+//
+// Contributors:
+//
+// Description:
+//
+
+/**
+@file
+
+@SYMPurpose Secure Backup Engine
+*/
+
+PRJ_MMPFILES
+sbencrypt.mmp
+sbeclient.mmp
+sbengine.mmp
+
+
+PRJ_TESTMMPFILES
+
+PRJ_PLATFORMS
+
+PRJ_EXPORTS
+./connectivity_securebackupengine.iby  /epoc32/rom/include/connectivity_securebackupengine.iby
+../inc/sbeclient.h SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(connect/sbeclient.h)
+../inc/sbtypes.h SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(connect/sbtypes.h)
+../inc/installmimetypes.h SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(connect/installmimetypes.h)
+../inc/sbexternalisablearray.h SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(connect/sbexternalisablearray.h)
+../inc/sbexternalisablearray.inl SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(connect/sbexternalisablearray.inl)
+../inc/sbencrypt.h SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(connect/sbencrypt.h)
+../inc/javamanagerinterface.h		SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(connect/javamanagerinterface.h)	
+../inc/javamanagerinterface.inl		SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(connect/javamanagerinterface.inl)

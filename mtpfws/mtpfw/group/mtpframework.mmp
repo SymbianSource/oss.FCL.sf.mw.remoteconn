@@ -1,0 +1,107 @@
+// Copyright (c) 2006-2009 Nokia Corporation and/or its subsidiary(-ies).
+// All rights reserved.
+// This component and the accompanying materials are made available
+// under the terms of "Eclipse Public License v1.0"
+// which accompanies this distribution, and is available
+// at the URL "http://www.eclipse.org/legal/epl-v10.html".
+//
+// Initial Contributors:
+// Nokia Corporation - initial contribution.
+//
+// Contributors:
+//
+// Description:
+// MTP framework.
+// 
+//
+
+/**
+ @file
+*/
+
+#include <comms-infras/commsdebugutility.mmh>
+#include "../common/inc/mtpbuildoptions.hrh"
+
+TARGET              mtpframework.dll
+TARGETTYPE          DLL
+UID                 0x1000008D 0x102827A1 
+VENDORID 			0x70000001
+
+CAPABILITY          CommDD PowerMgmt ReadDeviceData WriteDeviceData TrustedUI ProtServ NetworkControl NetworkServices LocalServices ReadUserData WriteUserData
+
+MW_LAYER_SYSTEMINCLUDE_SYMBIAN
+
+USERINCLUDE         ../inc/ 
+USERINCLUDE         ../common/inc 
+USERINCLUDE         ../transports/transportapi/inc
+
+SOURCEPATH          ../src/ 
+SOURCE              cmtpconnection.cpp
+SOURCE              cmtpconnectionmgr.cpp
+SOURCE              cmtpdataprovider.cpp
+SOURCE              cmtpdataproviderconfig.cpp
+SOURCE              cmtpdataprovidercontroller.cpp
+SOURCE              cmtpframeworkconfig.cpp
+SOURCE              cmtphandleallocator.cpp
+SOURCE              cmtpobjectmgr.cpp
+SOURCE              cmtpobjectstore.cpp
+SOURCE              cmtpparserrouter.cpp
+//SOURCE              cmtppuidmgr.cpp
+SOURCE              cmtpreferencemgr.cpp
+SOURCE              cmtpsession.cpp
+SOURCE              cmtpstoragemgr.cpp
+//SOURCE              cmtpsuidmap.cpp
+SOURCE              dbutility.cpp
+SOURCE              rmtpframework.cpp
+SOURCE              tmtptypeobjecthandle.cpp
+SOURCE		        cdummydp.cpp
+SOURCE              cmtpdeltadatamgr.cpp
+SOURCE              cmtpdpidstore.cpp
+SOURCE              cmtppkgidstore.cpp
+SOURCE              cmtpserviceconfig.cpp
+SOURCE              cmtpservicemgr.cpp 
+SOURCE              cmtpdatacodegenerator.cpp 
+SOURCE              cmtpserviceinfo.cpp
+
+//SOURCE		ruidmapper.cpp
+
+
+// Data provider configuration resource file. 
+// The target filename corresponds to the implementation UID.
+START RESOURCE      dummydp_config.rss   
+TARGETPATH          /resource/mtp
+TARGET              dummydp.rsc
+END
+
+/*START RESOURCE      framework_config.rss
+HEADER
+TARGETPATH          /resource/mtp
+TARGET              framework.rsc
+END*/
+
+START RESOURCE      services_config.rss   
+TARGETPATH          /resource/mtp
+TARGET              services.rsc
+END
+
+LIBRARY             bafl.lib
+LIBRARY             centralrepository.lib
+LIBRARY             ecom.lib 
+LIBRARY             edbms.lib 
+LIBRARY             efsrv.lib
+LIBRARY             estor.lib
+LIBRARY             euser.lib
+
+LIBRARY             mtpdatatypes.lib
+LIBRARY             mtpdataproviderapi.lib
+LIBRARY             mtptransportapi.lib
+LIBRARY				sisregistryclient.lib
+LIBRARY 			sishelper.lib
+
+#ifdef MTP_CAPTURE_TEST_DATA
+LIBRARY             mtprequestlogger.lib
+#endif
+
+
+SMPSAFE
+

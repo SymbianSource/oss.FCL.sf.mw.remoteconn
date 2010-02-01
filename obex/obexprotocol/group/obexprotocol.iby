@@ -1,0 +1,83 @@
+// Copyright (c) 2005-2009 Nokia Corporation and/or its subsidiary(-ies).
+// All rights reserved.
+// This component and the accompanying materials are made available
+// under the terms of "Eclipse Public License v1.0"
+// which accompanies this distribution, and is available
+// at the URL "http://www.eclipse.org/legal/epl-v10.html".
+//
+// Initial Contributors:
+// Nokia Corporation - initial contribution.
+//
+// Contributors:
+//
+// Description:
+// Obex
+// obexprotocol.iby
+// 
+//
+
+#ifndef  __OBEXPROTOCOL_IBY__
+#define  __OBEXPROTOCOL_IBY__
+
+REM If __OBEX_DEBUG__ is defined pull in debug versions of the
+REM OBEX DLLs and transport controllers regardless of the ROM type
+#ifdef __OBEX_DEBUG__
+define OBEX_DIR UDEB
+#define OBEX_PLUGIN ECOM_PLUGIN_UDEB
+#else
+define OBEX_DIR BUILD_DIR
+#define OBEX_PLUGIN ECOM_PLUGIN
+#endif
+
+REM *** The following iby files are always included, whether obex is
+REM *** supported by the device or not.
+
+#include <ecom.iby>
+
+#if defined(_DEBUG) || defined (__OBEX_DEBUG__)
+#include <commsdebugutility.iby>
+#endif
+
+REM *** The following dlls are client side dlls. They are always included
+REM *** in the ROM, whether obex is supported by the device or not, so
+REM *** that client applications can link against them regardless.
+
+file=ABI_DIR\OBEX_DIR\obex.dll	sys\bin\OBEX.dll
+REM Alias new obex.dll to also appear as irobex.dll to support legacy apps
+alias sys\bin\obex.dll			sys\bin\irobex.dll
+
+file=ABI_DIR\OBEX_DIR\obexcommontransport.dll 	System\Libs\obexcommontransport.dll
+
+#ifdef SYMBIAN_INCLUDE_OBEX_EXTENSIONAPIS
+file=ABI_DIR\OBEX_DIR\obexextensionapis.dll	sys\bin\obexextensionapis.dll
+#endif
+
+REM *** Now for things which should only be included if the device
+REM *** supports OBEX, to save ROM space...
+
+#ifdef SYMBIAN_EXCLUDE_OBEX
+REM Feature OBEX is not in this ROM
+#else
+
+
+REM *** Now for things which should only be included if the device
+REM *** supports USB, to save ROM space...
+
+#ifdef SYMBIAN_EXCLUDE_USB
+REM OBEX USB transport is not included in this ROM as it depends on USB
+#else
+OBEX_PLUGIN(obexusbtransportcontroller.dll,1020de87.rsc)
+#endif
+
+REM *** Now for things which should only be included if the device
+REM *** supports bluetooth, to save ROM space...
+
+#ifdef SYMBIAN_EXCLUDE_BLUETOOTH
+REM OBEX Bluetooth transport is not included in this ROM as it depends on BLUETOOTH
+#else
+OBEX_PLUGIN(obexbtrfcommtransportcontroller.dll,1020e043.rsc)
+#endif
+
+#endif // SYMBIAN_EXCLUDE_OBEX
+
+#endif //  __OBEXPROTOCOL_IBY__

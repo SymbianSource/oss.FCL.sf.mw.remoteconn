@@ -1,0 +1,50 @@
+// Copyright (c) 2004-2009 Nokia Corporation and/or its subsidiary(-ies).
+// All rights reserved.
+// This component and the accompanying materials are made available
+// under the terms of "Eclipse Public License v1.0"
+// which accompanies this distribution, and is available
+// at the URL "http://www.eclipse.org/legal/epl-v10.html".
+//
+// Initial Contributors:
+// Nokia Corporation - initial contribution.
+//
+// Contributors:
+//
+// Description:
+// Pointless file produced by test project; the test is that it 
+// compiles at all.
+// 
+//
+
+/**
+ @file
+ @internalComponent
+*/
+
+target			t_obexheadercheck.exe
+targettype		exe
+uid 			0
+VENDORID		0x70000001
+
+sourcepath		../src
+source			main.cpp
+source			t_obex.cpp
+source			t_obexbase.cpp
+source			t_obexbaseobject.cpp
+source			t_obexclient.cpp
+source			t_obexconstants.cpp
+source			t_obexheaders.cpp
+source			t_obexobjects.cpp
+source			t_obexserver.cpp
+source			t_obextypes.cpp
+source			t_obexfinalpacketobserver.cpp
+source			t_ObexTransportInfo.cpp
+source			t_ObexIrTransportInfo.cpp
+source			t_ObexBtTransportInfo.cpp
+source			t_ObexUsbTransportInfo.cpp
+
+MW_LAYER_SYSTEMINCLUDE_SYMBIAN
+
+library 		euser.lib
+
+SMPSAFE

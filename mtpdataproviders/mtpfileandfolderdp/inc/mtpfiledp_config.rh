@@ -1,0 +1,35 @@
+// Copyright (c) 2006-2009 Nokia Corporation and/or its subsidiary(-ies).
+// All rights reserved.
+// This component and the accompanying materials are made available
+// under the terms of "Eclipse Public License v1.0"
+// which accompanies this distribution, and is available
+// at the URL "http://www.eclipse.org/legal/epl-v10.html".
+//
+// Initial Contributors:
+// Nokia Corporation - initial contribution.
+//
+// Contributors:
+//
+// Description:
+// Defines the resource type for filedp specific configuration data
+// 
+//
+
+/**
+ @file
+ @publishedPartner
+ @released
+*/
+
+STRUCT MTP_FILEDP_EXTENSION_MAP
+	{
+	LTEXT file_extension; // File extension to map
+	WORD mtp_object_format; // MTP object format code for file extension
+	}
+
+STRUCT MTP_FILEDP_CONFIG
+	{
+	WORD enumeration_iteration_length = 64; // Iterate through max 64 file entries each RunL
+	WORD format_exclusion_list[]; // Formats to exclude as MTP object format code values
+	STRUCT extension_map[]; // Map defining file extension to MTP object format code translation - of MTP_FILEDP_EXTENSION_MAP type
+	}

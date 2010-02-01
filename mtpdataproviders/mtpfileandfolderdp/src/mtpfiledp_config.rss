@@ -1,0 +1,137 @@
+// Copyright (c) 2006-2009 Nokia Corporation and/or its subsidiary(-ies).
+// All rights reserved.
+// This component and the accompanying materials are made available
+// under the terms of "Eclipse Public License v1.0"
+// which accompanies this distribution, and is available
+// at the URL "http://www.eclipse.org/legal/epl-v10.html".
+//
+// Initial Contributors:
+// Nokia Corporation - initial contribution.
+//
+// Contributors:
+//
+// Description:
+//
+
+#include <mtp/mtpdataproviderconfig.rh>
+#include "mtpfiledp_config.rh"
+
+RESOURCE MTP_DATA_PROVIDER dpConfig
+    {
+    type = KMTPDataProviderTypeECOM;
+    major_version = 1;
+    object_enumeration_persistent = 0;
+    supported_modes = KMTPModeMTP;  
+    server_name = "";
+    server_image_name = "";
+    opaque_resource = fileConfig;
+    }
+
+RESOURCE MTP_FILEDP_CONFIG fileConfig
+	{
+	enumeration_iteration_length = 32;
+	format_exclusion_list = 
+        {
+        // Association 
+        0x3001
+        };
+
+	extension_map = 
+        {
+        MTP_FILEDP_EXTENSION_MAP
+            {
+            file_extension = "wav";
+            mtp_object_format = 0x3008;
+            },
+        MTP_FILEDP_EXTENSION_MAP
+			{
+		    file_extension = "mp3";
+		    mtp_object_format = 0x3009;
+		    },
+        MTP_FILEDP_EXTENSION_MAP
+		    {
+		    file_extension = "wma";
+		    mtp_object_format = 0xb901;
+		    },
+		MTP_FILEDP_EXTENSION_MAP
+            {
+	        file_extension = "aac";
+	        mtp_object_format = 0xb903;
+		    },
+        MTP_FILEDP_EXTENSION_MAP
+		    {
+		   file_extension = "jpg";
+		   mtp_object_format = 0x3801;
+		    },
+		MTP_FILEDP_EXTENSION_MAP
+		    {
+		    file_extension = "gif";
+		    mtp_object_format = 0x3807;
+		    },
+		MTP_FILEDP_EXTENSION_MAP
+		    {
+		    file_extension = "png";
+		    mtp_object_format = 0x380b;
+		    },
+		MTP_FILEDP_EXTENSION_MAP
+		    {
+		    file_extension = "bmp";
+		    mtp_object_format = 0x3804;
+		    },
+		MTP_FILEDP_EXTENSION_MAP
+		    {
+		    file_extension = "wpl";
+		    mtp_object_format = 0xba10;
+		    },
+		MTP_FILEDP_EXTENSION_MAP
+		    {
+		    file_extension = "m3u";
+		    mtp_object_format = 0xba11;
+		    },
+		MTP_FILEDP_EXTENSION_MAP
+		    {
+		    file_extension = "mp4";
+		    mtp_object_format = 0xb982;
+		    },
+		MTP_FILEDP_EXTENSION_MAP
+		    {
+		    file_extension = "m4a";
+		    mtp_object_format = 0xb982;
+		    },
+		MTP_FILEDP_EXTENSION_MAP
+		    {
+		    file_extension = "m4b";
+		    mtp_object_format = 0xb982;
+		    },
+		MTP_FILEDP_EXTENSION_MAP
+	        {
+	        file_extension = "m4v";
+	        mtp_object_format = 0xb982;
+	        },
+	    MTP_FILEDP_EXTENSION_MAP
+	        {
+	        file_extension = "3gp";
+	        mtp_object_format = 0xb984;
+	        },
+	    MTP_FILEDP_EXTENSION_MAP
+	        {
+	        file_extension = "3gpp";
+	        mtp_object_format = 0xb984;
+	        },
+	    MTP_FILEDP_EXTENSION_MAP
+	        {
+	        file_extension = "3ga";
+	        mtp_object_format = 0xb984;
+	        },
+	    MTP_FILEDP_EXTENSION_MAP
+	        {
+	        file_extension = "asf";
+	        mtp_object_format = 0x300C;
+	        },
+	    MTP_FILEDP_EXTENSION_MAP
+	        {
+	        file_extension = "wmv";
+	        mtp_object_format = 0xB981;				
+	        }
+	    };
+    }

@@ -1,0 +1,52 @@
+// Copyright (c) 2005-2009 Nokia Corporation and/or its subsidiary(-ies).
+// All rights reserved.
+// This component and the accompanying materials are made available
+// under the terms of "Eclipse Public License v1.0"
+// which accompanies this distribution, and is available
+// at the URL "http://www.eclipse.org/legal/epl-v10.html".
+//
+// Initial Contributors:
+// Nokia Corporation - initial contribution.
+//
+// Contributors:
+//
+// Description:
+// ObexUsbTransportController.dll Obex USB Controller plug-in, used to load the USB transport.
+// ObexUsbTransportController.rsc The rsc file for the USB controller plug-in, used by ECOM to locate the correct plugin.
+// 
+//
+
+/**
+ @file
+*/
+
+
+target obexusbtransportcontroller.dll //Recommended unpaged
+CAPABILITY All -Tcb
+targettype plugin
+
+// ECom Dll recognition UID followed by the unique dll UID 
+UID              	0x10009d8d 0x1020de87
+VENDORID 0x70000001
+
+SOURCEPATH		../src
+SOURCE			ObexUsbImpCollection.cpp
+SOURCE			ObexUsbTransportController.cpp
+SOURCE			usbconn.cpp 
+
+START resource 1020DE87.rss
+target obexusbtransportcontroller.rsc
+END
+
+USERINCLUDE		../inc
+USERINCLUDE		../../common
+
+MW_LAYER_SYSTEMINCLUDE_SYMBIAN
+
+LIBRARY			euser.lib 
+LIBRARY			obexcommontransport.lib
+
+//Since this component is a plug-in, there is no need to produce a .lib file.
+NOEXPORTLIBRARY 
+
+SMPSAFE

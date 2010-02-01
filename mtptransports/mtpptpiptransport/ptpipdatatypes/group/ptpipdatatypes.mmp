@@ -1,0 +1,51 @@
+// Copyright (c) 2007-2009 Nokia Corporation and/or its subsidiary(-ies).
+// All rights reserved.
+// This component and the accompanying materials are made available
+// under the terms of "Eclipse Public License v1.0"
+// which accompanies this distribution, and is available
+// at the URL "http://www.eclipse.org/legal/epl-v10.html".
+//
+// Initial Contributors:
+// Nokia Corporation - initial contribution.
+//
+// Contributors:
+//
+// Description:
+// ptpipdatatypes.dll which has all the ptppip datatypes derived from the generic MTPTypes
+// TODO: See about the capapbility and uid
+// 
+//
+
+/**
+ @file
+*/
+
+#include <comms-infras/commsdebugutility.mmh>
+
+
+TARGETTYPE		DLL
+TARGET			ptpipdatatypes.dll
+
+UID				0x10009D8D 0xA0004A58
+VENDORID		0x70000001
+
+CAPABILITY		All -Tcb
+MW_LAYER_SYSTEMINCLUDE_SYMBIAN
+USERINCLUDE		../inc/ 
+
+SOURCEPATH		../src/
+SOURCE			cptpipgenericcontainer.cpp
+SOURCE			cptpipdatacontainer.cpp
+SOURCE			tptpipstartdatapayload.cpp
+SOURCE			tptpiprequestpayload.cpp
+SOURCE			tptpipresponsepayload.cpp
+SOURCE			cptpipinitcmdreq.cpp
+SOURCE			cptpipinitcmdack.cpp
+SOURCE			tptpipinitevtreq.cpp
+SOURCE			tptpipinitevtack.cpp
+SOURCE			tptpipinitfailed.cpp
+
+LIBRARY			euser.lib
+LIBRARY			mtpdatatypes.lib 
+
+SMPSAFE

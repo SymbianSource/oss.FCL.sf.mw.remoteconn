@@ -1,0 +1,31 @@
+// Copyright (c) 2005-2009 Nokia Corporation and/or its subsidiary(-ies).
+// All rights reserved.
+// This component and the accompanying materials are made available
+// under the terms of "Eclipse Public License v1.0"
+// which accompanies this distribution, and is available
+// at the URL "http://www.eclipse.org/legal/epl-v10.html".
+//
+// Initial Contributors:
+// Nokia Corporation - initial contribution.
+//
+// Contributors:
+//
+// Description:
+//
+
+#ifndef __CONNECTIVITY_SBENGINE_IBY__
+#define __CONNECTIVITY_SBENGINE_IBY__
+
+// SECUREBACKUPENGINE
+file=ABI_DIR\BUILD_DIR\sbeclient.dll			System\libs\sbeclient.dll
+file=ABI_DIR\BUILD_DIR\abclient.dll			System\libs\abclient.dll
+
+#ifndef SBEHEAPMAX
+#define SBEHEAPMAX  0x400000
+#endif
+
+file=ABI_DIR\BUILD_DIR\sbengine.exe			System\programs\sbengine.exe heapmax=SBEHEAPMAX
+
+file=ABI_DIR\BUILD_DIR\sbencrypt.dll			System\programs\sbencrypt.dll
+
+#endif  // __CONNECTIVITY_SBENGINE_IBY__

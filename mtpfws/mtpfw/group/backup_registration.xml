@@ -1,0 +1,9 @@
+<?xml version="1.0" standalone="yes"?>
+<backup_registration> 
+	<proxy_data_manager sid = "0x10202BE9"/>
+  	<passive_backup>
+		<include_directory name = "\">
+			<exclude name = "\nobackup\" />
+		</include_directory>
+	</passive_backup>
+</backup_registration> 

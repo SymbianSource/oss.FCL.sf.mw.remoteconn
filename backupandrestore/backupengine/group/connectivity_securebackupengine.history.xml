@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<relnotes name="Backup Engine">
+  <purpose>
+    This component manages backup and restore operations. It manages the backup and restore of private data and installed software on behalf of other data owners. This component exposes an API and can be used by other components to carry out a remote backup / restore (for example to a connected PC) or a local backup / restore (for example to a removable memory card).
+  </purpose>
+  
+  <defect number="PDEF121045 " title="Updating API clasification from prototype to released in ThirdPartyJavaManager" revision="008">
+		  Modified the clasification tag form @prototype to @released in mentioned file.
+  </defect>
+
+  <defect number="PDEF117905 " title="SBE assumes only one mass-memory drive" revision="007">
+		  Now SB Engine handles the Exclamation (!) mark in public data paths mentioned in backup_registration.xml.
+		  If backup_registration.xml file contains an Exclamation (!) mark in place of the drive in the public data paths then the public data is searched in all available drives.
+  </defect>
+
+  <defect number="INC117583" title="MCCE_32.50_FAT: Connectivity_PC Suite does not restore the Message item succes" revision="006">
+		  Now SBE handles backup and restoration of messaging properly. Now SBE cleans the all data folders of messaging before restoring.
+  </defect>
+
+  <defect number="PDEF117154" title="Backup of sql databases" revision="005">
+		  Fix allows SBE to handle the backup and restore of SQL databases kept in SysLib data cage with the size of more than 64 KB.
+  </defect>
+
+  <defect number="DEF116358" title="Update comments and IM Tagging in sbebufferhandler.h of SBEJavaUtils" revision="004">
+		  Updated the IM tagging of of sbebufferhandler.h to @publishedPartner. Also aligned or modified the comments in few files including thirdpartyjavamanager.mmp.
+  </defect>
+  
+  <defect number="DEF116254" title="sbejavautils.dll - reporting build error for ARMV5" revision="003">
+		SBEJavaUtils using static variable in on of its function. Now,allowed WSD by putting EPOCALLOWDLLDATA in sbejavautils.mmp.
+  </defect>
+
+  <defect number="DEF091392" title="We don't restore an empty directory previously backed-up" revision="002">
+          Save empty directory paths also in the list of files to be backed up, if its not in 
+          the exclude list specified by the corresponding backup_registration file. Treat them
+          as file entries having no attributes and zero size. These entries will be supplied to
+          SCOM as part of Transfer Units in the same way as files and get stored in the Archive.
+          While restoring the entries are scanned by the Secure Backup Engine. If its a 
+          directory (path ending with "\"), then only the directory path is created and no file data is expected.
+  </defect>
+  
+  <defect number="PDEF109726" title="MMC application fails to backup data from a package backup registration file" revision="001">
+          Modify line 1205 of sbpackagedatatransfer.cpp to make the comparison case insensitive.
+  </defect>
+
+</relnotes>

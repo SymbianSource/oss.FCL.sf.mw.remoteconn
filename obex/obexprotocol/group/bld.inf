@@ -1,0 +1,24 @@
+// Copyright (c) 2005-2009 Nokia Corporation and/or its subsidiary(-ies).
+// All rights reserved.
+// This component and the accompanying materials are made available
+// under the terms of "Eclipse Public License v1.0"
+// which accompanies this distribution, and is available
+// at the URL "http://www.eclipse.org/legal/epl-v10.html".
+//
+// Initial Contributors:
+// Nokia Corporation - initial contribution.
+//
+// Contributors:
+//
+// Description:
+//
+
+#include "../obextransport/group/BLD.INF"
+#include "../obex/group/BLD.INF"
+#include "../obexbttransport/group/BLD.INF"
+#include "../obexusbtransport/group/BLD.INF"
+
+
+PRJ_EXPORTS
+obexprotocol.iby			/epoc32/rom/include/obexprotocol.iby
+

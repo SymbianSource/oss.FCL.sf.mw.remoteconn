@@ -1,0 +1,39 @@
+// Copyright (c) 2005-2009 Nokia Corporation and/or its subsidiary(-ies).
+// All rights reserved.
+// This component and the accompanying materials are made available
+// under the terms of "Eclipse Public License v1.0"
+// which accompanies this distribution, and is available
+// at the URL "http://www.eclipse.org/legal/epl-v10.html".
+//
+// Initial Contributors:
+// Nokia Corporation - initial contribution.
+//
+// Contributors:
+//
+// Description:
+//
+
+#ifndef __BUR_TEST_SERVER_IBY__
+#define __BUR_TEST_SERVER_IBY__
+
+file=ABI_DIR\BUILD_DIR\burtestserver.exe                            Sys\bin\burtestserver.exe
+data=EPOCROOT##Epoc32\data\z\testdata\scripts\sbetestdata\test.ini                         testdata\scripts\sbetestdata\test.ini
+data=EPOCROOT##Epoc32\data\z\testdata\scripts\sbetestdata\sbeconfig.xml                    private\10202d56\sbeconfig.xml
+data=EPOCROOT##Epoc32\data\z\testdata\scripts\sbetestdata\backup_registration.xml          testdata\scripts\sbetestdata\backup_registration.xml
+data=EPOCROOT##Epoc32\data\z\testdata\scripts\sbetestdata\increamenttest.xml               testdata\scripts\sbetestdata\increamenttest.xml
+data=EPOCROOT##Epoc32\data\z\testdata\scripts\sbetestdata\test_registration.xml            testdata\scripts\sbetestdata\test_registration.xml
+data=EPOCROOT##Epoc32\data\z\testdata\scripts\sbetestdata\public_file1.dat                 testdata\scripts\sbetestdata\public_file1.dat
+data=EPOCROOT##Epoc32\data\z\testdata\scripts\sbetestdata\public_file2.dat                 testdata\scripts\sbetestdata\public_file2.dat
+data=EPOCROOT##Epoc32\data\z\testdata\scripts\sbetestdata\private_file1.dat                testdata\scripts\sbetestdata\private_file1.dat
+data=EPOCROOT##Epoc32\data\z\testdata\scripts\sbetestdata\invalidproxymgr.xml              testdata\scripts\sbetestdata\invalidproxymgr.xml
+data=EPOCROOT##Epoc32\data\z\testdata\scripts\sbetestdata\testbigfile.dat                  testdata\scripts\sbetestdata\testbigfile.dat
+
+data=EPOCROOT##Epoc32\data\z\testdata\scripts\sbetestdata\test_backuprestore.script        testdata\scripts\sbetestdata\test_backuprestore.script
+data=EPOCROOT##Epoc32\data\z\testdata\scripts\sbetestdata\test_backuprestoreasync.script   testdata\scripts\sbetestdata\test_backuprestoreasync.script
+data=EPOCROOT##Epoc32\data\z\testdata\scripts\sbetestdata\test_backupinvalid.script        testdata\scripts\sbetestdata\test_backupinvalid.script
+data=EPOCROOT##Epoc32\data\z\testdata\scripts\sbetestdata\test_restorepackage.script       testdata\scripts\sbetestdata\test_restorepackage.script
+data=EPOCROOT##Epoc32\data\z\testdata\scripts\sbetestdata\test_backuppackage.script        testdata\scripts\sbetestdata\test_backuppackage.script
+data=EPOCROOT##Epoc32\data\z\testdata\scripts\sbetestdata\test_activebackuprestore.script  testdata\scripts\sbetestdata\test_activebackuprestore.script
+data=EPOCROOT##Epoc32\data\z\testdata\scripts\sbetestdata\test_increament.script           testdata\scripts\sbetestdata\test_increament.script
+
+#endif // __BUR_TEST_SERVER_IBY__

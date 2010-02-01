@@ -1,0 +1,51 @@
+// Copyright (c) 2004-2009 Nokia Corporation and/or its subsidiary(-ies).
+// All rights reserved.
+// This component and the accompanying materials are made available
+// under the terms of "Eclipse Public License v1.0"
+// which accompanies this distribution, and is available
+// at the URL "http://www.eclipse.org/legal/epl-v10.html".
+//
+// Initial Contributors:
+// Nokia Corporation - initial contribution.
+//
+// Contributors:
+//
+// Description:
+// Pointless file produced by test project; the test is that it 
+// compiles at all.
+// 
+//
+
+/**
+ @file
+ @internalComponent
+*/
+
+target			t_obextransportheadercheck.exe
+targettype		exe
+uid 			0
+VENDORID		0x70000001
+
+sourcepath		../src
+source			main.cpp
+source			t_mobexnotify.cpp
+source			t_mobextransportnotify.cpp
+source			t_obexactivereader.cpp
+source			t_obexactiverw.cpp
+source			t_obexactivewriter.cpp
+source			t_obexconnector.cpp
+source			t_obexdata.cpp
+source			t_obexinternalconstants.cpp
+source			t_obexinternalheader.cpp
+source			t_obexpacket.cpp
+source			t_ObexReaderBase.cpp
+source			t_obextransportconstants.cpp
+source			t_obextransportcontrollerbase.cpp
+source			t_ObexWriterBase.cpp
+source			t_mobexnotifyextend.cpp
+
+MW_LAYER_SYSTEMINCLUDE_SYMBIAN
+
+library 		euser.lib
+
+SMPSAFE

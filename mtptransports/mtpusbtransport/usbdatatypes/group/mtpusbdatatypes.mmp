@@ -1,0 +1,46 @@
+// Copyright (c) 2006-2009 Nokia Corporation and/or its subsidiary(-ies).
+// All rights reserved.
+// This component and the accompanying materials are made available
+// under the terms of "Eclipse Public License v1.0"
+// which accompanies this distribution, and is available
+// at the URL "http://www.eclipse.org/legal/epl-v10.html".
+//
+// Initial Contributors:
+// Nokia Corporation - initial contribution.
+//
+// Contributors:
+//
+// Description:
+// mtpusbdatatypes.dll MTP USB Data Types Library
+// 
+//
+
+/**
+ @file
+*/
+
+TARGET              mtpusbdatatypes.dll
+TARGETTYPE          DLL
+UID         	    0x1000008D 0x102827A9
+VENDORID 			0x70000001
+
+CAPABILITY          All -Tcb
+
+MW_LAYER_SYSTEMINCLUDE_SYMBIAN
+
+USERINCLUDE         ../inc
+
+SOURCEPATH          ../src/ 
+SOURCE              cmtpusbcontainer.cpp
+SOURCE              tmtpusbcontrolrequestcanceldata.cpp
+SOURCE              tmtpusbcontrolrequestdevicestatus.cpp
+SOURCE              tmtpusbcontrolrequestmodfunction.cpp
+SOURCE              tmtpusbcontrolrequestmodheader.cpp
+SOURCE              tmtpusbcontrolrequestsetup.cpp
+SOURCE              tmtpusbparameterpayloadblock.cpp
+
+LIBRARY             euser.lib
+
+LIBRARY             mtpdatatypes.lib
+
+SMPSAFE

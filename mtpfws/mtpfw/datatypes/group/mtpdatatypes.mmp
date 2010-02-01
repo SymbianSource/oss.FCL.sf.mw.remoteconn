@@ -1,0 +1,95 @@
+// Copyright (c) 2006-2009 Nokia Corporation and/or its subsidiary(-ies).
+// All rights reserved.
+// This component and the accompanying materials are made available
+// under the terms of "Eclipse Public License v1.0"
+// which accompanies this distribution, and is available
+// at the URL "http://www.eclipse.org/legal/epl-v10.html".
+//
+// Initial Contributors:
+// Nokia Corporation - initial contribution.
+//
+// Contributors:
+//
+// Description:
+// mtpdatatypes.dll Media Transfer Protocol Framework Data Types Library
+// 
+//
+
+/**
+ @file
+*/
+
+TARGET          mtpdatatypes.dll
+TARGETtype      DLL
+UID         	0x1000008D 0x102827A7
+VENDORID        0x70000001
+
+CAPABILITY      All -Tcb
+
+#if defined(WINS)
+#if defined(SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API)
+deffile mtpdatatypes
+#else
+deffile mtpdatatypes_f32
+#endif
+#endif
+
+MW_LAYER_SYSTEMINCLUDE_SYMBIAN
+
+USERINCLUDE     ../inc
+
+SOURCEPATH      ../src
+SOURCE          cmtptypearray.cpp
+SOURCE          cmtptypecompoundbase.cpp
+SOURCE          cmtptypedevicepropdesc.cpp
+SOURCE          cmtptypefile.cpp
+SOURCE          cmtptypeinterdependentpropdesc.cpp
+SOURCE          cmtptypeobjectinfo.cpp
+SOURCE          cmtptypeobjectpropdesc.cpp
+SOURCE          cmtptypeobjectproplist.cpp
+SOURCE          cmtptypestorageinfo.cpp
+SOURCE          cmtptypestring.cpp
+SOURCE          mmtptype.cpp
+SOURCE          rmtptype.cpp
+SOURCE          tmtptypeevent.cpp
+SOURCE          tmtptypeflatbase.cpp
+SOURCE          tmtptypeint8.cpp
+SOURCE          tmtptypeint16.cpp
+SOURCE          tmtptypeint32.cpp
+SOURCE          tmtptypeint64.cpp
+SOURCE          tmtptypeint128.cpp
+SOURCE          tmtptypeintbase.cpp
+SOURCE          tmtptypenull.cpp
+SOURCE          tmtptyperequest.cpp
+SOURCE          tmtptyperesponse.cpp
+SOURCE          tmtptypeuint8.cpp
+SOURCE          tmtptypeuint16.cpp
+SOURCE          tmtptypeuint32.cpp
+SOURCE          tmtptypeuint64.cpp
+SOURCE          tmtptypeuint128.cpp
+SOURCE          tmtptypeuintbase.cpp
+SOURCE          cmtptypecomplexbuffer.cpp
+SOURCE			cmtptypeserviceinfo.cpp 
+SOURCE			cmtptypeserviceprop.cpp 
+SOURCE			cmtptypeserviceformat.cpp 
+SOURCE			cmtptypeservicemethod.cpp 
+SOURCE			cmtptypeserviceevent.cpp
+SOURCE			cmtptypeservicecapabilitylist.cpp
+SOURCE			tmtptypedatapair.cpp
+SOURCE			cmtptypeserviceobjpropextnform.cpp
+SOURCE			cmtptypeservicemethodparamextnform.cpp
+SOURCE			cmtptypeservicepropdesclist.cpp 
+SOURCE			cmtptypelist.cpp 
+SOURCE          cmtptypedeleteobjectproplist.cpp 
+SOURCE          cmtptypedeleteserviceproplist.cpp
+SOURCE			tmtptypeguid.cpp
+SOURCE			cmtptypeserviceproplist.cpp
+SOURCE          cmtptypeopaquedata.cpp
+SOURCE          cmtptypetrivialdata.cpp
+
+LIBRARY         efsrv.lib
+LIBRARY         euser.lib
+LIBRARY         charconv.lib
+
+
+SMPSAFE

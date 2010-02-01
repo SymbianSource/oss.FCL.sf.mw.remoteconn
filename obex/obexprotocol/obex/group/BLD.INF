@@ -1,0 +1,60 @@
+// Copyright (c) 2005-2009 Nokia Corporation and/or its subsidiary(-ies).
+// All rights reserved.
+// This component and the accompanying materials are made available
+// under the terms of "Eclipse Public License v1.0"
+// which accompanies this distribution, and is available
+// at the URL "http://www.eclipse.org/legal/epl-v10.html".
+//
+// Initial Contributors:
+// Nokia Corporation - initial contribution.
+//
+// Contributors:
+//
+// Description:
+// Implementation of Object Exchange Protocol
+// 
+//
+
+/**
+ @file
+*/
+
+PRJ_EXPORTS
+
+../public/OBEX.H SYMBIAN_MW_LAYER_PUBLIC_EXPORT_PATH(obex.h)
+../public/obexbase.h SYMBIAN_MW_LAYER_PUBLIC_EXPORT_PATH(obexbase.h)
+../public/obexbaseobject.h SYMBIAN_MW_LAYER_PUBLIC_EXPORT_PATH(obexbaseobject.h)
+../public/obexclient.h SYMBIAN_MW_LAYER_PUBLIC_EXPORT_PATH(obexclient.h)
+../public/obexconstants.h SYMBIAN_MW_LAYER_PUBLIC_EXPORT_PATH(obexconstants.h)
+../public/obexpanics.h SYMBIAN_MW_LAYER_PUBLIC_EXPORT_PATH(obexpanics.h)
+../public/obexheaders.h SYMBIAN_MW_LAYER_PUBLIC_EXPORT_PATH(obexheaders.h)
+../public/obexobjects.h SYMBIAN_MW_LAYER_PUBLIC_EXPORT_PATH(obexobjects.h)
+../public/obexserver.h SYMBIAN_MW_LAYER_PUBLIC_EXPORT_PATH(obexserver.h)
+../public/obextypes.h SYMBIAN_MW_LAYER_PUBLIC_EXPORT_PATH(obextypes.h)
+../public/obexfinalpacketobserver.h SYMBIAN_MW_LAYER_PUBLIC_EXPORT_PATH(obexfinalpacketobserver.h)
+../public/obexreadactivityobserver.h SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(obexreadactivityobserver.h)
+../inc/obexconstantsinternal.h	SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(obexconstantsinternal.h)
+// NB obexcommontransport depends on these files to compile, but obex depends 
+// on obexcommontransport to link. This is a circular dependency. Due to how 
+// our build system works (export all the headers before trying to build 
+// anything) it doesn't cause a build break.
+../public/ObexBtTransportInfo.h SYMBIAN_MW_LAYER_PUBLIC_EXPORT_PATH(obexbttransportinfo.h)
+../public/ObexUsbTransportInfo.h SYMBIAN_MW_LAYER_PUBLIC_EXPORT_PATH(obexusbtransportinfo.h)
+../public/ObexTransportInfo.h SYMBIAN_MW_LAYER_PUBLIC_EXPORT_PATH(obextransportinfo.h)
+../public/ObexIrTransportInfo.h SYMBIAN_MW_LAYER_PUBLIC_EXPORT_PATH(obexirtransportinfo.h)
+
+PRJ_MMPFILES
+obex.mmp
+irobex.mmp	// Build irobex.lib to allow legacy components to continue linking without source changes
+
+
+PRJ_TESTEXPORTS
+../test/tobex/Contactsbak.vcf /epoc32/wins/c/contactsbak.vcf
+../test/tobex/Contactsbak2.vcf /epoc32/wins/c/contactsbak2.vcf
+../test/tobex/Contactsbak3.vcf /epoc32/wins/c/contactsbak3.vcf
+
+PRJ_TESTMMPFILES
+
+../test/tobex/TOBEX.MMP
+../test/testobexerrorcodes/TestObexErrorCodes.mmp
+../test/headercheck/group/t_obexheadercheck.mmp

@@ -1,0 +1,98 @@
+// Copyright (c) 2006-2009 Nokia Corporation and/or its subsidiary(-ies).
+// All rights reserved.
+// This component and the accompanying materials are made available
+// under the terms of "Eclipse Public License v1.0"
+// which accompanies this distribution, and is available
+// at the URL "http://www.eclipse.org/legal/epl-v10.html".
+//
+// Initial Contributors:
+// Nokia Corporation - initial contribution.
+//
+// Contributors:
+//
+// Description:
+//
+
+#ifndef MTPSERVICECONFIG_RH_
+
+#define MTPSERVICECONFIG_RH_
+
+#include "mtpserviceconfig.hrh"
+
+STRUCT SVC_PROPERTY
+    {
+    LONG    namespaceid;    
+    
+    LONG    pkid;
+    LTEXT   name;
+    
+    LONG    datatype;
+    BYTE    getset;
+    BYTE    formflag;
+    }
+
+STRUCT SVC_FORMAT
+    {
+    LONG    guid[KNum4IntsOfGUID];    
+    
+    LTEXT   name;
+    LTEXT   mimetype1;
+    WORD    baseformatcode1;
+    }
+
+STRUCT SVC_METHOD
+    {
+    LONG    guid[KNum4IntsOfGUID];   
+    
+    LTEXT   name;
+    WORD    obj_ass_formatcode1;
+    }
+
+STRUCT SVC_EVENT
+    {
+    WORD    datacode;
+    LONG    guid[KNum4IntsOfGUID];   
+    LTEXT   name;
+    }
+
+STRUCT SVC_GUID
+    {
+    LONG   guid[KNum4IntsOfGUID];   
+    }
+    
+STRUCT ELEMENTSARRAY
+    {
+    STRUCT  elements[];
+    }
+
+STRUCT MTP_SERVICE_INFO
+    {
+    LONG       pguid[KNum4IntsOfGUID]; 
+    
+    LONG       version;
+    
+    LONG       svcguid[KNum4IntsOfGUID]; 
+    
+    LTEXT      servicename;
+    LONG       servicetype;
+    LONG       base_serviceid;
+    
+    LLINK      use_service_guids;
+    
+    LLINK      svc_property_namespaces;
+    LLINK      svc_properties;
+    LLINK      svc_formats;
+    LLINK      svc_methods;
+    LLINK      svc_events;
+    LLINK      svc_datablock;
+    }
+
+STRUCT MTP_SUPPORTED_SERVICES
+    {
+    LONG    guid[KNum4IntsOfGUID]; 
+    LONG    svctype;
+    LLINK   r_serviceinfo;
+    }
+
+
+#endif /* MTPSERVICECONFIG_RH_ */

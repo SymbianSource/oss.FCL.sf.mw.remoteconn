@@ -1,0 +1,57 @@
+// Copyright (c) 2006-2009 Nokia Corporation and/or its subsidiary(-ies).
+// All rights reserved.
+// This component and the accompanying materials are made available
+// under the terms of "Eclipse Public License v1.0"
+// which accompanies this distribution, and is available
+// at the URL "http://www.eclipse.org/legal/epl-v10.html".
+//
+// Initial Contributors:
+// Nokia Corporation - initial contribution.
+//
+// Contributors:
+//
+// Description:
+// mtpusbtransport.dll USB MTP device class MTP transport plug-in.
+// 
+//
+
+/**
+ @file
+*/
+
+#include <comms-infras/commsdebugutility.mmh>
+
+TARGET              mtpusbsicimp.dll
+TARGETTYPE          PLUGIN
+UID                 0x10009D8D 0x102827AC
+VENDORID 			0x70000001
+
+CAPABILITY          CommDD PowerMgmt ReadDeviceData WriteDeviceData TrustedUI ProtServ NetworkControl NetworkServices LocalServices ReadUserData WriteUserData
+
+MW_LAYER_SYSTEMINCLUDE_SYMBIAN
+
+USERINCLUDE         ../inc/ 
+USERINCLUDE         ../../common/inc/ 
+USERINCLUDE         ../../usbdatatypes/inc
+USERINCLUDE         ../../../../mtpfws/mtpfw/transports/transportapi/inc
+USERINCLUDE         ../../../../mtpfws/mtpfw/common/inc
+
+SOURCEPATH          ../src/ 
+SOURCE              cmtpusbconnection.cpp
+SOURCE              cmtpusbepbase.cpp
+SOURCE              cmtpusbepbulkin.cpp
+SOURCE              cmtpusbepbulkout.cpp
+SOURCE              cmtpusbepcontrol.cpp
+SOURCE              cmtpusbepinterruptin.cpp
+SOURCE              cmtpusbtransport.cpp
+
+LIBRARY             euser.lib
+LIBRARY             mtpdatatypes.lib 
+LIBRARY             mtptransportapi.lib
+LIBRARY             mtpusbdatatypes.lib
+
+START RESOURCE      mtpusbsicimp.rss    
+TARGET              mtpusbsicimp.rsc
+END
+
+SMPSAFE

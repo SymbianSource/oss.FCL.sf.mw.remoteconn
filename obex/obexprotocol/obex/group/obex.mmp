@@ -1,0 +1,101 @@
+// Copyright (c) 2005-2009 Nokia Corporation and/or its subsidiary(-ies).
+// All rights reserved.
+// This component and the accompanying materials are made available
+// under the terms of "Eclipse Public License v1.0"
+// which accompanies this distribution, and is available
+// at the URL "http://www.eclipse.org/legal/epl-v10.html".
+//
+// Initial Contributors:
+// Nokia Corporation - initial contribution.
+//
+// Contributors:
+//
+// Description:
+// Obex
+// irobex.dll Implementation of Object Exchange Protocol
+// 
+//
+
+/**
+ @file
+*/
+
+
+TARGET							obex.dll //Recommended unpaged
+
+CAPABILITY All -Tcb
+TARGETTYPE		dll
+
+uid			0x1000008d 0x10201EF5
+
+#ifdef WINSCW
+DEFFILE			IROBEX2.DEF
+#else
+DEFFILE			irobex2.def
+#endif
+
+SOURCEPATH		../src
+SOURCE			OBEX.CPP
+SOURCE			obexobjectexpandedbaseobject.cpp
+SOURCE			obexheader.cpp
+SOURCE			obexheaderset.cpp
+SOURCE			obexconstants.cpp
+SOURCE			obexheaderutil.cpp
+SOURCE			obexobjects.cpp
+SOURCE			obexclient.cpp
+SOURCE			obexserver.cpp
+SOURCE			obexserverstatemachine.cpp
+SOURCE			obexfilewriter.cpp
+SOURCE			obexasyncfilewriter.cpp
+SOURCE			obexsyncfilewriter.cpp
+SOURCE 			obexsetpathdata.cpp
+SOURCE			OBEXUTIL.CPP 
+SOURCE			authentication.cpp
+SOURCE			obexservernotify.cpp
+SOURCE			obexauthchallengehandler.cpp
+SOURCE			obexpacketsignaller.cpp
+SOURCE			obexpackettimer.cpp
+SOURCE			obexnotifyhandlerbase.cpp
+SOURCE			obexnotifyhandlerclient.cpp
+SOURCE			obexnotifyhandlerserver.cpp
+SOURCE			obexservernotifysyncwrapper.cpp
+SOURCE			obexserverrequestpacketengine.cpp
+SOURCE			obexerrorengine.cpp
+SOURCE			TObexServerOperationState.cpp
+SOURCE			TObexServerStateDisconnected.cpp
+SOURCE			TObexServerStateTransportConnected.cpp
+SOURCE			TObexServerStateObexConnecting.cpp
+SOURCE			TObexServerStateWaitForUserPassword.cpp
+SOURCE			TObexServerStateReady.cpp
+SOURCE			TObexServerStatePutOpWaitForUser.cpp
+SOURCE			TObexServerStatePutOpReceiveObject.cpp
+SOURCE			TObexServerStateGetOpReceiveSpecification.cpp
+SOURCE			TObexServerStateGetOpWaitForUser.cpp
+SOURCE			TObexServerStateGetOpSendObject.cpp
+SOURCE			TObexServerStateSetPathOp.cpp
+SOURCE			TObexServerStatePutOpFinal.cpp
+SOURCE			TObexServerStateGetOpFinal.cpp
+SOURCE			TObexServerStateDisconnecting.cpp
+
+USERINCLUDE		../inc
+USERINCLUDE		../../common
+
+MW_LAYER_SYSTEMINCLUDE_SYMBIAN
+
+LIBRARY			euser.lib 
+LIBRARY			efsrv.lib 
+LIBRARY			esock.lib 
+LIBRARY			hash.lib 
+LIBRARY			charconv.lib 
+LIBRARY  		obexcommontransport.lib
+LIBRARY			irda.lib		// Needed by IrOBEXUtil::CreateTransportInfoL
+LIBRARY			bluetooth.lib	// Needed by IrOBEXUtil::CreateTransportInfoL
+LIBRARY 		ecom.lib
+
+START WINS
+    BASEADDRESS 0x73900000
+END
+
+VENDORID 0x70000001
+
+SMPSAFE

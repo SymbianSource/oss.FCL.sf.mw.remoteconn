@@ -1,0 +1,47 @@
+// Copyright (c) 2006-2009 Nokia Corporation and/or its subsidiary(-ies).
+// All rights reserved.
+// This component and the accompanying materials are made available
+// under the terms of "Eclipse Public License v1.0"
+// which accompanies this distribution, and is available
+// at the URL "http://www.eclipse.org/legal/epl-v10.html".
+//
+// Initial Contributors:
+// Nokia Corporation - initial contribution.
+//
+// Contributors:
+//
+// Description:
+// mtpusbsiccc.dll Media Transfer Protocol Framework USB SIC class controller plugin
+// 
+//
+
+/**
+ @file
+*/
+#include <comms-infras/commsdebugutility.mmh>
+
+TARGET mtpusbsiccc.dll
+TARGETTYPE PLUGIN
+CAPABILITY CommDD NetworkControl NetworkServices LocalServices ProtServ
+UID  0x10009D8D 0x102827AB
+
+SOURCEPATH ../src
+SOURCE cmtpusbsicclasscontroller.cpp
+SOURCE cmtpusbsicclassimpcollection.cpp
+
+USERINCLUDE ../inc
+USERINCLUDE ../../common/inc
+USERINCLUDE ../../../../mtpfws/mtpfw/common/inc
+
+MW_LAYER_SYSTEMINCLUDE_SYMBIAN
+
+LIBRARY euser.lib 
+LIBRARY	usbclasscontroller.lib
+LIBRARY mtpclient.lib
+
+START RESOURCE  mtpusbsiccc.rss    
+TARGET          mtpusbsiccc.rsc
+END
+VENDORID 0x70000001
+
+SMPSAFE

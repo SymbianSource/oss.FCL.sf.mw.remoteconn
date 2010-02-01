@@ -1,0 +1,526 @@
+// Copyright (c) 2006-2009 Nokia Corporation and/or its subsidiary(-ies).
+// All rights reserved.
+// This component and the accompanying materials are made available
+// under the terms of "Eclipse Public License v1.0"
+// which accompanies this distribution, and is available
+// at the URL "http://www.eclipse.org/legal/epl-v10.html".
+//
+// Initial Contributors:
+// Nokia Corporation - initial contribution.
+//
+// Contributors:
+//
+// Description:
+//
+
+#include <mtp/cmtpstoragemetadata.h>
+#include <mtp/mmtpconnection.h>
+#include <mtp/mmtpdataproviderframework.h>
+#include <mtp/mtpdataproviderapitypes.h>
+#include <mtp/tmtptyperequest.h>
+
+#include "cmtpdevdpexclusionmgr.h"
+#include "cmtpdevicedatastore.h"
+#include "cmtpdevicedp.h"
+#include "cmtpdevicedpconfigmgr.h"
+#include "cmtpfsenumerator.h"
+#include "cmtprequestprocessor.h"
+#include "cmtpstoragewatcher.h"
+#include "mtpdevicedpconst.h"
+#include "mtpdevicedpprocessor.h"
+#include "mtpdevdppanic.h"
+
+#include "cmtpextndevdp.h"
+#include <mtp/cmtptypestring.h>
+
+
+// Class constants.
+__FLOG_STMT(_LIT8(KComponent,"DeviceDataProvider");)
+static const TInt KMTPDeviceDpSessionGranularity(3);
+static const TInt KMTPDeviceDpActiveEnumeration(0);
+
+/**
+MTP device data provider plug-in factory method.
+@return A pointer to an MTP device data provider plug-in. Ownership IS
+transfered.
+@leave One of the system wide error codes, if a processing failure occurs.
+*/
+TAny* CMTPDeviceDataProvider::NewL(TAny* aParams)
+    {
+    CMTPDeviceDataProvider* self = new (ELeave) CMTPDeviceDataProvider(aParams);
+    CleanupStack::PushL(self);
+    self->ConstructL();
+    CleanupStack::Pop(self);
+    return self;
+    }
+
+/**
+Destructor
+*/
+CMTPDeviceDataProvider::~CMTPDeviceDataProvider()
+    {
+    __FLOG(_L8("~CMTPDeviceDataProvider - Entry"));
+    iPendingEnumerations.Close();
+    TInt count = iActiveProcessors.Count();
+    while(count--)
+        {
+        iActiveProcessors[count]->Release();
+        }
+    iActiveProcessors.Close();
+    delete iStorageWatcher;
+    iDevDpSingletons.Close();
+    iDpSingletons.Close();
+    delete iEnumerator;
+    delete iExclusionMgr;
+
+    iExtnPluginMapArray.ResetAndDestroy();
+    iExtnPluginMapArray.Close();
+	iEvent.Reset();
+
+    __FLOG(_L8("~CMTPDeviceDataProvider - Exit"));
+    __FLOG_CLOSE;
+    }
+
+void CMTPDeviceDataProvider::Cancel()
+    {
+
+    }
+
+void CMTPDeviceDataProvider::ProcessEventL(const TMTPTypeEvent& aEvent, MMTPConnection& aConnection)
+    {
+    __FLOG(_L8("ProcessEventL - Entry"));
+    TInt index = LocateRequestProcessorL(aEvent, aConnection);
+    if(index != KErrNotFound)
+        {
+        iActiveProcessors[index]->HandleEventL(aEvent);
+        }
+    __FLOG(_L8("ProcessEventL - Exit"));
+    }
+
+void CMTPDeviceDataProvider::ProcessNotificationL(TMTPNotification aNotification, const TAny* aParams)
+    {
+    __FLOG(_L8("ProcessNotificationL - Entry"));
+    switch (aNotification)
+        {
+    case EMTPSessionClosed:
+        SessionClosedL(*reinterpret_cast<const TMTPNotificationParamsSessionChange*>(aParams));
+        break;
+
+    case EMTPSessionOpened:
+        SessionOpenedL(*reinterpret_cast<const TMTPNotificationParamsSessionChange*>(aParams));
+        break;
+
+    default:
+        // Ignore all other notifications.
+        break;
+        }
+    __FLOG(_L8("ProcessNotificationL - Exit"));
+    }
+
+void CMTPDeviceDataProvider::ProcessRequestPhaseL(TMTPTransactionPhase aPhase, const TMTPTypeRequest& aRequest, MMTPConnection& aConnection)
+    {
+    __FLOG(_L8("ProcessRequestPhaseL - Entry"));
+    TInt index = LocateRequestProcessorL(aRequest, aConnection);
+    __ASSERT_DEBUG(index != KErrNotFound, Panic(EMTPDevDpNoMatchingProcessor));
+    MMTPRequestProcessor* processor = iActiveProcessors[index];
+    iActiveProcessor = index;
+    iActiveProcessorRemoved = EFalse;
+    TBool result = processor->HandleRequestL(aRequest, aPhase);
+    if (iActiveProcessorRemoved)
+	    {
+	    processor->Release(); // destroy the processor
+	    }
+    else if (result)
+	    {
+	    processor->Release();    	
+	    iActiveProcessors.Remove(index);
+	    }
+    iActiveProcessor = -1;
+    __FLOG(_L8("ProcessRequestPhaseL - Exit"));
+    }
+
+void CMTPDeviceDataProvider::StartObjectEnumerationL(TUint32 aStorageId, TBool /*aPersistentFullEnumeration*/)
+    {
+    __FLOG(_L8("StartObjectEnumerationL - Entry"));
+    iPendingEnumerations.AppendL(aStorageId);
+    if (iEnumeratingState == EUndefined)
+        {
+        iDevDpSingletons.DeviceDataStore().StartEnumerationL(aStorageId, *this);
+        iEnumeratingState = EEnumeratingDeviceDataStore;
+        iStorageWatcher->Start();
+        }
+    else if (iPendingEnumerations.Count() == 1)
+        {
+    	iEnumeratingState = EEnumeratingFolders;
+    	iEnumerator->StartL(iPendingEnumerations[KMTPDeviceDpActiveEnumeration]);
+        }
+    __FLOG(_L8("StartObjectEnumerationL - Exit"));
+    }
+
+void CMTPDeviceDataProvider::StartStorageEnumerationL()
+    {
+    __FLOG(_L8("StartStorageEnumerationL - Entry"));
+    iStorageWatcher->EnumerateStoragesL();
+    Framework().StorageEnumerationCompleteL();
+    __FLOG(_L8("StartStorageEnumerationL - Exit"));
+    }
+
+void CMTPDeviceDataProvider::Supported(TMTPSupportCategory aCategory, RArray<TUint>& aArray) const
+    {
+    __FLOG(_L8("Supported - Entry"));
+    TInt mode = Framework().Mode();
+    switch (aCategory)
+        {
+    case EAssociationTypes:
+        aArray.Append(EMTPAssociationTypeGenericFolder);        
+        break;
+
+    case EDeviceProperties:
+        {
+        TInt count = sizeof(KMTPDeviceDpSupportedProperties) / sizeof(TUint16);
+        for(TInt i = 0; i < count; i++)
+            {
+            if(( (EModePTP == mode) ||(EModePictBridge == mode) )
+				&& ( 0x4000 == (KMTPDeviceDpSupportedProperties[i] & 0xE000)))
+            	{
+            	//in ptp mode support only ptp properties
+            	aArray.Append(KMTPDeviceDpSupportedProperties[i]);
+            	}
+            else
+            	{
+            	aArray.Append(KMTPDeviceDpSupportedProperties[i]);
+            	}
+            }
+           
+        TInt noOfEtxnPlugins = iExtnPluginMapArray.Count();
+        for(TInt i=0; i < noOfEtxnPlugins; i++)
+	        {
+	        iExtnPluginMapArray[i]->ExtPlugin()->Supported(aCategory, *iExtnPluginMapArray[i]->SupportedOpCodes(), (TMTPOperationalMode)mode );// or pass the incoming array
+	        TInt count =iExtnPluginMapArray[i]->SupportedOpCodes()->Count();
+       												  														//bcoz it needs to b updated
+	        for (TInt r=0; r <count; r++ )
+	        	{
+	        	aArray.Append((*iExtnPluginMapArray[i]->SupportedOpCodes())[r]);
+	        	}
+	       }
+
+       TRAP_IGNORE(iPtrDataStore->SetSupportedDevicePropertiesL(aArray));
+       }
+        break;
+
+    case EEvents:
+        {
+        TInt count = sizeof(KMTPDeviceDpSupportedEvents) / sizeof(TUint16);
+        for(TInt i = 0; i < count; i++)
+            {
+            TUint16 event = KMTPDeviceDpSupportedEvents[i];
+            switch(mode)
+                {
+            case EModePTP:
+            case EModePictBridge:
+                // In the initial implementation all device DP events pass this test, but this
+                // catches any others added in the future that fall outside this range.
+                if(event <= EMTPEventCodePTPEnd)
+                    {
+                    aArray.Append(event);
+                    }
+                break;
+
+            case EModeMTP:
+                // In the initial implementation all device DP events pass this test, but this
+                // catches any others added in the future that fall outside this range.
+                if(event <= EMTPEventCodeMTPEnd)
+                    {
+                    aArray.Append(event);
+                    }
+                break;
+
+            default:
+            	// No other valid modes are defined
+                break;
+                }
+            }
+        }
+        break;
+
+    case EObjectCaptureFormats:
+    case EObjectPlaybackFormats:
+  		// Only supports association objects
+        aArray.Append(EMTPFormatCodeAssociation);
+        break;
+
+
+    case EOperations:
+        {
+        TInt count = sizeof(KMTPDeviceDpSupportedOperations) / sizeof(TUint16);
+        for(TInt i = 0; i < count; i++)
+            {
+            aArray.Append(KMTPDeviceDpSupportedOperations[i]);
+            }
+        }
+        break;
+
+    case EStorageSystemTypes:
+        aArray.Append(CMTPStorageMetaData::ESystemTypeDefaultFileSystem);
+        break;
+
+    case EObjectProperties:
+        {
+        TInt count(sizeof(KMTPDeviceDpSupportedObjectProperties) / sizeof(KMTPDeviceDpSupportedObjectProperties[0]));
+        for (TInt i(0); (i < count); i++)
+            {
+            aArray.Append(KMTPDeviceDpSupportedObjectProperties[i]);
+            }
+        }
+        break;
+
+    default:
+        // Unrecognised category, leave aArray unmodified.
+        break;
+        }
+    __FLOG(_L8("Supported - Exit"));
+    }
+
+#ifdef __FLOG_ACTIVE
+void CMTPDeviceDataProvider::NotifyEnumerationCompleteL(TUint32 aStorageId, TInt aError)
+#else
+void CMTPDeviceDataProvider::NotifyEnumerationCompleteL(TUint32 aStorageId, TInt /*aError*/)
+#endif // __FLOG_ACTIVE
+	{
+    __FLOG(_L8("NotifyEnumerationCompleteL - Entry"));
+    __ASSERT_DEBUG((aStorageId == iPendingEnumerations[KMTPDeviceDpActiveEnumeration]), User::Invariant());
+	switch(iEnumeratingState)
+		{
+	case EEnumeratingDeviceDataStore:
+		iEnumeratingState = EEnumeratingFolders;
+		iEnumerator->StartL(iPendingEnumerations[KMTPDeviceDpActiveEnumeration]);
+		break;
+
+	case EEnumeratingFolders:
+        __FLOG_VA((_L8("Enumeration of storage 0x%08X completed with error status %d"), aStorageId, aError));
+        iPendingEnumerations.Remove(KMTPDeviceDpActiveEnumeration);
+        Framework().ObjectEnumerationCompleteL(aStorageId);
+        if (iPendingEnumerations.Count() > 0)
+            {
+        	iEnumerator->StartL(iPendingEnumerations[KMTPDeviceDpActiveEnumeration]);
+            }
+        else
+            {
+    		iEnumeratingState = EEnumerationComplete;
+            }
+		break;
+
+	case EEnumerationComplete:
+	default:
+		__DEBUG_ONLY(User::Invariant());
+		break;
+		}
+    __FLOG(_L8("NotifyEnumerationCompleteL - Exit"));
+	}
+
+/**
+Constructor.
+*/
+CMTPDeviceDataProvider::CMTPDeviceDataProvider(TAny* aParams) :
+    CMTPDataProviderPlugin(aParams),
+    iActiveProcessors(KMTPDeviceDpSessionGranularity),
+    iActiveProcessor(-1)
+    {
+
+    }
+
+/**
+Load devdp extension plugins if present
+*/
+void CMTPDeviceDataProvider::LoadExtnPluginsL()
+	{
+
+	RArray<TUint> extnUidArray;
+	CleanupClosePushL(extnUidArray);
+	iDevDpSingletons.ConfigMgr().GetRssConfigInfoArrayL( extnUidArray, EDevDpExtnUids);
+
+	TInt count = extnUidArray.Count();
+	for (TInt i = 0; i < count; i++)
+		{
+
+		CDevDpExtnPluginMap* extnpluginMap = NULL;
+		extnpluginMap = CDevDpExtnPluginMap::NewL(*this, TUid::Uid(extnUidArray[i]));
+
+		if(extnpluginMap )
+			{
+			iExtnPluginMapArray.Append(extnpluginMap);
+			}
+
+		}
+	CleanupStack::PopAndDestroy(&extnUidArray);
+	}
+
+/**
+Second phase constructor.
+*/
+void CMTPDeviceDataProvider::ConstructL()
+    {
+    __FLOG_OPEN(KMTPSubsystem, KComponent);
+    __FLOG(_L8("ConstructL - Entry"));
+    iDevDpSingletons.OpenL(Framework());
+    iPtrDataStore = &(iDevDpSingletons.DeviceDataStore());
+    iDpSingletons.OpenL(Framework());
+
+    iExclusionMgr = CMTPDevDpExclusionMgr::NewL(Framework());
+    iDpSingletons.SetExclusionMgrL(*iExclusionMgr);
+
+    iStorageWatcher = CMTPStorageWatcher::NewL(Framework());
+
+    const TUint KProcessLimit = iDevDpSingletons.ConfigMgr().UintValueL(CMTPDeviceDpConfigMgr::EEnumerationIterationLength);
+
+ 	TRAPD(err, LoadExtnPluginsL());
+ //	__ASSERT_DEBUG((err == KErrNone), Panic(_L("Invalid resource file ")));
+ 	if(KErrNone != err)
+		{
+	    __FLOG(_L8("\nTere is an issue in loading the plugin !!!!!\n"));
+		}
+
+    iEnumerator = CMTPFSEnumerator::NewL(Framework(), iDpSingletons.ExclusionMgrL(), *this, KProcessLimit);
+    __FLOG(_L8("ConstructL - Exit"));
+
+    }
+
+void CMTPDeviceDataProvider::OnDevicePropertyChangedL (TMTPDevicePropertyCode& aPropCode)
+	{
+	iEvent.Reset();
+	iEvent.SetUint16(TMTPTypeEvent::EEventCode, EMTPEventCodeDevicePropChanged );
+	iEvent.SetUint32(TMTPTypeEvent::EEventSessionID, KMTPSessionAll);
+	iEvent.SetUint32(TMTPTypeEvent::EEventTransactionID, KMTPTransactionIdNone);
+	iEvent.SetUint32(TMTPTypeEvent::EEventParameter1, aPropCode);
+	Framework().SendEventL(iEvent);
+	}
+
+/**
+ *This method will return the reference to MMTPDataProviderFramework from CMTPDataProviderPlugin
+ */
+MMTPDataProviderFramework& CMTPDeviceDataProvider::DataProviderFramework ()
+	{
+	return Framework();
+	}
+
+TInt CMTPDeviceDataProvider::FindExtnPlugin(TUint aOpcode)
+	{
+	TInt noOfEtxnPlugins = iExtnPluginMapArray.Count();
+	for(TInt i=0; i < noOfEtxnPlugins; i++)
+		{
+		if(iExtnPluginMapArray[i]->SupportedOpCodes()->Find(aOpcode)!= KErrNotFound)
+			{
+			return i;
+			}
+		}
+	return KErrNotFound;
+	}
+/**
+Find or create a request processor that can process the request
+@param aRequest    The request to be processed
+@param aConnection The connection from which the request comes
+@return the index of the found/created request processor
+*/
+TInt CMTPDeviceDataProvider::LocateRequestProcessorL(const TMTPTypeRequest& aRequest, MMTPConnection& aConnection)
+    {
+    __FLOG(_L8("LocateRequestProcessorL - Entry"));
+    TInt index = KErrNotFound;
+    TInt count = iActiveProcessors.Count();
+    for(TInt i = 0; i < count; i++)
+        {
+        if(iActiveProcessors[i]->Match(aRequest, aConnection))
+            {
+            index = i;
+            break;
+            }
+        }
+    if(index == KErrNotFound)
+        {
+        MMTPRequestProcessor* processor = MTPDeviceDpProcessor::CreateL(Framework(), aRequest, aConnection);
+        __ASSERT_DEBUG(processor, Panic(EMTPDevDpNoMatchingProcessor));
+        CleanupReleasePushL(*processor);
+        iActiveProcessors.AppendL(processor);
+        TUint16 operationCode(aRequest.Uint16(TMTPTypeRequest::ERequestOperationCode));
+
+       if (operationCode >= EMTPOpCodeGetDevicePropDesc && operationCode <=EMTPOpCodeResetDevicePropValue)
+		{
+		TUint propCode = aRequest.Uint32(TMTPTypeRequest::ERequestParameter1);
+		TInt foundplugin = FindExtnPlugin (propCode);
+		if(foundplugin!= KErrNotFound)
+			{
+			iDevDpSingletons.DeviceDataStore().SetExtnDevicePropDp(iExtnPluginMapArray[foundplugin]->ExtPlugin());
+			}
+		}
+	        CleanupStack::Pop();
+	        index = count;
+        }
+    __FLOG(_L8("LocateRequestProcessorL - Exit"));
+    return index;
+    }
+
+/**
+Finds a request processor that can process the event
+@param aEvent    The event to be processed
+@param aConnection The connection from which the request comes
+@return the index of the found request processor, KErrNotFound if not found
+*/
+TInt CMTPDeviceDataProvider::LocateRequestProcessorL(const TMTPTypeEvent& aEvent, MMTPConnection& aConnection)
+    {
+    __FLOG(_L8("LocateRequestProcessorL - Entry"));
+    TInt index = KErrNotFound;
+    TInt count = iActiveProcessors.Count();
+    for(TInt i = 0; i < count; i++)
+	{
+	if(iActiveProcessors[i]->Match(aEvent, aConnection))
+		{
+		index = i;
+		break;
+		}
+	}
+    __FLOG(_L8("LocateRequestProcessorL - Exit"));
+    return index;
+    }
+
+/**
+Cleans up outstanding request processors when a session is closed.
+@param aSession notification parameter block
+*/
+void CMTPDeviceDataProvider::SessionClosedL(const TMTPNotificationParamsSessionChange& aSession)
+    {
+    __FLOG(_L8("SessionClosedL - Entry"));
+    TInt count = iActiveProcessors.Count();
+    while(count--)
+        {
+	MMTPRequestProcessor* processor = iActiveProcessors[count];
+	TUint32 sessionId = processor->SessionId();
+	if((sessionId == aSession.iMTPId) && (processor->Connection().ConnectionId() == aSession.iConnection.ConnectionId()))
+		{
+		iActiveProcessors.Remove(count);
+		if (count == iActiveProcessor)
+    		{
+    			iActiveProcessorRemoved = ETrue;
+    		}
+    	else
+    		{        		
+    			processor->Release();
+    		} 
+		}
+        }
+    __FLOG(_L8("SessionClosedL - Exit"));
+    }
+
+/**
+Prepares for a newly-opened session.
+@param aSession notification parameter block
+*/
+#ifdef __FLOG_ACTIVE
+void CMTPDeviceDataProvider::SessionOpenedL(const TMTPNotificationParamsSessionChange& aSession)
+#else
+void CMTPDeviceDataProvider::SessionOpenedL(const TMTPNotificationParamsSessionChange& /*aSession*/)
+#endif
+    {
+    __FLOG(_L8("SessionOpenedL - Entry"));
+    __FLOG_VA((_L8("SessionID = %d"), aSession.iMTPId));
+    __FLOG(_L8("SessionOpenedL - Exit"));
+    }
+

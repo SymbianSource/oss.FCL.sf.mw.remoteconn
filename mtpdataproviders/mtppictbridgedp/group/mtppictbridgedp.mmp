@@ -1,0 +1,77 @@
+// Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+// All rights reserved.
+// This component and the accompanying materials are made available
+// under the terms of "Eclipse Public License v1.0"
+// which accompanies this distribution, and is available
+// at the URL "http://www.eclipse.org/legal/epl-v10.html".
+//
+// Initial Contributors:
+// Nokia Corporation - initial contribution.
+//
+// Contributors:
+//
+// Description:
+//
+
+#include <comms-infras/commsdebugutility.mmh> 
+
+TARGET          mtppictbridgedp.dll
+TARGETTYPE      PLUGIN
+UID             0x10009D8D 0x2001FE3B
+CAPABILITY      CommDD PowerMgmt ReadDeviceData WriteDeviceData TrustedUI ProtServ NetworkControl NetworkServices LocalServices ReadUserData WriteUserData
+VENDORID        0x101FB657
+
+MW_LAYER_SYSTEMINCLUDE
+
+// framework
+SOURCEPATH      ../src
+
+SOURCE          mtppictbridgerequestprocessor.cpp
+SOURCE          cmtppictbridgedp.cpp
+SOURCE          cmtppictbridgeenumerator.cpp
+SOURCE          mtppictbridgedpimplementations.cpp
+SOURCE          cptpserver.cpp
+SOURCE          cptpsession.cpp
+SOURCE          cptptimer.cpp
+SOURCE          cptpreceivedmsghandler.cpp
+SOURCE          cmtppictbridgeprinter.cpp
+SOURCE          cmtppictbridgeusbconnection.cpp
+SOURCE          cmtppictbridgedpgetobject.cpp
+SOURCE          cmtppictbridgedpgetobjectinfo.cpp
+SOURCE          cmtppictbridgedpsendobjectinfo.cpp
+
+
+// ECOM resource
+START RESOURCE      mtppictbridgedp.rss    
+TARGET              mtppictbridgedp.rsc
+END
+
+// Data provider configuration resource file. 
+// The target filename corresponds to the implementation UID.
+START RESOURCE      mtppictbridgedp_config.rss   
+TARGETPATH          /resource/mtp
+TARGET              2001fe3c.rsc
+END
+
+USERINCLUDE     ../inc
+USERINCLUDE     ../../../mtpfws/mtpfw/dataproviders/dputility/inc
+USERINCLUDE     ../../../mtpfws/mtpfw/common/inc
+USERINCLUDE     ../../../mtpfws/mtpfw/inc
+USERINCLUDE     ../../../mtpfws/mtpfw/datatypes/inc
+USERINCLUDE     ../../../mtpfws/mtpfw/transports/transportapi/inc
+
+LIBRARY             featmgr.lib                         // For feature support management 
+LIBRARY             mtpdataproviderapi.lib
+LIBRARY             mtpdataproviderutility.lib
+LIBRARY             mtpdatatypes.lib
+LIBRARY             mtpframework.lib   //required by setobjectproplist.
+LIBRARY             euser.lib  
+LIBRARY             bafl.lib        // BaflUtils
+LIBRARY             edbms.lib       // db stuff
+LIBRARY             efsrv.lib 
+LIBRARY             estor.lib       // CFileStore
+#ifndef __TEST_IN_SYMBIAN_
+LIBRARY             platformenv.lib // PathInfo
+#endif
+
+SMPSAFE

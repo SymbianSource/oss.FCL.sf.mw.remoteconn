@@ -1,0 +1,82 @@
+// Copyright (c) 2006-2009 Nokia Corporation and/or its subsidiary(-ies).
+// All rights reserved.
+// This component and the accompanying materials are made available
+// under the terms of "Eclipse Public License v1.0"
+// which accompanies this distribution, and is available
+// at the URL "http://www.eclipse.org/legal/epl-v10.html".
+//
+// Initial Contributors:
+// Nokia Corporation - initial contribution.
+//
+// Contributors:
+//
+// Description:
+// MTP data types library
+// 
+//
+
+/**
+ @file
+*/
+
+PRJ_PLATFORMS
+DEFAULT
+
+PRJ_EXPORTS
+../interface/cmtptypecompoundbase.h	        SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(mtp/cmtptypecompoundbase.h)
+../interface/cmtptypedevicepropdesc.h           SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(mtp/cmtptypedevicepropdesc.h)
+../interface/cmtptypeinterdependentpropdesc.h   SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(mtp/cmtptypeinterdependentpropdesc.h) 
+../interface/cmtptypeobjectinfo.h               SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(mtp/cmtptypeobjectinfo.h) 
+../interface/cmtptypeobjectpropdesc.h           SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(mtp/cmtptypeobjectpropdesc.h) 
+../interface/cmtptypeobjectproplist.h           SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(mtp/cmtptypeobjectproplist.h) 
+../interface/cmtptypefile.h                     SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(mtp/cmtptypefile.h)  
+../interface/cmtptypestorageinfo.h              SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(mtp/cmtptypestorageinfo.h)
+../interface/cmtptypestring.h                   SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(mtp/cmtptypestring.h) 
+../interface/cmtptypearray.h                    SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(mtp/cmtptypearray.h) 
+../interface/mmtptype.h                         SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(mtp/mmtptype.h) 
+../interface/mtpdatatypeconstants.h             SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(mtp/mtpdatatypeconstants.h)
+../interface/mtpprotocolconstants.h             SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(mtp/mtpprotocolconstants.h)
+../interface/mtptypes.h                         SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(mtp/mtptypes.h) 
+../interface/mtptypescomplex.h                  SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(mtp/mtptypescomplex.h) 
+../interface/mtptypescompound.h                 SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(mtp/mtptypescompound.h) 
+../interface/mtptypesflat.h                     SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(mtp/mtptypesflat.h) 
+../interface/mtptypessimple.h                   SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(mtp/mtptypessimple.h) 
+../interface/rmtptype.h                         SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(mtp/rmtptype.h) 
+../interface/tmtptypeflatbase.h                 SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(mtp/tmtptypeflatbase.h)  
+../interface/tmtptypeevent.h                    SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(mtp/tmtptypeevent.h)  
+../interface/tmtptypeint8.h                     SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(mtp/tmtptypeint8.h)    
+../interface/tmtptypeint16.h                    SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(mtp/tmtptypeint16.h) 
+../interface/tmtptypeint32.h                    SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(mtp/tmtptypeint32.h)   
+../interface/tmtptypeint64.h                    SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(mtp/tmtptypeint64.h)     
+../interface/tmtptypeint128.h                   SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(mtp/tmtptypeint128.h)  
+../interface/tmtptypeintbase.h                  SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(mtp/tmtptypeintbase.h)     
+../interface/tmtptypenull.h                     SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(mtp/tmtptypenull.h)     
+../interface/tmtptyperequest.h                  SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(mtp/tmtptyperequest.h)  
+../interface/tmtptyperesponse.h                 SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(mtp/tmtptyperesponse.h) 
+../interface/tmtptypeuint8.h                    SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(mtp/tmtptypeuint8.h) 
+../interface/tmtptypeuint16.h                   SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(mtp/tmtptypeuint16.h) 
+../interface/tmtptypeuint32.h                   SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(mtp/tmtptypeuint32.h)   
+../interface/tmtptypeuint64.h                   SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(mtp/tmtptypeuint64.h) 
+../interface/tmtptypeuint128.h                  SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(mtp/tmtptypeuint128.h)   
+../interface/tmtptypeuintbase.h                 SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(mtp/tmtptypeuintbase.h)  
+../interface/cmtptypeserviceevent.h				SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(mtp/cmtptypeserviceevent.h)
+../interface/cmtptypeserviceformat.h			SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(mtp/cmtptypeserviceformat.h)
+../interface/cmtptypeserviceinfo.h				SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(mtp/cmtptypeserviceinfo.h)
+../interface/cmtptypeservicemethod.h			SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(mtp/cmtptypeservicemethod.h)
+../interface/cmtptypeserviceprop.h				SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(mtp/cmtptypeserviceprop.h)
+../interface/cmtptypeservicecapabilitylist.h	SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(mtp/cmtptypeservicecapabilitylist.h)
+../interface/tmtptypedatapair.h					SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(mtp/tmtptypedatapair.h)
+../interface/cmtptypeserviceobjpropextnform.h	SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(mtp/cmtptypeserviceobjpropextnform.h)
+../interface/cmtptypeservicemethodparamextnform.h	SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(mtp/cmtptypeservicemethodparamextnform.h)
+../interface/cmtptypeservicepropdesclist.h		SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(mtp/cmtptypeservicepropdesclist.h)
+../interface/cmtptypelist.h						SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(mtp/cmtptypelist.h)
+../interface/cmtptypedeleteobjectproplist.h		SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(mtp/cmtptypedeleteobjectproplist.h)
+../interface/cmtptypedeleteserviceproplist.h		SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(mtp/cmtptypedeleteserviceproplist.h)
+../interface/cmtptypeserviceproplist.h		        SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(mtp/cmtptypeserviceproplist.h)
+../interface/cmtptypeformatcapabilitylist.h			SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(mtp/cmtptypeformatcapabilitylist.h)
+../interface/cmtptypeopaquedata.h			        SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(mtp/cmtptypeopaquedata.h)
+../interface/tmtptypeguid.h					SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(mtp/tmtptypeguid.h)
+../interface/cmtptypetrivialdata.h			        SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(mtp/cmtptypetrivialdata.h)
+
+PRJ_MMPFILES 
+mtpdatatypes.mmp

@@ -1,0 +1,51 @@
+// Copyright (c) 2005-2009 Nokia Corporation and/or its subsidiary(-ies).
+// All rights reserved.
+// This component and the accompanying materials are made available
+// under the terms of "Eclipse Public License v1.0"
+// which accompanies this distribution, and is available
+// at the URL "http://www.eclipse.org/legal/epl-v10.html".
+//
+// Initial Contributors:
+// Nokia Corporation - initial contribution.
+//
+// Contributors:
+//
+// Description:
+//
+
+/**
+ @file
+*/
+
+PRJ_EXPORTS
+
+// Files intended for 3rd party use go into \epoc32\include. (NB This includes 
+// files which must be presented to 3rd parties for compatibility reasons.)
+../public/mobexnotify.h				SYMBIAN_MW_LAYER_PUBLIC_EXPORT_PATH(mobexnotify.h)
+
+// Files which are needed or which may be needed to make a transport 
+// controller go into \epoc32\include\obex\transport.
+../public/obexactivereader.h 				SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(obex/transport/obexactivereader.h)
+../public/obexactivewriter.h 				SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(obex/transport/obexactivewriter.h)
+../public/mobextransportnotify.h 			SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(obex/transport/mobextransportnotify.h)
+../public/obexconnector.h					SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(obex/transport/obexconnector.h)
+../public/obextransportcontrollerbase.h		SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(obex/transport/obextransportcontrollerbase.h)
+../public/obextransport.hrh					/epoc32/include/obex/transport/obextransport.hrh
+../public/ObexWriterBase.h					SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(obex/transport/obexwriterbase.h)
+../public/ObexReaderBase.h					SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(obex/transport/obexreaderbase.h)
+
+// Files which are internal to Symbian go into \epoc32\include\obex\internal. 
+../public/obexactiverw.h 					SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(obex/internal/obexactiverw.h)
+../public/obexdata.h 						SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(obex/internal/obexdata.h)
+../public/obexinternalheader.h 				SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(obex/internal/obexinternalheader.h)
+../public/obexpacket.h 						SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(obex/internal/obexpacket.h)
+../public/obexinternalconstants.h 			SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(obex/internal/obexinternalconstants.h)
+../public/obextransportconstants.h			SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(obex/internal/obextransportconstants.h)
+../public/mobexnotifyextend.h				SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(obex/internal/mobexnotifyextend.h)
+
+
+PRJ_MMPFILES
+obexcommontransport.MMP
+
+PRJ_TESTMMPFILES
+../test/headercheck/group/t_obextransportheadercheck.mmp

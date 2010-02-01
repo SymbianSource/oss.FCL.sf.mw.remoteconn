@@ -1,0 +1,71 @@
+// Copyright (c) 2006-2009 Nokia Corporation and/or its subsidiary(-ies).
+// All rights reserved.
+// This component and the accompanying materials are made available
+// under the terms of "Eclipse Public License v1.0"
+// which accompanies this distribution, and is available
+// at the URL "http://www.eclipse.org/legal/epl-v10.html".
+//
+// Initial Contributors:
+// Nokia Corporation - initial contribution.
+//
+// Contributors:
+//
+// Description:
+//
+
+#include <comms-infras/commsdebugutility.mmh> 
+
+TARGET              mtpproxydp.dll
+TARGETTYPE          PLUGIN
+UID                 0x10009D8D 0x102827A6
+VENDORID            0x70000001
+
+CAPABILITY          CommDD PowerMgmt ReadDeviceData WriteDeviceData TrustedUI ProtServ NetworkControl NetworkServices LocalServices ReadUserData WriteUserData
+
+MW_LAYER_SYSTEMINCLUDE_SYMBIAN
+USERINCLUDE         ../inc
+USERINCLUDE         ../../dputility/inc
+USERINCLUDE         ../../../common/inc
+USERINCLUDE         ../../../inc
+
+SOURCEPATH          ../src 
+SOURCE              cmtpcopyobject.cpp
+SOURCE              cmtpmoveobject.cpp
+SOURCE              cmtpdeleteobject.cpp
+SOURCE              cmtpgetobjectproplist.cpp
+SOURCE              cmtpgetobjectpropssupported.cpp
+SOURCE              cmtpproxydp.cpp
+SOURCE              cmtpsendobjectinfo.cpp
+SOURCE              cmtpsendobjectproplist.cpp
+SOURCE              cmtpsetobjectproplist.cpp
+SOURCE              mtpproxydpimplementations.cpp
+SOURCE              mtpproxydpprocessor.cpp
+SOURCE              rmtpproxydpsingletons.cpp
+SOURCE              cmtpproxydpconfigmgr.cpp 
+SOURCE              cmtpdeleteobjectproplist.cpp
+SOURCE				cmtpgetformatcapabilities.cpp
+SOURCE              cmtpobjectbrowser.cpp
+
+SOURCEPATH          ../src 
+START RESOURCE      mtpproxydp.rss  
+TARGET              mtpproxydp.rsc  
+END
+
+// Data provider configuration resource file. 
+// The target filename corresponds to the implementation UID.
+START RESOURCE      mtpproxydp_config.rss
+HEADER
+TARGETPATH          /resource/mtp
+TARGET              102827b1.rsc
+END
+
+LIBRARY             euser.lib
+LIBRARY             efsrv.lib
+LIBRARY             bafl.lib 
+
+LIBRARY             mtpdataproviderapi.lib
+LIBRARY             mtpdataproviderutility.lib
+LIBRARY             mtpdatatypes.lib
+LIBRARY             mtpframework.lib
+
+SMPSAFE

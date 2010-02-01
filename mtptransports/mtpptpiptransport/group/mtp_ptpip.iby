@@ -1,0 +1,36 @@
+// Copyright (c) 2005-2009 Nokia Corporation and/or its subsidiary(-ies).
+// All rights reserved.
+// This component and the accompanying materials are made available
+// under the terms of "Eclipse Public License v1.0"
+// which accompanies this distribution, and is available
+// at the URL "http://www.eclipse.org/legal/epl-v10.html".
+//
+// Initial Contributors:
+// Nokia Corporation - initial contribution.
+//
+// Contributors:
+//
+// Description:
+//
+
+#ifndef MTP_PTPIP_IBY
+#define MTP_PTPIP_IBY
+
+#if !defined (SYMBIAN_EXCLUDE_MTP) && !defined(SYMBIAN_EXCLUDE_PTPTIP)
+
+#include <mtp_framework.iby>
+
+//MTP PTP IP Data Types Library
+file=ABI_DIR\BUILD_DIR\ptpipdatatypes.dll			system\libs\ptpipdatatypes.dll
+file=ABI_DIR\BUILD_DIR\ptpipcontroller.dll			system\libs\ptpipcontroller.dll
+file=ABI_DIR\BUILD_DIR\ptpipfilterapi.dll			system\libs\ptpipfilterapi.dll
+//TODO
+
+//MTP PTP IP transport plugin
+ECOM_PLUGIN(ptpipplugin.dll, ptpipplugin.rsc)
+
+
+#endif // SYMBIAN_EXCLUDE_MTP
+
+#endif // MTP_PTPIP_IBY
+

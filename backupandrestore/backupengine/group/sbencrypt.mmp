@@ -1,0 +1,42 @@
+// Copyright (c) 2005-2009 Nokia Corporation and/or its subsidiary(-ies).
+// All rights reserved.
+// This component and the accompanying materials are made available
+// under the terms of "Eclipse Public License v1.0"
+// which accompanies this distribution, and is available
+// at the URL "http://www.eclipse.org/legal/epl-v10.html".
+//
+// Initial Contributors:
+// Nokia Corporation - initial contribution.
+//
+// Contributors:
+//
+// Description:
+//
+/**
+@file
+
+@SYMPurpose sbencrypt.dll Secure Backup Key Provider
+*/
+TARGET sbencrypt.dll
+TARGETTYPE DLL
+UID  0x1000008d 0x10207FAF
+VENDORID 0x70000001
+
+USERINCLUDE .
+MW_LAYER_SYSTEMINCLUDE_SYMBIAN
+
+USERINCLUDE ../../../../../os/ossrv/genericservices/activebackupclient/inc
+SOURCEPATH ../../../../../os/ossrv/genericservices/activebackupclient/src
+SOURCE panic.cpp
+
+
+USERINCLUDE . ../inc
+SOURCEPATH ../src
+SOURCE	sbencrypt.cpp
+SOURCE	sbencryptimpl.cpp
+
+LIBRARY euser.lib
+
+CAPABILITY ProtServ AllFiles WriteDeviceData ReadUserData TrustedUi
+
+SMPSAFE

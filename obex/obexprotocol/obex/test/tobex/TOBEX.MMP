@@ -1,0 +1,83 @@
+// Copyright (c) 1997-2009 Nokia Corporation and/or its subsidiary(-ies).
+// All rights reserved.
+// This component and the accompanying materials are made available
+// under the terms of "Eclipse Public License v1.0"
+// which accompanies this distribution, and is available
+// at the URL "http://www.eclipse.org/legal/epl-v10.html".
+//
+// Initial Contributors:
+// Nokia Corporation - initial contribution.
+//
+// Contributors:
+//
+// Description:
+//
+
+/**
+ @file
+*/
+
+TARGET			tobex.exe
+TARGETTYPE		exe
+
+UID				0x0 0x1020e1a4
+
+CAPABILITY		All -Tcb
+
+#define OBEX_EXTENSION_APIS //comment this out if the extension api is not present.
+//#define VERIFY_EMPTY_HEADERS_ACC //uncomment this is if you want to build the test code for checking the acceptance of OBEX requests containing empty headers
+
+SOURCEPATH		.             
+SOURCE			TOBEX.CPP
+SOURCE			TOBEXCON.CPP
+SOURCE			btutils.cpp
+SOURCE			clienthandler.cpp
+SOURCE			serverhandlerbase.cpp
+SOURCE			serverhandler.cpp
+SOURCE			serverhandlerfile.cpp
+SOURCE			TREFHANDLER.CPP
+SOURCE			serverasyncao.cpp
+
+#ifdef VERIFY_EMPTY_HEADERS_ACC
+SOURCE			emptyheaderstest.cpp
+MACRO EMPTY_HEADERS_TEST
+#endif //VERIFY_EMPTY_HEADERS_ACC
+
+#ifdef OBEX_EXTENSION_APIS
+SOURCE			serverpacketaccessui.cpp
+#endif // OBEX_EXTENSION_APIS
+
+USERINCLUDE		. ../../inc
+MW_LAYER_SYSTEMINCLUDE_SYMBIAN
+
+LIBRARY			euser.lib efsrv.lib esock.lib obex.lib bafl.lib c32.lib 
+
+#ifdef OBEX_EXTENSION_APIS
+LIBRARY			obexextensionapis.lib
+#endif // OBEX_EXTENSION_APIS
+
+// ONLY FOR IRDA:
+LIBRARY			irda.lib
+
+// ONLY FOR BLUETOOTH:
+LIBRARY			bluetooth.lib btmanclient.lib sdpdatabase.lib sdpagent.lib btextnotifiers.lib
+
+// Only for USB:
+LIBRARY			usbman.lib
+
+// For > 1M objects
+EPOCHEAPSIZE 1024000 4096000
+
+
+// At least one of these two must be uncommented:
+MACRO TRANSPORT_BLUETOOTH  // Comment this out if OBEX is not to be tested over Bluetooth
+MACRO TRANSPORT_IRDA // Comment this out if OBEX is not to be tested over IrDA
+// Uncomment this to exercise the server via MObexServerNotifyAsync rather 
+// than MObexServerNotify.
+//MACRO ASYNC_INDICATION
+#ifdef OBEX_EXTENSION_APIS
+MACRO PACKET_ACCESS_EXTENSION
+MACRO ERROR_RESOLUTION_EXTENSION
+#endif //OBEX_EXTENSION_APIS
+
+VENDORID 0x70000001

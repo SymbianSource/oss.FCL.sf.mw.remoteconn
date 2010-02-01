@@ -1,0 +1,284 @@
+// Copyright (c) 2006-2009 Nokia Corporation and/or its subsidiary(-ies).
+// All rights reserved.
+// This component and the accompanying materials are made available
+// under the terms of "Eclipse Public License v1.0"
+// which accompanies this distribution, and is available
+// at the URL "http://www.eclipse.org/legal/epl-v10.html".
+//
+// Initial Contributors:
+// Nokia Corporation - initial contribution.
+//
+// Contributors:
+//
+// Description:
+// Device dp specific configuration data
+// 
+//
+
+/**
+ @file
+ @publishedPartner
+*/
+
+#include <mtp/mtpdataproviderconfig.rh>
+#include <mtp/mtpdevicedp_config.rh>
+
+RESOURCE MTP_DATA_PROVIDER dpConfig
+    {
+    type = KMTPDataProviderTypeECOM;
+    major_version = 1;
+    object_enumeration_persistent = 0;
+    supported_modes = KMTPModeMTP;  
+    server_name = "";
+    server_image_name = "";
+    opaque_resource = folderConfig;
+    }
+
+
+RESOURCE MTP_DEVICEDP_CONFIG folderConfig
+	{
+	enumeration_iteration_length = 32;
+	folder_exclusion_list = 
+		{
+		"?:\\private",
+		"?:\\resource",
+		"?:\\sys",
+		"?:\\system",
+		"?:\\logs",
+		"z:\\"
+		};
+	}
+	
+
+/**
+ * Incase if needed to provide a user friendly volume name. 
+ * Update the drive number and provide the name that you wish to have. 
+ * Drive number varies from 0 to 25, '0' represent 
+ * A drive and '25' represent Z drive.
+ *
+ */
+RESOURCE DRIVEARRAY drives
+	{
+
+	elements = 
+		{
+		DRIVE
+		    {
+		    driveNo = 0;
+		    driveName = "A Drive";
+		    rootDirPath = "\\";
+		    },
+
+		DRIVE
+		    {
+		    driveNo = 1;
+		    driveName = "B Drive";
+		    rootDirPath = "\\";
+		    },
+		    
+		DRIVE
+		    {
+		    driveNo = 2;
+		    driveName = "Phone Memory";
+		    rootDirPath = "\\Data\\";
+		    },
+		    
+		DRIVE
+		    {
+		    driveNo = 3;
+		    driveName = "D Drive";
+		    rootDirPath = "\\";
+		    },		
+
+		DRIVE
+		    {
+		    driveNo = 4;
+		    driveName = "Mass Memory";
+		    rootDirPath = "\\";
+		    },		    
+
+		DRIVE
+		    {
+		    driveNo = 5;
+		    driveName = "Memory Card";
+		    rootDirPath = "\\";
+		    },
+
+		DRIVE
+		    {
+		    driveNo = 6;
+		    driveName = "G Drive";
+		    rootDirPath = "\\";
+		    },
+
+		DRIVE
+		    {
+		    driveNo = 7;
+		    driveName = "H Drive";
+		    rootDirPath = "\\";
+		    },
+
+		DRIVE
+		   {
+		    driveNo = 8;
+		    driveName = "I Drive";
+		    rootDirPath = "\\";
+		    },
+
+		DRIVE
+		   {
+		    driveNo = 9;
+		    driveName = "J Drive";
+		    rootDirPath = "\\ ";		    
+		    },
+		    
+		DRIVE
+		   {
+		    driveNo = 10;
+		    driveName = "K Drive";
+		    rootDirPath = "\\";		    
+		    },
+
+		DRIVE
+		    {
+		    driveNo = 11;
+		    driveName = "L Drive";
+		    rootDirPath = "\\";
+		    },
+
+		DRIVE
+		    {
+		    driveNo = 12;
+		    driveName = "M Drive";
+		    rootDirPath = "\\";
+		    },
+
+		DRIVE
+		    {
+		    driveNo = 13;
+		    driveName = "N Drive";
+		    rootDirPath = "\\";
+		    },
+
+		DRIVE
+		    {
+		    driveNo = 14;
+		    driveName = "O Drive";
+		    rootDirPath = "\\";
+		    },
+
+		DRIVE
+		    {
+		    driveNo = 15;
+		    driveName = "P Drive";
+		    rootDirPath = "\\";
+		    },
+
+		DRIVE
+		    {
+		    driveNo = 16;
+		    driveName = "Q Drive";
+		    rootDirPath = "\\";
+		    },
+
+		DRIVE
+		    {
+		    driveNo = 17;
+		    driveName = "R Drive";
+		    rootDirPath = "\\";
+		    },
+
+		DRIVE
+		    {
+		    driveNo = 18;
+		    driveName = "S Drive";
+		    rootDirPath = "\\";
+		    },
+
+		DRIVE
+		    {
+		    driveNo = 19;
+		    driveName = "T Drive";
+		    rootDirPath = "\\";
+		    },
+
+		DRIVE
+		    {
+		    driveNo = 20;
+		    driveName = "U Drive";
+		    rootDirPath = "\\";
+		    },
+
+		DRIVE
+		    {
+		    driveNo = 21;
+		    driveName = "V Drive";
+		    rootDirPath = "\\";
+		    },
+
+		DRIVE
+		    {
+		    driveNo = 22;
+		    driveName = "W Drive";
+		    rootDirPath = "\\";
+		    },
+
+		DRIVE
+		   {
+		    driveNo = 23;
+		    driveName = "X Drive";
+		    rootDirPath = "\\";		    
+		    },
+
+		DRIVE
+		    {
+		    driveNo = 24;
+		    driveName = "Y Drive";
+		    rootDirPath = "\\";
+		    },
+		    
+		DRIVE
+		   {
+		    driveNo = 25;
+		    driveName = "Z Drive";
+		    rootDirPath = "\\";		    
+		    } 
+
+		};
+		
+	}
+
+/**
+ *This resource used to create supported format ordered.
+ */ 
+RESOURCE FORMATSARRAY formats
+	{
+	//put the required format code in "" to enable format ordered property
+	objFormats = 
+        {
+        "3000", // Undefined
+        "3001", // Association
+        "B982", // MP4
+        "B984", // 3GP
+        "B903", // AAC
+        "3009", // MP3
+        "B901", // WMA
+        "3008", // WAV
+        "B981", // WMV
+        "300C", // ASF
+        "BA05", // PLA
+        "BA11", // M3U
+        "BA10" // WPL
+        };
+	}
+
+/**
+ * This resource used to load the extension dps for Dev DP.
+ */ 
+RESOURCE PLUGINUIDARRAY extnpluginuids
+	{
+	//Put the extension plugin implementation UID in "" to load particular exn plugin
+	// if more than one plugin is needed then seperate then by ',' eg:- "20010ADB" ,"20010ADC"
+	uid_list = {"20022E92"}; //20022E92, WMPDRM dll id
+	}
+
