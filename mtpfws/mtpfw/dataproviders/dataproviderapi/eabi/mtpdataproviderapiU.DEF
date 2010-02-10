@@ -1,0 +1,82 @@
+EXPORTS
+	_ZN12CMTPMetaData12GetIntArrayLEjR6RArrayIiE @ 1 NONAME
+	_ZN12CMTPMetaData12SetIntArrayLEjRK6RArrayIiE @ 2 NONAME
+	_ZN12CMTPMetaData13GetUintArrayLEjR6RArrayIjE @ 3 NONAME
+	_ZN12CMTPMetaData13SetDesCArrayLEjRK15CDesC16ArraySeg @ 4 NONAME
+	_ZN12CMTPMetaData13SetDesCArrayLEjRK16CDesC16ArrayFlat @ 5 NONAME
+	_ZN12CMTPMetaData13SetUintArrayLEjRK6RArrayIjE @ 6 NONAME
+	_ZN12CMTPMetaData20GetExtendedInterfaceE4TUid @ 7 NONAME
+	_ZN12CMTPMetaData6SetIntEji @ 8 NONAME
+	_ZN12CMTPMetaData7SetUintEjj @ 9 NONAME
+	_ZN12CMTPMetaData8SetDesCLEjRK7TDesC16 @ 10 NONAME
+	_ZN12CMTPMetaData9DesCArrayEj @ 11 NONAME
+	_ZN12CMTPMetaDataD0Ev @ 12 NONAME
+	_ZN12CMTPMetaDataD1Ev @ 13 NONAME
+	_ZN12CMTPMetaDataD2Ev @ 14 NONAME
+	_ZN16MMTPDataProvider20GetExtendedInterfaceE4TUid @ 15 NONAME
+	_ZN18CMTPObjectMetaData4NewLEjjjRK7TDesC16 @ 16 NONAME
+	_ZN18CMTPObjectMetaData4NewLEv @ 17 NONAME
+	_ZN18CMTPObjectMetaData5NewLCEjjjRK7TDesC16 @ 18 NONAME
+	_ZN18CMTPObjectMetaData5NewLCEv @ 19 NONAME
+	_ZN18CMTPObjectMetaDataD0Ev @ 20 NONAME
+	_ZN18CMTPObjectMetaDataD1Ev @ 21 NONAME
+	_ZN18CMTPObjectMetaDataD2Ev @ 22 NONAME
+	_ZN19CMTPStorageMetaData4NewLERKS_ @ 23 NONAME
+	_ZN19CMTPStorageMetaData4NewLEjRK7TDesC16 @ 24 NONAME
+	_ZN19CMTPStorageMetaData4NewLEv @ 25 NONAME
+	_ZN19CMTPStorageMetaData5NewLCERKS_ @ 26 NONAME
+	_ZN19CMTPStorageMetaData5NewLCEjRK7TDesC16 @ 27 NONAME
+	_ZN19CMTPStorageMetaData5NewLCEv @ 28 NONAME
+	_ZN19CMTPStorageMetaDataD0Ev @ 29 NONAME
+	_ZN19CMTPStorageMetaDataD1Ev @ 30 NONAME
+	_ZN19CMTPStorageMetaDataD2Ev @ 31 NONAME
+	_ZN22CMTPDataProviderPlugin4NewLE4TUidPv @ 32 NONAME
+	_ZN22CMTPDataProviderPluginC2EPv @ 33 NONAME
+	_ZN22CMTPDataProviderPluginD0Ev @ 34 NONAME
+	_ZN22CMTPDataProviderPluginD1Ev @ 35 NONAME
+	_ZN22CMTPDataProviderPluginD2Ev @ 36 NONAME
+	_ZN24TMTPObjectMgrQueryParamsC1Emmm @ 37 NONAME ABSENT
+	_ZN24TMTPObjectMgrQueryParamsC2Emmm @ 38 NONAME ABSENT
+	_ZN25RMTPObjectMgrQueryContext5CloseEv @ 39 NONAME
+	_ZN25RMTPObjectMgrQueryContext5OpenLEv @ 40 NONAME
+	_ZN25RMTPObjectMgrQueryContext6DbViewEv @ 41 NONAME
+	_ZN25RMTPObjectMgrQueryContextC1Ev @ 42 NONAME
+	_ZN25RMTPObjectMgrQueryContextC2Ev @ 43 NONAME
+	_ZN25TMTPStorageMgrQueryParams14SetStorageSuidERK7TDesC16 @ 44 NONAME
+	_ZN25TMTPStorageMgrQueryParams20SetStorageSystemTypeEm @ 45 NONAME
+	_ZN25TMTPStorageMgrQueryParamsC1ERK7TDesC16m @ 46 NONAME
+	_ZN25TMTPStorageMgrQueryParamsC1Ev @ 47 NONAME
+	_ZN25TMTPStorageMgrQueryParamsC2ERK7TDesC16m @ 48 NONAME
+	_ZN25TMTPStorageMgrQueryParamsC2Ev @ 49 NONAME
+	_ZNK12CMTPMetaData3IntEj @ 50 NONAME
+	_ZNK12CMTPMetaData4DesCEj @ 51 NONAME
+	_ZNK12CMTPMetaData4UintEj @ 52 NONAME
+	_ZNK12CMTPMetaData8IntArrayEj @ 53 NONAME
+	_ZNK12CMTPMetaData9UintArrayEj @ 54 NONAME
+	_ZNK16MMTPDataProvider10SupportedLE19TMTPSupportCategoryR12CDesC16Array @ 55 NONAME
+	_ZNK22CMTPDataProviderPlugin9FrameworkEv @ 56 NONAME
+	_ZNK25RMTPObjectMgrQueryContext13QueryCompleteEv @ 57 NONAME
+	_ZNK25RMTPObjectMgrQueryContext6IsOpenEv @ 58 NONAME
+	_ZNK25TMTPStorageMgrQueryParams11StorageSuidEv @ 59 NONAME
+	_ZNK25TMTPStorageMgrQueryParams17StorageSystemTypeEv @ 60 NONAME
+	_ZTI12CMTPMetaData @ 61 NONAME ; #<TI>#
+	_ZTI16MMTPDataProvider @ 62 NONAME ; #<TI>#
+	_ZTI18CMTPObjectMetaData @ 63 NONAME ; #<TI>#
+	_ZTI19CMTPStorageMetaData @ 64 NONAME ; #<TI>#
+	_ZTI22CMTPDataProviderPlugin @ 65 NONAME ; #<TI>#
+	_ZTV12CMTPMetaData @ 66 NONAME ; #<VT>#
+	_ZTV16MMTPDataProvider @ 67 NONAME ; #<VT>#
+	_ZTV18CMTPObjectMetaData @ 68 NONAME ; #<VT>#
+	_ZTV19CMTPStorageMetaData @ 69 NONAME ; #<VT>#
+	_ZTV22CMTPDataProviderPlugin @ 70 NONAME ; #<VT>#
+	_ZThn4_NK22CMTPDataProviderPlugin9FrameworkEv @ 71 NONAME ; #<thunk>#
+	_ZN18CMTPObjectMetaData4NewLERK7TDesC16jjj @ 72 NONAME
+	_ZN18CMTPObjectMetaData5NewLCERK7TDesC16jjj @ 73 NONAME
+	_ZN24TMTPObjectMgrQueryParamsC1Emmmm @ 74 NONAME
+	_ZN24TMTPObjectMgrQueryParamsC2Emmmm @ 75 NONAME
+	_ZN12CMTPMetaData11SetHashPathERK7TDesC16j @ 76 NONAME
+	_ZN12CMTPMetaData16CompareTPathHashERKNS_9TPathHashES2_ @ 77 NONAME
+	_ZN12CMTPMetaData16GetHashPathArrayEv @ 78 NONAME
+	_ZN16MMTPDataProvider23StartObjectEnumerationLEm @ 79 NONAME
+	_ZN16MMTPDataProvider23StartObjectEnumerationLEmi @ 80 NONAME
+

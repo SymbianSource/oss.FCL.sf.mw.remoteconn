@@ -1,0 +1,675 @@
+EXPORTS
+	??0CMTPTypeCompoundBase@@IAE@HI@Z @ 1 NONAME ; CMTPTypeCompoundBase::CMTPTypeCompoundBase(int, unsigned int)
+	??0RMTPType@@QAE@XZ @ 2 NONAME ; RMTPType::RMTPType(void)
+	??0RMTPTypeCompoundFlatChunk@CMTPTypeCompoundBase@@QAE@IAAV1@@Z @ 3 NONAME ; CMTPTypeCompoundBase::RMTPTypeCompoundFlatChunk::RMTPTypeCompoundFlatChunk(unsigned int, class CMTPTypeCompoundBase &)
+	??0TMTPTypeEvent@@QAE@XZ @ 4 NONAME ; TMTPTypeEvent::TMTPTypeEvent(void)
+	??0TMTPTypeFlatBase@@QAE@XZ @ 5 NONAME ; TMTPTypeFlatBase::TMTPTypeFlatBase(void)
+	??0TMTPTypeInt128@@QAE@ABVTPtrC8@@@Z @ 6 NONAME ; TMTPTypeInt128::TMTPTypeInt128(class TPtrC8 const &)
+	??0TMTPTypeInt128@@QAE@XZ @ 7 NONAME ; TMTPTypeInt128::TMTPTypeInt128(void)
+	??0TMTPTypeInt16@@QAE@F@Z @ 8 NONAME ; TMTPTypeInt16::TMTPTypeInt16(short)
+	??0TMTPTypeInt16@@QAE@XZ @ 9 NONAME ; TMTPTypeInt16::TMTPTypeInt16(void)
+	??0TMTPTypeInt32@@QAE@J@Z @ 10 NONAME ; TMTPTypeInt32::TMTPTypeInt32(long)
+	??0TMTPTypeInt32@@QAE@XZ @ 11 NONAME ; TMTPTypeInt32::TMTPTypeInt32(void)
+	??0TMTPTypeInt64@@QAE@XZ @ 12 NONAME ; TMTPTypeInt64::TMTPTypeInt64(void)
+	??0TMTPTypeInt64@@QAE@_J@Z @ 13 NONAME ; TMTPTypeInt64::TMTPTypeInt64(long long)
+	??0TMTPTypeInt8@@QAE@C@Z @ 14 NONAME ; TMTPTypeInt8::TMTPTypeInt8(signed char)
+	??0TMTPTypeInt8@@QAE@XZ @ 15 NONAME ; TMTPTypeInt8::TMTPTypeInt8(void)
+	??0TMTPTypeIntBase@@IAE@HIH@Z @ 16 NONAME ; TMTPTypeIntBase::TMTPTypeIntBase(int, unsigned int, int)
+	??0TMTPTypeNull@@QAE@XZ @ 17 NONAME ; TMTPTypeNull::TMTPTypeNull(void)
+	??0TMTPTypeRequest@@QAE@XZ @ 18 NONAME ; TMTPTypeRequest::TMTPTypeRequest(void)
+	??0TMTPTypeResponse@@QAE@XZ @ 19 NONAME ; TMTPTypeResponse::TMTPTypeResponse(void)
+	??0TMTPTypeUint128@@QAE@ABVTPtrC8@@@Z @ 20 NONAME ; TMTPTypeUint128::TMTPTypeUint128(class TPtrC8 const &)
+	??0TMTPTypeUint128@@QAE@XZ @ 21 NONAME ; TMTPTypeUint128::TMTPTypeUint128(void)
+	??0TMTPTypeUint16@@QAE@G@Z @ 22 NONAME ; TMTPTypeUint16::TMTPTypeUint16(unsigned short)
+	??0TMTPTypeUint16@@QAE@XZ @ 23 NONAME ; TMTPTypeUint16::TMTPTypeUint16(void)
+	??0TMTPTypeUint32@@QAE@K@Z @ 24 NONAME ; TMTPTypeUint32::TMTPTypeUint32(unsigned long)
+	??0TMTPTypeUint32@@QAE@XZ @ 25 NONAME ; TMTPTypeUint32::TMTPTypeUint32(void)
+	??0TMTPTypeUint64@@QAE@XZ @ 26 NONAME ; TMTPTypeUint64::TMTPTypeUint64(void)
+	??0TMTPTypeUint64@@QAE@_K@Z @ 27 NONAME ; TMTPTypeUint64::TMTPTypeUint64(unsigned long long)
+	??0TMTPTypeUint8@@QAE@E@Z @ 28 NONAME ; TMTPTypeUint8::TMTPTypeUint8(unsigned char)
+	??0TMTPTypeUint8@@QAE@XZ @ 29 NONAME ; TMTPTypeUint8::TMTPTypeUint8(void)
+	??0TMTPTypeUintBase@@IAE@IIH@Z @ 30 NONAME ; TMTPTypeUintBase::TMTPTypeUintBase(unsigned int, unsigned int, int)
+	??1CMTPTypeArray@@UAE@XZ @ 31 NONAME ; CMTPTypeArray::~CMTPTypeArray(void)
+	??1CMTPTypeCompoundBase@@UAE@XZ @ 32 NONAME ; CMTPTypeCompoundBase::~CMTPTypeCompoundBase(void)
+	??1CMTPTypeDevicePropDesc@@UAE@XZ @ 33 NONAME ; CMTPTypeDevicePropDesc::~CMTPTypeDevicePropDesc(void)
+	??1CMTPTypeDevicePropDescEnumerationForm@@UAE@XZ @ 34 NONAME ; CMTPTypeDevicePropDescEnumerationForm::~CMTPTypeDevicePropDescEnumerationForm(void)
+	??1CMTPTypeDevicePropDescRangeForm@@UAE@XZ @ 35 NONAME ; CMTPTypeDevicePropDescRangeForm::~CMTPTypeDevicePropDescRangeForm(void)
+	??1CMTPTypeFile@@UAE@XZ @ 36 NONAME ; CMTPTypeFile::~CMTPTypeFile(void)
+	??1CMTPTypeInterdependentPropDesc@@UAE@XZ @ 37 NONAME ; CMTPTypeInterdependentPropDesc::~CMTPTypeInterdependentPropDesc(void)
+	??1CMTPTypeInterdependentProperties@@UAE@XZ @ 38 NONAME ; CMTPTypeInterdependentProperties::~CMTPTypeInterdependentProperties(void)
+	??1CMTPTypeObjectInfo@@UAE@XZ @ 39 NONAME ; CMTPTypeObjectInfo::~CMTPTypeObjectInfo(void)
+	??1CMTPTypeObjectPropDesc@@UAE@XZ @ 40 NONAME ; CMTPTypeObjectPropDesc::~CMTPTypeObjectPropDesc(void)
+	??1CMTPTypeObjectPropDescEnumerationForm@@UAE@XZ @ 41 NONAME ; CMTPTypeObjectPropDescEnumerationForm::~CMTPTypeObjectPropDescEnumerationForm(void)
+	??1CMTPTypeObjectPropDescRangeForm@@UAE@XZ @ 42 NONAME ; CMTPTypeObjectPropDescRangeForm::~CMTPTypeObjectPropDescRangeForm(void)
+	??1CMTPTypeObjectPropList@@UAE@XZ @ 43 NONAME ; CMTPTypeObjectPropList::~CMTPTypeObjectPropList(void)
+	??1CMTPTypeObjectPropListElement@@UAE@XZ @ 44 NONAME ; CMTPTypeObjectPropListElement::~CMTPTypeObjectPropListElement(void)
+	??1CMTPTypeStorageInfo@@UAE@XZ @ 45 NONAME ; CMTPTypeStorageInfo::~CMTPTypeStorageInfo(void)
+	??1CMTPTypeString@@UAE@XZ @ 46 NONAME ; CMTPTypeString::~CMTPTypeString(void)
+	??1RMTPType@@UAE@XZ @ 47 NONAME ; RMTPType::~RMTPType(void)
+	??1TMTPTypeInt64@@UAE@XZ @ 48 NONAME ; TMTPTypeInt64::~TMTPTypeInt64(void)
+	??8TMTPTypeRequest@@QBEHABV0@@Z @ 49 NONAME ; int TMTPTypeRequest::operator==(class TMTPTypeRequest const &) const
+	??9TMTPTypeRequest@@QBEHABV0@@Z @ 50 NONAME ; int TMTPTypeRequest::operator!=(class TMTPTypeRequest const &) const
+	?AppendDataObjectL@CMTPTypeObjectPropList@@QAEXAAVMMTPType@@@Z @ 51 NONAME ABSENT ; void CMTPTypeObjectPropList::AppendDataObjectL(class MMTPType &)
+	?AppendInt64L@CMTPTypeArray@@QAEX_J@Z @ 52 NONAME ; void CMTPTypeArray::AppendInt64L(long long)
+	?AppendIntL@CMTPTypeArray@@QAEXH@Z @ 53 NONAME ; void CMTPTypeArray::AppendIntL(int)
+	?AppendL@CMTPTypeArray@@QAEXABV?$RArray@H@@@Z @ 54 NONAME ; void CMTPTypeArray::AppendL(class RArray<int> const &)
+	?AppendL@CMTPTypeArray@@QAEXABV?$RArray@I@@@Z @ 55 NONAME ; void CMTPTypeArray::AppendL(class RArray<unsigned int> const &)
+	?AppendL@CMTPTypeArray@@QAEXABV?$RArray@_J@@@Z @ 56 NONAME ; void CMTPTypeArray::AppendL(class RArray<long long> const &)
+	?AppendL@CMTPTypeArray@@QAEXABV?$RArray@_K@@@Z @ 57 NONAME ; void CMTPTypeArray::AppendL(class RArray<unsigned long long> const &)
+	?AppendL@CMTPTypeArray@@QAEXABVMMTPType@@@Z @ 58 NONAME ; void CMTPTypeArray::AppendL(class MMTPType const &)
+	?AppendL@CMTPTypeInterdependentPropDesc@@QAEXPAVCMTPTypeInterdependentProperties@@@Z @ 59 NONAME ; void CMTPTypeInterdependentPropDesc::AppendL(class CMTPTypeInterdependentProperties *)
+	?AppendL@CMTPTypeInterdependentProperties@@QAEXPAVCMTPTypeObjectPropDesc@@@Z @ 60 NONAME ; void CMTPTypeInterdependentProperties::AppendL(class CMTPTypeObjectPropDesc *)
+	?AppendL@CMTPTypeObjectPropList@@QAEXPAVCMTPTypeObjectPropListElement@@@Z @ 61 NONAME ABSENT ; void CMTPTypeObjectPropList::AppendL(class CMTPTypeObjectPropListElement *)
+	?AppendSupportedValueL@CMTPTypeDevicePropDescEnumerationForm@@QAEXABVMMTPType@@@Z @ 62 NONAME ; void CMTPTypeDevicePropDescEnumerationForm::AppendSupportedValueL(class MMTPType const &)
+	?AppendSupportedValueL@CMTPTypeObjectPropDescEnumerationForm@@QAEXABVMMTPType@@@Z @ 63 NONAME ; void CMTPTypeObjectPropDescEnumerationForm::AppendSupportedValueL(class MMTPType const &)
+	?AppendUint64L@CMTPTypeArray@@QAEX_K@Z @ 64 NONAME ; void CMTPTypeArray::AppendUint64L(unsigned long long)
+	?AppendUintL@CMTPTypeArray@@QAEXI@Z @ 65 NONAME ; void CMTPTypeArray::AppendUintL(unsigned int)
+	?Array@CMTPTypeArray@@QBEXAAV?$RArray@H@@@Z @ 66 NONAME ; void CMTPTypeArray::Array(class RArray<int> &) const
+	?Array@CMTPTypeArray@@QBEXAAV?$RArray@I@@@Z @ 67 NONAME ; void CMTPTypeArray::Array(class RArray<unsigned int> &) const
+	?Array@CMTPTypeArray@@QBEXAAV?$RArray@_J@@@Z @ 68 NONAME ; void CMTPTypeArray::Array(class RArray<long long> &) const
+	?Array@CMTPTypeArray@@QBEXAAV?$RArray@_K@@@Z @ 69 NONAME ; void CMTPTypeArray::Array(class RArray<unsigned long long> &) const
+	?ChunkAppendL@CMTPTypeCompoundBase@@IAEXABVMMTPType@@@Z @ 70 NONAME ; void CMTPTypeCompoundBase::ChunkAppendL(class MMTPType const &)
+	?ChunkCount@CMTPTypeCompoundBase@@IBEIXZ @ 71 NONAME ; unsigned int CMTPTypeCompoundBase::ChunkCount(void) const
+	?ChunkRemove@CMTPTypeCompoundBase@@IAEXI@Z @ 72 NONAME ; void CMTPTypeCompoundBase::ChunkRemove(unsigned int)
+	?CleanupClosePushL@RMTPType@@QAEXXZ @ 73 NONAME ; void RMTPType::CleanupClosePushL(void)
+	?Close@RMTPType@@QAEXXZ @ 74 NONAME ; void RMTPType::Close(void)
+	?Close@RMTPTypeCompoundFlatChunk@CMTPTypeCompoundBase@@QAEXXZ @ 75 NONAME ; void CMTPTypeCompoundBase::RMTPTypeCompoundFlatChunk::Close(void)
+	?CommitChunkL@CMTPTypeArray@@UAEXAAVTPtr8@@@Z @ 76 NONAME ABSENT ; void CMTPTypeArray::CommitChunkL(class TPtr8 &)
+	?CommitChunkL@CMTPTypeCompoundBase@@UAEXAAVTPtr8@@@Z @ 77 NONAME ABSENT ; void CMTPTypeCompoundBase::CommitChunkL(class TPtr8 &)
+	?CommitChunkL@CMTPTypeDevicePropDesc@@UAEXAAVTPtr8@@@Z @ 78 NONAME ABSENT ; void CMTPTypeDevicePropDesc::CommitChunkL(class TPtr8 &)
+	?CommitChunkL@CMTPTypeDevicePropDescEnumerationForm@@UAEXAAVTPtr8@@@Z @ 79 NONAME ABSENT ; void CMTPTypeDevicePropDescEnumerationForm::CommitChunkL(class TPtr8 &)
+	?CommitChunkL@CMTPTypeFile@@UAEXAAVTPtr8@@@Z @ 80 NONAME ABSENT ; void CMTPTypeFile::CommitChunkL(class TPtr8 &)
+	?CommitChunkL@CMTPTypeInterdependentPropDesc@@UAEXAAVTPtr8@@@Z @ 81 NONAME ABSENT ; void CMTPTypeInterdependentPropDesc::CommitChunkL(class TPtr8 &)
+	?CommitChunkL@CMTPTypeInterdependentProperties@@UAEXAAVTPtr8@@@Z @ 82 NONAME ABSENT ; void CMTPTypeInterdependentProperties::CommitChunkL(class TPtr8 &)
+	?CommitChunkL@CMTPTypeObjectPropDesc@@UAEXAAVTPtr8@@@Z @ 83 NONAME ABSENT ; void CMTPTypeObjectPropDesc::CommitChunkL(class TPtr8 &)
+	?CommitChunkL@CMTPTypeObjectPropDescEnumerationForm@@UAEXAAVTPtr8@@@Z @ 84 NONAME ABSENT ; void CMTPTypeObjectPropDescEnumerationForm::CommitChunkL(class TPtr8 &)
+	?CommitChunkL@CMTPTypeObjectPropList@@UAEXAAVTPtr8@@@Z @ 85 NONAME ABSENT ; void CMTPTypeObjectPropList::CommitChunkL(class TPtr8 &)
+	?CommitChunkL@CMTPTypeObjectPropListElement@@UAEXAAVTPtr8@@@Z @ 86 NONAME ABSENT ; void CMTPTypeObjectPropListElement::CommitChunkL(class TPtr8 &)
+	?CommitChunkL@CMTPTypeString@@UAEXAAVTPtr8@@@Z @ 87 NONAME ABSENT ; void CMTPTypeString::CommitChunkL(class TPtr8 &)
+	?CommitChunkL@MMTPType@@UAEXAAVTPtr8@@@Z @ 88 NONAME ABSENT ; void MMTPType::CommitChunkL(class TPtr8 &)
+	?CommitChunkL@RMTPType@@UAEXAAVTPtr8@@@Z @ 89 NONAME ABSENT ; void RMTPType::CommitChunkL(class TPtr8 &)
+	?CommitRequired@CMTPTypeArray@@UBEHXZ @ 90 NONAME ; int CMTPTypeArray::CommitRequired(void) const
+	?CommitRequired@CMTPTypeCompoundBase@@UBEHXZ @ 91 NONAME ; int CMTPTypeCompoundBase::CommitRequired(void) const
+	?CommitRequired@CMTPTypeDevicePropDesc@@UBEHXZ @ 92 NONAME ; int CMTPTypeDevicePropDesc::CommitRequired(void) const
+	?CommitRequired@CMTPTypeDevicePropDescEnumerationForm@@UBEHXZ @ 93 NONAME ; int CMTPTypeDevicePropDescEnumerationForm::CommitRequired(void) const
+	?CommitRequired@CMTPTypeFile@@UBEHXZ @ 94 NONAME ; int CMTPTypeFile::CommitRequired(void) const
+	?CommitRequired@CMTPTypeInterdependentPropDesc@@UBEHXZ @ 95 NONAME ; int CMTPTypeInterdependentPropDesc::CommitRequired(void) const
+	?CommitRequired@CMTPTypeInterdependentProperties@@UBEHXZ @ 96 NONAME ; int CMTPTypeInterdependentProperties::CommitRequired(void) const
+	?CommitRequired@CMTPTypeObjectPropDesc@@UBEHXZ @ 97 NONAME ; int CMTPTypeObjectPropDesc::CommitRequired(void) const
+	?CommitRequired@CMTPTypeObjectPropDescEnumerationForm@@UBEHXZ @ 98 NONAME ; int CMTPTypeObjectPropDescEnumerationForm::CommitRequired(void) const
+	?CommitRequired@CMTPTypeObjectPropList@@UBEHXZ @ 99 NONAME ; int CMTPTypeObjectPropList::CommitRequired(void) const
+	?CommitRequired@CMTPTypeObjectPropListElement@@UBEHXZ @ 100 NONAME ABSENT ; int CMTPTypeObjectPropListElement::CommitRequired(void) const
+	?CommitRequired@CMTPTypeString@@UBEHXZ @ 101 NONAME ; int CMTPTypeString::CommitRequired(void) const
+	?CommitRequired@MMTPType@@UBEHXZ @ 102 NONAME ; int MMTPType::CommitRequired(void) const
+	?CommitRequired@RMTPType@@UBEHXZ @ 103 NONAME ; int RMTPType::CommitRequired(void) const
+	?CopyL@MMTPType@@SAXABV1@AAV1@@Z @ 104 NONAME ; void MMTPType::CopyL(class MMTPType const &, class MMTPType &)
+	?CreateL@RMTPType@@MAEPAVMMTPType@@I@Z @ 105 NONAME ; class MMTPType * RMTPType::CreateL(unsigned int)
+	?Data@RMTPType@@QAEAAVMMTPType@@XZ @ 106 NONAME ; class MMTPType & RMTPType::Data(void)
+	?DataObjectL@CMTPTypeObjectPropList@@QBEAAVMMTPType@@XZ @ 107 NONAME ABSENT ; class MMTPType & CMTPTypeObjectPropList::DataObjectL(void) const
+	?Destroy@RMTPType@@MAEXPAVMMTPType@@@Z @ 108 NONAME ; void RMTPType::Destroy(class MMTPType *)
+	?Element@CMTPTypeObjectPropList@@QBEAAVCMTPTypeObjectPropListElement@@I@Z @ 109 NONAME ABSENT ; class CMTPTypeObjectPropListElement & CMTPTypeObjectPropList::Element(unsigned int) const
+	?ElementInfo@TMTPTypeEvent@@EBEABUTElementInfo@TMTPTypeFlatBase@@H@Z @ 110 NONAME ; struct TMTPTypeFlatBase::TElementInfo const & TMTPTypeEvent::ElementInfo(int) const
+	?ElementInfo@TMTPTypeRequest@@EBEABUTElementInfo@TMTPTypeFlatBase@@H@Z @ 111 NONAME ; struct TMTPTypeFlatBase::TElementInfo const & TMTPTypeRequest::ElementInfo(int) const
+	?ElementInfo@TMTPTypeResponse@@EBEABUTElementInfo@TMTPTypeFlatBase@@H@Z @ 112 NONAME ; struct TMTPTypeFlatBase::TElementInfo const & TMTPTypeResponse::ElementInfo(int) const
+	?ElementInt64@CMTPTypeArray@@QBE_JI@Z @ 113 NONAME ; long long CMTPTypeArray::ElementInt64(unsigned int) const
+	?ElementInt@CMTPTypeArray@@QBEHI@Z @ 114 NONAME ; int CMTPTypeArray::ElementInt(unsigned int) const
+	?ElementL@CMTPTypeArray@@QBEXIAAVMMTPType@@@Z @ 115 NONAME ; void CMTPTypeArray::ElementL(unsigned int, class MMTPType &) const
+	?ElementType@CMTPTypeArray@@QBEHXZ @ 116 NONAME ; int CMTPTypeArray::ElementType(void) const
+	?ElementUint64@CMTPTypeArray@@QBE_KI@Z @ 117 NONAME ; unsigned long long CMTPTypeArray::ElementUint64(unsigned int) const
+	?ElementUint@CMTPTypeArray@@QBEII@Z @ 118 NONAME ; unsigned int CMTPTypeArray::ElementUint(unsigned int) const
+	?File@CMTPTypeFile@@QAEAAVRFile64@@XZ @ 119 NONAME ; class RFile64 & CMTPTypeFile::File(void)
+	?FirstReadChunk@CMTPTypeArray@@UBEHAAVTPtrC8@@@Z @ 120 NONAME ; int CMTPTypeArray::FirstReadChunk(class TPtrC8 &) const
+	?FirstReadChunk@CMTPTypeCompoundBase@@UBEHAAVTPtrC8@@@Z @ 121 NONAME ; int CMTPTypeCompoundBase::FirstReadChunk(class TPtrC8 &) const
+	?FirstReadChunk@CMTPTypeFile@@UBEHAAVTPtrC8@@@Z @ 122 NONAME ; int CMTPTypeFile::FirstReadChunk(class TPtrC8 &) const
+	?FirstReadChunk@CMTPTypeString@@UBEHAAVTPtrC8@@@Z @ 123 NONAME ; int CMTPTypeString::FirstReadChunk(class TPtrC8 &) const
+	?FirstReadChunk@RMTPType@@UBEHAAVTPtrC8@@@Z @ 124 NONAME ; int RMTPType::FirstReadChunk(class TPtrC8 &) const
+	?FirstReadChunk@TMTPTypeFlatBase@@UBEHAAVTPtrC8@@@Z @ 125 NONAME ; int TMTPTypeFlatBase::FirstReadChunk(class TPtrC8 &) const
+	?FirstReadChunk@TMTPTypeInt128@@UBEHAAVTPtrC8@@@Z @ 126 NONAME ; int TMTPTypeInt128::FirstReadChunk(class TPtrC8 &) const
+	?FirstReadChunk@TMTPTypeInt64@@UBEHAAVTPtrC8@@@Z @ 127 NONAME ; int TMTPTypeInt64::FirstReadChunk(class TPtrC8 &) const
+	?FirstReadChunk@TMTPTypeIntBase@@UBEHAAVTPtrC8@@@Z @ 128 NONAME ; int TMTPTypeIntBase::FirstReadChunk(class TPtrC8 &) const
+	?FirstReadChunk@TMTPTypeNull@@UBEHAAVTPtrC8@@@Z @ 129 NONAME ; int TMTPTypeNull::FirstReadChunk(class TPtrC8 &) const
+	?FirstReadChunk@TMTPTypeUint128@@UBEHAAVTPtrC8@@@Z @ 130 NONAME ; int TMTPTypeUint128::FirstReadChunk(class TPtrC8 &) const
+	?FirstReadChunk@TMTPTypeUint64@@UBEHAAVTPtrC8@@@Z @ 131 NONAME ; int TMTPTypeUint64::FirstReadChunk(class TPtrC8 &) const
+	?FirstReadChunk@TMTPTypeUintBase@@UBEHAAVTPtrC8@@@Z @ 132 NONAME ; int TMTPTypeUintBase::FirstReadChunk(class TPtrC8 &) const
+	?FirstWriteChunk@CMTPTypeArray@@UAEHAAVTPtr8@@@Z @ 133 NONAME ; int CMTPTypeArray::FirstWriteChunk(class TPtr8 &)
+	?FirstWriteChunk@CMTPTypeCompoundBase@@UAEHAAVTPtr8@@@Z @ 134 NONAME ; int CMTPTypeCompoundBase::FirstWriteChunk(class TPtr8 &)
+	?FirstWriteChunk@CMTPTypeDevicePropDesc@@UAEHAAVTPtr8@@@Z @ 135 NONAME ; int CMTPTypeDevicePropDesc::FirstWriteChunk(class TPtr8 &)
+	?FirstWriteChunk@CMTPTypeDevicePropDescEnumerationForm@@UAEHAAVTPtr8@@@Z @ 136 NONAME ; int CMTPTypeDevicePropDescEnumerationForm::FirstWriteChunk(class TPtr8 &)
+	?FirstWriteChunk@CMTPTypeFile@@UAEHAAVTPtr8@@@Z @ 137 NONAME ; int CMTPTypeFile::FirstWriteChunk(class TPtr8 &)
+	?FirstWriteChunk@CMTPTypeInterdependentPropDesc@@UAEHAAVTPtr8@@@Z @ 138 NONAME ; int CMTPTypeInterdependentPropDesc::FirstWriteChunk(class TPtr8 &)
+	?FirstWriteChunk@CMTPTypeInterdependentProperties@@UAEHAAVTPtr8@@@Z @ 139 NONAME ; int CMTPTypeInterdependentProperties::FirstWriteChunk(class TPtr8 &)
+	?FirstWriteChunk@CMTPTypeObjectPropDesc@@UAEHAAVTPtr8@@@Z @ 140 NONAME ; int CMTPTypeObjectPropDesc::FirstWriteChunk(class TPtr8 &)
+	?FirstWriteChunk@CMTPTypeObjectPropDescEnumerationForm@@UAEHAAVTPtr8@@@Z @ 141 NONAME ; int CMTPTypeObjectPropDescEnumerationForm::FirstWriteChunk(class TPtr8 &)
+	?FirstWriteChunk@CMTPTypeObjectPropList@@UAEHAAVTPtr8@@@Z @ 142 NONAME ; int CMTPTypeObjectPropList::FirstWriteChunk(class TPtr8 &)
+	?FirstWriteChunk@CMTPTypeObjectPropListElement@@UAEHAAVTPtr8@@@Z @ 143 NONAME ABSENT ; int CMTPTypeObjectPropListElement::FirstWriteChunk(class TPtr8 &)
+	?FirstWriteChunk@CMTPTypeString@@UAEHAAVTPtr8@@@Z @ 144 NONAME ; int CMTPTypeString::FirstWriteChunk(class TPtr8 &)
+	?FirstWriteChunk@RMTPType@@UAEHAAVTPtr8@@@Z @ 145 NONAME ; int RMTPType::FirstWriteChunk(class TPtr8 &)
+	?FirstWriteChunk@TMTPTypeFlatBase@@UAEHAAVTPtr8@@@Z @ 146 NONAME ; int TMTPTypeFlatBase::FirstWriteChunk(class TPtr8 &)
+	?FirstWriteChunk@TMTPTypeInt128@@UAEHAAVTPtr8@@@Z @ 147 NONAME ; int TMTPTypeInt128::FirstWriteChunk(class TPtr8 &)
+	?FirstWriteChunk@TMTPTypeInt64@@UAEHAAVTPtr8@@@Z @ 148 NONAME ; int TMTPTypeInt64::FirstWriteChunk(class TPtr8 &)
+	?FirstWriteChunk@TMTPTypeIntBase@@UAEHAAVTPtr8@@@Z @ 149 NONAME ; int TMTPTypeIntBase::FirstWriteChunk(class TPtr8 &)
+	?FirstWriteChunk@TMTPTypeNull@@UAEHAAVTPtr8@@@Z @ 150 NONAME ; int TMTPTypeNull::FirstWriteChunk(class TPtr8 &)
+	?FirstWriteChunk@TMTPTypeUint128@@UAEHAAVTPtr8@@@Z @ 151 NONAME ; int TMTPTypeUint128::FirstWriteChunk(class TPtr8 &)
+	?FirstWriteChunk@TMTPTypeUint64@@UAEHAAVTPtr8@@@Z @ 152 NONAME ; int TMTPTypeUint64::FirstWriteChunk(class TPtr8 &)
+	?FirstWriteChunk@TMTPTypeUintBase@@UAEHAAVTPtr8@@@Z @ 153 NONAME ; int TMTPTypeUintBase::FirstWriteChunk(class TPtr8 &)
+	?GetExtendedInterface@MMTPType@@UAEPAXVTUid@@@Z @ 154 NONAME ; void * MMTPType::GetExtendedInterface(class TUid)
+	?GetL@CMTPTypeCompoundBase@@UBEXHAAVMMTPType@@@Z @ 155 NONAME ; void CMTPTypeCompoundBase::GetL(int, class MMTPType &) const
+	?GetL@TMTPTypeFlatBase@@UBEXHAAVMMTPType@@@Z @ 156 NONAME ; void TMTPTypeFlatBase::GetL(int, class MMTPType &) const
+	?Int16@TMTPTypeFlatBase@@UBEFH@Z @ 157 NONAME ; short TMTPTypeFlatBase::Int16(int) const
+	?Int16L@CMTPTypeCompoundBase@@UBEFH@Z @ 158 NONAME ; short CMTPTypeCompoundBase::Int16L(int) const
+	?Int32@TMTPTypeFlatBase@@UBEJH@Z @ 159 NONAME ; long TMTPTypeFlatBase::Int32(int) const
+	?Int32L@CMTPTypeCompoundBase@@UBEJH@Z @ 160 NONAME ; long CMTPTypeCompoundBase::Int32L(int) const
+	?Int64@TMTPTypeFlatBase@@UBE_JH@Z @ 161 NONAME ; long long TMTPTypeFlatBase::Int64(int) const
+	?Int64L@CMTPTypeCompoundBase@@UBE_JH@Z @ 162 NONAME ; long long CMTPTypeCompoundBase::Int64L(int) const
+	?Int8@TMTPTypeFlatBase@@UBECH@Z @ 163 NONAME ; signed char TMTPTypeFlatBase::Int8(int) const
+	?Int8L@CMTPTypeCompoundBase@@UBECH@Z @ 164 NONAME ; signed char CMTPTypeCompoundBase::Int8L(int) const
+	?InterdependentProperties@CMTPTypeInterdependentPropDesc@@QBEAAVCMTPTypeInterdependentProperties@@I@Z @ 165 NONAME ; class CMTPTypeInterdependentProperties & CMTPTypeInterdependentPropDesc::InterdependentProperties(unsigned int) const
+	?LowerValue@TMTPTypeInt128@@QBE_KXZ @ 166 NONAME ; unsigned long long TMTPTypeInt128::LowerValue(void) const
+	?LowerValue@TMTPTypeUint128@@QBE_KXZ @ 167 NONAME ; unsigned long long TMTPTypeUint128::LowerValue(void) const
+	?NewL@CMTPTypeArray@@SAPAV1@ABV?$RArray@_J@@@Z @ 168 NONAME ; class CMTPTypeArray * CMTPTypeArray::NewL(class RArray<long long> const &)
+	?NewL@CMTPTypeArray@@SAPAV1@ABV?$RArray@_K@@@Z @ 169 NONAME ; class CMTPTypeArray * CMTPTypeArray::NewL(class RArray<unsigned long long> const &)
+	?NewL@CMTPTypeArray@@SAPAV1@H@Z @ 170 NONAME ; class CMTPTypeArray * CMTPTypeArray::NewL(int)
+	?NewL@CMTPTypeArray@@SAPAV1@HABV?$RArray@H@@@Z @ 171 NONAME ; class CMTPTypeArray * CMTPTypeArray::NewL(int, class RArray<int> const &)
+	?NewL@CMTPTypeArray@@SAPAV1@HABV?$RArray@I@@@Z @ 172 NONAME ; class CMTPTypeArray * CMTPTypeArray::NewL(int, class RArray<unsigned int> const &)
+	?NewL@CMTPTypeArray@@SAPAV1@HHI@Z @ 173 NONAME ; class CMTPTypeArray * CMTPTypeArray::NewL(int, int, unsigned int)
+	?NewL@CMTPTypeArray@@SAPAV1@HI@Z @ 174 NONAME ; class CMTPTypeArray * CMTPTypeArray::NewL(int, unsigned int)
+	?NewL@CMTPTypeDevicePropDesc@@SAPAV1@G@Z @ 175 NONAME ; class CMTPTypeDevicePropDesc * CMTPTypeDevicePropDesc::NewL(unsigned short)
+	?NewL@CMTPTypeDevicePropDesc@@SAPAV1@GABUTPropertyInfo@1@PBVMMTPType@@@Z @ 176 NONAME ; class CMTPTypeDevicePropDesc * CMTPTypeDevicePropDesc::NewL(unsigned short, struct CMTPTypeDevicePropDesc::TPropertyInfo const &, class MMTPType const *)
+	?NewL@CMTPTypeDevicePropDesc@@SAPAV1@GABVMMTPType@@@Z @ 177 NONAME ; class CMTPTypeDevicePropDesc * CMTPTypeDevicePropDesc::NewL(unsigned short, class MMTPType const &)
+	?NewL@CMTPTypeDevicePropDesc@@SAPAV1@GEEPBVMMTPType@@@Z @ 178 NONAME ; class CMTPTypeDevicePropDesc * CMTPTypeDevicePropDesc::NewL(unsigned short, unsigned char, unsigned char, class MMTPType const *)
+	?NewL@CMTPTypeDevicePropDescEnumerationForm@@SAPAV1@I@Z @ 179 NONAME ; class CMTPTypeDevicePropDescEnumerationForm * CMTPTypeDevicePropDescEnumerationForm::NewL(unsigned int)
+	?NewL@CMTPTypeDevicePropDescRangeForm@@SAPAV1@I@Z @ 180 NONAME ; class CMTPTypeDevicePropDescRangeForm * CMTPTypeDevicePropDescRangeForm::NewL(unsigned int)
+	?NewL@CMTPTypeFile@@SAPAV1@AAVRFs@@ABVTDesC16@@W4TFileMode@@@Z @ 181 NONAME ; class CMTPTypeFile * CMTPTypeFile::NewL(class RFs &, class TDesC16 const &, enum TFileMode)
+	?NewL@CMTPTypeInterdependentPropDesc@@SAPAV1@XZ @ 182 NONAME ; class CMTPTypeInterdependentPropDesc * CMTPTypeInterdependentPropDesc::NewL(void)
+	?NewL@CMTPTypeInterdependentProperties@@SAPAV1@XZ @ 183 NONAME ; class CMTPTypeInterdependentProperties * CMTPTypeInterdependentProperties::NewL(void)
+	?NewL@CMTPTypeObjectInfo@@SAPAV1@XZ @ 184 NONAME ; class CMTPTypeObjectInfo * CMTPTypeObjectInfo::NewL(void)
+	?NewL@CMTPTypeObjectPropDesc@@SAPAV1@G@Z @ 185 NONAME ; class CMTPTypeObjectPropDesc * CMTPTypeObjectPropDesc::NewL(unsigned short)
+	?NewL@CMTPTypeObjectPropDesc@@SAPAV1@GABUTPropertyInfo@1@PBVMMTPType@@@Z @ 186 NONAME ; class CMTPTypeObjectPropDesc * CMTPTypeObjectPropDesc::NewL(unsigned short, struct CMTPTypeObjectPropDesc::TPropertyInfo const &, class MMTPType const *)
+	?NewL@CMTPTypeObjectPropDesc@@SAPAV1@GABVMMTPType@@@Z @ 187 NONAME ; class CMTPTypeObjectPropDesc * CMTPTypeObjectPropDesc::NewL(unsigned short, class MMTPType const &)
+	?NewL@CMTPTypeObjectPropDesc@@SAPAV1@GEPBVMMTPType@@@Z @ 188 NONAME ; class CMTPTypeObjectPropDesc * CMTPTypeObjectPropDesc::NewL(unsigned short, unsigned char, class MMTPType const *)
+	?NewL@CMTPTypeObjectPropDescEnumerationForm@@SAPAV1@I@Z @ 189 NONAME ; class CMTPTypeObjectPropDescEnumerationForm * CMTPTypeObjectPropDescEnumerationForm::NewL(unsigned int)
+	?NewL@CMTPTypeObjectPropDescRangeForm@@SAPAV1@I@Z @ 190 NONAME ; class CMTPTypeObjectPropDescRangeForm * CMTPTypeObjectPropDescRangeForm::NewL(unsigned int)
+	?NewL@CMTPTypeObjectPropList@@SAPAV1@XZ @ 191 NONAME ; class CMTPTypeObjectPropList * CMTPTypeObjectPropList::NewL(void)
+	?NewL@CMTPTypeObjectPropListElement@@SAPAV1@G@Z @ 192 NONAME ABSENT ; class CMTPTypeObjectPropListElement * CMTPTypeObjectPropListElement::NewL(unsigned short)
+	?NewL@CMTPTypeObjectPropListElement@@SAPAV1@GG@Z @ 193 NONAME ABSENT ; class CMTPTypeObjectPropListElement * CMTPTypeObjectPropListElement::NewL(unsigned short, unsigned short)
+	?NewL@CMTPTypeObjectPropListElement@@SAPAV1@KGABVMMTPType@@@Z @ 194 NONAME ABSENT ; class CMTPTypeObjectPropListElement * CMTPTypeObjectPropListElement::NewL(unsigned long, unsigned short, class MMTPType const &)
+	?NewL@CMTPTypeObjectPropListElement@@SAPAV1@KGGABVMMTPType@@@Z @ 195 NONAME ABSENT ; class CMTPTypeObjectPropListElement * CMTPTypeObjectPropListElement::NewL(unsigned long, unsigned short, unsigned short, class MMTPType const &)
+	?NewL@CMTPTypeStorageInfo@@SAPAV1@XZ @ 196 NONAME ; class CMTPTypeStorageInfo * CMTPTypeStorageInfo::NewL(void)
+	?NewL@CMTPTypeString@@SAPAV1@ABVTDesC16@@@Z @ 197 NONAME ; class CMTPTypeString * CMTPTypeString::NewL(class TDesC16 const &)
+	?NewL@CMTPTypeString@@SAPAV1@XZ @ 198 NONAME ; class CMTPTypeString * CMTPTypeString::NewL(void)
+	?NewLC@CMTPTypeArray@@SAPAV1@ABV?$RArray@_J@@@Z @ 199 NONAME ; class CMTPTypeArray * CMTPTypeArray::NewLC(class RArray<long long> const &)
+	?NewLC@CMTPTypeArray@@SAPAV1@ABV?$RArray@_K@@@Z @ 200 NONAME ; class CMTPTypeArray * CMTPTypeArray::NewLC(class RArray<unsigned long long> const &)
+	?NewLC@CMTPTypeArray@@SAPAV1@H@Z @ 201 NONAME ; class CMTPTypeArray * CMTPTypeArray::NewLC(int)
+	?NewLC@CMTPTypeArray@@SAPAV1@HABV?$RArray@H@@@Z @ 202 NONAME ; class CMTPTypeArray * CMTPTypeArray::NewLC(int, class RArray<int> const &)
+	?NewLC@CMTPTypeArray@@SAPAV1@HABV?$RArray@I@@@Z @ 203 NONAME ; class CMTPTypeArray * CMTPTypeArray::NewLC(int, class RArray<unsigned int> const &)
+	?NewLC@CMTPTypeArray@@SAPAV1@HHI@Z @ 204 NONAME ; class CMTPTypeArray * CMTPTypeArray::NewLC(int, int, unsigned int)
+	?NewLC@CMTPTypeArray@@SAPAV1@HI@Z @ 205 NONAME ; class CMTPTypeArray * CMTPTypeArray::NewLC(int, unsigned int)
+	?NewLC@CMTPTypeDevicePropDesc@@SAPAV1@G@Z @ 206 NONAME ; class CMTPTypeDevicePropDesc * CMTPTypeDevicePropDesc::NewLC(unsigned short)
+	?NewLC@CMTPTypeDevicePropDesc@@SAPAV1@GABUTPropertyInfo@1@PBVMMTPType@@@Z @ 207 NONAME ; class CMTPTypeDevicePropDesc * CMTPTypeDevicePropDesc::NewLC(unsigned short, struct CMTPTypeDevicePropDesc::TPropertyInfo const &, class MMTPType const *)
+	?NewLC@CMTPTypeDevicePropDesc@@SAPAV1@GABVMMTPType@@@Z @ 208 NONAME ; class CMTPTypeDevicePropDesc * CMTPTypeDevicePropDesc::NewLC(unsigned short, class MMTPType const &)
+	?NewLC@CMTPTypeDevicePropDesc@@SAPAV1@GEEPBVMMTPType@@@Z @ 209 NONAME ; class CMTPTypeDevicePropDesc * CMTPTypeDevicePropDesc::NewLC(unsigned short, unsigned char, unsigned char, class MMTPType const *)
+	?NewLC@CMTPTypeDevicePropDescEnumerationForm@@SAPAV1@I@Z @ 210 NONAME ; class CMTPTypeDevicePropDescEnumerationForm * CMTPTypeDevicePropDescEnumerationForm::NewLC(unsigned int)
+	?NewLC@CMTPTypeDevicePropDescRangeForm@@SAPAV1@I@Z @ 211 NONAME ; class CMTPTypeDevicePropDescRangeForm * CMTPTypeDevicePropDescRangeForm::NewLC(unsigned int)
+	?NewLC@CMTPTypeFile@@SAPAV1@AAVRFs@@ABVTDesC16@@W4TFileMode@@@Z @ 212 NONAME ; class CMTPTypeFile * CMTPTypeFile::NewLC(class RFs &, class TDesC16 const &, enum TFileMode)
+	?NewLC@CMTPTypeInterdependentPropDesc@@SAPAV1@XZ @ 213 NONAME ; class CMTPTypeInterdependentPropDesc * CMTPTypeInterdependentPropDesc::NewLC(void)
+	?NewLC@CMTPTypeInterdependentProperties@@SAPAV1@XZ @ 214 NONAME ; class CMTPTypeInterdependentProperties * CMTPTypeInterdependentProperties::NewLC(void)
+	?NewLC@CMTPTypeObjectInfo@@SAPAV1@XZ @ 215 NONAME ; class CMTPTypeObjectInfo * CMTPTypeObjectInfo::NewLC(void)
+	?NewLC@CMTPTypeObjectPropDesc@@SAPAV1@G@Z @ 216 NONAME ; class CMTPTypeObjectPropDesc * CMTPTypeObjectPropDesc::NewLC(unsigned short)
+	?NewLC@CMTPTypeObjectPropDesc@@SAPAV1@GABUTPropertyInfo@1@PBVMMTPType@@@Z @ 217 NONAME ; class CMTPTypeObjectPropDesc * CMTPTypeObjectPropDesc::NewLC(unsigned short, struct CMTPTypeObjectPropDesc::TPropertyInfo const &, class MMTPType const *)
+	?NewLC@CMTPTypeObjectPropDesc@@SAPAV1@GABVMMTPType@@@Z @ 218 NONAME ; class CMTPTypeObjectPropDesc * CMTPTypeObjectPropDesc::NewLC(unsigned short, class MMTPType const &)
+	?NewLC@CMTPTypeObjectPropDesc@@SAPAV1@GEPBVMMTPType@@@Z @ 219 NONAME ; class CMTPTypeObjectPropDesc * CMTPTypeObjectPropDesc::NewLC(unsigned short, unsigned char, class MMTPType const *)
+	?NewLC@CMTPTypeObjectPropDescEnumerationForm@@SAPAV1@I@Z @ 220 NONAME ; class CMTPTypeObjectPropDescEnumerationForm * CMTPTypeObjectPropDescEnumerationForm::NewLC(unsigned int)
+	?NewLC@CMTPTypeObjectPropDescRangeForm@@SAPAV1@I@Z @ 221 NONAME ; class CMTPTypeObjectPropDescRangeForm * CMTPTypeObjectPropDescRangeForm::NewLC(unsigned int)
+	?NewLC@CMTPTypeObjectPropList@@SAPAV1@XZ @ 222 NONAME ; class CMTPTypeObjectPropList * CMTPTypeObjectPropList::NewLC(void)
+	?NewLC@CMTPTypeObjectPropListElement@@SAPAV1@G@Z @ 223 NONAME ABSENT ; class CMTPTypeObjectPropListElement * CMTPTypeObjectPropListElement::NewLC(unsigned short)
+	?NewLC@CMTPTypeObjectPropListElement@@SAPAV1@GG@Z @ 224 NONAME ABSENT ; class CMTPTypeObjectPropListElement * CMTPTypeObjectPropListElement::NewLC(unsigned short, unsigned short)
+	?NewLC@CMTPTypeObjectPropListElement@@SAPAV1@KGABVMMTPType@@@Z @ 225 NONAME ABSENT ; class CMTPTypeObjectPropListElement * CMTPTypeObjectPropListElement::NewLC(unsigned long, unsigned short, class MMTPType const &)
+	?NewLC@CMTPTypeObjectPropListElement@@SAPAV1@KGGABVMMTPType@@@Z @ 226 NONAME ABSENT ; class CMTPTypeObjectPropListElement * CMTPTypeObjectPropListElement::NewLC(unsigned long, unsigned short, unsigned short, class MMTPType const &)
+	?NewLC@CMTPTypeStorageInfo@@SAPAV1@XZ @ 227 NONAME ; class CMTPTypeStorageInfo * CMTPTypeStorageInfo::NewLC(void)
+	?NewLC@CMTPTypeString@@SAPAV1@ABVTDesC16@@@Z @ 228 NONAME ; class CMTPTypeString * CMTPTypeString::NewLC(class TDesC16 const &)
+	?NewLC@CMTPTypeString@@SAPAV1@XZ @ 229 NONAME ; class CMTPTypeString * CMTPTypeString::NewLC(void)
+	?NextReadChunk@CMTPTypeArray@@UBEHAAVTPtrC8@@@Z @ 230 NONAME ; int CMTPTypeArray::NextReadChunk(class TPtrC8 &) const
+	?NextReadChunk@CMTPTypeCompoundBase@@UBEHAAVTPtrC8@@@Z @ 231 NONAME ; int CMTPTypeCompoundBase::NextReadChunk(class TPtrC8 &) const
+	?NextReadChunk@CMTPTypeFile@@UBEHAAVTPtrC8@@@Z @ 232 NONAME ; int CMTPTypeFile::NextReadChunk(class TPtrC8 &) const
+	?NextReadChunk@CMTPTypeString@@UBEHAAVTPtrC8@@@Z @ 233 NONAME ; int CMTPTypeString::NextReadChunk(class TPtrC8 &) const
+	?NextReadChunk@RMTPType@@UBEHAAVTPtrC8@@@Z @ 234 NONAME ; int RMTPType::NextReadChunk(class TPtrC8 &) const
+	?NextReadChunk@TMTPTypeFlatBase@@UBEHAAVTPtrC8@@@Z @ 235 NONAME ; int TMTPTypeFlatBase::NextReadChunk(class TPtrC8 &) const
+	?NextReadChunk@TMTPTypeInt128@@UBEHAAVTPtrC8@@@Z @ 236 NONAME ; int TMTPTypeInt128::NextReadChunk(class TPtrC8 &) const
+	?NextReadChunk@TMTPTypeInt64@@UBEHAAVTPtrC8@@@Z @ 237 NONAME ; int TMTPTypeInt64::NextReadChunk(class TPtrC8 &) const
+	?NextReadChunk@TMTPTypeIntBase@@UBEHAAVTPtrC8@@@Z @ 238 NONAME ; int TMTPTypeIntBase::NextReadChunk(class TPtrC8 &) const
+	?NextReadChunk@TMTPTypeNull@@UBEHAAVTPtrC8@@@Z @ 239 NONAME ; int TMTPTypeNull::NextReadChunk(class TPtrC8 &) const
+	?NextReadChunk@TMTPTypeUint128@@UBEHAAVTPtrC8@@@Z @ 240 NONAME ; int TMTPTypeUint128::NextReadChunk(class TPtrC8 &) const
+	?NextReadChunk@TMTPTypeUint64@@UBEHAAVTPtrC8@@@Z @ 241 NONAME ; int TMTPTypeUint64::NextReadChunk(class TPtrC8 &) const
+	?NextReadChunk@TMTPTypeUintBase@@UBEHAAVTPtrC8@@@Z @ 242 NONAME ; int TMTPTypeUintBase::NextReadChunk(class TPtrC8 &) const
+	?NextWriteChunk@CMTPTypeArray@@UAEHAAVTPtr8@@@Z @ 243 NONAME ; int CMTPTypeArray::NextWriteChunk(class TPtr8 &)
+	?NextWriteChunk@CMTPTypeCompoundBase@@UAEHAAVTPtr8@@@Z @ 244 NONAME ; int CMTPTypeCompoundBase::NextWriteChunk(class TPtr8 &)
+	?NextWriteChunk@CMTPTypeDevicePropDesc@@UAEHAAVTPtr8@@@Z @ 245 NONAME ; int CMTPTypeDevicePropDesc::NextWriteChunk(class TPtr8 &)
+	?NextWriteChunk@CMTPTypeDevicePropDescEnumerationForm@@UAEHAAVTPtr8@@@Z @ 246 NONAME ; int CMTPTypeDevicePropDescEnumerationForm::NextWriteChunk(class TPtr8 &)
+	?NextWriteChunk@CMTPTypeFile@@UAEHAAVTPtr8@@@Z @ 247 NONAME ; int CMTPTypeFile::NextWriteChunk(class TPtr8 &)
+	?NextWriteChunk@CMTPTypeInterdependentPropDesc@@UAEHAAVTPtr8@@@Z @ 248 NONAME ; int CMTPTypeInterdependentPropDesc::NextWriteChunk(class TPtr8 &)
+	?NextWriteChunk@CMTPTypeInterdependentProperties@@UAEHAAVTPtr8@@@Z @ 249 NONAME ; int CMTPTypeInterdependentProperties::NextWriteChunk(class TPtr8 &)
+	?NextWriteChunk@CMTPTypeObjectPropDesc@@UAEHAAVTPtr8@@@Z @ 250 NONAME ; int CMTPTypeObjectPropDesc::NextWriteChunk(class TPtr8 &)
+	?NextWriteChunk@CMTPTypeObjectPropDescEnumerationForm@@UAEHAAVTPtr8@@@Z @ 251 NONAME ; int CMTPTypeObjectPropDescEnumerationForm::NextWriteChunk(class TPtr8 &)
+	?NextWriteChunk@CMTPTypeObjectPropList@@UAEHAAVTPtr8@@@Z @ 252 NONAME ; int CMTPTypeObjectPropList::NextWriteChunk(class TPtr8 &)
+	?NextWriteChunk@CMTPTypeString@@UAEHAAVTPtr8@@@Z @ 253 NONAME ; int CMTPTypeString::NextWriteChunk(class TPtr8 &)
+	?NextWriteChunk@RMTPType@@UAEHAAVTPtr8@@@Z @ 254 NONAME ; int RMTPType::NextWriteChunk(class TPtr8 &)
+	?NextWriteChunk@TMTPTypeFlatBase@@UAEHAAVTPtr8@@@Z @ 255 NONAME ; int TMTPTypeFlatBase::NextWriteChunk(class TPtr8 &)
+	?NextWriteChunk@TMTPTypeInt128@@UAEHAAVTPtr8@@@Z @ 256 NONAME ; int TMTPTypeInt128::NextWriteChunk(class TPtr8 &)
+	?NextWriteChunk@TMTPTypeInt64@@UAEHAAVTPtr8@@@Z @ 257 NONAME ; int TMTPTypeInt64::NextWriteChunk(class TPtr8 &)
+	?NextWriteChunk@TMTPTypeIntBase@@UAEHAAVTPtr8@@@Z @ 258 NONAME ; int TMTPTypeIntBase::NextWriteChunk(class TPtr8 &)
+	?NextWriteChunk@TMTPTypeNull@@UAEHAAVTPtr8@@@Z @ 259 NONAME ; int TMTPTypeNull::NextWriteChunk(class TPtr8 &)
+	?NextWriteChunk@TMTPTypeUint128@@UAEHAAVTPtr8@@@Z @ 260 NONAME ; int TMTPTypeUint128::NextWriteChunk(class TPtr8 &)
+	?NextWriteChunk@TMTPTypeUint64@@UAEHAAVTPtr8@@@Z @ 261 NONAME ; int TMTPTypeUint64::NextWriteChunk(class TPtr8 &)
+	?NextWriteChunk@TMTPTypeUintBase@@UAEHAAVTPtr8@@@Z @ 262 NONAME ; int TMTPTypeUintBase::NextWriteChunk(class TPtr8 &)
+	?NumChars@CMTPTypeString@@QBEEXZ @ 263 NONAME ; unsigned char CMTPTypeString::NumChars(void) const
+	?NumElements@CMTPTypeArray@@QBEKXZ @ 264 NONAME ; unsigned long CMTPTypeArray::NumElements(void) const
+	?NumberOfElements@CMTPTypeObjectPropList@@QBEKXZ @ 265 NONAME ; unsigned long CMTPTypeObjectPropList::NumberOfElements(void) const
+	?NumberOfInterdependencies@CMTPTypeInterdependentPropDesc@@QBEKXZ @ 266 NONAME ; unsigned long CMTPTypeInterdependentPropDesc::NumberOfInterdependencies(void) const
+	?NumberOfPropDescs@CMTPTypeInterdependentProperties@@QBEKXZ @ 267 NONAME ; unsigned long CMTPTypeInterdependentProperties::NumberOfPropDescs(void) const
+	?NumberOfValues@CMTPTypeDevicePropDescEnumerationForm@@QBEGXZ @ 268 NONAME ; unsigned short CMTPTypeDevicePropDescEnumerationForm::NumberOfValues(void) const
+	?NumberOfValues@CMTPTypeObjectPropDescEnumerationForm@@QBEGXZ @ 269 NONAME ; unsigned short CMTPTypeObjectPropDescEnumerationForm::NumberOfValues(void) const
+	?ObjectPropDesc@CMTPTypeInterdependentProperties@@QBEAAVCMTPTypeObjectPropDesc@@I@Z @ 270 NONAME ; class CMTPTypeObjectPropDesc & CMTPTypeInterdependentProperties::ObjectPropDesc(unsigned int) const
+	?OpenL@RMTPType@@QAEXI@Z @ 271 NONAME ; void RMTPType::OpenL(unsigned int)
+	?OpenL@RMTPTypeCompoundFlatChunk@CMTPTypeCompoundBase@@QAEXXZ @ 272 NONAME ; void CMTPTypeCompoundBase::RMTPTypeCompoundFlatChunk::OpenL(void)
+	?ReadableElementL@CMTPTypeCompoundBase@@MBEHH@Z @ 273 NONAME ; int CMTPTypeCompoundBase::ReadableElementL(int) const
+	?Reset@CMTPTypeCompoundBase@@IAEXXZ @ 274 NONAME ; void CMTPTypeCompoundBase::Reset(void)
+	?Reset@TMTPTypeFlatBase@@UAEXXZ @ 275 NONAME ; void TMTPTypeFlatBase::Reset(void)
+	?Set@TMTPTypeInt128@@QAEX_J_K@Z @ 276 NONAME ; void TMTPTypeInt128::Set(long long, unsigned long long)
+	?Set@TMTPTypeInt16@@QAEXF@Z @ 277 NONAME ; void TMTPTypeInt16::Set(short)
+	?Set@TMTPTypeInt32@@QAEXJ@Z @ 278 NONAME ; void TMTPTypeInt32::Set(long)
+	?Set@TMTPTypeInt64@@QAEX_J@Z @ 279 NONAME ; void TMTPTypeInt64::Set(long long)
+	?Set@TMTPTypeInt8@@QAEXC@Z @ 280 NONAME ; void TMTPTypeInt8::Set(signed char)
+	?Set@TMTPTypeUint128@@QAEX_K0@Z @ 281 NONAME ; void TMTPTypeUint128::Set(unsigned long long, unsigned long long)
+	?Set@TMTPTypeUint16@@QAEXG@Z @ 282 NONAME ; void TMTPTypeUint16::Set(unsigned short)
+	?Set@TMTPTypeUint32@@QAEXK@Z @ 283 NONAME ; void TMTPTypeUint32::Set(unsigned long)
+	?Set@TMTPTypeUint64@@QAEX_K@Z @ 284 NONAME ; void TMTPTypeUint64::Set(unsigned long long)
+	?Set@TMTPTypeUint8@@QAEXE@Z @ 285 NONAME ; void TMTPTypeUint8::Set(unsigned char)
+	?SetBuffer@TMTPTypeFlatBase@@MAEXABVTDes8@@@Z @ 286 NONAME ; void TMTPTypeFlatBase::SetBuffer(class TDes8 const &)
+	?SetBuffer@TMTPTypeNull@@QAEXABVTDes8@@@Z @ 287 NONAME ; void TMTPTypeNull::SetBuffer(class TDes8 const &)
+	?SetExpectedChunkCount@CMTPTypeCompoundBase@@IAEXI@Z @ 288 NONAME ; void CMTPTypeCompoundBase::SetExpectedChunkCount(unsigned int)
+	?SetInt16@TMTPTypeFlatBase@@UAEXHF@Z @ 289 NONAME ; void TMTPTypeFlatBase::SetInt16(int, short)
+	?SetInt16L@CMTPTypeCompoundBase@@UAEXHF@Z @ 290 NONAME ; void CMTPTypeCompoundBase::SetInt16L(int, short)
+	?SetInt32@TMTPTypeFlatBase@@UAEXHJ@Z @ 291 NONAME ; void TMTPTypeFlatBase::SetInt32(int, long)
+	?SetInt32L@CMTPTypeCompoundBase@@UAEXHJ@Z @ 292 NONAME ; void CMTPTypeCompoundBase::SetInt32L(int, long)
+	?SetInt64@TMTPTypeFlatBase@@UAEXH_J@Z @ 293 NONAME ; void TMTPTypeFlatBase::SetInt64(int, long long)
+	?SetInt64L@CMTPTypeCompoundBase@@UAEXH_J@Z @ 294 NONAME ; void CMTPTypeCompoundBase::SetInt64L(int, long long)
+	?SetInt8@TMTPTypeFlatBase@@UAEXHC@Z @ 295 NONAME ; void TMTPTypeFlatBase::SetInt8(int, signed char)
+	?SetInt8L@CMTPTypeCompoundBase@@UAEXHC@Z @ 296 NONAME ; void CMTPTypeCompoundBase::SetInt8L(int, signed char)
+	?SetL@CMTPTypeCompoundBase@@UAEXHABVMMTPType@@@Z @ 297 NONAME ; void CMTPTypeCompoundBase::SetL(int, class MMTPType const &)
+	?SetL@CMTPTypeString@@QAEXABVTDesC16@@@Z @ 298 NONAME ; void CMTPTypeString::SetL(class TDesC16 const &)
+	?SetL@TMTPTypeFlatBase@@UAEXHABVMMTPType@@@Z @ 299 NONAME ; void TMTPTypeFlatBase::SetL(int, class MMTPType const &)
+	?SetSizeL@CMTPTypeFile@@QAEX_K@Z @ 300 NONAME ; void CMTPTypeFile::SetSizeL(unsigned long long)
+	?SetStringL@CMTPTypeCompoundBase@@UAEXHABVTDesC16@@@Z @ 301 NONAME ; void CMTPTypeCompoundBase::SetStringL(int, class TDesC16 const &)
+	?SetUint16@TMTPTypeFlatBase@@UAEXHG@Z @ 302 NONAME ; void TMTPTypeFlatBase::SetUint16(int, unsigned short)
+	?SetUint16L@CMTPTypeCompoundBase@@UAEXHG@Z @ 303 NONAME ; void CMTPTypeCompoundBase::SetUint16L(int, unsigned short)
+	?SetUint32@TMTPTypeFlatBase@@UAEXHK@Z @ 304 NONAME ; void TMTPTypeFlatBase::SetUint32(int, unsigned long)
+	?SetUint32L@CMTPTypeCompoundBase@@UAEXHK@Z @ 305 NONAME ; void CMTPTypeCompoundBase::SetUint32L(int, unsigned long)
+	?SetUint64@TMTPTypeFlatBase@@UAEXH_K@Z @ 306 NONAME ; void TMTPTypeFlatBase::SetUint64(int, unsigned long long)
+	?SetUint64L@CMTPTypeCompoundBase@@UAEXH_K@Z @ 307 NONAME ; void CMTPTypeCompoundBase::SetUint64L(int, unsigned long long)
+	?SetUint8@TMTPTypeFlatBase@@UAEXHE@Z @ 308 NONAME ; void TMTPTypeFlatBase::SetUint8(int, unsigned char)
+	?SetUint8L@CMTPTypeCompoundBase@@UAEXHE@Z @ 309 NONAME ; void CMTPTypeCompoundBase::SetUint8L(int, unsigned char)
+	?Size@CMTPTypeArray@@UBE_KXZ @ 310 NONAME ; unsigned long long CMTPTypeArray::Size(void) const
+	?Size@CMTPTypeCompoundBase@@UBE_KXZ @ 311 NONAME ; unsigned long long CMTPTypeCompoundBase::Size(void) const
+	?Size@CMTPTypeFile@@UBE_KXZ @ 312 NONAME ; unsigned long long CMTPTypeFile::Size(void) const
+	?Size@CMTPTypeString@@UBE_KXZ @ 313 NONAME ; unsigned long long CMTPTypeString::Size(void) const
+	?Size@RMTPType@@UBE_KXZ @ 314 NONAME ; unsigned long long RMTPType::Size(void) const
+	?Size@TMTPTypeFlatBase@@UBE_KXZ @ 315 NONAME ; unsigned long long TMTPTypeFlatBase::Size(void) const
+	?Size@TMTPTypeInt128@@UBE_KXZ @ 316 NONAME ; unsigned long long TMTPTypeInt128::Size(void) const
+	?Size@TMTPTypeInt64@@UBE_KXZ @ 317 NONAME ; unsigned long long TMTPTypeInt64::Size(void) const
+	?Size@TMTPTypeIntBase@@UBE_KXZ @ 318 NONAME ; unsigned long long TMTPTypeIntBase::Size(void) const
+	?Size@TMTPTypeNull@@UBE_KXZ @ 319 NONAME ; unsigned long long TMTPTypeNull::Size(void) const
+	?Size@TMTPTypeUint128@@UBE_KXZ @ 320 NONAME ; unsigned long long TMTPTypeUint128::Size(void) const
+	?Size@TMTPTypeUint64@@UBE_KXZ @ 321 NONAME ; unsigned long long TMTPTypeUint64::Size(void) const
+	?Size@TMTPTypeUintBase@@UBE_KXZ @ 322 NONAME ; unsigned long long TMTPTypeUintBase::Size(void) const
+	?StringChars@CMTPTypeString@@QBEABVTDesC16@@XZ @ 323 NONAME ; class TDesC16 const & CMTPTypeString::StringChars(void) const
+	?StringCharsL@CMTPTypeCompoundBase@@UBEABVTDesC16@@H@Z @ 324 NONAME ; class TDesC16 const & CMTPTypeCompoundBase::StringCharsL(int) const
+	?StringNumCharsL@CMTPTypeCompoundBase@@UBEEH@Z @ 325 NONAME ; unsigned char CMTPTypeCompoundBase::StringNumCharsL(int) const
+	?SupportedValueL@CMTPTypeDevicePropDescEnumerationForm@@QBEXIAAVMMTPType@@@Z @ 326 NONAME ; void CMTPTypeDevicePropDescEnumerationForm::SupportedValueL(unsigned int, class MMTPType &) const
+	?SupportedValueL@CMTPTypeObjectPropDescEnumerationForm@@QBEXIAAVMMTPType@@@Z @ 327 NONAME ; void CMTPTypeObjectPropDescEnumerationForm::SupportedValueL(unsigned int, class MMTPType &) const
+	?Type@CMTPTypeArray@@UBEIXZ @ 328 NONAME ; unsigned int CMTPTypeArray::Type(void) const
+	?Type@CMTPTypeCompoundBase@@UBEIXZ @ 329 NONAME ; unsigned int CMTPTypeCompoundBase::Type(void) const
+	?Type@CMTPTypeDevicePropDesc@@UBEIXZ @ 330 NONAME ; unsigned int CMTPTypeDevicePropDesc::Type(void) const
+	?Type@CMTPTypeDevicePropDescEnumerationForm@@UBEIXZ @ 331 NONAME ; unsigned int CMTPTypeDevicePropDescEnumerationForm::Type(void) const
+	?Type@CMTPTypeDevicePropDescRangeForm@@UBEIXZ @ 332 NONAME ; unsigned int CMTPTypeDevicePropDescRangeForm::Type(void) const
+	?Type@CMTPTypeFile@@UBEIXZ @ 333 NONAME ; unsigned int CMTPTypeFile::Type(void) const
+	?Type@CMTPTypeInterdependentPropDesc@@UBEIXZ @ 334 NONAME ; unsigned int CMTPTypeInterdependentPropDesc::Type(void) const
+	?Type@CMTPTypeInterdependentProperties@@UBEIXZ @ 335 NONAME ; unsigned int CMTPTypeInterdependentProperties::Type(void) const
+	?Type@CMTPTypeObjectInfo@@UBEIXZ @ 336 NONAME ; unsigned int CMTPTypeObjectInfo::Type(void) const
+	?Type@CMTPTypeObjectPropDesc@@UBEIXZ @ 337 NONAME ; unsigned int CMTPTypeObjectPropDesc::Type(void) const
+	?Type@CMTPTypeObjectPropDescEnumerationForm@@UBEIXZ @ 338 NONAME ; unsigned int CMTPTypeObjectPropDescEnumerationForm::Type(void) const
+	?Type@CMTPTypeObjectPropDescRangeForm@@UBEIXZ @ 339 NONAME ; unsigned int CMTPTypeObjectPropDescRangeForm::Type(void) const
+	?Type@CMTPTypeObjectPropList@@UBEIXZ @ 340 NONAME ; unsigned int CMTPTypeObjectPropList::Type(void) const
+	?Type@CMTPTypeObjectPropListElement@@UBEIXZ @ 341 NONAME ABSENT ; unsigned int CMTPTypeObjectPropListElement::Type(void) const
+	?Type@CMTPTypeStorageInfo@@UBEIXZ @ 342 NONAME ; unsigned int CMTPTypeStorageInfo::Type(void) const
+	?Type@CMTPTypeString@@UBEIXZ @ 343 NONAME ; unsigned int CMTPTypeString::Type(void) const
+	?Type@RMTPType@@UBEIXZ @ 344 NONAME ; unsigned int RMTPType::Type(void) const
+	?Type@RMTPTypeCompoundFlatChunk@CMTPTypeCompoundBase@@UBEIXZ @ 345 NONAME ; unsigned int CMTPTypeCompoundBase::RMTPTypeCompoundFlatChunk::Type(void) const
+	?Type@TMTPTypeEvent@@UBEIXZ @ 346 NONAME ; unsigned int TMTPTypeEvent::Type(void) const
+	?Type@TMTPTypeFlatBase@@UBEIXZ @ 347 NONAME ; unsigned int TMTPTypeFlatBase::Type(void) const
+	?Type@TMTPTypeInt128@@UBEIXZ @ 348 NONAME ; unsigned int TMTPTypeInt128::Type(void) const
+	?Type@TMTPTypeInt64@@UBEIXZ @ 349 NONAME ; unsigned int TMTPTypeInt64::Type(void) const
+	?Type@TMTPTypeIntBase@@UBEIXZ @ 350 NONAME ; unsigned int TMTPTypeIntBase::Type(void) const
+	?Type@TMTPTypeNull@@UBEIXZ @ 351 NONAME ; unsigned int TMTPTypeNull::Type(void) const
+	?Type@TMTPTypeRequest@@UBEIXZ @ 352 NONAME ; unsigned int TMTPTypeRequest::Type(void) const
+	?Type@TMTPTypeResponse@@UBEIXZ @ 353 NONAME ; unsigned int TMTPTypeResponse::Type(void) const
+	?Type@TMTPTypeUint128@@UBEIXZ @ 354 NONAME ; unsigned int TMTPTypeUint128::Type(void) const
+	?Type@TMTPTypeUint64@@UBEIXZ @ 355 NONAME ; unsigned int TMTPTypeUint64::Type(void) const
+	?Type@TMTPTypeUintBase@@UBEIXZ @ 356 NONAME ; unsigned int TMTPTypeUintBase::Type(void) const
+	?Uint16@TMTPTypeFlatBase@@UBEGH@Z @ 357 NONAME ; unsigned short TMTPTypeFlatBase::Uint16(int) const
+	?Uint16L@CMTPTypeCompoundBase@@UBEGH@Z @ 358 NONAME ; unsigned short CMTPTypeCompoundBase::Uint16L(int) const
+	?Uint32@TMTPTypeFlatBase@@UBEKH@Z @ 359 NONAME ; unsigned long TMTPTypeFlatBase::Uint32(int) const
+	?Uint32L@CMTPTypeCompoundBase@@UBEKH@Z @ 360 NONAME ; unsigned long CMTPTypeCompoundBase::Uint32L(int) const
+	?Uint64@TMTPTypeFlatBase@@UBE_KH@Z @ 361 NONAME ; unsigned long long TMTPTypeFlatBase::Uint64(int) const
+	?Uint64L@CMTPTypeCompoundBase@@UBE_KH@Z @ 362 NONAME ; unsigned long long CMTPTypeCompoundBase::Uint64L(int) const
+	?Uint8@TMTPTypeFlatBase@@UBEEH@Z @ 363 NONAME ; unsigned char TMTPTypeFlatBase::Uint8(int) const
+	?Uint8L@CMTPTypeCompoundBase@@UBEEH@Z @ 364 NONAME ; unsigned char CMTPTypeCompoundBase::Uint8L(int) const
+	?UpperValue@TMTPTypeInt128@@QBE_JXZ @ 365 NONAME ; long long TMTPTypeInt128::UpperValue(void) const
+	?UpperValue@TMTPTypeUint128@@QBE_KXZ @ 366 NONAME ; unsigned long long TMTPTypeUint128::UpperValue(void) const
+	?Validate@CMTPTypeArray@@UBEHXZ @ 367 NONAME ; int CMTPTypeArray::Validate(void) const
+	?Validate@CMTPTypeCompoundBase@@UBEHXZ @ 368 NONAME ; int CMTPTypeCompoundBase::Validate(void) const
+	?Validate@CMTPTypeString@@UBEHXZ @ 369 NONAME ; int CMTPTypeString::Validate(void) const
+	?Validate@MMTPType@@UBEHXZ @ 370 NONAME ; int MMTPType::Validate(void) const
+	?Validate@RMTPType@@UBEHXZ @ 371 NONAME ; int RMTPType::Validate(void) const
+	?ValidateChunkCount@CMTPTypeCompoundBase@@MBEHXZ @ 372 NONAME ; int CMTPTypeCompoundBase::ValidateChunkCount(void) const
+	?Value@TMTPTypeInt16@@QBEFXZ @ 373 NONAME ; short TMTPTypeInt16::Value(void) const
+	?Value@TMTPTypeInt32@@QBEJXZ @ 374 NONAME ; long TMTPTypeInt32::Value(void) const
+	?Value@TMTPTypeInt64@@QBE_JXZ @ 375 NONAME ; long long TMTPTypeInt64::Value(void) const
+	?Value@TMTPTypeInt8@@QBECXZ @ 376 NONAME ; signed char TMTPTypeInt8::Value(void) const
+	?Value@TMTPTypeUint16@@QBEGXZ @ 377 NONAME ; unsigned short TMTPTypeUint16::Value(void) const
+	?Value@TMTPTypeUint32@@QBEKXZ @ 378 NONAME ; unsigned long TMTPTypeUint32::Value(void) const
+	?Value@TMTPTypeUint64@@QBE_KXZ @ 379 NONAME ; unsigned long long TMTPTypeUint64::Value(void) const
+	?Value@TMTPTypeUint8@@QBEEXZ @ 380 NONAME ; unsigned char TMTPTypeUint8::Value(void) const
+	?WriteableElementL@CMTPTypeCompoundBase@@MBEHH@Z @ 381 NONAME ; int CMTPTypeCompoundBase::WriteableElementL(int) const
+	??1CMTPTypeComplexBuffer@@UAE@XZ @ 382 NONAME ; CMTPTypeComplexBuffer::~CMTPTypeComplexBuffer(void)
+	?Buffer@CMTPTypeComplexBuffer@@QAEABVTDesC8@@XZ @ 383 NONAME ; class TDesC8 const & CMTPTypeComplexBuffer::Buffer(void)
+	?CommitChunkL@CMTPTypeComplexBuffer@@UAEXAAVTPtr8@@@Z @ 384 NONAME ABSENT ; void CMTPTypeComplexBuffer::CommitChunkL(class TPtr8 &)
+	?CommitRequired@CMTPTypeComplexBuffer@@UBEHXZ @ 385 NONAME ; int CMTPTypeComplexBuffer::CommitRequired(void) const
+	?FirstReadChunk@CMTPTypeComplexBuffer@@UBEHAAVTPtrC8@@@Z @ 386 NONAME ; int CMTPTypeComplexBuffer::FirstReadChunk(class TPtrC8 &) const
+	?FirstWriteChunk@CMTPTypeComplexBuffer@@UAEHAAVTPtr8@@@Z @ 387 NONAME ; int CMTPTypeComplexBuffer::FirstWriteChunk(class TPtr8 &)
+	?NewL@CMTPTypeComplexBuffer@@SAPAV1@ABVTDesC8@@@Z @ 388 NONAME ; class CMTPTypeComplexBuffer * CMTPTypeComplexBuffer::NewL(class TDesC8 const &)
+	?NewL@CMTPTypeComplexBuffer@@SAPAV1@XZ @ 389 NONAME ; class CMTPTypeComplexBuffer * CMTPTypeComplexBuffer::NewL(void)
+	?NewLC@CMTPTypeComplexBuffer@@SAPAV1@ABVTDesC8@@@Z @ 390 NONAME ; class CMTPTypeComplexBuffer * CMTPTypeComplexBuffer::NewLC(class TDesC8 const &)
+	?NewLC@CMTPTypeComplexBuffer@@SAPAV1@XZ @ 391 NONAME ; class CMTPTypeComplexBuffer * CMTPTypeComplexBuffer::NewLC(void)
+	?NextReadChunk@CMTPTypeComplexBuffer@@UBEHAAVTPtrC8@@@Z @ 392 NONAME ; int CMTPTypeComplexBuffer::NextReadChunk(class TPtrC8 &) const
+	?NextWriteChunk@CMTPTypeComplexBuffer@@UAEHAAVTPtr8@@@Z @ 393 NONAME ; int CMTPTypeComplexBuffer::NextWriteChunk(class TPtr8 &)
+	?Size@CMTPTypeComplexBuffer@@UBE_KXZ @ 394 NONAME ; unsigned long long CMTPTypeComplexBuffer::Size(void) const
+	?Type@CMTPTypeComplexBuffer@@UBEIXZ @ 395 NONAME ; unsigned int CMTPTypeComplexBuffer::Type(void) const
+	?Compare@TMTPTypeUint128@@QBEHABV1@@Z @ 396 NONAME ; int TMTPTypeUint128::Compare(class TMTPTypeUint128 const &) const
+	?NewLC@CMTPTypeServiceFormatElement@@SAPAV1@GABVTMTPTypeUint128@@ABVTDesC16@@G1@Z @ 397 NONAME ABSENT ; class CMTPTypeServiceFormatElement * CMTPTypeServiceFormatElement::NewLC(unsigned short, class TMTPTypeUint128 const &, class TDesC16 const &, unsigned short, class TDesC16 const &)
+	?Type@CMTPTypeServiceMethodElement@@UBEIXZ @ 398 NONAME ; unsigned int CMTPTypeServiceMethodElement::Type(void) const
+	?NewL@CMTPTypeServiceMethodParamExtnForm@@SAPAV1@IVTMTPTypeUint128@@IABVTDesC16@@EEEPBVMMTPType@@@Z @ 399 NONAME ABSENT ; class CMTPTypeServiceMethodParamExtnForm * CMTPTypeServiceMethodParamExtnForm::NewL(unsigned int, class TMTPTypeUint128, unsigned int, class TDesC16 const &, unsigned char, unsigned char, unsigned char, class MMTPType const *)
+	?Type@CMTPTypeServiceEventElement@@UBEIXZ @ 400 NONAME ; unsigned int CMTPTypeServiceEventElement::Type(void) const
+	?NewLC@CMTPTypeServicePropDesc@@SAPAV1@GGEEPBVMMTPType@@@Z @ 401 NONAME ; class CMTPTypeServicePropDesc * CMTPTypeServicePropDesc::NewLC(unsigned short, unsigned short, unsigned char, unsigned char, class MMTPType const *)
+	?NewLC@CMTPTypeDeleteServicePropList@@SAPAV1@XZ @ 402 NONAME ; class CMTPTypeDeleteServicePropList * CMTPTypeDeleteServicePropList::NewLC(void)
+	?NewL@CMTPTypeServicePropertyElement@@SAPAV1@XZ @ 403 NONAME ; class CMTPTypeServicePropertyElement * CMTPTypeServicePropertyElement::NewL(void)
+	?AppendL@CMTPTypeServiceEventList@@QAEXPAVCMTPTypeServiceEventElement@@@Z @ 404 NONAME ; void CMTPTypeServiceEventList::AppendL(class CMTPTypeServiceEventElement *)
+	?AppendServiceDataBlockL@CMTPTypeServiceInfo@@QAEXABVTMTPTypeUint128@@@Z @ 405 NONAME ABSENT ; void CMTPTypeServiceInfo::AppendServiceDataBlockL(class TMTPTypeUint128 const &)
+	?NewL@CMTPTypeServicePropertyElement@@SAPAV1@GABVTMTPTypeUint128@@KABVTDesC16@@@Z @ 406 NONAME ABSENT ; class CMTPTypeServicePropertyElement * CMTPTypeServicePropertyElement::NewL(unsigned short, class TMTPTypeUint128 const &, unsigned long, class TDesC16 const &)
+	?ObjectPropDescL@CMTPTypeFormatCapability@@QBEAAVCMTPTypeObjectPropDesc@@I@Z @ 407 NONAME ; class CMTPTypeObjectPropDesc & CMTPTypeFormatCapability::ObjectPropDescL(unsigned int) const
+	??1CMTPTypeServicePropertyList@@UAE@XZ @ 408 NONAME ; CMTPTypeServicePropertyList::~CMTPTypeServicePropertyList(void)
+	?NumberOfUsedServices@CMTPTypeServiceInfo@@QBEKXZ @ 409 NONAME ; unsigned long CMTPTypeServiceInfo::NumberOfUsedServices(void) const
+	?ServiceFormatList@CMTPTypeServiceInfo@@QAEAAVCMTPTypeServiceFormatList@@XZ @ 410 NONAME ; class CMTPTypeServiceFormatList & CMTPTypeServiceInfo::ServiceFormatList(void)
+	?NewL@CMTPTypeServicePropDescList@@SAPAV1@XZ @ 411 NONAME ; class CMTPTypeServicePropDescList * CMTPTypeServicePropDescList::NewL(void)
+	??1CMTPTypeFormatCapability@@UAE@XZ @ 412 NONAME ; CMTPTypeFormatCapability::~CMTPTypeFormatCapability(void)
+	?AppendL@CMTPTypeServicePropDescList@@QAEXPAVCMTPTypeServicePropDesc@@@Z @ 413 NONAME ; void CMTPTypeServicePropDescList::AppendL(class CMTPTypeServicePropDesc *)
+	?CommitChunkL@CMTPTypeServicePropDesc@@UAEXAAVTPtr8@@@Z @ 414 NONAME ABSENT ; void CMTPTypeServicePropDesc::CommitChunkL(class TPtr8 &)
+	?FirstWriteChunk@CMTPTypeServiceObjPropExtnForm@@UAEHAAVTPtr8@@@Z @ 415 NONAME ; int CMTPTypeServiceObjPropExtnForm::FirstWriteChunk(class TPtr8 &)
+	?ElementL@CMTPTypeDeleteObjectPropList@@QBEAAVTMTPTypeDataPair@@H@Z @ 416 NONAME ; class TMTPTypeDataPair & CMTPTypeDeleteObjectPropList::ElementL(int) const
+	?CommitChunkL@CMTPTypeServiceMethodParamExtnForm@@UAEXAAVTPtr8@@@Z @ 417 NONAME ABSENT ; void CMTPTypeServiceMethodParamExtnForm::CommitChunkL(class TPtr8 &)
+	?ServiceEventList@CMTPTypeServiceInfo@@QAEAAVCMTPTypeServiceEventList@@XZ @ 418 NONAME ; class CMTPTypeServiceEventList & CMTPTypeServiceInfo::ServiceEventList(void)
+	?NewLC@CMTPTypeFormatCapability@@SAPAV1@GPAVCMTPTypeInterdependentPropDesc@@@Z @ 419 NONAME ; class CMTPTypeFormatCapability * CMTPTypeFormatCapability::NewLC(unsigned short, class CMTPTypeInterdependentPropDesc *)
+	?NewL@CMTPTypeServiceInfo@@SAPAV1@XZ @ 420 NONAME ; class CMTPTypeServiceInfo * CMTPTypeServiceInfo::NewL(void)
+	?NewLC@CMTPTypeServicePropertyList@@SAPAV1@XZ @ 421 NONAME ; class CMTPTypeServicePropertyList * CMTPTypeServicePropertyList::NewLC(void)
+	?NewL@CMTPTypeServicePropDesc@@SAPAV1@XZ @ 422 NONAME ; class CMTPTypeServicePropDesc * CMTPTypeServicePropDesc::NewL(void)
+	?ElementL@CMTPTypeDeleteServicePropList@@QBEAAVTMTPTypeDataPair@@H@Z @ 423 NONAME ; class TMTPTypeDataPair & CMTPTypeDeleteServicePropList::ElementL(int) const
+	??1CMTPTypeServicePropDescList@@UAE@XZ @ 424 NONAME ; CMTPTypeServicePropDescList::~CMTPTypeServicePropDescList(void)
+	??1CMTPTypeList@@UAE@XZ @ 425 NONAME ; CMTPTypeList::~CMTPTypeList(void)
+	?ToDes@CMTPTypeArray@@QBEXAAVTDes8@@@Z @ 426 NONAME ; void CMTPTypeArray::ToDes(class TDes8 &) const
+	??0TMTPTypeUint128@@QAE@_K0@Z @ 427 NONAME ; TMTPTypeUint128::TMTPTypeUint128(unsigned long long, unsigned long long)
+	?AppendL@CMTPTypeList@@UAEXPBVMMTPType@@@Z @ 428 NONAME ; void CMTPTypeList::AppendL(class MMTPType const *)
+	??1CMTPTypeServicePropertyElement@@UAE@XZ @ 429 NONAME ; CMTPTypeServicePropertyElement::~CMTPTypeServicePropertyElement(void)
+	??1CMTPTypeServiceEventElement@@UAE@XZ @ 430 NONAME ; CMTPTypeServiceEventElement::~CMTPTypeServiceEventElement(void)
+	?NewL@CMTPTypeServiceFormatElement@@SAPAV1@XZ @ 431 NONAME ; class CMTPTypeServiceFormatElement * CMTPTypeServiceFormatElement::NewL(void)
+	?ElementL@CMTPTypeList@@QBEAAVMMTPType@@H@Z @ 432 NONAME ; class MMTPType & CMTPTypeList::ElementL(int) const
+	?Type@CMTPTypeList@@UBEIXZ @ 433 NONAME ; unsigned int CMTPTypeList::Type(void) const
+	??1CMTPTypeServiceEventList@@UAE@XZ @ 434 NONAME ; CMTPTypeServiceEventList::~CMTPTypeServiceEventList(void)
+	?ReadableElementL@CMTPTypeFormatCapability@@MBEHH@Z @ 435 NONAME ; int CMTPTypeFormatCapability::ReadableElementL(int) const
+	?NumberOfElements@CMTPTypeList@@UBEKXZ @ 436 NONAME ; unsigned long CMTPTypeList::NumberOfElements(void) const
+	?NewLC@CMTPTypeServiceCapabilityList@@SAPAV1@XZ @ 437 NONAME ; class CMTPTypeServiceCapabilityList * CMTPTypeServiceCapabilityList::NewLC(void)
+	?Type@CMTPTypeServiceFormatElement@@UBEIXZ @ 438 NONAME ; unsigned int CMTPTypeServiceFormatElement::Type(void) const
+	?SerivceDataBlockL@CMTPTypeServiceInfo@@QBEXIAAVTMTPTypeUint128@@@Z @ 439 NONAME ABSENT ; void CMTPTypeServiceInfo::SerivceDataBlockL(unsigned int, class TMTPTypeUint128 &) const
+	?NewL@CMTPTypeServiceObjPropExtnForm@@SAPAV1@IVTMTPTypeUint128@@IABVTDesC16@@EPBVMMTPType@@@Z @ 440 NONAME ABSENT ; class CMTPTypeServiceObjPropExtnForm * CMTPTypeServiceObjPropExtnForm::NewL(unsigned int, class TMTPTypeUint128, unsigned int, class TDesC16 const &, unsigned char, class MMTPType const *)
+	?NewLC@CMTPTypeServiceObjPropExtnForm@@SAPAV1@IVTMTPTypeUint128@@IABVTDesC16@@EPBVMMTPType@@@Z @ 441 NONAME ABSENT ; class CMTPTypeServiceObjPropExtnForm * CMTPTypeServiceObjPropExtnForm::NewLC(unsigned int, class TMTPTypeUint128, unsigned int, class TDesC16 const &, unsigned char, class MMTPType const *)
+	??0TMTPTypeDataPair@@QAE@KG@Z @ 442 NONAME ; TMTPTypeDataPair::TMTPTypeDataPair(unsigned long, unsigned short)
+	?FirstWriteChunk@CMTPTypeList@@UAEHAAVTPtr8@@@Z @ 443 NONAME ; int CMTPTypeList::FirstWriteChunk(class TPtr8 &)
+	?InterdependentPropDesc@CMTPTypeFormatCapability@@QBEAAVCMTPTypeInterdependentPropDesc@@XZ @ 444 NONAME ; class CMTPTypeInterdependentPropDesc & CMTPTypeFormatCapability::InterdependentPropDesc(void) const
+	?NewL@CMTPTypeServiceFormatElement@@SAPAV1@GABVTMTPTypeUint128@@ABVTDesC16@@G1@Z @ 445 NONAME ABSENT ; class CMTPTypeServiceFormatElement * CMTPTypeServiceFormatElement::NewL(unsigned short, class TMTPTypeUint128 const &, class TDesC16 const &, unsigned short, class TDesC16 const &)
+	?NewLC@CMTPTypeServiceEventElement@@SAPAV1@XZ @ 446 NONAME ; class CMTPTypeServiceEventElement * CMTPTypeServiceEventElement::NewLC(void)
+	?Type@CMTPTypeServiceMethodParamExtnForm@@UBEIXZ @ 447 NONAME ; unsigned int CMTPTypeServiceMethodParamExtnForm::Type(void) const
+	?NewLC@CMTPTypeServiceMethodElement@@SAPAV1@GABVTMTPTypeUint128@@ABVTDesC16@@G@Z @ 448 NONAME ABSENT ; class CMTPTypeServiceMethodElement * CMTPTypeServiceMethodElement::NewLC(unsigned short, class TMTPTypeUint128 const &, class TDesC16 const &, unsigned short)
+	??1CMTPTypeDeleteServicePropList@@UAE@XZ @ 449 NONAME ; CMTPTypeDeleteServicePropList::~CMTPTypeDeleteServicePropList(void)
+	?Type@CMTPTypeServicePropertyElement@@UBEIXZ @ 450 NONAME ; unsigned int CMTPTypeServicePropertyElement::Type(void) const
+	?FirstWriteChunk@CMTPTypeServiceMethodParamExtnForm@@UAEHAAVTPtr8@@@Z @ 451 NONAME ; int CMTPTypeServiceMethodParamExtnForm::FirstWriteChunk(class TPtr8 &)
+	?NewLC@CMTPTypeServiceMethodList@@SAPAV1@XZ @ 452 NONAME ; class CMTPTypeServiceMethodList * CMTPTypeServiceMethodList::NewLC(void)
+	?NewLC@CMTPTypeServiceFormatElement@@SAPAV1@XZ @ 453 NONAME ; class CMTPTypeServiceFormatElement * CMTPTypeServiceFormatElement::NewLC(void)
+	?Equal@TMTPTypeUint128@@QBEHABV1@@Z @ 454 NONAME ; int TMTPTypeUint128::Equal(class TMTPTypeUint128 const &) const
+	?ElementL@CMTPTypeServiceEventList@@QBEAAVCMTPTypeServiceEventElement@@I@Z @ 455 NONAME ; class CMTPTypeServiceEventElement & CMTPTypeServiceEventList::ElementL(unsigned int) const
+	?NewL@CMTPTypeDeleteServicePropList@@SAPAV1@XZ @ 456 NONAME ; class CMTPTypeDeleteServicePropList * CMTPTypeDeleteServicePropList::NewL(void)
+	?CommitRequired@CMTPTypeServiceObjPropExtnForm@@UBEHXZ @ 457 NONAME ; int CMTPTypeServiceObjPropExtnForm::CommitRequired(void) const
+	?NewL@CMTPTypeServiceMethodList@@SAPAV1@XZ @ 458 NONAME ; class CMTPTypeServiceMethodList * CMTPTypeServiceMethodList::NewL(void)
+	?CommitRequired@CMTPTypeServiceMethodParamExtnForm@@UBEHXZ @ 459 NONAME ; int CMTPTypeServiceMethodParamExtnForm::CommitRequired(void) const
+	?NewLC@CMTPTypeServicePropertyElement@@SAPAV1@XZ @ 460 NONAME ; class CMTPTypeServicePropertyElement * CMTPTypeServicePropertyElement::NewLC(void)
+	??1CMTPTypeServicePropDesc@@UAE@XZ @ 461 NONAME ; CMTPTypeServicePropDesc::~CMTPTypeServicePropDesc(void)
+	?NextWriteChunk@CMTPTypeList@@UAEHAAVTPtr8@@@Z @ 462 NONAME ; int CMTPTypeList::NextWriteChunk(class TPtr8 &)
+	?NewL@CMTPTypeServiceMethodElement@@SAPAV1@GABVTMTPTypeUint128@@ABVTDesC16@@G@Z @ 463 NONAME ABSENT ; class CMTPTypeServiceMethodElement * CMTPTypeServiceMethodElement::NewL(unsigned short, class TMTPTypeUint128 const &, class TDesC16 const &, unsigned short)
+	?NextWriteChunk@CMTPTypeServiceMethodParamExtnForm@@UAEHAAVTPtr8@@@Z @ 464 NONAME ; int CMTPTypeServiceMethodParamExtnForm::NextWriteChunk(class TPtr8 &)
+	?NewLC@CMTPTypeServiceInfo@@SAPAV1@XZ @ 465 NONAME ; class CMTPTypeServiceInfo * CMTPTypeServiceInfo::NewLC(void)
+	?ElementL@CMTPTypeServiceFormatList@@QBEAAVCMTPTypeServiceFormatElement@@I@Z @ 466 NONAME ; class CMTPTypeServiceFormatElement & CMTPTypeServiceFormatList::ElementL(unsigned int) const
+	?NextWriteChunk@CMTPTypeServiceObjPropExtnForm@@UAEHAAVTPtr8@@@Z @ 467 NONAME ; int CMTPTypeServiceObjPropExtnForm::NextWriteChunk(class TPtr8 &)
+	?NewL@CMTPTypeFormatCapability@@SAPAV1@GPAVCMTPTypeInterdependentPropDesc@@@Z @ 468 NONAME ; class CMTPTypeFormatCapability * CMTPTypeFormatCapability::NewL(unsigned short, class CMTPTypeInterdependentPropDesc *)
+	?Type@CMTPTypeServiceInfo@@UBEIXZ @ 469 NONAME ; unsigned int CMTPTypeServiceInfo::Type(void) const
+	?AppendL@CMTPTypeDeleteObjectPropList@@QAEXPBVTMTPTypeDataPair@@@Z @ 470 NONAME ; void CMTPTypeDeleteObjectPropList::AppendL(class TMTPTypeDataPair const *)
+	?NextWriteChunk@CMTPTypeServicePropDesc@@UAEHAAVTPtr8@@@Z @ 471 NONAME ; int CMTPTypeServicePropDesc::NextWriteChunk(class TPtr8 &)
+	??1CMTPTypeServiceMethodList@@UAE@XZ @ 472 NONAME ; CMTPTypeServiceMethodList::~CMTPTypeServiceMethodList(void)
+	??1CMTPTypeServiceObjPropExtnForm@@UAE@XZ @ 473 NONAME ; CMTPTypeServiceObjPropExtnForm::~CMTPTypeServiceObjPropExtnForm(void)
+	?NumberOfPropDescs@CMTPTypeFormatCapability@@QBEKXZ @ 474 NONAME ; unsigned long CMTPTypeFormatCapability::NumberOfPropDescs(void) const
+	?NewLC@CMTPTypeServiceEventElement@@SAPAV1@GABVTMTPTypeUint128@@ABVTDesC16@@@Z @ 475 NONAME ABSENT ; class CMTPTypeServiceEventElement * CMTPTypeServiceEventElement::NewLC(unsigned short, class TMTPTypeUint128 const &, class TDesC16 const &)
+	?UsedServiceL@CMTPTypeServiceInfo@@QBEXIAAVTMTPTypeUint128@@@Z @ 476 NONAME ABSENT ; void CMTPTypeServiceInfo::UsedServiceL(unsigned int, class TMTPTypeUint128 &) const
+	?AppendL@CMTPTypeServiceFormatList@@QAEXPAVCMTPTypeServiceFormatElement@@@Z @ 477 NONAME ; void CMTPTypeServiceFormatList::AppendL(class CMTPTypeServiceFormatElement *)
+	?NewL@CMTPTypeServicePropertyList@@SAPAV1@XZ @ 478 NONAME ; class CMTPTypeServicePropertyList * CMTPTypeServicePropertyList::NewL(void)
+	?NewL@CMTPTypeDeleteObjectPropList@@SAPAV1@XZ @ 479 NONAME ; class CMTPTypeDeleteObjectPropList * CMTPTypeDeleteObjectPropList::NewL(void)
+	?Remove@CMTPTypeList@@UAEXH@Z @ 480 NONAME ; void CMTPTypeList::Remove(int)
+	?NewL@CMTPTypeList@@SAPAV1@W4TMTPTypeIds@@0@Z @ 481 NONAME ; class CMTPTypeList * CMTPTypeList::NewL(enum TMTPTypeIds, enum TMTPTypeIds)
+	?Type@CMTPTypeServicePropDesc@@UBEIXZ @ 482 NONAME ; unsigned int CMTPTypeServicePropDesc::Type(void) const
+	?CommitChunkL@CMTPTypeList@@UAEXAAVTPtr8@@@Z @ 483 NONAME ABSENT ; void CMTPTypeList::CommitChunkL(class TPtr8 &)
+	?ServiceMethodList@CMTPTypeServiceInfo@@QAEAAVCMTPTypeServiceMethodList@@XZ @ 484 NONAME ; class CMTPTypeServiceMethodList & CMTPTypeServiceInfo::ServiceMethodList(void)
+	?Type@CMTPTypeServiceObjPropExtnForm@@UBEIXZ @ 485 NONAME ; unsigned int CMTPTypeServiceObjPropExtnForm::Type(void) const
+	?NumberOfServiceDataBlock@CMTPTypeServiceInfo@@QBEKXZ @ 486 NONAME ; unsigned long CMTPTypeServiceInfo::NumberOfServiceDataBlock(void) const
+	?NewLC@CMTPTypeServicePropertyElement@@SAPAV1@GABVTMTPTypeUint128@@KABVTDesC16@@@Z @ 487 NONAME ABSENT ; class CMTPTypeServicePropertyElement * CMTPTypeServicePropertyElement::NewLC(unsigned short, class TMTPTypeUint128 const &, unsigned long, class TDesC16 const &)
+	?NewL@CMTPTypeServiceCapabilityList@@SAPAV1@XZ @ 488 NONAME ; class CMTPTypeServiceCapabilityList * CMTPTypeServiceCapabilityList::NewL(void)
+	?AppendL@CMTPTypeFormatCapability@@QAEXPAVCMTPTypeObjectPropDesc@@@Z @ 489 NONAME ; void CMTPTypeFormatCapability::AppendL(class CMTPTypeObjectPropDesc *)
+	?Type@CMTPTypeFormatCapability@@UBEIXZ @ 490 NONAME ; unsigned int CMTPTypeFormatCapability::Type(void) const
+	?AppendL@CMTPTypeServiceMethodList@@QAEXPAVCMTPTypeServiceMethodElement@@@Z @ 491 NONAME ; void CMTPTypeServiceMethodList::AppendL(class CMTPTypeServiceMethodElement *)
+	?NewLC@CMTPTypeServiceFormatList@@SAPAV1@XZ @ 492 NONAME ; class CMTPTypeServiceFormatList * CMTPTypeServiceFormatList::NewLC(void)
+	?ElementL@CMTPTypeServiceMethodList@@QBEAAVCMTPTypeServiceMethodElement@@I@Z @ 493 NONAME ; class CMTPTypeServiceMethodElement & CMTPTypeServiceMethodList::ElementL(unsigned int) const
+	?NewLC@CMTPTypeFormatCapability@@SAPAV1@XZ @ 494 NONAME ; class CMTPTypeFormatCapability * CMTPTypeFormatCapability::NewLC(void)
+	?NewL@CMTPTypeServiceObjPropExtnForm@@SAPAV1@I@Z @ 495 NONAME ; class CMTPTypeServiceObjPropExtnForm * CMTPTypeServiceObjPropExtnForm::NewL(unsigned int)
+	?NewL@CMTPTypeServiceFormatList@@SAPAV1@XZ @ 496 NONAME ; class CMTPTypeServiceFormatList * CMTPTypeServiceFormatList::NewL(void)
+	?NewL@CMTPTypeServiceMethodElement@@SAPAV1@XZ @ 497 NONAME ; class CMTPTypeServiceMethodElement * CMTPTypeServiceMethodElement::NewL(void)
+	?NewLC@CMTPTypeDeleteObjectPropList@@SAPAV1@XZ @ 498 NONAME ; class CMTPTypeDeleteObjectPropList * CMTPTypeDeleteObjectPropList::NewLC(void)
+	?AppendUsedServiceL@CMTPTypeServiceInfo@@QAEXABVTMTPTypeUint128@@@Z @ 499 NONAME ABSENT ; void CMTPTypeServiceInfo::AppendUsedServiceL(class TMTPTypeUint128 const &)
+	?ElementL@CMTPTypeServiceCapabilityList@@QBEAAVCMTPTypeFormatCapability@@I@Z @ 500 NONAME ; class CMTPTypeFormatCapability & CMTPTypeServiceCapabilityList::ElementL(unsigned int) const
+	?NewLC@CMTPTypeServiceEventList@@SAPAV1@XZ @ 501 NONAME ; class CMTPTypeServiceEventList * CMTPTypeServiceEventList::NewLC(void)
+	?NewLC@CMTPTypeList@@SAPAV1@W4TMTPTypeIds@@0@Z @ 502 NONAME ; class CMTPTypeList * CMTPTypeList::NewLC(enum TMTPTypeIds, enum TMTPTypeIds)
+	?NewL@CMTPTypeServiceEventElement@@SAPAV1@XZ @ 503 NONAME ; class CMTPTypeServiceEventElement * CMTPTypeServiceEventElement::NewL(void)
+	?WriteableElementL@CMTPTypeFormatCapability@@MBEHH@Z @ 504 NONAME ; int CMTPTypeFormatCapability::WriteableElementL(int) const
+	?AppendL@CMTPTypeDeleteServicePropList@@QAEXPBVTMTPTypeDataPair@@@Z @ 505 NONAME ; void CMTPTypeDeleteServicePropList::AppendL(class TMTPTypeDataPair const *)
+	??1CMTPTypeServiceMethodElement@@UAE@XZ @ 506 NONAME ; CMTPTypeServiceMethodElement::~CMTPTypeServiceMethodElement(void)
+	?SetByDesL@CMTPTypeArray@@QAEXABVTDesC8@@@Z @ 507 NONAME ; void CMTPTypeArray::SetByDesL(class TDesC8 const &)
+	?AppendL@CMTPTypeServiceCapabilityList@@QAEXPAVCMTPTypeFormatCapability@@@Z @ 508 NONAME ; void CMTPTypeServiceCapabilityList::AppendL(class CMTPTypeFormatCapability *)
+	??1CMTPTypeServiceFormatList@@UAE@XZ @ 509 NONAME ; CMTPTypeServiceFormatList::~CMTPTypeServiceFormatList(void)
+	??0TMTPTypeDataPair@@QAE@XZ @ 510 NONAME ; TMTPTypeDataPair::TMTPTypeDataPair(void)
+	?ElementL@CMTPTypeServicePropertyList@@QBEAAVCMTPTypeServicePropertyElement@@I@Z @ 511 NONAME ; class CMTPTypeServicePropertyElement & CMTPTypeServicePropertyList::ElementL(unsigned int) const
+	?NewLC@CMTPTypeServiceObjPropExtnForm@@SAPAV1@I@Z @ 512 NONAME ; class CMTPTypeServiceObjPropExtnForm * CMTPTypeServiceObjPropExtnForm::NewLC(unsigned int)
+	?CommitChunkL@CMTPTypeServiceObjPropExtnForm@@UAEXAAVTPtr8@@@Z @ 513 NONAME ABSENT ; void CMTPTypeServiceObjPropExtnForm::CommitChunkL(class TPtr8 &)
+	?NewLC@CMTPTypeServicePropDescList@@SAPAV1@XZ @ 514 NONAME ; class CMTPTypeServicePropDescList * CMTPTypeServicePropDescList::NewLC(void)
+	?CommitRequired@CMTPTypeServicePropDesc@@UBEHXZ @ 515 NONAME ; int CMTPTypeServicePropDesc::CommitRequired(void) const
+	?ResetAndDestroy@CMTPTypeList@@QAEXXZ @ 516 NONAME ; void CMTPTypeList::ResetAndDestroy(void)
+	?CommitRequired@CMTPTypeList@@UBEHXZ @ 517 NONAME ; int CMTPTypeList::CommitRequired(void) const
+	?NewLC@CMTPTypeServiceMethodElement@@SAPAV1@XZ @ 518 NONAME ; class CMTPTypeServiceMethodElement * CMTPTypeServiceMethodElement::NewLC(void)
+	?ServicePropList@CMTPTypeServiceInfo@@QAEAAVCMTPTypeServicePropertyList@@XZ @ 519 NONAME ; class CMTPTypeServicePropertyList & CMTPTypeServiceInfo::ServicePropList(void)
+	?NewL@CMTPTypeServiceMethodParamExtnForm@@SAPAV1@I@Z @ 520 NONAME ; class CMTPTypeServiceMethodParamExtnForm * CMTPTypeServiceMethodParamExtnForm::NewL(unsigned int)
+	?NewL@CMTPTypeObjectPropDesc@@SAPAV1@XZ @ 521 NONAME ; class CMTPTypeObjectPropDesc * CMTPTypeObjectPropDesc::NewL(void)
+	?NewLC@CMTPTypeServiceMethodParamExtnForm@@SAPAV1@IVTMTPTypeUint128@@IABVTDesC16@@EEEPBVMMTPType@@@Z @ 522 NONAME ABSENT ; class CMTPTypeServiceMethodParamExtnForm * CMTPTypeServiceMethodParamExtnForm::NewLC(unsigned int, class TMTPTypeUint128, unsigned int, class TDesC16 const &, unsigned char, unsigned char, unsigned char, class MMTPType const *)
+	??1CMTPTypeServiceCapabilityList@@UAE@XZ @ 523 NONAME ; CMTPTypeServiceCapabilityList::~CMTPTypeServiceCapabilityList(void)
+	?NewL@CMTPTypeServiceEventElement@@SAPAV1@GABVTMTPTypeUint128@@ABVTDesC16@@@Z @ 524 NONAME ABSENT ; class CMTPTypeServiceEventElement * CMTPTypeServiceEventElement::NewL(unsigned short, class TMTPTypeUint128 const &, class TDesC16 const &)
+	?NewLC@CMTPTypeServiceMethodParamExtnForm@@SAPAV1@I@Z @ 525 NONAME ; class CMTPTypeServiceMethodParamExtnForm * CMTPTypeServiceMethodParamExtnForm::NewLC(unsigned int)
+	??1CMTPTypeServiceInfo@@UAE@XZ @ 526 NONAME ; CMTPTypeServiceInfo::~CMTPTypeServiceInfo(void)
+	?NewL@CMTPTypeFormatCapability@@SAPAV1@XZ @ 527 NONAME ; class CMTPTypeFormatCapability * CMTPTypeFormatCapability::NewL(void)
+	?Type@TMTPTypeDataPair@@UBEIXZ @ 528 NONAME ; unsigned int TMTPTypeDataPair::Type(void) const
+	?ElementType@CMTPTypeList@@UBEHXZ @ 529 NONAME ; int CMTPTypeList::ElementType(void) const
+	?FirstWriteChunk@CMTPTypeServicePropDesc@@UAEHAAVTPtr8@@@Z @ 530 NONAME ; int CMTPTypeServicePropDesc::FirstWriteChunk(class TPtr8 &)
+	?NewL@CMTPTypeServiceEventList@@SAPAV1@XZ @ 531 NONAME ; class CMTPTypeServiceEventList * CMTPTypeServiceEventList::NewL(void)
+	?NewLC@CMTPTypeServicePropDesc@@SAPAV1@XZ @ 532 NONAME ; class CMTPTypeServicePropDesc * CMTPTypeServicePropDesc::NewLC(void)
+	??1CMTPTypeServiceMethodParamExtnForm@@UAE@XZ @ 533 NONAME ; CMTPTypeServiceMethodParamExtnForm::~CMTPTypeServiceMethodParamExtnForm(void)
+	?ElementL@CMTPTypeServicePropDescList@@QBEAAVCMTPTypeServicePropDesc@@I@Z @ 534 NONAME ; class CMTPTypeServicePropDesc & CMTPTypeServicePropDescList::ElementL(unsigned int) const
+	??1CMTPTypeDeleteObjectPropList@@UAE@XZ @ 535 NONAME ; CMTPTypeDeleteObjectPropList::~CMTPTypeDeleteObjectPropList(void)
+	?NewL@CMTPTypeServicePropDesc@@SAPAV1@GGEEPBVMMTPType@@@Z @ 536 NONAME ; class CMTPTypeServicePropDesc * CMTPTypeServicePropDesc::NewL(unsigned short, unsigned short, unsigned char, unsigned char, class MMTPType const *)
+	?AppendL@CMTPTypeServicePropertyList@@QAEXPAVCMTPTypeServicePropertyElement@@@Z @ 537 NONAME ; void CMTPTypeServicePropertyList::AppendL(class CMTPTypeServicePropertyElement *)
+	?Compare@TMTPTypeUint128@@QBEH_K0@Z @ 538 NONAME ; int TMTPTypeUint128::Compare(unsigned long long, unsigned long long) const
+	?SetBuffer@CMTPTypeComplexBuffer@@QAEXABVTDesC8@@@Z @ 539 NONAME ; void CMTPTypeComplexBuffer::SetBuffer(class TDesC8 const &)
+	??1CMTPTypeServiceFormatElement@@UAE@XZ @ 540 NONAME ; CMTPTypeServiceFormatElement::~CMTPTypeServiceFormatElement(void)
+	?CommitChunkL@CMTPTypeServiceMethodParamExtnForm@@UAEPAVMMTPType@@AAVTPtr8@@@Z @ 541 NONAME ; class MMTPType * CMTPTypeServiceMethodParamExtnForm::CommitChunkL(class TPtr8 &)
+	?CommitChunkL@MMTPType@@UAEPAV1@AAVTPtr8@@@Z @ 542 NONAME ; class MMTPType * MMTPType::CommitChunkL(class TPtr8 &)
+	?CommitChunkL@CMTPTypeServicePropDesc@@UAEPAVMMTPType@@AAVTPtr8@@@Z @ 543 NONAME ; class MMTPType * CMTPTypeServicePropDesc::CommitChunkL(class TPtr8 &)
+	?CommitChunkL@CMTPTypeInterdependentPropDesc@@UAEPAVMMTPType@@AAVTPtr8@@@Z @ 544 NONAME ; class MMTPType * CMTPTypeInterdependentPropDesc::CommitChunkL(class TPtr8 &)
+	?CommitChunkL@CMTPTypeFile@@UAEPAVMMTPType@@AAVTPtr8@@@Z @ 545 NONAME ; class MMTPType * CMTPTypeFile::CommitChunkL(class TPtr8 &)
+	?CommitChunkL@CMTPTypeComplexBuffer@@UAEPAVMMTPType@@AAVTPtr8@@@Z @ 546 NONAME ; class MMTPType * CMTPTypeComplexBuffer::CommitChunkL(class TPtr8 &)
+	?CommitChunkL@CMTPTypeCompoundBase@@UAEPAVMMTPType@@AAVTPtr8@@@Z @ 547 NONAME ; class MMTPType * CMTPTypeCompoundBase::CommitChunkL(class TPtr8 &)
+	?CommitChunkL@CMTPTypeObjectPropDesc@@UAEPAVMMTPType@@AAVTPtr8@@@Z @ 548 NONAME ; class MMTPType * CMTPTypeObjectPropDesc::CommitChunkL(class TPtr8 &)
+	?CommitChunkL@CMTPTypeServiceObjPropExtnForm@@UAEPAVMMTPType@@AAVTPtr8@@@Z @ 549 NONAME ; class MMTPType * CMTPTypeServiceObjPropExtnForm::CommitChunkL(class TPtr8 &)
+	?CommitChunkL@CMTPTypeInterdependentProperties@@UAEPAVMMTPType@@AAVTPtr8@@@Z @ 550 NONAME ; class MMTPType * CMTPTypeInterdependentProperties::CommitChunkL(class TPtr8 &)
+	?CommitChunkL@CMTPTypeDevicePropDescEnumerationForm@@UAEPAVMMTPType@@AAVTPtr8@@@Z @ 551 NONAME ; class MMTPType * CMTPTypeDevicePropDescEnumerationForm::CommitChunkL(class TPtr8 &)
+	?CommitChunkL@CMTPTypeObjectPropList@@UAEPAVMMTPType@@AAVTPtr8@@@Z @ 552 NONAME ; class MMTPType * CMTPTypeObjectPropList::CommitChunkL(class TPtr8 &)
+	?CommitChunkL@CMTPTypeDevicePropDesc@@UAEPAVMMTPType@@AAVTPtr8@@@Z @ 553 NONAME ; class MMTPType * CMTPTypeDevicePropDesc::CommitChunkL(class TPtr8 &)
+	?CommitChunkL@CMTPTypeString@@UAEPAVMMTPType@@AAVTPtr8@@@Z @ 554 NONAME ; class MMTPType * CMTPTypeString::CommitChunkL(class TPtr8 &)
+	?CommitChunkL@CMTPTypeList@@UAEPAVMMTPType@@AAVTPtr8@@@Z @ 555 NONAME ; class MMTPType * CMTPTypeList::CommitChunkL(class TPtr8 &)
+	?CommitChunkL@CMTPTypeArray@@UAEPAVMMTPType@@AAVTPtr8@@@Z @ 556 NONAME ; class MMTPType * CMTPTypeArray::CommitChunkL(class TPtr8 &)
+	?CommitChunkL@CMTPTypeObjectPropListElement@@UAEPAVMMTPType@@AAVTPtr8@@@Z @ 557 NONAME ABSENT ; class MMTPType * CMTPTypeObjectPropListElement::CommitChunkL(class TPtr8 &)
+	?CommitChunkL@CMTPTypeObjectPropDescEnumerationForm@@UAEPAVMMTPType@@AAVTPtr8@@@Z @ 558 NONAME ; class MMTPType * CMTPTypeObjectPropDescEnumerationForm::CommitChunkL(class TPtr8 &)
+	?CommitChunkL@RMTPType@@UAEPAVMMTPType@@AAVTPtr8@@@Z @ 559 NONAME ; class MMTPType * RMTPType::CommitChunkL(class TPtr8 &)
+	?Type@CMTPTypeServicePropListElement@@UBEIXZ @ 560 NONAME ; unsigned int CMTPTypeServicePropListElement::Type(void) const
+	?CommitPropElemL@CMTPTypeObjectPropList@@QAEXAAVCMTPTypeObjectPropListElement@@@Z @ 561 NONAME ; void CMTPTypeObjectPropList::CommitPropElemL(class CMTPTypeObjectPropListElement &)
+	?SetUint128L@CMTPTypeObjectPropListElement@@QAEXH_K0@Z @ 562 NONAME ; void CMTPTypeObjectPropListElement::SetUint128L(int, unsigned long long, unsigned long long)
+	?NextWriteChunk@MMTPType@@UAEHAAVTPtr8@@I@Z @ 563 NONAME ; int MMTPType::NextWriteChunk(class TPtr8 &, unsigned int)
+	??1CMTPTypeServicePropList@@UAE@XZ @ 564 NONAME ; CMTPTypeServicePropList::~CMTPTypeServicePropList(void)
+	?ResetCursor@CMTPTypeObjectPropList@@QBEXXZ @ 565 NONAME ; void CMTPTypeObjectPropList::ResetCursor(void) const
+	?NewLC@CMTPTypeServicePropListElement@@SAPAV1@KGGABVMMTPType@@@Z @ 566 NONAME ; class CMTPTypeServicePropListElement * CMTPTypeServicePropListElement::NewLC(unsigned long, unsigned short, unsigned short, class MMTPType const &)
+	?FirstWriteChunk@MMTPType@@UAEHAAVTPtr8@@I@Z @ 567 NONAME ; int MMTPType::FirstWriteChunk(class TPtr8 &, unsigned int)
+	?NumberOfElements@CMTPTypeServicePropList@@QBEKXZ @ 568 NONAME ; unsigned long CMTPTypeServicePropList::NumberOfElements(void) const
+	?NewL@CMTPTypeServicePropList@@SAPAV1@XZ @ 569 NONAME ; class CMTPTypeServicePropList * CMTPTypeServicePropList::NewL(void)
+	?DataObjectL@CMTPTypeServicePropList@@QBEAAVMMTPType@@XZ @ 570 NONAME ; class MMTPType & CMTPTypeServicePropList::DataObjectL(void) const
+	?CommitChunkL@CMTPTypeServicePropList@@UAEPAVMMTPType@@AAVTPtr8@@@Z @ 571 NONAME ; class MMTPType * CMTPTypeServicePropList::CommitChunkL(class TPtr8 &)
+	?FirstWriteChunk@CMTPTypeServicePropList@@UAEHAAVTPtr8@@@Z @ 572 NONAME ; int CMTPTypeServicePropList::FirstWriteChunk(class TPtr8 &)
+	?Uint8L@CMTPTypeObjectPropListElement@@QBEEH@Z @ 573 NONAME ; unsigned char CMTPTypeObjectPropListElement::Uint8L(int) const
+	?NewL@CMTPTypeServicePropListElement@@SAPAV1@KGABVMMTPType@@@Z @ 574 NONAME ; class CMTPTypeServicePropListElement * CMTPTypeServicePropListElement::NewL(unsigned long, unsigned short, class MMTPType const &)
+	?AppendObjectPropListL@CMTPTypeObjectPropList@@QAEXABV1@@Z @ 575 NONAME ; void CMTPTypeObjectPropList::AppendObjectPropListL(class CMTPTypeObjectPropList const &)
+	?Type@CMTPTypeServicePropList@@UBEIXZ @ 576 NONAME ; unsigned int CMTPTypeServicePropList::Type(void) const
+	?Element@CMTPTypeServicePropList@@QBEAAVCMTPTypeServicePropListElement@@I@Z @ 577 NONAME ; class CMTPTypeServicePropListElement & CMTPTypeServicePropList::Element(unsigned int) const
+	?Size@CMTPTypeObjectPropList@@UBE_KXZ @ 578 NONAME ; unsigned long long CMTPTypeObjectPropList::Size(void) const
+	?GetNextElementL@CMTPTypeObjectPropList@@QBEAAVCMTPTypeObjectPropListElement@@XZ @ 579 NONAME ; class CMTPTypeObjectPropListElement & CMTPTypeObjectPropList::GetNextElementL(void) const
+	?NewL@CMTPTypeServicePropListElement@@SAPAV1@G@Z @ 580 NONAME ; class CMTPTypeServicePropListElement * CMTPTypeServicePropListElement::NewL(unsigned short)
+	?NextWriteChunk@CMTPTypeObjectPropList@@UAEHAAVTPtr8@@I@Z @ 581 NONAME ; int CMTPTypeObjectPropList::NextWriteChunk(class TPtr8 &, unsigned int)
+	?SetUint64L@CMTPTypeObjectPropListElement@@QAEXH_K@Z @ 582 NONAME ; void CMTPTypeObjectPropListElement::SetUint64L(int, unsigned long long)
+	?FirstReadChunk@CMTPTypeObjectPropList@@UBEHAAVTPtrC8@@@Z @ 583 NONAME ; int CMTPTypeObjectPropList::FirstReadChunk(class TPtrC8 &) const
+	?SetUint8L@CMTPTypeObjectPropListElement@@QAEXHE@Z @ 584 NONAME ; void CMTPTypeObjectPropListElement::SetUint8L(int, unsigned char)
+	?ReservePropElemL@CMTPTypeObjectPropList@@QAEAAVCMTPTypeObjectPropListElement@@KG@Z @ 585 NONAME ; class CMTPTypeObjectPropListElement & CMTPTypeObjectPropList::ReservePropElemL(unsigned long, unsigned short)
+	?NextWriteChunk@CMTPTypeCompoundBase@@UAEHAAVTPtr8@@I@Z @ 586 NONAME ; int CMTPTypeCompoundBase::NextWriteChunk(class TPtr8 &, unsigned int)
+	?CommitRequired@CMTPTypeServicePropList@@UBEHXZ @ 587 NONAME ; int CMTPTypeServicePropList::CommitRequired(void) const
+	?NewLC@CMTPTypeServicePropListElement@@SAPAV1@G@Z @ 588 NONAME ; class CMTPTypeServicePropListElement * CMTPTypeServicePropListElement::NewLC(unsigned short)
+	?FirstWriteChunk@CMTPTypeServicePropListElement@@UAEHAAVTPtr8@@@Z @ 589 NONAME ; int CMTPTypeServicePropListElement::FirstWriteChunk(class TPtr8 &)
+	?NewL@CMTPTypeServicePropListElement@@SAPAV1@KGGABVMMTPType@@@Z @ 590 NONAME ; class CMTPTypeServicePropListElement * CMTPTypeServicePropListElement::NewL(unsigned long, unsigned short, unsigned short, class MMTPType const &)
+	?StringL@CMTPTypeObjectPropListElement@@QBEABVTDesC16@@H@Z @ 591 NONAME ; class TDesC16 const & CMTPTypeObjectPropListElement::StringL(int) const
+	?CommitChunkL@CMTPTypeServicePropListElement@@UAEPAVMMTPType@@AAVTPtr8@@@Z @ 592 NONAME ; class MMTPType * CMTPTypeServicePropListElement::CommitChunkL(class TPtr8 &)
+	?Validate@CMTPTypeObjectPropList@@UBEHXZ @ 593 NONAME ; int CMTPTypeObjectPropList::Validate(void) const
+	?AppendDataObjectL@CMTPTypeServicePropList@@QAEXAAVMMTPType@@@Z @ 594 NONAME ; void CMTPTypeServicePropList::AppendDataObjectL(class MMTPType &)
+	?Uint64L@CMTPTypeObjectPropListElement@@QBE_KH@Z @ 595 NONAME ; unsigned long long CMTPTypeObjectPropListElement::Uint64L(int) const
+	?Uint128L@CMTPTypeObjectPropListElement@@QBEXHAA_K0@Z @ 596 NONAME ; void CMTPTypeObjectPropListElement::Uint128L(int, unsigned long long &, unsigned long long &) const
+	?SetUint16L@CMTPTypeObjectPropListElement@@QAEXHG@Z @ 597 NONAME ; void CMTPTypeObjectPropListElement::SetUint16L(int, unsigned short)
+	?NextReadChunk@CMTPTypeObjectPropList@@UBEHAAVTPtrC8@@@Z @ 598 NONAME ; int CMTPTypeObjectPropList::NextReadChunk(class TPtrC8 &) const
+	?ReserveTransportHeader@CMTPTypeObjectPropList@@UAEHIAAVTPtr8@@@Z @ 599 NONAME ; int CMTPTypeObjectPropList::ReserveTransportHeader(unsigned int, class TPtr8 &)
+	?CommitRequired@CMTPTypeServicePropListElement@@UBEHXZ @ 600 NONAME ; int CMTPTypeServicePropListElement::CommitRequired(void) const
+	?Uint32L@CMTPTypeObjectPropListElement@@QBEKH@Z @ 601 NONAME ; unsigned long CMTPTypeObjectPropListElement::Uint32L(int) const
+	?Uint16L@CMTPTypeObjectPropListElement@@QBEGH@Z @ 602 NONAME ; unsigned short CMTPTypeObjectPropListElement::Uint16L(int) const
+	?NewLC@CMTPTypeServicePropListElement@@SAPAV1@KGABVMMTPType@@@Z @ 603 NONAME ; class CMTPTypeServicePropListElement * CMTPTypeServicePropListElement::NewLC(unsigned long, unsigned short, class MMTPType const &)
+	?NewLC@CMTPTypeServicePropListElement@@SAPAV1@GG@Z @ 604 NONAME ; class CMTPTypeServicePropListElement * CMTPTypeServicePropListElement::NewLC(unsigned short, unsigned short)
+	?SetStringL@CMTPTypeObjectPropListElement@@QAEXHABVTDesC16@@@Z @ 605 NONAME ; void CMTPTypeObjectPropListElement::SetStringL(int, class TDesC16 const &)
+	?SetUint32L@CMTPTypeObjectPropListElement@@QAEXHK@Z @ 606 NONAME ; void CMTPTypeObjectPropListElement::SetUint32L(int, unsigned long)
+	?FirstWriteChunk@CMTPTypeObjectPropList@@UAEHAAVTPtr8@@I@Z @ 607 NONAME ; int CMTPTypeObjectPropList::FirstWriteChunk(class TPtr8 &, unsigned int)
+	?NewL@CMTPTypeServicePropListElement@@SAPAV1@GG@Z @ 608 NONAME ; class CMTPTypeServicePropListElement * CMTPTypeServicePropListElement::NewL(unsigned short, unsigned short)
+	?ArrayL@CMTPTypeObjectPropListElement@@QBEABVTDesC8@@H@Z @ 609 NONAME ; class TDesC8 const & CMTPTypeObjectPropListElement::ArrayL(int) const
+	?NextWriteChunk@CMTPTypeServicePropList@@UAEHAAVTPtr8@@@Z @ 610 NONAME ; int CMTPTypeServicePropList::NextWriteChunk(class TPtr8 &)
+	??1CMTPTypeServicePropListElement@@UAE@XZ @ 611 NONAME ; CMTPTypeServicePropListElement::~CMTPTypeServicePropListElement(void)
+	?ReserveTransportHeader@MMTPType@@UAEHIAAVTPtr8@@@Z @ 612 NONAME ; int MMTPType::ReserveTransportHeader(unsigned int, class TPtr8 &)
+	?AppendL@CMTPTypeServicePropList@@QAEXPAVCMTPTypeServicePropListElement@@@Z @ 613 NONAME ; void CMTPTypeServicePropList::AppendL(class CMTPTypeServicePropListElement *)
+	?Size@CMTPTypeObjectPropListElement@@QBEKXZ @ 614 NONAME ; unsigned long CMTPTypeObjectPropListElement::Size(void) const
+	?SetArrayL@CMTPTypeObjectPropListElement@@QAEXHABVCMTPTypeArray@@@Z @ 615 NONAME ; void CMTPTypeObjectPropListElement::SetArrayL(int, class CMTPTypeArray const &)
+	?NewLC@CMTPTypeServicePropList@@SAPAV1@XZ @ 616 NONAME ; class CMTPTypeServicePropList * CMTPTypeServicePropList::NewLC(void)
+	?NewLC@CMTPTypeOpaqueData@@SAPAV1@XZ @ 617 NONAME ; class CMTPTypeOpaqueData * CMTPTypeOpaqueData::NewLC(void)
+	?NewLC@CMTPTypeOpaqueData@@SAPAV1@ABVTDesC8@@@Z @ 618 NONAME ; class CMTPTypeOpaqueData * CMTPTypeOpaqueData::NewLC(class TDesC8 const &)
+	?Write@CMTPTypeOpaqueData@@QAEHABVTPtrC8@@@Z @ 619 NONAME ; int CMTPTypeOpaqueData::Write(class TPtrC8 const &)
+	?Size@CMTPTypeOpaqueData@@UBE_KXZ @ 620 NONAME ; unsigned long long CMTPTypeOpaqueData::Size(void) const
+	?NextWriteChunk@CMTPTypeOpaqueData@@UAEHAAVTPtr8@@@Z @ 621 NONAME ; int CMTPTypeOpaqueData::NextWriteChunk(class TPtr8 &)
+	?FirstWriteChunk@CMTPTypeOpaqueData@@UAEHAAVTPtr8@@@Z @ 622 NONAME ; int CMTPTypeOpaqueData::FirstWriteChunk(class TPtr8 &)
+	?FirstWriteChunk@CMTPTypeOpaqueData@@UAEHAAVTPtr8@@I@Z @ 623 NONAME ; int CMTPTypeOpaqueData::FirstWriteChunk(class TPtr8 &, unsigned int)
+	?CommitChunkL@CMTPTypeOpaqueData@@UAEPAVMMTPType@@AAVTPtr8@@@Z @ 624 NONAME ; class MMTPType * CMTPTypeOpaqueData::CommitChunkL(class TPtr8 &)
+	?Read@CMTPTypeOpaqueData@@QBEHAAVTPtrC8@@@Z @ 625 NONAME ; int CMTPTypeOpaqueData::Read(class TPtrC8 &) const
+	?NewL@CMTPTypeOpaqueData@@SAPAV1@ABVTDesC8@@@Z @ 626 NONAME ; class CMTPTypeOpaqueData * CMTPTypeOpaqueData::NewL(class TDesC8 const &)
+	?NewL@CMTPTypeOpaqueData@@SAPAV1@XZ @ 627 NONAME ; class CMTPTypeOpaqueData * CMTPTypeOpaqueData::NewL(void)
+	?NextReadChunk@CMTPTypeOpaqueData@@UBEHAAVTPtrC8@@@Z @ 628 NONAME ; int CMTPTypeOpaqueData::NextReadChunk(class TPtrC8 &) const
+	??1CMTPTypeOpaqueData@@UAE@XZ @ 629 NONAME ; CMTPTypeOpaqueData::~CMTPTypeOpaqueData(void)
+	?FirstReadChunk@CMTPTypeOpaqueData@@UBEHAAVTPtrC8@@@Z @ 630 NONAME ; int CMTPTypeOpaqueData::FirstReadChunk(class TPtrC8 &) const
+	?CommitRequired@CMTPTypeOpaqueData@@UBEHXZ @ 631 NONAME ; int CMTPTypeOpaqueData::CommitRequired(void) const
+	?Type@CMTPTypeOpaqueData@@UBEIXZ @ 632 NONAME ; unsigned int CMTPTypeOpaqueData::Type(void) const
+	?GetByteSent@CMTPTypeFile@@QAE_JXZ @ 633 NONAME ; long long CMTPTypeFile::GetByteSent(void)
+	?NewL@CMTPTypeFile@@SAPAV1@AAVRFs@@ABVTDesC16@@W4TFileMode@@_J3@Z @ 634 NONAME ; class CMTPTypeFile * CMTPTypeFile::NewL(class RFs &, class TDesC16 const &, enum TFileMode, long long, long long)
+	?NewLC@CMTPTypeFile@@SAPAV1@AAVRFs@@ABVTDesC16@@W4TFileMode@@_J3@Z @ 635 NONAME ; class CMTPTypeFile * CMTPTypeFile::NewLC(class RFs &, class TDesC16 const &, enum TFileMode, long long, long long)
+	?UsedServiceL@CMTPTypeServiceInfo@@QBEXIAAVTMTPTypeGuid@@@Z @ 636 NONAME ; void CMTPTypeServiceInfo::UsedServiceL(unsigned int, class TMTPTypeGuid &) const
+	?NewLC@CMTPTypeServiceObjPropExtnForm@@SAPAV1@IVTMTPTypeGuid@@IABVTDesC16@@EPBVMMTPType@@@Z @ 637 NONAME ; class CMTPTypeServiceObjPropExtnForm * CMTPTypeServiceObjPropExtnForm::NewLC(unsigned int, class TMTPTypeGuid, unsigned int, class TDesC16 const &, unsigned char, class MMTPType const *)
+	??0TMTPTypeGuid@@QAE@XZ @ 638 NONAME ; TMTPTypeGuid::TMTPTypeGuid(void)
+	?NewLC@CMTPTypeServiceMethodElement@@SAPAV1@GABVTMTPTypeGuid@@ABVTDesC16@@G@Z @ 639 NONAME ; class CMTPTypeServiceMethodElement * CMTPTypeServiceMethodElement::NewLC(unsigned short, class TMTPTypeGuid const &, class TDesC16 const &, unsigned short)
+	??0TMTPTypeGuid@@QAE@_K0@Z @ 640 NONAME ; TMTPTypeGuid::TMTPTypeGuid(unsigned long long, unsigned long long)
+	?NewL@CMTPTypeServiceFormatElement@@SAPAV1@GABVTMTPTypeGuid@@ABVTDesC16@@G1@Z @ 641 NONAME ; class CMTPTypeServiceFormatElement * CMTPTypeServiceFormatElement::NewL(unsigned short, class TMTPTypeGuid const &, class TDesC16 const &, unsigned short, class TDesC16 const &)
+	?AppendServiceDataBlockL@CMTPTypeServiceInfo@@QAEXABVTMTPTypeGuid@@@Z @ 642 NONAME ; void CMTPTypeServiceInfo::AppendServiceDataBlockL(class TMTPTypeGuid const &)
+	?NewL@CMTPTypeServiceMethodParamExtnForm@@SAPAV1@IVTMTPTypeGuid@@IABVTDesC16@@EEEPBVMMTPType@@@Z @ 643 NONAME ; class CMTPTypeServiceMethodParamExtnForm * CMTPTypeServiceMethodParamExtnForm::NewL(unsigned int, class TMTPTypeGuid, unsigned int, class TDesC16 const &, unsigned char, unsigned char, unsigned char, class MMTPType const *)
+	?NewL@CMTPTypeServiceEventElement@@SAPAV1@GABVTMTPTypeGuid@@ABVTDesC16@@@Z @ 644 NONAME ; class CMTPTypeServiceEventElement * CMTPTypeServiceEventElement::NewL(unsigned short, class TMTPTypeGuid const &, class TDesC16 const &)
+	?SerivceDataBlockL@CMTPTypeServiceInfo@@QBEXIAAVTMTPTypeGuid@@@Z @ 645 NONAME ; void CMTPTypeServiceInfo::SerivceDataBlockL(unsigned int, class TMTPTypeGuid &) const
+	?Set@TMTPTypeGuid@@QAEX_K0@Z @ 646 NONAME ; void TMTPTypeGuid::Set(unsigned long long, unsigned long long)
+	?SetL@TMTPTypeGuid@@QAEHABVTDesC16@@@Z @ 647 NONAME ; int TMTPTypeGuid::SetL(class TDesC16 const &)
+	?NewL@CMTPTypeServicePropertyElement@@SAPAV1@GABVTMTPTypeGuid@@KABVTDesC16@@@Z @ 648 NONAME ; class CMTPTypeServicePropertyElement * CMTPTypeServicePropertyElement::NewL(unsigned short, class TMTPTypeGuid const &, unsigned long, class TDesC16 const &)
+	??0TMTPTypeGuid@@QAE@ABVTPtrC8@@@Z @ 649 NONAME ; TMTPTypeGuid::TMTPTypeGuid(class TPtrC8 const &)
+	?NewL@CMTPTypeServiceObjPropExtnForm@@SAPAV1@IVTMTPTypeGuid@@IABVTDesC16@@EPBVMMTPType@@@Z @ 650 NONAME ; class CMTPTypeServiceObjPropExtnForm * CMTPTypeServiceObjPropExtnForm::NewL(unsigned int, class TMTPTypeGuid, unsigned int, class TDesC16 const &, unsigned char, class MMTPType const *)
+	?NewLC@CMTPTypeServiceMethodParamExtnForm@@SAPAV1@IVTMTPTypeGuid@@IABVTDesC16@@EEEPBVMMTPType@@@Z @ 651 NONAME ; class CMTPTypeServiceMethodParamExtnForm * CMTPTypeServiceMethodParamExtnForm::NewLC(unsigned int, class TMTPTypeGuid, unsigned int, class TDesC16 const &, unsigned char, unsigned char, unsigned char, class MMTPType const *)
+	?NewLC@CMTPTypeServiceEventElement@@SAPAV1@GABVTMTPTypeGuid@@ABVTDesC16@@@Z @ 652 NONAME ; class CMTPTypeServiceEventElement * CMTPTypeServiceEventElement::NewLC(unsigned short, class TMTPTypeGuid const &, class TDesC16 const &)
+	?AppendUsedServiceL@CMTPTypeServiceInfo@@QAEXABVTMTPTypeGuid@@@Z @ 653 NONAME ; void CMTPTypeServiceInfo::AppendUsedServiceL(class TMTPTypeGuid const &)
+	?NewLC@CMTPTypeServiceFormatElement@@SAPAV1@GABVTMTPTypeGuid@@ABVTDesC16@@G1@Z @ 654 NONAME ; class CMTPTypeServiceFormatElement * CMTPTypeServiceFormatElement::NewLC(unsigned short, class TMTPTypeGuid const &, class TDesC16 const &, unsigned short, class TDesC16 const &)
+	?NewLC@CMTPTypeServicePropertyElement@@SAPAV1@GABVTMTPTypeGuid@@KABVTDesC16@@@Z @ 655 NONAME ; class CMTPTypeServicePropertyElement * CMTPTypeServicePropertyElement::NewLC(unsigned short, class TMTPTypeGuid const &, unsigned long, class TDesC16 const &)
+	?NewL@CMTPTypeServiceMethodElement@@SAPAV1@GABVTMTPTypeGuid@@ABVTDesC16@@G@Z @ 656 NONAME ; class CMTPTypeServiceMethodElement * CMTPTypeServiceMethodElement::NewL(unsigned short, class TMTPTypeGuid const &, class TDesC16 const &, unsigned short)
+	??0TMTPTypeEvent@@QAE@ABV0@@Z @ 657 NONAME ; TMTPTypeEvent::TMTPTypeEvent(class TMTPTypeEvent const &)
+	??0TMTPTypeRequest@@QAE@ABV0@@Z @ 658 NONAME ; TMTPTypeRequest::TMTPTypeRequest(class TMTPTypeRequest const &)
+	??0TMTPTypeDataPair@@QAE@ABV0@@Z @ 659 NONAME ; TMTPTypeDataPair::TMTPTypeDataPair(class TMTPTypeDataPair const &)
+	??0TMTPTypeResponse@@QAE@ABV0@@Z @ 660 NONAME ; TMTPTypeResponse::TMTPTypeResponse(class TMTPTypeResponse const &)
+	?NextWriteChunk@CMTPTypeTrivialData@@UAEHAAVTPtr8@@I@Z @ 661 NONAME ; int CMTPTypeTrivialData::NextWriteChunk(class TPtr8 &, unsigned int)
+	?NewLC@CMTPTypeTrivialData@@SAPAV1@XZ @ 662 NONAME ; class CMTPTypeTrivialData * CMTPTypeTrivialData::NewLC(void)
+	?Size@CMTPTypeTrivialData@@UBE_KXZ @ 663 NONAME ; unsigned long long CMTPTypeTrivialData::Size(void) const
+	?NextReadChunk@CMTPTypeTrivialData@@UBEHAAVTPtrC8@@@Z @ 664 NONAME ; int CMTPTypeTrivialData::NextReadChunk(class TPtrC8 &) const
+	?FirstWriteChunk@CMTPTypeTrivialData@@UAEHAAVTPtr8@@I@Z @ 665 NONAME ; int CMTPTypeTrivialData::FirstWriteChunk(class TPtr8 &, unsigned int)
+	?Type@CMTPTypeTrivialData@@UBEIXZ @ 666 NONAME ; unsigned int CMTPTypeTrivialData::Type(void) const
+	?FirstWriteChunk@CMTPTypeTrivialData@@UAEHAAVTPtr8@@@Z @ 667 NONAME ; int CMTPTypeTrivialData::FirstWriteChunk(class TPtr8 &)
+	??1CMTPTypeTrivialData@@UAE@XZ @ 668 NONAME ; CMTPTypeTrivialData::~CMTPTypeTrivialData(void)
+	?NewL@CMTPTypeTrivialData@@SAPAV1@XZ @ 669 NONAME ; class CMTPTypeTrivialData * CMTPTypeTrivialData::NewL(void)
+	?NextWriteChunk@CMTPTypeTrivialData@@UAEHAAVTPtr8@@@Z @ 670 NONAME ; int CMTPTypeTrivialData::NextWriteChunk(class TPtr8 &)
+	?FirstReadChunk@CMTPTypeTrivialData@@UBEHAAVTPtrC8@@@Z @ 671 NONAME ; int CMTPTypeTrivialData::FirstReadChunk(class TPtrC8 &) const
+	?SetArrayL@CMTPTypeObjectPropListElement@@QAEXHABVTDesC16@@@Z @ 672 NONAME ; void CMTPTypeObjectPropListElement::SetArrayL(int, class TDesC16 const &)
+	?NextWriteChunk@CMTPTypeList@@UAEHAAVTPtr8@@I@Z @ 673 NONAME ; int CMTPTypeList::NextWriteChunk(class TPtr8 &, unsigned int)
+

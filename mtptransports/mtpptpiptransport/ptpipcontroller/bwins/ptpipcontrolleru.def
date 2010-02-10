@@ -1,0 +1,15 @@
+EXPORTS
+	??0RPTPIPFramework@@QAE@XZ @ 1 NONAME ; RPTPIPFramework::RPTPIPFramework(void)
+	??1CPTPIPController@@UAE@XZ @ 2 NONAME ; CPTPIPController::~CPTPIPController(void)
+	?Close@RPTPIPFramework@@QAEXXZ @ 3 NONAME ; void RPTPIPFramework::Close(void)
+	?Controller@RPTPIPFramework@@QAEAAVMPTPIPController@@XZ @ 4 NONAME ; class MPTPIPController & RPTPIPFramework::Controller(void)
+	?NewL@CPTPIPController@@SAPAV1@XZ @ 5 NONAME ; class CPTPIPController * CPTPIPController::NewL(void)
+	?NewLC@CPTPIPController@@SAPAV1@XZ @ 6 NONAME ; class CPTPIPController * CPTPIPController::NewLC(void)
+	?NewSocketL@CPTPIPController@@UAEAAVRSocket@@XZ @ 7 NONAME ; class RSocket & CPTPIPController::NewSocketL(void)
+	?OnTimeOut@CPTPIPController@@QAEXXZ @ 8 NONAME ; void CPTPIPController::OnTimeOut(void)
+	?OpenL@RPTPIPFramework@@QAEXXZ @ 9 NONAME ; void RPTPIPFramework::OpenL(void)
+	?SetDeviceFriendlyName@CPTPIPController@@UAEXPAVTDesC16@@@Z @ 10 NONAME ; void CPTPIPController::SetDeviceFriendlyName(class TDesC16 *)
+	?SetDeviceGUID@CPTPIPController@@UAEHAAVTDesC8@@@Z @ 11 NONAME ; int CPTPIPController::SetDeviceGUID(class TDesC8 &)
+	?SocketAccepted@CPTPIPController@@UAEXAAVTRequestStatus@@@Z @ 12 NONAME ; void CPTPIPController::SocketAccepted(class TRequestStatus &)
+	?StopTransport@CPTPIPController@@UAEXXZ @ 13 NONAME ; void CPTPIPController::StopTransport(void)
+

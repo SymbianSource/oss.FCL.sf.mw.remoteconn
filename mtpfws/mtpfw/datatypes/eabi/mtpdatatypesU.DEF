@@ -1,0 +1,1035 @@
+EXPORTS
+	_ZN12CMTPTypeFile12CommitChunkLER5TPtr8 @ 1 NONAME
+	_ZN12CMTPTypeFile14NextWriteChunkER5TPtr8 @ 2 NONAME
+	_ZN12CMTPTypeFile15FirstWriteChunkER5TPtr8 @ 3 NONAME
+	_ZN12CMTPTypeFile4FileEv @ 4 NONAME
+	_ZN12CMTPTypeFile4NewLER3RFsRK7TDesC169TFileMode @ 5 NONAME
+	_ZN12CMTPTypeFile5NewLCER3RFsRK7TDesC169TFileMode @ 6 NONAME
+	_ZN12CMTPTypeFile8SetSizeLEy @ 7 NONAME
+	_ZN12CMTPTypeFileD0Ev @ 8 NONAME
+	_ZN12CMTPTypeFileD1Ev @ 9 NONAME
+	_ZN12CMTPTypeFileD2Ev @ 10 NONAME
+	_ZN12TMTPTypeInt83SetEa @ 11 NONAME
+	_ZN12TMTPTypeInt8C1Ea @ 12 NONAME
+	_ZN12TMTPTypeInt8C1Ev @ 13 NONAME
+	_ZN12TMTPTypeInt8C2Ea @ 14 NONAME
+	_ZN12TMTPTypeInt8C2Ev @ 15 NONAME
+	_ZN12TMTPTypeNull14NextWriteChunkER5TPtr8 @ 16 NONAME
+	_ZN12TMTPTypeNull15FirstWriteChunkER5TPtr8 @ 17 NONAME
+	_ZN12TMTPTypeNull9SetBufferERK5TDes8 @ 18 NONAME
+	_ZN12TMTPTypeNullC1Ev @ 19 NONAME
+	_ZN12TMTPTypeNullC2Ev @ 20 NONAME
+	_ZN13CMTPTypeArray10AppendIntLEi @ 21 NONAME
+	_ZN13CMTPTypeArray11AppendUintLEj @ 22 NONAME
+	_ZN13CMTPTypeArray12AppendInt64LEx @ 23 NONAME
+	_ZN13CMTPTypeArray12CommitChunkLER5TPtr8 @ 24 NONAME
+	_ZN13CMTPTypeArray13AppendUint64LEy @ 25 NONAME
+	_ZN13CMTPTypeArray14NextWriteChunkER5TPtr8 @ 26 NONAME
+	_ZN13CMTPTypeArray15FirstWriteChunkER5TPtr8 @ 27 NONAME
+	_ZN13CMTPTypeArray4NewLERK6RArrayIxE @ 28 NONAME
+	_ZN13CMTPTypeArray4NewLERK6RArrayIyE @ 29 NONAME
+	_ZN13CMTPTypeArray4NewLEi @ 30 NONAME
+	_ZN13CMTPTypeArray4NewLEiRK6RArrayIiE @ 31 NONAME
+	_ZN13CMTPTypeArray4NewLEiRK6RArrayIjE @ 32 NONAME
+	_ZN13CMTPTypeArray4NewLEiij @ 33 NONAME
+	_ZN13CMTPTypeArray4NewLEij @ 34 NONAME
+	_ZN13CMTPTypeArray5NewLCERK6RArrayIxE @ 35 NONAME
+	_ZN13CMTPTypeArray5NewLCERK6RArrayIyE @ 36 NONAME
+	_ZN13CMTPTypeArray5NewLCEi @ 37 NONAME
+	_ZN13CMTPTypeArray5NewLCEiRK6RArrayIiE @ 38 NONAME
+	_ZN13CMTPTypeArray5NewLCEiRK6RArrayIjE @ 39 NONAME
+	_ZN13CMTPTypeArray5NewLCEiij @ 40 NONAME
+	_ZN13CMTPTypeArray5NewLCEij @ 41 NONAME
+	_ZN13CMTPTypeArray7AppendLERK6RArrayIiE @ 42 NONAME
+	_ZN13CMTPTypeArray7AppendLERK6RArrayIjE @ 43 NONAME
+	_ZN13CMTPTypeArray7AppendLERK6RArrayIxE @ 44 NONAME
+	_ZN13CMTPTypeArray7AppendLERK6RArrayIyE @ 45 NONAME
+	_ZN13CMTPTypeArray7AppendLERK8MMTPType @ 46 NONAME
+	_ZN13CMTPTypeArrayD0Ev @ 47 NONAME
+	_ZN13CMTPTypeArrayD1Ev @ 48 NONAME
+	_ZN13CMTPTypeArrayD2Ev @ 49 NONAME
+	_ZN13TMTPTypeEventC1Ev @ 50 NONAME
+	_ZN13TMTPTypeEventC2Ev @ 51 NONAME
+	_ZN13TMTPTypeInt163SetEs @ 52 NONAME
+	_ZN13TMTPTypeInt16C1Es @ 53 NONAME
+	_ZN13TMTPTypeInt16C1Ev @ 54 NONAME
+	_ZN13TMTPTypeInt16C2Es @ 55 NONAME
+	_ZN13TMTPTypeInt16C2Ev @ 56 NONAME
+	_ZN13TMTPTypeInt323SetEl @ 57 NONAME
+	_ZN13TMTPTypeInt32C1El @ 58 NONAME
+	_ZN13TMTPTypeInt32C1Ev @ 59 NONAME
+	_ZN13TMTPTypeInt32C2El @ 60 NONAME
+	_ZN13TMTPTypeInt32C2Ev @ 61 NONAME
+	_ZN13TMTPTypeInt6414NextWriteChunkER5TPtr8 @ 62 NONAME
+	_ZN13TMTPTypeInt6415FirstWriteChunkER5TPtr8 @ 63 NONAME
+	_ZN13TMTPTypeInt643SetEx @ 64 NONAME
+	_ZN13TMTPTypeInt64C1Ev @ 65 NONAME
+	_ZN13TMTPTypeInt64C1Ex @ 66 NONAME
+	_ZN13TMTPTypeInt64C2Ev @ 67 NONAME
+	_ZN13TMTPTypeInt64C2Ex @ 68 NONAME
+	_ZN13TMTPTypeInt64D0Ev @ 69 NONAME
+	_ZN13TMTPTypeInt64D1Ev @ 70 NONAME
+	_ZN13TMTPTypeInt64D2Ev @ 71 NONAME
+	_ZN13TMTPTypeUint83SetEh @ 72 NONAME
+	_ZN13TMTPTypeUint8C1Eh @ 73 NONAME
+	_ZN13TMTPTypeUint8C1Ev @ 74 NONAME
+	_ZN13TMTPTypeUint8C2Eh @ 75 NONAME
+	_ZN13TMTPTypeUint8C2Ev @ 76 NONAME
+	_ZN14CMTPTypeString12CommitChunkLER5TPtr8 @ 77 NONAME
+	_ZN14CMTPTypeString14NextWriteChunkER5TPtr8 @ 78 NONAME
+	_ZN14CMTPTypeString15FirstWriteChunkER5TPtr8 @ 79 NONAME
+	_ZN14CMTPTypeString4NewLERK7TDesC16 @ 80 NONAME
+	_ZN14CMTPTypeString4NewLEv @ 81 NONAME
+	_ZN14CMTPTypeString4SetLERK7TDesC16 @ 82 NONAME
+	_ZN14CMTPTypeString5NewLCERK7TDesC16 @ 83 NONAME
+	_ZN14CMTPTypeString5NewLCEv @ 84 NONAME
+	_ZN14CMTPTypeStringD0Ev @ 85 NONAME
+	_ZN14CMTPTypeStringD1Ev @ 86 NONAME
+	_ZN14CMTPTypeStringD2Ev @ 87 NONAME
+	_ZN14TMTPTypeInt12814NextWriteChunkER5TPtr8 @ 88 NONAME
+	_ZN14TMTPTypeInt12815FirstWriteChunkER5TPtr8 @ 89 NONAME
+	_ZN14TMTPTypeInt1283SetExy @ 90 NONAME
+	_ZN14TMTPTypeInt128C1ERK6TPtrC8 @ 91 NONAME
+	_ZN14TMTPTypeInt128C1Ev @ 92 NONAME
+	_ZN14TMTPTypeInt128C2ERK6TPtrC8 @ 93 NONAME
+	_ZN14TMTPTypeInt128C2Ev @ 94 NONAME
+	_ZN14TMTPTypeUint163SetEt @ 95 NONAME
+	_ZN14TMTPTypeUint16C1Et @ 96 NONAME
+	_ZN14TMTPTypeUint16C1Ev @ 97 NONAME
+	_ZN14TMTPTypeUint16C2Et @ 98 NONAME
+	_ZN14TMTPTypeUint16C2Ev @ 99 NONAME
+	_ZN14TMTPTypeUint323SetEm @ 100 NONAME
+	_ZN14TMTPTypeUint32C1Em @ 101 NONAME
+	_ZN14TMTPTypeUint32C1Ev @ 102 NONAME
+	_ZN14TMTPTypeUint32C2Em @ 103 NONAME
+	_ZN14TMTPTypeUint32C2Ev @ 104 NONAME
+	_ZN14TMTPTypeUint6414NextWriteChunkER5TPtr8 @ 105 NONAME
+	_ZN14TMTPTypeUint6415FirstWriteChunkER5TPtr8 @ 106 NONAME
+	_ZN14TMTPTypeUint643SetEy @ 107 NONAME
+	_ZN14TMTPTypeUint64C1Ev @ 108 NONAME
+	_ZN14TMTPTypeUint64C1Ey @ 109 NONAME
+	_ZN14TMTPTypeUint64C2Ev @ 110 NONAME
+	_ZN14TMTPTypeUint64C2Ey @ 111 NONAME
+	_ZN15TMTPTypeIntBase14NextWriteChunkER5TPtr8 @ 112 NONAME
+	_ZN15TMTPTypeIntBase15FirstWriteChunkER5TPtr8 @ 113 NONAME
+	_ZN15TMTPTypeIntBaseC1Eiji @ 114 NONAME
+	_ZN15TMTPTypeIntBaseC2Eiji @ 115 NONAME
+	_ZN15TMTPTypeRequestC1Ev @ 116 NONAME
+	_ZN15TMTPTypeRequestC2Ev @ 117 NONAME
+	_ZN15TMTPTypeUint12814NextWriteChunkER5TPtr8 @ 118 NONAME
+	_ZN15TMTPTypeUint12815FirstWriteChunkER5TPtr8 @ 119 NONAME
+	_ZN15TMTPTypeUint1283SetEyy @ 120 NONAME
+	_ZN15TMTPTypeUint128C1ERK6TPtrC8 @ 121 NONAME
+	_ZN15TMTPTypeUint128C1Ev @ 122 NONAME
+	_ZN15TMTPTypeUint128C2ERK6TPtrC8 @ 123 NONAME
+	_ZN15TMTPTypeUint128C2Ev @ 124 NONAME
+	_ZN16TMTPTypeFlatBase14NextWriteChunkER5TPtr8 @ 125 NONAME
+	_ZN16TMTPTypeFlatBase15FirstWriteChunkER5TPtr8 @ 126 NONAME
+	_ZN16TMTPTypeFlatBase4SetLEiRK8MMTPType @ 127 NONAME
+	_ZN16TMTPTypeFlatBase5ResetEv @ 128 NONAME
+	_ZN16TMTPTypeFlatBase7SetInt8Eia @ 129 NONAME
+	_ZN16TMTPTypeFlatBase8SetInt16Eis @ 130 NONAME
+	_ZN16TMTPTypeFlatBase8SetInt32Eil @ 131 NONAME
+	_ZN16TMTPTypeFlatBase8SetInt64Eix @ 132 NONAME
+	_ZN16TMTPTypeFlatBase8SetUint8Eih @ 133 NONAME
+	_ZN16TMTPTypeFlatBase9SetBufferERK5TDes8 @ 134 NONAME
+	_ZN16TMTPTypeFlatBase9SetUint16Eit @ 135 NONAME
+	_ZN16TMTPTypeFlatBase9SetUint32Eim @ 136 NONAME
+	_ZN16TMTPTypeFlatBase9SetUint64Eiy @ 137 NONAME
+	_ZN16TMTPTypeFlatBaseC2Ev @ 138 NONAME
+	_ZN16TMTPTypeResponseC1Ev @ 139 NONAME
+	_ZN16TMTPTypeResponseC2Ev @ 140 NONAME
+	_ZN16TMTPTypeUintBase14NextWriteChunkER5TPtr8 @ 141 NONAME
+	_ZN16TMTPTypeUintBase15FirstWriteChunkER5TPtr8 @ 142 NONAME
+	_ZN16TMTPTypeUintBaseC1Ejji @ 143 NONAME
+	_ZN16TMTPTypeUintBaseC2Ejji @ 144 NONAME
+	_ZN18CMTPTypeObjectInfo4NewLEv @ 145 NONAME
+	_ZN18CMTPTypeObjectInfo5NewLCEv @ 146 NONAME
+	_ZN18CMTPTypeObjectInfoD0Ev @ 147 NONAME
+	_ZN18CMTPTypeObjectInfoD1Ev @ 148 NONAME
+	_ZN18CMTPTypeObjectInfoD2Ev @ 149 NONAME
+	_ZN19CMTPTypeStorageInfo4NewLEv @ 150 NONAME
+	_ZN19CMTPTypeStorageInfo5NewLCEv @ 151 NONAME
+	_ZN19CMTPTypeStorageInfoD0Ev @ 152 NONAME
+	_ZN19CMTPTypeStorageInfoD1Ev @ 153 NONAME
+	_ZN19CMTPTypeStorageInfoD2Ev @ 154 NONAME
+	_ZN20CMTPTypeCompoundBase10SetStringLEiRK7TDesC16 @ 155 NONAME
+	_ZN20CMTPTypeCompoundBase10SetUint16LEit @ 156 NONAME
+	_ZN20CMTPTypeCompoundBase10SetUint32LEim @ 157 NONAME
+	_ZN20CMTPTypeCompoundBase10SetUint64LEiy @ 158 NONAME
+	_ZN20CMTPTypeCompoundBase11ChunkRemoveEj @ 159 NONAME
+	_ZN20CMTPTypeCompoundBase12ChunkAppendLERK8MMTPType @ 160 NONAME
+	_ZN20CMTPTypeCompoundBase12CommitChunkLER5TPtr8 @ 161 NONAME
+	_ZN20CMTPTypeCompoundBase14NextWriteChunkER5TPtr8 @ 162 NONAME
+	_ZN20CMTPTypeCompoundBase15FirstWriteChunkER5TPtr8 @ 163 NONAME
+	_ZN20CMTPTypeCompoundBase21SetExpectedChunkCountEj @ 164 NONAME
+	_ZN20CMTPTypeCompoundBase25RMTPTypeCompoundFlatChunk5CloseEv @ 165 NONAME
+	_ZN20CMTPTypeCompoundBase25RMTPTypeCompoundFlatChunk5OpenLEv @ 166 NONAME
+	_ZN20CMTPTypeCompoundBase25RMTPTypeCompoundFlatChunkC1EjRS_ @ 167 NONAME
+	_ZN20CMTPTypeCompoundBase25RMTPTypeCompoundFlatChunkC2EjRS_ @ 168 NONAME
+	_ZN20CMTPTypeCompoundBase4SetLEiRK8MMTPType @ 169 NONAME
+	_ZN20CMTPTypeCompoundBase5ResetEv @ 170 NONAME
+	_ZN20CMTPTypeCompoundBase8SetInt8LEia @ 171 NONAME
+	_ZN20CMTPTypeCompoundBase9SetInt16LEis @ 172 NONAME
+	_ZN20CMTPTypeCompoundBase9SetInt32LEil @ 173 NONAME
+	_ZN20CMTPTypeCompoundBase9SetInt64LEix @ 174 NONAME
+	_ZN20CMTPTypeCompoundBase9SetUint8LEih @ 175 NONAME
+	_ZN20CMTPTypeCompoundBaseC2Eij @ 176 NONAME
+	_ZN20CMTPTypeCompoundBaseD0Ev @ 177 NONAME
+	_ZN20CMTPTypeCompoundBaseD1Ev @ 178 NONAME
+	_ZN20CMTPTypeCompoundBaseD2Ev @ 179 NONAME
+	_ZN22CMTPTypeDevicePropDesc12CommitChunkLER5TPtr8 @ 180 NONAME
+	_ZN22CMTPTypeDevicePropDesc14NextWriteChunkER5TPtr8 @ 181 NONAME
+	_ZN22CMTPTypeDevicePropDesc15FirstWriteChunkER5TPtr8 @ 182 NONAME
+	_ZN22CMTPTypeDevicePropDesc4NewLEt @ 183 NONAME
+	_ZN22CMTPTypeDevicePropDesc4NewLEtRK8MMTPType @ 184 NONAME
+	_ZN22CMTPTypeDevicePropDesc4NewLEtRKNS_13TPropertyInfoEPK8MMTPType @ 185 NONAME
+	_ZN22CMTPTypeDevicePropDesc4NewLEthhPK8MMTPType @ 186 NONAME
+	_ZN22CMTPTypeDevicePropDesc5NewLCEt @ 187 NONAME
+	_ZN22CMTPTypeDevicePropDesc5NewLCEtRK8MMTPType @ 188 NONAME
+	_ZN22CMTPTypeDevicePropDesc5NewLCEtRKNS_13TPropertyInfoEPK8MMTPType @ 189 NONAME
+	_ZN22CMTPTypeDevicePropDesc5NewLCEthhPK8MMTPType @ 190 NONAME
+	_ZN22CMTPTypeDevicePropDescD0Ev @ 191 NONAME
+	_ZN22CMTPTypeDevicePropDescD1Ev @ 192 NONAME
+	_ZN22CMTPTypeDevicePropDescD2Ev @ 193 NONAME
+	_ZN22CMTPTypeObjectPropDesc12CommitChunkLER5TPtr8 @ 194 NONAME
+	_ZN22CMTPTypeObjectPropDesc14NextWriteChunkER5TPtr8 @ 195 NONAME
+	_ZN22CMTPTypeObjectPropDesc15FirstWriteChunkER5TPtr8 @ 196 NONAME
+	_ZN22CMTPTypeObjectPropDesc4NewLEt @ 197 NONAME
+	_ZN22CMTPTypeObjectPropDesc4NewLEtRK8MMTPType @ 198 NONAME
+	_ZN22CMTPTypeObjectPropDesc4NewLEtRKNS_13TPropertyInfoEPK8MMTPType @ 199 NONAME
+	_ZN22CMTPTypeObjectPropDesc4NewLEthPK8MMTPType @ 200 NONAME
+	_ZN22CMTPTypeObjectPropDesc5NewLCEt @ 201 NONAME
+	_ZN22CMTPTypeObjectPropDesc5NewLCEtRK8MMTPType @ 202 NONAME
+	_ZN22CMTPTypeObjectPropDesc5NewLCEtRKNS_13TPropertyInfoEPK8MMTPType @ 203 NONAME
+	_ZN22CMTPTypeObjectPropDesc5NewLCEthPK8MMTPType @ 204 NONAME
+	_ZN22CMTPTypeObjectPropDescD0Ev @ 205 NONAME
+	_ZN22CMTPTypeObjectPropDescD1Ev @ 206 NONAME
+	_ZN22CMTPTypeObjectPropDescD2Ev @ 207 NONAME
+	_ZN22CMTPTypeObjectPropList12CommitChunkLER5TPtr8 @ 208 NONAME
+	_ZN22CMTPTypeObjectPropList14NextWriteChunkER5TPtr8 @ 209 NONAME
+	_ZN22CMTPTypeObjectPropList15FirstWriteChunkER5TPtr8 @ 210 NONAME
+	_ZN22CMTPTypeObjectPropList17AppendDataObjectLER8MMTPType @ 211 NONAME ABSENT
+	_ZN22CMTPTypeObjectPropList4NewLEv @ 212 NONAME
+	_ZN22CMTPTypeObjectPropList5NewLCEv @ 213 NONAME
+	_ZN22CMTPTypeObjectPropList7AppendLEP29CMTPTypeObjectPropListElement @ 214 NONAME ABSENT
+	_ZN22CMTPTypeObjectPropListD0Ev @ 215 NONAME
+	_ZN22CMTPTypeObjectPropListD1Ev @ 216 NONAME
+	_ZN22CMTPTypeObjectPropListD2Ev @ 217 NONAME
+	_ZN29CMTPTypeObjectPropListElement12CommitChunkLER5TPtr8 @ 218 NONAME ABSENT
+	_ZN29CMTPTypeObjectPropListElement15FirstWriteChunkER5TPtr8 @ 219 NONAME ABSENT
+	_ZN29CMTPTypeObjectPropListElement4NewLEmtRK8MMTPType @ 220 NONAME ABSENT
+	_ZN29CMTPTypeObjectPropListElement4NewLEmttRK8MMTPType @ 221 NONAME ABSENT
+	_ZN29CMTPTypeObjectPropListElement4NewLEt @ 222 NONAME ABSENT
+	_ZN29CMTPTypeObjectPropListElement4NewLEtt @ 223 NONAME ABSENT
+	_ZN29CMTPTypeObjectPropListElement5NewLCEmtRK8MMTPType @ 224 NONAME ABSENT
+	_ZN29CMTPTypeObjectPropListElement5NewLCEmttRK8MMTPType @ 225 NONAME ABSENT
+	_ZN29CMTPTypeObjectPropListElement5NewLCEt @ 226 NONAME ABSENT
+	_ZN29CMTPTypeObjectPropListElement5NewLCEtt @ 227 NONAME ABSENT
+	_ZN29CMTPTypeObjectPropListElementD0Ev @ 228 NONAME
+	_ZN29CMTPTypeObjectPropListElementD1Ev @ 229 NONAME
+	_ZN29CMTPTypeObjectPropListElementD2Ev @ 230 NONAME
+	_ZN30CMTPTypeInterdependentPropDesc12CommitChunkLER5TPtr8 @ 231 NONAME
+	_ZN30CMTPTypeInterdependentPropDesc14NextWriteChunkER5TPtr8 @ 232 NONAME
+	_ZN30CMTPTypeInterdependentPropDesc15FirstWriteChunkER5TPtr8 @ 233 NONAME
+	_ZN30CMTPTypeInterdependentPropDesc4NewLEv @ 234 NONAME
+	_ZN30CMTPTypeInterdependentPropDesc5NewLCEv @ 235 NONAME
+	_ZN30CMTPTypeInterdependentPropDesc7AppendLEP32CMTPTypeInterdependentProperties @ 236 NONAME
+	_ZN30CMTPTypeInterdependentPropDescD0Ev @ 237 NONAME
+	_ZN30CMTPTypeInterdependentPropDescD1Ev @ 238 NONAME
+	_ZN30CMTPTypeInterdependentPropDescD2Ev @ 239 NONAME
+	_ZN31CMTPTypeDevicePropDescRangeForm4NewLEj @ 240 NONAME
+	_ZN31CMTPTypeDevicePropDescRangeForm5NewLCEj @ 241 NONAME
+	_ZN31CMTPTypeDevicePropDescRangeFormD0Ev @ 242 NONAME
+	_ZN31CMTPTypeDevicePropDescRangeFormD1Ev @ 243 NONAME
+	_ZN31CMTPTypeDevicePropDescRangeFormD2Ev @ 244 NONAME
+	_ZN31CMTPTypeObjectPropDescRangeForm4NewLEj @ 245 NONAME
+	_ZN31CMTPTypeObjectPropDescRangeForm5NewLCEj @ 246 NONAME
+	_ZN31CMTPTypeObjectPropDescRangeFormD0Ev @ 247 NONAME
+	_ZN31CMTPTypeObjectPropDescRangeFormD1Ev @ 248 NONAME
+	_ZN31CMTPTypeObjectPropDescRangeFormD2Ev @ 249 NONAME
+	_ZN32CMTPTypeInterdependentProperties12CommitChunkLER5TPtr8 @ 250 NONAME
+	_ZN32CMTPTypeInterdependentProperties14NextWriteChunkER5TPtr8 @ 251 NONAME
+	_ZN32CMTPTypeInterdependentProperties15FirstWriteChunkER5TPtr8 @ 252 NONAME
+	_ZN32CMTPTypeInterdependentProperties4NewLEv @ 253 NONAME
+	_ZN32CMTPTypeInterdependentProperties5NewLCEv @ 254 NONAME
+	_ZN32CMTPTypeInterdependentProperties7AppendLEP22CMTPTypeObjectPropDesc @ 255 NONAME
+	_ZN32CMTPTypeInterdependentPropertiesD0Ev @ 256 NONAME
+	_ZN32CMTPTypeInterdependentPropertiesD1Ev @ 257 NONAME
+	_ZN32CMTPTypeInterdependentPropertiesD2Ev @ 258 NONAME
+	_ZN37CMTPTypeDevicePropDescEnumerationForm12CommitChunkLER5TPtr8 @ 259 NONAME
+	_ZN37CMTPTypeDevicePropDescEnumerationForm14NextWriteChunkER5TPtr8 @ 260 NONAME
+	_ZN37CMTPTypeDevicePropDescEnumerationForm15FirstWriteChunkER5TPtr8 @ 261 NONAME
+	_ZN37CMTPTypeDevicePropDescEnumerationForm21AppendSupportedValueLERK8MMTPType @ 262 NONAME
+	_ZN37CMTPTypeDevicePropDescEnumerationForm4NewLEj @ 263 NONAME
+	_ZN37CMTPTypeDevicePropDescEnumerationForm5NewLCEj @ 264 NONAME
+	_ZN37CMTPTypeDevicePropDescEnumerationFormD0Ev @ 265 NONAME
+	_ZN37CMTPTypeDevicePropDescEnumerationFormD1Ev @ 266 NONAME
+	_ZN37CMTPTypeDevicePropDescEnumerationFormD2Ev @ 267 NONAME
+	_ZN37CMTPTypeObjectPropDescEnumerationForm12CommitChunkLER5TPtr8 @ 268 NONAME
+	_ZN37CMTPTypeObjectPropDescEnumerationForm14NextWriteChunkER5TPtr8 @ 269 NONAME
+	_ZN37CMTPTypeObjectPropDescEnumerationForm15FirstWriteChunkER5TPtr8 @ 270 NONAME
+	_ZN37CMTPTypeObjectPropDescEnumerationForm21AppendSupportedValueLERK8MMTPType @ 271 NONAME
+	_ZN37CMTPTypeObjectPropDescEnumerationForm4NewLEj @ 272 NONAME
+	_ZN37CMTPTypeObjectPropDescEnumerationForm5NewLCEj @ 273 NONAME
+	_ZN37CMTPTypeObjectPropDescEnumerationFormD0Ev @ 274 NONAME
+	_ZN37CMTPTypeObjectPropDescEnumerationFormD1Ev @ 275 NONAME
+	_ZN37CMTPTypeObjectPropDescEnumerationFormD2Ev @ 276 NONAME
+	_ZN8MMTPType12CommitChunkLER5TPtr8 @ 277 NONAME
+	_ZN8MMTPType20GetExtendedInterfaceE4TUid @ 278 NONAME
+	_ZN8MMTPType5CopyLERKS_RS_ @ 279 NONAME
+	_ZN8RMTPType12CommitChunkLER5TPtr8 @ 280 NONAME
+	_ZN8RMTPType14NextWriteChunkER5TPtr8 @ 281 NONAME
+	_ZN8RMTPType15FirstWriteChunkER5TPtr8 @ 282 NONAME
+	_ZN8RMTPType17CleanupClosePushLEv @ 283 NONAME
+	_ZN8RMTPType4DataEv @ 284 NONAME
+	_ZN8RMTPType5CloseEv @ 285 NONAME
+	_ZN8RMTPType5OpenLEj @ 286 NONAME
+	_ZN8RMTPType7CreateLEj @ 287 NONAME
+	_ZN8RMTPType7DestroyEP8MMTPType @ 288 NONAME
+	_ZN8RMTPTypeC1Ev @ 289 NONAME
+	_ZN8RMTPTypeC2Ev @ 290 NONAME
+	_ZN8RMTPTypeD0Ev @ 291 NONAME
+	_ZN8RMTPTypeD1Ev @ 292 NONAME
+	_ZN8RMTPTypeD2Ev @ 293 NONAME
+	_ZNK12CMTPTypeFile13NextReadChunkER6TPtrC8 @ 294 NONAME
+	_ZNK12CMTPTypeFile14CommitRequiredEv @ 295 NONAME
+	_ZNK12CMTPTypeFile14FirstReadChunkER6TPtrC8 @ 296 NONAME
+	_ZNK12CMTPTypeFile4SizeEv @ 297 NONAME
+	_ZNK12CMTPTypeFile4TypeEv @ 298 NONAME
+	_ZNK12TMTPTypeInt85ValueEv @ 299 NONAME
+	_ZNK12TMTPTypeNull13NextReadChunkER6TPtrC8 @ 300 NONAME
+	_ZNK12TMTPTypeNull14FirstReadChunkER6TPtrC8 @ 301 NONAME
+	_ZNK12TMTPTypeNull4SizeEv @ 302 NONAME
+	_ZNK12TMTPTypeNull4TypeEv @ 303 NONAME
+	_ZNK13CMTPTypeArray10ElementIntEj @ 304 NONAME
+	_ZNK13CMTPTypeArray11ElementTypeEv @ 305 NONAME
+	_ZNK13CMTPTypeArray11ElementUintEj @ 306 NONAME
+	_ZNK13CMTPTypeArray11NumElementsEv @ 307 NONAME
+	_ZNK13CMTPTypeArray12ElementInt64Ej @ 308 NONAME
+	_ZNK13CMTPTypeArray13ElementUint64Ej @ 309 NONAME
+	_ZNK13CMTPTypeArray13NextReadChunkER6TPtrC8 @ 310 NONAME
+	_ZNK13CMTPTypeArray14CommitRequiredEv @ 311 NONAME
+	_ZNK13CMTPTypeArray14FirstReadChunkER6TPtrC8 @ 312 NONAME
+	_ZNK13CMTPTypeArray4SizeEv @ 313 NONAME
+	_ZNK13CMTPTypeArray4TypeEv @ 314 NONAME
+	_ZNK13CMTPTypeArray5ArrayER6RArrayIiE @ 315 NONAME
+	_ZNK13CMTPTypeArray5ArrayER6RArrayIjE @ 316 NONAME
+	_ZNK13CMTPTypeArray5ArrayER6RArrayIxE @ 317 NONAME
+	_ZNK13CMTPTypeArray5ArrayER6RArrayIyE @ 318 NONAME
+	_ZNK13CMTPTypeArray8ElementLEjR8MMTPType @ 319 NONAME
+	_ZNK13CMTPTypeArray8ValidateEv @ 320 NONAME
+	_ZNK13TMTPTypeEvent11ElementInfoEi @ 321 NONAME
+	_ZNK13TMTPTypeEvent4TypeEv @ 322 NONAME
+	_ZNK13TMTPTypeInt165ValueEv @ 323 NONAME
+	_ZNK13TMTPTypeInt325ValueEv @ 324 NONAME
+	_ZNK13TMTPTypeInt6413NextReadChunkER6TPtrC8 @ 325 NONAME
+	_ZNK13TMTPTypeInt6414FirstReadChunkER6TPtrC8 @ 326 NONAME
+	_ZNK13TMTPTypeInt644SizeEv @ 327 NONAME
+	_ZNK13TMTPTypeInt644TypeEv @ 328 NONAME
+	_ZNK13TMTPTypeInt645ValueEv @ 329 NONAME
+	_ZNK13TMTPTypeUint85ValueEv @ 330 NONAME
+	_ZNK14CMTPTypeString11StringCharsEv @ 331 NONAME
+	_ZNK14CMTPTypeString13NextReadChunkER6TPtrC8 @ 332 NONAME
+	_ZNK14CMTPTypeString14CommitRequiredEv @ 333 NONAME
+	_ZNK14CMTPTypeString14FirstReadChunkER6TPtrC8 @ 334 NONAME
+	_ZNK14CMTPTypeString4SizeEv @ 335 NONAME
+	_ZNK14CMTPTypeString4TypeEv @ 336 NONAME
+	_ZNK14CMTPTypeString8NumCharsEv @ 337 NONAME
+	_ZNK14CMTPTypeString8ValidateEv @ 338 NONAME
+	_ZNK14TMTPTypeInt12810LowerValueEv @ 339 NONAME
+	_ZNK14TMTPTypeInt12810UpperValueEv @ 340 NONAME
+	_ZNK14TMTPTypeInt12813NextReadChunkER6TPtrC8 @ 341 NONAME
+	_ZNK14TMTPTypeInt12814FirstReadChunkER6TPtrC8 @ 342 NONAME
+	_ZNK14TMTPTypeInt1284SizeEv @ 343 NONAME
+	_ZNK14TMTPTypeInt1284TypeEv @ 344 NONAME
+	_ZNK14TMTPTypeUint165ValueEv @ 345 NONAME
+	_ZNK14TMTPTypeUint325ValueEv @ 346 NONAME
+	_ZNK14TMTPTypeUint6413NextReadChunkER6TPtrC8 @ 347 NONAME
+	_ZNK14TMTPTypeUint6414FirstReadChunkER6TPtrC8 @ 348 NONAME
+	_ZNK14TMTPTypeUint644SizeEv @ 349 NONAME
+	_ZNK14TMTPTypeUint644TypeEv @ 350 NONAME
+	_ZNK14TMTPTypeUint645ValueEv @ 351 NONAME
+	_ZNK15TMTPTypeIntBase13NextReadChunkER6TPtrC8 @ 352 NONAME
+	_ZNK15TMTPTypeIntBase14FirstReadChunkER6TPtrC8 @ 353 NONAME
+	_ZNK15TMTPTypeIntBase4SizeEv @ 354 NONAME
+	_ZNK15TMTPTypeIntBase4TypeEv @ 355 NONAME
+	_ZNK15TMTPTypeRequest11ElementInfoEi @ 356 NONAME
+	_ZNK15TMTPTypeRequest4TypeEv @ 357 NONAME
+	_ZNK15TMTPTypeRequesteqERKS_ @ 358 NONAME
+	_ZNK15TMTPTypeRequestneERKS_ @ 359 NONAME
+	_ZNK15TMTPTypeUint12810LowerValueEv @ 360 NONAME
+	_ZNK15TMTPTypeUint12810UpperValueEv @ 361 NONAME
+	_ZNK15TMTPTypeUint12813NextReadChunkER6TPtrC8 @ 362 NONAME
+	_ZNK15TMTPTypeUint12814FirstReadChunkER6TPtrC8 @ 363 NONAME
+	_ZNK15TMTPTypeUint1284SizeEv @ 364 NONAME
+	_ZNK15TMTPTypeUint1284TypeEv @ 365 NONAME
+	_ZNK16TMTPTypeFlatBase13NextReadChunkER6TPtrC8 @ 366 NONAME
+	_ZNK16TMTPTypeFlatBase14FirstReadChunkER6TPtrC8 @ 367 NONAME
+	_ZNK16TMTPTypeFlatBase4GetLEiR8MMTPType @ 368 NONAME
+	_ZNK16TMTPTypeFlatBase4Int8Ei @ 369 NONAME
+	_ZNK16TMTPTypeFlatBase4SizeEv @ 370 NONAME
+	_ZNK16TMTPTypeFlatBase4TypeEv @ 371 NONAME
+	_ZNK16TMTPTypeFlatBase5Int16Ei @ 372 NONAME
+	_ZNK16TMTPTypeFlatBase5Int32Ei @ 373 NONAME
+	_ZNK16TMTPTypeFlatBase5Int64Ei @ 374 NONAME
+	_ZNK16TMTPTypeFlatBase5Uint8Ei @ 375 NONAME
+	_ZNK16TMTPTypeFlatBase6Uint16Ei @ 376 NONAME
+	_ZNK16TMTPTypeFlatBase6Uint32Ei @ 377 NONAME
+	_ZNK16TMTPTypeFlatBase6Uint64Ei @ 378 NONAME
+	_ZNK16TMTPTypeResponse11ElementInfoEi @ 379 NONAME
+	_ZNK16TMTPTypeResponse4TypeEv @ 380 NONAME
+	_ZNK16TMTPTypeUintBase13NextReadChunkER6TPtrC8 @ 381 NONAME
+	_ZNK16TMTPTypeUintBase14FirstReadChunkER6TPtrC8 @ 382 NONAME
+	_ZNK16TMTPTypeUintBase4SizeEv @ 383 NONAME
+	_ZNK16TMTPTypeUintBase4TypeEv @ 384 NONAME
+	_ZNK18CMTPTypeObjectInfo4TypeEv @ 385 NONAME
+	_ZNK19CMTPTypeStorageInfo4TypeEv @ 386 NONAME
+	_ZNK20CMTPTypeCompoundBase10ChunkCountEv @ 387 NONAME
+	_ZNK20CMTPTypeCompoundBase12StringCharsLEi @ 388 NONAME
+	_ZNK20CMTPTypeCompoundBase13NextReadChunkER6TPtrC8 @ 389 NONAME
+	_ZNK20CMTPTypeCompoundBase14CommitRequiredEv @ 390 NONAME
+	_ZNK20CMTPTypeCompoundBase14FirstReadChunkER6TPtrC8 @ 391 NONAME
+	_ZNK20CMTPTypeCompoundBase15StringNumCharsLEi @ 392 NONAME
+	_ZNK20CMTPTypeCompoundBase16ReadableElementLEi @ 393 NONAME
+	_ZNK20CMTPTypeCompoundBase17WriteableElementLEi @ 394 NONAME
+	_ZNK20CMTPTypeCompoundBase18ValidateChunkCountEv @ 395 NONAME
+	_ZNK20CMTPTypeCompoundBase25RMTPTypeCompoundFlatChunk4TypeEv @ 396 NONAME
+	_ZNK20CMTPTypeCompoundBase4GetLEiR8MMTPType @ 397 NONAME
+	_ZNK20CMTPTypeCompoundBase4SizeEv @ 398 NONAME
+	_ZNK20CMTPTypeCompoundBase4TypeEv @ 399 NONAME
+	_ZNK20CMTPTypeCompoundBase5Int8LEi @ 400 NONAME
+	_ZNK20CMTPTypeCompoundBase6Int16LEi @ 401 NONAME
+	_ZNK20CMTPTypeCompoundBase6Int32LEi @ 402 NONAME
+	_ZNK20CMTPTypeCompoundBase6Int64LEi @ 403 NONAME
+	_ZNK20CMTPTypeCompoundBase6Uint8LEi @ 404 NONAME
+	_ZNK20CMTPTypeCompoundBase7Uint16LEi @ 405 NONAME
+	_ZNK20CMTPTypeCompoundBase7Uint32LEi @ 406 NONAME
+	_ZNK20CMTPTypeCompoundBase7Uint64LEi @ 407 NONAME
+	_ZNK20CMTPTypeCompoundBase8ValidateEv @ 408 NONAME
+	_ZNK22CMTPTypeDevicePropDesc14CommitRequiredEv @ 409 NONAME
+	_ZNK22CMTPTypeDevicePropDesc4TypeEv @ 410 NONAME
+	_ZNK22CMTPTypeObjectPropDesc14CommitRequiredEv @ 411 NONAME
+	_ZNK22CMTPTypeObjectPropDesc4TypeEv @ 412 NONAME
+	_ZNK22CMTPTypeObjectPropList11DataObjectLEv @ 413 NONAME ABSENT
+	_ZNK22CMTPTypeObjectPropList14CommitRequiredEv @ 414 NONAME
+	_ZNK22CMTPTypeObjectPropList16NumberOfElementsEv @ 415 NONAME
+	_ZNK22CMTPTypeObjectPropList4TypeEv @ 416 NONAME
+	_ZNK22CMTPTypeObjectPropList7ElementEj @ 417 NONAME ABSENT
+	_ZNK29CMTPTypeObjectPropListElement14CommitRequiredEv @ 418 NONAME ABSENT
+	_ZNK29CMTPTypeObjectPropListElement4TypeEv @ 419 NONAME ABSENT
+	_ZNK30CMTPTypeInterdependentPropDesc14CommitRequiredEv @ 420 NONAME
+	_ZNK30CMTPTypeInterdependentPropDesc24InterdependentPropertiesEj @ 421 NONAME
+	_ZNK30CMTPTypeInterdependentPropDesc25NumberOfInterdependenciesEv @ 422 NONAME
+	_ZNK30CMTPTypeInterdependentPropDesc4TypeEv @ 423 NONAME
+	_ZNK31CMTPTypeDevicePropDescRangeForm4TypeEv @ 424 NONAME
+	_ZNK31CMTPTypeObjectPropDescRangeForm4TypeEv @ 425 NONAME
+	_ZNK32CMTPTypeInterdependentProperties14CommitRequiredEv @ 426 NONAME
+	_ZNK32CMTPTypeInterdependentProperties14ObjectPropDescEj @ 427 NONAME
+	_ZNK32CMTPTypeInterdependentProperties17NumberOfPropDescsEv @ 428 NONAME
+	_ZNK32CMTPTypeInterdependentProperties4TypeEv @ 429 NONAME
+	_ZNK37CMTPTypeDevicePropDescEnumerationForm14CommitRequiredEv @ 430 NONAME
+	_ZNK37CMTPTypeDevicePropDescEnumerationForm14NumberOfValuesEv @ 431 NONAME
+	_ZNK37CMTPTypeDevicePropDescEnumerationForm15SupportedValueLEjR8MMTPType @ 432 NONAME
+	_ZNK37CMTPTypeDevicePropDescEnumerationForm4TypeEv @ 433 NONAME
+	_ZNK37CMTPTypeObjectPropDescEnumerationForm14CommitRequiredEv @ 434 NONAME
+	_ZNK37CMTPTypeObjectPropDescEnumerationForm14NumberOfValuesEv @ 435 NONAME
+	_ZNK37CMTPTypeObjectPropDescEnumerationForm15SupportedValueLEjR8MMTPType @ 436 NONAME
+	_ZNK37CMTPTypeObjectPropDescEnumerationForm4TypeEv @ 437 NONAME
+	_ZNK8MMTPType14CommitRequiredEv @ 438 NONAME
+	_ZNK8MMTPType8ValidateEv @ 439 NONAME
+	_ZNK8RMTPType13NextReadChunkER6TPtrC8 @ 440 NONAME
+	_ZNK8RMTPType14CommitRequiredEv @ 441 NONAME
+	_ZNK8RMTPType14FirstReadChunkER6TPtrC8 @ 442 NONAME
+	_ZNK8RMTPType4SizeEv @ 443 NONAME
+	_ZNK8RMTPType4TypeEv @ 444 NONAME
+	_ZNK8RMTPType8ValidateEv @ 445 NONAME
+	_ZTI12CMTPTypeFile @ 446 NONAME ; #<TI>#
+	_ZTI12TMTPTypeNull @ 447 NONAME ; #<TI>#
+	_ZTI13CMTPTypeArray @ 448 NONAME ; #<TI>#
+	_ZTI13TMTPTypeEvent @ 449 NONAME ; #<TI>#
+	_ZTI13TMTPTypeInt64 @ 450 NONAME ; #<TI>#
+	_ZTI14CMTPTypeString @ 451 NONAME ; #<TI>#
+	_ZTI14TMTPTypeInt128 @ 452 NONAME ; #<TI>#
+	_ZTI14TMTPTypeUint64 @ 453 NONAME ; #<TI>#
+	_ZTI15TMTPTypeIntBase @ 454 NONAME ; #<TI>#
+	_ZTI15TMTPTypeRequest @ 455 NONAME ; #<TI>#
+	_ZTI15TMTPTypeUint128 @ 456 NONAME ; #<TI>#
+	_ZTI16TMTPTypeFlatBase @ 457 NONAME ; #<TI>#
+	_ZTI16TMTPTypeResponse @ 458 NONAME ; #<TI>#
+	_ZTI16TMTPTypeUintBase @ 459 NONAME ; #<TI>#
+	_ZTI18CMTPTypeObjectInfo @ 460 NONAME ; #<TI>#
+	_ZTI19CMTPTypeStorageInfo @ 461 NONAME ; #<TI>#
+	_ZTI20CMTPTypeCompoundBase @ 462 NONAME ; #<TI>#
+	_ZTI22CMTPTypeDevicePropDesc @ 463 NONAME ; #<TI>#
+	_ZTI22CMTPTypeObjectPropDesc @ 464 NONAME ; #<TI>#
+	_ZTI22CMTPTypeObjectPropList @ 465 NONAME ; #<TI>#
+	_ZTI29CMTPTypeObjectPropListElement @ 466 NONAME ; #<TI>#
+	_ZTI30CMTPTypeInterdependentPropDesc @ 467 NONAME ; #<TI>#
+	_ZTI31CMTPTypeDevicePropDescRangeForm @ 468 NONAME ; #<TI>#
+	_ZTI31CMTPTypeObjectPropDescRangeForm @ 469 NONAME ; #<TI>#
+	_ZTI32CMTPTypeInterdependentProperties @ 470 NONAME ; #<TI>#
+	_ZTI37CMTPTypeDevicePropDescEnumerationForm @ 471 NONAME ; #<TI>#
+	_ZTI37CMTPTypeObjectPropDescEnumerationForm @ 472 NONAME ; #<TI>#
+	_ZTI8MMTPType @ 473 NONAME ; #<TI>#
+	_ZTI8RMTPType @ 474 NONAME ; #<TI>#
+	_ZTIN20CMTPTypeCompoundBase25RMTPTypeCompoundFlatChunkE @ 475 NONAME ; #<TI>#
+	_ZTIN22CMTPTypeDevicePropDesc26RMTPTypeDevicePropDescFormE @ 476 NONAME ; #<TI>#
+	_ZTIN22CMTPTypeObjectPropDesc26RMTPTypeObjectPropDescFormE @ 477 NONAME ; #<TI>#
+	_ZTV12CMTPTypeFile @ 478 NONAME ; #<VT>#
+	_ZTV12TMTPTypeNull @ 479 NONAME ; #<VT>#
+	_ZTV13CMTPTypeArray @ 480 NONAME ; #<VT>#
+	_ZTV13TMTPTypeEvent @ 481 NONAME ; #<VT>#
+	_ZTV13TMTPTypeInt64 @ 482 NONAME ; #<VT>#
+	_ZTV14CMTPTypeString @ 483 NONAME ; #<VT>#
+	_ZTV14TMTPTypeInt128 @ 484 NONAME ; #<VT>#
+	_ZTV14TMTPTypeUint64 @ 485 NONAME ; #<VT>#
+	_ZTV15TMTPTypeIntBase @ 486 NONAME ; #<VT>#
+	_ZTV15TMTPTypeRequest @ 487 NONAME ; #<VT>#
+	_ZTV15TMTPTypeUint128 @ 488 NONAME ; #<VT>#
+	_ZTV16TMTPTypeFlatBase @ 489 NONAME ; #<VT>#
+	_ZTV16TMTPTypeResponse @ 490 NONAME ; #<VT>#
+	_ZTV16TMTPTypeUintBase @ 491 NONAME ; #<VT>#
+	_ZTV18CMTPTypeObjectInfo @ 492 NONAME ; #<VT>#
+	_ZTV19CMTPTypeStorageInfo @ 493 NONAME ; #<VT>#
+	_ZTV20CMTPTypeCompoundBase @ 494 NONAME ; #<VT>#
+	_ZTV22CMTPTypeDevicePropDesc @ 495 NONAME ; #<VT>#
+	_ZTV22CMTPTypeObjectPropDesc @ 496 NONAME ; #<VT>#
+	_ZTV22CMTPTypeObjectPropList @ 497 NONAME ; #<VT>#
+	_ZTV29CMTPTypeObjectPropListElement @ 498 NONAME ; #<VT>#
+	_ZTV30CMTPTypeInterdependentPropDesc @ 499 NONAME ; #<VT>#
+	_ZTV31CMTPTypeDevicePropDescRangeForm @ 500 NONAME ; #<VT>#
+	_ZTV31CMTPTypeObjectPropDescRangeForm @ 501 NONAME ; #<VT>#
+	_ZTV32CMTPTypeInterdependentProperties @ 502 NONAME ; #<VT>#
+	_ZTV37CMTPTypeDevicePropDescEnumerationForm @ 503 NONAME ; #<VT>#
+	_ZTV37CMTPTypeObjectPropDescEnumerationForm @ 504 NONAME ; #<VT>#
+	_ZTV8MMTPType @ 505 NONAME ; #<VT>#
+	_ZTV8RMTPType @ 506 NONAME ; #<VT>#
+	_ZTVN20CMTPTypeCompoundBase25RMTPTypeCompoundFlatChunkE @ 507 NONAME ; #<VT>#
+	_ZTVN22CMTPTypeDevicePropDesc26RMTPTypeDevicePropDescFormE @ 508 NONAME ; #<VT>#
+	_ZTVN22CMTPTypeObjectPropDesc26RMTPTypeObjectPropDescFormE @ 509 NONAME ; #<VT>#
+	_ZThn28_N12CMTPTypeFile12CommitChunkLER5TPtr8 @ 510 NONAME ; #<thunk>#
+	_ZThn28_N12CMTPTypeFile14NextWriteChunkER5TPtr8 @ 511 NONAME ; #<thunk>#
+	_ZThn28_N12CMTPTypeFile15FirstWriteChunkER5TPtr8 @ 512 NONAME ; #<thunk>#
+	_ZThn4_N13CMTPTypeArray12CommitChunkLER5TPtr8 @ 513 NONAME ; #<thunk>#
+	_ZThn4_N13CMTPTypeArray14NextWriteChunkER5TPtr8 @ 514 NONAME ; #<thunk>#
+	_ZThn4_N13CMTPTypeArray15FirstWriteChunkER5TPtr8 @ 515 NONAME ; #<thunk>#
+	_ZThn4_N14CMTPTypeString12CommitChunkLER5TPtr8 @ 516 NONAME ; #<thunk>#
+	_ZThn4_N14CMTPTypeString14NextWriteChunkER5TPtr8 @ 517 NONAME ; #<thunk>#
+	_ZThn4_N14CMTPTypeString15FirstWriteChunkER5TPtr8 @ 518 NONAME ; #<thunk>#
+	_ZThn4_N20CMTPTypeCompoundBase12CommitChunkLER5TPtr8 @ 519 NONAME ; #<thunk>#
+	_ZThn4_N20CMTPTypeCompoundBase14NextWriteChunkER5TPtr8 @ 520 NONAME ; #<thunk>#
+	_ZThn4_N20CMTPTypeCompoundBase15FirstWriteChunkER5TPtr8 @ 521 NONAME ; #<thunk>#
+	_ZThn4_N22CMTPTypeDevicePropDesc12CommitChunkLER5TPtr8 @ 522 NONAME ; #<thunk>#
+	_ZThn4_N22CMTPTypeDevicePropDesc14NextWriteChunkER5TPtr8 @ 523 NONAME ; #<thunk>#
+	_ZThn4_N22CMTPTypeDevicePropDesc15FirstWriteChunkER5TPtr8 @ 524 NONAME ; #<thunk>#
+	_ZThn4_N22CMTPTypeObjectPropDesc12CommitChunkLER5TPtr8 @ 525 NONAME ; #<thunk>#
+	_ZThn4_N22CMTPTypeObjectPropDesc14NextWriteChunkER5TPtr8 @ 526 NONAME ; #<thunk>#
+	_ZThn4_N22CMTPTypeObjectPropDesc15FirstWriteChunkER5TPtr8 @ 527 NONAME ; #<thunk>#
+	_ZThn4_N22CMTPTypeObjectPropList12CommitChunkLER5TPtr8 @ 528 NONAME ; #<thunk>#
+	_ZThn4_N22CMTPTypeObjectPropList14NextWriteChunkER5TPtr8 @ 529 NONAME ; #<thunk>#
+	_ZThn4_N22CMTPTypeObjectPropList15FirstWriteChunkER5TPtr8 @ 530 NONAME ; #<thunk>#
+	_ZThn4_N29CMTPTypeObjectPropListElement12CommitChunkLER5TPtr8 @ 531 NONAME ABSENT ; #<thunk>#
+	_ZThn4_N29CMTPTypeObjectPropListElement15FirstWriteChunkER5TPtr8 @ 532 NONAME ABSENT ; #<thunk>#
+	_ZThn4_N30CMTPTypeInterdependentPropDesc12CommitChunkLER5TPtr8 @ 533 NONAME ; #<thunk>#
+	_ZThn4_N30CMTPTypeInterdependentPropDesc14NextWriteChunkER5TPtr8 @ 534 NONAME ; #<thunk>#
+	_ZThn4_N30CMTPTypeInterdependentPropDesc15FirstWriteChunkER5TPtr8 @ 535 NONAME ; #<thunk>#
+	_ZThn4_N32CMTPTypeInterdependentProperties12CommitChunkLER5TPtr8 @ 536 NONAME ; #<thunk>#
+	_ZThn4_N32CMTPTypeInterdependentProperties14NextWriteChunkER5TPtr8 @ 537 NONAME ; #<thunk>#
+	_ZThn4_N32CMTPTypeInterdependentProperties15FirstWriteChunkER5TPtr8 @ 538 NONAME ; #<thunk>#
+	_ZThn4_N37CMTPTypeDevicePropDescEnumerationForm12CommitChunkLER5TPtr8 @ 539 NONAME ; #<thunk>#
+	_ZThn4_N37CMTPTypeDevicePropDescEnumerationForm14NextWriteChunkER5TPtr8 @ 540 NONAME ; #<thunk>#
+	_ZThn4_N37CMTPTypeDevicePropDescEnumerationForm15FirstWriteChunkER5TPtr8 @ 541 NONAME ; #<thunk>#
+	_ZThn4_N37CMTPTypeObjectPropDescEnumerationForm12CommitChunkLER5TPtr8 @ 542 NONAME ; #<thunk>#
+	_ZThn4_N37CMTPTypeObjectPropDescEnumerationForm14NextWriteChunkER5TPtr8 @ 543 NONAME ; #<thunk>#
+	_ZThn4_N37CMTPTypeObjectPropDescEnumerationForm15FirstWriteChunkER5TPtr8 @ 544 NONAME ; #<thunk>#
+	_ZThn28_NK12CMTPTypeFile13NextReadChunkER6TPtrC8 @ 545 NONAME ; #<thunk>#
+	_ZThn28_NK12CMTPTypeFile14CommitRequiredEv @ 546 NONAME ; #<thunk>#
+	_ZThn28_NK12CMTPTypeFile14FirstReadChunkER6TPtrC8 @ 547 NONAME ; #<thunk>#
+	_ZThn28_NK12CMTPTypeFile4SizeEv @ 548 NONAME ; #<thunk>#
+	_ZThn28_NK12CMTPTypeFile4TypeEv @ 549 NONAME ; #<thunk>#
+	_ZThn4_NK13CMTPTypeArray13NextReadChunkER6TPtrC8 @ 550 NONAME ; #<thunk>#
+	_ZThn4_NK13CMTPTypeArray14CommitRequiredEv @ 551 NONAME ; #<thunk>#
+	_ZThn4_NK13CMTPTypeArray14FirstReadChunkER6TPtrC8 @ 552 NONAME ; #<thunk>#
+	_ZThn4_NK13CMTPTypeArray4SizeEv @ 553 NONAME ; #<thunk>#
+	_ZThn4_NK13CMTPTypeArray4TypeEv @ 554 NONAME ; #<thunk>#
+	_ZThn4_NK13CMTPTypeArray8ValidateEv @ 555 NONAME ; #<thunk>#
+	_ZThn4_NK14CMTPTypeString13NextReadChunkER6TPtrC8 @ 556 NONAME ; #<thunk>#
+	_ZThn4_NK14CMTPTypeString14CommitRequiredEv @ 557 NONAME ; #<thunk>#
+	_ZThn4_NK14CMTPTypeString14FirstReadChunkER6TPtrC8 @ 558 NONAME ; #<thunk>#
+	_ZThn4_NK14CMTPTypeString4SizeEv @ 559 NONAME ; #<thunk>#
+	_ZThn4_NK14CMTPTypeString4TypeEv @ 560 NONAME ; #<thunk>#
+	_ZThn4_NK14CMTPTypeString8ValidateEv @ 561 NONAME ; #<thunk>#
+	_ZThn4_NK18CMTPTypeObjectInfo4TypeEv @ 562 NONAME ; #<thunk>#
+	_ZThn4_NK19CMTPTypeStorageInfo4TypeEv @ 563 NONAME ; #<thunk>#
+	_ZThn4_NK20CMTPTypeCompoundBase13NextReadChunkER6TPtrC8 @ 564 NONAME ; #<thunk>#
+	_ZThn4_NK20CMTPTypeCompoundBase14CommitRequiredEv @ 565 NONAME ; #<thunk>#
+	_ZThn4_NK20CMTPTypeCompoundBase14FirstReadChunkER6TPtrC8 @ 566 NONAME ; #<thunk>#
+	_ZThn4_NK20CMTPTypeCompoundBase4SizeEv @ 567 NONAME ; #<thunk>#
+	_ZThn4_NK20CMTPTypeCompoundBase4TypeEv @ 568 NONAME ; #<thunk>#
+	_ZThn4_NK20CMTPTypeCompoundBase8ValidateEv @ 569 NONAME ; #<thunk>#
+	_ZThn4_NK22CMTPTypeDevicePropDesc14CommitRequiredEv @ 570 NONAME ; #<thunk>#
+	_ZThn4_NK22CMTPTypeDevicePropDesc4TypeEv @ 571 NONAME ; #<thunk>#
+	_ZThn4_NK22CMTPTypeObjectPropDesc14CommitRequiredEv @ 572 NONAME ; #<thunk>#
+	_ZThn4_NK22CMTPTypeObjectPropDesc4TypeEv @ 573 NONAME ; #<thunk>#
+	_ZThn4_NK22CMTPTypeObjectPropList14CommitRequiredEv @ 574 NONAME ; #<thunk>#
+	_ZThn4_NK22CMTPTypeObjectPropList4TypeEv @ 575 NONAME ; #<thunk>#
+	_ZThn4_NK29CMTPTypeObjectPropListElement14CommitRequiredEv @ 576 NONAME ABSENT ; #<thunk>#
+	_ZThn4_NK29CMTPTypeObjectPropListElement4TypeEv @ 577 NONAME ABSENT ; #<thunk>#
+	_ZThn4_NK30CMTPTypeInterdependentPropDesc14CommitRequiredEv @ 578 NONAME ; #<thunk>#
+	_ZThn4_NK30CMTPTypeInterdependentPropDesc4TypeEv @ 579 NONAME ; #<thunk>#
+	_ZThn4_NK31CMTPTypeDevicePropDescRangeForm4TypeEv @ 580 NONAME ; #<thunk>#
+	_ZThn4_NK31CMTPTypeObjectPropDescRangeForm4TypeEv @ 581 NONAME ; #<thunk>#
+	_ZThn4_NK32CMTPTypeInterdependentProperties14CommitRequiredEv @ 582 NONAME ; #<thunk>#
+	_ZThn4_NK32CMTPTypeInterdependentProperties4TypeEv @ 583 NONAME ; #<thunk>#
+	_ZThn4_NK37CMTPTypeDevicePropDescEnumerationForm14CommitRequiredEv @ 584 NONAME ; #<thunk>#
+	_ZThn4_NK37CMTPTypeDevicePropDescEnumerationForm4TypeEv @ 585 NONAME ; #<thunk>#
+	_ZThn4_NK37CMTPTypeObjectPropDescEnumerationForm14CommitRequiredEv @ 586 NONAME ; #<thunk>#
+	_ZThn4_NK37CMTPTypeObjectPropDescEnumerationForm4TypeEv @ 587 NONAME ; #<thunk>#
+	_ZN21CMTPTypeComplexBuffer12CommitChunkLER5TPtr8 @ 588 NONAME
+	_ZN21CMTPTypeComplexBuffer14NextWriteChunkER5TPtr8 @ 589 NONAME
+	_ZN21CMTPTypeComplexBuffer15FirstWriteChunkER5TPtr8 @ 590 NONAME
+	_ZN21CMTPTypeComplexBuffer4NewLERK6TDesC8 @ 591 NONAME
+	_ZN21CMTPTypeComplexBuffer4NewLEv @ 592 NONAME
+	_ZN21CMTPTypeComplexBuffer5NewLCERK6TDesC8 @ 593 NONAME
+	_ZN21CMTPTypeComplexBuffer5NewLCEv @ 594 NONAME
+	_ZN21CMTPTypeComplexBuffer6BufferEv @ 595 NONAME
+	_ZN21CMTPTypeComplexBufferD0Ev @ 596 NONAME
+	_ZN21CMTPTypeComplexBufferD1Ev @ 597 NONAME
+	_ZN21CMTPTypeComplexBufferD2Ev @ 598 NONAME
+	_ZNK21CMTPTypeComplexBuffer13NextReadChunkER6TPtrC8 @ 599 NONAME
+	_ZNK21CMTPTypeComplexBuffer14CommitRequiredEv @ 600 NONAME
+	_ZNK21CMTPTypeComplexBuffer14FirstReadChunkER6TPtrC8 @ 601 NONAME
+	_ZNK21CMTPTypeComplexBuffer4SizeEv @ 602 NONAME
+	_ZNK21CMTPTypeComplexBuffer4TypeEv @ 603 NONAME
+	_ZTI21CMTPTypeComplexBuffer @ 604 NONAME
+	_ZTV21CMTPTypeComplexBuffer @ 605 NONAME
+	_ZThn4_N21CMTPTypeComplexBuffer12CommitChunkLER5TPtr8 @ 606 NONAME
+	_ZThn4_N21CMTPTypeComplexBuffer14NextWriteChunkER5TPtr8 @ 607 NONAME
+	_ZThn4_N21CMTPTypeComplexBuffer15FirstWriteChunkER5TPtr8 @ 608 NONAME
+	_ZThn4_NK21CMTPTypeComplexBuffer13NextReadChunkER6TPtrC8 @ 609 NONAME
+	_ZThn4_NK21CMTPTypeComplexBuffer14CommitRequiredEv @ 610 NONAME
+	_ZThn4_NK21CMTPTypeComplexBuffer14FirstReadChunkER6TPtrC8 @ 611 NONAME
+	_ZThn4_NK21CMTPTypeComplexBuffer4SizeEv @ 612 NONAME
+	_ZThn4_NK21CMTPTypeComplexBuffer4TypeEv @ 613 NONAME
+	_ZN12CMTPTypeList12CommitChunkLER5TPtr8 @ 614 NONAME
+	_ZN12CMTPTypeList14NextWriteChunkER5TPtr8 @ 615 NONAME
+	_ZN12CMTPTypeList15FirstWriteChunkER5TPtr8 @ 616 NONAME
+	_ZN12CMTPTypeList15ResetAndDestroyEv @ 617 NONAME
+	_ZN12CMTPTypeList4NewLE11TMTPTypeIdsS0_ @ 618 NONAME
+	_ZN12CMTPTypeList5NewLCE11TMTPTypeIdsS0_ @ 619 NONAME
+	_ZN12CMTPTypeList6RemoveEi @ 620 NONAME
+	_ZN12CMTPTypeList7AppendLEPK8MMTPType @ 621 NONAME
+	_ZN12CMTPTypeListD0Ev @ 622 NONAME
+	_ZN12CMTPTypeListD1Ev @ 623 NONAME
+	_ZN12CMTPTypeListD2Ev @ 624 NONAME
+	_ZN13CMTPTypeArray9SetByDesLERK6TDesC8 @ 625 NONAME
+	_ZN15TMTPTypeUint128C1Eyy @ 626 NONAME
+	_ZN15TMTPTypeUint128C2Eyy @ 627 NONAME
+	_ZN16TMTPTypeDataPairC1Emt @ 628 NONAME
+	_ZN16TMTPTypeDataPairC1Ev @ 629 NONAME
+	_ZN16TMTPTypeDataPairC2Emt @ 630 NONAME
+	_ZN16TMTPTypeDataPairC2Ev @ 631 NONAME
+	_ZN19CMTPTypeServiceInfo15ServicePropListEv @ 632 NONAME
+	_ZN19CMTPTypeServiceInfo16ServiceEventListEv @ 633 NONAME
+	_ZN19CMTPTypeServiceInfo17ServiceFormatListEv @ 634 NONAME
+	_ZN19CMTPTypeServiceInfo17ServiceMethodListEv @ 635 NONAME
+	_ZN19CMTPTypeServiceInfo18AppendUsedServiceLERK15TMTPTypeUint128 @ 636 NONAME ABSENT
+	_ZN19CMTPTypeServiceInfo23AppendServiceDataBlockLERK15TMTPTypeUint128 @ 637 NONAME ABSENT
+	_ZN19CMTPTypeServiceInfo4NewLEv @ 638 NONAME
+	_ZN19CMTPTypeServiceInfo5NewLCEv @ 639 NONAME
+	_ZN19CMTPTypeServiceInfoD0Ev @ 640 NONAME
+	_ZN19CMTPTypeServiceInfoD1Ev @ 641 NONAME
+	_ZN19CMTPTypeServiceInfoD2Ev @ 642 NONAME
+	_ZN21CMTPTypeComplexBuffer9SetBufferERK6TDesC8 @ 643 NONAME
+	_ZN22CMTPTypeObjectPropDesc4NewLEv @ 644 NONAME
+	_ZN23CMTPTypeServicePropDesc12CommitChunkLER5TPtr8 @ 645 NONAME
+	_ZN23CMTPTypeServicePropDesc14NextWriteChunkER5TPtr8 @ 646 NONAME
+	_ZN23CMTPTypeServicePropDesc15FirstWriteChunkER5TPtr8 @ 647 NONAME
+	_ZN23CMTPTypeServicePropDesc4NewLEtthhPK8MMTPType @ 648 NONAME
+	_ZN23CMTPTypeServicePropDesc4NewLEv @ 649 NONAME
+	_ZN23CMTPTypeServicePropDesc5NewLCEtthhPK8MMTPType @ 650 NONAME
+	_ZN23CMTPTypeServicePropDesc5NewLCEv @ 651 NONAME
+	_ZN23CMTPTypeServicePropDescD0Ev @ 652 NONAME
+	_ZN23CMTPTypeServicePropDescD1Ev @ 653 NONAME
+	_ZN23CMTPTypeServicePropDescD2Ev @ 654 NONAME
+	_ZN24CMTPTypeFormatCapability4NewLEtP30CMTPTypeInterdependentPropDesc @ 655 NONAME
+	_ZN24CMTPTypeFormatCapability4NewLEv @ 656 NONAME
+	_ZN24CMTPTypeFormatCapability5NewLCEtP30CMTPTypeInterdependentPropDesc @ 657 NONAME
+	_ZN24CMTPTypeFormatCapability5NewLCEv @ 658 NONAME
+	_ZN24CMTPTypeFormatCapability7AppendLEP22CMTPTypeObjectPropDesc @ 659 NONAME
+	_ZN24CMTPTypeFormatCapabilityD0Ev @ 660 NONAME
+	_ZN24CMTPTypeFormatCapabilityD1Ev @ 661 NONAME
+	_ZN24CMTPTypeFormatCapabilityD2Ev @ 662 NONAME
+	_ZN24CMTPTypeServiceEventList4NewLEv @ 663 NONAME
+	_ZN24CMTPTypeServiceEventList5NewLCEv @ 664 NONAME
+	_ZN24CMTPTypeServiceEventList7AppendLEP27CMTPTypeServiceEventElement @ 665 NONAME
+	_ZN24CMTPTypeServiceEventListD0Ev @ 666 NONAME
+	_ZN24CMTPTypeServiceEventListD1Ev @ 667 NONAME
+	_ZN24CMTPTypeServiceEventListD2Ev @ 668 NONAME
+	_ZN25CMTPTypeServiceFormatList4NewLEv @ 669 NONAME
+	_ZN25CMTPTypeServiceFormatList5NewLCEv @ 670 NONAME
+	_ZN25CMTPTypeServiceFormatList7AppendLEP28CMTPTypeServiceFormatElement @ 671 NONAME
+	_ZN25CMTPTypeServiceFormatListD0Ev @ 672 NONAME
+	_ZN25CMTPTypeServiceFormatListD1Ev @ 673 NONAME
+	_ZN25CMTPTypeServiceFormatListD2Ev @ 674 NONAME
+	_ZN25CMTPTypeServiceMethodList4NewLEv @ 675 NONAME
+	_ZN25CMTPTypeServiceMethodList5NewLCEv @ 676 NONAME
+	_ZN25CMTPTypeServiceMethodList7AppendLEP28CMTPTypeServiceMethodElement @ 677 NONAME
+	_ZN25CMTPTypeServiceMethodListD0Ev @ 678 NONAME
+	_ZN25CMTPTypeServiceMethodListD1Ev @ 679 NONAME
+	_ZN25CMTPTypeServiceMethodListD2Ev @ 680 NONAME
+	_ZN27CMTPTypeServiceEventElement4NewLEtRK15TMTPTypeUint128RK7TDesC16 @ 681 NONAME ABSENT
+	_ZN27CMTPTypeServiceEventElement4NewLEv @ 682 NONAME
+	_ZN27CMTPTypeServiceEventElement5NewLCEtRK15TMTPTypeUint128RK7TDesC16 @ 683 NONAME ABSENT
+	_ZN27CMTPTypeServiceEventElement5NewLCEv @ 684 NONAME
+	_ZN27CMTPTypeServiceEventElementD0Ev @ 685 NONAME
+	_ZN27CMTPTypeServiceEventElementD1Ev @ 686 NONAME
+	_ZN27CMTPTypeServiceEventElementD2Ev @ 687 NONAME
+	_ZN27CMTPTypeServicePropDescList4NewLEv @ 688 NONAME
+	_ZN27CMTPTypeServicePropDescList5NewLCEv @ 689 NONAME
+	_ZN27CMTPTypeServicePropDescList7AppendLEP23CMTPTypeServicePropDesc @ 690 NONAME
+	_ZN27CMTPTypeServicePropDescListD0Ev @ 691 NONAME
+	_ZN27CMTPTypeServicePropDescListD1Ev @ 692 NONAME
+	_ZN27CMTPTypeServicePropDescListD2Ev @ 693 NONAME
+	_ZN27CMTPTypeServicePropertyList4NewLEv @ 694 NONAME
+	_ZN27CMTPTypeServicePropertyList5NewLCEv @ 695 NONAME
+	_ZN27CMTPTypeServicePropertyList7AppendLEP30CMTPTypeServicePropertyElement @ 696 NONAME
+	_ZN27CMTPTypeServicePropertyListD0Ev @ 697 NONAME
+	_ZN27CMTPTypeServicePropertyListD1Ev @ 698 NONAME
+	_ZN27CMTPTypeServicePropertyListD2Ev @ 699 NONAME
+	_ZN28CMTPTypeDeleteObjectPropList4NewLEv @ 700 NONAME
+	_ZN28CMTPTypeDeleteObjectPropList5NewLCEv @ 701 NONAME
+	_ZN28CMTPTypeDeleteObjectPropList7AppendLEPK16TMTPTypeDataPair @ 702 NONAME
+	_ZN28CMTPTypeDeleteObjectPropListD0Ev @ 703 NONAME
+	_ZN28CMTPTypeDeleteObjectPropListD1Ev @ 704 NONAME
+	_ZN28CMTPTypeDeleteObjectPropListD2Ev @ 705 NONAME
+	_ZN28CMTPTypeServiceFormatElement4NewLEtRK15TMTPTypeUint128RK7TDesC16tS5_ @ 706 NONAME ABSENT
+	_ZN28CMTPTypeServiceFormatElement4NewLEv @ 707 NONAME
+	_ZN28CMTPTypeServiceFormatElement5NewLCEtRK15TMTPTypeUint128RK7TDesC16tS5_ @ 708 NONAME ABSENT
+	_ZN28CMTPTypeServiceFormatElement5NewLCEv @ 709 NONAME
+	_ZN28CMTPTypeServiceFormatElementD0Ev @ 710 NONAME
+	_ZN28CMTPTypeServiceFormatElementD1Ev @ 711 NONAME
+	_ZN28CMTPTypeServiceFormatElementD2Ev @ 712 NONAME
+	_ZN28CMTPTypeServiceMethodElement4NewLEtRK15TMTPTypeUint128RK7TDesC16t @ 713 NONAME ABSENT
+	_ZN28CMTPTypeServiceMethodElement4NewLEv @ 714 NONAME
+	_ZN28CMTPTypeServiceMethodElement5NewLCEtRK15TMTPTypeUint128RK7TDesC16t @ 715 NONAME ABSENT
+	_ZN28CMTPTypeServiceMethodElement5NewLCEv @ 716 NONAME
+	_ZN28CMTPTypeServiceMethodElementD0Ev @ 717 NONAME
+	_ZN28CMTPTypeServiceMethodElementD1Ev @ 718 NONAME
+	_ZN28CMTPTypeServiceMethodElementD2Ev @ 719 NONAME
+	_ZN29CMTPTypeDeleteServicePropList4NewLEv @ 720 NONAME
+	_ZN29CMTPTypeDeleteServicePropList5NewLCEv @ 721 NONAME
+	_ZN29CMTPTypeDeleteServicePropList7AppendLEPK16TMTPTypeDataPair @ 722 NONAME
+	_ZN29CMTPTypeDeleteServicePropListD0Ev @ 723 NONAME
+	_ZN29CMTPTypeDeleteServicePropListD1Ev @ 724 NONAME
+	_ZN29CMTPTypeDeleteServicePropListD2Ev @ 725 NONAME
+	_ZN29CMTPTypeServiceCapabilityList4NewLEv @ 726 NONAME
+	_ZN29CMTPTypeServiceCapabilityList5NewLCEv @ 727 NONAME
+	_ZN29CMTPTypeServiceCapabilityList7AppendLEP24CMTPTypeFormatCapability @ 728 NONAME
+	_ZN29CMTPTypeServiceCapabilityListD0Ev @ 729 NONAME
+	_ZN29CMTPTypeServiceCapabilityListD1Ev @ 730 NONAME
+	_ZN29CMTPTypeServiceCapabilityListD2Ev @ 731 NONAME
+	_ZN30CMTPTypeServiceObjPropExtnForm12CommitChunkLER5TPtr8 @ 732 NONAME
+	_ZN30CMTPTypeServiceObjPropExtnForm14NextWriteChunkER5TPtr8 @ 733 NONAME
+	_ZN30CMTPTypeServiceObjPropExtnForm15FirstWriteChunkER5TPtr8 @ 734 NONAME
+	_ZN30CMTPTypeServiceObjPropExtnForm4NewLEj @ 735 NONAME
+	_ZN30CMTPTypeServiceObjPropExtnForm4NewLEj15TMTPTypeUint128jRK7TDesC16hPK8MMTPType @ 736 NONAME ABSENT
+	_ZN30CMTPTypeServiceObjPropExtnForm5NewLCEj @ 737 NONAME
+	_ZN30CMTPTypeServiceObjPropExtnForm5NewLCEj15TMTPTypeUint128jRK7TDesC16hPK8MMTPType @ 738 NONAME ABSENT
+	_ZN30CMTPTypeServiceObjPropExtnFormD0Ev @ 739 NONAME
+	_ZN30CMTPTypeServiceObjPropExtnFormD1Ev @ 740 NONAME
+	_ZN30CMTPTypeServiceObjPropExtnFormD2Ev @ 741 NONAME
+	_ZN30CMTPTypeServicePropertyElement4NewLEtRK15TMTPTypeUint128mRK7TDesC16 @ 742 NONAME ABSENT
+	_ZN30CMTPTypeServicePropertyElement4NewLEv @ 743 NONAME
+	_ZN30CMTPTypeServicePropertyElement5NewLCEtRK15TMTPTypeUint128mRK7TDesC16 @ 744 NONAME ABSENT
+	_ZN30CMTPTypeServicePropertyElement5NewLCEv @ 745 NONAME
+	_ZN30CMTPTypeServicePropertyElementD0Ev @ 746 NONAME
+	_ZN30CMTPTypeServicePropertyElementD1Ev @ 747 NONAME
+	_ZN30CMTPTypeServicePropertyElementD2Ev @ 748 NONAME
+	_ZN34CMTPTypeServiceMethodParamExtnForm12CommitChunkLER5TPtr8 @ 749 NONAME
+	_ZN34CMTPTypeServiceMethodParamExtnForm14NextWriteChunkER5TPtr8 @ 750 NONAME
+	_ZN34CMTPTypeServiceMethodParamExtnForm15FirstWriteChunkER5TPtr8 @ 751 NONAME
+	_ZN34CMTPTypeServiceMethodParamExtnForm4NewLEj @ 752 NONAME
+	_ZN34CMTPTypeServiceMethodParamExtnForm4NewLEj15TMTPTypeUint128jRK7TDesC16hhhPK8MMTPType @ 753 NONAME ABSENT
+	_ZN34CMTPTypeServiceMethodParamExtnForm5NewLCEj @ 754 NONAME
+	_ZN34CMTPTypeServiceMethodParamExtnForm5NewLCEj15TMTPTypeUint128jRK7TDesC16hhhPK8MMTPType @ 755 NONAME ABSENT
+	_ZN34CMTPTypeServiceMethodParamExtnFormD0Ev @ 756 NONAME
+	_ZN34CMTPTypeServiceMethodParamExtnFormD1Ev @ 757 NONAME
+	_ZN34CMTPTypeServiceMethodParamExtnFormD2Ev @ 758 NONAME
+	_ZNK12CMTPTypeList11ElementTypeEv @ 759 NONAME
+	_ZNK12CMTPTypeList14CommitRequiredEv @ 760 NONAME
+	_ZNK12CMTPTypeList16NumberOfElementsEv @ 761 NONAME
+	_ZNK12CMTPTypeList4TypeEv @ 762 NONAME
+	_ZNK12CMTPTypeList8ElementLEi @ 763 NONAME
+	_ZNK13CMTPTypeArray5ToDesER5TDes8 @ 764 NONAME
+	_ZNK15TMTPTypeUint1285EqualERKS_ @ 765 NONAME
+	_ZNK15TMTPTypeUint1287CompareERKS_ @ 766 NONAME
+	_ZNK15TMTPTypeUint1287CompareEyy @ 767 NONAME
+	_ZNK16TMTPTypeDataPair4TypeEv @ 768 NONAME
+	_ZNK19CMTPTypeServiceInfo12UsedServiceLEjR15TMTPTypeUint128 @ 769 NONAME ABSENT
+	_ZNK19CMTPTypeServiceInfo17SerivceDataBlockLEjR15TMTPTypeUint128 @ 770 NONAME ABSENT
+	_ZNK19CMTPTypeServiceInfo20NumberOfUsedServicesEv @ 771 NONAME
+	_ZNK19CMTPTypeServiceInfo24NumberOfServiceDataBlockEv @ 772 NONAME
+	_ZNK19CMTPTypeServiceInfo4TypeEv @ 773 NONAME
+	_ZNK23CMTPTypeServicePropDesc14CommitRequiredEv @ 774 NONAME
+	_ZNK23CMTPTypeServicePropDesc4TypeEv @ 775 NONAME
+	_ZNK24CMTPTypeFormatCapability15ObjectPropDescLEj @ 776 NONAME
+	_ZNK24CMTPTypeFormatCapability16ReadableElementLEi @ 777 NONAME
+	_ZNK24CMTPTypeFormatCapability17NumberOfPropDescsEv @ 778 NONAME
+	_ZNK24CMTPTypeFormatCapability17WriteableElementLEi @ 779 NONAME
+	_ZNK24CMTPTypeFormatCapability22InterdependentPropDescEv @ 780 NONAME
+	_ZNK24CMTPTypeFormatCapability4TypeEv @ 781 NONAME
+	_ZNK24CMTPTypeServiceEventList8ElementLEj @ 782 NONAME
+	_ZNK25CMTPTypeServiceFormatList8ElementLEj @ 783 NONAME
+	_ZNK25CMTPTypeServiceMethodList8ElementLEj @ 784 NONAME
+	_ZNK27CMTPTypeServiceEventElement4TypeEv @ 785 NONAME
+	_ZNK27CMTPTypeServicePropDescList8ElementLEj @ 786 NONAME
+	_ZNK27CMTPTypeServicePropertyList8ElementLEj @ 787 NONAME
+	_ZNK28CMTPTypeDeleteObjectPropList8ElementLEi @ 788 NONAME
+	_ZNK28CMTPTypeServiceFormatElement4TypeEv @ 789 NONAME
+	_ZNK28CMTPTypeServiceMethodElement4TypeEv @ 790 NONAME
+	_ZNK29CMTPTypeDeleteServicePropList8ElementLEi @ 791 NONAME
+	_ZNK29CMTPTypeServiceCapabilityList8ElementLEj @ 792 NONAME
+	_ZNK30CMTPTypeServiceObjPropExtnForm14CommitRequiredEv @ 793 NONAME
+	_ZNK30CMTPTypeServiceObjPropExtnForm4TypeEv @ 794 NONAME
+	_ZNK30CMTPTypeServicePropertyElement4TypeEv @ 795 NONAME
+	_ZNK34CMTPTypeServiceMethodParamExtnForm14CommitRequiredEv @ 796 NONAME
+	_ZNK34CMTPTypeServiceMethodParamExtnForm4TypeEv @ 797 NONAME
+	_ZTI12CMTPTypeList @ 798 NONAME
+	_ZTI16TMTPTypeDataPair @ 799 NONAME
+	_ZTI19CMTPTypeServiceInfo @ 800 NONAME
+	_ZTI23CMTPTypeServicePropDesc @ 801 NONAME
+	_ZTI24CMTPTypeFormatCapability @ 802 NONAME
+	_ZTI24CMTPTypeServiceEventList @ 803 NONAME
+	_ZTI25CMTPTypeServiceFormatList @ 804 NONAME
+	_ZTI25CMTPTypeServiceMethodList @ 805 NONAME
+	_ZTI27CMTPTypeServiceEventElement @ 806 NONAME
+	_ZTI27CMTPTypeServicePropDescList @ 807 NONAME
+	_ZTI27CMTPTypeServicePropertyList @ 808 NONAME
+	_ZTI28CMTPTypeDeleteObjectPropList @ 809 NONAME
+	_ZTI28CMTPTypeServiceFormatElement @ 810 NONAME
+	_ZTI28CMTPTypeServiceMethodElement @ 811 NONAME
+	_ZTI29CMTPTypeDeleteServicePropList @ 812 NONAME
+	_ZTI29CMTPTypeServiceCapabilityList @ 813 NONAME
+	_ZTI30CMTPTypeServiceObjPropExtnForm @ 814 NONAME
+	_ZTI30CMTPTypeServicePropertyElement @ 815 NONAME
+	_ZTI34CMTPTypeServiceMethodParamExtnForm @ 816 NONAME
+	_ZTV12CMTPTypeList @ 817 NONAME
+	_ZTV16TMTPTypeDataPair @ 818 NONAME
+	_ZTV19CMTPTypeServiceInfo @ 819 NONAME
+	_ZTV23CMTPTypeServicePropDesc @ 820 NONAME
+	_ZTV24CMTPTypeFormatCapability @ 821 NONAME
+	_ZTV24CMTPTypeServiceEventList @ 822 NONAME
+	_ZTV25CMTPTypeServiceFormatList @ 823 NONAME
+	_ZTV25CMTPTypeServiceMethodList @ 824 NONAME
+	_ZTV27CMTPTypeServiceEventElement @ 825 NONAME
+	_ZTV27CMTPTypeServicePropDescList @ 826 NONAME
+	_ZTV27CMTPTypeServicePropertyList @ 827 NONAME
+	_ZTV28CMTPTypeDeleteObjectPropList @ 828 NONAME
+	_ZTV28CMTPTypeServiceFormatElement @ 829 NONAME
+	_ZTV28CMTPTypeServiceMethodElement @ 830 NONAME
+	_ZTV29CMTPTypeDeleteServicePropList @ 831 NONAME
+	_ZTV29CMTPTypeServiceCapabilityList @ 832 NONAME
+	_ZTV30CMTPTypeServiceObjPropExtnForm @ 833 NONAME
+	_ZTV30CMTPTypeServicePropertyElement @ 834 NONAME
+	_ZTV34CMTPTypeServiceMethodParamExtnForm @ 835 NONAME
+	_ZThn4_N12CMTPTypeList12CommitChunkLER5TPtr8 @ 836 NONAME
+	_ZThn4_N12CMTPTypeList14NextWriteChunkER5TPtr8 @ 837 NONAME
+	_ZThn4_N12CMTPTypeList15FirstWriteChunkER5TPtr8 @ 838 NONAME
+	_ZThn4_N23CMTPTypeServicePropDesc12CommitChunkLER5TPtr8 @ 839 NONAME
+	_ZThn4_N23CMTPTypeServicePropDesc14NextWriteChunkER5TPtr8 @ 840 NONAME
+	_ZThn4_N23CMTPTypeServicePropDesc15FirstWriteChunkER5TPtr8 @ 841 NONAME
+	_ZThn4_N30CMTPTypeServiceObjPropExtnForm12CommitChunkLER5TPtr8 @ 842 NONAME
+	_ZThn4_N30CMTPTypeServiceObjPropExtnForm14NextWriteChunkER5TPtr8 @ 843 NONAME
+	_ZThn4_N30CMTPTypeServiceObjPropExtnForm15FirstWriteChunkER5TPtr8 @ 844 NONAME
+	_ZThn4_N34CMTPTypeServiceMethodParamExtnForm12CommitChunkLER5TPtr8 @ 845 NONAME
+	_ZThn4_N34CMTPTypeServiceMethodParamExtnForm14NextWriteChunkER5TPtr8 @ 846 NONAME
+	_ZThn4_N34CMTPTypeServiceMethodParamExtnForm15FirstWriteChunkER5TPtr8 @ 847 NONAME
+	_ZThn4_NK12CMTPTypeList14CommitRequiredEv @ 848 NONAME
+	_ZThn4_NK12CMTPTypeList4TypeEv @ 849 NONAME
+	_ZThn4_NK19CMTPTypeServiceInfo4TypeEv @ 850 NONAME
+	_ZThn4_NK23CMTPTypeServicePropDesc14CommitRequiredEv @ 851 NONAME
+	_ZThn4_NK23CMTPTypeServicePropDesc4TypeEv @ 852 NONAME
+	_ZThn4_NK24CMTPTypeFormatCapability4TypeEv @ 853 NONAME
+	_ZThn4_NK27CMTPTypeServiceEventElement4TypeEv @ 854 NONAME
+	_ZThn4_NK28CMTPTypeServiceFormatElement4TypeEv @ 855 NONAME
+	_ZThn4_NK28CMTPTypeServiceMethodElement4TypeEv @ 856 NONAME
+	_ZThn4_NK30CMTPTypeServiceObjPropExtnForm14CommitRequiredEv @ 857 NONAME
+	_ZThn4_NK30CMTPTypeServiceObjPropExtnForm4TypeEv @ 858 NONAME
+	_ZThn4_NK30CMTPTypeServicePropertyElement4TypeEv @ 859 NONAME
+	_ZThn4_NK34CMTPTypeServiceMethodParamExtnForm14CommitRequiredEv @ 860 NONAME
+	_ZThn4_NK34CMTPTypeServiceMethodParamExtnForm4TypeEv @ 861 NONAME
+	_ZN20CMTPTypeCompoundBase14NextWriteChunkER5TPtr8j @ 862 NONAME
+	_ZN22CMTPTypeObjectPropList14NextWriteChunkER5TPtr8j @ 863 NONAME
+	_ZN22CMTPTypeObjectPropList15CommitPropElemLER29CMTPTypeObjectPropListElement @ 864 NONAME
+	_ZN22CMTPTypeObjectPropList15FirstWriteChunkER5TPtr8j @ 865 NONAME
+	_ZN22CMTPTypeObjectPropList16ReservePropElemLEmt @ 866 NONAME
+	_ZN22CMTPTypeObjectPropList21AppendObjectPropListLERKS_ @ 867 NONAME
+	_ZN22CMTPTypeObjectPropList22ReserveTransportHeaderEjR5TPtr8 @ 868 NONAME
+	_ZN23CMTPTypeServicePropList12CommitChunkLER5TPtr8 @ 869 NONAME
+	_ZN23CMTPTypeServicePropList14NextWriteChunkER5TPtr8 @ 870 NONAME
+	_ZN23CMTPTypeServicePropList15FirstWriteChunkER5TPtr8 @ 871 NONAME
+	_ZN23CMTPTypeServicePropList17AppendDataObjectLER8MMTPType @ 872 NONAME
+	_ZN23CMTPTypeServicePropList4NewLEv @ 873 NONAME
+	_ZN23CMTPTypeServicePropList5NewLCEv @ 874 NONAME
+	_ZN23CMTPTypeServicePropList7AppendLEP30CMTPTypeServicePropListElement @ 875 NONAME
+	_ZN23CMTPTypeServicePropListD0Ev @ 876 NONAME
+	_ZN23CMTPTypeServicePropListD1Ev @ 877 NONAME
+	_ZN23CMTPTypeServicePropListD2Ev @ 878 NONAME
+	_ZN29CMTPTypeObjectPropListElement10SetStringLEiRK7TDesC16 @ 879 NONAME
+	_ZN29CMTPTypeObjectPropListElement10SetUint16LEit @ 880 NONAME
+	_ZN29CMTPTypeObjectPropListElement10SetUint32LEim @ 881 NONAME
+	_ZN29CMTPTypeObjectPropListElement10SetUint64LEiy @ 882 NONAME
+	_ZN29CMTPTypeObjectPropListElement11SetUint128LEiyy @ 883 NONAME
+	_ZN29CMTPTypeObjectPropListElement9SetArrayLEiRK13CMTPTypeArray @ 884 NONAME
+	_ZN29CMTPTypeObjectPropListElement9SetUint8LEih @ 885 NONAME
+	_ZN30CMTPTypeServicePropListElement12CommitChunkLER5TPtr8 @ 886 NONAME
+	_ZN30CMTPTypeServicePropListElement15FirstWriteChunkER5TPtr8 @ 887 NONAME
+	_ZN30CMTPTypeServicePropListElement4NewLEmtRK8MMTPType @ 888 NONAME
+	_ZN30CMTPTypeServicePropListElement4NewLEmttRK8MMTPType @ 889 NONAME
+	_ZN30CMTPTypeServicePropListElement4NewLEt @ 890 NONAME
+	_ZN30CMTPTypeServicePropListElement4NewLEtt @ 891 NONAME
+	_ZN30CMTPTypeServicePropListElement5NewLCEmtRK8MMTPType @ 892 NONAME
+	_ZN30CMTPTypeServicePropListElement5NewLCEmttRK8MMTPType @ 893 NONAME
+	_ZN30CMTPTypeServicePropListElement5NewLCEt @ 894 NONAME
+	_ZN30CMTPTypeServicePropListElement5NewLCEtt @ 895 NONAME
+	_ZN30CMTPTypeServicePropListElementD0Ev @ 896 NONAME
+	_ZN30CMTPTypeServicePropListElementD1Ev @ 897 NONAME
+	_ZN30CMTPTypeServicePropListElementD2Ev @ 898 NONAME
+	_ZN8MMTPType14NextWriteChunkER5TPtr8j @ 899 NONAME
+	_ZN8MMTPType15FirstWriteChunkER5TPtr8j @ 900 NONAME
+	_ZN8MMTPType22ReserveTransportHeaderEjR5TPtr8 @ 901 NONAME
+	_ZNK22CMTPTypeObjectPropList11ResetCursorEv @ 902 NONAME
+	_ZNK22CMTPTypeObjectPropList13NextReadChunkER6TPtrC8 @ 903 NONAME
+	_ZNK22CMTPTypeObjectPropList14FirstReadChunkER6TPtrC8 @ 904 NONAME
+	_ZNK22CMTPTypeObjectPropList15GetNextElementLEv @ 905 NONAME
+	_ZNK22CMTPTypeObjectPropList4SizeEv @ 906 NONAME
+	_ZNK22CMTPTypeObjectPropList8ValidateEv @ 907 NONAME
+	_ZNK23CMTPTypeServicePropList11DataObjectLEv @ 908 NONAME
+	_ZNK23CMTPTypeServicePropList14CommitRequiredEv @ 909 NONAME
+	_ZNK23CMTPTypeServicePropList16NumberOfElementsEv @ 910 NONAME
+	_ZNK23CMTPTypeServicePropList4TypeEv @ 911 NONAME
+	_ZNK23CMTPTypeServicePropList7ElementEj @ 912 NONAME
+	_ZNK29CMTPTypeObjectPropListElement4SizeEv @ 913 NONAME
+	_ZNK29CMTPTypeObjectPropListElement6ArrayLEi @ 914 NONAME
+	_ZNK29CMTPTypeObjectPropListElement6Uint8LEi @ 915 NONAME
+	_ZNK29CMTPTypeObjectPropListElement7StringLEi @ 916 NONAME
+	_ZNK29CMTPTypeObjectPropListElement7Uint16LEi @ 917 NONAME
+	_ZNK29CMTPTypeObjectPropListElement7Uint32LEi @ 918 NONAME
+	_ZNK29CMTPTypeObjectPropListElement7Uint64LEi @ 919 NONAME
+	_ZNK29CMTPTypeObjectPropListElement8Uint128LEiRyS0_ @ 920 NONAME
+	_ZNK30CMTPTypeServicePropListElement14CommitRequiredEv @ 921 NONAME
+	_ZNK30CMTPTypeServicePropListElement4TypeEv @ 922 NONAME
+	_ZTI23CMTPTypeServicePropList @ 923 NONAME
+	_ZTI30CMTPTypeServicePropListElement @ 924 NONAME
+	_ZTV23CMTPTypeServicePropList @ 925 NONAME
+	_ZTV30CMTPTypeServicePropListElement @ 926 NONAME
+	_ZThn4_N20CMTPTypeCompoundBase14NextWriteChunkER5TPtr8j @ 927 NONAME
+	_ZThn4_N22CMTPTypeObjectPropList14NextWriteChunkER5TPtr8j @ 928 NONAME
+	_ZThn4_N22CMTPTypeObjectPropList15FirstWriteChunkER5TPtr8j @ 929 NONAME
+	_ZThn4_N22CMTPTypeObjectPropList22ReserveTransportHeaderEjR5TPtr8 @ 930 NONAME
+	_ZThn4_N23CMTPTypeServicePropList12CommitChunkLER5TPtr8 @ 931 NONAME
+	_ZThn4_N23CMTPTypeServicePropList14NextWriteChunkER5TPtr8 @ 932 NONAME
+	_ZThn4_N23CMTPTypeServicePropList15FirstWriteChunkER5TPtr8 @ 933 NONAME
+	_ZThn4_N30CMTPTypeServicePropListElement12CommitChunkLER5TPtr8 @ 934 NONAME
+	_ZThn4_N30CMTPTypeServicePropListElement15FirstWriteChunkER5TPtr8 @ 935 NONAME
+	_ZThn4_NK22CMTPTypeObjectPropList13NextReadChunkER6TPtrC8 @ 936 NONAME
+	_ZThn4_NK22CMTPTypeObjectPropList14FirstReadChunkER6TPtrC8 @ 937 NONAME
+	_ZThn4_NK22CMTPTypeObjectPropList4SizeEv @ 938 NONAME
+	_ZThn4_NK22CMTPTypeObjectPropList8ValidateEv @ 939 NONAME
+	_ZThn4_NK23CMTPTypeServicePropList14CommitRequiredEv @ 940 NONAME
+	_ZThn4_NK23CMTPTypeServicePropList4TypeEv @ 941 NONAME
+	_ZThn4_NK30CMTPTypeServicePropListElement14CommitRequiredEv @ 942 NONAME
+	_ZThn4_NK30CMTPTypeServicePropListElement4TypeEv @ 943 NONAME
+	_ZN18CMTPTypeOpaqueData12CommitChunkLER5TPtr8 @ 944 NONAME
+	_ZN18CMTPTypeOpaqueData14NextWriteChunkER5TPtr8 @ 945 NONAME
+	_ZN18CMTPTypeOpaqueData15FirstWriteChunkER5TPtr8 @ 946 NONAME
+	_ZN18CMTPTypeOpaqueData15FirstWriteChunkER5TPtr8j @ 947 NONAME
+	_ZN18CMTPTypeOpaqueData4NewLERK6TDesC8 @ 948 NONAME
+	_ZN18CMTPTypeOpaqueData4NewLEv @ 949 NONAME
+	_ZN18CMTPTypeOpaqueData5NewLCERK6TDesC8 @ 950 NONAME
+	_ZN18CMTPTypeOpaqueData5NewLCEv @ 951 NONAME
+	_ZN18CMTPTypeOpaqueData5WriteERK6TPtrC8 @ 952 NONAME
+	_ZNK18CMTPTypeOpaqueData13NextReadChunkER6TPtrC8 @ 953 NONAME
+	_ZNK18CMTPTypeOpaqueData14CommitRequiredEv @ 954 NONAME
+	_ZNK18CMTPTypeOpaqueData14FirstReadChunkER6TPtrC8 @ 955 NONAME
+	_ZNK18CMTPTypeOpaqueData4ReadER6TPtrC8 @ 956 NONAME
+	_ZNK18CMTPTypeOpaqueData4SizeEv @ 957 NONAME
+	_ZNK18CMTPTypeOpaqueData4TypeEv @ 958 NONAME
+	_ZTI18CMTPTypeOpaqueData @ 959 NONAME
+	_ZTV18CMTPTypeOpaqueData @ 960 NONAME
+	_ZThn4_N18CMTPTypeOpaqueData12CommitChunkLER5TPtr8 @ 961 NONAME
+	_ZThn4_N18CMTPTypeOpaqueData14NextWriteChunkER5TPtr8 @ 962 NONAME
+	_ZThn4_N18CMTPTypeOpaqueData15FirstWriteChunkER5TPtr8 @ 963 NONAME
+	_ZThn4_N18CMTPTypeOpaqueData15FirstWriteChunkER5TPtr8j @ 964 NONAME
+	_ZThn4_NK18CMTPTypeOpaqueData13NextReadChunkER6TPtrC8 @ 965 NONAME
+	_ZThn4_NK18CMTPTypeOpaqueData14CommitRequiredEv @ 966 NONAME
+	_ZThn4_NK18CMTPTypeOpaqueData14FirstReadChunkER6TPtrC8 @ 967 NONAME
+	_ZThn4_NK18CMTPTypeOpaqueData4SizeEv @ 968 NONAME
+	_ZThn4_NK18CMTPTypeOpaqueData4TypeEv @ 969 NONAME
+	_ZN12CMTPTypeFile11GetByteSentEv @ 970 NONAME
+	_ZN12CMTPTypeFile4NewLER3RFsRK7TDesC169TFileModexx @ 971 NONAME
+	_ZN12CMTPTypeFile5NewLCER3RFsRK7TDesC169TFileModexx @ 972 NONAME
+	_ZN12TMTPTypeGuid3SetEyy @ 973 NONAME
+	_ZN12TMTPTypeGuid4SetLERK7TDesC16 @ 974 NONAME
+	_ZN12TMTPTypeGuidC1ERK6TPtrC8 @ 975 NONAME
+	_ZN12TMTPTypeGuidC1Ev @ 976 NONAME
+	_ZN12TMTPTypeGuidC1Eyy @ 977 NONAME
+	_ZN12TMTPTypeGuidC2ERK6TPtrC8 @ 978 NONAME
+	_ZN12TMTPTypeGuidC2Ev @ 979 NONAME
+	_ZN12TMTPTypeGuidC2Eyy @ 980 NONAME
+	_ZN19CMTPTypeServiceInfo18AppendUsedServiceLERK12TMTPTypeGuid @ 981 NONAME
+	_ZN19CMTPTypeServiceInfo23AppendServiceDataBlockLERK12TMTPTypeGuid @ 982 NONAME
+	_ZN27CMTPTypeServiceEventElement4NewLEtRK12TMTPTypeGuidRK7TDesC16 @ 983 NONAME
+	_ZN27CMTPTypeServiceEventElement5NewLCEtRK12TMTPTypeGuidRK7TDesC16 @ 984 NONAME
+	_ZN28CMTPTypeServiceFormatElement4NewLEtRK12TMTPTypeGuidRK7TDesC16tS5_ @ 985 NONAME
+	_ZN28CMTPTypeServiceFormatElement5NewLCEtRK12TMTPTypeGuidRK7TDesC16tS5_ @ 986 NONAME
+	_ZN28CMTPTypeServiceMethodElement4NewLEtRK12TMTPTypeGuidRK7TDesC16t @ 987 NONAME
+	_ZN28CMTPTypeServiceMethodElement5NewLCEtRK12TMTPTypeGuidRK7TDesC16t @ 988 NONAME
+	_ZN30CMTPTypeServiceObjPropExtnForm4NewLEj12TMTPTypeGuidjRK7TDesC16hPK8MMTPType @ 989 NONAME
+	_ZN30CMTPTypeServiceObjPropExtnForm5NewLCEj12TMTPTypeGuidjRK7TDesC16hPK8MMTPType @ 990 NONAME
+	_ZN30CMTPTypeServicePropertyElement4NewLEtRK12TMTPTypeGuidmRK7TDesC16 @ 991 NONAME
+	_ZN30CMTPTypeServicePropertyElement5NewLCEtRK12TMTPTypeGuidmRK7TDesC16 @ 992 NONAME
+	_ZN34CMTPTypeServiceMethodParamExtnForm4NewLEj12TMTPTypeGuidjRK7TDesC16hhhPK8MMTPType @ 993 NONAME
+	_ZN34CMTPTypeServiceMethodParamExtnForm5NewLCEj12TMTPTypeGuidjRK7TDesC16hhhPK8MMTPType @ 994 NONAME
+	_ZNK19CMTPTypeServiceInfo12UsedServiceLEjR12TMTPTypeGuid @ 995 NONAME
+	_ZNK19CMTPTypeServiceInfo17SerivceDataBlockLEjR12TMTPTypeGuid @ 996 NONAME
+	_ZN18CMTPTypeOpaqueDataD0Ev @ 997 NONAME
+	_ZN18CMTPTypeOpaqueDataD1Ev @ 998 NONAME
+	_ZN18CMTPTypeOpaqueDataD2Ev @ 999 NONAME
+	_ZN13TMTPTypeEventC1ERKS_ @ 1000 NONAME
+	_ZN13TMTPTypeEventC2ERKS_ @ 1001 NONAME
+	_ZN15TMTPTypeRequestC1ERKS_ @ 1002 NONAME
+	_ZN15TMTPTypeRequestC2ERKS_ @ 1003 NONAME
+	_ZN16TMTPTypeDataPairC1ERKS_ @ 1004 NONAME
+	_ZN16TMTPTypeDataPairC2ERKS_ @ 1005 NONAME
+	_ZN16TMTPTypeResponseC1ERKS_ @ 1006 NONAME
+	_ZN16TMTPTypeResponseC2ERKS_ @ 1007 NONAME
+	_ZN19CMTPTypeTrivialData14NextWriteChunkER5TPtr8 @ 1008 NONAME
+	_ZN19CMTPTypeTrivialData14NextWriteChunkER5TPtr8j @ 1009 NONAME
+	_ZN19CMTPTypeTrivialData15FirstWriteChunkER5TPtr8 @ 1010 NONAME
+	_ZN19CMTPTypeTrivialData15FirstWriteChunkER5TPtr8j @ 1011 NONAME
+	_ZN19CMTPTypeTrivialData4NewLEv @ 1012 NONAME
+	_ZN19CMTPTypeTrivialData5NewLCEv @ 1013 NONAME
+	_ZN19CMTPTypeTrivialDataD0Ev @ 1014 NONAME
+	_ZN19CMTPTypeTrivialDataD1Ev @ 1015 NONAME
+	_ZN19CMTPTypeTrivialDataD2Ev @ 1016 NONAME
+	_ZNK19CMTPTypeTrivialData13NextReadChunkER6TPtrC8 @ 1017 NONAME
+	_ZNK19CMTPTypeTrivialData14FirstReadChunkER6TPtrC8 @ 1018 NONAME
+	_ZNK19CMTPTypeTrivialData4SizeEv @ 1019 NONAME
+	_ZNK19CMTPTypeTrivialData4TypeEv @ 1020 NONAME
+	_ZTI19CMTPTypeTrivialData @ 1021 NONAME
+	_ZTV19CMTPTypeTrivialData @ 1022 NONAME
+	_ZThn4_N19CMTPTypeTrivialData14NextWriteChunkER5TPtr8 @ 1023 NONAME
+	_ZThn4_N19CMTPTypeTrivialData14NextWriteChunkER5TPtr8j @ 1024 NONAME
+	_ZThn4_N19CMTPTypeTrivialData15FirstWriteChunkER5TPtr8 @ 1025 NONAME
+	_ZThn4_N19CMTPTypeTrivialData15FirstWriteChunkER5TPtr8j @ 1026 NONAME
+	_ZThn4_NK19CMTPTypeTrivialData13NextReadChunkER6TPtrC8 @ 1027 NONAME
+	_ZThn4_NK19CMTPTypeTrivialData14FirstReadChunkER6TPtrC8 @ 1028 NONAME
+	_ZThn4_NK19CMTPTypeTrivialData4SizeEv @ 1029 NONAME
+	_ZThn4_NK19CMTPTypeTrivialData4TypeEv @ 1030 NONAME
+	_ZN29CMTPTypeObjectPropListElement9SetArrayLEiRK7TDesC16 @ 1031 NONAME
+	_ZN12CMTPTypeList14NextWriteChunkER5TPtr8j @ 1032 NONAME
+	_ZThn4_N12CMTPTypeList14NextWriteChunkER5TPtr8j @ 1033 NONAME
+

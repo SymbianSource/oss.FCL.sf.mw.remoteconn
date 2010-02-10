@@ -1,0 +1,5 @@
+EXPORTS
+	??1CPTPIPHostFilterInterface@@UAE@XZ @ 1 NONAME ; CPTPIPHostFilterInterface::~CPTPIPHostFilterInterface(void)
+	?ListImplementations@CPTPIPHostFilterInterface@@SAXAAV?$RPointerArray@VCImplementationInformation@@@@@Z @ 2 NONAME ; void CPTPIPHostFilterInterface::ListImplementations(class RPointerArray<class CImplementationInformation> &)
+	?NewL@CPTPIPHostFilterInterface@@SAPAV1@XZ @ 3 NONAME ; class CPTPIPHostFilterInterface * CPTPIPHostFilterInterface::NewL(void)
+

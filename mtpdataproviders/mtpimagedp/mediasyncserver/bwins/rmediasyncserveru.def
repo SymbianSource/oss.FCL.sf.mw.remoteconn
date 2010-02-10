@@ -1,0 +1,17 @@
+EXPORTS
+	?Close@RMediaSyncServer@@QAEXXZ @ 1 NONAME ; void RMediaSyncServer::Close(void)
+	?DisableMonitor@RMediaSyncServer@@QAEHXZ @ 2 NONAME ; int RMediaSyncServer::DisableMonitor(void)
+	?EnableMonitor@RMediaSyncServer@@QAEHXZ @ 3 NONAME ; int RMediaSyncServer::EnableMonitor(void)
+	?HasNext@CMediaSyncDataReader@@QAEHXZ @ 4 NONAME ; int CMediaSyncDataReader::HasNext(void)
+	?NeedFullSync@RMediaSyncServer@@QAEHAAH@Z @ 5 NONAME ; int RMediaSyncServer::NeedFullSync(int &)
+	?GetChangesL@RMediaSyncServer@@QAEXAAPAVCMediaSyncDataReader@@AAHAAVTRequestStatus@@H@Z @ 6 NONAME ; void RMediaSyncServer::GetChangesL(class CMediaSyncDataReader * &, int &, class TRequestStatus &, int)
+	??0RMediaSyncServer@@QAE@XZ @ 7 NONAME ; RMediaSyncServer::RMediaSyncServer(void)
+	?Connect@RMediaSyncServer@@QAEHXZ @ 8 NONAME ; int RMediaSyncServer::Connect(void)
+	?Count@CMediaSyncDataReader@@QAEHXZ @ 9 NONAME ; int CMediaSyncDataReader::Count(void)
+	?RemoveAllRecords@RMediaSyncServer@@QAEXXZ @ 10 NONAME ; void RMediaSyncServer::RemoveAllRecords(void)
+	??1CMediaSyncDataReader@@UAE@XZ @ 11 NONAME ; CMediaSyncDataReader::~CMediaSyncDataReader(void)
+	?GetNextL@CMediaSyncDataReader@@QAEXAAKAAEAAVTPtr16@@@Z @ 12 NONAME ; void CMediaSyncDataReader::GetNextL(unsigned long &, unsigned char &, class TPtr16 &)
+	?Shutdown@RMediaSyncServer@@QAEXXZ @ 13 NONAME ; void RMediaSyncServer::Shutdown(void)
+	?Startup@RMediaSyncServer@@QAEHXZ @ 14 NONAME ; int RMediaSyncServer::Startup(void)
+	?ClearFullSync@RMediaSyncServer@@QAEHXZ @ 15 NONAME ; int RMediaSyncServer::ClearFullSync(void)
+

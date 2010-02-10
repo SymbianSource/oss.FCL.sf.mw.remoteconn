@@ -1,0 +1,9 @@
+EXPORTS
+	_ZN25CPTPIPHostFilterInterface19ListImplementationsER13RPointerArrayI26CImplementationInformationE @ 1 NONAME
+	_ZN25CPTPIPHostFilterInterface4NewLEv @ 2 NONAME
+	_ZN25CPTPIPHostFilterInterfaceD0Ev @ 3 NONAME
+	_ZN25CPTPIPHostFilterInterfaceD1Ev @ 4 NONAME
+	_ZN25CPTPIPHostFilterInterfaceD2Ev @ 5 NONAME
+	_ZTI25CPTPIPHostFilterInterface @ 6 NONAME
+	_ZTV25CPTPIPHostFilterInterface @ 7 NONAME
+

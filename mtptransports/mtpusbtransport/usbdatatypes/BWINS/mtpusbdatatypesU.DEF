@@ -1,0 +1,47 @@
+EXPORTS
+	??0TMTPUsbControlRequestCancelData@@QAE@XZ @ 1 NONAME ; TMTPUsbControlRequestCancelData::TMTPUsbControlRequestCancelData(void)
+	??0TMTPUsbControlRequestDeviceStatus@@QAE@XZ @ 2 NONAME ; TMTPUsbControlRequestDeviceStatus::TMTPUsbControlRequestDeviceStatus(void)
+	??0TMTPUsbControlRequestMODFunction@@QAE@XZ @ 3 NONAME ; TMTPUsbControlRequestMODFunction::TMTPUsbControlRequestMODFunction(void)
+	??0TMTPUsbControlRequestMODHeader@@QAE@XZ @ 4 NONAME ; TMTPUsbControlRequestMODHeader::TMTPUsbControlRequestMODHeader(void)
+	??0TMTPUsbControlRequestSetup@@QAE@XZ @ 5 NONAME ; TMTPUsbControlRequestSetup::TMTPUsbControlRequestSetup(void)
+	??0TMTPUsbParameterPayloadBlock@@QAE@XZ @ 6 NONAME ; TMTPUsbParameterPayloadBlock::TMTPUsbParameterPayloadBlock(void)
+	??1CMTPUsbContainer@@UAE@XZ @ 7 NONAME ; CMTPUsbContainer::~CMTPUsbContainer(void)
+	?CommitChunkL@TMTPUsbControlRequestDeviceStatus@@UAEXAAVTPtr8@@@Z @ 8 NONAME ABSENT ; void TMTPUsbControlRequestDeviceStatus::CommitChunkL(class TPtr8 &)
+	?CommitChunkL@TMTPUsbParameterPayloadBlock@@UAEXAAVTPtr8@@@Z @ 9 NONAME ABSENT ; void TMTPUsbParameterPayloadBlock::CommitChunkL(class TPtr8 &)
+	?CommitRequired@TMTPUsbControlRequestDeviceStatus@@UBEHXZ @ 10 NONAME ; int TMTPUsbControlRequestDeviceStatus::CommitRequired(void) const
+	?CommitRequired@TMTPUsbParameterPayloadBlock@@UBEHXZ @ 11 NONAME ; int TMTPUsbParameterPayloadBlock::CommitRequired(void) const
+	?CopyIn@TMTPUsbParameterPayloadBlock@@QAEXABVTMTPTypeFlatBase@@IIHI@Z @ 12 NONAME ; void TMTPUsbParameterPayloadBlock::CopyIn(class TMTPTypeFlatBase const &, unsigned int, unsigned int, int, unsigned int)
+	?CopyOut@TMTPUsbParameterPayloadBlock@@QAEXAAVTMTPTypeFlatBase@@II@Z @ 13 NONAME ; void TMTPUsbParameterPayloadBlock::CopyOut(class TMTPTypeFlatBase &, unsigned int, unsigned int)
+	?ElementInfo@TMTPUsbControlRequestCancelData@@EBEABUTElementInfo@TMTPTypeFlatBase@@H@Z @ 14 NONAME ; struct TMTPTypeFlatBase::TElementInfo const & TMTPUsbControlRequestCancelData::ElementInfo(int) const
+	?ElementInfo@TMTPUsbControlRequestDeviceStatus@@EBEABUTElementInfo@TMTPTypeFlatBase@@H@Z @ 15 NONAME ; struct TMTPTypeFlatBase::TElementInfo const & TMTPUsbControlRequestDeviceStatus::ElementInfo(int) const
+	?ElementInfo@TMTPUsbControlRequestMODFunction@@EBEABUTElementInfo@TMTPTypeFlatBase@@H@Z @ 16 NONAME ; struct TMTPTypeFlatBase::TElementInfo const & TMTPUsbControlRequestMODFunction::ElementInfo(int) const
+	?ElementInfo@TMTPUsbControlRequestMODHeader@@EBEABUTElementInfo@TMTPTypeFlatBase@@H@Z @ 17 NONAME ; struct TMTPTypeFlatBase::TElementInfo const & TMTPUsbControlRequestMODHeader::ElementInfo(int) const
+	?ElementInfo@TMTPUsbControlRequestSetup@@EBEABUTElementInfo@TMTPTypeFlatBase@@H@Z @ 18 NONAME ; struct TMTPTypeFlatBase::TElementInfo const & TMTPUsbControlRequestSetup::ElementInfo(int) const
+	?ElementInfo@TMTPUsbParameterPayloadBlock@@EBEABUTElementInfo@TMTPTypeFlatBase@@H@Z @ 19 NONAME ; struct TMTPTypeFlatBase::TElementInfo const & TMTPUsbParameterPayloadBlock::ElementInfo(int) const
+	?FirstReadChunk@TMTPUsbControlRequestDeviceStatus@@UBEHAAVTPtrC8@@@Z @ 20 NONAME ; int TMTPUsbControlRequestDeviceStatus::FirstReadChunk(class TPtrC8 &) const
+	?FirstReadChunk@TMTPUsbParameterPayloadBlock@@UBEHAAVTPtrC8@@@Z @ 21 NONAME ; int TMTPUsbParameterPayloadBlock::FirstReadChunk(class TPtrC8 &) const
+	?NewL@CMTPUsbContainer@@SAPAV1@XZ @ 22 NONAME ; class CMTPUsbContainer * CMTPUsbContainer::NewL(void)
+	?NumParameters@TMTPUsbControlRequestDeviceStatus@@QBEIXZ @ 23 NONAME ; unsigned int TMTPUsbControlRequestDeviceStatus::NumParameters(void) const
+	?NumParameters@TMTPUsbParameterPayloadBlock@@QBEIXZ @ 24 NONAME ; unsigned int TMTPUsbParameterPayloadBlock::NumParameters(void) const
+	?Payload@CMTPUsbContainer@@QBEPAVMMTPType@@XZ @ 25 NONAME ; class MMTPType * CMTPUsbContainer::Payload(void) const
+	?Reset@TMTPUsbControlRequestDeviceStatus@@UAEXXZ @ 26 NONAME ; void TMTPUsbControlRequestDeviceStatus::Reset(void)
+	?Reset@TMTPUsbParameterPayloadBlock@@UAEXXZ @ 27 NONAME ; void TMTPUsbParameterPayloadBlock::Reset(void)
+	?SetPayloadL@CMTPUsbContainer@@QAEXPAVMMTPType@@@Z @ 28 NONAME ; void CMTPUsbContainer::SetPayloadL(class MMTPType *)
+	?SetUint32@TMTPUsbParameterPayloadBlock@@UAEXHK@Z @ 29 NONAME ; void TMTPUsbParameterPayloadBlock::SetUint32(int, unsigned long)
+	ABSENT?SetUint8@TMTPUsbControlRequestDeviceStatus@@UAEXHE@Z @ 30 NONAME ABSENT ; void TMTPUsbControlRequestDeviceStatus::SetUint8(int, unsigned char)
+	?Size@TMTPUsbControlRequestDeviceStatus@@UBE_KXZ @ 31 NONAME ; unsigned long long TMTPUsbControlRequestDeviceStatus::Size(void) const
+	?Size@TMTPUsbParameterPayloadBlock@@UBE_KXZ @ 32 NONAME ; unsigned long long TMTPUsbParameterPayloadBlock::Size(void) const
+	?Type@CMTPUsbContainer@@UBEIXZ @ 33 NONAME ; unsigned int CMTPUsbContainer::Type(void) const
+	?Type@TMTPUsbControlRequestCancelData@@UBEIXZ @ 34 NONAME ; unsigned int TMTPUsbControlRequestCancelData::Type(void) const
+	?Type@TMTPUsbControlRequestDeviceStatus@@UBEIXZ @ 35 NONAME ; unsigned int TMTPUsbControlRequestDeviceStatus::Type(void) const
+	?Type@TMTPUsbControlRequestMODFunction@@UBEIXZ @ 36 NONAME ; unsigned int TMTPUsbControlRequestMODFunction::Type(void) const
+	?Type@TMTPUsbControlRequestMODHeader@@UBEIXZ @ 37 NONAME ; unsigned int TMTPUsbControlRequestMODHeader::Type(void) const
+	?Type@TMTPUsbControlRequestSetup@@UBEIXZ @ 38 NONAME ; unsigned int TMTPUsbControlRequestSetup::Type(void) const
+	?Type@TMTPUsbParameterPayloadBlock@@UBEIXZ @ 39 NONAME ; unsigned int TMTPUsbParameterPayloadBlock::Type(void) const
+	?Uint32@TMTPUsbParameterPayloadBlock@@UBEKH@Z @ 40 NONAME ; unsigned long TMTPUsbParameterPayloadBlock::Uint32(int) const
+	ABSENT?Uint8@TMTPUsbControlRequestDeviceStatus@@UBEEH@Z @ 41 NONAME ABSENT ; unsigned char TMTPUsbControlRequestDeviceStatus::Uint8(int) const
+	?CommitChunkL@TMTPUsbControlRequestDeviceStatus@@UAEPAVMMTPType@@AAVTPtr8@@@Z @ 42 NONAME ; class MMTPType * TMTPUsbControlRequestDeviceStatus::CommitChunkL(class TPtr8 &)
+	?CommitChunkL@TMTPUsbParameterPayloadBlock@@UAEPAVMMTPType@@AAVTPtr8@@@Z @ 43 NONAME ; class MMTPType * TMTPUsbParameterPayloadBlock::CommitChunkL(class TPtr8 &)
+	?Uint32@TMTPUsbControlRequestDeviceStatus@@UBEKH@Z @ 44 NONAME ; unsigned long TMTPUsbControlRequestDeviceStatus::Uint32(int) const
+	?SetUint32@TMTPUsbControlRequestDeviceStatus@@UAEXHK@Z @ 45 NONAME ; void TMTPUsbControlRequestDeviceStatus::SetUint32(int, unsigned long)
+

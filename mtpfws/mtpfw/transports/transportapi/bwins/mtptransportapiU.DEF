@@ -1,0 +1,7 @@
+EXPORTS
+	??0CMTPTransportPlugin@@IAE@XZ @ 1 NONAME ; CMTPTransportPlugin::CMTPTransportPlugin(void)
+	??1CMTPTransportPlugin@@UAE@XZ @ 2 NONAME ; CMTPTransportPlugin::~CMTPTransportPlugin(void)
+	?NewL@CMTPTransportPlugin@@SAPAV1@VTUid@@@Z @ 3 NONAME ; class CMTPTransportPlugin * CMTPTransportPlugin::NewL(class TUid)
+	?NewL@CMTPTransportPlugin@@SAPAV1@VTUid@@PBX@Z @ 4 NONAME ; class CMTPTransportPlugin * CMTPTransportPlugin::NewL(class TUid, void const *)
+	
+
