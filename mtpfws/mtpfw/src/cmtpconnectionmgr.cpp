@@ -93,6 +93,15 @@ EXPORT_C TUid CMTPConnectionMgr::TransportUid()
     return iTransportUid;
     }
 
+void CMTPConnectionMgr::ConnectionCloseComplete(const TUint& /*aConnUid*/)
+    {
+    if (iIsTransportStopping)
+        {
+        iIsTransportStopping = EFalse;
+        ResumeSuspendedTransport();
+        }
+    }
+
 EXPORT_C void CMTPConnectionMgr::StartTransportL(TUid aTransport)
     {
     StartTransportL( aTransport, NULL );
@@ -187,14 +196,14 @@ EXPORT_C void CMTPConnectionMgr::StopTransport( TUid aTransport, TBool aByBearer
             {
             TRAP_IGNORE( SuspendTransportL( aTransport ) );
             }
+        iIsTransportStopping = ETrue;
         iTransport->Stop(*this);
         delete iTransport;
         iTransport = NULL;
         iTransportUid = KNullUid;
         iTransportCount--;
-
-
         }
+    
     if ( aByBearer )
         {
         UnsuspendTransport( aTransport );
@@ -227,7 +236,7 @@ EXPORT_C TInt CMTPConnectionMgr::TransportCount() const
 	return iTransportCount;
     }
 
-void CMTPConnectionMgr::ConnectionClosed(MMTPTransportConnection& aTransportConnection)
+TBool CMTPConnectionMgr::ConnectionClosed(MMTPTransportConnection& aTransportConnection)
     {
     __FLOG(_L8("ConnectionClosed - Entry"));
     
@@ -236,11 +245,9 @@ void CMTPConnectionMgr::ConnectionClosed(MMTPTransportConnection& aTransportConn
     __ASSERT_DEBUG((idx != KErrNotFound), User::Invariant());
     
     CMTPConnection* connection(iConnections[idx]);
-    connection->ConnectionSuspended();
-    
-    ResumeSuspendedTransport();
     
     __FLOG(_L8("ConnectionClosed - Exit"));
+    return connection->ConnectionSuspended();
     }
     
 void CMTPConnectionMgr::ConnectionOpenedL(MMTPTransportConnection& aTransportConnection)
@@ -267,26 +274,6 @@ void CMTPConnectionMgr::ConnectionOpenedL(MMTPTransportConnection& aTransportCon
     __FLOG(_L8("ConnectionOpenedL - Exit"));
     }
 
-TBool CMTPConnectionMgr::DeleteConnection(TUint aConnectionId)
-    {
-    __FLOG(_L8("DeleteConnection - Entry"));
-    
-    TBool ret = EFalse;    
-    TInt idx = ConnectionFind(aConnectionId);
-    
-    if (idx != KErrNotFound)
-        {
-        CMTPConnection* connection(iConnections[idx]);
-        iConnections.Remove(idx);
-        delete connection;
-        ret = ETrue;
-        }
-    
-    __FLOG(_L8("DeleteConnection - Entry"));
-    
-    return ret;
-    }
-
 EXPORT_C TUid CMTPConnectionMgr::ClientSId()
 	{
 	return iSecureId;
@@ -297,7 +284,8 @@ Constructor.
 CMTPConnectionMgr::CMTPConnectionMgr() :
     iConnectionOrder(ConnectionOrderCompare),
     iShutdownConnectionIdx(KErrNotFound),
-	iTransportUid(KNullUid)
+	iTransportUid(KNullUid),
+	iIsTransportStopping(EFalse)
     {
     __FLOG_OPEN(KMTPSubsystem, KComponent);    
     }

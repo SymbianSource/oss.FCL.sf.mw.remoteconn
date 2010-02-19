@@ -385,6 +385,7 @@ void CMTPObjectStore::InsertObjectL(CMTPObjectMetaData& aObject)
 	TBool needToInsert = EFalse;
 	TBool needUpdateOwner = EFalse;
 	TUint dpId(aObject.Uint(CMTPObjectMetaData::EDataProviderId));
+
 	TFileName suid;
 	suid.CopyLC(aObject.DesC(CMTPObjectMetaData::ESuid));
 	TUint32 suidHash = DefaultHash::Des16(suid);
@@ -392,7 +393,7 @@ void CMTPObjectStore::InsertObjectL(CMTPObjectMetaData& aObject)
 	TUint32 handle = KMTPHandleNone, handleInDB = KMTPHandleAll;
 	TInt64 id = 0;
 	// Check if the dp is enumerating
-	if (iSingletons.DpController().EnumerateState() != CMTPDataProviderController::EEnumerated && iCacheExist)
+	if (iSingletons.DpController().EnumerateState() != CMTPDataProviderController::EEnumeratedFulllyCompleted && iCacheExist)
 		{
 		//it is in the object enumeration phase. 
 		// if it's see if we have an object with the same SUID
@@ -438,7 +439,8 @@ void CMTPObjectStore::InsertObjectL(CMTPObjectMetaData& aObject)
 				}
 			else
 				{
-				User::Leave(KErrAlreadyExists);
+				//while enumerating, we ignore the repeatedly INSERT operations.
+				//User::Leave(KErrAlreadyExists);
 				}
 			}
 		}
@@ -686,7 +688,7 @@ void CMTPObjectStore::RemoveObjectL(const TMTPTypeUint32& aHandle)
 	{
 	if (LocateByHandleL(aHandle.Value()))
 		{
-		if (iSingletons.DpController().EnumerateState() != CMTPDataProviderController::EEnumerated &&
+		if (iSingletons.DpController().EnumerateState() != CMTPDataProviderController::EEnumeratedFulllyCompleted &&
 			IsMediaFormat(iBatched.ColUint16(EObjectStoreFormatCode)))
 			{
 			iMtpDeltaDataMgr->UpdateDeltaDataTableL(iBatched.ColInt64(EObjectStorePOUID), CMtpDeltaDataMgr::EDeleted);
@@ -702,7 +704,7 @@ void CMTPObjectStore::RemoveObjectL(const TDesC& aSuid)
 	{
 	if(LocateBySuidL(aSuid))
 		{
-		if (iSingletons.DpController().EnumerateState() != CMTPDataProviderController::EEnumerated &&
+		if (iSingletons.DpController().EnumerateState() != CMTPDataProviderController::EEnumeratedFulllyCompleted &&
 			IsMediaFormat(iBatched_SuidHashID.ColUint16(EObjectStoreFormatCode)))
 			{
 			iMtpDeltaDataMgr->UpdateDeltaDataTableL(iBatched_SuidHashID.ColInt64(EObjectStorePOUID), CMtpDeltaDataMgr::EDeleted);

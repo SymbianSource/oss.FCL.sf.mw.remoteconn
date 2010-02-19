@@ -27,9 +27,17 @@
 #include "mmtpenumerationcallback.h"
 #include "cmtpdataprovidercontroller.h"
 #include "cmtpdataprovider.h"
+#include "mtpframeworkconst.h"
+
 
 // Class constants.
 __FLOG_STMT(_LIT8(KComponent,"FSEnumerator");)
+
+const TUint KMTPMaxFullFileName = 259;
+/*
+ * 
+ */
+#define KMAX_FILECOUNT_ENUMERATINGPHASE1 5000
 
 /**
  * the files should not be owned by any dp. 
@@ -86,9 +94,13 @@ EXPORT_C CMTPFSEnumerator::~CMTPFSEnumerator()
 Kick off the enumeration on the specified storage
 @param aStorageId storage to be enumerated
 */
-EXPORT_C void CMTPFSEnumerator::StartL(TUint32 aStorageId)
+EXPORT_C void CMTPFSEnumerator::StartL(TUint32 aStorageId, TBool aOnlyRoot)
 	{
 	__ASSERT_DEBUG(!IsActive(), User::Invariant());
+	iNumOfFoldersAndFiles = 0;
+	iOnlyScanRoot = aOnlyRoot;
+	__FLOG_VA((_L8("iOnlyScanRoot == %d "), iOnlyScanRoot));
+	
 	MMTPStorageMgr& storageMgr(iFramework.StorageMgr());
 	if (aStorageId == KMTPStorageAll)
 	    {
@@ -157,6 +169,11 @@ EXPORT_C void CMTPFSEnumerator::StartL(TUint32 aStorageId)
 		}
 	else
 		{
+		if((!iIsFileEnumerator) &&(iNumOfFoldersAndFiles > KMAX_FILECOUNT_ENUMERATINGPHASE1))
+			{
+			iSingletons.DpController().SetNeedEnumeratingPhase2(ETrue);
+			}
+		
 		iCallback.NotifyEnumerationCompleteL(iStorageId, KErrNone);
 		
 		TMTPTypeEvent event;
@@ -248,7 +265,12 @@ void CMTPFSEnumerator::ScanNextStorageL()
 		{
 		// We are done
 		iStorages.Reset();
+		if((!iIsFileEnumerator) &&(iNumOfFoldersAndFiles > KMAX_FILECOUNT_ENUMERATINGPHASE1))
+			{
+			iSingletons.DpController().SetNeedEnumeratingPhase2(ETrue);
+			}
 		iCallback.NotifyEnumerationCompleteL(iStorageId, KErrNone);
+		
 		}
 	__FLOG_VA(_L8("ScanNextStorageL - exit"));
 	}
@@ -283,7 +305,7 @@ void CMTPFSEnumerator::ScanNextL()
 	__FLOG_VA(_L8("ScanNextL - entry"));
 	TInt count = iDirStack.Count();
 	
-	if (count == 0)
+	if ((count == 0) || iOnlyScanRoot )
 		{
 		// No more directories on the stack, try the next storage
 		ScanNextStorageL();
@@ -372,6 +394,7 @@ TInt CMTPFSEnumerator::RunError(TInt aError)
 	__FLOG_VA((_L8("RunError - entry with error %d"), aError));
 	 if(!iFramework.StorageMgr().ValidStorageId(iStorages[0]))
 		 {
+		 __FLOG_VA((_L8("Invalid StorageID = %d"),iStorages[0] ));
 		 if (iStorages.Count()>1)
 			 {
 			 //Not necessary to process any entry on the storage, since the storage removed.
@@ -411,6 +434,7 @@ void CMTPFSEnumerator::ConstructL()
 	iDpSingletons.OpenL(iFramework);
 	iObject = CMTPObjectMetaData::NewL();	
 	iDpID = iFramework.DataProviderId();
+	iIsFileEnumerator = (KMTPFileDPID == iDpID);
 	}
 
 /**
@@ -419,8 +443,6 @@ Iterates iEntries adding entries as needed to object manager and iDirStack.
 
 void CMTPFSEnumerator::ProcessEntriesL()
 	{
-	const TUint KMTPMaxFullFileName = 259;
-
 	TBuf<KMTPMaxFullFileName> path = iPath.DriveAndPath();
 	
 	// Start looping through entries at where we left off
@@ -429,7 +451,11 @@ void CMTPFSEnumerator::ProcessEntriesL()
 	count = Min(count, iProcessLimit);
 	iFirstUnprocessed += count;		
 	
-		
+	if(!iIsFileEnumerator)
+		{
+		iNumOfFoldersAndFiles +=count;
+		}	
+	
 	for (TInt i = (iFirstUnprocessed - count); i < iFirstUnprocessed; ++i)
 		{
 		const TEntry& entry = iEntries[i];
@@ -475,14 +501,14 @@ void CMTPFSEnumerator::ProcessEntriesL()
 				path.Append('\\');
 				++len;
 				format = EMTPFormatCodeAssociation;
-				AddEntryL(path, handle, format, iDpID, entry);
+				AddEntryL(path, handle, format, iDpID, entry, iStorages[0], iParentHandle);
 				iDirStack.AppendL(entry);
 				}
 			}
 		else if ( iExclusionMgr.IsFileAcceptedL(path,iStorages[0]) )
 			{
 			format = EMTPFormatCodeUndefined;
-			AddEntryL(path, handle, format, iDpID, entry);
+			AddEntryL(path, handle, format, iDpID, entry, iStorages[0], iParentHandle);
 			}
 		else if ( parse.ExtPresent() )
 		    {
@@ -492,7 +518,7 @@ void CMTPFSEnumerator::ProcessEntriesL()
                 if (KMTPHandleNone == iFramework.ObjectMgr().HandleL(path))
                     {
                     format = EMTPFormatCodeUndefined;
-                    AddEntryL(path, handle, format, iDpID, entry);		   
+                    AddEntryL(path, handle, format, iDpID, entry, iStorages[0], iParentHandle);		   
                     }
                 break;
                 
@@ -501,7 +527,7 @@ void CMTPFSEnumerator::ProcessEntriesL()
                     {
                     format = iDpSingletons.MTPUtility().GetFormatByExtension(parse.Ext().Mid(1));  
                     TUint32 DpId = iDpSingletons.MTPUtility().GetDpId(parse.Ext().Mid(1), KNullDesC);
-                    AddFileEntryForOtherDpL(path, handle, format, DpId, entry);
+                    AddFileEntryForOtherDpL(path, handle, format, DpId, entry, iStorages[0], iParentHandle);
                     }
                 break;
                 
@@ -509,7 +535,7 @@ void CMTPFSEnumerator::ProcessEntriesL()
                 {
                 format = iDpSingletons.MTPUtility().GetFormatByExtension(parse.Ext().Mid(1));  
                 TUint32 DpId = iDpSingletons.MTPUtility().GetDpId(parse.Ext().Mid(1), KNullDesC);
-                AddFileEntryForOtherDpL(path, handle, format, DpId, entry);
+                AddFileEntryForOtherDpL(path, handle, format, DpId, entry, iStorages[0], iParentHandle);
                 }
                 break;
                 
@@ -531,7 +557,7 @@ Add a file entry to the object store
 @param aPath    The full path name of the entry
 @return MTP object handle, or KMTPHandleNone if entry was not accepted
 */    
-void CMTPFSEnumerator::AddEntryL(const TDesC& aPath, TUint32 &aHandle, TMTPFormatCode format, TUint32 aDPId, const TEntry& aEntry)
+void CMTPFSEnumerator::AddEntryL(const TDesC& aPath, TUint32 &aHandle, TMTPFormatCode format, TUint32 aDPId, const TEntry& aEntry, TUint32 aStorageId, TUint32 aParentHandle)
 	{
 #ifdef __FLOG_ACTIVE    
 	TBuf8<KMaxFileName> tmp;
@@ -561,10 +587,10 @@ void CMTPFSEnumerator::AddEntryL(const TDesC& aPath, TUint32 &aHandle, TMTPForma
         
         iObject->SetUint(CMTPObjectMetaData::EDataProviderId, aDPId);
         iObject->SetUint(CMTPObjectMetaData::EFormatCode, format);
-        iObject->SetUint(CMTPObjectMetaData::EStorageId, iStorages[0]);
+        iObject->SetUint(CMTPObjectMetaData::EStorageId, aStorageId);
         iObject->SetDesCL(CMTPObjectMetaData::ESuid, aPath);
         iObject->SetUint(CMTPObjectMetaData::EFormatSubCode, assoc);
-        iObject->SetUint(CMTPObjectMetaData::EParentHandle, iParentHandle);
+        iObject->SetUint(CMTPObjectMetaData::EParentHandle, aParentHandle);
         iObject->SetUint(CMTPObjectMetaData::ENonConsumable, EMTPConsumable);
         iObject->SetDesCL(CMTPObjectMetaData::EName, name);
         iFramework.ObjectMgr().InsertObjectL(*iObject);
@@ -572,7 +598,7 @@ void CMTPFSEnumerator::AddEntryL(const TDesC& aPath, TUint32 &aHandle, TMTPForma
 	__FLOG_VA(_L8("AddEntryL - exit"));	
 	}
 
-void CMTPFSEnumerator::AddFileEntryForOtherDpL(const TDesC& aPath, TUint32 &aHandle, TMTPFormatCode format, TUint32 aDPId, const TEntry& /*aEntry*/)
+void CMTPFSEnumerator::AddFileEntryForOtherDpL(const TDesC& aPath, TUint32 &aHandle, TMTPFormatCode format, TUint32 aDPId, const TEntry& /*aEntry*/, TUint32 aStorageId, TUint32 aParentHandle)
     {
 #ifdef __FLOG_ACTIVE    
     TBuf8<KMaxFileName> tmp;
@@ -589,10 +615,10 @@ void CMTPFSEnumerator::AddFileEntryForOtherDpL(const TDesC& aPath, TUint32 &aHan
     
     iObject->SetUint(CMTPObjectMetaData::EDataProviderId, aDPId);
     iObject->SetUint(CMTPObjectMetaData::EFormatCode, format);
-    iObject->SetUint(CMTPObjectMetaData::EStorageId, iStorages[0]);
+    iObject->SetUint(CMTPObjectMetaData::EStorageId, aStorageId);
     iObject->SetDesCL(CMTPObjectMetaData::ESuid, aPath);
     iObject->SetUint(CMTPObjectMetaData::EFormatSubCode, assoc);
-    iObject->SetUint(CMTPObjectMetaData::EParentHandle, iParentHandle);
+    iObject->SetUint(CMTPObjectMetaData::EParentHandle, aParentHandle);
     iObject->SetUint(CMTPObjectMetaData::ENonConsumable, EMTPConsumable);
     iObject->SetDesCL(CMTPObjectMetaData::EName, name);
     iFramework.ObjectMgr().InsertObjectL(*iObject);
@@ -603,4 +629,5 @@ void CMTPFSEnumerator::NotifyObjectAddToDP(const TUint32 aHandle,const TUint DpI
     {
     iSingletons.DpController().NotifyDataProvidersL(DpId,EMTPObjectAdded,(TAny*)&aHandle);
     }
+
 

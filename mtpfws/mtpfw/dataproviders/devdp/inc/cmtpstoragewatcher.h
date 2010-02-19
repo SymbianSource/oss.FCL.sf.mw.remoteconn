@@ -27,8 +27,10 @@
 #include "mtpdebug.h"
 #include "rmtpframework.h"
 #include "rmtpdpsingletons.h"
+#include "rmtpdevicedpsingletons.h"
 
 class MMTPDataProviderFramework;
+
 
 /** 
 Implements the MTP device data provider system storage watcher.
@@ -118,6 +120,8 @@ private: // Owned
     The DP Singleton.
     */
     RMTPDpSingletons				iDpSingletons;
+    
+    RMTPDeviceDpSingletons          iDevDpSingletons;
     
 private: // Not owned.
 

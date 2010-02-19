@@ -45,6 +45,8 @@ public:
     CMTPDeviceDataStore& DeviceDataStore();
     CMTPDeviceDpConfigMgr& ConfigMgr();
     
+    RArray<TUint>& PendingStorages();
+    
 private:
     
     /**
@@ -79,6 +81,11 @@ private:
         The device dp config manager.
         */
         CMTPDeviceDpConfigMgr*	iConfigMgr;
+        
+        /*
+         * The pending storageids which is not enumerated.
+         */
+        RArray<TUint>         iPendingStorages;
     };
     
 private: // Owned

@@ -261,6 +261,15 @@ void CMTPImageDpDeleteObject::StartL()
     {
     __FLOG(_L8(">> CMTPImageDpDeleteObject::StartL"));
     
+    if(iCancelled)
+        {
+        __FLOG(_L8("Cancell the delete"));
+        CMTPRequestProcessor::SendResponseL(EMTPRespCodeTransactionCancelled);
+        iObjectsToDelete.Reset();
+        iCancelled = EFalse;
+        return;
+        }
+    
     TInt numObjectsToDelete = iObjectsToDelete.Count();
 
     if ( numObjectsToDelete > 0 )

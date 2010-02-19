@@ -558,7 +558,7 @@ void CMTPDataProvider::RunL()
             }
         }
     
-		else if (iSingletons.DpController().EnumerateState() != CMTPDataProviderController::EEnumerated)
+		else if (iSingletons.DpController().EnumerateState() < CMTPDataProviderController::EEnumeratingPhaseOneDone)
     	{
         __FLOG(_L8("DP Enumeration is not complete"));
 

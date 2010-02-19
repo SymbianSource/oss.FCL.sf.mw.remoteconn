@@ -45,7 +45,8 @@ public:
 private: // From CMTPRequestProcessor
 
     void ServiceL();    
-
+	TMTPResponseCode CheckRequestL();
+	
 private: // From MMTPTransactionProxy
 
     void ProxyReceiveDataL(MMTPType& aData, const TMTPTypeRequest& aRequest, MMTPConnection& aConnection, TRequestStatus& aStatus);

@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2008-2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2008-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -57,6 +57,13 @@ CSConVideoParser::~CSConVideoParser()
         iVideoUtil->Close();
         }
     delete iVideoUtil;
+    
+    if ( iWindow )
+        {
+        iWindow->Close();
+        }
+    delete iWindow;
+    iRootWindow.Close();
     delete iScreen;
     iWsSession.Close();
     
@@ -90,26 +97,16 @@ void CSConVideoParser::ConstructL()
     User::LeaveIfError( iWsSession.Connect() );
     
     iScreen = new(ELeave) CWsScreenDevice( iWsSession );
-    iScreen->Construct();
+    User::LeaveIfError( iScreen->Construct() );
     
-    RWindowGroup wg( iWsSession );
-    User::LeaveIfError( wg.Construct(reinterpret_cast<TUint32>(&wg), EFalse) );
-    CleanupClosePushL( wg );
+    iRootWindow = RWindowGroup(iWsSession);
+    User::LeaveIfError( iRootWindow.Construct(reinterpret_cast<TUint32>(&iWsSession), EFalse) );
     
-    CWindowGc* gc;
-    User::LeaveIfError( iScreen->CreateContext(gc) );
-    CleanupStack::PushL(gc);
-    
-    RWindow window( iWsSession );
-    User::LeaveIfError( window.Construct(wg, reinterpret_cast<TUint32>(&wg) + 1) );
-    CleanupClosePushL( window );
+    iWindow = new(ELeave) RWindow( iWsSession );
+    User::LeaveIfError( iWindow->Construct(iRootWindow, reinterpret_cast<TUint32>(&iRootWindow) + 1) );
     
     TRect temp(0,0,320,240); // dummy parameter
-    iVideoUtil = CVideoPlayerUtility::NewL(*this, EMdaPriorityNormal, EMdaPriorityPreferenceNone, iWsSession, *(iScreen), window, temp, temp);
-    
-    CleanupStack::PopAndDestroy( &window );
-    CleanupStack::PopAndDestroy( gc );
-    CleanupStack::PopAndDestroy( &wg );
+    iVideoUtil = CVideoPlayerUtility::NewL(*this, EMdaPriorityNormal, EMdaPriorityPreferenceNone, iWsSession, *iScreen, *iWindow, temp, temp);
     
     iTimeOut = CSconTimeOut::NewL( *this );
     

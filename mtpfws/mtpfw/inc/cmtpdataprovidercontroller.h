@@ -62,7 +62,9 @@ public:
         EEnumeratingDataProviderStorages    = 3,
         EEnumeratingFrameworkObjects        = 4,
         EEnumeratingDataProviderObjects     = 5,
-        EEnumerated                         = 6,
+        EEnumeratingPhaseOneDone            = 6,
+        EEnumeratingSubDirFiles				= 7, //Only File DP care the status.
+        EEnumeratedFulllyCompleted			= 8,
         };
         
 public:
@@ -90,6 +92,9 @@ public:
 
     IMPORT_C void WaitForEnumerationComplete();
     TBool FreeEnumerationWaiter();
+    
+    IMPORT_C void SetNeedEnumeratingPhase2(TBool aNeed);
+    IMPORT_C TBool NeedEnumeratingPhase2() const;
 private: // From CActive
 
     void DoCancel();
@@ -115,7 +120,7 @@ private:
     static void ImplementationsCleanup(TAny* aData);
     static TInt ImplementationsLinearOrderUid(const TUid* aUid, const CImplementationInformation& aObject);
     static TInt ImplementationsLinearOrderUid(const CImplementationInformation& aL, const CImplementationInformation& aR);
-        
+    
 private: // Owned
     /**
     FLOGGER debug trace member variable.
@@ -208,11 +213,12 @@ private: // Owned
     opensession waiter
     */
     CActiveSchedulerWait *iOpenSessionWaiter;
-    
-    /**
-    Flag for Create DBSnapshot
-    */
-    TUint8 iFlagDb;
+
+    /*
+     The number of folders and files that will be enumerated.
+     */
+    TBool		iNeedEnumeratingPhase2;
+    TUint32 	iNeedEnumeratingPhase2StorageId;
 
     };
 

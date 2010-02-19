@@ -150,7 +150,7 @@ private:
     
     void ResumeConnectionL();
     void StartConnectionL();
-    void StopConnection();
+    TBool StopConnection();
     void SuspendConnectionL();
     
     void StartUsbL();
@@ -416,6 +416,12 @@ private: // Owned.
 	is triggered.
 	*/
 	TBool 												iIsCancelReceived;
+	
+    /**
+    A flag to reflect if a Host initiated cancel transaction
+    is triggered.
+    */
+    TBool                                               iIsResetRequestSignaled;
 	
     /**
     FLOGGER debug trace member variable.
