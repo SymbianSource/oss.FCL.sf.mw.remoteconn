@@ -1,0 +1,7 @@
+EXPORTS
+	??1CSecureBUREncryptKeySource@conn@@UAE@XZ @ 1 NONAME ; conn::CSecureBUREncryptKeySource::~CSecureBUREncryptKeySource(void)
+	?GetBackupKeyL@CSecureBUREncryptKeySource@conn@@QAEXW4TDriveNumber@@VTSecureId@@AAHAAVTDes8@@2AAVTDes16@@@Z @ 2 NONAME ; void conn::CSecureBUREncryptKeySource::GetBackupKeyL(enum TDriveNumber, class TSecureId, int &, class TDes8 &, int &, class TDes16 &)
+	?GetDefaultBufferForBackupL@CSecureBUREncryptKeySource@conn@@QAEXW4TDriveNumber@@AAHAAVTDes16@@@Z @ 3 NONAME ; void conn::CSecureBUREncryptKeySource::GetDefaultBufferForBackupL(enum TDriveNumber, int &, class TDes16 &)
+	?GetRestoreKeyL@CSecureBUREncryptKeySource@conn@@QAEXW4TDriveNumber@@VTSecureId@@HAAVTDes16@@AAHAAVTDes8@@@Z @ 4 NONAME ; void conn::CSecureBUREncryptKeySource::GetRestoreKeyL(enum TDriveNumber, class TSecureId, int, class TDes16 &, int &, class TDes8 &)
+	?NewL@CSecureBUREncryptKeySource@conn@@SAPAV12@XZ @ 5 NONAME ; class conn::CSecureBUREncryptKeySource * conn::CSecureBUREncryptKeySource::NewL(void)
+

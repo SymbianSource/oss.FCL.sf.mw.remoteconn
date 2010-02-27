@@ -1,0 +1,60 @@
+EXPORTS
+	"_._Q24conn22CSBPackageTransferType" @ 1 NONAME R3UNUSED ; conn::CSBPackageTransferType::~CSBPackageTransferType(void)
+	AllSystemFilesRestored__Q24conn10CSBEClient @ 2 NONAME R3UNUSED ; conn::CSBEClient::AllSystemFilesRestored(void)
+	CommonSettings__Q24conn14CDataOwnerInfo @ 3 NONAME R3UNUSED ; conn::CDataOwnerInfo::CommonSettings(void)
+	DataChecksum__Q24conn10CSBEClient12TDriveNumberG9TSecureId @ 4 NONAME R3UNUSED ; conn::CSBEClient::DataChecksum(TDriveNumber, TSecureId)
+	DataTypeL__CQ24conn18CSBSIDTransferType @ 5 NONAME R3UNUSED ; conn::CSBSIDTransferType::DataTypeL(void) const
+	DataTypeL__CQ24conn22CSBPackageTransferType @ 6 NONAME R3UNUSED ; conn::CSBPackageTransferType::DataTypeL(void) const
+	DerivedTypeL__CQ24conn18CSBGenericDataType @ 7 NONAME R3UNUSED ; conn::CSBGenericDataType::DerivedTypeL(void) const
+	DriveList__CQ24conn14CDataOwnerInfo @ 8 NONAME R3UNUSED ; conn::CDataOwnerInfo::DriveList(void) const
+	DriveList__Q24conn14CDataOwnerInfo @ 9 NONAME R3UNUSED ; conn::CDataOwnerInfo::DriveList(void)
+	DriveNumberL__CQ24conn22CSBGenericTransferType @ 10 NONAME R3UNUSED ; conn::CSBGenericTransferType::DriveNumberL(void) const
+	ExpectedDataSizeL__Q24conn10CSBEClientPQ24conn22CSBGenericTransferType @ 11 NONAME R3UNUSED ; conn::CSBEClient::ExpectedDataSizeL(conn::CSBGenericTransferType *)
+	ExternaliseL__Q24conn14CDataOwnerInfoRP6HBufC8 @ 12 NONAME R3UNUSED ; conn::CDataOwnerInfo::ExternaliseL(HBufC8 *&)
+	ExternaliseL__Q24conn18CSBGenericDataType @ 13 NONAME R3UNUSED ; conn::CSBGenericDataType::ExternaliseL(void)
+	Identifier__CQ24conn14CDataOwnerInfo @ 14 NONAME R3UNUSED ; conn::CDataOwnerInfo::Identifier(void) const
+	Identifier__Q24conn14CDataOwnerInfo @ 15 NONAME R3UNUSED ; conn::CDataOwnerInfo::Identifier(void)
+	ListOfDataOwnersL__Q24conn10CSBEClientRt13RPointerArray1ZQ24conn14CDataOwnerInfo @ 16 NONAME R3UNUSED ; conn::CSBEClient::ListOfDataOwnersL(RPointerArray<conn::CDataOwnerInfo> &)
+	NewL__Q24conn10CSBEClient @ 17 NONAME R3UNUSED ; conn::CSBEClient::NewL(void)
+	NewL__Q24conn11CSBSecureIdG9TSecureId @ 18 NONAME R3UNUSED ; conn::CSBSecureId::NewL(TSecureId)
+	NewL__Q24conn11CSBSecureIdPQ24conn18CSBGenericDataType @ 19 NONAME R3UNUSED ; conn::CSBSecureId::NewL(conn::CSBGenericDataType *)
+	NewL__Q24conn12CSBPackageIdG4TUidG9TSecureIdRC7TDesC16 @ 20 NONAME R3UNUSED ; conn::CSBPackageId::NewL(TUid, TSecureId, TDesC16 const &)
+	NewL__Q24conn12CSBPackageIdPQ24conn18CSBGenericDataType @ 21 NONAME R3UNUSED ; conn::CSBPackageId::NewL(conn::CSBGenericDataType *)
+	NewL__Q24conn14CDataOwnerInfoPQ24conn18CSBGenericDataTypeUlUlUlRCt5TBuf81i26 @ 22 NONAME ; conn::CDataOwnerInfo::NewL(conn::CSBGenericDataType *, unsigned long, unsigned long, unsigned long, TBuf8<26> const &)
+	NewL__Q24conn14CDataOwnerInfoRC6TDesC8 @ 23 NONAME R3UNUSED ; conn::CDataOwnerInfo::NewL(TDesC8 const &)
+	NewL__Q24conn18CSBGenericDataTypeRC6TDesC8 @ 24 NONAME R3UNUSED ; conn::CSBGenericDataType::NewL(TDesC8 const &)
+	NewL__Q24conn18CSBSIDTransferTypeG9TSecureId12TDriveNumberQ24conn17TTransferDataType @ 25 NONAME R3UNUSED ; conn::CSBSIDTransferType::NewL(TSecureId, TDriveNumber, conn::TTransferDataType)
+	NewL__Q24conn18CSBSIDTransferTypePQ24conn22CSBGenericTransferType @ 26 NONAME R3UNUSED ; conn::CSBSIDTransferType::NewL(conn::CSBGenericTransferType *)
+	NewL__Q24conn22CSBGenericTransferTypeRC6TDesC8 @ 27 NONAME R3UNUSED ; conn::CSBGenericTransferType::NewL(TDesC8 const &)
+	NewL__Q24conn22CSBPackageTransferTypeG4TUid12TDriveNumberQ24conn16TPackageDataType @ 28 NONAME R3UNUSED ; conn::CSBPackageTransferType::NewL(TUid, TDriveNumber, conn::TPackageDataType)
+	NewL__Q24conn22CSBPackageTransferTypePQ24conn22CSBGenericTransferType @ 29 NONAME R3UNUSED ; conn::CSBPackageTransferType::NewL(conn::CSBGenericTransferType *)
+	PackageIdL__CQ24conn12CSBPackageId @ 30 NONAME R3UNUSED ; conn::CSBPackageId::PackageIdL(void) const
+	PackageIdL__CQ24conn22CSBPackageTransferType @ 31 NONAME R3UNUSED ; conn::CSBPackageTransferType::PackageIdL(void) const
+	PackageNameL__CQ24conn12CSBPackageId @ 32 NONAME R3UNUSED ; conn::CSBPackageId::PackageNameL(void) const
+	PassiveSettings__Q24conn14CDataOwnerInfo @ 33 NONAME R3UNUSED ; conn::CDataOwnerInfo::PassiveSettings(void)
+	PublicFileListL__Q24conn10CSBEClient12TDriveNumberG9TSecureIdRQ24connt20RExternalisableArray1ZQ24conn9TFileInfo @ 34 NONAME ; conn::CSBEClient::PublicFileListL(TDriveNumber, TSecureId, conn::RExternalisableArray<conn::TFileInfo> &)
+	PublicFileListXMLL__Q24conn10CSBEClient12TDriveNumberG9TSecureIdRP7HBufC16 @ 35 NONAME ; conn::CSBEClient::PublicFileListXMLL(TDriveNumber, TSecureId, HBufC16 *&)
+	RawPublicFileListL__Q24conn10CSBEClient12TDriveNumberG9TSecureIdRQ24connt20RExternalisableArray1ZQ24conn18TRestoreFileFilter @ 36 NONAME ; conn::CSBEClient::RawPublicFileListL(TDriveNumber, TSecureId, conn::RExternalisableArray<conn::TRestoreFileFilter> &)
+	RequestDataL__Q24conn10CSBEClientPQ24conn22CSBGenericTransferType @ 37 NONAME R3UNUSED ; conn::CSBEClient::RequestDataL(conn::CSBGenericTransferType *)
+	RequestDataL__Q24conn10CSBEClientPQ24conn22CSBGenericTransferTypeR14TRequestStatus @ 38 NONAME R3UNUSED ; conn::CSBEClient::RequestDataL(conn::CSBGenericTransferType *, TRequestStatus &)
+	SIDStatusL__Q24conn10CSBEClientRQ24connt20RExternalisableArray1ZQ24conn19TDataOwnerAndStatus @ 39 NONAME R3UNUSED ; conn::CSBEClient::SIDStatusL(conn::RExternalisableArray<conn::TDataOwnerAndStatus> &)
+	SecureIdL__CQ24conn11CSBSecureId @ 40 NONAME R3UNUSED ; conn::CSBSecureId::SecureIdL(void) const
+	SecureIdL__CQ24conn12CSBPackageId @ 41 NONAME R3UNUSED ; conn::CSBPackageId::SecureIdL(void) const
+	SecureIdL__CQ24conn18CSBSIDTransferType @ 42 NONAME R3UNUSED ; conn::CSBSIDTransferType::SecureIdL(void) const
+	SetBURModeL__Q24conn10CSBEClientRCt5TBuf81i26Q24conn12TBURPartTypeQ24conn14TBackupIncType @ 43 NONAME ; conn::CSBEClient::SetBURModeL(TBuf8<26> const &, conn::TBURPartType, conn::TBackupIncType)
+	SetBaseBackupTypeL__Q24conn10CSBEClientRQ24connt20RExternalisableArray1Z9TSecureId @ 44 NONAME R3UNUSED ; conn::CSBEClient::SetBaseBackupTypeL(conn::RExternalisableArray<TSecureId> &)
+	SetSIDListForPartialBURL__Q24conn10CSBEClientRQ24connt20RExternalisableArray1Z9TSecureId @ 45 NONAME R3UNUSED ; conn::CSBEClient::SetSIDListForPartialBURL(conn::RExternalisableArray<TSecureId> &)
+	Size__CQ24conn14CDataOwnerInfo @ 46 NONAME R3UNUSED ; conn::CDataOwnerInfo::Size(void) const
+	SupplyDataL__Q24conn10CSBEClientPQ24conn22CSBGenericTransferTypei @ 47 NONAME R3UNUSED ; conn::CSBEClient::SupplyDataL(conn::CSBGenericTransferType *, int)
+	SupplyDataL__Q24conn10CSBEClientPQ24conn22CSBGenericTransferTypeiR14TRequestStatus @ 48 NONAME ; conn::CSBEClient::SupplyDataL(conn::CSBGenericTransferType *, int, TRequestStatus &)
+	TransferDataAddressL__Q24conn10CSBEClient @ 49 NONAME R3UNUSED ; conn::CSBEClient::TransferDataAddressL(void)
+	TransferDataInfoL__Q24conn10CSBEClientRPQ24conn22CSBGenericTransferTypeRi @ 50 NONAME R3UNUSED ; conn::CSBEClient::TransferDataInfoL(conn::CSBGenericTransferType *&, int &)
+	"_._Q24conn10CSBEClient" @ 51 NONAME R3UNUSED ; conn::CSBEClient::~CSBEClient(void)
+	"_._Q24conn11CSBSecureId" @ 52 NONAME R3UNUSED ; conn::CSBSecureId::~CSBSecureId(void)
+	"_._Q24conn12CSBPackageId" @ 53 NONAME R3UNUSED ; conn::CSBPackageId::~CSBPackageId(void)
+	"_._Q24conn14CDataOwnerInfo" @ 54 NONAME R3UNUSED ; conn::CDataOwnerInfo::~CDataOwnerInfo(void)
+	"_._Q24conn18CSBGenericDataType" @ 55 NONAME R3UNUSED ; conn::CSBGenericDataType::~CSBGenericDataType(void)
+	"_._Q24conn18CSBSIDTransferType" @ 56 NONAME R3UNUSED ; conn::CSBSIDTransferType::~CSBSIDTransferType(void)
+	"_._Q24conn22CSBGenericTransferType" @ 57 NONAME R3UNUSED ; conn::CSBGenericTransferType::~CSBGenericTransferType(void)
+	ActiveSettings__Q24conn14CDataOwnerInfo @ 58 NONAME R3UNUSED ; conn::CDataOwnerInfo::ActiveSettings(void)
+

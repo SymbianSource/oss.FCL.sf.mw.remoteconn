@@ -1,0 +1,13 @@
+EXPORTS
+	_ZTIN4conn23CSecureBURKeySourceImplE @ 1 NONAME ; #<TI>#
+	_ZTIN4conn26CSecureBUREncryptKeySourceE @ 2 NONAME ; #<TI>#
+	_ZTVN4conn23CSecureBURKeySourceImplE @ 3 NONAME ; #<VT>#
+	_ZTVN4conn26CSecureBUREncryptKeySourceE @ 4 NONAME ; #<VT>#
+	_ZN4conn26CSecureBUREncryptKeySource13GetBackupKeyLE12TDriveNumber9TSecureIdRiR5TDes8S3_R6TDes16 @ 5 NONAME
+	_ZN4conn26CSecureBUREncryptKeySource14GetRestoreKeyLE12TDriveNumber9TSecureIdiR6TDes16RiR5TDes8 @ 6 NONAME
+	_ZN4conn26CSecureBUREncryptKeySource26GetDefaultBufferForBackupLE12TDriveNumberRiR6TDes16 @ 7 NONAME
+	_ZN4conn26CSecureBUREncryptKeySource4NewLEv @ 8 NONAME
+	_ZN4conn26CSecureBUREncryptKeySourceD0Ev @ 9 NONAME
+	_ZN4conn26CSecureBUREncryptKeySourceD1Ev @ 10 NONAME
+	_ZN4conn26CSecureBUREncryptKeySourceD2Ev @ 11 NONAME
+

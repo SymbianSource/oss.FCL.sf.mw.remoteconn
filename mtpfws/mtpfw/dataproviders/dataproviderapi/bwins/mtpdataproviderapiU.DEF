@@ -1,0 +1,58 @@
+EXPORTS
+	??0CMTPDataProviderPlugin@@IAE@PAX@Z @ 1 NONAME ; CMTPDataProviderPlugin::CMTPDataProviderPlugin(void *)
+	??0RMTPObjectMgrQueryContext@@QAE@XZ @ 2 NONAME ; RMTPObjectMgrQueryContext::RMTPObjectMgrQueryContext(void)
+	??0TMTPObjectMgrQueryParams@@QAE@KKK@Z @ 3 NONAME ABSENT ; TMTPObjectMgrQueryParams::TMTPObjectMgrQueryParams(unsigned long, unsigned long, unsigned long)
+	??0TMTPStorageMgrQueryParams@@QAE@ABVTDesC16@@K@Z @ 4 NONAME ; TMTPStorageMgrQueryParams::TMTPStorageMgrQueryParams(class TDesC16 const &, unsigned long)
+	??0TMTPStorageMgrQueryParams@@QAE@XZ @ 5 NONAME ; TMTPStorageMgrQueryParams::TMTPStorageMgrQueryParams(void)
+	??1CMTPDataProviderPlugin@@UAE@XZ @ 6 NONAME ; CMTPDataProviderPlugin::~CMTPDataProviderPlugin(void)
+	??1CMTPMetaData@@UAE@XZ @ 7 NONAME ; CMTPMetaData::~CMTPMetaData(void)
+	??1CMTPObjectMetaData@@UAE@XZ @ 8 NONAME ; CMTPObjectMetaData::~CMTPObjectMetaData(void)
+	??1CMTPStorageMetaData@@UAE@XZ @ 9 NONAME ; CMTPStorageMetaData::~CMTPStorageMetaData(void)
+	?Close@RMTPObjectMgrQueryContext@@QAEXXZ @ 10 NONAME ; void RMTPObjectMgrQueryContext::Close(void)
+	?DbView@RMTPObjectMgrQueryContext@@AAEAAVRDbView@@XZ @ 11 NONAME ; class RDbView & RMTPObjectMgrQueryContext::DbView(void)
+	?DesC@CMTPMetaData@@QBEABVTDesC16@@I@Z @ 12 NONAME ; class TDesC16 const & CMTPMetaData::DesC(unsigned int) const
+	?DesCArray@CMTPMetaData@@QAEABVCDesC16Array@@I@Z @ 13 NONAME ; class CDesC16Array const & CMTPMetaData::DesCArray(unsigned int)
+	?Framework@CMTPDataProviderPlugin@@MBEAAVMMTPDataProviderFramework@@XZ @ 14 NONAME ; class MMTPDataProviderFramework & CMTPDataProviderPlugin::Framework(void) const
+	?GetExtendedInterface@CMTPMetaData@@QAEPAXVTUid@@@Z @ 15 NONAME ; void * CMTPMetaData::GetExtendedInterface(class TUid)
+	?GetExtendedInterface@MMTPDataProvider@@UAEPAXVTUid@@@Z @ 16 NONAME ; void * MMTPDataProvider::GetExtendedInterface(class TUid)
+	?GetIntArrayL@CMTPMetaData@@QAEXIAAV?$RArray@H@@@Z @ 17 NONAME ; void CMTPMetaData::GetIntArrayL(unsigned int, class RArray<int> &)
+	?GetUintArrayL@CMTPMetaData@@QAEXIAAV?$RArray@I@@@Z @ 18 NONAME ; void CMTPMetaData::GetUintArrayL(unsigned int, class RArray<unsigned int> &)
+	?Int@CMTPMetaData@@QBEHI@Z @ 19 NONAME ; int CMTPMetaData::Int(unsigned int) const
+	?IntArray@CMTPMetaData@@QBEABV?$RArray@H@@I@Z @ 20 NONAME ; class RArray<int> const & CMTPMetaData::IntArray(unsigned int) const
+	?IsOpen@RMTPObjectMgrQueryContext@@ABEHXZ @ 21 NONAME ; int RMTPObjectMgrQueryContext::IsOpen(void) const
+	?NewL@CMTPDataProviderPlugin@@SAPAV1@VTUid@@PAX@Z @ 22 NONAME ; class CMTPDataProviderPlugin * CMTPDataProviderPlugin::NewL(class TUid, void *)
+	?NewL@CMTPObjectMetaData@@SAPAV1@IIIABVTDesC16@@@Z @ 23 NONAME ; class CMTPObjectMetaData * CMTPObjectMetaData::NewL(unsigned int, unsigned int, unsigned int, class TDesC16 const &)
+	?NewL@CMTPObjectMetaData@@SAPAV1@XZ @ 24 NONAME ; class CMTPObjectMetaData * CMTPObjectMetaData::NewL(void)
+	?NewL@CMTPStorageMetaData@@SAPAV1@ABV1@@Z @ 25 NONAME ; class CMTPStorageMetaData * CMTPStorageMetaData::NewL(class CMTPStorageMetaData const &)
+	?NewL@CMTPStorageMetaData@@SAPAV1@IABVTDesC16@@@Z @ 26 NONAME ; class CMTPStorageMetaData * CMTPStorageMetaData::NewL(unsigned int, class TDesC16 const &)
+	?NewL@CMTPStorageMetaData@@SAPAV1@XZ @ 27 NONAME ; class CMTPStorageMetaData * CMTPStorageMetaData::NewL(void)
+	?NewLC@CMTPObjectMetaData@@SAPAV1@IIIABVTDesC16@@@Z @ 28 NONAME ; class CMTPObjectMetaData * CMTPObjectMetaData::NewLC(unsigned int, unsigned int, unsigned int, class TDesC16 const &)
+	?NewLC@CMTPObjectMetaData@@SAPAV1@XZ @ 29 NONAME ; class CMTPObjectMetaData * CMTPObjectMetaData::NewLC(void)
+	?NewLC@CMTPStorageMetaData@@SAPAV1@ABV1@@Z @ 30 NONAME ; class CMTPStorageMetaData * CMTPStorageMetaData::NewLC(class CMTPStorageMetaData const &)
+	?NewLC@CMTPStorageMetaData@@SAPAV1@IABVTDesC16@@@Z @ 31 NONAME ; class CMTPStorageMetaData * CMTPStorageMetaData::NewLC(unsigned int, class TDesC16 const &)
+	?NewLC@CMTPStorageMetaData@@SAPAV1@XZ @ 32 NONAME ; class CMTPStorageMetaData * CMTPStorageMetaData::NewLC(void)
+	?OpenL@RMTPObjectMgrQueryContext@@AAEXXZ @ 33 NONAME ; void RMTPObjectMgrQueryContext::OpenL(void)
+	?QueryComplete@RMTPObjectMgrQueryContext@@QBEHXZ @ 34 NONAME ; int RMTPObjectMgrQueryContext::QueryComplete(void) const
+	?SetDesCArrayL@CMTPMetaData@@QAEXIABVCDesC16ArrayFlat@@@Z @ 35 NONAME ; void CMTPMetaData::SetDesCArrayL(unsigned int, class CDesC16ArrayFlat const &)
+	?SetDesCArrayL@CMTPMetaData@@QAEXIABVCDesC16ArraySeg@@@Z @ 36 NONAME ; void CMTPMetaData::SetDesCArrayL(unsigned int, class CDesC16ArraySeg const &)
+	?SetDesCL@CMTPMetaData@@QAEXIABVTDesC16@@@Z @ 37 NONAME ; void CMTPMetaData::SetDesCL(unsigned int, class TDesC16 const &)
+	?SetInt@CMTPMetaData@@QAEXIH@Z @ 38 NONAME ; void CMTPMetaData::SetInt(unsigned int, int)
+	?SetIntArrayL@CMTPMetaData@@QAEXIABV?$RArray@H@@@Z @ 39 NONAME ; void CMTPMetaData::SetIntArrayL(unsigned int, class RArray<int> const &)
+	?SetStorageSuid@TMTPStorageMgrQueryParams@@QAEXABVTDesC16@@@Z @ 40 NONAME ; void TMTPStorageMgrQueryParams::SetStorageSuid(class TDesC16 const &)
+	?SetStorageSystemType@TMTPStorageMgrQueryParams@@QAEXK@Z @ 41 NONAME ; void TMTPStorageMgrQueryParams::SetStorageSystemType(unsigned long)
+	?SetUint@CMTPMetaData@@QAEXII@Z @ 42 NONAME ; void CMTPMetaData::SetUint(unsigned int, unsigned int)
+	?SetUintArrayL@CMTPMetaData@@QAEXIABV?$RArray@I@@@Z @ 43 NONAME ; void CMTPMetaData::SetUintArrayL(unsigned int, class RArray<unsigned int> const &)
+	?StorageSuid@TMTPStorageMgrQueryParams@@QBEABVTDesC16@@XZ @ 44 NONAME ; class TDesC16 const & TMTPStorageMgrQueryParams::StorageSuid(void) const
+	?StorageSystemType@TMTPStorageMgrQueryParams@@QBEKXZ @ 45 NONAME ; unsigned long TMTPStorageMgrQueryParams::StorageSystemType(void) const
+	?SupportedL@MMTPDataProvider@@UBEXW4TMTPSupportCategory@@AAVCDesC16Array@@@Z @ 46 NONAME ; void MMTPDataProvider::SupportedL(enum TMTPSupportCategory, class CDesC16Array &) const
+	?Uint@CMTPMetaData@@QBEII@Z @ 47 NONAME ; unsigned int CMTPMetaData::Uint(unsigned int) const
+	?UintArray@CMTPMetaData@@QBEABV?$RArray@I@@I@Z @ 48 NONAME ; class RArray<unsigned int> const & CMTPMetaData::UintArray(unsigned int) const
+	?NewL@CMTPObjectMetaData@@SAPAV1@ABVTDesC16@@III@Z @ 49 NONAME ; class CMTPObjectMetaData * CMTPObjectMetaData::NewL(class TDesC16 const &, unsigned int, unsigned int, unsigned int)
+	?NewLC@CMTPObjectMetaData@@SAPAV1@ABVTDesC16@@III@Z @ 50 NONAME ; class CMTPObjectMetaData * CMTPObjectMetaData::NewLC(class TDesC16 const &, unsigned int, unsigned int, unsigned int)
+	??0TMTPObjectMgrQueryParams@@QAE@KKKK@Z @ 51 NONAME ; TMTPObjectMgrQueryParams::TMTPObjectMgrQueryParams(unsigned long, unsigned long, unsigned long, unsigned long)
+	?SetHashPath@CMTPMetaData@@QAEXABVTDesC16@@I@Z @ 52 NONAME ; void CMTPMetaData::SetHashPath(class TDesC16 const &, unsigned int)
+	?GetHashPathArray@CMTPMetaData@@QAEABV?$RArray@UTPathHash@CMTPMetaData@@@@XZ @ 53 NONAME ; class RArray<struct CMTPMetaData::TPathHash> const & CMTPMetaData::GetHashPathArray(void)
+	?CompareTPathHash@CMTPMetaData@@SAHABUTPathHash@1@0@Z @ 54 NONAME ; int CMTPMetaData::CompareTPathHash(struct CMTPMetaData::TPathHash const &, struct CMTPMetaData::TPathHash const &)
+	?StartObjectEnumerationL@MMTPDataProvider@@UAEXK@Z @ 55 NONAME ; void MMTPDataProvider::StartObjectEnumerationL(unsigned long)
+	?StartObjectEnumerationL@MMTPDataProvider@@UAEXKH@Z @ 56 NONAME ; void MMTPDataProvider::StartObjectEnumerationL(unsigned long, int)
+

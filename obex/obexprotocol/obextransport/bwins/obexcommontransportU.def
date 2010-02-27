@@ -1,0 +1,110 @@
+EXPORTS
+	??0CObexConnector@@QAE@AAVMObexTransportNotify@@@Z @ 1 NONAME ; CObexConnector::CObexConnector(class MObexTransportNotify &)
+	??0CObexReaderBase@@IAE@W4TPriority@CActive@@AAVMObexTransportNotify@@AAUTObexConnectionInfo@@@Z @ 2 NONAME ; CObexReaderBase::CObexReaderBase(enum CActive::TPriority, class MObexTransportNotify &, struct TObexConnectionInfo &)
+	??0CObexTransportControllerBase@@IAE@XZ @ 3 NONAME ; CObexTransportControllerBase::CObexTransportControllerBase(void)
+	??0CObexWriterBase@@IAE@W4TPriority@CActive@@AAVMObexTransportNotify@@AAUTObexConnectionInfo@@@Z @ 4 NONAME ; CObexWriterBase::CObexWriterBase(enum CActive::TPriority, class MObexTransportNotify &, struct TObexConnectionInfo &)
+	??0TFunctionLogger@@QAE@ABVTDesC8@@0PAX@Z @ 5 NONAME ; TFunctionLogger::TFunctionLogger(class TDesC8 const &, class TDesC8 const &, void *)
+	??0TObexInternalHeader@@QAE@XZ @ 6 NONAME ; TObexInternalHeader::TObexInternalHeader(void)
+	??1CObexActiveReader@@UAE@XZ @ 7 NONAME ; CObexActiveReader::~CObexActiveReader(void)
+	??1CObexActiveWriter@@UAE@XZ @ 8 NONAME ; CObexActiveWriter::~CObexActiveWriter(void)
+	??1CObexConnector@@UAE@XZ @ 9 NONAME ; CObexConnector::~CObexConnector(void)
+	??1CObexPacket@@UAE@XZ @ 10 NONAME ; CObexPacket::~CObexPacket(void)
+	??1CObexReaderBase@@UAE@XZ @ 11 NONAME ; CObexReaderBase::~CObexReaderBase(void)
+	??1CObexTransportControllerBase@@UAE@XZ @ 12 NONAME ; CObexTransportControllerBase::~CObexTransportControllerBase(void)
+	??1CObexWriterBase@@UAE@XZ @ 13 NONAME ; CObexWriterBase::~CObexWriterBase(void)
+	??1TFunctionLogger@@QAE@XZ @ 14 NONAME ; TFunctionLogger::~TFunctionLogger(void)
+	?AcceptConnectionL@CObexTransportControllerBase@@QAEXXZ @ 15 NONAME ; void CObexTransportControllerBase::AcceptConnectionL(void)
+	?AddPacketProcessEvents@CObexPacket@@QAEXI@Z @ 16 NONAME ; void CObexPacket::AddPacketProcessEvents(unsigned int)
+	?BaseConstructL@CObexConnector@@IAEXXZ @ 17 NONAME ; void CObexConnector::BaseConstructL(void)
+	?BaseConstructL@CObexReaderBase@@IAEXXZ @ 18 NONAME ; void CObexReaderBase::BaseConstructL(void)
+	?BaseConstructL@CObexWriterBase@@IAEXXZ @ 19 NONAME ; void CObexWriterBase::BaseConstructL(void)
+	?BringTransportDown@CObexTransportControllerBase@@QAEHXZ @ 20 NONAME ; int CObexTransportControllerBase::BringTransportDown(void)
+	?BufferSize@CObexPacket@@QBEGXZ @ 21 NONAME ; unsigned short CObexPacket::BufferSize(void) const
+	?CancelAccept@CObexTransportControllerBase@@QAEXXZ @ 22 NONAME ; void CObexTransportControllerBase::CancelAccept(void)
+	?CancelConnect@CObexTransportControllerBase@@QAEXXZ @ 23 NONAME ; void CObexTransportControllerBase::CancelConnect(void)
+	?CancelTransfers@CObexTransportControllerBase@@QAEXXZ @ 24 NONAME ; void CObexTransportControllerBase::CancelTransfers(void)
+	?Close@CObexLog@@SAXXZ @ 25 NONAME ; void CObexLog::Close(void)
+	?CompleteTransfer@CObexReaderBase@@MAEHXZ @ 26 NONAME ; int CObexReaderBase::CompleteTransfer(void)
+	?CompleteTransfer@CObexWriterBase@@MAEHXZ @ 27 NONAME ; int CObexWriterBase::CompleteTransfer(void)
+	?Connect@CObexLog@@SAHXZ @ 28 NONAME ; int CObexLog::Connect(void)
+	?ConnectL@CObexTransportControllerBase@@QAEXXZ @ 29 NONAME ; void CObexTransportControllerBase::ConnectL(void)
+	?DataLimit@CObexPacket@@QBEGXZ @ 30 NONAME ; unsigned short CObexPacket::DataLimit(void) const
+	?DoError@CObexTransportControllerBase@@MAEXH@Z @ 31 NONAME ; void CObexTransportControllerBase::DoError(int)
+	?DoProcess@CObexTransportControllerBase@@MAEXAAVCObexPacket@@@Z @ 32 NONAME ; void CObexTransportControllerBase::DoProcess(class CObexPacket &)
+	?DoSignalPacketProcessEvent@CObexTransportControllerBase@@MAEXW4TObexPacketProcessEvent@@@Z @ 33 NONAME ; void CObexTransportControllerBase::DoSignalPacketProcessEvent(enum TObexPacketProcessEvent)
+	?DoTransportUp@CObexTransportControllerBase@@MAEXAAUTObexConnectionInfo@@@Z @ 34 NONAME ; void CObexTransportControllerBase::DoTransportUp(struct TObexConnectionInfo &)
+	?Dump@CObexPacket@@QBEXXZ @ 35 NONAME ; void CObexPacket::Dump(void) const
+	?Error@MObexTransportNotify@@QAEXH@Z @ 36 NONAME ; void MObexTransportNotify::Error(int)
+	?ExtractData@CObexPacket@@QAEHAAVTObexData@@@Z @ 37 NONAME ; int CObexPacket::ExtractData(class TObexData &)
+	?ExtractRemoteConnectInfo@CObexTransportControllerBase@@QAEHAAVCObexPacket@@AAE1@Z @ 38 NONAME ; int CObexTransportControllerBase::ExtractRemoteConnectInfo(class CObexPacket &, unsigned char &, unsigned char &)
+	?GetHVText@TObexInternalHeader@@QBEHAAVTDes16@@@Z @ 39 NONAME ; int TObexInternalHeader::GetHVText(class TDes16 &) const
+	?GetInterface@CObexConnector@@MAEPAXVTUid@@@Z @ 40 NONAME ; void * CObexConnector::GetInterface(class TUid)
+	?GetInterface@CObexReaderBase@@MAEPAXVTUid@@@Z @ 41 NONAME ; void * CObexReaderBase::GetInterface(class TUid)
+	?GetInterface@CObexTransportControllerBase@@MAEPAXVTUid@@@Z @ 42 NONAME ; void * CObexTransportControllerBase::GetInterface(class TUid)
+	?GetInterface@CObexWriterBase@@MAEPAXVTUid@@@Z @ 43 NONAME ; void * CObexWriterBase::GetInterface(class TUid)
+	?GetObexPacketBufferSize@CObexReaderBase@@IAEHXZ @ 44 NONAME ; int CObexReaderBase::GetObexPacketBufferSize(void)
+	?GetObexPacketDataLimit@CObexReaderBase@@IAEHXZ @ 45 NONAME ; int CObexReaderBase::GetObexPacketDataLimit(void)
+	?GetObexPacketHeaderSize@CObexReaderBase@@IAEHXZ @ 46 NONAME ; int CObexReaderBase::GetObexPacketHeaderSize(void)
+	?HI@TObexInternalHeader@@QBEEXZ @ 47 NONAME ; unsigned char TObexInternalHeader::HI(void) const
+	?HISize@TObexInternalHeader@@QBEGXZ @ 48 NONAME ; unsigned short TObexInternalHeader::HISize(void) const
+	?HIType@TObexInternalHeader@@QBE?AW4THeaderType@1@XZ @ 49 NONAME ; enum TObexInternalHeader::THeaderType TObexInternalHeader::HIType(void) const
+	?HVByteSeq@TObexInternalHeader@@QBEPAEXZ @ 50 NONAME ; unsigned char * TObexInternalHeader::HVByteSeq(void) const
+	?HVInt@TObexInternalHeader@@QBEHXZ @ 51 NONAME ; int TObexInternalHeader::HVInt(void) const
+	?HVSize@TObexInternalHeader@@QBEGXZ @ 52 NONAME ; unsigned short TObexInternalHeader::HVSize(void) const
+	?HexDump@CObexLog@@SAXABVTDesC8@@PBG1PBEH@Z @ 53 NONAME ; void CObexLog::HexDump(class TDesC8 const &, unsigned short const *, unsigned short const *, unsigned char const *, int)
+	?Init@CObexPacket@@QAEXE@Z @ 54 NONAME ; void CObexPacket::Init(unsigned char)
+	?InsertData@CObexPacket@@QAEHABVTObexData@@@Z @ 55 NONAME ; int CObexPacket::InsertData(class TObexData const &)
+	?InsertLocalConnectInfo@CObexTransportControllerBase@@QAEHAAVCObexPacket@@EE@Z @ 56 NONAME ; int CObexTransportControllerBase::InsertLocalConnectInfo(class CObexPacket &, unsigned char, unsigned char)
+	?IsFinal@CObexPacket@@QBEHXZ @ 57 NONAME ; int CObexPacket::IsFinal(void) const
+	?IsTransportRestartable@CObexTransportControllerBase@@QBEHXZ @ 58 NONAME ; int CObexTransportControllerBase::IsTransportRestartable(void) const
+	?IsWriteActive@CObexTransportControllerBase@@QBEHXZ @ 59 NONAME ; int CObexTransportControllerBase::IsWriteActive(void) const
+	?NewL@CObexActiveReader@@SAPAV1@AAVMObexTransportNotify@@AAVRSocket@@AAUTObexConnectionInfo@@@Z @ 60 NONAME ; class CObexActiveReader * CObexActiveReader::NewL(class MObexTransportNotify &, class RSocket &, struct TObexConnectionInfo &)
+	?NewL@CObexActiveWriter@@SAPAV1@AAVMObexTransportNotify@@AAVRSocket@@AAUTObexConnectionInfo@@@Z @ 61 NONAME ; class CObexActiveWriter * CObexActiveWriter::NewL(class MObexTransportNotify &, class RSocket &, struct TObexConnectionInfo &)
+	?NewL@CObexPacket@@SAPAV1@GG@Z @ 62 NONAME ; class CObexPacket * CObexPacket::NewL(unsigned short, unsigned short)
+	?NewL@CObexTransportControllerBase@@SAPAV1@AAVTObexTransportInfo@@@Z @ 63 NONAME ; class CObexTransportControllerBase * CObexTransportControllerBase::NewL(class TObexTransportInfo &)
+	?Observer@CObexConnector@@IAEAAVMObexTransportNotify@@XZ @ 64 NONAME ; class MObexTransportNotify & CObexConnector::Observer(void)
+	?OnCompleteTransfer@CObexReaderBase@@MAEXXZ @ 65 NONAME ; void CObexReaderBase::OnCompleteTransfer(void)
+	?OnCompleteTransfer@CObexWriterBase@@MAEXXZ @ 66 NONAME ; void CObexWriterBase::OnCompleteTransfer(void)
+	?Opcode@CObexPacket@@QBEEXZ @ 67 NONAME ; unsigned char CObexPacket::Opcode(void) const
+	?PacketProcessNotificationEvents@CObexPacket@@QBEIXZ @ 68 NONAME ; unsigned int CObexPacket::PacketProcessNotificationEvents(void) const
+	?PacketSize@CObexPacket@@QBEGXZ @ 69 NONAME ; unsigned short CObexPacket::PacketSize(void) const
+	?Process@MObexTransportNotify@@QAEXAAVCObexPacket@@@Z @ 70 NONAME ; void MObexTransportNotify::Process(class CObexPacket &)
+	?Receive@CObexTransportControllerBase@@QAEXXZ @ 71 NONAME ; void CObexTransportControllerBase::Receive(void)
+	?ReceivePacket@CObexTransportControllerBase@@QAEAAVCObexPacket@@XZ @ 72 NONAME ; class CObexPacket & CObexTransportControllerBase::ReceivePacket(void)
+	?Remaining@CObexReaderBase@@MAEHXZ @ 73 NONAME ; int CObexReaderBase::Remaining(void)
+	?Remaining@CObexWriterBase@@MAEHXZ @ 74 NONAME ; int CObexWriterBase::Remaining(void)
+	?RemainingExtractSpace@CObexPacket@@QBEGXZ @ 75 NONAME ; unsigned short CObexPacket::RemainingExtractSpace(void) const
+	?RemainingInsertSpace@CObexPacket@@QBEGXZ @ 76 NONAME ; unsigned short CObexPacket::RemainingInsertSpace(void) const
+	?RemoteAddr@CObexTransportControllerBase@@QAEXAAVTSockAddr@@@Z @ 77 NONAME ; void CObexTransportControllerBase::RemoteAddr(class TSockAddr &)
+	?RemovePacketProcessEvents@CObexPacket@@QAEXI@Z @ 78 NONAME ; void CObexPacket::RemovePacketProcessEvents(unsigned int)
+	?RunL@CObexActiveRW@@MAEXXZ @ 79 NONAME ; void CObexActiveRW::RunL(void)
+	?Send@CObexTransportControllerBase@@QAEXE@Z @ 80 NONAME ; void CObexTransportControllerBase::Send(unsigned char)
+	?Send@CObexTransportControllerBase@@QAEXXZ @ 81 NONAME ; void CObexTransportControllerBase::Send(void)
+	?SendPacket@CObexTransportControllerBase@@QAEAAVCObexPacket@@XZ @ 82 NONAME ; class CObexPacket & CObexTransportControllerBase::SendPacket(void)
+	?Set@TObexInternalHeader@@QAEXEABVTDesC16@@@Z @ 83 NONAME ; void TObexInternalHeader::Set(unsigned char, class TDesC16 const &)
+	?Set@TObexInternalHeader@@QAEXEH@Z @ 84 NONAME ; void TObexInternalHeader::Set(unsigned char, int)
+	?Set@TObexInternalHeader@@QAEXEPAEH@Z @ 85 NONAME ; void TObexInternalHeader::Set(unsigned char, unsigned char *, int)
+	?SetDeferred@TObexInternalHeader@@QAEXEPAVTPtr8@@HH@Z @ 86 NONAME ; void TObexInternalHeader::SetDeferred(unsigned char, class TPtr8 *, int, int)
+	?SetFinal@CObexPacket@@QAEXH@Z @ 87 NONAME ; void CObexPacket::SetFinal(int)
+	?SetHI@TObexInternalHeader@@QAEXE@Z @ 88 NONAME ; void TObexInternalHeader::SetHI(unsigned char)
+	?SetLegalDataLimit@CObexPacket@@QAEGG@Z @ 89 NONAME ; unsigned short CObexPacket::SetLegalDataLimit(unsigned short)
+	?SetOpcode@CObexPacket@@QAEXE@Z @ 90 NONAME ; void CObexPacket::SetOpcode(unsigned char)
+	?SetOwner@CObexTransportControllerBase@@QAEXAAVMObexNotifyExtend@@@Z @ 91 NONAME ; void CObexTransportControllerBase::SetOwner(class MObexNotifyExtend &)
+	?SetPacketSize@CObexPacket@@QAEXG@Z @ 92 NONAME ; void CObexPacket::SetPacketSize(unsigned short)
+	?SignalPacketProcessEvent@MObexTransportNotify@@QAEXW4TObexPacketProcessEvent@@@Z @ 93 NONAME ; void MObexTransportNotify::SignalPacketProcessEvent(enum TObexPacketProcessEvent)
+	?SignalTransportError@CObexTransportControllerBase@@QAEXXZ @ 94 NONAME ; void CObexTransportControllerBase::SignalTransportError(void)
+	?StartTransfer@CObexReaderBase@@MAEXAAVCObexPacket@@@Z @ 95 NONAME ; void CObexReaderBase::StartTransfer(class CObexPacket &)
+	?StartTransfer@CObexWriterBase@@MAEXAAVCObexPacket@@@Z @ 96 NONAME ; void CObexWriterBase::StartTransfer(class CObexPacket &)
+	?TotalSize@TObexData@@QBEGXZ @ 97 NONAME ; unsigned short TObexData::TotalSize(void) const
+	?TransportUp@MObexTransportNotify@@QAEXAAUTObexConnectionInfo@@@Z @ 98 NONAME ; void MObexTransportNotify::TransportUp(struct TObexConnectionInfo &)
+	?VerboseLeaveIfErrorL@@YAXABVTDesC8@@PADHH@Z @ 99 NONAME ; void VerboseLeaveIfErrorL(class TDesC8 const &, char *, int, int)
+	?VerbosePanic@@YAXABVTDesC8@@PADHHPAEABVTDesC16@@@Z @ 100 NONAME ; void VerbosePanic(class TDesC8 const &, char *, int, int, unsigned char *, class TDesC16 const &)
+	?Write@CObexLog@@SAXABVTDesC8@@0@Z @ 101 NONAME ; void CObexLog::Write(class TDesC8 const &, class TDesC8 const &)
+	?Write@CObexLog@@SAXABVTDesC8@@ABVTDesC16@@@Z @ 102 NONAME ; void CObexLog::Write(class TDesC8 const &, class TDesC16 const &)
+	?WriteFormat@CObexLog@@SAXABVTDesC8@@V?$TRefByValue@$$CBVTDesC16@@@@AAY00PAC@Z @ 103 NONAME ; void CObexLog::WriteFormat(class TDesC8 const &, class TRefByValue<class TDesC16 const >, signed char * [1] &)
+	?WriteFormat@CObexLog@@SAXABVTDesC8@@V?$TRefByValue@$$CBVTDesC16@@@@ZZ @ 104 NONAME ; void CObexLog::WriteFormat(class TDesC8 const &, class TRefByValue<class TDesC16 const >, ...)
+	?WriteFormat@CObexLog@@SAXABVTDesC8@@V?$TRefByValue@$$CBVTDesC8@@@@AAY00PAC@Z @ 105 NONAME ; void CObexLog::WriteFormat(class TDesC8 const &, class TRefByValue<class TDesC8 const >, signed char * [1] &)
+	?WriteFormat@CObexLog@@SAXABVTDesC8@@V?$TRefByValue@$$CBVTDesC8@@@@ZZ @ 106 NONAME ; void CObexLog::WriteFormat(class TDesC8 const &, class TRefByValue<class TDesC8 const >, ...)
+	?TransportInfo@CObexTransportControllerBase@@QBEPBVTObexTransportInfo@@XZ @ 107 NONAME ; class TObexTransportInfo const * CObexTransportControllerBase::TransportInfo(void) const
+	?OnReadActivity@CObexReaderBase@@IAEXXZ @ 108 NONAME ; void CObexReaderBase::OnReadActivity(void)
+
