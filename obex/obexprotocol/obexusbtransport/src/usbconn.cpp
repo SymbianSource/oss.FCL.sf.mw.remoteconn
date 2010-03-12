@@ -1056,6 +1056,15 @@ void CObexUsbHandler::RegInterfacesL()
 				maxSize = maxPacketSize;
 				}
 			dataifc2().iEndpointData[KTransmitEndpoint - 1].iSize  = maxSize;
+			
+			// Allocate dma if requested and the device support resource allocation scheme version 2
+			// for resource allocation scheme version1, refer to AllocateDma()
+			if (iRequestDmaOnInEndpoint && 
+				((dCaps().iFeatureWord1 & KUsbDevCapsFeatureWord1_EndpointResourceAllocV2) != 0))
+				{
+				dataifc2().iEndpointData[KTransmitEndpoint - 1].iFeatureWord1 |= KUsbcEndpointInfoFeatureWord1_DMA;
+				}
+
 			foundIn = ETrue;
 			}
 		else if (!foundOut && (caps->iTypesAndDir & KBulkOutFlags) == KBulkOutFlags)
@@ -1068,6 +1077,15 @@ void CObexUsbHandler::RegInterfacesL()
 				maxSize = maxPacketSize;
 				}
 			dataifc2().iEndpointData[KReceiveEndpoint - 1].iSize  = maxSize;
+			
+			//Allocate dma here if requested and the device support resource allocation scheme version 2
+			// for resource allocation scheme version1, refer to AllocateDma()
+			if (iRequestDmaOnOutEndpoint && 
+				((dCaps().iFeatureWord1 & KUsbDevCapsFeatureWord1_EndpointResourceAllocV2) != 0))
+				{
+				dataifc2().iEndpointData[KReceiveEndpoint - 1].iFeatureWord1 |= KUsbcEndpointInfoFeatureWord1_DMA;
+				}
+			
 			foundOut = ETrue;
 			}
 		}
@@ -1154,6 +1172,14 @@ panic with either EDmaAllocationFailedEndpointIn or EDmaAllocationFailedEndpoint
 void CObexUsbHandler::AllocateDma()
 	{
 	LOG_FUNC
+
+	TUsbDeviceCaps dCaps;
+	iUsb.DeviceCaps(dCaps);
+	if ((dCaps().iFeatureWord1 & KUsbDevCapsFeatureWord1_EndpointResourceAllocV2) != 0)
+		{
+		// for resource allocation version2, refer to CObexUsbHandler::RegInterfacesL()
+		return;
+		}
 
 	if (iRequestDmaOnInEndpoint)
 		{

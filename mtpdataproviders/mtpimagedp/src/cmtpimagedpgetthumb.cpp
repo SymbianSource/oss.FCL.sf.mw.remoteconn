@@ -58,7 +58,7 @@ Destructor
 CMTPImageDpGetThumb::~CMTPImageDpGetThumb()
     {
     __FLOG(_L8(">> CMTPImageDpGetThumb::~CMTPImageDpGetThumb"));
-    delete iThumb;
+    delete iThumb;    
     delete iObjectMeta;
     __FLOG(_L8("<< CMTPImageDpGetThumb::~CMTPImageDpGetThumb"));
     __FLOG_CLOSE;
@@ -80,7 +80,7 @@ void CMTPImageDpGetThumb::ConstructL()
     {
     __FLOG_OPEN(KMTPSubsystem, KComponent);
     __FLOG(_L8("CMTPImageDpGetThumb::ConstructL"));
-    iThumb = CMTPTypeOpaqueData::NewL();
+    iThumb = CMTPTypeOpaqueData::NewL();    
     iObjectMeta = CMTPObjectMetaData::NewL();
     __FLOG(_L8("CMTPImageDpGetThumb::ConstructL"));
     }
@@ -102,17 +102,30 @@ void CMTPImageDpGetThumb::ServiceL()
     {
     __FLOG(_L8(">> CMTPImageDpGetThumb::ServiceL"));
     TInt err = KErrNone;
-    TEntry fileEntry;
     
-    User::LeaveIfError(iFramework.Fs().Entry(iObjectMeta->DesC(CMTPObjectMetaData::ESuid), fileEntry));
-    imgDp.ThumbnailManager().GetThumbMgr()->SetFlagsL(CThumbnailManager::EDefaultFlags);
-    if(fileEntry.iSize > KFileSizeMax)
+    //at first, try to query thumbnail from property manager
+    HBufC8* thumbnailData = imgDp.PropertyMgr().Thumbnail(iObjectMeta->Uint(CMTPObjectMetaData::EHandle));
+    if (thumbnailData == NULL)
         {
-        __FLOG(_L8(">> CMTPImageDpGetThumb::ServiceL, fileEntry.iSize > KFileSizeMax"));
-        imgDp.ThumbnailManager().GetThumbMgr()->SetFlagsL(CThumbnailManager::EDoNotCreate);
+        __FLOG(_L8("CMTPImageDpGetThumb::ServiceL-  fail to query thumbnail from cache"));
+        TEntry fileEntry;
+        
+        User::LeaveIfError(iFramework.Fs().Entry(iObjectMeta->DesC(CMTPObjectMetaData::ESuid), fileEntry));
+        imgDp.ThumbnailManager().GetThumbMgr()->SetFlagsL(CThumbnailManager::EDefaultFlags);
+        if(fileEntry.FileSize() > KFileSizeMax)
+            {
+            __FLOG(_L8(">> CMTPImageDpGetThumb::ServiceL, fileEntry.FileSize() > KFileSizeMax"));
+            imgDp.ThumbnailManager().GetThumbMgr()->SetFlagsL(CThumbnailManager::EDoNotCreate);
+            }
+        
+        imgDp.ThumbnailManager().GetThumbnailL(iObjectMeta->DesC(CMTPObjectMetaData::ESuid), thumbnailData, err);
+        User::LeaveIfError(err);
+        User::LeaveIfNull(thumbnailData);
+        
+        //Transfer ownership of thumbnailData to Property Manager
+        imgDp.PropertyMgr().StoreThunmnail(iObjectMeta->Uint(CMTPObjectMetaData::EHandle), thumbnailData);
         }
-    imgDp.ThumbnailManager().GetThumbnailL(iObjectMeta->DesC(CMTPObjectMetaData::ESuid), *iThumb, err);
-    User::LeaveIfError(err);
+    iThumb->Write(*thumbnailData);
     SendDataL(*iThumb);
     __FLOG(_L8("<< CMTPImageDpGetThumb::ServiceL"));
     }

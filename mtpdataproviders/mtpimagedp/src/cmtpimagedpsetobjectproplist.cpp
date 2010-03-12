@@ -162,7 +162,8 @@ TMTPResponseCode CMTPImageDpSetObjectPropList::CheckPropCode(TUint16 aPropertyCo
         case EMTPObjectPropCodeRepresentativeSampleSize:
         case EMTPObjectPropCodeRepresentativeSampleHeight:
         case EMTPObjectPropCodeRepresentativeSampleWidth:
-        case EMTPObjectPropCodeDateCreated:
+        case EMTPObjectPropCodeRepresentativeSampleData:
+        case EMTPObjectPropCodeDateCreated:        
             responseCode = 	EMTPRespCodeAccessDenied;
             break;
                             

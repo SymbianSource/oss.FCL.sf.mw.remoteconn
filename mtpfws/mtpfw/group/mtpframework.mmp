@@ -91,6 +91,8 @@ LIBRARY             edbms.lib
 LIBRARY             efsrv.lib
 LIBRARY             estor.lib
 LIBRARY             euser.lib
+LIBRARY             bluetooth.lib
+LIBRARY             usbman.lib
 
 LIBRARY             mtpdatatypes.lib
 LIBRARY             mtpdataproviderapi.lib

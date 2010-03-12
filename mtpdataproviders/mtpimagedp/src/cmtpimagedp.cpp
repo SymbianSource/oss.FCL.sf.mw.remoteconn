@@ -29,6 +29,7 @@
 #include <mtp/mtpprotocolconstants.h>
 #include <mtp/mmtpobjectmgr.h>
 #include <mtp/mmtpstoragemgr.h>
+#include <mtp/cmtpobjectmetadata.h>
 #include <mtp/tmtptypeevent.h>
 
 #include "cmtpimagedp.h"
@@ -40,6 +41,7 @@
 #include "mtpimagedputilits.h"
 #include "cmtpimagedpmdeobserver.h"
 #include "cmtpimagedprenameobject.h"
+#include "cmtpimagedpnewpicturesnotifier.h"
 
 __FLOG_STMT(_LIT8(KComponent,"CMTPImageDataProvider");)
 
@@ -80,6 +82,7 @@ CMTPImageDataProvider::CMTPImageDataProvider(TAny* aParams) :
     CMTPDataProviderPlugin(aParams),
     iActiveProcessors(KArrayGranularity),
     iFormatMappings(&TBuf16Hash, &TBuf16Ident),
+    iMimeMappings(&TBuf16Hash, &TBuf16Ident),
     iActiveProcessor(-1),
     iEnumerated(EFalse),
 	iDeleteObjectsArray(KDeleteObjectGranularity)
@@ -94,10 +97,11 @@ void CMTPImageDataProvider::ConstructL()
     __FLOG_OPEN(KMTPSubsystem, KComponent);
     __FLOG(_L8(">> CMTPImageDataProvider::ConstructL"));
     
-    iPropertyMgr = CMTPImageDpObjectPropertyMgr::NewL(Framework());
-    iThumbnailManager = CMTPImageDpThumbnailCreator::NewL();
+    iPropertyMgr = CMTPImageDpObjectPropertyMgr::NewL(Framework(), *this);
+    iThumbnailManager = CMTPImageDpThumbnailCreator::NewL(*this);
     iMdeObserver = CMTPImageDpMdeObserver::NewL(Framework(), *this);
     iMdeObserver->SubscribeForChangeNotificationL();
+    iNewPicNotifier = CMTPImageDpNewPicturesNotifier::NewL();
     
     //Setup central repository connection
     const TUint32 KUidMTPImageRepositoryValue(0x2001FCA2);
@@ -110,6 +114,13 @@ void CMTPImageDataProvider::ConstructL()
         {
         iFormatMappings.Insert(KMTPValidCodeExtensionMappings[i].iExtension, KMTPValidCodeExtensionMappings[i].iFormatCode);
         }    
+    
+    //Initialize hash map of extension to mime type
+    count = sizeof(KMTPExtensionMimeTypeMappings) / sizeof(KMTPExtensionMimeTypeMappings[0]);
+    for(TInt i(0); i<count; i++)
+        {
+        iMimeMappings.Insert(KMTPExtensionMimeTypeMappings[i].iExtension, KMTPExtensionMimeTypeMappings[i].iMimeType);
+        }     
     
     //Define RProperty of new pictures for status data provider
     _LIT_SECURITY_POLICY_PASS(KAllowReadAll);
@@ -148,8 +159,10 @@ CMTPImageDataProvider::~CMTPImageDataProvider()
     delete iPropertyMgr;       
     delete iRepository;   
     delete iRenameObject;
+    delete iNewPicNotifier;
     
     iFormatMappings.Close();
+    iMimeMappings.Close();
     
     //Try to delete objects in array
     HandleDeleteObjectsArray();
@@ -263,12 +276,10 @@ void CMTPImageDataProvider::StartObjectEnumerationL(TUint32 aStorageId, TBool /*
     if (aStorageId == KMTPStorageAll)
         {
         /*
-         * Query previous image object count for calculation of new pictures when MTP startup
+         * framework notify data provider to enumerate
          * 
          */
-        iPrePictures = QueryImageObjectCountL();
         iEnumerated = ETrue;
-        __FLOG_1(_L16("CMTPImageDpEnumerator::CompleteEnumeration - Previous Pics: %d"), iPrePictures);
         }
 
     NotifyEnumerationCompleteL(aStorageId, KErrNone);
@@ -382,7 +393,35 @@ void CMTPImageDataProvider::SupportedL(TMTPSupportCategory aCategory, CDesCArray
         _LIT(KFormatExtensionJpe, "0x3801:jpe::3");
         aStrings.AppendL(KFormatExtensionJpe);
         _LIT(KFormatExtensionJpeg, "0x3801:jpeg::3");
-        aStrings.AppendL(KFormatExtensionJpeg);   
+        aStrings.AppendL(KFormatExtensionJpeg);
+        
+        /*
+         * bmp files
+         */
+//        _LIT(KFormatExtensionBmp, "0x3804:bmp::3");
+//        aStrings.AppendL(KFormatExtensionBmp);
+        
+        /*
+         * gif files
+         */
+//        _LIT(KFormatExtensionGif, "0x3807:gif::3");
+//        aStrings.AppendL(KFormatExtensionGif);
+        
+        /*
+         * png files
+         */
+//        _LIT(KFormatExtensionPng, "0x380B:png::3");
+//        aStrings.AppendL(KFormatExtensionPng);
+        
+        /*
+         * tif, tiff files
+         */
+        /*
+        _LIT(KFormatExtensionTif, "0x380D:tif::3");
+        aStrings.AppendL(KFormatExtensionTif);
+        _LIT(KFormatExtensionTiff, "0x380D:tiff::3");
+        aStrings.AppendL(KFormatExtensionTiff);
+        */                 
         }
         break;
         
@@ -530,6 +569,11 @@ void CMTPImageDataProvider::SessionClosedL(const TMTPNotificationParamsSessionCh
             }
         }
     
+    /**
+     * We clear property manager cache when receiving session close notification from framework every times
+     */
+    iPropertyMgr->ClearCacheL();
+    
     __FLOG(_L8("<< SessionClosedL"));
     }
 
@@ -552,19 +596,10 @@ void CMTPImageDataProvider::SessionOpenedL(const TMTPNotificationParamsSessionCh
         /**
          * Get image object count from framework and calculate the new pictures
          */
-        TUint curPictures = QueryImageObjectCountL();
-        TInt  newPictures = curPictures - iPrePictures;
-        
-        __FLOG_2(_L16("CMTPImageDpEnumerator::CompleteEnumeration - Previous Pics:%d, New Pics: %d"), iPrePictures, newPictures);
-        if (newPictures >= 0)
-            {
-            MTPImageDpUtilits::UpdateNewPicturesValue(*this, newPictures, ETrue);  
-            }
-        else
-            {
-            MTPImageDpUtilits::UpdateNewPicturesValue(*this, 0, ETrue);  
-            }
-        
+        TUint newPictures = QueryImageObjectCountL();
+        RProperty::Set(TUid::Uid(KMTPServerUID), KMTPNewPicKey, newPictures);
+        iNewPicNotifier->SetNewPictures(newPictures);
+        __FLOG_1(_L16("CMTPImageDpEnumerator::CompleteEnumeration - New Pics: %d"), newPictures);        
         iEnumerated = EFalse;
         }
     
@@ -593,12 +628,39 @@ void CMTPImageDataProvider::RenameObjectL(const TMTPNotificationParamsHandle& aP
 /**
  Find format code according to its extension name 
 */
-TMTPFormatCode CMTPImageDataProvider::FindFormatL(const TDesC& aExtension)
+TMTPFormatCode CMTPImageDataProvider::FindFormat(const TDesC& aExtension)
     {
     TMTPFormatCode* ret = iFormatMappings.Find(aExtension);
-    User::LeaveIfNull(ret);
+    if (ret == NULL)
+        {
+        return EMTPFormatCodeUndefined;
+        }
+    else
+        {
+        return *ret;
+        }
+    }
+
+/**
+ Find mime type according to its extension name 
+*/
+const TDesC& CMTPImageDataProvider::FindMimeType(const TDesC& aExtension)
+    {
+    /**
+     * copy file extension by insensitive case
+     */
+    TBuf<KMaxExtNameLength> extension;
+    extension.CopyLC(aExtension);
     
-    return *ret;
+    const TDesC* ret = iMimeMappings.Find(extension);
+    if (ret == NULL)
+        {
+        return KNullDesC;
+        }
+    else
+        {
+        return *ret;
+        }
     }
 
 /**
@@ -606,8 +668,40 @@ TMTPFormatCode CMTPImageDataProvider::FindFormatL(const TDesC& aExtension)
 */
 TUint CMTPImageDataProvider::QueryImageObjectCountL()
     { 
-    TMTPObjectMgrQueryParams params(KMTPStorageAll, EMTPFormatCodeEXIFJPEG, KMTPHandleNone);    
-    return Framework().ObjectMgr().CountL(params);
+    RMTPObjectMgrQueryContext   context;
+    RArray<TUint>               handles;
+    TMTPObjectMgrQueryParams    params(KMTPStorageAll, KMTPFormatsAll, KMTPHandleNone, Framework().DataProviderId());
+    CleanupClosePushL(context);
+    CleanupClosePushL(handles);    
+    
+    do
+        {
+        /*
+         * Speed up query performance, avoid to duplicated copy object handle between RArrays
+         */
+        Framework().ObjectMgr().GetObjectHandlesL(params, context, handles);
+        }
+    while (!context.QueryComplete());    
+    
+    CMTPObjectMetaData* objMetadata = CMTPObjectMetaData::NewLC();
+    
+    TUint newPictures = 0;
+    TInt count = handles.Count();
+    for (TInt i(0); i<count; ++i)
+        {
+        Framework().ObjectMgr().ObjectL(handles[i], *objMetadata);
+        if (MTPImageDpUtilits::IsNewPicture(*objMetadata))
+            {
+            ++newPictures;
+            }
+        }
+    
+    
+    CleanupStack::PopAndDestroy(objMetadata);
+    CleanupStack::PopAndDestroy(&handles);
+    CleanupStack::PopAndDestroy(&context);
+    
+    return newPictures;
     }
 
 TBool CMTPImageDataProvider::GetCacheParentHandle(const TDesC& aParentPath, TUint32& aParentHandle)
@@ -655,4 +749,22 @@ void CMTPImageDataProvider::HandleDeleteObjectsArray()
             object = NULL;
             }
         }
+    }
+
+void CMTPImageDataProvider::IncreaseNewPictures(TInt aCount)
+    {
+    __FLOG_VA((_L16(">> IncreaseNewPictures New Pictures: %d"), aCount));
+
+    iNewPicNotifier->IncreaseCount(aCount);    
+    
+    __FLOG(_L8("<< IncreaseNewPictures "));    
+    }
+
+void CMTPImageDataProvider::DecreaseNewPictures(TInt aCount)
+    {
+    __FLOG_VA((_L16(">> DecreaseNewPictures New Pictures: %d"), aCount));
+
+    iNewPicNotifier->DecreaseCount(aCount);
+    
+    __FLOG(_L8("<< DecreaseNewPictures "));    
     }

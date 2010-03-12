@@ -101,7 +101,7 @@ void CMTPGetServiceInfo::ServiceL()
         //it may be caused by: 
         //    1. DP plugin does not register the ServiceID by the Supported() function. Mostly.
         //    2. Framework have some errors while setup the router mapping table.
-        Panic(EMTPDevDpUnknownServiceID);
+        __DEBUG_ONLY(Panic(EMTPDevDpUnknownServiceID));
         }
     
     __FLOG(_L8("ServiceL - Exit"));

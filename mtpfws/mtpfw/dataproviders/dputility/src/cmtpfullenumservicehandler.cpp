@@ -197,23 +197,12 @@ EXPORT_C TMTPResponseCode CMTPFullEnumServiceHandler::GetServicePropDescL(
 
 		case EMTPServicePropertyFilterType:
 			{
-			CMTPTypeObjectPropDescEnumerationForm* expectedForm
-			    = CMTPTypeObjectPropDescEnumerationForm::NewL(EMTPTypeUINT8);
-			CleanupStack::PushL(expectedForm);
-			expectedForm->AppendSupportedValueL(TMTPTypeUint8(EMTPSyncSvcFilterNone));
-			expectedForm->AppendSupportedValueL(TMTPTypeUint8(EMTPSyncSvcFilterContactsWithPhone));
-			expectedForm->AppendSupportedValueL(TMTPTypeUint8(EMTPSyncSvcFilterTaskActive));
-			expectedForm->AppendSupportedValueL(TMTPTypeUint8(EMTPSyncSvcFilterCalendarWindowWithRecurrence));
-
-			servicePropDesc = CMTPTypeServicePropDesc::NewL(
+			servicePropDesc = CMTPTypeServicePropDesc::NewLC(
 								  aServicePropertyCode,
 								  EMTPTypeUINT8,
 								  CMTPTypeObjectPropDesc::EReadWrite,
-								  CMTPTypeObjectPropDesc::EEnumerationForm,
-								  expectedForm);
-			// Form can be NULL, so need destroy here for MTPType object here.
-			CleanupStack::PopAndDestroy(expectedForm);
-			CleanupStack::PushL(servicePropDesc);
+								  CMTPTypeObjectPropDesc::ENone,
+								  NULL);
 			break;
 			}
 		case EMTPServicePropertySyncObjectReferences:

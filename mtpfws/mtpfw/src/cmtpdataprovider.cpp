@@ -481,6 +481,28 @@ MMTPDataCodeGenerator& CMTPDataProvider::DataCodeGenerator() const
     return iSingletons.DataCodeGenerator();
     }
 
+void CMTPDataProvider::NotifyFrameworkL( TMTPNotificationToFramework aNotification, const TAny* aParams )
+    {
+    __FLOG(_L8("NotifyFrameworkL - Entry"));
+    
+    __ASSERT_DEBUG( aParams, User::Invariant());
+    
+    switch ( aNotification )
+        {
+    case EMTPAddFolder:
+        {
+        TUint deviceDpId = iSingletons.DpController().DeviceDpId();
+        iSingletons.DpController().NotifyDataProvidersL( deviceDpId, EMTPObjectAdded, aParams );
+        }
+        break;
+    default:
+        __FLOG(_L8("Ignore other notification"));
+        break;
+        }
+    
+    __FLOG(_L8("NotifyFrameworkL - Exit"));
+    }
+
 void CMTPDataProvider::DoCancel()
     {
     __FLOG_VA((_L8("DoCancel - Entry, data provider %d "), iId));
@@ -528,6 +550,18 @@ void CMTPDataProvider::RunL()
     else if (status == KErrCancel)
         {
         iImplementation->Cancel();
+        }
+    else if (status == KErrAbort)
+        {
+        if (iCurrentRequest != NULL)
+            {
+            TMTPTypeEvent event;
+            event.SetUint16(TMTPTypeEvent::EEventCode, EMTPEventCodeCancelTransaction);
+            event.SetUint32(TMTPTypeEvent::EEventSessionID, iCurrentRequest->Uint32(TMTPTypeRequest::ERequestSessionID) );
+            event.SetUint32(TMTPTypeEvent::EEventTransactionID, iCurrentRequest->Uint32(TMTPTypeRequest::ERequestTransactionID) );
+            
+            iImplementation->ProcessEventL(event ,*iCurrentConnection);
+            }
         }
 
     
@@ -603,12 +637,15 @@ void CMTPDataProvider::RunL()
 			iTimer.After(iStatus, TTimeIntervalMicroSeconds32(KWaitForEnumeration));
 			SetActive();
 			iTimerActive = ETrue;
-			break;		   
-	   	case ECompletingPhase:
-	   		TransactionCompleteL(*iCurrentRequest, *iCurrentConnection);   
-		   	break;
-	   	default:
-		   	break;
+			break;
+		case EResponsePhase:
+			iImplementation->ProcessRequestPhaseL(iCurrentTransactionPhase, *iCurrentRequest, *iCurrentConnection);
+			break; 		   
+	  case ECompletingPhase:
+	   	TransactionCompleteL(*iCurrentRequest, *iCurrentConnection);   
+		  break;
+	  default:
+		  break;
 		    }
 	    }
 		}

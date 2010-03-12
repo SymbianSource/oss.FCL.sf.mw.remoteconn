@@ -166,7 +166,8 @@ void CMTPGetObjectPropValue::ServiceL()
 			ServiceNonConsumableL();
 			break;
 		default:
-			Panic(EMTPDpUnsupportedProperty);
+		    User::Leave( KErrNotSupported );
+			break;
 		}	
 	}
 
@@ -201,7 +202,7 @@ void CMTPGetObjectPropValue::ServiceProtectionStatusL()
 	
 void CMTPGetObjectPropValue::ServiceObjectSizeL()
 	{
-	iMTPTypeUint64.Set(iFileEntry.iSize);
+	iMTPTypeUint64.Set(iFileEntry.FileSize());
 
 	SendDataL(iMTPTypeUint64);
 	}

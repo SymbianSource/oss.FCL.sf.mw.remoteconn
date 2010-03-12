@@ -280,17 +280,23 @@ TUint CMTPObjectStore::CountL(const TMTPObjectMgrQueryParams& aParams) const
 
 void CMTPObjectStore::CommitReservedObjectHandleL(CMTPObjectMetaData& aObject)
 	{
+	TFileName suid;
+	suid.CopyLC(aObject.DesC(CMTPObjectMetaData::ESuid));
+	TUint32 handle = HandleL(suid);
+	if (handle != KMTPHandleNone)
+	    {
+	    __FLOG(_L8("CommitReserverd leave for duplicate suid."));
+	    User::Leave(KErrAlreadyExists);
+	    }
+	TUint32 suidHash = DefaultHash::Des16(suid);
+	
 	//After the PutL called the cursor's position is not well defined.
 	iCachedHandle = 0;
 	iCachedSuidHash = 0;
 	TInt64 id = iHandleAllocator->NextPOUIDL();
 	aObject.SetUint(CMTPObjectMetaData::EIdentifier, id);
 
-	TFileName suid;
-	suid.CopyLC(aObject.DesC(CMTPObjectMetaData::ESuid));
-	TUint32 suidHash = DefaultHash::Des16(suid);
-
-	TUint32 handle = aObject.Uint(CMTPObjectMetaData::EHandle);
+	handle = aObject.Uint(CMTPObjectMetaData::EHandle);
 	CleanupStack::PushL(TCleanupItem(CMTPObjectStore::DBUpdateFailRecover, &iBatched));
 	iBatched.InsertL();
 	iBatched.SetColL(EObjectStoreHandleId, handle);
@@ -558,6 +564,14 @@ void CMTPObjectStore::ModifyObjectL(const CMTPObjectMetaData& aObject)
 
 	if (LocateByHandleL(handle))
 		{
+		//To avoid this modification will not generate duplicate SUID
+		TUint32 handle2 = HandleL(suid);
+		if (handle2 != KMTPHandleNone && handle2 != handle)
+		    {
+		    __FLOG(_L8("ModifyObjectL leave for duplicate suid."));
+		    User::Leave(KErrAlreadyExists); 
+		    }
+		
 		//After the PutL called the cursor's position is not well defined.
 		iCachedHandle = 0;
 		iCachedSuidHash = 0;

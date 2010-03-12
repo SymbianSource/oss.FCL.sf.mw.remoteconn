@@ -106,7 +106,8 @@ void CMTPPictBridgeGetObjectPropDesc::ServiceL()
             ServiceNonConsumableL();
             break;
         default:
-            Panic(EMTPPictBridgeDpUnsupportedProperty);
+            User::Leave( KErrNotSupported );
+            break;
         }
     __ASSERT_DEBUG(iObjectProperty, Panic(EMTPPictBridgeDpObjectPropertyNull));
     iObjectProperty->SetUint32L(CMTPTypeObjectPropDesc::EGroupCode,GetPropertyGroupNumber(propCode));

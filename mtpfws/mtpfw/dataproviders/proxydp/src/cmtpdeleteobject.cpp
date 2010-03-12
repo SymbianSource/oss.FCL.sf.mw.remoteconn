@@ -35,6 +35,14 @@ __FLOG_STMT( _LIT8( KComponent,"PrxyDelObj" ); )
 const TUint KInvalidDpId = 0xFF;
 
 /**
+Verification data for the DeleteObject request
+*/
+const TMTPRequestElementInfo KMTPDeleteObjectPolicy[] = 
+    {
+        { TMTPTypeRequest::ERequestParameter1, EMTPElementTypeObjectHandle, (EMTPElementAttrDir | EMTPElementAttrWrite), 1, KMTPHandleAll, 0 }
+    };
+
+/**
 Two-phase construction method
 @param aFramework    The data provider framework
 @param aConnection    The connection from which the request comes
@@ -67,7 +75,7 @@ CMTPDeleteObject::~CMTPDeleteObject()
 Constructor
 */    
 CMTPDeleteObject::CMTPDeleteObject(MMTPDataProviderFramework& aFramework, MMTPConnection& aConnection) :
-    CMTPRequestProcessor(aFramework, aConnection, 0, NULL),
+    CMTPRequestProcessor(aFramework, aConnection, sizeof(KMTPDeleteObjectPolicy)/sizeof(TMTPRequestElementInfo), KMTPDeleteObjectPolicy),
     iDeletedObjectsNumber(0)
     {
     __FLOG_OPEN( KMTPSubsystem, KComponent );

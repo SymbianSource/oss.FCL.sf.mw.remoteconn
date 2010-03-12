@@ -73,7 +73,7 @@ public:
     const TDesC& DateTimeL();
     TInt SetDateTimeL(const TDesC& aDateTime );    
     void DateTimeToStringL(TDes& aDateTime);
-    void StringToDateTime(TDes& aDateTime );
+    void StringToDateTimeL(TDes& aDateTime );
     void LoadDeviceIconL();
     const CMTPTypeArray& DeviceIcon();
     TInt ValidateString(const TDesC& aDateTimeStr, TDes& aDateTime, TInt &aOffsetVal);

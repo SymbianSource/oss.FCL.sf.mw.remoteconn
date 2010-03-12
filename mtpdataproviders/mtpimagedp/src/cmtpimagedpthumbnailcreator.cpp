@@ -30,6 +30,7 @@
 #include "cmtpimagedpthumbnailcreator.h"
 #include "mtpimagedpconst.h"
 #include "mtpimagedputilits.h"
+#include "cmtpimagedp.h"
 
 __FLOG_STMT(_LIT8(KComponent,"CMTPImageDpThumbnailCreator");)
 // --------------------------------------------------------------------------
@@ -37,9 +38,9 @@ __FLOG_STMT(_LIT8(KComponent,"CMTPImageDpThumbnailCreator");)
 // 2-phased constructor.
 // --------------------------------------------------------------------------
 //
-CMTPImageDpThumbnailCreator* CMTPImageDpThumbnailCreator::NewL()
+CMTPImageDpThumbnailCreator* CMTPImageDpThumbnailCreator::NewL(CMTPImageDataProvider& aDataProvider)
     {
-    CMTPImageDpThumbnailCreator* self= new (ELeave) CMTPImageDpThumbnailCreator();
+    CMTPImageDpThumbnailCreator* self= new (ELeave) CMTPImageDpThumbnailCreator(aDataProvider);
     CleanupStack::PushL(self);
     self->ConstructL();
     CleanupStack::Pop(self);
@@ -82,8 +83,9 @@ CMTPImageDpThumbnailCreator::~CMTPImageDpThumbnailCreator()
 // C++ constructor.
 // --------------------------------------------------------------------------
 //    
-CMTPImageDpThumbnailCreator::CMTPImageDpThumbnailCreator(): 
-CActive(EPriorityStandard)
+CMTPImageDpThumbnailCreator::CMTPImageDpThumbnailCreator(CMTPImageDataProvider& aDataProvider): 
+    CActive(EPriorityStandard),
+    iDataProvider(aDataProvider)
     {
     __FLOG_OPEN(KMTPSubsystem, KComponent);
     __FLOG(_L8("CMTPImageDpThumbnailCreator::CMTPImageDpThumbnailCreator(), begin"));
@@ -100,7 +102,7 @@ void CMTPImageDpThumbnailCreator::ConstructL()
     {
     __FLOG(_L8("CMTPImageDpThumbnailCreator::ConstructL(), begin"));
     iThumbMgr = CThumbnailManager::NewL( *this ); 
-    iThumbMgr->SetThumbnailSizeL( EFullScreenThumbnailSize );
+    iThumbMgr->SetThumbnailSizeL( EGridThumbnailSize );
 #ifdef MTPTHUMBSCALING
     iScaler = CBitmapScaler::NewL();
 #endif    
@@ -171,10 +173,6 @@ void CMTPImageDpThumbnailCreator::RunL()
                 __FLOG_VA((_L8("CMTPImageDpThumbnailCreator::RunL(),EDoNotCreate; iState %d"), iState));
                 delete iData;
                 iData = HBufC8::NewL(1);
-                iBuffer->Write(*iData);
-                }
-            else{
-                iBuffer->Write(*iData);
                 }
             
             __FLOG_VA((_L8("<< CMTPImageDpThumbnailCreator::RunL(),iBuffer->Write(*iData); iState %d"), iState));
@@ -215,15 +213,27 @@ TInt CMTPImageDpThumbnailCreator::RunError(TInt aErr)
 // 
 // --------------------------------------------------------------------------
 //
-void CMTPImageDpThumbnailCreator::GetThumbnailL(const TDesC& aFileName, CMTPTypeOpaqueData& aThumbName,  TInt& result)
+void CMTPImageDpThumbnailCreator::GetThumbnailL(const TDesC& aFileName, HBufC8*& aDestinationData,  TInt& result)
     {
     __FLOG(_L8(">> CMtpImageDphumbnailCreator::GetThumbnailL()"));
-    iBuffer = &aThumbName;
     GetThumbL(aFileName);
-    iCreationErr = &result;		//reset the err flag
+    iCreationErr = &result;     //reset the err flag
     *iCreationErr = KErrNone;
     __FLOG(_L8("<< CMTPImageDpThumbnailCreator::CreateThumbnailL()"));
     iActiveSchedulerWait->Start();
+    
+    /**
+     * transfer the ownership of iData if query successfully
+     */
+    if (*iCreationErr == KErrNone)
+        {
+        aDestinationData = iData;
+        iData = NULL;        
+        }
+    else
+        {
+        aDestinationData = NULL;
+        }
     }
 
 // --------------------------------------------------------------------------
@@ -250,7 +260,11 @@ void CMTPImageDpThumbnailCreator::GetThumbL(const TDesC& aFileName)
     delete iObjectSource;
     iObjectSource = NULL;
     
-    iObjectSource = CThumbnailObjectSource::NewL(aFileName, KJpegMimeType);
+    TParsePtrC parse(aFileName);
+    const TDesC& mimeType = iDataProvider.FindMimeType(parse.Ext().Mid(1));
+    __FLOG_VA((_L16("CMtpImageDphumbnailCreator::GetThumbL() - FileName:%S, MimeType:%S"), &aFileName, &mimeType));
+    
+    iObjectSource = CThumbnailObjectSource::NewL(aFileName, mimeType);
     iCurrentReq = iThumbMgr->GetThumbnailL( *iObjectSource );
     iState = EGetting;
     __FLOG(_L8("<< CMtpImageDphumbnailCreator::GetThumbL()"));
@@ -267,7 +281,16 @@ void CMTPImageDpThumbnailCreator::ScaleBitmap()
     __FLOG(_L8("CMTPImageDpThumbnailCreator::ScaleBitmapL(), begin"));
     TSize size( KThumbWidht, KThumbHeigth ); // size 160x120      
     // Resize image to thumbnail size 
-    iScaler->Scale( &iStatus, *iBitmap, size );
+//    iScaler->Scale( &iStatus, *iBitmap, size );
+    
+    /**
+     * [Thumbnail SIZE]: performance improvement
+     * comments scaling code, but it breaks PTP spect.
+     * so if we meet any break of compatible test, we should re-scale thumbnail size
+     */    
+    TRequestStatus* status = &iStatus;
+    User::RequestComplete( status, KErrNone );
+    
     SetActive();
     __FLOG(_L8("CMTPImageDpThumbnailCreator::ScaleBitmapL(), end"));
     }
@@ -309,7 +332,7 @@ void CMTPImageDpThumbnailCreator::ThumbnailReady( TInt aError, MThumbnailData& a
     if (aError == KErrNone)
         {
         TRAP_IGNORE(iThumbMgr->SetFlagsL(CThumbnailManager::EDefaultFlags));
-        delete iBitmap;   
+        delete iBitmap;
         // Claim ownership of the bitmap instance for later use
         iBitmap = aThumbnail.DetachBitmap();
 #ifdef MTPTHUMBSCALING
@@ -322,7 +345,8 @@ void CMTPImageDpThumbnailCreator::ThumbnailReady( TInt aError, MThumbnailData& a
         {
         __FLOG(_L8("CMTPImageDpThumbnailCreator::ThumbnailReady(),EDoNotCreate, KErrNotFound"));
         iState = EEncoding;
-        iThumbMgr->CreateThumbnails(*iObjectSource);
+        //don't trigger TNM to create thumbnail if image files are too big
+        //iThumbMgr->CreateThumbnails(*iObjectSource);
         aError = KErrNone;
         }
     iStatus=KRequestPending;

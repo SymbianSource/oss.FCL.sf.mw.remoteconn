@@ -64,7 +64,7 @@ private:
                                    const RArray<TItemId>& aObjectIdArray);
             
     void ProcessMdeNotificationL(const RArray<TItemId>& aObjectIdArray, TObserverNotificationType aType);     
-    void CreateMetadataL(const CMdEObject& aMdeObject, CMTPObjectMetaData& aMetaData); 
+    void CreateMetadataL(const TParsePtrC& aParse, TMTPFormatCode aFormat, TUint32 aParentHandle, CMTPObjectMetaData& aMetaData); 
     
 private:
     /**

@@ -296,6 +296,15 @@ public:
     @return Handle to the MTP datacode generator.
     */
     virtual MMTPDataCodeGenerator& DataCodeGenerator() const = 0;
+    
+    /**
+    Issues the specified notification to framework.
+    @param aNotification The notification type identifier.
+    @param aParams The notification type specific parameter block
+    @leave One of the system wide error code if a processing failure occurs
+    in the framework.
+    */
+    virtual void NotifyFrameworkL( TMTPNotificationToFramework aNotification, const TAny* aParams ) = 0;
    
     };
 

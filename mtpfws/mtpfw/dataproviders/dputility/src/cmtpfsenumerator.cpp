@@ -210,7 +210,7 @@ void CMTPFSEnumerator::ScanStorageL(TUint32 aStorageId)
  	    {
  	    iParentHandle = KMTPHandleNoParent;
  	    iPath.Set(root, NULL, NULL);
- 	    User::LeaveIfError(iDir.Open(iFramework.Fs(), iPath.DriveAndPath(), KEntryAttNormal | KEntryAttDir));
+ 	    User::LeaveIfError(iDir.Open(iFramework.Fs(), iPath.DriveAndPath(), KEntryAttNormal | KEntryAttHidden | KEntryAttDir));
  	    ScanDirL();
  	    }
  	else
@@ -290,7 +290,7 @@ void CMTPFSEnumerator::ScanNextSubdirL()
 				
 	// Kick-off a scan of the next directory
 	iDir.Close();
-	User::LeaveIfError(iDir.Open(iFramework.Fs(), iPath.DriveAndPath(), KEntryAttNormal | KEntryAttDir));
+	User::LeaveIfError(iDir.Open(iFramework.Fs(), iPath.DriveAndPath(), KEntryAttNormal | KEntryAttHidden | KEntryAttDir));
 	ScanDirL();
 	__FLOG_VA(_L8("ScanNextSubdirL - exit"));
 	}

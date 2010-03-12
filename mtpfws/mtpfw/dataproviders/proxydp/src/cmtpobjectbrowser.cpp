@@ -55,15 +55,7 @@ void CMTPObjectBrowser::GoL( TUint32 aFormatCode, TUint32 aHandle, TUint32 aDept
     switch ( aHandle )
         {
         case KMTPHandleAll:
-           //for the format code of serveice dp's, need to check the format
-           if( (aFormatCode >= EMTPFormatCodeVendorExtStart)&&(aFormatCode <= EMTPFormatCodeVendorExtEnd) )
-               {
-               GetAllObjectHandlesL( aFormatCode,aBrowseCallback );
-               }
-           else
-               {
-               GetAllObjectHandlesL( KMTPFormatsAll,aBrowseCallback );
-               }
+            GetObjectHandlesL( 0, KMTPStorageAll, aFormatCode, KMaxTUint, KMTPHandleNoParent, aBrowseCallback );
            
             break;
         case KMTPHandleNone:
@@ -168,15 +160,8 @@ void CMTPObjectBrowser::GetRootObjectHandlesL( TUint32 aCurDepth, TUint32 aForma
     
     if( aDepth > 0)
         {        
-            if (KMaxTUint == aDepth)
-                {
-                GetAllObjectHandlesL( aFormatCode,aBrowseCallback );
-                }
-            else
-                {
                 // attention: aDepth should be reduced by 1 here
                 GetObjectHandlesL( aCurDepth, KMTPStorageAll, aFormatCode, aDepth-1, KMTPHandleNoParent, aBrowseCallback );
-                }
         }
     
     // if aDepth == 0, no handles should be returned.

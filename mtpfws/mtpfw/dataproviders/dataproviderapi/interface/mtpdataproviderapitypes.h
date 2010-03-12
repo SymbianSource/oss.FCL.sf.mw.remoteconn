@@ -128,6 +128,17 @@ enum TMTPNotification
 	EMTPObjectAdded
     };
 
+/** 
+Defines the MTP framework event notification types.
+This notification is from dp to framework
+@publishedPartner
+@released
+*/
+enum TMTPNotificationToFramework
+    {
+    EMTPAddFolder = 0x10000000,
+    };
+
 /**
 Defines the notification parameter block which accompanies @see EMTPModeChanged 
 notifications.
@@ -181,7 +192,21 @@ public:
     */
     TUint32 iStorageId;
     };
-    
+
+/**
+Defines the notification parameter block which accompanies @see EMTPAddFolder 
+notification
+*/
+class TMTPNotificationParamsFolderChange
+    {
+public:
+
+    /**
+    The Folder on which need to do action.
+    */
+    const TDesC& iFolderChanged;
+    };
+
 /** 
 Defines the various data provider MTP feature support categories.
 @publishedPartner

@@ -33,6 +33,15 @@
 
 __FLOG_STMT( _LIT8( KComponent,"PrxyGetObjPrpLst" ); )
 const TUint KInvalidDpId = 0xFF;
+
+/**
+Verification data for the GetObjectPropList request
+*/
+const TMTPRequestElementInfo KMTPGetObjectPropListPolicy[] = 
+    {
+		{ TMTPTypeRequest::ERequestParameter1, EMTPElementTypeObjectHandle, EMTPElementAttrNone, 2, KMTPHandleAll, KMTPHandleNone}
+    };
+
 /**
 Factory method.
 @param aFramework	The data provider framework
@@ -126,7 +135,7 @@ void CMTPGetObjectPropList::ProxyTransactionCompleteL(const TMTPTypeRequest& /*a
     
 	__ASSERT_DEBUG((( (iRequest == &aRequest) || ( &iCurrentRequest == &aRequest ) ) && (&iConnection == &aConnection)), Panic(EMTPNotSameRequestProxy));
 	TUint16 response = iResponse.Uint16(TMTPTypeResponse::EResponseCode);
-	if(( EMTPRespCodeGroupNotSupported == response) || (EMTPRespCodeSpecificationByGroupUnsupported == response))
+	if(( EMTPRespCodeGroupNotSupported == response) || (EMTPRespCodeSpecificationByGroupUnsupported == response) || ( EMTPRespCodeObjectPropNotSupported == response))
 		{
 		response = EMTPRespCodeOK;
 		iResponse.SetUint16(TMTPTypeResponse::EResponseCode, response);
@@ -178,7 +187,7 @@ void CMTPGetObjectPropList::RunL()
 Constructor.
 */	
 CMTPGetObjectPropList::CMTPGetObjectPropList(MMTPDataProviderFramework& aFramework, MMTPConnection& aConnection) :
-    CMTPRequestProcessor(aFramework, aConnection, 0, NULL)
+    CMTPRequestProcessor(aFramework, aConnection, sizeof(KMTPGetObjectPropListPolicy)/sizeof(TMTPRequestElementInfo), KMTPGetObjectPropListPolicy)
     {
     __FLOG_OPEN( KMTPSubsystem, KComponent );
     __FLOG( _L8("+/-Ctor") );

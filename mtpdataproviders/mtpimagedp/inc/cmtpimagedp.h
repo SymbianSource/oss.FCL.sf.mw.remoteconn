@@ -39,8 +39,10 @@ class CMTPImageDpObjectPropertyMgr;
 class CMTPImageDpMdeObserver;
 class CRepository;
 class CMTPImageDpRenameObject;
+class CMTPImageDpNewPicturesNotifier;
 
 const TInt KMaxExtNameLength = 4;
+const TInt KMaxMimeNameLength = 10;
 
 /** 
 Implements the picture data provider plugin.
@@ -59,11 +61,14 @@ public:
     CMTPImageDpThumbnailCreator&  ThumbnailManager() const;
     CRepository& Repository() const;
     
-    TMTPFormatCode FindFormatL(const TDesC& aExtension);
+    TMTPFormatCode FindFormat(const TDesC& aExtension);
+    const TDesC& FindMimeType(const TDesC& aExtension);
     TBool GetCacheParentHandle(const TDesC& aParentPath, TUint32& aParentHandle);
     void  SetCacheParentHandle(const TDesC& aParentPath, TUint32 aParentHandle);
     void AppendDeleteObjectsArrayL(const TDesC& aSuid);
     void HandleDeleteObjectsArray();
+    void IncreaseNewPictures(TInt aCount);
+    void DecreaseNewPictures(TInt aCount);
     
 public: // From CMTPDataProviderPlugin
     void Cancel();
@@ -109,6 +114,7 @@ private:
     CMTPImageDpMdeObserver*             iMdeObserver;
     CRepository*                        iRepository;
     CMTPImageDpRenameObject*            iRenameObject;
+    CMTPImageDpNewPicturesNotifier*     iNewPicNotifier;
     
     /**
     The active request processors table.
@@ -116,13 +122,16 @@ private:
     RPointerArray<MMTPRequestProcessor> iActiveProcessors;
     
     /**
-     * contain the image mapping of extenstion to formatcode
+     * contain the mapping image'extension to formatcode
      */
     RHashMap<TBuf<KMaxExtNameLength>, TMTPFormatCode> iFormatMappings;
     
-    SMTPImageDpParentCache  iParentCache;
+    /**
+     * contain the mapping image's extension to mime type
+     */
+    RHashMap<TBuf<KMaxExtNameLength>, TBuf<KMaxMimeNameLength> > iMimeMappings;    
     
-    TUint                   iPrePictures;
+    SMTPImageDpParentCache  iParentCache;
     
     TInt                    iActiveProcessor;
     TBool                   iActiveProcessorRemoved;    

@@ -93,10 +93,6 @@ CMTPConnection::~CMTPConnection()
     	delete link;
     	}
     
-    if (iTransportConnection != NULL)
-	    {
-	    iTransportConnection->Unbind(*this);
-	    }
     iSessions.ResetAndDestroy();
     //close the property
     iProperty.Close();
@@ -374,6 +370,10 @@ void CMTPConnection::CompleteCloseConnection()
     
     CloseAllSessions();
     iSessions.Reset();
+	if (iTransportConnection != NULL)
+		{
+		iTransportConnection->Unbind(*this);
+		}
     
     //notify ConnectionMgr and corresponding transports of completion of connection close
     iSingletons.ConnectionMgr().ConnectionCloseComplete(iConnectionId);    
@@ -430,14 +430,14 @@ void CMTPConnection::TransactionCompleteL(const TMTPTypeRequest& aRequest)
         {
         session.SetTransactionPhase(EIdlePhase);
         
+		if (iTransportConnection != NULL)
+            {
+            iTransportConnection->TransactionCompleteL(aRequest);
+            }
+			
         if (State() == EStateShutdown && ActiveSessions() == 0)
             {     
             CompleteCloseConnection();
-            }
-        
-        if (iTransportConnection != NULL)
-            {
-            iTransportConnection->TransactionCompleteL(aRequest);
             }
         }
     __FLOG(_L8("TransactionCompleteL - Exit"));

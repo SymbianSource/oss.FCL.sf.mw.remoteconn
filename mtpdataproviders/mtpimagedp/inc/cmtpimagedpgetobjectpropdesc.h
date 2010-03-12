@@ -67,7 +67,8 @@ private:
     void ServiceRepresentativeSampleFormatL();
     void ServiceRepresentativeSampleSizeL();
     void ServiceRepresentativeSampleHeightL();
-    void ServiceRepresentativeSampleWidthL();   
+    void ServiceRepresentativeSampleWidthL();
+    void ServiceRepresentativeSampleDataL();
     void ServiceNonConsumableL();
     TUint16 GetPropertyGroupNumber(const TUint16 aPropCode) const;
     

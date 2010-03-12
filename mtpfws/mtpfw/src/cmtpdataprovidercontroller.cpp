@@ -385,7 +385,7 @@ Wait for the enumeration complete.
 */ 
 EXPORT_C void CMTPDataProviderController::WaitForEnumerationComplete()
 {
-	if(EnumerateState() < CMTPDataProviderController::EEnumeratingPhaseOneDone)
+	if((EnumerateState() < CMTPDataProviderController::EEnumeratingPhaseOneDone) && ( !iOpenSessionWaiter->IsStarted()))
 		{
 		iOpenSessionWaiter->Start();
 		}

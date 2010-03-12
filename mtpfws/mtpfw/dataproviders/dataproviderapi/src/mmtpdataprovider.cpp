@@ -33,8 +33,8 @@ EXPORT_C TAny* MMTPDataProvider::GetExtendedInterface(TUid /*aInterfaceUid*/)
 
 EXPORT_C void MMTPDataProvider::StartObjectEnumerationL(TUint32 /*aStorageId*/)
 	{
-	_LIT(KMTPPanicCategory, "MMTPDataProvider");
-	User::Panic(KMTPPanicCategory, KErrNotSupported);
+	__DEBUG_ONLY(_LIT(KMTPPanicCategory, "MMTPDataProvider"));
+	__DEBUG_ONLY( User::Panic( KMTPPanicCategory, KErrNotSupported ));
 	}
 
 EXPORT_C void MMTPDataProvider::StartObjectEnumerationL(TUint32 aStorageId, TBool /*aPersistentFullEnumeration*/)

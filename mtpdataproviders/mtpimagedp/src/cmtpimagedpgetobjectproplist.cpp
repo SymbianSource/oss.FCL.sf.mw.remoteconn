@@ -373,6 +373,17 @@ void CMTPImageDpGetObjectPropList::ServiceOneObjectPropertyL(TUint32 aHandle, TU
             }
             break;
             
+        case EMTPObjectPropCodeRepresentativeSampleData:
+            {
+            CMTPTypeArray* value = CMTPTypeArray::NewLC(EMTPTypeAUINT8);
+            iPropertyMgr.GetPropertyL(TMTPObjectPropertyCode(aPropCode), *value);            
+            CMTPTypeObjectPropListElement& propElem = iPropertyList->ReservePropElemL(aHandle, propCode);
+            propElem.SetArrayL(CMTPTypeObjectPropListElement::EValue, *value);            
+            iPropertyList->CommitPropElemL(propElem);
+            CleanupStack::PopAndDestroy(value);            
+            }
+            break;
+            
         case EMTPObjectPropCodeObjectSize:
             {
             TUint64 value;

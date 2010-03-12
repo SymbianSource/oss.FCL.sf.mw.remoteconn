@@ -848,7 +848,7 @@ void CMTPImageDpSendObjectInfo::RemoveObjectFromFs()
     if (err != KErrNone)
         {
         //add Suid to deleteobjectlist
-        iDataProvider.AppendDeleteObjectsArrayL(iFullPath);
+        TRAP_IGNORE(iDataProvider.AppendDeleteObjectsArrayL(iFullPath));
         }
     }
 
@@ -1166,6 +1166,12 @@ TMTPResponseCode CMTPImageDpSendObjectInfo::CheckPropCodeL(const CMTPTypeObjectP
             responseCode = EMTPRespCodeInvalidObjectPropFormat;
             }
         break;
+    case EMTPObjectPropCodeRepresentativeSampleData:
+        if (aElement.Uint16L(CMTPTypeObjectPropListElement::EDatatype) != EMTPTypeAUINT8)
+            {
+            responseCode = EMTPRespCodeInvalidObjectPropFormat;
+            }        
+        break;
     case EMTPObjectPropCodeNonConsumable:
         if (aElement.Uint16L(CMTPTypeObjectPropListElement::EDatatype) != EMTPTypeUINT8)
             {
@@ -1188,7 +1194,9 @@ sends a success response.
 void CMTPImageDpSendObjectInfo::ReserveObjectL()
     {
     __FLOG(_L8("CMTPImageDpSendObjectInfo::ReserveObjectL - Entry"));
-
+    const TInt objectStatusBitmask = 0x8000;//the most significant bit represents importing flag
+    
+    iReceivedObject->SetUint(CMTPObjectMetaData::EFormatSubCode, objectStatusBitmask);//mark object imported due to it sent by PC
     iReceivedObject->SetUint(CMTPObjectMetaData::EStorageId, iStorageId);    
     iFramework.ObjectMgr().ReserveObjectHandleL(*iReceivedObject, iObjectSize);    
     

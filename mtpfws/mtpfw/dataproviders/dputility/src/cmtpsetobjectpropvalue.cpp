@@ -208,7 +208,8 @@ void CMTPSetObjectPropValue::ServiceL()
 			//No break sentance, goto Panic
 			}
 		default:
-			Panic(EMTPDpUnsupportedProperty);
+		    User::Leave( KErrNotSupported );
+		    break;
 		}	
 	}
 
@@ -310,7 +311,8 @@ TBool CMTPSetObjectPropValue::DoHandleResponsePhaseL()
 			
 			
 		default:
-			Panic(EMTPDpUnsupportedProperty);
+		    User::Leave( KErrNotSupported );
+		    break;
 		}
 
 	SendResponseL(responseCode);

@@ -26,11 +26,13 @@
 #include <e32cmn.h>
 #include <imageconversion.h> 
 #include <mdeconstants.h>
+#include <thumbnailmanager.h>
 
 #include <mtp/mmtpobjectmgr.h>
 #include <mtp/cmtpobjectmetadata.h>
 #include <mtp/tmtptypeuint32.h>
 #include <mtp/cmtptypestring.h>
+#include <mtp/cmtptypeopaquedata.h>
 #include <mtp/mmtpdataproviderframework.h>
 #include <mtp/cmtptypearray.h>
 #include <mtp/mmtpdataproviderframework.h>
@@ -38,7 +40,9 @@
 #include <mtp/cmtptypestring.h>
 #include <mtp/mtpprotocolconstants.h>
 
+#include "cmtpimagedp.h"
 #include "cmtpimagedpobjectpropertymgr.h"
+#include "cmtpimagedpthumbnailcreator.h"
 #include "mtpimagedppanic.h"
 #include "mtpimagedputilits.h"
 #include "mtpimagedpconst.h"
@@ -114,6 +118,7 @@ void CMTPImageDpObjectPropertyMgr::CMTPImagePropertiesCache::ConstructL()
 
 void CMTPImageDpObjectPropertyMgr::CMTPImagePropertiesCache::ResetL()
     {
+    iObjectHandle = KMTPHandleNone;
     SetUint(EImagePixWidth, 0);
     SetUint(EImagePixHeight, 0);
     SetUint(EImageBitDepth, 0);
@@ -157,16 +162,18 @@ void CMTPImageDpObjectPropertyMgr::CMTPImagePropertiesCache::SetObjectHandle(TUi
     iObjectHandle = aObjectHandle;
     }
 
-CMTPImageDpObjectPropertyMgr* CMTPImageDpObjectPropertyMgr::NewL(MMTPDataProviderFramework& aFramework)
+CMTPImageDpObjectPropertyMgr* CMTPImageDpObjectPropertyMgr::NewL(MMTPDataProviderFramework& aFramework, CMTPImageDataProvider& aDataProvider)
     {
-    CMTPImageDpObjectPropertyMgr* self = new (ELeave) CMTPImageDpObjectPropertyMgr(aFramework);
+    CMTPImageDpObjectPropertyMgr* self = new (ELeave) CMTPImageDpObjectPropertyMgr(aFramework, aDataProvider);
     CleanupStack::PushL(self);
     self->ConstructL(aFramework);
     CleanupStack::Pop(self);
     return self;
     }
 
-CMTPImageDpObjectPropertyMgr::CMTPImageDpObjectPropertyMgr(MMTPDataProviderFramework& aFramework) :
+CMTPImageDpObjectPropertyMgr::CMTPImageDpObjectPropertyMgr(MMTPDataProviderFramework& aFramework, CMTPImageDataProvider& aDataProvider) :
+    iFramework(aFramework),
+    iDataProvider(aDataProvider),
     iFs(aFramework.Fs()),
     iObjectMgr(aFramework.ObjectMgr())
     {
@@ -196,6 +203,7 @@ CMTPImageDpObjectPropertyMgr::~CMTPImageDpObjectPropertyMgr()
     delete iObject;
     delete iMetaDataSession;
     delete iActiveSchedulerWait; 
+    delete iThumbnailCache.iThumbnailData;
     __FLOG(_L8("CMTPImageDpObjectPropertyMgr::~CMTPImageDpObjectPropertyMgr - Exit"));
     __FLOG_CLOSE;
     }
@@ -218,18 +226,20 @@ void CMTPImageDpObjectPropertyMgr::SetCurrentObjectL(CMTPObjectMetaData& aObject
             iCacheHit = ETrue;
             }
         else
-            {
+            {            
             iCacheHit = EFalse;
+
+            /**
+             * if cache miss, we should clear the cache content
+             */
+            ClearCacheL();
             
-            CMdENamespaceDef& defaultNamespace = iMetaDataSession->GetDefaultNamespaceDefL();
-            CMdEObjectDef& imageObjDef = defaultNamespace.GetObjectDefL( MdeConstants::Image::KImageObject );
+			//need parse image file by our self if fail to get properties from MdS
+            iNeedParse = ETrue;
+
+			//clear previous Mde object
             delete iObject;
-            iObject = NULL;
-            
-            //if we can not open MdS object for getting properties, we will not get properites which stored in MdS
-            TFileName uri;
-            uri.CopyLC(iObjectInfo->DesC(CMTPObjectMetaData::ESuid));
-            TRAP_IGNORE((iObject = iMetaDataSession->GetObjectL(uri, imageObjDef)));            
+            iObject = NULL;            
             }        
         }    
     else
@@ -357,7 +367,7 @@ void CMTPImageDpObjectPropertyMgr::SetPropertyL(TMTPObjectPropertyCode aProperty
         {
         TTime modifiedTime;
         ConvertMTPTimeStr2TTimeL(aValue, modifiedTime);
-        iFs.SetModified(iObjectInfo->DesC(CMTPObjectMetaData::ESuid), modifiedTime);     
+        iFs.SetModified(iObjectInfo->DesC(CMTPObjectMetaData::ESuid), modifiedTime);            
         }
         break;
       
@@ -413,7 +423,9 @@ void CMTPImageDpObjectPropertyMgr::GetPropertyL(TMTPObjectPropertyCode aProperty
             }
         break;        
     default:
-        GetPropertyFromMdsL(aProperty, &aValue);
+        aValue = 0;//initialization
+        //ingore the failure if we can't get properties form MdS
+        TRAP_IGNORE(GetPropertyFromMdsL(aProperty, &aValue));
         break;
         }
     __FLOG(_L8("<< CMTPImageDpObjectPropertyMgr::GetPropertyL"));
@@ -434,20 +446,66 @@ void CMTPImageDpObjectPropertyMgr::GetPropertyL(TMTPObjectPropertyCode aProperty
         aValue = iObjectInfo->Uint(CMTPObjectMetaData::EParentHandle);
         break;        
        
-    case EMTPObjectPropCodeRepresentativeSampleSize:
-        aValue = KThumbCompressedSize;
-       break;       
+    case EMTPObjectPropCodeRepresentativeSampleSize: 
+        aValue = MTPImageDpUtilits::GetThumbnailSize(*iObjectInfo);
+        if (aValue == 0)
+            {
+            __FLOG_VA((_L16("Query smaple size from MdS - URI:%S"), &iObjectInfo->DesC(CMTPObjectMetaData::ESuid)));
+            ClearThumnailCache();                                
+            /**
+             * try to query thumbnail from TNM, and then store thumbnail to cache
+             */
+            TEntry fileEntry;
+            TInt err = iFs.Entry(iObjectInfo->DesC(CMTPObjectMetaData::ESuid), fileEntry);
+            if (err == KErrNone)
+                {
+                iDataProvider.ThumbnailManager().GetThumbMgr()->SetFlagsL(CThumbnailManager::EDefaultFlags);
+                if(fileEntry.FileSize() > KFileSizeMax)
+                    {
+                    iDataProvider.ThumbnailManager().GetThumbMgr()->SetFlagsL(CThumbnailManager::EDoNotCreate);
+                    }
+                
+                /**
+                 * trap the leave to avoid return general error when PC get object property list
+                 */
+                TRAP(err, iDataProvider.ThumbnailManager().GetThumbnailL(iObjectInfo->DesC(CMTPObjectMetaData::ESuid), iThumbnailCache.iThumbnailData, err));
+                if (err == KErrNone)
+                    {
+                    iThumbnailCache.iObjectHandle = iObjectInfo->Uint(CMTPObjectMetaData::EHandle);                        
+                    if (iThumbnailCache.iThumbnailData != NULL)
+                        {
+                        aValue = static_cast<TUint32>(iThumbnailCache.iThumbnailData->Size());
+                        }
+                                                
+                    if (aValue > 0)
+                        {
+                        //update metadata column
+                        MTPImageDpUtilits::UpdateObjectThumbnailSizeL(iFramework, *iObjectInfo, aValue);
+                        }
+                    else
+                        {
+                        //trigger initiator to re-query thumbnail again if the thumbnail size of response is zero
+                        aValue = KThumbCompressedSize;
+                        }
+
+                    __FLOG_VA((_L16("Cache miss:GetThumbnailSize - URI:%S, Size:%u"), &iObjectInfo->DesC(CMTPObjectMetaData::ESuid), aValue));
+                    }
+                }
+            }	    
+        break;       
        
     case EMTPObjectPropCodeRepresentativeSampleHeight:
         aValue = KThumbHeigth;
-       break;
+        break;
        
     case EMTPObjectPropCodeRepresentativeSampleWidth:
         aValue = KThumbWidht;
-       break;
+        break;
               
     default:
-        GetPropertyFromMdsL(aProperty, &aValue);
+        aValue = 0;//initialization
+        //ingore the failure if we can't get properties form MdS
+        TRAP_IGNORE(GetPropertyFromMdsL(aProperty, &aValue));
         break;  
         }
     __FLOG(_L8("<< CMTPImageDpObjectPropertyMgr::GetPropertyL"));
@@ -522,10 +580,66 @@ void CMTPImageDpObjectPropertyMgr::GetPropertyL(TMTPObjectPropertyCode aProperty
         break;                 
         
     default:
-        GetPropertyFromMdsL(aProperty, &aValue);
+        //ingore the failure if we can't get properties form MdS
+        TRAP_IGNORE(GetPropertyFromMdsL(aProperty, &aValue));
         break;
         }
     __FLOG(_L8("<< CMTPImageDpObjectPropertyMgr::GetPropertyL"));
+    }
+
+void CMTPImageDpObjectPropertyMgr::GetPropertyL(TMTPObjectPropertyCode aProperty, CMTPTypeArray& aValue)
+    {
+    __FLOG(_L8(">> CMTPImageDpObjectPropertyMgr::GetPropertyL -- SmapleData"));       
+    
+    if (aProperty == EMTPObjectPropCodeRepresentativeSampleData)
+        {
+        HBufC8* tnBuf = Thumbnail(iObjectInfo->Uint(CMTPObjectMetaData::EHandle));    
+        if (tnBuf != NULL)
+            {    
+            aValue.SetByDesL(*tnBuf);
+            }
+        else
+            {    
+            ClearThumnailCache();                                
+            /**
+             * try to query thumbnail from TNM, and then store thumbnail to cache
+             */
+            TEntry fileEntry;
+            TInt err = iFs.Entry(iObjectInfo->DesC(CMTPObjectMetaData::ESuid), fileEntry);
+            if (err == KErrNone)
+                {
+                iDataProvider.ThumbnailManager().GetThumbMgr()->SetFlagsL(CThumbnailManager::EDefaultFlags);
+                if(fileEntry.FileSize() > KFileSizeMax)
+                    {
+                    iDataProvider.ThumbnailManager().GetThumbMgr()->SetFlagsL(CThumbnailManager::EDoNotCreate);
+                    }
+                
+                /**
+                 * trap the leave to avoid return general error when PC get object property list
+                 */
+                TRAP(err, iDataProvider.ThumbnailManager().GetThumbnailL(iObjectInfo->DesC(CMTPObjectMetaData::ESuid), iThumbnailCache.iThumbnailData, err));
+                if (err == KErrNone)
+                    {
+                    TInt size = MTPImageDpUtilits::GetThumbnailSize(*iObjectInfo);
+                    iThumbnailCache.iObjectHandle = iObjectInfo->Uint(CMTPObjectMetaData::EHandle);                        
+                    if (iThumbnailCache.iThumbnailData != NULL)
+                        {
+                        aValue.SetByDesL(*iThumbnailCache.iThumbnailData);
+                        if (size == 0)
+                            {
+                            //update metadata column
+                            MTPImageDpUtilits::UpdateObjectThumbnailSizeL(iFramework, *iObjectInfo, iThumbnailCache.iThumbnailData->Size());
+                            __FLOG_VA((_L16("Cache miss:GetThumbnailSize - URI:%S, Size:%u"), &iObjectInfo->DesC(CMTPObjectMetaData::ESuid), size));
+                            }
+                        }                                
+                    }
+                }
+            }
+        }
+    else
+        {
+        User::Leave(EMTPRespCodeObjectPropNotSupported);
+        }
     }
 
 void CMTPImageDpObjectPropertyMgr::GetPropertyFromMdsL(TMTPObjectPropertyCode aProperty, TAny* aValue)
@@ -533,138 +647,138 @@ void CMTPImageDpObjectPropertyMgr::GetPropertyFromMdsL(TMTPObjectPropertyCode aP
     __FLOG(_L8(">> CMTPImageDpObjectPropertyMgr::GetPropertyFromMdsL"));
     
     TInt err = KErrNone;
-    CMdENamespaceDef& defaultNamespace = iMetaDataSession->GetDefaultNamespaceDefL();
-    CMdEObjectDef& imageObjDef = defaultNamespace.GetObjectDefL( MdeConstants::Image::KImageObject );
-    CMdEProperty* mdeProperty = NULL;
-    switch (aProperty)
-        {        
-    case EMTPObjectPropCodeDateCreated:
+      
+    if (iCacheHit)
         {
-        if (iCacheHit)
+        /**
+         * The object hit the cache, so we query properties from cache
+         */
+        switch (aProperty)
             {
-            (*(static_cast<CMTPTypeString*>(aValue))).SetL(iPropertiesCache->DesC(CMTPImageDpObjectPropertyMgr::CMTPImagePropertiesCache::EDateCreated));
+        case EMTPObjectPropCodeDateCreated:
+            (*(static_cast<CMTPTypeString*>(aValue))).SetL(iPropertiesCache->DesC(CMTPImageDpObjectPropertyMgr::CMTPImagePropertiesCache::EDateCreated));            
+            break;
+          
+        case EMTPObjectPropCodeWidth:
+            *static_cast<TUint32*>(aValue) = iPropertiesCache->Uint(CMTPImageDpObjectPropertyMgr::CMTPImagePropertiesCache::EImagePixWidth);            
+            break;
+            
+        case EMTPObjectPropCodeHeight:
+            *static_cast<TUint32*>(aValue) = iPropertiesCache->Uint(CMTPImageDpObjectPropertyMgr::CMTPImagePropertiesCache::EImagePixHeight);           
+            break;
+            
+        case EMTPObjectPropCodeImageBitDepth:
+            *static_cast<TUint32*>(aValue) = iPropertiesCache->Uint(CMTPImageDpObjectPropertyMgr::CMTPImagePropertiesCache::EImageBitDepth);            
+            break;
+            
+        default:
+            //nothing to do
+            break;
             }
-        else if (iObject)
+        }
+    else
+        {
+        /**
+         * The object miss cache, so we should open Mde object to query properties
+         */
+        OpenMdeObjectL();
+        
+        CMdENamespaceDef& defaultNamespace = iMetaDataSession->GetDefaultNamespaceDefL();
+        CMdEObjectDef& imageObjDef = defaultNamespace.GetObjectDefL( MdeConstants::Image::KImageObject );
+        CMdEProperty* mdeProperty = NULL;
+        
+        switch (aProperty)
             {        
-            CMdEPropertyDef& creationDatePropDef = imageObjDef.GetPropertyDefL(MdeConstants::Object::KCreationDateProperty);
-            TInt err = iObject->Property( creationDatePropDef, mdeProperty );  
-            if (err >= KErrNone) 
-                {
-                TBuf<KMaxTimeFormatSpec*2> timeValue;
-                // locale independent YYYYMMSSThhmmss, as required by the MTP spec
-                _LIT(KTimeFormat, "%F%Y%M%DT%H%T%S");
-                mdeProperty->TimeValueL().FormatL(timeValue, KTimeFormat);
-                (*(static_cast<CMTPTypeString*>(aValue))).SetL(timeValue);
+        case EMTPObjectPropCodeDateCreated:
+            {
+            if (iObject)
+                {        
+                CMdEPropertyDef& creationDatePropDef = imageObjDef.GetPropertyDefL(MdeConstants::Object::KCreationDateProperty);
+                TInt err = iObject->Property( creationDatePropDef, mdeProperty );  
+                if (err >= KErrNone) 
+                    {
+                    TBuf<KMaxTimeFormatSpec*2> timeValue;
+                    // locale independent YYYYMMSSThhmmss, as required by the MTP spec
+                    _LIT(KTimeFormat, "%F%Y%M%DT%H%T%S");
+                    mdeProperty->TimeValueL().FormatL(timeValue, KTimeFormat);
+                    (*(static_cast<CMTPTypeString*>(aValue))).SetL(timeValue);
+                    
+                    __FLOG_VA((_L16("GetPropertyFromMdsL - from MdS: URI:%S, DateCreated:%S"), &iObjectInfo->DesC(CMTPObjectMetaData::ESuid), &timeValue));
+                    }
                 }
             }
-        }
-       break;  
-       
-    case EMTPObjectPropCodeWidth:
-        {
-        if (iCacheHit)
+           break;  
+           
+        case EMTPObjectPropCodeWidth:
             {
-            *static_cast<TUint32*>(aValue) = iPropertiesCache->Uint(CMTPImageDpObjectPropertyMgr::CMTPImagePropertiesCache::EImagePixWidth);
-            }
-        else if (iObject)
-            {
-            CMdEPropertyDef& imageWidthPropDef = imageObjDef.GetPropertyDefL(MdeConstants::MediaObject::KWidthProperty);
-            err = iObject->Property( imageWidthPropDef, mdeProperty );  
-            if (err >= KErrNone) 
+            if (iObject)
                 {
-                TUint16 width = mdeProperty->Uint16ValueL();
-                if (width > 0)
+                CMdEPropertyDef& imageWidthPropDef = imageObjDef.GetPropertyDefL(MdeConstants::MediaObject::KWidthProperty);
+                err = iObject->Property( imageWidthPropDef, mdeProperty );  
+                if (err >= KErrNone) 
                     {
-                    *static_cast<TUint32*>(aValue) = width;
+                    *static_cast<TUint32*>(aValue) = mdeProperty->Uint16ValueL();
                     }
                 else
                     {
-                    *static_cast<TUint32*>(aValue) = ParseImageFileL(iObject->Uri(), EMTPObjectPropCodeWidth);
+                    *static_cast<TUint32*>(aValue) = 0;
                     }
                 }
             else
                 {
-                *static_cast<TUint32*>(aValue) = ParseImageFileL(iObject->Uri(), EMTPObjectPropCodeWidth);
+                *static_cast<TUint32*>(aValue) = 0;
                 }
             }
-        else
+           break; 
+           
+        case EMTPObjectPropCodeHeight:
             {
-            *static_cast<TUint32*>(aValue) = 0;
-            }
-        }
-       break; 
-       
-    case EMTPObjectPropCodeHeight:
-        {
-        if (iCacheHit)
-            {
-            *static_cast<TUint32*>(aValue) = iPropertiesCache->Uint(CMTPImageDpObjectPropertyMgr::CMTPImagePropertiesCache::EImagePixHeight);
-            }
-        else if (iObject)
-            {
-            CMdEPropertyDef& imageHeightPropDef = imageObjDef.GetPropertyDefL(MdeConstants::MediaObject::KHeightProperty);
-            err = iObject->Property( imageHeightPropDef, mdeProperty );  
-            if (err >= KErrNone) 
+            if (iObject)
                 {
-                TUint16 height = mdeProperty->Uint16ValueL();
-                if (height > 0)
+                CMdEPropertyDef& imageHeightPropDef = imageObjDef.GetPropertyDefL(MdeConstants::MediaObject::KHeightProperty);
+                err = iObject->Property( imageHeightPropDef, mdeProperty );  
+                if (err >= KErrNone) 
                     {
-                    *static_cast<TUint32*>(aValue) = height;
+                    *static_cast<TUint32*>(aValue) = mdeProperty->Uint16ValueL();
                     }
                 else
                     {
-                    *static_cast<TUint32*>(aValue) = ParseImageFileL(iObject->Uri(), EMTPObjectPropCodeHeight);
+                    *static_cast<TUint32*>(aValue) = 0;
                     }
                 }
             else
                 {
-                *static_cast<TUint32*>(aValue) = ParseImageFileL(iObject->Uri(), EMTPObjectPropCodeHeight);
+                *static_cast<TUint32*>(aValue) = 0;
                 }
             }
-        else
+           break; 
+           
+        case EMTPObjectPropCodeImageBitDepth:
             {
-            *static_cast<TUint32*>(aValue) = 0;
-            }
-        }
-       break; 
-       
-    case EMTPObjectPropCodeImageBitDepth:
-        {
-        if (iCacheHit)
-            {
-            *static_cast<TUint32*>(aValue) = iPropertiesCache->Uint(CMTPImageDpObjectPropertyMgr::CMTPImagePropertiesCache::EImageBitDepth);
-            }
-        else if (iObject)
-            {
-            CMdEPropertyDef& imageBitDepth = imageObjDef.GetPropertyDefL(MdeConstants::Image::KBitsPerSampleProperty);
-            err = iObject->Property( imageBitDepth, mdeProperty );  
-            if (err >= KErrNone) 
+            if (iObject)
                 {
-                TUint16 bitDepth = mdeProperty->Uint16ValueL();
-                if (bitDepth > 0)
+                CMdEPropertyDef& imageBitDepth = imageObjDef.GetPropertyDefL(MdeConstants::Image::KBitsPerSampleProperty);
+                err = iObject->Property( imageBitDepth, mdeProperty );  
+                if (err >= KErrNone) 
                     {
-                    *static_cast<TUint32*>(aValue) = bitDepth;
+                    *static_cast<TUint32*>(aValue) = mdeProperty->Uint16ValueL();               
                     }
                 else
                     {
-                    *static_cast<TUint32*>(aValue) = ParseImageFileL(iObject->Uri(), EMTPObjectPropCodeImageBitDepth);
-                    }                
+                    *static_cast<TUint32*>(aValue) = 0;
+                    }  
                 }
             else
                 {
-                *static_cast<TUint32*>(aValue) = ParseImageFileL(iObject->Uri(), EMTPObjectPropCodeImageBitDepth);
-                }  
+                *static_cast<TUint32*>(aValue) = 0;
+                }        
+            }     
+           break; 
+           
+        default:
+            //nothing to do
+            break;
             }
-        else
-            {
-            *static_cast<TUint32*>(aValue) = 0;
-            }        
-        }     
-       break; 
-       
-    default:
-        //nothing to do
-        break;
         }
     __FLOG(_L8("<< CMTPImageDpObjectPropertyMgr::GetPropertyFromMdsL"));
     }
@@ -781,7 +895,7 @@ void CMTPImageDpObjectPropertyMgr::ConvertMTPTimeStr2TTimeL(const TDesC& aTimeSt
            ||!GetMinute(aTimeString,minute)
            ||!GetSecond(aTimeString,second)
            ||!GetTenthSecond(aTimeString,tenthSecond))
-        {
+        {        
         User::Leave(KErrArgument);
         }
     else
@@ -803,93 +917,30 @@ void CMTPImageDpObjectPropertyMgr::RemoveProperty(CMdEObject& aObject, CMdEPrope
         }
     }
 
-TUint32 CMTPImageDpObjectPropertyMgr::ParseImageFileL(const TDesC& aUri, TMTPObjectPropertyCode aPropCode)
+/**
+ * Store thumbnail into cache
+ */
+void CMTPImageDpObjectPropertyMgr::StoreThunmnail(TUint aHandle, HBufC8* aData)
     {
-    TUint32 result = 0;
-    TInt err = KErrNone;
-    const TInt K64Kb = 65536;
+    ClearThumnailCache();
     
-    HBufC8* buffer = HBufC8::NewLC(K64Kb);
-    TPtr8 myImagePtr = buffer->Des();
-    err = iFs.ReadFileSection(aUri, 0, myImagePtr, K64Kb);
-    if (err != KErrNone)
+    iThumbnailCache.iObjectHandle = aHandle;      
+    iThumbnailCache.iThumbnailData = aData;
+    }
+
+/**
+ * Get thumbnail from cache
+ */
+HBufC8* CMTPImageDpObjectPropertyMgr::Thumbnail(TUint aHandle)
+    {
+    if (iThumbnailCache.iObjectHandle == aHandle)
         {
-        CleanupStack::PopAndDestroy(buffer);
-        return result;
+        return iThumbnailCache.iThumbnailData;
         }
-    
-    CBufferedImageDecoder *decoder = CBufferedImageDecoder::NewL(iFs);
-    CleanupStack::PushL(decoder);
-        
-    decoder->OpenL(myImagePtr, CImageDecoder::TOptions( CImageDecoder::EPreferFastDecode | CImageDecoder::EOptionIgnoreExifMetaData));
-    if (decoder->ValidDecoder())
+    else
         {
-        const TFrameInfo& info = decoder->FrameInfo();
-        
-        switch (aPropCode)
-            {
-        case EMTPObjectPropCodeWidth:
-            result = info.iOverallSizeInPixels.iWidth;
-            break;
-            
-        case EMTPObjectPropCodeHeight:
-            result = info.iOverallSizeInPixels.iHeight;
-            break;
-            
-        case EMTPObjectPropCodeImageBitDepth:
-            result = info.iBitsPerPixel;
-            break;
-            
-        default:
-            // nothing to do
-            break;
-            }
-        
-        /**
-         * Open MdE object for update image object properties after parsing
-         */
-        CMdENamespaceDef& defaultNamespace = iMetaDataSession->GetDefaultNamespaceDefL();
-        CMdEObjectDef& imageObjDef = defaultNamespace.GetObjectDefL(MdeConstants::Image::KImageObject);
-        CMdEPropertyDef& imageWidthPropDef = imageObjDef.GetPropertyDefL(MdeConstants::MediaObject::KWidthProperty);
-        CMdEPropertyDef& imageHeightPropDef = imageObjDef.GetPropertyDefL(MdeConstants::MediaObject::KHeightProperty);
-        CMdEPropertyDef& imageBitDepth = imageObjDef.GetPropertyDefL(MdeConstants::Image::KBitsPerSampleProperty);
-        
-        //update current object properties
-        TUint16 width = info.iOverallSizeInPixels.iWidth;
-        RemoveProperty(*iObject, imageWidthPropDef);
-        iObject->AddUint16PropertyL(imageWidthPropDef, width);
-        
-        TUint16 height = info.iOverallSizeInPixels.iHeight;
-        RemoveProperty(*iObject, imageHeightPropDef);
-        iObject->AddUint16PropertyL(imageHeightPropDef, height);
-        
-        TUint16 bitsPerPixel = info.iBitsPerPixel;
-        RemoveProperty(*iObject, imageBitDepth);
-        iObject->AddUint16PropertyL(imageBitDepth, bitsPerPixel);
-        
-        CMdEObject* updateObject = NULL;
-        TRAP(err, updateObject = iMetaDataSession->OpenObjectL(iObject->Id(), imageObjDef));
-        if (err == KErrNone && updateObject != NULL)
-            {
-            CleanupStack::PushL(updateObject);
-            
-            RemoveProperty(*updateObject, imageWidthPropDef);                   
-            updateObject->AddUint16PropertyL(imageWidthPropDef, width);    
-            
-            RemoveProperty(*updateObject, imageHeightPropDef);        
-            updateObject->AddUint16PropertyL(imageHeightPropDef, height);
-            
-            RemoveProperty(*updateObject, imageBitDepth);        
-            updateObject->AddUint16PropertyL(imageBitDepth, bitsPerPixel);    
-                    
-            iMetaDataSession->CommitObjectL(*updateObject);
-            CleanupStack::PopAndDestroy(updateObject);
-            }
+        return NULL;
         }
-    
-    CleanupStack::PopAndDestroy(2);// decoder, buffer
-    
-    return result;
     }
 
 /**
@@ -932,4 +983,28 @@ void CMTPImageDpObjectPropertyMgr::SetMdeSessionError(TInt aError)
 void CMTPImageDpObjectPropertyMgr::ClearCacheL()
     {
     iPropertiesCache->ResetL();
+    }
+
+void CMTPImageDpObjectPropertyMgr::OpenMdeObjectL()
+    {
+    if (iObject == NULL)
+        {
+        __FLOG_VA((_L16("OpenMdeObjectL - URI = %S"), &iObjectInfo->DesC(CMTPObjectMetaData::ESuid)));
+		
+        CMdENamespaceDef& defaultNamespace = iMetaDataSession->GetDefaultNamespaceDefL();
+        CMdEObjectDef& imageObjDef = defaultNamespace.GetObjectDefL( MdeConstants::Image::KImageObject );
+        
+        //if we can not open MdS object for getting properties, we will not get properites which stored in MdS
+        TFileName uri;
+        uri.CopyLC(iObjectInfo->DesC(CMTPObjectMetaData::ESuid));
+        TRAP_IGNORE((iObject = iMetaDataSession->GetObjectL(uri, imageObjDef)));      
+        }
+    }
+
+void CMTPImageDpObjectPropertyMgr::ClearThumnailCache()
+    {
+    delete iThumbnailCache.iThumbnailData;
+    iThumbnailCache.iThumbnailData = NULL;
+    
+    iThumbnailCache.iObjectHandle = KMTPHandleNone;
     }

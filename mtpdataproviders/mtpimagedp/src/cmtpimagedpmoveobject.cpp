@@ -281,7 +281,7 @@ TMTPResponseCode CMTPImageDpMoveObject::CanMoveObjectL(const TDesC& aOldName, co
     TVolumeInfo volumeInfo;
     User::LeaveIfError(iFramework.Fs().Volume(volumeInfo, drive));
     
-    if(volumeInfo.iFree < fileEntry.iSize)
+    if(volumeInfo.iFree < fileEntry.FileSize())
         {
         result = EMTPRespCodeStoreFull;
         }
