@@ -67,7 +67,6 @@ LIBRARY         etelmm.lib
 LIBRARY         hal.lib
 LIBRARY         platformenv.lib
 LIBRARY         charconv.lib
-LIBRARY	        customapi.lib
 LIBRARY	        centralrepository.lib
 LIBRARY         apgrfx.lib
 LIBRARY         apparc.lib

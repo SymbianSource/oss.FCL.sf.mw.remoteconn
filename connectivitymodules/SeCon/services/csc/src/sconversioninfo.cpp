@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2008-2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2008-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -23,8 +23,7 @@
 #include <etel3rdparty.h> // read imsi
 #include <etel.h>
 #include <etelmm.h>
-#include <e32event.h>
-#include <e32svr.h>
+#include <hal.h>
 
 #include "caputils.h"
 #include "debug.h"
@@ -200,13 +199,6 @@ void CSconVersionInfo::FetchInfoL( RFs& aFs )
         iProductCode = info.AllocL();
         }
     
-    // screen size
-    TPckgBuf<TScreenInfoV01> siBuf;
-    UserSvr::ScreenInfo(siBuf);
-    TScreenInfoV01& si=siBuf();
-    iScreenSize = si.iScreenSize;
-    
-    
     // read DesktopSync key value
     CRepository* repository(NULL);
     TRAP( iDesktopSyncError, repository = CRepository::NewL( KCRUidDSDCMOConfig ));
@@ -222,7 +214,9 @@ void CSconVersionInfo::FetchInfoL( RFs& aFs )
         LOGGER_WRITE_1("Could not create CRepository, err: %d", iDesktopSyncError );
         }
     
-    
+    // screen size
+    HAL::Get(HAL::EDisplayXPixels, iScreenSize.iWidth);
+    HAL::Get(HAL::EDisplayYPixels, iScreenSize.iHeight);
     
     iInfoFetched = ETrue;
     TRACE_FUNC_EXIT;   

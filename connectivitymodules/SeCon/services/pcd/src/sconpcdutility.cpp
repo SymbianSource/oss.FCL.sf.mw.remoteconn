@@ -21,7 +21,7 @@
 #include <swi/sisregistrysession.h>
 #include <swi/sisregistrypackage.h>
 #include <stringresourcereader.h>
-#include <WidgetRegistryClient.h>
+#include <widgetregistryclient.h>
 #include <javaregistryincludes.h>
 #include <appversion.h>
 #include <mmf/common/mmfcontrollerpluginresolver.h>

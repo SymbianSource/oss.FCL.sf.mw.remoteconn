@@ -33,6 +33,43 @@ Defines the MTP file object data type.
 */
 class CMTPTypeFile : public CActive, public MMTPType
     {
+
+class CFileWriter : public CActive
+    {
+public:
+    
+    static CFileWriter* NewL(RFile&  aFile, RBuf8& aWriteBuf);
+    /*
+     * Get the buffer for transport to receive data.
+     */
+    void GetWriteBuf(TPtr8& aChunk);
+    /*
+     * Get the file write result.
+     */
+    TInt GetResult() const;
+    /*
+     * Issue a async request to write aLength Data
+     * 
+     */
+    void Write(TInt aLength);
+    /*
+     * Wait until the async write complete.
+     */
+    void WaitForWriteComplete();
+    void RunL();
+    ~CFileWriter();
+    
+private:
+    void DoCancel();
+    CFileWriter(RFile&  aFile, RBuf8& aBuf);
+    void ConstructL();
+    
+private:
+    TInt    iWriteResult;
+    RFile&  iFile;
+    RBuf8&  iBuf;
+    };
+
 public:
 
     IMPORT_C static CMTPTypeFile* NewL(RFs& aFs, const TDesC& aFileName, TFileMode aFileMode);
@@ -167,6 +204,14 @@ private:
 	TInt64          iOffSet;
     
     mutable TInt64          iByteSent;
+    /*
+     * Use the writer to controll buffer1 write.
+     */
+    CFileWriter    *iFileWriter1;
+    /*
+     * Use the writer to controll buffer2 write.
+     */
+    CFileWriter    *iFileWriter2;
 
     };
     

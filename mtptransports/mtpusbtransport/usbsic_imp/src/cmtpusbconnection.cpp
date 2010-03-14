@@ -78,7 +78,7 @@ Destructor.
 CMTPUsbConnection::~CMTPUsbConnection()
     {
     __FLOG(_L8("~CMTPUsbConnection - Entry"));
-
+    
     // Terminate all endpoint data transfer activity.
     StopConnection();
         
@@ -91,11 +91,13 @@ CMTPUsbConnection::~CMTPUsbConnection()
     StopUsb();
     
     iNullBuffer.Close();
-    if (iProtocolLayer)
-	    {    	
-	    iProtocolLayer->Unbind(*this);
-	    }
 
+    if (iProtocolLayer != NULL)
+        {
+        BoundProtocolLayer().Unbind(*this);
+        }
+    iProtocolLayer = NULL;
+    
     __FLOG(_L8("~CMTPUsbConnection - Exit"));
     __FLOG_CLOSE;
     }
@@ -331,21 +333,27 @@ void CMTPUsbConnection::TransactionCompleteL(const TMTPTypeRequest& /*aRequest*/
     __FLOG(_L8("TransactionCompleteL - Entry"));
    
    	__FLOG_VA((_L8("DeviceState: 0x%x TransactionState: 0x%x"), iDeviceStatusCode, iBulkTransactionState));
-    
-    if (iBulkTransactionState != ERequestPhase)
-    	{
-	    // Update the transaction state.
-    	SetBulkTransactionState(EIdlePhase);
-    	
-   		// Update the device status
-   		SetDeviceStatus(EMTPUsbDeviceStatusOK); 
-   		
-   		// Clear the cancel flag.
-   		iIsCancelReceived = EFalse; 
-   		
-   		// Initiate the next request phase bulk data receive sequence.
-   		InitiateBulkRequestSequenceL();
-    	}
+   	
+   	if (iBulkTransactionState != ERequestPhase)
+   	    {
+        // Update the transaction state.
+        SetBulkTransactionState(EIdlePhase);    
+        // Update the device status
+        SetDeviceStatus(EMTPUsbDeviceStatusOK);     
+        // Clear the cancel flag.
+        iIsCancelReceived = EFalse; 
+        
+        if (ConnectionOpen())
+            {
+            // Initiate the next request phase bulk data receive sequence.
+            InitiateBulkRequestSequenceL();   		    
+            }
+        else if (iIsResetRequestSignaled)
+            {
+            iIsResetRequestSignaled = EFalse;
+            StartConnectionL();
+            }
+   	    }
     
     __FLOG(_L8("TransactionCompleteL - Exit"));
     } 
@@ -587,8 +595,7 @@ void CMTPUsbConnection::SendBulkDataCompleteL(TInt aError, const MMTPType& /*aDa
         {
         TUint16 containerType(iUsbBulkContainer->Uint16L(CMTPUsbContainer::EContainerType));
 
-#ifdef _DEBUG        
-      
+#ifdef _DEBUG              
         TUint16 transactionID(iUsbBulkContainer->Uint32L(CMTPUsbContainer::ETransactionID));
         RDebug::Print(_L("Time Stamp is :%d"), User::TickCount());
         RDebug::Print(_L("the container Type is 0x%x, the transaction ID is 0x%x\n"), containerType,transactionID);
@@ -906,6 +913,8 @@ Constructor.
 CMTPUsbConnection::CMTPUsbConnection(MMTPConnectionMgr& aConnectionMgr) :
     CActive(EPriorityStandard),
     iEndpointInfo(KEndpointMetaData, EMTPUsbEpNumEndpoints),
+    iIsCancelReceived(EFalse),
+    iIsResetRequestSignaled(EFalse),
     iConnectionMgr(&aConnectionMgr)
     {
     CActiveScheduler::Add(this);
@@ -1233,7 +1242,7 @@ Processes received USB SIC class specific Device Reset requests
 void CMTPUsbConnection::ProcessControlRequestDeviceResetL(const TMTPUsbControlRequestSetup& /*aRequest*/)
     {
     __FLOG(_L8("ProcessControlRequestDeviceResetL - Entry"));
-                
+    
     // Clear stalled endpoints and re-open connection
     BulkEndpointsStallClearL();
     StartConnectionL();
@@ -1243,9 +1252,18 @@ void CMTPUsbConnection::ProcessControlRequestDeviceResetL(const TMTPUsbControlRe
     sequence and initiate the next control request sequence. 
     */
     static_cast<CMTPUsbEpControl*>(iEndpoints[EMTPUsbEpControl])->SendControlRequestStatus();
-    StopConnection();
+    TBool connIsStopped = StopConnection();
     InitiateControlRequestSequenceL();
-    StartConnectionL();
+    
+    if (connIsStopped)
+        {
+        StartConnectionL();
+        }
+    else
+        {
+        iIsResetRequestSignaled = ETrue;
+        }
+
     __FLOG(_L8("ProcessControlRequestDeviceResetL - Exit"));
     }
     
@@ -1261,8 +1279,7 @@ void CMTPUsbConnection::ProcessControlRequestDeviceStatusL(const TMTPUsbControlR
     
     TUint offset = 0;
     for(TUint i(EMTPUsbEpControl); i<EMTPUsbEpNumEndpoints; ++i)
-    	{
-        
+    	{        
         if ( IsEpStalled(i) )
             {
             TInt epSize(0);
@@ -1277,16 +1294,11 @@ void CMTPUsbConnection::ProcessControlRequestDeviceStatusL(const TMTPUsbControlR
             //but in practice, it's requested by host with a 32-bit value, so we plus offset with 4 to reflect this.
             TUint32 epAddress = epDesc[KEpAddressOffsetInEpDesc];
             iUsbControlRequestDeviceStatus.SetUint32((offset + TMTPUsbControlRequestDeviceStatus::EParameter1), epAddress);            
-            CleanupStack::PopAndDestroy(); // calls epDesc.Close()
-            
+            CleanupStack::PopAndDestroy(); // calls epDesc.Close()            
             ++offset;
             }
         }
-   
 
-  
-   
-    
     // if the current status is OK and a cancel event has been received but the device has not respond 
     // transaction_cancelled yet, return transaction_cancelled firstly.
     TUint16 originalStatus = iDeviceStatusCode;
@@ -1296,10 +1308,7 @@ void CMTPUsbConnection::ProcessControlRequestDeviceStatusL(const TMTPUsbControlR
     	  // clear the transaction cancelled flag
         isResponseTransactionCancelledNeeded = false;
     	}
-    
-    
 
-    
     // Set the Code and wLength fields and send the dataset.
     iUsbControlRequestDeviceStatus.SetUint16(TMTPUsbControlRequestDeviceStatus::ECode, iDeviceStatusCode);
     iUsbControlRequestDeviceStatus.SetUint16(TMTPUsbControlRequestDeviceStatus::EwLength, iUsbControlRequestDeviceStatus.Size());
@@ -1511,7 +1520,6 @@ void CMTPUsbConnection::BulkEndpointsStallL()
     __FLOG(_L8("BulkEndpointsStallL - Entry"));
     EndpointStallL(EMTPUsbEpBulkIn);
     EndpointStallL(EMTPUsbEpBulkOut);
-    SetDeviceStatus(EMTPUsbDeviceStatusTransactionCancelled);
     __FLOG(_L8("BulkEndpointsStallL - Exit"));
     }
 
@@ -1523,7 +1531,6 @@ void CMTPUsbConnection::BulkEndpointsStallClearL()
     __FLOG(_L8("BulkEndpointsStallClearL - Entry"));
     EndpointStallClearL(EMTPUsbEpBulkIn);
     EndpointStallClearL(EMTPUsbEpBulkOut);
-    SetDeviceStatus(EMTPUsbDeviceStatusOK);
     __FLOG(_L8("BulkEndpointsStallClearL - Exit"));  
     }
 
@@ -1582,14 +1589,9 @@ void CMTPUsbConnection::EndpointStallL(TMTPUsbEndpointId aId)
     CMTPUsbEpBase& ep(*iEndpoints[aId]);
     ep.Stall();
     
-    // Stop the connection.
-    StopConnection();
-    
     // Update the connection state.
-    if (!(ConnectionState() & EStalled))
-        {
-        SetConnectionState(EStalled);
-        }
+    SetConnectionState(EStalled);
+    
     __FLOG(_L8("EndpointStallL - Exit"));
     }
     
@@ -1617,7 +1619,7 @@ void CMTPUsbConnection::EndpointStallClearL(TMTPUsbEndpointId aId)
         else if (!IsEpStalled( aId ) )
             {
             // All data endpoint stall conditions are clear.
-          	SetConnectionState(EIdlePhase);
+          	SetConnectionState(EIdle);
             }
         }
     __FLOG(_L8("EndpointStallClearL - Exit"));
@@ -1651,8 +1653,9 @@ void CMTPUsbConnection::StartConnectionL()
     if (ConnectionClosed())
         {
         __FLOG(_L8("Notifying protocol layer connection opened"));
-        iConnectionMgr->ConnectionOpenedL(*this);  
+        iConnectionMgr->ConnectionOpenedL(*this);
         SetConnectionState(EOpen);
+        SetDeviceStatus(EMTPUsbDeviceStatusOK);
         InitiateBulkRequestSequenceL();
         }
     __FLOG(_L8("StartConnectionL - Exit"));
@@ -1661,10 +1664,11 @@ void CMTPUsbConnection::StartConnectionL()
 /**
 Halts USB MTP device class processing.
 */ 
-void CMTPUsbConnection::StopConnection()
+TBool CMTPUsbConnection::StopConnection()
     {
     __FLOG(_L8("StopConnection - Entry"));
     
+    TBool ret = ETrue;
     // Stop all data transfer activity.
     DataEndpointsStop();    
     
@@ -1672,13 +1676,16 @@ void CMTPUsbConnection::StopConnection()
     if (ConnectionOpen())
         {
         __FLOG(_L8("Notifying protocol layer connection closed"));
-        iConnectionMgr->ConnectionClosed(*this);
+        ret = iConnectionMgr->ConnectionClosed(*this);
         SetBulkTransactionState(EUndefined);
         SetConnectionState(EIdle);
         SetSuspendState(ENotSuspended);
+        SetDeviceStatus(EMTPUsbDeviceStatusBusy);
         }
     
     __FLOG(_L8("StopConnection - Exit"));
+    
+    return ret;
     }
        
 /**
@@ -1706,7 +1713,7 @@ Configures the USB MTP device class.
 */
 void CMTPUsbConnection::StartUsbL()
     {
-    __FLOG(_L8("StartUsbL - Exit"));
+    __FLOG(_L8("StartUsbL - Entry"));
     
     // Open the USB device interface.
     User::LeaveIfError(iLdd.Open(KDefaultUsbClientController));

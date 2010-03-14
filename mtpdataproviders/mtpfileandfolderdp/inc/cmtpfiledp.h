@@ -27,6 +27,7 @@
 #include "mtpdebug.h"
 #include "rmtpfiledpsingletons.h"
 #include "rmtpdpsingletons.h"
+#include "rmtpframework.h"
 
 class CMTPFileDpExclusionMgr;
 class CMTPFSEnumerator;
@@ -117,6 +118,8 @@ private:
     
     TInt								iActiveProcessor;
     TBool								iActiveProcessorRemoved;
+    
+	RMTPFramework               		iSingletons;
 
     };
     

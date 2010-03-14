@@ -31,6 +31,93 @@
 class CMTPTypeFile;
 class CRepository;
 
+NONSHARABLE_CLASS(CKnowledgeObject) : public CBase
+	{
+public:
+	static CKnowledgeObject* NewL(CRepository& aRepository);
+	~CKnowledgeObject();
+	
+	/**
+	Get the value from the central repository
+	@leave One of the system wide error codes, if repository get value fail
+	*/
+	void LoadL();
+	/**
+	Set the cached value to the central repository
+	@leave One of the system wide error codes, if repository set value fail
+	*/
+	void CommitL();
+	/** 
+	Clear the cached knowledge object property values 
+	*/
+	void Clear();
+	/**
+	Update cached DateModified to current Device time
+	*/
+	void RefreshDateModifed();
+	/**
+	Check if the cached object property values are aligned with repository
+	*/
+	TBool IsDirty() {return iDirty;};
+	
+	//Get method for all prop
+	TUint64 Size(){return iKnowledgeObjectSize;};
+	TDesC& DateModified(){return iDateModified;};
+	TDesC& Name(){return iName;};
+	const TMTPTypeUint128& LastAuthorProxyID() {return iLastAuthorProxyID;};
+	
+	//Set method for all prop
+	void SetSize(TUint64 aSize);
+	void SetDateModified(const TDesC& aDateModified);
+	void SetName(const TDesC& aName);
+	void SetLastAuthorProxyID(TUint64 aHigh, TUint64 aLow);
+	
+private:
+	//key of central repository
+	enum TMTPKnowledgeStoreKeyNum
+		{
+		ESize 				= 0x10001, 
+		EDateModified 		= 0x10002,
+		EName 				= 0x10003,
+		ELastAuthorProxyID 	= 0x10004
+		};
+
+	// Bit flag of the property
+	enum TMTPKnowledgeBitFlag
+		{
+		EBitFlagNone 				= 0x00,
+		EBitFlagSize 				= 0x01, 
+		EBitFlagDateModified 		= 0x02,
+		EBitFlagName 				= 0x04,
+		EBitFlagLastAuthorProxyID 	= 0x08,
+		EBitFlagAll 				= 0x0F
+		};
+
+private:
+	CKnowledgeObject(CRepository& aRepository);
+	
+	void ConstructL();
+	
+	TMTPResponseCode SetColumnType128Value(TMTPKnowledgeStoreKeyNum aColumnNum, TMTPTypeUint128& aNewData);
+	
+	CRepository&     	iRepository;
+
+	// The bit wise value of TMTPKnowledgeBitFlag 
+	// to state which property is not aligned with repository
+	TUint				iDirty;
+	
+	TUint64          	iKnowledgeObjectSize; 
+	RBuf             	iDateModified;
+	RBuf             	iName;
+	TMTPTypeUint128  	iLastAuthorProxyID;
+	
+	/**
+	FLOGGER debug trace member variable.
+	*/
+	__FLOG_DECLARATION_MEMBER_MUTABLE;
+	
+	};
+
 /** 
 Controls access to the knowledge object.
 @internalComponent
@@ -68,58 +155,24 @@ protected:
 	void RollBack();
 	void ReleaseObjectBuffer();	
 
-	enum TCacheStatus
-		{
-		EOK,
-		EDirty,
-		EDeleted
-		};
-	//key of central repository
-	enum TMTPKnowledgeStoreKeyNum
-		{
-		ESize = 0x10001, 
-		EDateModified = 0x10002,
-		EName = 0x10003,
-		ELastAuthorProxyID = 0x10004
-		};
 	
-	TMTPResponseCode SetColumnType128Value(TMTPKnowledgeStoreKeyNum aColumnNum, TMTPTypeUint128& aNewData);
-
 private:
 	CMTPKnowledgeHandler(MMTPDataProviderFramework& aFramework,TUint16 aFormatCode, CRepository& aReposotry, const TDesC& aKwgSuid);
 	void ConstructL();
 	
 	/**
-	Get the value from the central repository
-	@leave One of the system wide error codes, if repository get value fail
-	*/
-	void LoadKnowledgeObjPropertiesL();
-	/**
-	Cleanup Item operation for drop all knowledge properties
-	*/
-	static void DropCacheWrapper(TAny* aObject);
-	void DropKnowledgeObjPropertiesCache();
-	/**
 	Helper for GetObjectInfo request handling
 	*/
 	void BuildObjectInfoL(CMTPTypeObjectInfo& aObjectInfo) const;
-	/**
-	Delete knowledge object properties and content
-	@leave One of the system wide error codes, if repository set value fail
-	*/
-	void DeleteAllObjectPropertiesL();
 	
 private:
 	MMTPDataProviderFramework&  iFramework;
 	CRepository&                iRepository;
 	TUint32                     iStorageID;
 	TUint16                     iKnowledgeFormatCode;
-	TUint64                     iKnowledgeObjectSize; 
-	HBufC*                      iDateModified;
-	HBufC*                      iName;
-	TMTPTypeUint128             iLastAuthorProxyID;
-	TCacheStatus                iCacheStatus;
-	TCacheStatus                iCacheStatusFlag;
+	
+	CKnowledgeObject*			iCachedKnowledgeObject;
+	
 	TFileName                   iKnowObjFileName;
 	TFileName                   iKnowObjSwpFileName;
 	// Knowledge object content file

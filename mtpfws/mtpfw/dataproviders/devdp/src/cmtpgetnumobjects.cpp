@@ -18,6 +18,7 @@
 #include <mtp/mmtpobjectmgr.h>
 #include <mtp/mmtpdataprovider.h>
 #include <mtp/cmtpdataproviderplugin.h>
+#include <mtp/cmtpobjectmetadata.h>
 
 #include "cmtpdataprovidercontroller.h"
 #include "cmtpdataprovider.h"
@@ -25,6 +26,7 @@
 #include "cmtpgetnumobjects.h"
 #include "mtpdevicedpconst.h"
 #include "mtpdevdppanic.h"
+
 
 /**
 Verification data for GetNumObjects request
@@ -57,6 +59,7 @@ Destructor
 */	
 CMTPGetNumObjects::~CMTPGetNumObjects()
 	{	
+	iDevDpSingletons.Close();
     iSingletons.Close();
 	}
 /**
@@ -74,19 +77,51 @@ Second phase constructor.
 void CMTPGetNumObjects::ConstructL()
     {
     iSingletons.OpenL();
+    iDevDpSingletons.OpenL(iFramework);
     }
 
 TMTPResponseCode CMTPGetNumObjects::CheckRequestL()
 	{
 	TMTPResponseCode responseCode = CMTPRequestProcessor::CheckRequestL();
-	if(responseCode == EMTPRespCodeOK)
+	if(responseCode != EMTPRespCodeOK)
 		{
-		TUint32 formatCode = Request().Uint32(TMTPTypeRequest::ERequestParameter2);
-		if(formatCode != 0 && !IsSupportedFormatL(formatCode))
+		return responseCode;	
+		}
+	
+	TUint32 formatCode = Request().Uint32(TMTPTypeRequest::ERequestParameter2); 
+	if(formatCode != 0 && !IsSupportedFormatL(formatCode))
+		{
+		return EMTPRespCodeInvalidObjectFormatCode;
+		}
+	
+	if(iSingletons.DpController().EnumerateState() != CMTPDataProviderController::EEnumeratedFulllyCompleted)
+		{
+		TUint storageID = Request().Uint32(TMTPTypeRequest::ERequestParameter1);
+		TUint handle = Request().Uint32(TMTPTypeRequest::ERequestParameter3);
+		if(iDevDpSingletons.PendingStorages().FindInOrder(storageID) != KErrNotFound)
 			{
-			responseCode = EMTPRespCodeInvalidObjectFormatCode;
+			responseCode = EMTPRespCodeDeviceBusy;
+			}
+		else if( (handle != KMTPHandleNone) && (handle != KMTPHandleAll)  )
+			{
+			CMTPObjectMetaData* meta = iRequestChecker->GetObjectInfo(handle);
+			__ASSERT_DEBUG(meta, Panic(EMTPDevDpObjectNull));
+			
+			if( meta->Uint(CMTPObjectMetaData::EFormatCode) == EMTPFormatCodeAssociation )
+				{
+				responseCode = EMTPRespCodeDeviceBusy;
+				}
+			}
+		else if(EMTPFormatCodeUndefined == formatCode)
+			{
+			responseCode = EMTPRespCodeDeviceBusy;
 			}
 		}
+	else if(iDevDpSingletons.PendingStorages().Count() > 0)
+		{
+		iDevDpSingletons.PendingStorages().Close();
+		}
+	
 	return responseCode;	
 	}
 	

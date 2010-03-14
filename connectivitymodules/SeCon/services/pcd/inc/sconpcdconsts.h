@@ -42,6 +42,7 @@ const TInt KSConCodeCancelled( 514 );
 // ConML Status code: No memory
 const TInt KSConCodeNoMemory( 420 );
 
+
 // ConML Status codes in installer errorcases
 const TInt KSConCodeInstErrUserCancel = KSConCodeCancelled; // User cancelled the operation
 const TInt KSConCodeInstErrFileCorrupted = 600; // File is corrupted
@@ -56,6 +57,9 @@ const TInt KSConCodeInstErrNetworkFailure = 606; // Indicates that network failu
 const TInt KSConCodeInstErrBusy = 607; // Installer is busy doing some other operation
 const TInt KSConCodeInstErrAccessDenied = 608;  // Target location of package is not accessible
 const TInt KSConCodeInstUpgradeError = 609;  // The package is an invalid upgrade
+
+// ConML Status code: 1001...1050 System wide error code
+const TInt KSConCodeFirstSymbianErr( 1000 );
 
 struct SDeviceInfo
 	{

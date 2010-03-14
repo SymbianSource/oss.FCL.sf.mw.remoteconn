@@ -39,8 +39,13 @@ public:
     Signals that an MTP transport layer connection has become unavailable.
     @param aTransportConnection Interface handle of the MTP transport layer 
     connection instance.
+    @return ETrue means MTP framework successfully cleanup ts env and can accept
+    another ConnectionOpendedL call. EFalse means there is a transaction alive currently,
+    ConnectionOpenedL must not be called until MMTPTransportConnection::TransactionCompleteL is called.
+    @see MMTPConnectionMgr::ConnectionOpenedL()
+    @see MMTPTransportConnection::TransactionCompleteL()
     */
-    virtual void ConnectionClosed(MMTPTransportConnection& aTransportConnection) = 0;
+    virtual TBool ConnectionClosed(MMTPTransportConnection& aTransportConnection) = 0;
     
     /**
     Signals that an MTP transport layer connection has become available.

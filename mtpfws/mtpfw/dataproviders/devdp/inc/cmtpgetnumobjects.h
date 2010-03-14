@@ -24,8 +24,10 @@
 
 #include "cmtprequestprocessor.h"
 #include "rmtpframework.h"
+#include "rmtpdevicedpsingletons.h"
 
 class MMTPObjectMgr;
+
 
 /** 
 Implements device data provider GetNumObjects request processor
@@ -55,6 +57,8 @@ private:
 private:
 
 	RMTPFramework iSingletons;
+
+    RMTPDeviceDpSingletons              iDevDpSingletons;
 	};
 	
 #endif // CMTPGETNUMOBJECTS_H

@@ -55,7 +55,16 @@ void CMTPObjectBrowser::GoL( TUint32 aFormatCode, TUint32 aHandle, TUint32 aDept
     switch ( aHandle )
         {
         case KMTPHandleAll:
-            GetObjectHandlesL( 0, KMTPStorageAll, aFormatCode, KMaxTUint, KMTPHandleNoParent, aBrowseCallback );
+           //for the format code of serveice dp's, need to check the format
+           if( (aFormatCode >= EMTPFormatCodeVendorExtStart)&&(aFormatCode <= EMTPFormatCodeVendorExtEnd) )
+               {
+               GetAllObjectHandlesL( aFormatCode,aBrowseCallback );
+               }
+           else
+               {
+               GetAllObjectHandlesL( KMTPFormatsAll,aBrowseCallback );
+               }
+           
             break;
         case KMTPHandleNone:
             GetRootObjectHandlesL( 0, aFormatCode, aDepth, aBrowseCallback );
@@ -88,7 +97,16 @@ void CMTPObjectBrowser::GetObjectHandlesL( TUint32 aCurDepth, TUint32 aStorageId
     
     RMTPObjectMgrQueryContext   context;
     RArray< TUint >             handles;
-    TMTPObjectMgrQueryParams    params( aStorageId, aFormatCode, aParentHandle );
+    TMTPObjectMgrQueryParams    params( aStorageId, KMTPFormatsAll, aParentHandle );
+    // if parenthandle = 0, depth >0 and != ffffffff, for service dp, 
+    // 1. there is no tree structure
+    // 2. KMTPFormatsAll may make the low lever api filter the handls of service dp.
+    if( (aFormatCode >= EMTPFormatCodeVendorExtStart)&&(aFormatCode <= EMTPFormatCodeVendorExtEnd) )
+        {
+        params.iFormatCode = aFormatCode ;
+        }
+     
+      
     CleanupClosePushL( context );
     CleanupClosePushL( handles );
     
@@ -107,7 +125,13 @@ void CMTPObjectBrowser::GetObjectHandlesL( TUint32 aCurDepth, TUint32 aStorageId
             {
             for ( TUint i = 0; i < handleCount; i++ )
                 {
-                aBrowseCallback.iCallback( aBrowseCallback.iContext, handles[i], aCurDepth );
+                //before insert the handle to th result list , check it's format.
+                iDpFw.ObjectMgr().ObjectL( handles[i], *iObjMetaCache );
+                if ( (KMTPFormatsAll == aFormatCode) || ( aFormatCode == iObjMetaCache->Uint( CMTPObjectMetaData::EFormatCode )) )
+                   {
+                   aBrowseCallback.iCallback( aBrowseCallback.iContext, handles[i], aCurDepth );
+                   }
+           
                 }
             }
         }
@@ -123,16 +147,18 @@ void CMTPObjectBrowser::GetFolderObjectHandlesL( TUint32 aCurDepth, TUint32 aFor
     {
     __FLOG_VA( ( _L8("+GetFolderObjectHandlesL( %d, 0x%08X, %d, 0x%08X )"), aCurDepth, aFormatCode, aDepth, aParentHandle ) );
     
-    if ( 0 == aDepth )
-        {
-        aBrowseCallback.iCallback( aBrowseCallback.iContext, aParentHandle, aCurDepth );
-        }
-    else
+    if (  aDepth > 0)
         {
         GetObjectHandlesL( aCurDepth + 1, KMTPStorageAll, aFormatCode, aDepth - 1, aParentHandle, aBrowseCallback );
-        aBrowseCallback.iCallback( aBrowseCallback.iContext, aParentHandle, aCurDepth );
         }
     
+    //before insert the handle to th result list , check it's format.
+    iDpFw.ObjectMgr().ObjectL( aParentHandle, *iObjMetaCache );
+    if ( (KMTPFormatsAll == aFormatCode) || ( aFormatCode == iObjMetaCache->Uint( CMTPObjectMetaData::EFormatCode )) )
+       {
+       aBrowseCallback.iCallback( aBrowseCallback.iContext, aParentHandle, aCurDepth );
+       }
+            
     __FLOG( _L8("-GetFolderObjectHandlesL") );
     }
 
@@ -140,18 +166,20 @@ void CMTPObjectBrowser::GetRootObjectHandlesL( TUint32 aCurDepth, TUint32 aForma
     {
     __FLOG_VA( ( _L8("+GetRootObjectHandlesL( %d, 0x%08X, %d )"), aCurDepth, aFormatCode, aDepth ) );
     
-    switch ( aDepth )
-        {
-        case KMaxTUint:
-            GetObjectHandlesL( aCurDepth, KMTPStorageAll, aFormatCode, aDepth, KMTPHandleNoParent, aBrowseCallback );
-            break;
-        case 0:
-            // do nothing
-            break;
-        default:
-            GetObjectHandlesL( aCurDepth, KMTPStorageAll, aFormatCode, aDepth, KMTPHandleNoParent, aBrowseCallback );
-            break;
+    if( aDepth > 0)
+        {        
+            if (KMaxTUint == aDepth)
+                {
+                GetAllObjectHandlesL( aFormatCode,aBrowseCallback );
+                }
+            else
+                {
+                // attention: aDepth should be reduced by 1 here
+                GetObjectHandlesL( aCurDepth, KMTPStorageAll, aFormatCode, aDepth-1, KMTPHandleNoParent, aBrowseCallback );
+                }
         }
+    
+    // if aDepth == 0, no handles should be returned.
     
     __FLOG( _L8("-GetRootObjectHandlesL") );
     }
@@ -169,9 +197,13 @@ void CMTPObjectBrowser::GetObjectHandlesTreeL( TUint32 aCurDepth, TUint32 aForma
         {
         GetFolderObjectHandlesL( aCurDepth, aFormatCode, aDepth, aParentHandle, aBrowseCallback );
         }
-    else
+    else if ( (KMTPFormatsAll == aFormatCode) || ( aFormatCode == iObjMetaCache->Uint( CMTPObjectMetaData::EFormatCode )) )
         {
         aBrowseCallback.iCallback( aBrowseCallback.iContext, aParentHandle, aCurDepth );
+        }
+    else
+        {
+          // format doesn't match, do nothing
         }
 #ifdef __FLOG_ACTIVE
     __FLOG_1( _L8("recursion_depth: %d"), aCurDepth );
@@ -181,4 +213,45 @@ void CMTPObjectBrowser::GetObjectHandlesTreeL( TUint32 aCurDepth, TUint32 aForma
     __FLOG( _L8("-GetObjectHandlesTreeL") );
     }
 
+/**
+ * This function retrives all the object handles with the format code of aFormatCode.
+ * 
+ * If aFormatCode == KMTPFormatsAll, only Legacy dp's object handles are returned. Object
+ * Handles of service dp's will not be returned.
+ * 
+ */
+
+void CMTPObjectBrowser::GetAllObjectHandlesL(TUint32 aFormatCode,const TBrowseCallback& aBrowseCallback ) const
+    {
+    __FLOG( _L8("CMTPObjectBrowser::GetAllObjectHandles-----entry") );
+
+    RMTPObjectMgrQueryContext   context;
+    RArray< TUint >             handles;
+    TMTPObjectMgrQueryParams    params( KMTPStorageAll, aFormatCode, KMTPHandleNone );
+    
+   
+    CleanupClosePushL( context );
+    CleanupClosePushL( handles );
+      
+    do
+        {
+        iDpFw.ObjectMgr().GetObjectHandlesL( params, context, handles );
+        TUint handleCount = handles.Count();
+        
+        for ( TUint i = 0; i < handleCount; i++ )
+          {
+            /* the argument aCurDepth of the callback is set to 0, since the call back never use this argument. 
+             * If aCurDepth is used later, this arugment shoud be changed to the valid value.
+             */
+            aBrowseCallback.iCallback( aBrowseCallback.iContext, handles[i], 0 );
+          }
+        
+        }
+    while ( !context.QueryComplete() );
+      
+    CleanupStack::PopAndDestroy( &handles );
+    CleanupStack::PopAndDestroy( &context );
+    
+    __FLOG( _L8("CMTPObjectBrowser::GetAllObjectHandles------exit") );
+    }
 

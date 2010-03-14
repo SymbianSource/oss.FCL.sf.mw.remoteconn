@@ -46,7 +46,7 @@ public:
     IMPORT_C static CMTPFSEnumerator* NewL(MMTPDataProviderFramework& aFramework, CMTPFSExclusionMgr& aExclusionMgr, MMTPEnumerationCallback& aCallback, TInt aProcessLimit);
     IMPORT_C ~CMTPFSEnumerator();
 
-	IMPORT_C void StartL(TUint32 aStorageId);	
+	IMPORT_C void StartL(TUint32 aStorageId, TBool aOnlyRoot = EFalse);	
 	
 private:
 	//from CActive
@@ -64,9 +64,10 @@ private:
 	void ScanNextStorageL();
 	void ScanNextSubdirL();
 	void ProcessEntriesL();
-	void AddEntryL(const TDesC& aPath, TUint32 &aHandle, TMTPFormatCode format, TUint32 aDPId, const TEntry& aEntry);
-	void AddFileEntryForOtherDpL(const TDesC& aPath, TUint32 &aHandle, TMTPFormatCode format, TUint32 aDPId, const TEntry& aEntry);
+	void AddEntryL(const TDesC& aPath, TUint32 &aHandle, TMTPFormatCode format, TUint32 aDPId, const TEntry& aEntry, TUint32 aStorageId, TUint32 aParentHandle);
+	void AddFileEntryForOtherDpL(const TDesC& aPath, TUint32 &aHandle, TMTPFormatCode format, TUint32 aDPId, const TEntry& aEntry, TUint32 aStorageId, TUint32 aParentHandle);
 	void NotifyObjectAddToDP(const TUint32 aHandle,const TUint DpId);
+	
 	
 private: 
 	// Owned
@@ -88,6 +89,10 @@ private:
 	TUint						iDpID;
 	RMTPFramework               iSingletons;
 	TBool                       iSkipCurrentStorage;
+	
+	TBool						iIsFileEnumerator;
+	TBool						iOnlyScanRoot;
+	TInt						iNumOfFoldersAndFiles;
 	/**
     FLOGGER debug trace member variable.
     */

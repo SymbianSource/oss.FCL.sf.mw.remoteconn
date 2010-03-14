@@ -54,7 +54,7 @@ void CMTPShutdown::Start()
     
 void CMTPShutdown::RunL()
     {
-    if ( iSingletons.DpController().EnumerateState() != CMTPDataProviderController::EEnumerated )
+    if ( iSingletons.DpController().EnumerateState() != CMTPDataProviderController::EEnumeratedFulllyCompleted )
         {
         Start();
         }

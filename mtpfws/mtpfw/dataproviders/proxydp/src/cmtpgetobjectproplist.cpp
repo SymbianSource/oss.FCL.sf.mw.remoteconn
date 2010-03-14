@@ -248,18 +248,7 @@ void CMTPGetObjectPropList::GetObjectHandlesL()
     
     if ( 0 == iHandles.Count() )
         {
-        if ( handle==KMTPHandleNone && depth==0 )
-            {
-            SendDataL( *iObjectPropList );
-            }
-        else if ( fmtCode != KMTPFormatsAll )
-            {
-            SendResponseL(EMTPRespCodeSpecificationByFormatUnsupported);
-            }
-        else if ( handle != KMTPHandleAll )
-            {
-            SendResponseL(EMTPRespCodeInvalidObjectHandle);
-            }
+          SendDataL( *iObjectPropList );
         }
     else
         {

@@ -68,6 +68,11 @@ CPTPIPConnection::~CPTPIPConnection( )
 	delete iPTPIPCommandContainer;
 	delete iPTPIPDataContainer;
 	delete iPTPIPEventContainer;
+
+        if (iProtocolLayer != NULL)
+           {
+           iProtocolLayer->Unbind(*this);
+           }
 	
 	iNullBuffer.Close();
 

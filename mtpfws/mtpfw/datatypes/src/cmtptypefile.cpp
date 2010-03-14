@@ -32,6 +32,80 @@ const TInt64 KMTPFileSetSizeChunk(1<<30); //1G
 
 const TUint KUSBHeaderLen = 12;
 
+
+
+CMTPTypeFile::CFileWriter* CMTPTypeFile::CFileWriter::NewL(RFile&  aFile, RBuf8& aWriteBuf)
+    {
+    CFileWriter *self = new(ELeave)CFileWriter(aFile, aWriteBuf);
+    CleanupStack::PushL(self);
+    self->ConstructL();
+    CleanupStack::Pop(self);
+    return self;
+    }
+
+void CMTPTypeFile::CFileWriter::GetWriteBuf(TPtr8& aChunk)
+    {
+    WaitForWriteComplete();
+    aChunk.Set(&iBuf[0], 0, iBuf.MaxLength());
+    }
+    
+TInt CMTPTypeFile::CFileWriter::GetResult() const
+    {
+    return iWriteResult;
+    }
+    
+void CMTPTypeFile::CFileWriter::Write(TInt aLength)
+    {
+    iFile.Write(iBuf, aLength, iStatus);
+    SetActive();
+    }
+    
+void CMTPTypeFile::CFileWriter::WaitForWriteComplete()
+    {
+    /*
+     * We didn't want to cancel the file write here.
+     * But we need to wait until the file write complete.
+     * The Cancel() function of CActive will do the wait until the file write complete.
+     * If the Write already complete and the RunL() invoked there's nothing happened in the Cancel().
+     */
+    Cancel(); 
+    //Have to save the result.
+    iWriteResult = iStatus.Int();
+    }
+
+void CMTPTypeFile::CFileWriter::RunL()
+    {
+    //Have to save the result.
+    iWriteResult = iStatus.Int();
+    }
+    
+    
+CMTPTypeFile::CFileWriter::~CFileWriter()
+    {
+    WaitForWriteComplete(); //make sure all async request complete
+    if(iWriteResult != KErrNone)
+        {
+        iFile.SetSize(0);
+        }
+    }
+
+
+void CMTPTypeFile::CFileWriter::DoCancel()
+    {
+    //We didn't really want to cancel the file write, so we do nothing here
+    }
+
+
+CMTPTypeFile::CFileWriter::CFileWriter(RFile&  aFile, RBuf8& aBuf):CActive(EPriorityStandard), iWriteResult(KErrNone), iFile(aFile), iBuf(aBuf) 
+    {
+    }
+    
+
+void CMTPTypeFile::CFileWriter::ConstructL()
+    {
+    CActiveScheduler::Add(this);
+    }
+
 /**
  MTP file object data type factory method. 
  @param aFs The handle of an active file server session.
@@ -88,13 +162,9 @@ EXPORT_C CMTPTypeFile* CMTPTypeFile::NewLC(RFs& aFs, const TDesC& aName, TFileMo
  */
 EXPORT_C CMTPTypeFile::~CMTPTypeFile()
     {
-    if(iCurrentCommitChunk.Length() != 0)
-        {
-        ToggleRdWrBuffer();
-        }
-
+    delete iFileWriter1;
+    delete iFileWriter2;
     iFile.Close();
-
     iBuffer1.Close();
     iBuffer2.Close();
     Cancel();
@@ -133,6 +203,8 @@ EXPORT_C void CMTPTypeFile::SetSizeL(TUint64 aSize)
         User::LeaveIfError(iFile.SetSize(aSize));
         iCurrentFileSetSize = aSize;
         }
+    iFileWriter1 = CFileWriter::NewL(iFile, iBuffer1);
+    iFileWriter2 = CFileWriter::NewL(iFile, iBuffer2);
     }
 
 /**
@@ -311,19 +383,14 @@ EXPORT_C TInt CMTPTypeFile::FirstWriteChunk(TPtr8& aChunk)
     TInt err(iFile.Seek(ESeekStart, pos));
     if (err == KErrNone)
         {
-        //Because USB HS's transmission rate is several time faster than the rate of writting data into File System.
-        //If the first packet is a full chunk size packet, then the writting of that data will not start until the full-chunk
-        //sized packet is received. Here we intentionly reduce the first packet size to 1/4 of the full chunk size, therefore,
-        //the start of writting data into File system will start only after 1/4 of the full chunk size data is received.
-        //This can make the writting of data to FS start earlier.
-        aChunk.Set(&iBuffer1[0], 0, iBuffer1.MaxLength());
+        iFileWriter1->GetWriteBuf(aChunk);
         iWriteSequenceState = EInProgress;
 
         //this chunk is going to be used by Transport to write data into it, and when it is full, transport
-        //will call back CommitChunkL(), at that time, the EFalse means it already contains data in it.
+        //will call back CommitChunkL(), at that time, the ETrue means it already contains data in it.
         //it is ready for reading data from it. 
         //This is a initial value for it to trigger the double-buffering mechanism.
-        iBuffer1AvailForWrite = EFalse;
+        iBuffer1AvailForWrite = ETrue;
         }
 
     return err;
@@ -342,11 +409,11 @@ EXPORT_C TInt CMTPTypeFile::NextWriteChunk(TPtr8& aChunk)
         {//toggle between buffer 1 and buffer 2 here.
         if(iBuffer1AvailForWrite)
             {
-            aChunk.Set(&iBuffer1[0], 0, iBuffer1.MaxLength());
+            iFileWriter1->GetWriteBuf(aChunk);
             }
         else
             {
-            aChunk.Set(&iBuffer2[0], 0, iBuffer2.MaxLength());
+            iFileWriter2->GetWriteBuf(aChunk);
             }
         }
 
@@ -402,51 +469,43 @@ EXPORT_C TBool CMTPTypeFile::CommitRequired() const
 
 EXPORT_C MMTPType* CMTPTypeFile::CommitChunkL(TPtr8& aChunk)
     {
-	if(iFileRdWrError)
-		{
-		return NULL;
-		}
-	if(0 == aChunk.Length())
-		{
-		ToggleRdWrBuffer();
-		return NULL;
-		}
+    if(iFileRdWrError)
+        {
+        return NULL;
+        }
     iCurrentCommitChunk.Set(aChunk);
-
     if(iRemainingDataSize> iCurrentCommitChunk.Length())
-        {//This is NOT the last chunk, we issue an active object to commit it to File system.
-        iRemainingDataSize -= iCurrentCommitChunk.Length();
-		/*
-		if (!IsActive())
-			{
-			//Since the writting data into file sever will take a long time, will issue a dedicated Active Object to do that.
-			SetActive();
-			TRequestStatus* thisAO = &iStatus;
-			User::RequestComplete(thisAO, KErrNone);
-			}
-		else
-			{
-			//This is a very extreme cases, it only occurs when the following assumption is met
-			//1. USB received buffer1 and already call this CommitChunkL(), therefore, the ActiveObject has completed itself, and USB then use another buffer to
-			//receive the data.
-			//2. Somehow, this active object is not scheduled to be running even after the USB already fill out the other buffer.
-			//3. USB's active object is scheduled to be running prior to the last File active object(this should not happen if ActiveScheduler follow the priority scheduler).
-			//4. USB call this function again to commit the other data buffer.
-			//5. Then it find the previous active is not scheduled to run.
-			//in single-core platform, the code rely on the CActiveScheduler to guarantee the first active call which has higher priority to be running firstly before
-			//the 2nd USB active. but for multi-core platform, this should be re-evaluated .
-			iFileRdWrError = ETrue;//if it really discard the incoming recevied file.			
-			//__FLOG(_L8("\nThe program should not arrive here !!!!!\n"));
-			}
-			*/
+        {
+        iRemainingDataSize -= iCurrentCommitChunk.Length();    
         }
     else
-        {//This is the last chunk, we synchronous commit it 
+        {
         iRemainingDataSize = 0;
-        ToggleRdWrBuffer();
-			return NULL;
         }
-	return this;
+    //wait until previous write complete
+    if(iBuffer1AvailForWrite)
+        {
+        iFileWriter2->WaitForWriteComplete();
+        iFileRdWrError = (iFileWriter2->GetResult() != KErrNone); 
+        }
+    else
+        {
+        iFileWriter1->WaitForWriteComplete();
+        iFileRdWrError = (iFileWriter1->GetResult() != KErrNone);
+        }
+    ToggleRdWrBuffer();
+    if(iRemainingDataSize <= 0) //last chunk need wait the write complete
+        {
+        iFileWriter1->WaitForWriteComplete();
+        iFileWriter2->WaitForWriteComplete();
+        if(iFileWriter1->GetResult() != KErrNone || iFileWriter2->GetResult() != KErrNone)
+            {
+            iFile.SetSize(0);
+            iFileRdWrError = ETrue;
+            }
+        }
+    
+    return NULL;
     }
 
 //for partial
@@ -590,16 +649,19 @@ void CMTPTypeFile::ToggleRdWrBuffer()
                 }
             else
                 {
-                err = iFile.Write(iCurrentCommitChunk);
-                if (err != KErrNone)
-                    {// file Write failed,	this means we cannot successfully received this file but however, we cannot disrupt a current DIOR phase according to MTP spec.
-                    // We should continue to receive the data and discard this data, only after the data  phase is finished can we send back an error response
-                    //to Initiator. Therefore, we pretend to continue to write this data into file, and let final processor to check the file size and then give back a 
-                    //corresponding error code to MTP initiator.
-                    iFileRdWrError = ETrue;
-                    iFile.SetSize(0);
+                if(iBuffer1AvailForWrite)
+                    {
+                    iFileWriter1->Write(iCurrentCommitChunk.Length());
+                    }
+                else
+                    {
+                    iFileWriter2->Write(iCurrentCommitChunk.Length());
                     }
                 }
+            }
+        else
+            {
+            iFile.SetSize(0);
             }
         iCurrentCommitChunk.Zero();
         }

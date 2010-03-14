@@ -28,6 +28,7 @@
 #include "mtpfiledpconst.h"
 #include "mtpfiledppanic.h"
 #include "mtpfiledpprocessor.h"
+#include "cmtpdataprovidercontroller.h"
 
 // Class constants
 static const TInt KArrayGranularity = 3;
@@ -63,6 +64,7 @@ CMTPFileDataProvider::~CMTPFileDataProvider()
     iActiveProcessors.Close();
     iDpSingletons.Close();
 	iFileDPSingletons.Close();
+	iSingletons.Close();
     delete iFileEnumerator;
     delete iExclusionMgr;
     __FLOG(_L8("~CMTPFileDataProvider - Exit"));
@@ -135,12 +137,12 @@ void CMTPFileDataProvider::StartObjectEnumerationL(TUint32 aStorageId, TBool /*a
     {
     __FLOG(_L8("StartObjectEnumerationL - Entry"));
 
-    iExclusionMgr->AppendFormatExclusionListL();
-    iDpSingletons.MTPUtility().FormatExtensionMapping();
     iPendingEnumerations.AppendL(aStorageId);
     if (iPendingEnumerations.Count() == 1)
         {
-        iFileEnumerator->StartL(iPendingEnumerations[KActiveEnumeration]);
+		CMTPDataProviderController& dpController(iSingletons.DpController());
+		TBool bOnlyScanRoot = ( (dpController.EnumerateState() == CMTPDataProviderController::EEnumeratingFrameworkObjects) && (dpController.NeedEnumeratingPhase2()) );
+		iFileEnumerator->StartL(iPendingEnumerations[KActiveEnumeration], bOnlyScanRoot);
         }
     __FLOG(_L8("StartObjectEnumerationL - Exit"));
     }
@@ -148,6 +150,8 @@ void CMTPFileDataProvider::StartObjectEnumerationL(TUint32 aStorageId, TBool /*a
 void CMTPFileDataProvider::StartStorageEnumerationL()
     {
     __FLOG(_L8("StartStorageEnumerationL - Entry"));
+    iExclusionMgr->AppendFormatExclusionListL();
+    iDpSingletons.MTPUtility().FormatExtensionMapping();
     Framework().StorageEnumerationCompleteL();
     __FLOG(_L8("StartStorageEnumerationL - Exit"));
     }
@@ -220,7 +224,9 @@ void CMTPFileDataProvider::NotifyEnumerationCompleteL(TUint32 /*aStorageId*/, TI
     iPendingEnumerations.Remove(KActiveEnumeration);
     if (iPendingEnumerations.Count())
         {
-        iFileEnumerator->StartL(iPendingEnumerations[KActiveEnumeration]);
+		CMTPDataProviderController& dpController(iSingletons.DpController());
+		TBool bOnlyScanRoot = ( (dpController.EnumerateState() == CMTPDataProviderController::EEnumeratingFrameworkObjects) && (dpController.NeedEnumeratingPhase2()) );
+        iFileEnumerator->StartL(iPendingEnumerations[KActiveEnumeration], bOnlyScanRoot);
         }
     __FLOG(_L8("HandleEnumerationCompletedL - Exit"));
     }
@@ -246,6 +252,7 @@ void CMTPFileDataProvider::ConstructL()
     __FLOG(_L8("ConstructL - Entry"));
   	iDpSingletons.OpenL(Framework());
   	iFileDPSingletons.OpenL(Framework());
+  	iSingletons.OpenL();
   	
   	iExclusionMgr = CMTPFileDpExclusionMgr::NewL(Framework());
   	iDpSingletons.SetExclusionMgrL(*iExclusionMgr);
