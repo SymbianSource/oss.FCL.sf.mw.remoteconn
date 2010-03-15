@@ -27,7 +27,6 @@
 
 #include <comms-infras/commsdebugutility.h>
 
-#include "rmediasyncserver.h"
 #include "cmtpimagedpobjectpropertymgr.h"
 
 class MMTPDataProviderFramework;

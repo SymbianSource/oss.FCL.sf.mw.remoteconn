@@ -1,0 +1,86 @@
+EXPORTS
+	??0CPTPIPInitCmdAck@@AAE@XZ @ 1 NONAME ; CPTPIPInitCmdAck::CPTPIPInitCmdAck(void)
+	??0CPTPIPInitCmdRequest@@AAE@XZ @ 2 NONAME ; CPTPIPInitCmdRequest::CPTPIPInitCmdRequest(void)
+	??0TPTPIPInitEvtAck@@QAE@XZ @ 3 NONAME ; TPTPIPInitEvtAck::TPTPIPInitEvtAck(void)
+	??0TPTPIPInitEvtRequest@@QAE@XZ @ 4 NONAME ; TPTPIPInitEvtRequest::TPTPIPInitEvtRequest(void)
+	??0TPTPIPInitFailed@@QAE@XZ @ 5 NONAME ; TPTPIPInitFailed::TPTPIPInitFailed(void)
+	??0TPTPIPTypeRequestPayload@@QAE@XZ @ 6 NONAME ; TPTPIPTypeRequestPayload::TPTPIPTypeRequestPayload(void)
+	??0TPTPIPTypeResponsePayload@@QAE@XZ @ 7 NONAME ; TPTPIPTypeResponsePayload::TPTPIPTypeResponsePayload(void)
+	??0TPTPIPTypeStartDataPayload@@QAE@XZ @ 8 NONAME ; TPTPIPTypeStartDataPayload::TPTPIPTypeStartDataPayload(void)
+	??1CPTPIPDataContainer@@UAE@XZ @ 9 NONAME ; CPTPIPDataContainer::~CPTPIPDataContainer(void)
+	??1CPTPIPGenericContainer@@UAE@XZ @ 10 NONAME ; CPTPIPGenericContainer::~CPTPIPGenericContainer(void)
+	??1CPTPIPInitCmdAck@@UAE@XZ @ 11 NONAME ; CPTPIPInitCmdAck::~CPTPIPInitCmdAck(void)
+	??1CPTPIPInitCmdRequest@@UAE@XZ @ 12 NONAME ; CPTPIPInitCmdRequest::~CPTPIPInitCmdRequest(void)
+	?CommitChunkL@CPTPIPInitCmdRequest@@UAEXAAVTPtr8@@@Z @ 13 NONAME ABSENT ; void CPTPIPInitCmdRequest::CommitChunkL(class TPtr8 &)
+	?CommitChunkL@TPTPIPTypeRequestPayload@@UAEXAAVTPtr8@@@Z @ 14 NONAME ABSENT ; void TPTPIPTypeRequestPayload::CommitChunkL(class TPtr8 &)
+	?CommitChunkL@TPTPIPTypeResponsePayload@@UAEXAAVTPtr8@@@Z @ 15 NONAME ABSENT ; void TPTPIPTypeResponsePayload::CommitChunkL(class TPtr8 &)
+	?CommitChunkL@TPTPIPTypeStartDataPayload@@UAEXAAVTPtr8@@@Z @ 16 NONAME ABSENT ; void TPTPIPTypeStartDataPayload::CommitChunkL(class TPtr8 &)
+	?CommitRequired@TPTPIPTypeRequestPayload@@UBEHXZ @ 17 NONAME ; int TPTPIPTypeRequestPayload::CommitRequired(void) const
+	?CommitRequired@TPTPIPTypeResponsePayload@@UBEHXZ @ 18 NONAME ; int TPTPIPTypeResponsePayload::CommitRequired(void) const
+	?CommitRequired@TPTPIPTypeStartDataPayload@@UBEHXZ @ 19 NONAME ; int TPTPIPTypeStartDataPayload::CommitRequired(void) const
+	?CopyIn@TPTPIPTypeRequestPayload@@QAEXABVTMTPTypeFlatBase@@IIHI@Z @ 20 NONAME ; void TPTPIPTypeRequestPayload::CopyIn(class TMTPTypeFlatBase const &, unsigned int, unsigned int, int, unsigned int)
+	?CopyIn@TPTPIPTypeResponsePayload@@QAEXABVTMTPTypeFlatBase@@IIHI@Z @ 21 NONAME ; void TPTPIPTypeResponsePayload::CopyIn(class TMTPTypeFlatBase const &, unsigned int, unsigned int, int, unsigned int)
+	?CopyOut@TPTPIPTypeRequestPayload@@QAEXAAVTMTPTypeFlatBase@@II@Z @ 22 NONAME ; void TPTPIPTypeRequestPayload::CopyOut(class TMTPTypeFlatBase &, unsigned int, unsigned int)
+	?CopyOut@TPTPIPTypeResponsePayload@@QAEXAAVTMTPTypeFlatBase@@II@Z @ 23 NONAME ; void TPTPIPTypeResponsePayload::CopyOut(class TMTPTypeFlatBase &, unsigned int, unsigned int)
+	?ElementInfo@TPTPIPInitEvtAck@@EBEABUTElementInfo@TMTPTypeFlatBase@@H@Z @ 24 NONAME ; struct TMTPTypeFlatBase::TElementInfo const & TPTPIPInitEvtAck::ElementInfo(int) const
+	?ElementInfo@TPTPIPInitEvtRequest@@EBEABUTElementInfo@TMTPTypeFlatBase@@H@Z @ 25 NONAME ; struct TMTPTypeFlatBase::TElementInfo const & TPTPIPInitEvtRequest::ElementInfo(int) const
+	?ElementInfo@TPTPIPInitFailed@@EBEABUTElementInfo@TMTPTypeFlatBase@@H@Z @ 26 NONAME ; struct TMTPTypeFlatBase::TElementInfo const & TPTPIPInitFailed::ElementInfo(int) const
+	?ElementInfo@TPTPIPTypeRequestPayload@@EBEABUTElementInfo@TMTPTypeFlatBase@@H@Z @ 27 NONAME ; struct TMTPTypeFlatBase::TElementInfo const & TPTPIPTypeRequestPayload::ElementInfo(int) const
+	?ElementInfo@TPTPIPTypeResponsePayload@@EBEABUTElementInfo@TMTPTypeFlatBase@@H@Z @ 28 NONAME ; struct TMTPTypeFlatBase::TElementInfo const & TPTPIPTypeResponsePayload::ElementInfo(int) const
+	?ElementInfo@TPTPIPTypeStartDataPayload@@EBEABUTElementInfo@TMTPTypeFlatBase@@H@Z @ 29 NONAME ; struct TMTPTypeFlatBase::TElementInfo const & TPTPIPTypeStartDataPayload::ElementInfo(int) const
+	?FirstReadChunk@CPTPIPInitCmdAck@@UBEHAAVTPtrC8@@@Z @ 30 NONAME ; int CPTPIPInitCmdAck::FirstReadChunk(class TPtrC8 &) const
+	?FirstReadChunk@TPTPIPTypeRequestPayload@@UBEHAAVTPtrC8@@@Z @ 31 NONAME ; int TPTPIPTypeRequestPayload::FirstReadChunk(class TPtrC8 &) const
+	?FirstReadChunk@TPTPIPTypeResponsePayload@@UBEHAAVTPtrC8@@@Z @ 32 NONAME ; int TPTPIPTypeResponsePayload::FirstReadChunk(class TPtrC8 &) const
+	?FirstReadChunk@TPTPIPTypeStartDataPayload@@UBEHAAVTPtrC8@@@Z @ 33 NONAME ; int TPTPIPTypeStartDataPayload::FirstReadChunk(class TPtrC8 &) const
+	?FirstWriteChunk@CPTPIPInitCmdRequest@@UAEHAAVTPtr8@@@Z @ 34 NONAME ; int CPTPIPInitCmdRequest::FirstWriteChunk(class TPtr8 &)
+	?HostFriendlyName@CPTPIPInitCmdRequest@@QAEAAVTDes16@@XZ @ 35 NONAME ; class TDes16 & CPTPIPInitCmdRequest::HostFriendlyName(void)
+	?NewL@CPTPIPDataContainer@@SAPAV1@XZ @ 36 NONAME ; class CPTPIPDataContainer * CPTPIPDataContainer::NewL(void)
+	?NewL@CPTPIPGenericContainer@@SAPAV1@XZ @ 37 NONAME ; class CPTPIPGenericContainer * CPTPIPGenericContainer::NewL(void)
+	?NewL@CPTPIPInitCmdAck@@SAPAV1@XZ @ 38 NONAME ; class CPTPIPInitCmdAck * CPTPIPInitCmdAck::NewL(void)
+	?NewL@CPTPIPInitCmdRequest@@SAPAV1@XZ @ 39 NONAME ; class CPTPIPInitCmdRequest * CPTPIPInitCmdRequest::NewL(void)
+	?NextReadChunk@CPTPIPInitCmdAck@@UBEHAAVTPtrC8@@@Z @ 40 NONAME ; int CPTPIPInitCmdAck::NextReadChunk(class TPtrC8 &) const
+	?NextWriteChunk@CPTPIPInitCmdRequest@@UAEHAAVTPtr8@@@Z @ 41 NONAME ; int CPTPIPInitCmdRequest::NextWriteChunk(class TPtr8 &)
+	?NumParameters@TPTPIPTypeRequestPayload@@QBEIXZ @ 42 NONAME ; unsigned int TPTPIPTypeRequestPayload::NumParameters(void) const
+	?NumParameters@TPTPIPTypeResponsePayload@@QBEIXZ @ 43 NONAME ; unsigned int TPTPIPTypeResponsePayload::NumParameters(void) const
+	?Payload@CPTPIPDataContainer@@QBEPAVMMTPType@@XZ @ 44 NONAME ; class MMTPType * CPTPIPDataContainer::Payload(void) const
+	?Payload@CPTPIPGenericContainer@@QBEPAVMMTPType@@XZ @ 45 NONAME ; class MMTPType * CPTPIPGenericContainer::Payload(void) const
+	?Reset@TPTPIPTypeRequestPayload@@UAEXXZ @ 46 NONAME ; void TPTPIPTypeRequestPayload::Reset(void)
+	?Reset@TPTPIPTypeResponsePayload@@UAEXXZ @ 47 NONAME ; void TPTPIPTypeResponsePayload::Reset(void)
+	?Reset@TPTPIPTypeStartDataPayload@@UAEXXZ @ 48 NONAME ; void TPTPIPTypeStartDataPayload::Reset(void)
+	?SetDeviceFriendlyName@CPTPIPInitCmdAck@@QAEXAAVTDesC16@@@Z @ 49 NONAME ; void CPTPIPInitCmdAck::SetDeviceFriendlyName(class TDesC16 &)
+	?SetPayloadL@CPTPIPDataContainer@@QAEXPAVMMTPType@@@Z @ 50 NONAME ; void CPTPIPDataContainer::SetPayloadL(class MMTPType *)
+	?SetPayloadL@CPTPIPGenericContainer@@QAEXPAVMMTPType@@@Z @ 51 NONAME ; void CPTPIPGenericContainer::SetPayloadL(class MMTPType *)
+	?SetUint16@TPTPIPTypeRequestPayload@@UAEXHG@Z @ 52 NONAME ; void TPTPIPTypeRequestPayload::SetUint16(int, unsigned short)
+	?SetUint16@TPTPIPTypeResponsePayload@@UAEXHG@Z @ 53 NONAME ; void TPTPIPTypeResponsePayload::SetUint16(int, unsigned short)
+	?SetUint32@TPTPIPTypeRequestPayload@@UAEXHK@Z @ 54 NONAME ; void TPTPIPTypeRequestPayload::SetUint32(int, unsigned long)
+	?SetUint32@TPTPIPTypeResponsePayload@@UAEXHK@Z @ 55 NONAME ; void TPTPIPTypeResponsePayload::SetUint32(int, unsigned long)
+	?SetUint32@TPTPIPTypeStartDataPayload@@UAEXHK@Z @ 56 NONAME ; void TPTPIPTypeStartDataPayload::SetUint32(int, unsigned long)
+	?SetUint64@TPTPIPTypeStartDataPayload@@UAEXH_K@Z @ 57 NONAME ; void TPTPIPTypeStartDataPayload::SetUint64(int, unsigned long long)
+	?Size@CPTPIPInitCmdAck@@UBE_KXZ @ 58 NONAME ; unsigned long long CPTPIPInitCmdAck::Size(void) const
+	?Size@TPTPIPTypeRequestPayload@@UBE_KXZ @ 59 NONAME ; unsigned long long TPTPIPTypeRequestPayload::Size(void) const
+	?Size@TPTPIPTypeResponsePayload@@UBE_KXZ @ 60 NONAME ; unsigned long long TPTPIPTypeResponsePayload::Size(void) const
+	?Size@TPTPIPTypeStartDataPayload@@UBE_KXZ @ 61 NONAME ; unsigned long long TPTPIPTypeStartDataPayload::Size(void) const
+	?Type@CPTPIPDataContainer@@UBEIXZ @ 62 NONAME ; unsigned int CPTPIPDataContainer::Type(void) const
+	?Type@CPTPIPGenericContainer@@UBEIXZ @ 63 NONAME ; unsigned int CPTPIPGenericContainer::Type(void) const
+	?Type@CPTPIPInitCmdAck@@UBEIXZ @ 64 NONAME ; unsigned int CPTPIPInitCmdAck::Type(void) const
+	?Type@CPTPIPInitCmdRequest@@UBEIXZ @ 65 NONAME ; unsigned int CPTPIPInitCmdRequest::Type(void) const
+	?Type@TPTPIPInitEvtAck@@UBEIXZ @ 66 NONAME ; unsigned int TPTPIPInitEvtAck::Type(void) const
+	?Type@TPTPIPInitEvtRequest@@UBEIXZ @ 67 NONAME ; unsigned int TPTPIPInitEvtRequest::Type(void) const
+	?Type@TPTPIPInitFailed@@UBEIXZ @ 68 NONAME ; unsigned int TPTPIPInitFailed::Type(void) const
+	?Type@TPTPIPTypeRequestPayload@@UBEIXZ @ 69 NONAME ; unsigned int TPTPIPTypeRequestPayload::Type(void) const
+	?Type@TPTPIPTypeResponsePayload@@UBEIXZ @ 70 NONAME ; unsigned int TPTPIPTypeResponsePayload::Type(void) const
+	?Type@TPTPIPTypeStartDataPayload@@UBEIXZ @ 71 NONAME ; unsigned int TPTPIPTypeStartDataPayload::Type(void) const
+	?Uint16@TPTPIPTypeRequestPayload@@UBEGH@Z @ 72 NONAME ; unsigned short TPTPIPTypeRequestPayload::Uint16(int) const
+	?Uint16@TPTPIPTypeResponsePayload@@UBEGH@Z @ 73 NONAME ; unsigned short TPTPIPTypeResponsePayload::Uint16(int) const
+	?Uint32@TPTPIPTypeRequestPayload@@UBEKH@Z @ 74 NONAME ; unsigned long TPTPIPTypeRequestPayload::Uint32(int) const
+	?Uint32@TPTPIPTypeResponsePayload@@UBEKH@Z @ 75 NONAME ; unsigned long TPTPIPTypeResponsePayload::Uint32(int) const
+	?Uint32@TPTPIPTypeStartDataPayload@@UBEKH@Z @ 76 NONAME ; unsigned long TPTPIPTypeStartDataPayload::Uint32(int) const
+	?Uint64@TPTPIPTypeStartDataPayload@@UBE_KH@Z @ 77 NONAME ; unsigned long long TPTPIPTypeStartDataPayload::Uint64(int) const
+	?FirstWriteChunk@CPTPIPDataContainer@@UAEHAAVTPtr8@@@Z @ 78 NONAME ; int CPTPIPDataContainer::FirstWriteChunk(class TPtr8 &)
+	?CommitChunkL@CPTPIPDataContainer@@UAEXAAVTPtr8@@@Z @ 79 NONAME ABSENT ; void CPTPIPDataContainer::CommitChunkL(class TPtr8 &)
+	?CommitChunkL@TPTPIPTypeResponsePayload@@UAEPAVMMTPType@@AAVTPtr8@@@Z @ 80 NONAME ; class MMTPType * TPTPIPTypeResponsePayload::CommitChunkL(class TPtr8 &)
+	?CommitChunkL@CPTPIPInitCmdRequest@@UAEPAVMMTPType@@AAVTPtr8@@@Z @ 81 NONAME ; class MMTPType * CPTPIPInitCmdRequest::CommitChunkL(class TPtr8 &)
+	?CommitChunkL@CPTPIPDataContainer@@UAEPAVMMTPType@@AAVTPtr8@@@Z @ 82 NONAME ; class MMTPType * CPTPIPDataContainer::CommitChunkL(class TPtr8 &)
+	?CommitChunkL@TPTPIPTypeStartDataPayload@@UAEPAVMMTPType@@AAVTPtr8@@@Z @ 83 NONAME ; class MMTPType * TPTPIPTypeStartDataPayload::CommitChunkL(class TPtr8 &)
+	?CommitChunkL@TPTPIPTypeRequestPayload@@UAEPAVMMTPType@@AAVTPtr8@@@Z @ 84 NONAME ; class MMTPType * TPTPIPTypeRequestPayload::CommitChunkL(class TPtr8 &)
+

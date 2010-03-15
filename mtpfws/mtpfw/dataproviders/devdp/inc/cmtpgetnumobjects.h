@@ -55,9 +55,13 @@ private:
 	TBool IsSupportedFormatL(TUint32 aFormatCode);
 			
 private:
+	/**
+    FLOGGER debug trace member variable.
+    */
+    __FLOG_DECLARATION_MEMBER_MUTABLE;
 
 	RMTPFramework iSingletons;
-
+protected:
     RMTPDeviceDpSingletons              iDevDpSingletons;
 	};
 	

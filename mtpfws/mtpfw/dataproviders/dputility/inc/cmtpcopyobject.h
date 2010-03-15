@@ -21,6 +21,7 @@
 #ifndef CMTPCOPYOBJECT_H
 #define CMTPCOPYOBJECT_H
 
+#include "rmtpframework.h"
 #include "cmtprequestprocessor.h"
 #include "mtpdebug.h"
 
@@ -51,7 +52,8 @@ private:
 
 private:	//from CMTPRequestProcessor
 	virtual void ServiceL();
-
+    TMTPResponseCode CheckRequestL();
+    
 private:
 	void ConstructL();
 	void GetParametersL();
@@ -72,7 +74,7 @@ private:
 	TUint32					iNewParentHandle;
 	TUint32					iStorageId;
 	TTime					iPreviousModifiedTime;
-	
+    RMTPFramework           iSingletons;
 	/**
     FLOGGER debug trace member variable.
     */

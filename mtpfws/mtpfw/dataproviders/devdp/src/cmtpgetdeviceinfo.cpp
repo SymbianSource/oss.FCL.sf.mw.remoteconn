@@ -48,6 +48,7 @@ static const TUint16 KMTPStandardVersion = 100;
 This identifies the PTP vendor-extension version that are in use by this device
 */
 static const TUint32 KMTPVendorExtensionId = 0x00000006;
+static const TUint32 KMTPVendorExtensionId_Mac = 0xFFFFFFFF;
 
 /**
 This identifies, in hundredths, the version of the MTP standard that this device supports
@@ -126,9 +127,26 @@ void CMTPGetDeviceInfo::BuildDeviceInfoL()
     __FLOG(_L8("BuildDeviceInfoL - Entry")); 
     CMTPDeviceDataStore& device(iDpSingletons.DeviceDataStore());
     iDeviceInfo->SetUint16L(CMTPTypeDeviceInfo::EStandardVersion, KMTPStandardVersion);
-    iDeviceInfo->SetUint32L(CMTPTypeDeviceInfo::EMTPVendorExtensionID, KMTPVendorExtensionId);
-    iDeviceInfo->SetUint16L(CMTPTypeDeviceInfo::EMTPVersion, KMTPVersion);
-    iDeviceInfo->SetStringL(CMTPTypeDeviceInfo::EMTPExtensions, iDpSingletons.DeviceDataStore().MTPExtensions());    
+    
+    if(iDpSingletons.DeviceDataStore().IsConnectMac())
+        {
+        __FLOG(_L8("Connect Mac = ETrue"));         
+        iDeviceInfo->SetUint32L(CMTPTypeDeviceInfo::EMTPVendorExtensionID, KMTPVendorExtensionId_Mac);
+        iDeviceInfo->SetUint16L(CMTPTypeDeviceInfo::EMTPVersion, KMTPVersion);        
+        RBuf  mtpExtensions;
+        mtpExtensions.CleanupClosePushL();
+        mtpExtensions.CreateL(0);
+        iDeviceInfo->SetStringL(CMTPTypeDeviceInfo::EMTPExtensions, mtpExtensions);
+        CleanupStack::PopAndDestroy(&mtpExtensions);
+        }
+    else
+        {
+        __FLOG(_L8("Connect Mac = EFalse")); 
+        iDeviceInfo->SetUint32L(CMTPTypeDeviceInfo::EMTPVendorExtensionID, KMTPVendorExtensionId);
+        iDeviceInfo->SetUint16L(CMTPTypeDeviceInfo::EMTPVersion, KMTPVersion);        
+        iDeviceInfo->SetStringL(CMTPTypeDeviceInfo::EMTPExtensions, iDpSingletons.DeviceDataStore().MTPExtensions());  
+        }
+    
     iDeviceInfo->SetUint16L(CMTPTypeDeviceInfo::EFunctionalMode, EMTPFunctionalModeStandard);    
     iDeviceInfo->SetStringL(CMTPTypeDeviceInfo::EManufacturer, device.Manufacturer());
     iDeviceInfo->SetStringL(CMTPTypeDeviceInfo::EModel, device.Model());

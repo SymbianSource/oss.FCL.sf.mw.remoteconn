@@ -231,11 +231,13 @@ void CMTPImageDpDeleteObject::DeleteObjectL( TUint32 aHandle )
         switch ( err )
             {
             case KErrInUse:
+                //coverity[fallthrough]
             case KErrAccessDenied:
                 //add for test 
                 __FLOG_1(_L8("err:%d"), err);
                 //add Suid to deleteobjectlist
                 iDataProvider.AppendDeleteObjectsArrayL(iObjectMeta->DesC(CMTPObjectMetaData::ESuid));
+                //coverity[unterminated_case]
             case KErrNone:
                 //add for test
                 __FLOG(_L8("KErrNone"));                

@@ -646,7 +646,9 @@ private:
     void SelectSubTypeRoutingL(TRoutingSubType aSubType, RArray<TUint>& aRoutingSubTypes, RArray<TUint>& aValidationSubTypes, RArray<TRoutingParameters>& aParams) const; 
     void SelectSubTypeValidationL(TRoutingSubType aSubType, RArray<TUint>& aValidationSubTypes) const;
     void ValidateTargetsL(const TRoutingParameters& aParams, const RArray<TUint>& aValidationSubTypes, RArray<TUint>& aTargets) const;
-
+    void ValidateOperationRequestParametersL(TRoutingParameters& aParams) const;
+    
+    
     static TUint Flags(TUint aSubType);
     static TUint Index(TUint aSubType);
     static TUint Params(TUint aSubType);

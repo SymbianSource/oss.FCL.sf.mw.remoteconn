@@ -348,8 +348,54 @@ EXPORT_C TInt CMTPStorageMgr::DeallocatePhysicalStorageId(TUint aDataProviderId,
 EXPORT_C TUint32 CMTPStorageMgr::DefaultStorageId() const
     {
     __FLOG(_L8("DefaultStorageId - Entry"));
+    
+    TUint32 ret = iDefaultStorageId;
+    TBool check = EFalse;
+	TInt driveNo = DriveNumber(ret);
+	const TUint KMinFreeSpace(1024 * 512);  
+	if( (KErrNotFound == driveNo) || ( !IsReadWriteStorage(ret) ) )
+		{
+		check = ETrue;
+		}
+	else
+		{
+		TVolumeInfo volumeInfo;
+		if(iSingletons.Fs().Volume(volumeInfo, driveNo) != KErrNone)
+			{
+			check = ETrue;
+			}
+		else if (volumeInfo.iFree < KMinFreeSpace)
+			{
+			check = ETrue;
+			}
+		}
+    	
+    if(check)
+    	{ 
+		const TUint KCount(iMapDriveToStorage.Count());
+		for (TInt i = 0; i < KCount; i++)
+			{
+			if (iMapDriveToStorage[i] == KErrNotFound)
+				{
+				continue;
+				}
+			TVolumeInfo volume;
+			if( !IsReadWriteStorage(iMapDriveToStorage[i]) 
+					|| (iSingletons.Fs().Volume(volume, i) != KErrNone) )
+				{
+				continue;
+				}
+			
+			if (volume.iFree > KMinFreeSpace )
+				{
+				ret = iMapDriveToStorage[i];
+				break;
+				}
+			}
+    	}
+    
     __FLOG(_L8("DefaultStorageId - Exit"));
-    return iDefaultStorageId;
+    return ret;
     }
 
 EXPORT_C TInt CMTPStorageMgr::DriveNumber(TUint32 aStorageId) const
@@ -809,3 +855,52 @@ TInt CMTPStorageMgr::StorageOrder(const TUint32* aKey, const CMTPStorageMetaData
     return (*aKey - aStorage.Uint(CMTPStorageMetaData::EStorageId));
     }
 
+EXPORT_C TBool CMTPStorageMgr::IsReadWriteStorage(TUint32 aStorageId) const
+	{
+	const TInt KCDrive = 2;
+	TInt driveNo(DriveNumber(aStorageId));
+	if(KErrNotFound == driveNo)
+		return ETrue;
+	
+	if(KCDrive == driveNo)
+		return EFalse;
+	
+	TDriveInfo driveInfo;
+	if(iSingletons.Fs().Drive(driveInfo, driveNo) != KErrNone)
+		return EFalse;
+	
+	TBool ret = ETrue;
+	switch(driveInfo.iType)
+		{
+		case EMediaCdRom:
+		case EMediaRom:
+			ret = EFalse;
+			break;
+		
+		//comment the blank cases.
+		//case EMediaNotPresent:
+		//case EMediaUnknown:	
+		//case EMediaRam:
+		//case EMediaNANDFlash:
+		//case EMediaHardDisk:
+		//case EMediaFlash:					
+		//case EMediaRemote:
+		//case EMediaFloppy:
+		default:
+			break;
+		}
+	
+	if(ret)
+		{
+		TVolumeInfo volumeInfo;
+		if(iSingletons.Fs().Volume(volumeInfo, driveNo) == KErrNone)
+			{
+			if( volumeInfo.iDrive.iMediaAtt & (KMediaAttWriteProtected | KMediaAttLocked) )
+				{
+				ret = EFalse;
+				}
+			}
+		}
+	    	
+	return ret;
+	}

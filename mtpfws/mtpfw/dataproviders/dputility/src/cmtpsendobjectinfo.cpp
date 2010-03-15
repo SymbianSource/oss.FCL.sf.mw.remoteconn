@@ -36,6 +36,7 @@
 #include "cmtpfsexclusionmgr.h"
 #include "cmtpdataprovidercontroller.h"
 #include "cmtpdataprovider.h"
+#include "cmtpstoragemgr.h"
 
 
 // Class constants.
@@ -720,7 +721,7 @@ TBool CMTPSendObjectInfo::DoHandleSendObjectCompleteL()
         	TParsePtrC file( iFullPath );
         	_LIT( KTxtExtensionODF, ".odf" );
         	if ( file.ExtPresent() && file.Ext().CompareF(KTxtExtensionODF)==0 )
-        	    {;
+        	    {
         	    TUint32 DpId = iFramework.DataProviderId();
         	    DpId = iDpSingletons.MTPUtility().GetDpId(file.Ext().Mid(1),KNullDesC);
         	    //The data provider which owns all mimetypes of a file extension is not found 
@@ -1080,19 +1081,30 @@ TMTPResponseCode CMTPSendObjectInfo::MatchStoreAndParentL() const
     const TUint32 storeId(Request().Uint32(TMTPTypeRequest::ERequestParameter1));
     const TUint32 parentHandle(Request().Uint32(TMTPTypeRequest::ERequestParameter2));
     
-    // this checking is only valid when the second parameter is not a special value.
-    if (parentHandle != KMTPHandleAll && parentHandle != KMTPHandleNone)
-        {
-        //does not take owernship
-        CMTPObjectMetaData* parentObjInfo = iRequestChecker->GetObjectInfo(parentHandle);
-        __ASSERT_DEBUG(parentObjInfo, Panic(EMTPDpObjectNull));
-        
-        if (parentObjInfo->Uint(CMTPObjectMetaData::EStorageId) != storeId)      
-            {
-            ret = EMTPRespCodeInvalidObjectHandle;
-            }
-        }
-        
+    if( (EMTPOpCodeSendObjectPropList == iOperationCode) || (EMTPOpCodeSendObjectInfo == iOperationCode) )
+    	{
+		if(storeId != KMTPStorageDefault)
+			{
+			if(!iSingletons.StorageMgr().IsReadWriteStorage(storeId))
+				{
+				ret = EMTPRespCodeStoreReadOnly;
+				}
+			}
+		
+		 // this checking is only valid when the second parameter is not a special value.
+		if ((EMTPRespCodeOK == ret) && (parentHandle != KMTPHandleAll && parentHandle != KMTPHandleNone))
+			{
+			//does not take owernship
+			CMTPObjectMetaData* parentObjInfo = iRequestChecker->GetObjectInfo(parentHandle);
+			__ASSERT_DEBUG(parentObjInfo, Panic(EMTPDpObjectNull));
+			
+			if (parentObjInfo->Uint(CMTPObjectMetaData::EStorageId) != storeId)      
+				{
+				ret = EMTPRespCodeInvalidObjectHandle;
+				}
+			}
+    	}
+    
     return ret;
     }
 
@@ -1225,6 +1237,14 @@ void CMTPSendObjectInfo::SetPropertiesL()
             }
         User::LeaveIfError(iFramework.Fs().SetAtt(iFullPath, entry.iAtt, ~entry.iAtt));
         }
+
+    if(iDateMod != NULL && iDateMod->Length())
+       {
+       TTime modifiedTime;
+       iDpSingletons.MTPUtility().MTPTimeStr2TTime(*iDateMod, modifiedTime);
+       User::LeaveIfError(iFramework.Fs().SetModified(iFullPath, modifiedTime));
+       }  
+    
     iReceivedObject->SetDesCL(CMTPObjectMetaData::EName, iName);
     
     __FLOG(_L8("SetPropertiesL - Exit"));

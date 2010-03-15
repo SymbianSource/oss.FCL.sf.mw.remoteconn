@@ -526,7 +526,11 @@ void CMTPTypeFile::ConstructL(RFs& aFs, const TDesC& aName, TFileMode aMode)
     if (aMode & EFileWrite)
         {
         iFileOpenForRead = EFalse;
-        User::LeaveIfError(iFile.Replace(aFs, aName, aMode|EFileWriteDirectIO));
+        TInt err = iFile.Create(aFs, aName, aMode|EFileWriteDirectIO);
+        if (err != KErrNone)
+            {
+            User::LeaveIfError(iFile.Replace(aFs, aName, aMode|EFileWriteDirectIO));
+            }
         }
     else
         {
@@ -559,7 +563,11 @@ void CMTPTypeFile::ConstructL(RFs& aFs, const TDesC& aName, TFileMode aMode, TIn
     if (aMode & EFileWrite)
         {
         iFileOpenForRead = EFalse;
-        User::LeaveIfError(iFile.Replace(aFs, aName, aMode|EFileWriteDirectIO));
+        TInt err = iFile.Create(aFs, aName, aMode|EFileWriteDirectIO);
+        if (err != KErrNone)
+            {
+            User::LeaveIfError(iFile.Replace(aFs, aName, aMode|EFileWriteDirectIO));
+            }
         }
     else
         {

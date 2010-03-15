@@ -21,6 +21,7 @@
 #ifndef CMTPMOVEOBJECT_H
 #define CMTPMOVEOBJECT_H
 
+#include "rmtpframework.h"
 #include "cmtprequestprocessor.h"
 #include "mtpdebug.h"
 
@@ -47,10 +48,7 @@ private:
 
 private:	//from CMTPRequestProcessor
 	virtual void ServiceL();
-	
-private:	//from CActive
-	void RunL();
-	TInt RunError(TInt aError);
+    TMTPResponseCode CheckRequestL();
 	
 private:
 	void ConstructL();
@@ -62,8 +60,6 @@ private:
 	void SetPreviousPropertiesL(const TDesC& aFileName);
 	void MoveFileL(const TDesC& aNewFileName);
 	void MoveFolderL();
-	TMTPResponseCode FinalPhaseMove();
-	void MoveAndUpdateL(TUint32 objectHandle);
 	
 private:	
 	CFileMan*				iFileMan;
@@ -76,7 +72,7 @@ private:
 	HBufC*					iPathToMove;
 	RArray<TUint>           iObjectHandles;
 	TInt                    iMoveObjectIndex;
-	
+    RMTPFramework           iSingletons;
 	/**
     FLOGGER debug trace member variable.
     */

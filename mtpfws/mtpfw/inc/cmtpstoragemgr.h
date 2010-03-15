@@ -73,7 +73,10 @@ public: // From MMTPStorageMgr
     IMPORT_C TUint32 StorageId(TUint32 aPhysicalStorageId, TUint32 aLogicalStorageId) const;
     IMPORT_C TBool ValidStorageId(TUint32 aStorageId) const;
     IMPORT_C CMTPTypeString* VolumeIdL(TUint aDataProviderId, TUint32 aStorageId, const TDesC& aVolumeIdSuffix) const;
-            
+          
+public:
+    IMPORT_C TBool IsReadWriteStorage(TUint32 aStorageId) const; 
+    
 private:
 
     CMTPStorageMgr();

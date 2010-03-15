@@ -23,6 +23,7 @@
 #include <mtp/cmtptypearray.h>
 #include <mtp/cmtptypestring.h>
 
+#include "cmtpstoragemgr.h"
 #include "cmtpcopyobject.h"
 #include "mtpdppanic.h"
 
@@ -62,7 +63,7 @@ EXPORT_C CMTPCopyObject::~CMTPCopyObject()
 	{	
 	delete iDest;
 	delete iFileMan;
-
+	iSingletons.Close();
 	__FLOG_CLOSE;
 	}
 
@@ -75,6 +76,20 @@ CMTPCopyObject::CMTPCopyObject(MMTPDataProviderFramework& aFramework, MMTPConnec
 	__FLOG_OPEN(KMTPSubsystem, KComponent);
 	}
 
+
+
+TMTPResponseCode CMTPCopyObject::CheckRequestL()
+	{
+    __FLOG(_L8("CheckRequestL - Entry"));
+	TMTPResponseCode result = CMTPRequestProcessor::CheckRequestL();
+	if ( (EMTPRespCodeOK == result) && (!iSingletons.StorageMgr().IsReadWriteStorage(Request().Uint32(TMTPTypeRequest::ERequestParameter2))) )
+		{
+		result = EMTPRespCodeStoreReadOnly;
+		}
+	
+    __FLOG(_L8("CheckRequestL - Exit"));
+	return result;	
+	} 
 
 /**
 CopyObject request handler
@@ -99,7 +114,7 @@ void CMTPCopyObject::ServiceL()
 */
 void CMTPCopyObject::ConstructL()
     {
-
+	iSingletons.OpenL();
     }
 
 	

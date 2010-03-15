@@ -282,15 +282,6 @@ Processes the Date Time property transaction response phase.
 void CMTPSetDevicePropValue::CompleteServiceDateTimeL()
 	{
 	__FLOG(_L8("CompleteDateTime - Entry"));
-	
-	//Just a workAround for WinLogo
-	_LIT(KWinLogoWorkAround,"20051231");
-	TInt pos = iString->StringChars().Find( KWinLogoWorkAround );
-	if ( KErrNotFound != pos )
-		{
-		SendResponseL(EMTPRespCodeOK);
-		return;
-		}
 												
 	//validate the incoming date time string first and then set it.
 	if(KErrNone == iDpSingletons.DeviceDataStore().SetDateTimeL(iString->StringChars()) )

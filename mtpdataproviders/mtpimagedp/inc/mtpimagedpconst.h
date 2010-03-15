@@ -187,9 +187,9 @@ static const SMTPValidCodeExtensionMapping KMTPValidCodeExtensionMappings[] =
     {EMTPFormatCodeEXIFJPEG, CASTING("jpg")},  // jpeg
     {EMTPFormatCodeEXIFJPEG, CASTING("jpe")},  // jpeg
     {EMTPFormatCodeEXIFJPEG, CASTING("jpeg")}, // jpeg
-//    {EMTPFormatCodeBMP,      CASTING("bmp")},  // bmp
-//    {EMTPFormatCodeGIF,      CASTING("gif")},  // gif
-//    {EMTPFormatCodePNG,      CASTING("png")},  // png
+    {EMTPFormatCodeBMP,      CASTING("bmp")},  // bmp
+    {EMTPFormatCodeGIF,      CASTING("gif")},  // gif
+    {EMTPFormatCodePNG,      CASTING("png")},  // png
 //    {EMTPFormatCodeTIFF,     CASTING("tif")},  // tiff, TNM does not support
 //    {EMTPFormatCodeTIFF,     CASTING("tiff")}, // tiff, TNM does not support
     };
@@ -199,11 +199,20 @@ static const SMTPExtensionMimeTypeMapping KMTPExtensionMimeTypeMappings[] =
     {CASTING("jpg"),         CASTING("image/jpeg")}, // jpeg
     {CASTING("jpe"),         CASTING("image/jpeg")}, // jpeg
     {CASTING("jpeg"),        CASTING("image/jpeg")}, // jpeg
-//    {CASTING("bmp"),         CASTING("image/bmp")},  // bmp
-//    {CASTING("gif"),         CASTING("image/gif")},  // gif
-//    {CASTING("png"),         CASTING("image/png")},  // png
+    {CASTING("bmp"),         CASTING("image/bmp")},  // bmp
+    {CASTING("gif"),         CASTING("image/gif")},  // gif
+    {CASTING("png"),         CASTING("image/png")},  // png
 //    {CASTING("tif"),         CASTING("image/tiff")}, // tiff, TNM does not support
 //    {CASTING("tiff"),        CASTING("image/tiff")}, // tiff, TNM does not support
+    };
+
+static const TMTPFormatCode KMTPImageDpSupportFormatCodes[] =
+    {
+    EMTPFormatCodeEXIFJPEG,
+    EMTPFormatCodeBMP,
+    EMTPFormatCodeGIF,
+    EMTPFormatCodePNG,
+//    EMTPFormatCodeTIFF
     };
 
 /**

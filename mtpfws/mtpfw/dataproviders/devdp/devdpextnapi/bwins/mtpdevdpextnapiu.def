@@ -1,0 +1,13 @@
+EXPORTS
+	??1CMtpExtnDevicePropPlugin@@UAE@XZ @ 1 NONAME ; CMtpExtnDevicePropPlugin::~CMtpExtnDevicePropPlugin(void)
+	?GetDevPropertyDescL@CMtpExtnDevicePropPlugin@@UAEHW4TMTPDevicePropertyCode@@PAPAVMMTPType@@@Z @ 2 NONAME ; int CMtpExtnDevicePropPlugin::GetDevPropertyDescL(enum TMTPDevicePropertyCode, class MMTPType * *)
+	?GetDevPropertyL@CMtpExtnDevicePropPlugin@@UAEHW4TMTPDevicePropertyCode@@PAPAVMMTPType@@@Z @ 3 NONAME ; int CMtpExtnDevicePropPlugin::GetDevPropertyL(enum TMTPDevicePropertyCode, class MMTPType * *)
+	?GetDevicePropertyContainerL@CMtpExtnDevicePropPlugin@@UAEHW4TMTPDevicePropertyCode@@PAPAVMMTPType@@@Z @ 4 NONAME ; int CMtpExtnDevicePropPlugin::GetDevicePropertyContainerL(enum TMTPDevicePropertyCode, class MMTPType * *)
+	?NewL@CMtpExtnDevicePropPlugin@@SAPAV1@VTUid@@@Z @ 5 NONAME ; class CMtpExtnDevicePropPlugin * CMtpExtnDevicePropPlugin::NewL(class TUid)
+	?NotifyOnDevicePropertyChanged@CMtpExtnDevicePropPlugin@@QAEXAAW4TMTPDevicePropertyCode@@@Z @ 6 NONAME ; void CMtpExtnDevicePropPlugin::NotifyOnDevicePropertyChanged(enum TMTPDevicePropertyCode &)
+	?ResetDevPropertyL@CMtpExtnDevicePropPlugin@@UAEHW4TMTPDevicePropertyCode@@@Z @ 7 NONAME ; int CMtpExtnDevicePropPlugin::ResetDevPropertyL(enum TMTPDevicePropertyCode)
+	?SetCallback@CMtpExtnDevicePropPlugin@@QAEXAAVMExtnDevPluginCallback@@@Z @ 8 NONAME ; void CMtpExtnDevicePropPlugin::SetCallback(class MExtnDevPluginCallback &)
+	?SetDevicePropertyL@CMtpExtnDevicePropPlugin@@UAE?AW4TMTPResponseCode@@XZ @ 9 NONAME ; enum TMTPResponseCode CMtpExtnDevicePropPlugin::SetDevicePropertyL(void)
+	?Supported@CMtpExtnDevicePropPlugin@@UAEXW4TMTPSupportCategory@@AAV?$RArray@I@@W4TMTPOperationalMode@@@Z @ 10 NONAME ; void CMtpExtnDevicePropPlugin::Supported(enum TMTPSupportCategory, class RArray<unsigned int> &, enum TMTPOperationalMode)
+	?Framework@CMtpExtnDevicePropPlugin@@QBEAAVMMTPDataProviderFramework@@XZ @ 11 NONAME ; class MMTPDataProviderFramework & CMtpExtnDevicePropPlugin::Framework(void) const
+

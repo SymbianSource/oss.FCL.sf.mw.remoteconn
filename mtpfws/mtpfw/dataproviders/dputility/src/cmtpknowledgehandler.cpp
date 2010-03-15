@@ -536,7 +536,6 @@ TMTPResponseCode CMTPKnowledgeHandler::SetObjectPropertyL(const TDesC& /*aSuid*/
 	TMTPResponseCode responseCode = CheckGenObjectPropertyL(aElement, aOperationCode);
 	if (responseCode == EMTPRespCodeOK)
 		{
-		TInt ret = KErrNone;
 		TUint16 propertyCode(aElement.Uint16L(CMTPTypeObjectPropListElement::EPropertyCode));
 		switch (propertyCode)
 			{
@@ -568,10 +567,6 @@ TMTPResponseCode CMTPKnowledgeHandler::SetObjectPropertyL(const TDesC& /*aSuid*/
 			default:
 				responseCode = EMTPRespCodeObjectPropNotSupported;
 				break;
-			}
-		if (KErrNone != ret)
-			{
-			responseCode = EMTPRespCodeGeneralError;
 			}
 		}
 	__FLOG(_L8("SetObjectPropertyL - Exit"));

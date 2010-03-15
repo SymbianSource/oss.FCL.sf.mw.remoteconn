@@ -209,8 +209,7 @@ void CMTPImageDpMdeObserver::SubscribeForChangeNotificationL()
         CMdEObjectDef& imageObjDef = def.GetObjectDefL(MdeConstants::Image::KImageObject);
         
         //Only subscribe add observer        
-        CMdELogicCondition* addCondition = CMdELogicCondition::NewLC(ELogicConditionOperatorAnd);          
-        CMdEPropertyDef& itemTypePropDef = imageObjDef.GetPropertyDefL(MdeConstants::Object::KItemTypeProperty);
+        CMdELogicCondition* addCondition = CMdELogicCondition::NewLC(ELogicConditionOperatorAnd);        
         addCondition->AddObjectConditionL(imageObjDef);                 
         mdeSession.AddObjectObserverL(*this, addCondition, ENotifyAdd);
         CleanupStack::Pop(addCondition);

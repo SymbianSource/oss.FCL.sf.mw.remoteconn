@@ -48,7 +48,7 @@ private:
 
     CMTPImageDpGetFormatCapabilities(MMTPDataProviderFramework& aFramework, MMTPConnection& aConnection);
     void ConstructL();
-    void BuildFormatExifJpegL();
+    void ServiceOneFormatCapabilitiesL(TUint aFormatCode);
     CMTPTypeObjectPropDesc* ServiceProtectionStatusL();
     CMTPTypeObjectPropDesc* ServiceNonConsumableL();
     

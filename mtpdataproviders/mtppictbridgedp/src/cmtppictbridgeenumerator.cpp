@@ -17,6 +17,7 @@
 #include <f32file.h>
 #include <bautils.h>
 #include <s32file.h>
+#include <e32std.h>
 #include <mtp/mmtpobjectmgr.h>
 #include <mtp/cmtpobjectmetadata.h>
 #include <mtp/mmtpdataproviderframework.h>
@@ -124,17 +125,20 @@ void CMTPPictBridgeEnumerator::EnumerateObjectsL(TUint32 aStorageId)
 		iFramework.Fs().Delete(fullPath);
 		
         // enumerate device discovery file (create if not exist)
-        CMTPTypeFile*    discoveryFile;
+
+        RFile rf;
+        CleanupClosePushL(rf);
         fullPath = PathInfo::PhoneMemoryRootPath();
         fullPath.Append(KDeviceDiscovery);
         __FLOG_VA((_L16("full path is %S "), &fullPath));
         iFramework.Fs().SetAtt(fullPath, KEntryAttNormal, KEntryAttReadOnly);
         iFramework.Fs().Delete(fullPath);
         
-        discoveryFile = NULL;
-        discoveryFile = CMTPTypeFile::NewLC(iFramework.Fs(), fullPath, EFileWrite);
-        discoveryFile->SetSizeL(0);
-        CleanupStack::PopAndDestroy(discoveryFile);
+        rf.Create(iFramework.Fs(), fullPath, EFileWrite);
+        TTime time;
+        time.HomeTime();
+        rf.SetModified(time);
+        CleanupStack::PopAndDestroy(&rf);
         
         CMTPObjectMetaData* objectP = CMTPObjectMetaData::NewLC(iSingletons.DpController().FileDpId(), EMTPFormatCodeScript, storageId, fullPath);
 

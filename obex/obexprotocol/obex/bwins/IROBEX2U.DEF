@@ -1,0 +1,149 @@
+EXPORTS
+	??0TObexBufferingDetails@@QAE@AAVCBufBase@@@Z @ 1 NONAME ; TObexBufferingDetails::TObexBufferingDetails(class CBufBase &)
+	??0TObexConnectInfo@@QAE@XZ @ 2 NONAME ; TObexConnectInfo::TObexConnectInfo(void)
+	??0TObexFilenameBackedBuffer@@QAE@AAVCBufBase@@ABVTPtrC16@@W4TFileBuffering@CObexBufObject@@@Z @ 3 NONAME ; TObexFilenameBackedBuffer::TObexFilenameBackedBuffer(class CBufBase &, class TPtrC16 const &, enum CObexBufObject::TFileBuffering)
+	??0TObexProtocolPolicy@@QAE@XZ @ 4 NONAME ; TObexProtocolPolicy::TObexProtocolPolicy(void)
+	??0TObexPureFileBuffer@@QAE@ABVTPtrC16@@@Z @ 5 NONAME ; TObexPureFileBuffer::TObexPureFileBuffer(class TPtrC16 const &)
+	??0TObexRFileBackedBuffer@@QAE@AAVCBufBase@@VRFile@@W4TFileBuffering@CObexBufObject@@@Z @ 6 NONAME ; TObexRFileBackedBuffer::TObexRFileBackedBuffer(class CBufBase &, class RFile, enum CObexBufObject::TFileBuffering)
+	??0TSetPathInfo@CObex@@QAE@XZ @ 7 NONAME ; CObex::TSetPathInfo::TSetPathInfo(void)
+	??1CObexBufObject@@UAE@XZ @ 8 NONAME ; CObexBufObject::~CObexBufObject(void)
+	??1CObexClient@@UAE@XZ @ 9 NONAME ; CObexClient::~CObexClient(void)
+	??1CObexFileObject@@UAE@XZ @ 10 NONAME ; CObexFileObject::~CObexFileObject(void)
+	??1CObexServer@@UAE@XZ @ 11 NONAME ABSENT ; CObexServer::~CObexServer(void)
+	?Abort@CObexClient@@QAEXXZ @ 12 NONAME ; void CObexClient::Abort(void)
+	?AddHeader@CObexHeaderSet@@QAEHPAVCObexHeader@@@Z @ 13 NONAME ; int CObexHeaderSet::AddHeader(class CObexHeader *)
+	?AddHeaderL@CObexBaseObject@@QAEXAAVCObexHeader@@@Z @ 14 NONAME ; void CObexBaseObject::AddHeaderL(class CObexHeader &)
+	?AddHttpL@CObexBaseObject@@QAEXABVTDesC8@@@Z @ 15 NONAME ; void CObexBaseObject::AddHttpL(class TDesC8 const &)
+	?AppParam@CObexBaseObject@@QBEABVTDesC8@@XZ @ 16 NONAME ; class TDesC8 const & CObexBaseObject::AppParam(void) const
+	?AsByte@CObexHeader@@QBEEXZ @ 17 NONAME ; unsigned char CObexHeader::AsByte(void) const
+	?AsByteSeq@CObexHeader@@QBEABVTDesC8@@XZ @ 18 NONAME ; class TDesC8 const & CObexHeader::AsByteSeq(void) const
+	?AsFourByte@CObexHeader@@QBEKXZ @ 19 NONAME ; unsigned long CObexHeader::AsFourByte(void) const
+	?AsUnicode@CObexHeader@@QBEABVTDesC16@@XZ @ 20 NONAME ; class TDesC16 const & CObexHeader::AsUnicode(void) const
+	?Attributes@CObexHeader@@QBEGXZ @ 21 NONAME ; unsigned short CObexHeader::Attributes(void) const
+	?BytesReceived@CObexBaseObject@@QAEHXZ @ 22 NONAME ; int CObexBaseObject::BytesReceived(void)
+	?BytesSent@CObexBaseObject@@QAEHXZ @ 23 NONAME ; int CObexBaseObject::BytesSent(void)
+	?Connect@CObexClient@@QAEXAAVCObexBaseObject@@AAVTRequestStatus@@@Z @ 24 NONAME ; void CObexClient::Connect(class CObexBaseObject &, class TRequestStatus &)
+	?Connect@CObexClient@@QAEXAAVTRequestStatus@@@Z @ 25 NONAME ; void CObexClient::Connect(class TRequestStatus &)
+	?ConnectL@CObexClient@@QAEXAAVCObexBaseObject@@ABVTDesC16@@AAVTRequestStatus@@@Z @ 26 NONAME ; void CObexClient::ConnectL(class CObexBaseObject &, class TDesC16 const &, class TRequestStatus &)
+	?ConnectL@CObexClient@@QAEXABVTDesC16@@AAVTRequestStatus@@@Z @ 27 NONAME ; void CObexClient::ConnectL(class TDesC16 const &, class TRequestStatus &)
+	?ConnectState@CObex@@IBE?AW4TConnectState@1@XZ @ 28 NONAME ; enum CObex::TConnectState CObex::ConnectState(void) const
+	?CopyL@CObexHeader@@QBEPAV1@XZ @ 29 NONAME ; class CObexHeader * CObexHeader::CopyL(void) const
+	?CopyL@CObexHeaderSet@@QAEPAV1@AAVMObexHeaderCheck@@@Z @ 30 NONAME ; class CObexHeaderSet * CObexHeaderSet::CopyL(class MObexHeaderCheck &)
+	?CopyL@CObexHeaderSet@@QAEPAV1@XZ @ 31 NONAME ; class CObexHeaderSet * CObexHeaderSet::CopyL(void)
+	?Count@CObexHeaderSet@@QBEHXZ @ 32 NONAME ; int CObexHeaderSet::Count(void) const
+	?CurrentOperation@CObexServer@@QBE?AW4TOperation@CObex@@XZ @ 33 NONAME ; enum CObex::TOperation CObexServer::CurrentOperation(void) const
+	?DataBuf@CObexBufObject@@QAEPAVCBufBase@@XZ @ 34 NONAME ; class CBufBase * CObexBufObject::DataBuf(void)
+	?DeleteCurrentHeader@CObexHeaderSet@@QAEXXZ @ 35 NONAME ; void CObexHeaderSet::DeleteCurrentHeader(void)
+	?DeleteMasked@CObexHeaderSet@@QAEXXZ @ 36 NONAME ; void CObexHeaderSet::DeleteMasked(void)
+	?Description@CObexBaseObject@@QAEABVTDesC16@@XZ @ 37 NONAME ; class TDesC16 const & CObexBaseObject::Description(void)
+	?Disconnect@CObexClient@@QAEXAAVTRequestStatus@@@Z @ 38 NONAME ; void CObexClient::Disconnect(class TRequestStatus &)
+	?EncodedSize@CObexHeader@@QBEHXZ @ 39 NONAME ; int CObexHeader::EncodedSize(void) const
+	?Find@CObexHeaderSet@@QBEHEAAVCObexHeader@@@Z @ 40 NONAME ; int CObexHeaderSet::Find(unsigned char, class CObexHeader &) const
+	?First@CObexHeaderSet@@QBEXXZ @ 41 NONAME ; void CObexHeaderSet::First(void) const
+	?Get@CObexClient@@QAEXAAVCObexBaseObject@@AAVTRequestStatus@@@Z @ 42 NONAME ; void CObexClient::Get(class CObexBaseObject &, class TRequestStatus &)
+	?GetPutFinalResponseHeaders@CObexClient@@QAEABVCObexHeaderSet@@XZ @ 43 NONAME ; class CObexHeaderSet const & CObexClient::GetPutFinalResponseHeaders(void)
+	?HI@CObexHeader@@QBEEXZ @ 44 NONAME ; unsigned char CObexHeader::HI(void) const
+	?HeaderMask@CObexBaseObject@@QAEGXZ @ 45 NONAME ; unsigned short CObexBaseObject::HeaderMask(void)
+	?HeaderSet@CObexBaseObject@@QAEAAVCObexHeaderSet@@XZ @ 46 NONAME ; class CObexHeaderSet & CObexBaseObject::HeaderSet(void)
+	?HeaderSet@CObexBaseObject@@QBEABVCObexHeaderSet@@XZ @ 47 NONAME ; class CObexHeaderSet const & CObexBaseObject::HeaderSet(void) const
+	?Http@CObexBaseObject@@QBEPBV?$RPointerArray@VHBufC8@@@@XZ @ 48 NONAME ; class RPointerArray<class HBufC8> const * CObexBaseObject::Http(void) const
+	?InitFromFileL@CObexFileObject@@QAEXABVTDesC16@@@Z @ 49 NONAME ; void CObexFileObject::InitFromFileL(class TDesC16 const &)
+	?Interested@TObexMatchHeader@@UAEHE@Z @ 50 NONAME ; int TObexMatchHeader::Interested(unsigned char)
+	?Interested@TObexMatchHeaderType@@UAEHE@Z @ 51 NONAME ; int TObexMatchHeaderType::Interested(unsigned char)
+	?IsConnected@CObex@@QBEHXZ @ 52 NONAME ; int CObex::IsConnected(void) const
+	?IsStarted@CObexServer@@QAEHXZ @ 53 NONAME ; int CObexServer::IsStarted(void)
+	?IsStrictPeer@CObex@@QBEHXZ @ 54 NONAME ; int CObex::IsStrictPeer(void) const
+	?Length@CObexBaseObject@@QAEKXZ @ 55 NONAME ; unsigned long CObexBaseObject::Length(void)
+	?LocalInfo@CObex@@QBEABVTObexConnectInfo@@XZ @ 56 NONAME ; class TObexConnectInfo const & CObex::LocalInfo(void) const
+	?Name@CObexBaseObject@@QAEABVTDesC16@@XZ @ 57 NONAME ; class TDesC16 const & CObexBaseObject::Name(void)
+	?NewL@CObexBufObject@@SAPAV1@PAVCBufBase@@@Z @ 58 NONAME ; class CObexBufObject * CObexBufObject::NewL(class CBufBase *)
+	?NewL@CObexClient@@SAPAV1@AAVTObexProtocolInfo@@@Z @ 59 NONAME ; class CObexClient * CObexClient::NewL(class TObexProtocolInfo &)
+	?NewL@CObexClient@@SAPAV1@AAVTObexProtocolInfo@@AAVTObexProtocolPolicy@@@Z @ 60 NONAME ; class CObexClient * CObexClient::NewL(class TObexProtocolInfo &, class TObexProtocolPolicy &)
+	?NewL@CObexFileObject@@SAPAV1@ABVTDesC16@@@Z @ 61 NONAME ; class CObexFileObject * CObexFileObject::NewL(class TDesC16 const &)
+	?NewL@CObexHeader@@SAPAV1@XZ @ 62 NONAME ; class CObexHeader * CObexHeader::NewL(void)
+	?NewL@CObexHeaderSet@@SAPAV1@XZ @ 63 NONAME ; class CObexHeaderSet * CObexHeaderSet::NewL(void)
+	?NewL@CObexNullObject@@SAPAV1@XZ @ 64 NONAME ; class CObexNullObject * CObexNullObject::NewL(void)
+	?NewL@CObexServer@@SAPAV1@AAVTObexProtocolInfo@@@Z @ 65 NONAME ; class CObexServer * CObexServer::NewL(class TObexProtocolInfo &)
+	?NewL@CObexServer@@SAPAV1@AAVTObexProtocolInfo@@AAVTObexProtocolPolicy@@@Z @ 66 NONAME ; class CObexServer * CObexServer::NewL(class TObexProtocolInfo &, class TObexProtocolPolicy &)
+	?Next@CObexHeaderSet@@QBEHH@Z @ 67 NONAME ; int CObexHeaderSet::Next(int) const
+	?Parent@TSetPathInfo@CObex@@QBEHXZ @ 68 NONAME ; int CObex::TSetPathInfo::Parent(void) const
+	?Put@CObexClient@@QAEXAAVCObexBaseObject@@AAVTRequestStatus@@@Z @ 69 NONAME ; void CObexClient::Put(class CObexBaseObject &, class TRequestStatus &)
+	?ReceiveMtu@TObexProtocolPolicy@@QBEGXZ @ 70 NONAME ; unsigned short TObexProtocolPolicy::ReceiveMtu(void) const
+	?RemoteAddr@CObex@@QAEXAAVTSockAddr@@@Z @ 71 NONAME ; void CObex::RemoteAddr(class TSockAddr &)
+	?RemoteInfo@CObex@@QBEABVTObexConnectInfo@@XZ @ 72 NONAME ; class TObexConnectInfo const & CObex::RemoteInfo(void) const
+	?Reset@CObexBaseObject@@QAEXXZ @ 73 NONAME ; void CObexBaseObject::Reset(void)
+	?Reset@CObexHeader@@QAEXXZ @ 74 NONAME ; void CObexHeader::Reset(void)
+	?Reset@MObexHeaderCheck@@UAEXXZ @ 75 NONAME ; void MObexHeaderCheck::Reset(void)
+	?ResetChallenge@CObexServer@@QAEXXZ @ 76 NONAME ; void CObexServer::ResetChallenge(void)
+	?ResetContents@CObexHeader@@QAEXXZ @ 77 NONAME ; void CObexHeader::ResetContents(void)
+	?Set@CObexHeader@@QAEXPAV1@@Z @ 78 NONAME ; void CObexHeader::Set(class CObexHeader *)
+	?SetAppParamL@CObexBaseObject@@QAEXABVTDesC8@@@Z @ 79 NONAME ; void CObexBaseObject::SetAppParamL(class TDesC8 const &)
+	?SetAttributes@CObexHeader@@QAEXG@Z @ 80 NONAME ; void CObexHeader::SetAttributes(unsigned short)
+	?SetByte@CObexHeader@@QAEXEE@Z @ 81 NONAME ; void CObexHeader::SetByte(unsigned char, unsigned char)
+	?SetByteSeqL@CObexHeader@@QAEXEABVTDesC8@@@Z @ 82 NONAME ; void CObexHeader::SetByteSeqL(unsigned char, class TDesC8 const &)
+	?SetCallBack@CObex@@QAEXAAVMObexAuthChallengeHandler@@@Z @ 83 NONAME ; void CObex::SetCallBack(class MObexAuthChallengeHandler &)
+	?SetChallengeL@CObexServer@@QAEXABVTDesC16@@@Z @ 84 NONAME ; void CObexServer::SetChallengeL(class TDesC16 const &)
+	?SetDataBufL@CObexBufObject@@QAEXAAVTObexBufferingDetails@@@Z @ 85 NONAME ; void CObexBufObject::SetDataBufL(class TObexBufferingDetails &)
+	?SetDataBufL@CObexBufObject@@QAEXABVTPtrC16@@@Z @ 86 NONAME ; void CObexBufObject::SetDataBufL(class TPtrC16 const &)
+	?SetDataBufL@CObexBufObject@@QAEXABVTPtrC16@@AAVCBufBase@@W4TFileBuffering@1@@Z @ 87 NONAME ; void CObexBufObject::SetDataBufL(class TPtrC16 const &, class CBufBase &, enum CObexBufObject::TFileBuffering)
+	?SetDataBufL@CObexBufObject@@QAEXABVTPtrC16@@PAVCBufBase@@@Z @ 88 NONAME ; void CObexBufObject::SetDataBufL(class TPtrC16 const &, class CBufBase *)
+	?SetDataBufL@CObexBufObject@@QAEXPAVCBufBase@@@Z @ 89 NONAME ; void CObexBufObject::SetDataBufL(class CBufBase *)
+	?SetDescriptionL@CObexBaseObject@@QAEXABVTDesC16@@@Z @ 90 NONAME ; void CObexBaseObject::SetDescriptionL(class TDesC16 const &)
+	?SetFourByte@CObexHeader@@QAEXEK@Z @ 91 NONAME ; void CObexHeader::SetFourByte(unsigned char, unsigned long)
+	?SetHeader@TObexMatchHeader@@QAEXE@Z @ 92 NONAME ; void TObexMatchHeader::SetHeader(unsigned char)
+	?SetHeaderMask@CObexBaseObject@@QAEXG@Z @ 93 NONAME ; void CObexBaseObject::SetHeaderMask(unsigned short)
+	?SetLengthL@CObexBaseObject@@QAEXK@Z @ 94 NONAME ; void CObexBaseObject::SetLengthL(unsigned long)
+	?SetLocalWho@CObex@@QAEHABVTDesC8@@@Z @ 95 NONAME ; int CObex::SetLocalWho(class TDesC8 const &)
+	?SetMask@CObexHeaderSet@@QAEXPAVMObexHeaderCheck@@@Z @ 96 NONAME ; void CObexHeaderSet::SetMask(class MObexHeaderCheck *)
+	?SetNameL@CObexBaseObject@@QAEXABVTDesC16@@@Z @ 97 NONAME ; void CObexBaseObject::SetNameL(class TDesC16 const &)
+	?SetPath@CObexClient@@QAEXAAVTSetPathInfo@CObex@@AAVTRequestStatus@@@Z @ 98 NONAME ; void CObexClient::SetPath(class CObex::TSetPathInfo &, class TRequestStatus &)
+	?SetPutFinalResponseHeaders@CObexServer@@QAEHPAVCObexHeaderSet@@@Z @ 99 NONAME ; int CObexServer::SetPutFinalResponseHeaders(class CObexHeaderSet *)
+	?SetReceiveMtu@TObexProtocolPolicy@@QAEHG@Z @ 100 NONAME ; int TObexProtocolPolicy::SetReceiveMtu(unsigned short)
+	?SetTargetChecking@CObexServer@@QAEXW4TTargetChecking@1@@Z @ 101 NONAME ; void CObexServer::SetTargetChecking(enum CObexServer::TTargetChecking)
+	?SetTargetL@CObexBaseObject@@QAEXABVTDesC8@@@Z @ 102 NONAME ; void CObexBaseObject::SetTargetL(class TDesC8 const &)
+	?SetTimeL@CObexBaseObject@@QAEXVTTime@@@Z @ 103 NONAME ; void CObexBaseObject::SetTimeL(class TTime)
+	?SetTransmitMtu@TObexProtocolPolicy@@QAEHG@Z @ 104 NONAME ; int TObexProtocolPolicy::SetTransmitMtu(unsigned short)
+	?SetType@TObexMatchHeaderType@@QAEXW4THeaderType@CObexHeader@@@Z @ 105 NONAME ; void TObexMatchHeaderType::SetType(enum CObexHeader::THeaderType)
+	?SetTypeL@CObexBaseObject@@QAEXABVTDesC8@@@Z @ 106 NONAME ; void CObexBaseObject::SetTypeL(class TDesC8 const &)
+	?SetUnicodeL@CObexHeader@@QAEXEABVTDesC16@@@Z @ 107 NONAME ; void CObexHeader::SetUnicodeL(unsigned char, class TDesC16 const &)
+	?Start@CObexServer@@QAEHPAVMObexServerNotify@@@Z @ 108 NONAME ; int CObexServer::Start(class MObexServerNotify *)
+	?Stop@CObexServer@@QAEXXZ @ 109 NONAME ; void CObexServer::Stop(void)
+	?Target@CObexBaseObject@@QAEABVTDesC8@@XZ @ 110 NONAME ; class TDesC8 const & CObexBaseObject::Target(void)
+	?This@CObexHeaderSet@@QBEHPAVCObexHeader@@@Z @ 111 NONAME ; int CObexHeaderSet::This(class CObexHeader *) const
+	?Time@CObexBaseObject@@QAE?BVTTime@@XZ @ 112 NONAME ; class TTime const CObexBaseObject::Time(void)
+	?TransmitMtu@TObexProtocolPolicy@@QBEGXZ @ 113 NONAME ; unsigned short TObexProtocolPolicy::TransmitMtu(void) const
+	?Type@CObexBaseObject@@QAEABVTDesC8@@XZ @ 114 NONAME ; class TDesC8 const & CObexBaseObject::Type(void)
+	?Type@CObexHeader@@QBE?AW4THeaderType@1@XZ @ 115 NONAME ; enum CObexHeader::THeaderType CObexHeader::Type(void) const
+	?UserPasswordL@CObexClient@@UAEXABVTDesC16@@@Z @ 116 NONAME ; void CObexClient::UserPasswordL(class TDesC16 const &)
+	?UserPasswordL@CObexServer@@UAEXABVTDesC16@@@Z @ 117 NONAME ; void CObexServer::UserPasswordL(class TDesC16 const &)
+	?ValidHeaders@CObexBaseObject@@QAEGXZ @ 118 NONAME ; unsigned short CObexBaseObject::ValidHeaders(void)
+	?Version@TObexProtocolPolicy@@QBEGXZ @ 119 NONAME ; unsigned short TObexProtocolPolicy::Version(void) const
+	?VersionMajor@TObexConnectInfo@@QBEEXZ @ 120 NONAME ; unsigned char TObexConnectInfo::VersionMajor(void) const
+	?VersionMinor@TObexConnectInfo@@QBEEXZ @ 121 NONAME ; unsigned char TObexConnectInfo::VersionMinor(void) const
+	?WriteToFile@CObexBufObject@@QAEHABVTPtrC16@@@Z @ 122 NONAME ; int CObexBufObject::WriteToFile(class TPtrC16 const &)
+	?MOACH_ExtensionInterfaceL@MObexAuthChallengeHandler@@UAEXVTUid@@AAPAX@Z @ 123 NONAME ; void MObexAuthChallengeHandler::MOACH_ExtensionInterfaceL(class TUid, void * &)
+	?MOHC_ExtensionInterfaceL@MObexHeaderCheck@@UAEXVTUid@@AAPAX@Z @ 124 NONAME ; void MObexHeaderCheck::MOHC_ExtensionInterfaceL(class TUid, void * &)
+	?MOSN_ExtensionInterfaceL@MObexServerNotify@@UAEXVTUid@@AAPAX@Z @ 125 NONAME ; void MObexServerNotify::MOSN_ExtensionInterfaceL(class TUid, void * &)
+	?NewL@CObexFileObject@@SAPAV1@XZ @ 126 NONAME ; class CObexFileObject * CObexFileObject::NewL(void)
+	?Next@CObexHeaderSet@@QBEHXZ @ 127 NONAME ; int CObexHeaderSet::Next(void) const
+	?NewL@CObexClient@@SAPAV1@AAVTObexTransportInfo@@@Z @ 128 NONAME ; class CObexClient * CObexClient::NewL(class TObexTransportInfo &)
+	?NewL@CObexServer@@SAPAV1@AAVTObexTransportInfo@@@Z @ 129 NONAME ; class CObexServer * CObexServer::NewL(class TObexTransportInfo &)
+	?SetFinalPacketObserver@CObexClient@@QAEXPAVMObexFinalPacketObserver@@@Z @ 130 NONAME ; void CObexClient::SetFinalPacketObserver(class MObexFinalPacketObserver *)
+	?Start@CObexServer@@QAEHPAVMObexServerNotifyAsync@@@Z @ 131 NONAME ; int CObexServer::Start(class MObexServerNotifyAsync *)
+	?MOSNA_ExtensionInterfaceL@MObexServerNotifyAsync@@UAEXVTUid@@AAPAX@Z @ 132 NONAME ; void MObexServerNotifyAsync::MOSNA_ExtensionInterfaceL(class TUid, void * &)
+	?RequestIndicationCallback@CObexServer@@QAEHPAVCObexBaseObject@@@Z @ 133 NONAME ; int CObexServer::RequestIndicationCallback(class CObexBaseObject *)
+	?RequestCompleteIndicationCallback@CObexServer@@QAEHH@Z @ 134 NONAME ; int CObexServer::RequestCompleteIndicationCallback(int)
+	?RequestCompleteIndicationCallback@CObexServer@@QAEHW4TObexResponse@@@Z @ 135 NONAME ; int CObexServer::RequestCompleteIndicationCallback(enum TObexResponse)
+	?RequestIndicationCallbackWithError@CObexServer@@QAEHH@Z @ 136 NONAME ; int CObexServer::RequestIndicationCallbackWithError(int)
+	?RequestIndicationCallbackWithError@CObexServer@@QAEHW4TObexResponse@@@Z @ 137 NONAME ; int CObexServer::RequestIndicationCallbackWithError(enum TObexResponse)
+	?IsAuthenticating@CObex@@QBEHXZ @ 138 NONAME ; int CObex::IsAuthenticating(void) const
+	?LastServerResponseCode@CObexClient@@QBE?AW4TObexResponse@@XZ @ 139 NONAME ; enum TObexResponse CObexClient::LastServerResponseCode(void) const
+	?ExtensionInterface@CObexClient@@QAEPAXVTUid@@@Z @ 140 NONAME ; void * CObexClient::ExtensionInterface(class TUid)
+	?ExtensionInterfaceL@CObexServer@@QAEPAXVTUid@@@Z @ 141 NONAME ; void * CObexServer::ExtensionInterfaceL(class TUid)
+	?PacketHeaders@CObexServer@@QAEHAAPAVCObexHeaderSet@@@Z @ 142 NONAME ; int CObexServer::PacketHeaders(class CObexHeaderSet * &)
+	?PacketHeaders@CObexServer@@QAEHAAPAVCObexHeaderSet@@AAVMObexHeaderCheck@@@Z @ 143 NONAME ; int CObexServer::PacketHeaders(class CObexHeaderSet * &, class MObexHeaderCheck &)
+	?SetCommandTimeOut@CObexClient@@QAEXVTTimeIntervalMicroSeconds32@@@Z @ 144 NONAME ; void CObexClient::SetCommandTimeOut(class TTimeIntervalMicroSeconds32)
+	?SuppressAuthenticationHeaderElements@CObex@@QAEXW4TObexSuppressedAuthElements@1@@Z @ 145 NONAME ; void CObex::SuppressAuthenticationHeaderElements(enum CObex::TObexSuppressedAuthElements)
+	?TransportInfo@CObexServer@@QBEPBVTObexTransportInfo@@XZ @ 146 NONAME ; class TObexTransportInfo const * CObexServer::TransportInfo(void) const
+	?SetReadActivityObserver@CObexServer@@QAEXPAVMObexReadActivityObserver@@@Z @ 147 NONAME ; void CObexServer::SetReadActivityObserver(class MObexReadActivityObserver *)
+

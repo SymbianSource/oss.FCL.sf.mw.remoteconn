@@ -1,0 +1,139 @@
+EXPORTS
+	_Z12VerbosePanicRK6TDesC8PciiPhRK7TDesC16 @ 1 NONAME
+	_Z20VerboseLeaveIfErrorLRK6TDesC8Pcii @ 2 NONAME
+	_ZN11CObexPacket10InsertDataERK9TObexData @ 3 NONAME
+	_ZN11CObexPacket11ExtractDataER9TObexData @ 4 NONAME
+	_ZN11CObexPacket13SetPacketSizeEt @ 5 NONAME
+	_ZN11CObexPacket17SetLegalDataLimitEt @ 6 NONAME
+	_ZN11CObexPacket22AddPacketProcessEventsEj @ 7 NONAME
+	_ZN11CObexPacket25RemovePacketProcessEventsEj @ 8 NONAME
+	_ZN11CObexPacket4InitEh @ 9 NONAME
+	_ZN11CObexPacket4NewLEtt @ 10 NONAME
+	_ZN11CObexPacket8SetFinalEi @ 11 NONAME
+	_ZN11CObexPacket9SetOpcodeEh @ 12 NONAME
+	_ZN11CObexPacketD0Ev @ 13 NONAME
+	_ZN11CObexPacketD1Ev @ 14 NONAME
+	_ZN11CObexPacketD2Ev @ 15 NONAME
+	_ZN13CObexActiveRW4RunLEv @ 16 NONAME
+	_ZN14CObexConnector12GetInterfaceE4TUid @ 17 NONAME
+	_ZN14CObexConnector14BaseConstructLEv @ 18 NONAME
+	_ZN14CObexConnector8ObserverEv @ 19 NONAME
+	_ZN14CObexConnectorC2ER20MObexTransportNotify @ 20 NONAME
+	_ZN14CObexConnectorD0Ev @ 21 NONAME
+	_ZN14CObexConnectorD1Ev @ 22 NONAME
+	_ZN14CObexConnectorD2Ev @ 23 NONAME
+	_ZN15CObexReaderBase12GetInterfaceE4TUid @ 24 NONAME
+	_ZN15CObexReaderBase13StartTransferER11CObexPacket @ 25 NONAME
+	_ZN15CObexReaderBase14BaseConstructLEv @ 26 NONAME
+	_ZN15CObexReaderBase16CompleteTransferEv @ 27 NONAME
+	_ZN15CObexReaderBase18OnCompleteTransferEv @ 28 NONAME
+	_ZN15CObexReaderBase22GetObexPacketDataLimitEv @ 29 NONAME
+	_ZN15CObexReaderBase23GetObexPacketBufferSizeEv @ 30 NONAME
+	_ZN15CObexReaderBase23GetObexPacketHeaderSizeEv @ 31 NONAME
+	_ZN15CObexReaderBase9RemainingEv @ 32 NONAME
+	_ZN15CObexReaderBaseC2EN7CActive9TPriorityER20MObexTransportNotifyR19TObexConnectionInfo @ 33 NONAME
+	_ZN15CObexReaderBaseD0Ev @ 34 NONAME
+	_ZN15CObexReaderBaseD1Ev @ 35 NONAME
+	_ZN15CObexReaderBaseD2Ev @ 36 NONAME
+	_ZN15CObexWriterBase12GetInterfaceE4TUid @ 37 NONAME
+	_ZN15CObexWriterBase13StartTransferER11CObexPacket @ 38 NONAME
+	_ZN15CObexWriterBase14BaseConstructLEv @ 39 NONAME
+	_ZN15CObexWriterBase16CompleteTransferEv @ 40 NONAME
+	_ZN15CObexWriterBase18OnCompleteTransferEv @ 41 NONAME
+	_ZN15CObexWriterBase9RemainingEv @ 42 NONAME
+	_ZN15CObexWriterBaseC2EN7CActive9TPriorityER20MObexTransportNotifyR19TObexConnectionInfo @ 43 NONAME
+	_ZN15CObexWriterBaseD0Ev @ 44 NONAME
+	_ZN15CObexWriterBaseD1Ev @ 45 NONAME
+	_ZN15CObexWriterBaseD2Ev @ 46 NONAME
+	_ZN15TFunctionLoggerC1ERK6TDesC8S2_Pv @ 47 NONAME
+	_ZN15TFunctionLoggerC2ERK6TDesC8S2_Pv @ 48 NONAME
+	_ZN15TFunctionLoggerD1Ev @ 49 NONAME
+	_ZN15TFunctionLoggerD2Ev @ 50 NONAME
+	_ZN17CObexActiveReader4NewLER20MObexTransportNotifyR7RSocketR19TObexConnectionInfo @ 51 NONAME
+	_ZN17CObexActiveReaderD0Ev @ 52 NONAME
+	_ZN17CObexActiveReaderD1Ev @ 53 NONAME
+	_ZN17CObexActiveReaderD2Ev @ 54 NONAME
+	_ZN17CObexActiveWriter4NewLER20MObexTransportNotifyR7RSocketR19TObexConnectionInfo @ 55 NONAME
+	_ZN17CObexActiveWriterD0Ev @ 56 NONAME
+	_ZN17CObexActiveWriterD1Ev @ 57 NONAME
+	_ZN17CObexActiveWriterD2Ev @ 58 NONAME
+	_ZN19TObexInternalHeader11SetDeferredEhP5TPtr8ii @ 59 NONAME
+	_ZN19TObexInternalHeader3SetEhPhi @ 60 NONAME
+	_ZN19TObexInternalHeader3SetEhRK7TDesC16 @ 61 NONAME
+	_ZN19TObexInternalHeader3SetEhi @ 62 NONAME
+	_ZN19TObexInternalHeader5SetHIEh @ 63 NONAME
+	_ZN19TObexInternalHeaderC1Ev @ 64 NONAME
+	_ZN19TObexInternalHeaderC2Ev @ 65 NONAME
+	_ZN20MObexTransportNotify11TransportUpER19TObexConnectionInfo @ 66 NONAME
+	_ZN20MObexTransportNotify24SignalPacketProcessEventE23TObexPacketProcessEvent @ 67 NONAME
+	_ZN20MObexTransportNotify5ErrorEi @ 68 NONAME
+	_ZN20MObexTransportNotify7ProcessER11CObexPacket @ 69 NONAME
+	_ZN28CObexTransportControllerBase10RemoteAddrER9TSockAddr @ 70 NONAME
+	_ZN28CObexTransportControllerBase10SendPacketEv @ 71 NONAME
+	_ZN28CObexTransportControllerBase12CancelAcceptEv @ 72 NONAME
+	_ZN28CObexTransportControllerBase12GetInterfaceE4TUid @ 73 NONAME
+	_ZN28CObexTransportControllerBase13CancelConnectEv @ 74 NONAME
+	_ZN28CObexTransportControllerBase13DoTransportUpER19TObexConnectionInfo @ 75 NONAME
+	_ZN28CObexTransportControllerBase13ReceivePacketEv @ 76 NONAME
+	_ZN28CObexTransportControllerBase15CancelTransfersEv @ 77 NONAME
+	_ZN28CObexTransportControllerBase17AcceptConnectionLEv @ 78 NONAME
+	_ZN28CObexTransportControllerBase18BringTransportDownEv @ 79 NONAME
+	_ZN28CObexTransportControllerBase20SignalTransportErrorEv @ 80 NONAME
+	_ZN28CObexTransportControllerBase22InsertLocalConnectInfoER11CObexPackethh @ 81 NONAME
+	_ZN28CObexTransportControllerBase24ExtractRemoteConnectInfoER11CObexPacketRhS2_ @ 82 NONAME
+	_ZN28CObexTransportControllerBase26DoSignalPacketProcessEventE23TObexPacketProcessEvent @ 83 NONAME
+	_ZN28CObexTransportControllerBase4NewLER18TObexTransportInfo @ 84 NONAME
+	_ZN28CObexTransportControllerBase4SendEh @ 85 NONAME
+	_ZN28CObexTransportControllerBase4SendEv @ 86 NONAME
+	_ZN28CObexTransportControllerBase7DoErrorEi @ 87 NONAME
+	_ZN28CObexTransportControllerBase7ReceiveEv @ 88 NONAME
+	_ZN28CObexTransportControllerBase8ConnectLEv @ 89 NONAME
+	_ZN28CObexTransportControllerBase8SetOwnerER17MObexNotifyExtend @ 90 NONAME
+	_ZN28CObexTransportControllerBase9DoProcessER11CObexPacket @ 91 NONAME
+	_ZN28CObexTransportControllerBaseC2Ev @ 92 NONAME
+	_ZN28CObexTransportControllerBaseD0Ev @ 93 NONAME
+	_ZN28CObexTransportControllerBaseD1Ev @ 94 NONAME
+	_ZN28CObexTransportControllerBaseD2Ev @ 95 NONAME
+	_ZN8CObexLog11WriteFormatERK6TDesC811TRefByValueIK7TDesC16ERSt9__va_list @ 96 NONAME
+	_ZN8CObexLog11WriteFormatERK6TDesC811TRefByValueIK7TDesC16Ez @ 97 NONAME
+	_ZN8CObexLog11WriteFormatERK6TDesC811TRefByValueIS1_ERSt9__va_list @ 98 NONAME
+	_ZN8CObexLog11WriteFormatERK6TDesC811TRefByValueIS1_Ez @ 99 NONAME
+	_ZN8CObexLog5CloseEv @ 100 NONAME
+	_ZN8CObexLog5WriteERK6TDesC8RK7TDesC16 @ 101 NONAME
+	_ZN8CObexLog5WriteERK6TDesC8S2_ @ 102 NONAME
+	_ZN8CObexLog7ConnectEv @ 103 NONAME
+	_ZN8CObexLog7HexDumpERK6TDesC8PKtS4_PKhi @ 104 NONAME
+	_ZNK11CObexPacket10BufferSizeEv @ 105 NONAME
+	_ZNK11CObexPacket10PacketSizeEv @ 106 NONAME
+	_ZNK11CObexPacket20RemainingInsertSpaceEv @ 107 NONAME
+	_ZNK11CObexPacket21RemainingExtractSpaceEv @ 108 NONAME
+	_ZNK11CObexPacket31PacketProcessNotificationEventsEv @ 109 NONAME
+	_ZNK11CObexPacket4DumpEv @ 110 NONAME
+	_ZNK11CObexPacket6OpcodeEv @ 111 NONAME
+	_ZNK11CObexPacket7IsFinalEv @ 112 NONAME
+	_ZNK11CObexPacket9DataLimitEv @ 113 NONAME
+	_ZNK19TObexInternalHeader2HIEv @ 114 NONAME
+	_ZNK19TObexInternalHeader5HVIntEv @ 115 NONAME
+	_ZNK19TObexInternalHeader6HISizeEv @ 116 NONAME
+	_ZNK19TObexInternalHeader6HITypeEv @ 117 NONAME
+	_ZNK19TObexInternalHeader6HVSizeEv @ 118 NONAME
+	_ZNK19TObexInternalHeader9GetHVTextER6TDes16 @ 119 NONAME
+	_ZNK19TObexInternalHeader9HVByteSeqEv @ 120 NONAME
+	_ZNK28CObexTransportControllerBase13IsWriteActiveEv @ 121 NONAME
+	_ZNK28CObexTransportControllerBase22IsTransportRestartableEv @ 122 NONAME
+	_ZNK9TObexData9TotalSizeEv @ 123 NONAME
+	_ZTI14CObexConnector @ 124 NONAME ; #<TI>#
+	_ZTI15CObexReaderBase @ 125 NONAME ; #<TI>#
+	_ZTI15CObexWriterBase @ 126 NONAME ; #<TI>#
+	_ZTI28CObexTransportControllerBase @ 127 NONAME ; #<TI>#
+	_ZTV14CObexConnector @ 128 NONAME ; #<VT>#
+	_ZTV15CObexReaderBase @ 129 NONAME ; #<VT>#
+	_ZTV15CObexWriterBase @ 130 NONAME ; #<VT>#
+	_ZTV28CObexTransportControllerBase @ 131 NONAME ; #<VT>#
+	_ZThn4_N28CObexTransportControllerBase13DoTransportUpER19TObexConnectionInfo @ 132 NONAME ; #<thunk>#
+	_ZThn4_N28CObexTransportControllerBase26DoSignalPacketProcessEventE23TObexPacketProcessEvent @ 133 NONAME ; #<thunk>#
+	_ZThn4_N28CObexTransportControllerBase7DoErrorEi @ 134 NONAME ; #<thunk>#
+	_ZThn4_N28CObexTransportControllerBase9DoProcessER11CObexPacket @ 135 NONAME ; #<thunk>#
+	_ZNK28CObexTransportControllerBase13TransportInfoEv @ 136 NONAME
+	_ZN15CObexReaderBase14OnReadActivityEv @ 137 NONAME
+

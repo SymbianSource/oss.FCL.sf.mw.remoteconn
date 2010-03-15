@@ -23,6 +23,7 @@
 #include <mtp/cmtptypearray.h>
 #include <mtp/cmtptypestring.h>
 
+#include "cmtpstoragemgr.h"
 #include "cmtpmoveobject.h"
 #include "mtpdppanic.h"
 
@@ -65,6 +66,7 @@ EXPORT_C CMTPMoveObject::~CMTPMoveObject()
 	delete iFileMan;
 	delete iPathToMove;
 	delete iNewRootFolder;
+	iSingletons.Close();
 	__FLOG_CLOSE;
 	}
 
@@ -77,7 +79,35 @@ CMTPMoveObject::CMTPMoveObject(MMTPDataProviderFramework& aFramework, MMTPConnec
 	{
 	__FLOG_OPEN(KMTPSubsystem, KComponent);
 	}
+
+TMTPResponseCode CMTPMoveObject::CheckRequestL()
+	{
+    __FLOG(_L8("CheckRequestL - Entry"));
+	TMTPResponseCode result = CMTPRequestProcessor::CheckRequestL();
+	if (EMTPRespCodeOK != result)
+		{
+		__FLOG(_L8("CheckRequestL with error- Exit"));
+		return result;
+		}
 	
+	const TUint32 KObjectHandle = Request().Uint32(TMTPTypeRequest::ERequestParameter1);
+	//not taking owernship
+	iObjectInfo = iRequestChecker->GetObjectInfo(KObjectHandle); 
+	__ASSERT_DEBUG(iObjectInfo, Panic(EMTPDpObjectNull));	
+	if(!iSingletons.StorageMgr().IsReadWriteStorage(iObjectInfo->Uint(CMTPObjectMetaData::EStorageId)))
+		{
+		result = EMTPRespCodeStoreReadOnly;
+		}
+	
+	if ( (EMTPRespCodeOK == result) && (!iSingletons.StorageMgr().IsReadWriteStorage(Request().Uint32(TMTPTypeRequest::ERequestParameter2))) )
+		{
+		result = EMTPRespCodeStoreReadOnly;
+		}
+	
+    __FLOG(_L8("CheckRequestL - Exit"));
+	return result;	
+	} 
+
 /**
 MoveObject request handler
 */		
@@ -95,20 +125,9 @@ void CMTPMoveObject::ServiceL()
 */
 void CMTPMoveObject::ConstructL()
     {
+	iSingletons.OpenL();
     }
     
-void CMTPMoveObject::RunL()
-	{
-	__FLOG(_L8("RunL - Entry"));
-    SendResponseL( EMTPRespCodeOK );
-    __FLOG(_L8("RunL - Exit"));
-	}
-    
-TInt CMTPMoveObject::RunError(TInt /*aError*/)
-	{
-	TRAP_IGNORE(SendResponseL(EMTPRespCodeGeneralError));
-    return KErrNone;  
-	}
 
 /**
 A helper function of MoveObjectL.
@@ -239,13 +258,8 @@ void CMTPMoveObject::GetParametersL()
 	__FLOG(_L8("GetParametersL - Entry"));
 	__ASSERT_DEBUG(iRequestChecker, Panic(EMTPDpRequestCheckNull));
 	
-	TUint32 objectHandle  = Request().Uint32(TMTPTypeRequest::ERequestParameter1);
 	iStorageId = Request().Uint32(TMTPTypeRequest::ERequestParameter2);
 	iNewParentHandle  = Request().Uint32(TMTPTypeRequest::ERequestParameter3);
-	
-	//not taking owernship
-	iObjectInfo = iRequestChecker->GetObjectInfo(objectHandle); 
-	__ASSERT_DEBUG(iObjectInfo, Panic(EMTPDpObjectNull));	
 
 	if(iNewParentHandle == 0)
 		{
@@ -326,74 +340,6 @@ void CMTPMoveObject::SetPreviousPropertiesL(const TDesC& aFileName)
 	__FLOG(_L8("SetPreviousPropertiesL - Entry"));
 	User::LeaveIfError(iFramework.Fs().SetModified(aFileName, iPreviousModifiedTime));
 	__FLOG(_L8("SetPreviousPropertiesL - Exit"));
-	}
-
-
-/* This function will actually delete the orginal folders from the file system. */
-TMTPResponseCode CMTPMoveObject::FinalPhaseMove()
-	{
-	__FLOG(_L8("FinalPhaseMove - Entry"));
-	TMTPResponseCode ret = EMTPRespCodeOK;
-	__FLOG(*iPathToMove);
-	TInt rel = iFileMan->RmDir(*iPathToMove);
-	__FLOG_VA((_L8("Error code of RmDir is %d"),rel));
-	if (rel != KErrNone)
-		{
-		ret = EMTPRespCodeGeneralError;
-		}
-	__FLOG(_L8("FinalPhaseMove - Exit"));
-	return ret;
-	}
-
-/* Move a single object and update the database */	
-void CMTPMoveObject::MoveAndUpdateL(TUint32 aObjectHandle)
-	{
-	__FLOG(_L8("MoveAndUpdateL - Entry"));
-	CMTPObjectMetaData* objectInfo(CMTPObjectMetaData::NewLC());
-	RBuf fileName;
-	fileName.CreateL(KMaxFileName);
-	fileName.CleanupClosePushL();	
-	RBuf rightPartName;
-	rightPartName.CreateL(KMaxFileName);
-	rightPartName.CleanupClosePushL();
-	RBuf oldName;
-	oldName.CreateL(KMaxFileName);	
-	oldName.CleanupClosePushL();
-		
-	if(iFramework.ObjectMgr().ObjectL(TMTPTypeUint32(aObjectHandle), *objectInfo))
-		{	
-		fileName = objectInfo->DesC(CMTPObjectMetaData::ESuid);
-		oldName = fileName;
-				
-		if (objectInfo->Uint(CMTPObjectMetaData::EDataProviderId) == iFramework.DataProviderId())
-			{	
-			rightPartName = fileName.Right(fileName.Length() - iPathToMove->Length());
-			
-			if((iNewRootFolder->Length() + rightPartName.Length()) > fileName.MaxLength())
-				{
-				User::Leave(KErrCorrupt);
-				}
-				
-			fileName.Zero();
-			fileName.Append(*iNewRootFolder);
-			fileName.Append(rightPartName);
-			objectInfo->SetDesCL(CMTPObjectMetaData::ESuid, fileName);				
-			objectInfo->SetUint(CMTPObjectMetaData::EStorageId, iStorageId);
-			iFramework.ObjectMgr().ModifyObjectL(*objectInfo);
-			}
-		}
-	else
-		{
-		User::Leave(KErrCorrupt);
-		}	
-			
-	iFileMan->Move(oldName, fileName);
-	
-	CleanupStack::PopAndDestroy(&oldName);	
-	CleanupStack::PopAndDestroy(&rightPartName); 
-	CleanupStack::PopAndDestroy(&fileName); 	
-	CleanupStack::PopAndDestroy(objectInfo);
-	__FLOG(_L8("MoveAndUpdateL - Exit"));	
 	}
 
 

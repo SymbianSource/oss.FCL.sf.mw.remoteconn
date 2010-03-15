@@ -22,11 +22,14 @@
 
 #include "cmtpdataprovidercontroller.h"
 #include "cmtpdataprovider.h"
+#include "cmtpdevicedatastore.h"
 
 #include "cmtpgetnumobjects.h"
 #include "mtpdevicedpconst.h"
 #include "mtpdevdppanic.h"
 
+// Class constants.
+__FLOG_STMT(_LIT8(KComponent,"GetNumObjects");)
 
 /**
 Verification data for GetNumObjects request
@@ -61,6 +64,7 @@ CMTPGetNumObjects::~CMTPGetNumObjects()
 	{	
 	iDevDpSingletons.Close();
     iSingletons.Close();
+    __FLOG_CLOSE;
 	}
 /**
 Standard c++ constructor
@@ -76,6 +80,7 @@ Second phase constructor.
 */
 void CMTPGetNumObjects::ConstructL()
     {
+	__FLOG_OPEN(KMTPSubsystem, KComponent);
     iSingletons.OpenL();
     iDevDpSingletons.OpenL(iFramework);
     }
@@ -131,9 +136,34 @@ GetNumObjects request handler
 */	
 void CMTPGetNumObjects::ServiceL()
 	{
-	TMTPObjectMgrQueryParams params(Request().Uint32(TMTPTypeRequest::ERequestParameter1), Request().Uint32(TMTPTypeRequest::ERequestParameter2), Request().Uint32(TMTPTypeRequest::ERequestParameter3));
-	TUint32 count = iFramework.ObjectMgr().CountL(params);		
-	SendResponseL(EMTPRespCodeOK, 1, &count);	
+    __FLOG(_L8("ServiceL - Entry"));
+    __FLOG_VA((_L8("IsConnectMac = %d; ERequestParameter2 = %d" ), iDevDpSingletons.DeviceDataStore().IsConnectMac(), Request().Uint32(TMTPTypeRequest::ERequestParameter2)));
+	if(iDevDpSingletons.DeviceDataStore().IsConnectMac()
+        &&(KMTPFormatsAll == Request().Uint32(TMTPTypeRequest::ERequestParameter2)))
+        {
+        //get folder count
+    	TMTPObjectMgrQueryParams paramsFolder(Request().Uint32(TMTPTypeRequest::ERequestParameter1), EMTPFormatCodeAssociation, Request().Uint32(TMTPTypeRequest::ERequestParameter3));        
+    	TUint32 count = iFramework.ObjectMgr().CountL(paramsFolder);
+        __FLOG_VA((_L8("ConnectMac and Fetch all, folder count = %d"), count));
+
+        //get script count
+        TMTPObjectMgrQueryParams paramsScript(Request().Uint32(TMTPTypeRequest::ERequestParameter1), EMTPFormatCodeScript, Request().Uint32(TMTPTypeRequest::ERequestParameter3));
+        count += iFramework.ObjectMgr().CountL(paramsScript);
+        
+        //get Image file count
+        TMTPObjectMgrQueryParams paramsImage(Request().Uint32(TMTPTypeRequest::ERequestParameter1), EMTPFormatCodeEXIFJPEG, Request().Uint32(TMTPTypeRequest::ERequestParameter3));
+        count += iFramework.ObjectMgr().CountL(paramsImage);
+        __FLOG_VA((_L8("ConnectMac and Fetch all, total count = %d"), count));        
+    	SendResponseL(EMTPRespCodeOK, 1, &count); 
+        }
+    else
+        {       
+    	TMTPObjectMgrQueryParams params(Request().Uint32(TMTPTypeRequest::ERequestParameter1), Request().Uint32(TMTPTypeRequest::ERequestParameter2), Request().Uint32(TMTPTypeRequest::ERequestParameter3));
+    	TUint32 count = iFramework.ObjectMgr().CountL(params);	
+        __FLOG_VA((_L8("NOT ConnectMac or NOT Fetch all, total count = %d"), count));         
+    	SendResponseL(EMTPRespCodeOK, 1, &count);
+        }
+    __FLOG(_L8("ServiceL - Exit"));	    
 	}
 
 /**

@@ -2177,7 +2177,8 @@ TUint CMTPParserRouter::RoutingTargetL(const TMTPTypeRequest& aRequest, CMTPConn
     // Parse the operation request dataset.
     TRoutingParameters params(aRequest, static_cast<MMTPConnection&>(aConnection));
     ParseOperationRequestL(params);
-      
+    ValidateOperationRequestParametersL(params);
+    
     // Route the operation request.
     RArray<TUint> targets;
     CleanupClosePushL(targets);
@@ -2293,6 +2294,91 @@ void CMTPParserRouter::ValidateTargetsL(const TRoutingParameters& aParams, const
     __FLOG(_L8("ValidateTargetsL, Exit"));
     }
     
+void CMTPParserRouter::ValidateOperationRequestParametersL(TRoutingParameters& aParams) const
+	{
+    __FLOG(_L8("ValidateOperationRequestParametersL, Entry"));
+    if(aParams.Param(TRoutingParameters::EFlagInvalid))
+    	{
+		__FLOG(_L8("ValidateOperationRequestParametersL, Invalid is true,Exit"));
+		return;
+    	}
+    		
+    const TUint16 KOpCode(aParams.Request().Uint16(TMTPTypeRequest::ERequestOperationCode));
+	__FLOG_VA((_L8("Operation Code = 0x%04X"), KOpCode));
+	switch (KOpCode)
+	   {
+		case EMTPOpCodeDeleteObject:
+			{
+			const TUint32 KObjectHandle(aParams.Request().Uint32(TMTPTypeRequest::ERequestParameter1));
+			if ((KObjectHandle != KMTPHandleAll) && (KObjectHandle != KMTPHandleNone))
+				{
+				CMTPObjectMetaData* obj(CMTPObjectMetaData::NewLC());
+				if (!iSingletons.ObjectMgr().ObjectL(KObjectHandle, *obj))
+					{
+					// Object does not exist.
+					aParams.SetParam(TRoutingParameters::EFlagInvalid, ETrue);
+					}
+				else if(!iSingletons.StorageMgr().IsReadWriteStorage(obj->Uint(CMTPObjectMetaData::EStorageId)))
+					{
+					aParams.SetParam(TRoutingParameters::EFlagInvalid, ETrue);      
+					}
+				CleanupStack::PopAndDestroy(obj);
+				}
+			}
+		   break;
+		   
+	    case EMTPOpCodeMoveObject:
+	    	{
+	    	const TUint32 KObjectHandle(aParams.Request().Uint32(TMTPTypeRequest::ERequestParameter1));
+			CMTPObjectMetaData* obj(CMTPObjectMetaData::NewLC());
+			if (!iSingletons.ObjectMgr().ObjectL(KObjectHandle, *obj))
+				{
+				// Object does not exist.
+				aParams.SetParam(TRoutingParameters::EFlagInvalid, ETrue);
+				}
+			else if(!iSingletons.StorageMgr().IsReadWriteStorage(obj->Uint(CMTPObjectMetaData::EStorageId)))
+				{
+				aParams.SetParam(TRoutingParameters::EFlagInvalid, ETrue);      
+				}
+			else
+				{
+				const TUint32 KStorageID(aParams.Request().Uint32(TMTPTypeRequest::ERequestParameter2));
+				if( (!iSingletons.StorageMgr().ValidStorageId(KStorageID)) || (!iSingletons.StorageMgr().IsReadWriteStorage(KStorageID)) )
+					{
+					aParams.SetParam(TRoutingParameters::EFlagInvalid, ETrue);
+					}
+				}
+			CleanupStack::PopAndDestroy(obj);
+	    	}
+	    	break;
+	    case EMTPOpCodeCopyObject:    
+	    	{
+	    	const TUint32 KStorageID(aParams.Request().Uint32(TMTPTypeRequest::ERequestParameter2));
+			if( (!iSingletons.StorageMgr().ValidStorageId(KStorageID)) || (!iSingletons.StorageMgr().IsReadWriteStorage(KStorageID)) )
+				{
+				aParams.SetParam(TRoutingParameters::EFlagInvalid, ETrue);
+				}
+	    	}
+	    	break;
+	    case EMTPOpCodeSendObjectInfo:
+	    case EMTPOpCodeSendObjectPropList:
+	    	{
+	    	const TUint32 KStorageID(aParams.Request().Uint32(TMTPTypeRequest::ERequestParameter1));
+			if( KMTPStorageDefault != KStorageID )
+				{
+				if( (!iSingletons.StorageMgr().ValidStorageId(KStorageID)) || (!iSingletons.StorageMgr().IsReadWriteStorage(KStorageID)) )
+					{
+					aParams.SetParam(TRoutingParameters::EFlagInvalid, ETrue);
+					}
+				}
+	    	}
+	    	break;
+		default:
+			break;
+	   }
+    __FLOG(_L8("ValidateOperationRequestParametersL, Exit"));
+	}
+
 /**
 Provides the routing sub-type modifier flags of the specified routing sub-type.
 @param aSubType The routing sub-type identifier.

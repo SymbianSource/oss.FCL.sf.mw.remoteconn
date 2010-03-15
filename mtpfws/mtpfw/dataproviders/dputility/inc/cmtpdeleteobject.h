@@ -24,6 +24,7 @@
 #include <badesca.h>
 #include <f32file.h>
 
+#include "rmtpframework.h"
 #include "cmtprequestprocessor.h"
 #include "mtpdebug.h"
 
@@ -46,7 +47,7 @@ private: // From CMTPRequestProcessor
     void ServiceL();
  
 private:    
-
+    void ConstructL();
     CMTPDeleteObject(MMTPDataProviderFramework& aFramework, MMTPConnection& aConnection);
 	void ProcessFinalPhaseL();
 	TBool IsFolderObject(const CMTPObjectMetaData& aObject);
@@ -67,6 +68,7 @@ private:
 	*/
     TBool					iSuccessDeletion;
     TBool 					iObjectWritePotected;
+    RMTPFramework           iSingletons;
 	};
 	
 #endif

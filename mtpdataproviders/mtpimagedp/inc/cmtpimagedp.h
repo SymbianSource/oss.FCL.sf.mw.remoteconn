@@ -69,6 +69,7 @@ public:
     void HandleDeleteObjectsArray();
     void IncreaseNewPictures(TInt aCount);
     void DecreaseNewPictures(TInt aCount);
+    void HandleMdeSessionCompleteL(TInt aError);
     
 public: // From CMTPDataProviderPlugin
     void Cancel();

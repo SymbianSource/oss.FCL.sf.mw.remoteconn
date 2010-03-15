@@ -129,6 +129,7 @@ Populate the storage info data set
 */	
 void CMTPGetStorageInfo::BuildStorageInfoL()
 	{
+	iIsCDrive = EFalse;
 	SetupDriveVolumeInfoL();
     SetStorageTypeL();
     SetFileSystemTypeL();
@@ -151,6 +152,13 @@ void CMTPGetStorageInfo::SetupDriveVolumeInfoL()
 	RFs& fs = iFramework.Fs();
 	User::LeaveIfError(fs.Drive(iDriveInfo, driveNo));
 	User::LeaveIfError(fs.Volume(iVolumeInfo, driveNo));
+	
+	const TInt KCDriveNo = 2;
+	if(KCDriveNo == driveNo)
+		{
+		iDriveInfo.iType = EMediaRom;
+		iIsCDrive = ETrue;
+		}
 	}
 	
 /**
@@ -232,6 +240,10 @@ Set the free space of the drive in the storage info data set
 void CMTPGetStorageInfo::SetFreeSpaceInBytesL()
 	{
 	TMTPTypeUint64 mtpFreeSpace(iVolumeInfo.iFree);
+	if(iIsCDrive)
+		{
+		mtpFreeSpace.Set(0);
+		}
 	iStorageInfo->SetL(CMTPTypeStorageInfo::EFreeSpaceInBytes, mtpFreeSpace);	
 	}
 	

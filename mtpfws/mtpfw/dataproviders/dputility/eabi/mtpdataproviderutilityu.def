@@ -1,0 +1,403 @@
+EXPORTS
+	_ZN13CMTPGetObject4NewLER25MMTPDataProviderFrameworkR14MMTPConnection @ 1 NONAME
+	_ZN13CMTPGetObjectD0Ev @ 2 NONAME
+	_ZN13CMTPGetObjectD1Ev @ 3 NONAME
+	_ZN13CMTPGetObjectD2Ev @ 4 NONAME
+	_ZN14CMTPCopyObject4NewLER25MMTPDataProviderFrameworkR14MMTPConnection @ 5 NONAME
+	_ZN14CMTPCopyObjectD0Ev @ 6 NONAME
+	_ZN14CMTPCopyObjectD1Ev @ 7 NONAME
+	_ZN14CMTPCopyObjectD2Ev @ 8 NONAME
+	_ZN14CMTPMoveObject4NewLER25MMTPDataProviderFrameworkR14MMTPConnection @ 9 NONAME
+	_ZN14CMTPMoveObjectD0Ev @ 10 NONAME
+	_ZN14CMTPMoveObjectD1Ev @ 11 NONAME
+	_ZN14CMTPMoveObjectD2Ev @ 12 NONAME
+	_ZN16CMTPDeleteObject4NewLER25MMTPDataProviderFrameworkR14MMTPConnection @ 13 NONAME
+	_ZN16CMTPDeleteObjectD0Ev @ 14 NONAME
+	_ZN16CMTPDeleteObjectD1Ev @ 15 NONAME
+	_ZN16CMTPDeleteObjectD2Ev @ 16 NONAME
+	_ZN16CMTPFSEnumerator4NewLER25MMTPDataProviderFrameworkR18CMTPFSExclusionMgrR23MMTPEnumerationCallbacki @ 17 NONAME
+	_ZN16CMTPFSEnumerator6StartLEm @ 18 NONAME ABSENT
+	_ZN16CMTPFSEnumeratorD0Ev @ 19 NONAME
+	_ZN16CMTPFSEnumeratorD1Ev @ 20 NONAME
+	_ZN16CMTPFSEnumeratorD2Ev @ 21 NONAME
+	_ZN16RMTPDpSingletons16SetExclusionMgrLER18CMTPFSExclusionMgr @ 22 NONAME
+	_ZN16RMTPDpSingletons5CloseEv @ 23 NONAME
+	_ZN16RMTPDpSingletons5OpenLER25MMTPDataProviderFramework @ 24 NONAME
+	_ZN16RMTPDpSingletonsC1Ev @ 25 NONAME
+	_ZN16RMTPDpSingletonsC2Ev @ 26 NONAME
+	_ZN17CMTPGetObjectInfo4NewLER25MMTPDataProviderFrameworkR14MMTPConnection @ 27 NONAME
+	_ZN17CMTPGetObjectInfoD0Ev @ 28 NONAME
+	_ZN17CMTPGetObjectInfoD1Ev @ 29 NONAME
+	_ZN17CMTPGetObjectInfoD2Ev @ 30 NONAME
+	_ZN17CMTPGetReferences4NewLER25MMTPDataProviderFrameworkR14MMTPConnection @ 31 NONAME
+	_ZN17CMTPGetReferencesD0Ev @ 32 NONAME
+	_ZN17CMTPGetReferencesD1Ev @ 33 NONAME
+	_ZN17CMTPGetReferencesD2Ev @ 34 NONAME
+	_ZN17CMTPPropertyStore12GetPropertyLERK14TMTPTypeUint3222TMTPObjectPropertyCodeR14CMTPTypeString @ 35 NONAME ABSENT
+	_ZN17CMTPPropertyStore12GetPropertyLERK14TMTPTypeUint3222TMTPObjectPropertyCodeRh @ 36 NONAME ABSENT
+	_ZN17CMTPPropertyStore12GetPropertyLERK14TMTPTypeUint3222TMTPObjectPropertyCodeRm @ 37 NONAME ABSENT
+	_ZN17CMTPPropertyStore12GetPropertyLERK14TMTPTypeUint3222TMTPObjectPropertyCodeRt @ 38 NONAME ABSENT
+	_ZN17CMTPPropertyStore12GetPropertyLERK14TMTPTypeUint3222TMTPObjectPropertyCodeRy @ 39 NONAME ABSENT
+	_ZN17CMTPPropertyStore12SetPropertyLERK14TMTPTypeUint3222TMTPObjectPropertyCodeRK7TDesC16 @ 40 NONAME ABSENT
+	_ZN17CMTPPropertyStore12SetPropertyLERK14TMTPTypeUint3222TMTPObjectPropertyCodeh @ 41 NONAME ABSENT
+	_ZN17CMTPPropertyStore12SetPropertyLERK14TMTPTypeUint3222TMTPObjectPropertyCodem @ 42 NONAME ABSENT
+	_ZN17CMTPPropertyStore12SetPropertyLERK14TMTPTypeUint3222TMTPObjectPropertyCodet @ 43 NONAME ABSENT
+	_ZN17CMTPPropertyStore12SetPropertyLERK14TMTPTypeUint3222TMTPObjectPropertyCodey @ 44 NONAME ABSENT
+	_ZN17CMTPPropertyStore16GetPropertyByIdLERKy22TMTPObjectPropertyCodeRt @ 45 NONAME ABSENT
+	_ZN17CMTPPropertyStore17AddBatchedInsertLERKNS_13TBatchedEntryE @ 46 NONAME ABSENT
+	_ZN17CMTPPropertyStore17DeletePropertiesLERKy @ 47 NONAME ABSENT
+	_ZN17CMTPPropertyStore28DeletePropertiesByStorageIdLEm @ 48 NONAME ABSENT
+	_ZN17CMTPPropertyStore4NewLER25MMTPDataProviderFramework @ 49 NONAME ABSENT
+	_ZN17CMTPPropertyStoreD0Ev @ 50 NONAME ABSENT
+	_ZN17CMTPPropertyStoreD1Ev @ 51 NONAME ABSENT
+	_ZN17CMTPPropertyStoreD2Ev @ 52 NONAME ABSENT
+	_ZN17CMTPSetReferences4NewLER25MMTPDataProviderFrameworkR14MMTPConnection @ 53 NONAME
+	_ZN17CMTPSetReferencesD0Ev @ 54 NONAME
+	_ZN17CMTPSetReferencesD1Ev @ 55 NONAME
+	_ZN17CMTPSetReferencesD2Ev @ 56 NONAME
+	_ZN18CMTPFSExclusionMgrC2ER25MMTPDataProviderFramework @ 57 NONAME
+	_ZN18CMTPFSExclusionMgrD0Ev @ 58 NONAME
+	_ZN18CMTPFSExclusionMgrD1Ev @ 59 NONAME
+	_ZN18CMTPFSExclusionMgrD2Ev @ 60 NONAME
+	_ZN18CMTPRequestChecker14VerifyRequestLERK15TMTPTypeRequestiPK22TMTPRequestElementInfo @ 61 NONAME
+	_ZN18CMTPRequestChecker4NewLER25MMTPDataProviderFrameworkR14MMTPConnection @ 62 NONAME
+	_ZN18CMTPRequestCheckerD0Ev @ 63 NONAME
+	_ZN18CMTPRequestCheckerD1Ev @ 64 NONAME
+	_ZN18CMTPRequestCheckerD2Ev @ 65 NONAME
+	_ZN18CMTPRequestUnknown4NewLER25MMTPDataProviderFrameworkR14MMTPConnection @ 66 NONAME
+	_ZN18CMTPRequestUnknown8ServiceLEv @ 67 NONAME
+	_ZN18CMTPRequestUnknownC1ER25MMTPDataProviderFrameworkR14MMTPConnection @ 68 NONAME
+	_ZN18CMTPRequestUnknownC2ER25MMTPDataProviderFrameworkR14MMTPConnection @ 69 NONAME
+	_ZN18CMTPRequestUnknownD0Ev @ 70 NONAME
+	_ZN18CMTPRequestUnknownD1Ev @ 71 NONAME
+	_ZN18CMTPRequestUnknownD2Ev @ 72 NONAME
+	_ZN18CMTPSendObjectInfo4NewLER25MMTPDataProviderFrameworkR14MMTPConnection @ 73 NONAME
+	_ZN18CMTPSendObjectInfoD0Ev @ 74 NONAME
+	_ZN18CMTPSendObjectInfoD1Ev @ 75 NONAME
+	_ZN18CMTPSendObjectInfoD2Ev @ 76 NONAME
+	_ZN20CMTPRequestProcessor12HandleEventLERK13TMTPTypeEvent @ 77 NONAME
+	_ZN20CMTPRequestProcessor12ReceiveDataLER8MMTPType @ 78 NONAME
+	_ZN20CMTPRequestProcessor13CheckRequestLEv @ 79 NONAME
+	_ZN20CMTPRequestProcessor13SendResponseLE16TMTPResponseCodeiPm @ 80 NONAME
+	_ZN20CMTPRequestProcessor14HandleRequestLERK15TMTPTypeRequest20TMTPTransactionPhase @ 81 NONAME
+	_ZN20CMTPRequestProcessor16CompleteRequestLEv @ 82 NONAME
+	_ZN20CMTPRequestProcessor18DoHandleRToIPhaseLEv @ 83 NONAME
+	_ZN20CMTPRequestProcessor21DoHandleRequestPhaseLEv @ 84 NONAME
+	_ZN20CMTPRequestProcessor22DoHandleDataIToRPhaseLEv @ 85 NONAME
+	_ZN20CMTPRequestProcessor22DoHandleResponsePhaseLEv @ 86 NONAME
+	_ZN20CMTPRequestProcessor24DoHandleCompletingPhaseLEv @ 87 NONAME
+	_ZN20CMTPRequestProcessor4RunLEv @ 88 NONAME
+	_ZN20CMTPRequestProcessor7ReleaseEv @ 89 NONAME
+	_ZN20CMTPRequestProcessor8DoCancelEv @ 90 NONAME
+	_ZN20CMTPRequestProcessor8RunErrorEi @ 91 NONAME
+	_ZN20CMTPRequestProcessor9SendDataLERK8MMTPType @ 92 NONAME
+	_ZN20CMTPRequestProcessorC2ER25MMTPDataProviderFrameworkR14MMTPConnectioniPK22TMTPRequestElementInfo @ 93 NONAME
+	_ZN20CMTPRequestProcessorD0Ev @ 94 NONAME
+	_ZN20CMTPRequestProcessorD1Ev @ 95 NONAME
+	_ZN20CMTPRequestProcessorD2Ev @ 96 NONAME
+	_ZN21CMTPGetObjectPropDesc4NewLER25MMTPDataProviderFrameworkR14MMTPConnection @ 97 NONAME
+	_ZN21CMTPGetObjectPropDescD0Ev @ 98 NONAME
+	_ZN21CMTPGetObjectPropDescD1Ev @ 99 NONAME
+	_ZN21CMTPGetObjectPropDescD2Ev @ 100 NONAME
+	_ZN21CMTPGetObjectPropList4NewLER25MMTPDataProviderFrameworkR14MMTPConnection @ 101 NONAME
+	_ZN21CMTPGetObjectPropListD0Ev @ 102 NONAME
+	_ZN21CMTPGetObjectPropListD1Ev @ 103 NONAME
+	_ZN21CMTPGetObjectPropListD2Ev @ 104 NONAME
+	_ZN21CMTPObjectPropertyMgr12GetPropertyLE22TMTPObjectPropertyCodeR14CMTPTypeString @ 105 NONAME ABSENT
+	_ZN21CMTPObjectPropertyMgr12GetPropertyLE22TMTPObjectPropertyCodeR15TMTPTypeUint128 @ 106 NONAME ABSENT
+	_ZN21CMTPObjectPropertyMgr12GetPropertyLE22TMTPObjectPropertyCodeRh @ 107 NONAME ABSENT
+	_ZN21CMTPObjectPropertyMgr12GetPropertyLE22TMTPObjectPropertyCodeRm @ 108 NONAME ABSENT
+	_ZN21CMTPObjectPropertyMgr12GetPropertyLE22TMTPObjectPropertyCodeRt @ 109 NONAME ABSENT
+	_ZN21CMTPObjectPropertyMgr12GetPropertyLE22TMTPObjectPropertyCodeRy @ 110 NONAME ABSENT
+	_ZN21CMTPObjectPropertyMgr12SetPropertyLE22TMTPObjectPropertyCodeRK7TDesC16 @ 111 NONAME ABSENT
+	_ZN21CMTPObjectPropertyMgr12SetPropertyLE22TMTPObjectPropertyCodeh @ 112 NONAME ABSENT
+	_ZN21CMTPObjectPropertyMgr12SetPropertyLE22TMTPObjectPropertyCodem @ 113 NONAME ABSENT
+	_ZN21CMTPObjectPropertyMgr12SetPropertyLE22TMTPObjectPropertyCodet @ 114 NONAME ABSENT
+	_ZN21CMTPObjectPropertyMgr12SetPropertyLE22TMTPObjectPropertyCodey @ 115 NONAME ABSENT
+	_ZN21CMTPObjectPropertyMgr17SetCurrentObjectLEP18CMTPObjectMetaDatai @ 116 NONAME ABSENT
+	_ZN21CMTPObjectPropertyMgr17SetCurrentObjectLEm @ 117 NONAME ABSENT
+	_ZN21CMTPObjectPropertyMgr4NewLER25MMTPDataProviderFramework @ 118 NONAME ABSENT
+	_ZN21CMTPObjectPropertyMgrD0Ev @ 119 NONAME ABSENT
+	_ZN21CMTPObjectPropertyMgrD1Ev @ 120 NONAME ABSENT
+	_ZN21CMTPObjectPropertyMgrD2Ev @ 121 NONAME ABSENT
+	_ZN21CMTPSetObjectPropList4NewLER25MMTPDataProviderFrameworkR14MMTPConnection @ 122 NONAME
+	_ZN21CMTPSetObjectPropListD0Ev @ 123 NONAME
+	_ZN21CMTPSetObjectPropListD1Ev @ 124 NONAME
+	_ZN21CMTPSetObjectPropListD2Ev @ 125 NONAME
+	_ZN22CMTPGetObjectPropValue4NewLER25MMTPDataProviderFrameworkR14MMTPConnection @ 126 NONAME
+	_ZN22CMTPGetObjectPropValueD0Ev @ 127 NONAME
+	_ZN22CMTPGetObjectPropValueD1Ev @ 128 NONAME
+	_ZN22CMTPGetObjectPropValueD2Ev @ 129 NONAME
+	_ZN22CMTPSetObjectPropValue4NewLER25MMTPDataProviderFrameworkR14MMTPConnection @ 130 NONAME
+	_ZN22CMTPSetObjectPropValueD0Ev @ 131 NONAME
+	_ZN22CMTPSetObjectPropValueD1Ev @ 132 NONAME
+	_ZN22CMTPSetObjectPropValueD2Ev @ 133 NONAME
+	_ZN25CMTPGetFormatCapabilities4NewLER25MMTPDataProviderFrameworkR14MMTPConnection @ 134 NONAME
+	_ZN25CMTPGetFormatCapabilitiesD0Ev @ 135 NONAME
+	_ZN25CMTPGetFormatCapabilitiesD1Ev @ 136 NONAME
+	_ZN25CMTPGetFormatCapabilitiesD2Ev @ 137 NONAME
+	_ZN27CMTPGetObjectPropsSupported4NewLER25MMTPDataProviderFrameworkR14MMTPConnection @ 138 NONAME
+	_ZN27CMTPGetObjectPropsSupportedD0Ev @ 139 NONAME
+	_ZN27CMTPGetObjectPropsSupportedD1Ev @ 140 NONAME
+	_ZN27CMTPGetObjectPropsSupportedD2Ev @ 141 NONAME
+	_ZNK16RMTPDpSingletons13ExclusionMgrLEv @ 142 NONAME
+	_ZNK16RMTPDpSingletons13PropertyStoreEv @ 143 NONAME ABSENT
+	_ZNK18CMTPFSExclusionMgr15IsFileAcceptedLERK7TDesC16m @ 144 NONAME
+	_ZNK18CMTPFSExclusionMgr15IsPathAcceptedLERK7TDesC16m @ 145 NONAME
+	_ZNK18CMTPFSExclusionMgr17IsFolderAcceptedLERK7TDesC16m @ 146 NONAME
+	_ZNK18CMTPRequestChecker13GetObjectInfoEm @ 147 NONAME
+	_ZNK18CMTPRequestUnknown5MatchERK15TMTPTypeRequestR14MMTPConnection @ 148 NONAME
+	_ZNK20CMTPRequestProcessor10ConnectionEv @ 149 NONAME
+	_ZNK20CMTPRequestProcessor12HasDataphaseEv @ 150 NONAME
+	_ZNK20CMTPRequestProcessor5MatchERK13TMTPTypeEventR14MMTPConnection @ 151 NONAME
+	_ZNK20CMTPRequestProcessor5MatchERK15TMTPTypeRequestR14MMTPConnection @ 152 NONAME
+	_ZNK20CMTPRequestProcessor7RequestEv @ 153 NONAME
+	_ZTI13CMTPGetObject @ 154 NONAME
+	_ZTI14CMTPCopyObject @ 155 NONAME
+	_ZTI14CMTPMoveObject @ 156 NONAME
+	_ZTI16CMTPDeleteObject @ 157 NONAME
+	_ZTI16CMTPFSEnumerator @ 158 NONAME
+	_ZTI17CMTPGetObjectInfo @ 159 NONAME
+	_ZTI17CMTPGetReferences @ 160 NONAME
+	_ZTI17CMTPPropertyStore @ 161 NONAME ABSENT
+	_ZTI17CMTPSetReferences @ 162 NONAME
+	_ZTI18CMTPFSExclusionMgr @ 163 NONAME
+	_ZTI18CMTPRequestChecker @ 164 NONAME
+	_ZTI18CMTPRequestUnknown @ 165 NONAME
+	_ZTI18CMTPSendObjectInfo @ 166 NONAME
+	_ZTI20CMTPRequestProcessor @ 167 NONAME
+	_ZTI21CMTPGetObjectPropDesc @ 168 NONAME
+	_ZTI21CMTPGetObjectPropList @ 169 NONAME
+	_ZTI21CMTPObjectPropertyMgr @ 170 NONAME ABSENT
+	_ZTI21CMTPSetObjectPropList @ 171 NONAME
+	_ZTI22CMTPGetObjectPropValue @ 172 NONAME
+	_ZTI22CMTPSetObjectPropValue @ 173 NONAME
+	_ZTI25CMTPGetFormatCapabilities @ 174 NONAME
+	_ZTI27CMTPGetObjectPropsSupported @ 175 NONAME
+	_ZTIN16RMTPDpSingletons11CSingletonsE @ 176 NONAME
+	_ZTV13CMTPGetObject @ 177 NONAME
+	_ZTV14CMTPCopyObject @ 178 NONAME
+	_ZTV14CMTPMoveObject @ 179 NONAME
+	_ZTV16CMTPDeleteObject @ 180 NONAME
+	_ZTV16CMTPFSEnumerator @ 181 NONAME
+	_ZTV17CMTPGetObjectInfo @ 182 NONAME
+	_ZTV17CMTPGetReferences @ 183 NONAME
+	_ZTV17CMTPPropertyStore @ 184 NONAME ABSENT
+	_ZTV17CMTPSetReferences @ 185 NONAME
+	_ZTV18CMTPFSExclusionMgr @ 186 NONAME
+	_ZTV18CMTPRequestChecker @ 187 NONAME
+	_ZTV18CMTPRequestUnknown @ 188 NONAME
+	_ZTV18CMTPSendObjectInfo @ 189 NONAME
+	_ZTV20CMTPRequestProcessor @ 190 NONAME
+	_ZTV21CMTPGetObjectPropDesc @ 191 NONAME
+	_ZTV21CMTPGetObjectPropList @ 192 NONAME
+	_ZTV21CMTPObjectPropertyMgr @ 193 NONAME ABSENT
+	_ZTV21CMTPSetObjectPropList @ 194 NONAME
+	_ZTV22CMTPGetObjectPropValue @ 195 NONAME
+	_ZTV22CMTPSetObjectPropValue @ 196 NONAME
+	_ZTV25CMTPGetFormatCapabilities @ 197 NONAME
+	_ZTV27CMTPGetObjectPropsSupported @ 198 NONAME
+	_ZTVN16RMTPDpSingletons11CSingletonsE @ 199 NONAME
+	_ZThn28_N20CMTPRequestProcessor12HandleEventLERK13TMTPTypeEvent @ 200 NONAME
+	_ZThn28_N20CMTPRequestProcessor14HandleRequestLERK15TMTPTypeRequest20TMTPTransactionPhase @ 201 NONAME
+	_ZThn28_N20CMTPRequestProcessor7ReleaseEv @ 202 NONAME
+	_ZThn28_NK18CMTPRequestUnknown5MatchERK15TMTPTypeRequestR14MMTPConnection @ 203 NONAME
+	_ZThn28_NK20CMTPRequestProcessor10ConnectionEv @ 204 NONAME
+	_ZThn28_NK20CMTPRequestProcessor5MatchERK13TMTPTypeEventR14MMTPConnection @ 205 NONAME
+	_ZThn28_NK20CMTPRequestProcessor5MatchERK15TMTPTypeRequestR14MMTPConnection @ 206 NONAME
+	_ZN11RMTPUtility13RenameObjectLEjRK7TDesC16 @ 207 NONAME
+	_ZN11RMTPUtility17ContainerMimeTypeERK7TDesC16 @ 208 NONAME
+	_ZN11RMTPUtility18FormatFromFilenameERK7TDesC16 @ 209 NONAME
+	_ZN11RMTPUtility20GetFormatByExtensionERK7TDesC16 @ 210 NONAME
+	_ZN11RMTPUtility22FormatExtensionMappingEv @ 211 NONAME
+	_ZN11RMTPUtility7GetDpIdERK7TDesC16S2_ @ 212 NONAME
+	_ZNK11RMTPUtility16MTPTimeStr2TTimeERK7TDesC16R5TTime @ 213 NONAME
+	_ZNK11RMTPUtility16TTime2MTPTimeStrERK5TTimeR6TDes16 @ 214 NONAME
+	_ZNK16RMTPDpSingletons10MTPUtilityEv @ 215 NONAME
+	_ZTI20CMTPExtensionMapping @ 216 NONAME
+	_ZTV20CMTPExtensionMapping @ 217 NONAME
+	_ZThn28_NK20CMTPRequestProcessor7RequestEv @ 218 NONAME
+	_ZN20CMTPRequestProcessor9SessionIdEv @ 219 NONAME
+	_ZThn28_N20CMTPRequestProcessor9SessionIdEv @ 220 NONAME
+	_ZN11RMTPUtility18GetEnumerationFlagERK7TDesC16 @ 221 NONAME
+	_ZN16CMTPSvcGetObject4NewLER25MMTPDataProviderFrameworkR14MMTPConnectionR23MMTPServiceDataProvider @ 222 NONAME
+	_ZN16CMTPSvcGetObjectD0Ev @ 223 NONAME
+	_ZN16CMTPSvcGetObjectD1Ev @ 224 NONAME
+	_ZN16CMTPSvcGetObjectD2Ev @ 225 NONAME
+	_ZN17RMTPServiceFormat14FormatRelationEPKtRKS_ @ 226 NONAME
+	_ZN17RMTPServiceFormatD1Ev @ 227 NONAME
+	_ZN17RMTPServiceFormatD2Ev @ 228 NONAME
+	_ZN18MMTPServiceHandler20SaveServicePropValueER11CRepositoryjR12TMTPTypeGuid @ 229 NONAME
+	_ZN18MMTPServiceHandler20SaveServicePropValueER11CRepositoryji @ 230 NONAME
+	_ZN18MMTPServiceHandler23GenerateSvcObjPropertyLEjRK12TMTPTypeGuidjRK7TDesC16hPK8MMTPTypeN22CMTPTypeObjectPropDesc24TMTPObjectPropDescGetSetEtm @ 231 NONAME
+	_ZN18MMTPServiceHandler24GenerateSvcObjPropertyLCEjRK12TMTPTypeGuidjRK7TDesC16hPK8MMTPTypeN22CMTPTypeObjectPropDesc24TMTPObjectPropDescGetSetEtm @ 232 NONAME
+	_ZN18MMTPServiceHandler31GenerateGenericObjectPropDescLCEt @ 233 NONAME
+	_ZN19CMTPSvcDeleteObject4NewLER25MMTPDataProviderFrameworkR14MMTPConnectionR23MMTPServiceDataProvider @ 234 NONAME
+	_ZN19CMTPSvcDeleteObjectD0Ev @ 235 NONAME
+	_ZN19CMTPSvcDeleteObjectD1Ev @ 236 NONAME
+	_ZN19CMTPSvcDeleteObjectD2Ev @ 237 NONAME
+	_ZN20CMTPKnowledgeHandler12SetStorageIdEm @ 238 NONAME
+	_ZN20CMTPKnowledgeHandler4NewLER25MMTPDataProviderFrameworktR11CRepositoryRK7TDesC16 @ 239 NONAME
+	_ZN20CMTPKnowledgeHandlerD0Ev @ 240 NONAME
+	_ZN20CMTPKnowledgeHandlerD1Ev @ 241 NONAME
+	_ZN20CMTPKnowledgeHandlerD2Ev @ 242 NONAME
+	_ZN20CMTPSvcGetObjectInfo4NewLER25MMTPDataProviderFrameworkR14MMTPConnectionR23MMTPServiceDataProvider @ 243 NONAME
+	_ZN20CMTPSvcGetObjectInfoD0Ev @ 244 NONAME
+	_ZN20CMTPSvcGetObjectInfoD1Ev @ 245 NONAME
+	_ZN20CMTPSvcGetObjectInfoD2Ev @ 246 NONAME
+	_ZN20CMTPSvcGetReferences4NewLER25MMTPDataProviderFrameworkR14MMTPConnectionR23MMTPServiceDataProvider @ 247 NONAME
+	_ZN20CMTPSvcGetReferencesD0Ev @ 248 NONAME
+	_ZN20CMTPSvcGetReferencesD1Ev @ 249 NONAME
+	_ZN20CMTPSvcGetReferencesD2Ev @ 250 NONAME
+	_ZN20CMTPSvcSetReferences4NewLER25MMTPDataProviderFrameworkR14MMTPConnectionR23MMTPServiceDataProvider @ 251 NONAME
+	_ZN20CMTPSvcSetReferencesD0Ev @ 252 NONAME
+	_ZN20CMTPSvcSetReferencesD1Ev @ 253 NONAME
+	_ZN20CMTPSvcSetReferencesD2Ev @ 254 NONAME
+	_ZN20MMTPSvcObjectHandler10CopyObjectERK18CMTPObjectMetaDatamm @ 255 NONAME
+	_ZN20MMTPSvcObjectHandler10MoveObjectERK18CMTPObjectMetaDatamm @ 256 NONAME
+	_ZN20MMTPSvcObjectHandler14GetObjectInfoLERK18CMTPObjectMetaDataR18CMTPTypeObjectInfo @ 257 NONAME
+	_ZN20MMTPSvcObjectHandler15SendObjectInfoLERK18CMTPTypeObjectInfoRmR6TDes16 @ 258 NONAME
+	_ZN20MMTPSvcObjectHandler19CommitForNewObjectLER6TDes16 @ 259 NONAME
+	_ZN20MMTPSvcObjectHandler19GetObjectReferenceLERK18CMTPObjectMetaDataR13CMTPTypeArray @ 260 NONAME
+	_ZN20MMTPSvcObjectHandler19ReleaseObjectBufferEv @ 261 NONAME
+	_ZN20MMTPSvcObjectHandler19SetObjectReferenceLERK18CMTPObjectMetaDataRK13CMTPTypeArray @ 262 NONAME
+	_ZN20MMTPSvcObjectHandler7CommitLEv @ 263 NONAME
+	_ZN20MMTPSvcObjectHandler8RollBackEv @ 264 NONAME
+	_ZN21CMTPSvcGetServiceInfo4NewLER25MMTPDataProviderFrameworkR14MMTPConnectionR23MMTPServiceDataProvider @ 265 NONAME
+	_ZN21CMTPSvcGetServiceInfoD0Ev @ 266 NONAME
+	_ZN21CMTPSvcGetServiceInfoD1Ev @ 267 NONAME
+	_ZN21CMTPSvcGetServiceInfoD2Ev @ 268 NONAME
+	_ZN21CMTPSvcGetStorageInfo4NewLER25MMTPDataProviderFrameworkR14MMTPConnectionR23MMTPServiceDataProvider @ 269 NONAME
+	_ZN21CMTPSvcGetStorageInfoD0Ev @ 270 NONAME
+	_ZN21CMTPSvcGetStorageInfoD1Ev @ 271 NONAME
+	_ZN21CMTPSvcGetStorageInfoD2Ev @ 272 NONAME
+	_ZN23CMTPFullEnumDataCodeMgr4NewLER25MMTPDataProviderFramework @ 273 NONAME
+	_ZN23CMTPFullEnumDataCodeMgrD0Ev @ 274 NONAME
+	_ZN23CMTPFullEnumDataCodeMgrD1Ev @ 275 NONAME
+	_ZN23CMTPFullEnumDataCodeMgrD2Ev @ 276 NONAME
+	_ZN23TMTPServicePropertyInfo27LinearOrderServicePropOrderEPKtRKS_ @ 277 NONAME
+	_ZN23TMTPServicePropertyInfo27LinearOrderServicePropOrderERKS_S1_ @ 278 NONAME
+	_ZN24CMTPSvcCompoundProcessor4NewLER25MMTPDataProviderFrameworkR14MMTPConnectionR23MMTPServiceDataProvider @ 279 NONAME
+	_ZN24CMTPSvcCompoundProcessorD0Ev @ 280 NONAME
+	_ZN24CMTPSvcCompoundProcessorD1Ev @ 281 NONAME
+	_ZN24CMTPSvcCompoundProcessorD2Ev @ 282 NONAME
+	_ZN24CMTPSvcGetObjectPropList4NewLER25MMTPDataProviderFrameworkR14MMTPConnectionR23MMTPServiceDataProvider @ 283 NONAME
+	_ZN24CMTPSvcGetObjectPropListD0Ev @ 284 NONAME
+	_ZN24CMTPSvcGetObjectPropListD1Ev @ 285 NONAME
+	_ZN24CMTPSvcGetObjectPropListD2Ev @ 286 NONAME
+	_ZN24CMTPSvcSetObjectPropList4NewLER25MMTPDataProviderFrameworkR14MMTPConnectionR23MMTPServiceDataProvider @ 287 NONAME
+	_ZN24CMTPSvcSetObjectPropListD0Ev @ 288 NONAME
+	_ZN24CMTPSvcSetObjectPropListD1Ev @ 289 NONAME
+	_ZN24CMTPSvcSetObjectPropListD2Ev @ 290 NONAME
+	_ZN25CMTPSvcGetServicePropDesc4NewLER25MMTPDataProviderFrameworkR14MMTPConnectionR23MMTPServiceDataProvider @ 291 NONAME
+	_ZN25CMTPSvcGetServicePropDescD0Ev @ 292 NONAME
+	_ZN25CMTPSvcGetServicePropDescD1Ev @ 293 NONAME
+	_ZN25CMTPSvcGetServicePropDescD2Ev @ 294 NONAME
+	_ZN25CMTPSvcGetServicePropList4NewLER25MMTPDataProviderFrameworkR14MMTPConnectionR23MMTPServiceDataProvider @ 295 NONAME
+	_ZN25CMTPSvcGetServicePropListD0Ev @ 296 NONAME
+	_ZN25CMTPSvcGetServicePropListD1Ev @ 297 NONAME
+	_ZN25CMTPSvcGetServicePropListD2Ev @ 298 NONAME
+	_ZN25CMTPSvcSetServicePropList4NewLER25MMTPDataProviderFrameworkR14MMTPConnectionR23MMTPServiceDataProvider @ 299 NONAME
+	_ZN25CMTPSvcSetServicePropListD0Ev @ 300 NONAME
+	_ZN25CMTPSvcSetServicePropListD1Ev @ 301 NONAME
+	_ZN25CMTPSvcSetServicePropListD2Ev @ 302 NONAME
+	_ZN26CMTPFullEnumServiceHandler18SetServicePropetyLEtRK30CMTPTypeServicePropListElement @ 303 NONAME
+	_ZN26CMTPFullEnumServiceHandler21DeleteServicePropertyEt @ 304 NONAME
+	_ZN26CMTPFullEnumServiceHandler4NewLER25MMTPDataProviderFrameworkRK23CMTPFullEnumDataCodeMgrR11CRepositoryjRK7TDesC16RK12TMTPTypeGuid @ 305 NONAME
+	_ZN26CMTPFullEnumServiceHandlerD0Ev @ 306 NONAME
+	_ZN26CMTPFullEnumServiceHandlerD1Ev @ 307 NONAME
+	_ZN26CMTPFullEnumServiceHandlerD2Ev @ 308 NONAME
+	_ZN27CMTPSvcDeleteObjectPropList4NewLER25MMTPDataProviderFrameworkR14MMTPConnectionR23MMTPServiceDataProvider @ 309 NONAME
+	_ZN27CMTPSvcDeleteObjectPropListD0Ev @ 310 NONAME
+	_ZN27CMTPSvcDeleteObjectPropListD1Ev @ 311 NONAME
+	_ZN27CMTPSvcDeleteObjectPropListD2Ev @ 312 NONAME
+	_ZN28CMTPSvcDeleteServicePropList4NewLER25MMTPDataProviderFrameworkR14MMTPConnectionR23MMTPServiceDataProvider @ 313 NONAME
+	_ZN28CMTPSvcDeleteServicePropListD0Ev @ 314 NONAME
+	_ZN28CMTPSvcDeleteServicePropListD1Ev @ 315 NONAME
+	_ZN28CMTPSvcDeleteServicePropListD2Ev @ 316 NONAME
+	_ZN29CMTPSvcGetServiceCapabilities4NewLER25MMTPDataProviderFrameworkR14MMTPConnectionR23MMTPServiceDataProvider @ 317 NONAME
+	_ZN29CMTPSvcGetServiceCapabilitiesD0Ev @ 318 NONAME
+	_ZN29CMTPSvcGetServiceCapabilitiesD1Ev @ 319 NONAME
+	_ZN29CMTPSvcGetServiceCapabilitiesD2Ev @ 320 NONAME
+	_ZNK20CMTPKnowledgeHandler14GetObjectSuidLER6TDes16 @ 321 NONAME
+	_ZNK20MMTPSvcObjectHandler23CheckGenObjectPropertyLERK29CMTPTypeObjectPropListElement17TMTPOperationCode @ 322 NONAME
+	_ZNK23CMTPFullEnumDataCodeMgr11ServiceGUIDEv @ 323 NONAME
+	_ZNK23CMTPFullEnumDataCodeMgr15KnowledgeFormatEv @ 324 NONAME
+	_ZNK23CMTPFullEnumDataCodeMgr19GetSevicePropCodesLER6RArrayImE @ 325 NONAME
+	_ZNK23CMTPFullEnumDataCodeMgr19ServicePropertyInfoEt @ 326 NONAME
+	_ZNK23CMTPFullEnumDataCodeMgr9ServiceIDEv @ 327 NONAME
+	_ZNK23MMTPServiceDataProvider14ServiceHandlerEv @ 328 NONAME
+	_ZNK23MMTPServiceDataProvider20OperationGranularityEv @ 329 NONAME
+	_ZNK23MMTPServiceDataProvider23IsValidServicePropCodeLEt @ 330 NONAME
+	_ZNK23MMTPServiceDataProvider9ServiceIDEv @ 331 NONAME
+	_ZNK26CMTPFullEnumServiceHandler18GetServicePropetyLEtR23CMTPTypeServicePropList @ 332 NONAME
+	_ZNK26CMTPFullEnumServiceHandler19GetServicePropDescLEtR27CMTPTypeServicePropDescList @ 333 NONAME
+	_ZNK26CMTPFullEnumServiceHandler21GetServiceCapabilityLEtR29CMTPTypeServiceCapabilityList @ 334 NONAME
+	_ZTI16CMTPSvcGetObject @ 335 NONAME
+	_ZTI19CMTPSvcDeleteObject @ 336 NONAME
+	_ZTI20CMTPKnowledgeHandler @ 337 NONAME
+	_ZTI20CMTPSvcGetObjectInfo @ 338 NONAME
+	_ZTI20CMTPSvcGetReferences @ 339 NONAME
+	_ZTI20CMTPSvcSetReferences @ 340 NONAME
+	_ZTI20MMTPSvcObjectHandler @ 341 NONAME
+	_ZTI21CMTPSvcGetServiceInfo @ 342 NONAME
+	_ZTI21CMTPSvcGetStorageInfo @ 343 NONAME
+	_ZTI23CMTPFullEnumDataCodeMgr @ 344 NONAME
+	_ZTI23MMTPServiceDataProvider @ 345 NONAME
+	_ZTI24CMTPSvcCompoundProcessor @ 346 NONAME
+	_ZTI24CMTPSvcGetObjectPropList @ 347 NONAME
+	_ZTI24CMTPSvcSetObjectPropList @ 348 NONAME
+	_ZTI25CMTPSvcGetServicePropDesc @ 349 NONAME
+	_ZTI25CMTPSvcGetServicePropList @ 350 NONAME
+	_ZTI25CMTPSvcSetServicePropList @ 351 NONAME
+	_ZTI26CMTPFullEnumServiceHandler @ 352 NONAME
+	_ZTI27CMTPSvcDeleteObjectPropList @ 353 NONAME
+	_ZTI28CMTPSvcDeleteServicePropList @ 354 NONAME
+	_ZTI29CMTPSvcGetServiceCapabilities @ 355 NONAME
+	_ZTV16CMTPSvcGetObject @ 356 NONAME
+	_ZTV19CMTPSvcDeleteObject @ 357 NONAME
+	_ZTV20CMTPKnowledgeHandler @ 358 NONAME
+	_ZTV20CMTPSvcGetObjectInfo @ 359 NONAME
+	_ZTV20CMTPSvcGetReferences @ 360 NONAME
+	_ZTV20CMTPSvcSetReferences @ 361 NONAME
+	_ZTV20MMTPSvcObjectHandler @ 362 NONAME
+	_ZTV21CMTPSvcGetServiceInfo @ 363 NONAME
+	_ZTV21CMTPSvcGetStorageInfo @ 364 NONAME
+	_ZTV23CMTPFullEnumDataCodeMgr @ 365 NONAME
+	_ZTV23MMTPServiceDataProvider @ 366 NONAME
+	_ZTV24CMTPSvcCompoundProcessor @ 367 NONAME
+	_ZTV24CMTPSvcGetObjectPropList @ 368 NONAME
+	_ZTV24CMTPSvcSetObjectPropList @ 369 NONAME
+	_ZTV25CMTPSvcGetServicePropDesc @ 370 NONAME
+	_ZTV25CMTPSvcGetServicePropList @ 371 NONAME
+	_ZTV25CMTPSvcSetServicePropList @ 372 NONAME
+	_ZTV26CMTPFullEnumServiceHandler @ 373 NONAME
+	_ZTV27CMTPSvcDeleteObjectPropList @ 374 NONAME
+	_ZTV28CMTPSvcDeleteServicePropList @ 375 NONAME
+	_ZTV29CMTPSvcGetServiceCapabilities @ 376 NONAME
+	_ZN26CMTPCommonRequestProcessor4NewLER25MMTPDataProviderFrameworkR14MMTPConnection16TMTPResponseCodei @ 377 NONAME
+	_ZN26CMTPCommonRequestProcessorD0Ev @ 378 NONAME
+	_ZN26CMTPCommonRequestProcessorD1Ev @ 379 NONAME
+	_ZN26CMTPCommonRequestProcessorD2Ev @ 380 NONAME
+	_ZTI26CMTPCommonRequestProcessor @ 381 NONAME
+	_ZTV26CMTPCommonRequestProcessor @ 382 NONAME
+	_ZN20CMTPGetPartialObject4NewLER25MMTPDataProviderFrameworkR14MMTPConnection @ 383 NONAME
+	_ZN20CMTPGetPartialObjectD0Ev @ 384 NONAME
+	_ZN20CMTPGetPartialObjectD1Ev @ 385 NONAME
+	_ZN20CMTPGetPartialObjectD2Ev @ 386 NONAME
+	_ZTI20CMTPGetPartialObject @ 387 NONAME
+	_ZTV20CMTPGetPartialObject @ 388 NONAME
+	_ZN23CMTPSetObjectProtection4NewLER25MMTPDataProviderFrameworkR14MMTPConnection @ 389 NONAME
+	_ZN23CMTPSetObjectProtectionD0Ev @ 390 NONAME
+	_ZN23CMTPSetObjectProtectionD1Ev @ 391 NONAME
+	_ZN23CMTPSetObjectProtectionD2Ev @ 392 NONAME
+	_ZTI23CMTPSetObjectProtection @ 393 NONAME
+	_ZTV23CMTPSetObjectProtection @ 394 NONAME
+	_ZN29CMTPGetInterDependentPropDesc4NewLER25MMTPDataProviderFrameworkR14MMTPConnection @ 395 NONAME
+	_ZN29CMTPGetInterDependentPropDescD0Ev @ 396 NONAME
+	_ZN29CMTPGetInterDependentPropDescD1Ev @ 397 NONAME
+	_ZN29CMTPGetInterDependentPropDescD2Ev @ 398 NONAME
+	_ZTI29CMTPGetInterDependentPropDesc @ 399 NONAME
+	_ZTV29CMTPGetInterDependentPropDesc @ 400 NONAME
+	_ZN16CMTPFSEnumerator6StartLEmi @ 401 NONAME
+

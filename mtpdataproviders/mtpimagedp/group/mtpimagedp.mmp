@@ -36,7 +36,6 @@ USERINCLUDE     ../../../mtpfws/mtpfw/common/inc
 USERINCLUDE     ../../../mtpfws/mtpfw/inc
 USERINCLUDE     ../../../mtpfws/mtpfw/datatypes/inc
 USERINCLUDE     ../../../mtpfws/mtpfw/transports/transportapi/inc
-USERINCLUDE     ../mediasyncserver/inc/
 
 SOURCEPATH      ../src
 
@@ -99,6 +98,5 @@ LIBRARY             fbscli.lib
 LIBRARY             sysutil.lib
 LIBRARY             mdeclient.lib
 LIBRARY             thumbnailmanager.lib
-LIBRARY             rmediasyncserver.lib
 
 SMPSAFE

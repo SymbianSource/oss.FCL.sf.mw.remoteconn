@@ -1,0 +1,6 @@
+EXPORTS
+	_ZN32CObexServerPacketAccessExtension4NewLER11CObexServerR30MObexServerRequestPacketNotify @ 1 NONAME
+	_ZN24CObexClientErrorResolver4NewLER11CObexClient @ 2 NONAME
+	_ZN24CObexClientErrorResolver4NewLER11CObexClient33TObexClientErrorResolutionSetType @ 3 NONAME
+	_ZNK24CObexClientErrorResolver9LastErrorEv @ 4 NONAME
+
