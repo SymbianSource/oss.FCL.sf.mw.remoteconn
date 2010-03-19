@@ -92,6 +92,7 @@ void CMTPDevRequestUnknown::ServiceL()
 	    case EMTPOpCodeGetPartialObject:
 	    case EMTPOpCodeGetObjectReferences:
 	    case EMTPOpCodeSetObjectReferences:
+	    case EMTPOpCodeSetObjectProtection:
             {
             CMTPObjectMetaData* object(CMTPObjectMetaData::NewLC());
             if (!iSingletons.ObjectMgr().ObjectL(iRequest->Uint32(TMTPTypeRequest::ERequestParameter1), *object))

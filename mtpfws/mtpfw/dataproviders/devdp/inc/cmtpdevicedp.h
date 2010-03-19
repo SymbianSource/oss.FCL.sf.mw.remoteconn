@@ -88,10 +88,14 @@ private:
     void SessionOpenedL(const TMTPNotificationParamsSessionChange& aSession);
     TInt FindExtnPlugin(TUint aOpcode);
     void LoadExtnPluginsL();
-   
+    void AddFolderRecursiveL( const TMTPNotificationParamsFolderChange& aFolder );
+    TUint32 AddEntryL( const TDesC& aPath, TUint32 aParentHandle, TUint32 aStorageId, CMTPObjectMetaData& objectInfo );
+    TUint32 GetStorageIdL( const TDesC& aPath );
+    void OnDeviceFolderChangedL( TMTPEventCode aEventCode, CMTPObjectMetaData& objectInfo );
+    
    public:
     //from MExtnDevPluginCallback
-    void OnDevicePropertyChangedL (TMTPDevicePropertyCode& aPropCode);
+    void OnDevicePropertyChangedL(TMTPDevicePropertyCode& aPropCode);
 	
     /**
       * This method return reference MMTPDataProviderFramework
@@ -162,7 +166,6 @@ private: // Owned
     TInt								iActiveProcessor;
     TBool								iActiveProcessorRemoved;
 
-   
     };
     
 #endif // CMTPDEVICEDP_H

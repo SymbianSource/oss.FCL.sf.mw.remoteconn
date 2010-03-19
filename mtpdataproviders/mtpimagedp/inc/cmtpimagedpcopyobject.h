@@ -75,6 +75,7 @@ private:
     TUint32                 iNewParentHandle;
     TUint32                 iStorageId;
     TFileName               iNewFileName;
+    MMTPDataProviderFramework& iFramework;
     CMTPImageDataProvider&  iDataProvider;
     
     /*

@@ -85,6 +85,7 @@ Standard c++ constructor
 */	
 CMTPImageDpCopyObject::CMTPImageDpCopyObject(MMTPDataProviderFramework& aFramework, MMTPConnection& aConnection,CMTPImageDataProvider& aDataProvider) :
     CMTPRequestProcessor(aFramework, aConnection, sizeof(KMTPCopyObjectPolicy)/sizeof(TMTPRequestElementInfo), KMTPCopyObjectPolicy),
+    iFramework(aFramework),
     iDataProvider(aDataProvider)
     {
     __FLOG_OPEN(KMTPSubsystem, KComponent);
@@ -193,6 +194,13 @@ TUint32 CMTPImageDpCopyObject::CopyFileL(const TDesC& aOldFileName, const TDesC&
     SetPreviousPropertiesL(aNewFileName);
     
     iFramework.ObjectMgr().InsertObjectL(*iTargetObjectInfo);
+    //check object whether it is a new image object
+    if (MTPImageDpUtilits::IsNewPicture(*iTargetObjectInfo))
+        {
+        //increate new pictures count
+        iDataProvider.IncreaseNewPictures(1);
+        }    
+    
     __FLOG(_L8("<< CMTPImageDpCopyObject::CopyFileL"));
     CleanupStack::Pop(this);
     return iTargetObjectInfo->Uint(CMTPObjectMetaData::EHandle);
@@ -261,7 +269,7 @@ TMTPResponseCode CMTPImageDpCopyObject::CanCopyObjectL(const TDesC& aOldName, co
     TVolumeInfo volumeInfo;
     User::LeaveIfError(iFramework.Fs().Volume(volumeInfo, drive));
     
-    if(volumeInfo.iFree < fileEntry.iSize)
+    if(volumeInfo.iFree < fileEntry.FileSize())
         {
         result = EMTPRespCodeStoreFull;
         }
@@ -295,6 +303,7 @@ void CMTPImageDpCopyObject::SetPreviousPropertiesL(const TDesC& aNewFileName)
     iTargetObjectInfo = CMTPObjectMetaData::NewL();
     iTargetObjectInfo->SetUint(CMTPObjectMetaData::EDataProviderId, iSrcObjectInfo->Uint(CMTPObjectMetaData::EDataProviderId));
     iTargetObjectInfo->SetUint(CMTPObjectMetaData::EFormatCode, iSrcObjectInfo->Uint(CMTPObjectMetaData::EFormatCode));
+    iTargetObjectInfo->SetUint(CMTPObjectMetaData::EFormatSubCode, iSrcObjectInfo->Uint(CMTPObjectMetaData::EFormatSubCode));
     iTargetObjectInfo->SetDesCL(CMTPObjectMetaData::EName, iSrcObjectInfo->DesC(CMTPObjectMetaData::EName));
     iTargetObjectInfo->SetUint(CMTPObjectMetaData::ENonConsumable, iSrcObjectInfo->Uint(CMTPObjectMetaData::ENonConsumable));
     iTargetObjectInfo->SetUint(CMTPObjectMetaData::EParentHandle, iNewParentHandle);

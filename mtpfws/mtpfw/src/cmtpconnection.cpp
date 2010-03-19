@@ -93,10 +93,6 @@ CMTPConnection::~CMTPConnection()
     	delete link;
     	}
     
-    if (iTransportConnection != NULL)
-	    {
-	    iTransportConnection->Unbind(*this);
-	    }
     iSessions.ResetAndDestroy();
     //close the property
     iProperty.Close();
@@ -106,14 +102,6 @@ CMTPConnection::~CMTPConnection()
     __FLOG(_L8("~CMTPConnection - Exit"));
 	__FLOG_CLOSE;
     }
-
-/**
-Unbinds the Transport Connection
-*/    
-void CMTPConnection::Unbind(MMTPTransportConnection& /*aConnection*/)
-	{
-	iTransportConnection = NULL;
-	}
 
 /**
 Initiates MTP transaction data phase processing for initiator-to-responder
@@ -351,45 +339,47 @@ EXPORT_C void CMTPConnection::SessionOpenedL(TUint32 aMTPId)
  * Signals the connection is suspended, the connection state is set to EStateShutdown which 
  * means that all the current transaction will not be able to send/receive any data via the
  * connection
+ * @return ETrue - there is an active transaction currently, and Connection will suspend when it finishes
+ * EFalse - No active transaction, connection suspends immediately.
  */
-void CMTPConnection::ConnectionSuspended()
+TBool CMTPConnection::ConnectionSuspended()
     {
     __FLOG(_L8("ConnectionSuspended - Entry"));
     
+    TBool ret = EFalse;
     TUint currentState = State();
-    if (currentState!=EStateShutdown && currentState!=EStateErrorShutdown)
+    if (currentState != EStateShutdown)
         {
-        SetState(EStateShutdown);
+        if (ActiveSessions() == 0 || currentState == EStateErrorShutdown)
+            {
+            CompleteCloseConnection();
+            ret = ETrue;
+            }
         
-        if (iTransportConnection != NULL)
-            {
-            iTransportConnection->Unbind(*this);
-            iTransportConnection = NULL;
-            }
+        SetState(EStateShutdown);
         PublishConnState(EDisconnectedFromHost);   
-    
-        if (ActiveSessions() == 0)
-            {
-            CloseAllSessions();
-            iSessions.Reset();
-            iSingletons.Close();
-            }
-        else 
-            {
-            //some session may be in data or response phase, complete them and set transaction phase to ECompletingPhase.
-            const TUint count(iSessions.Count());
-            for (TUint i(0); (i < count); i++)
-                {
-                if (iSessions[i]->TransactionPhase() & (EDataIToRPhase|EDataRToIPhase|EResponsePhase))
-                    {
-                    iSessions[i]->SetTransactionPhase(ECompletingPhase);
-                    iSessions[i]->CompletePendingRequest(KErrCancel);
-                    }
-                }
-            }
         }
     
     __FLOG(_L8("ConnectionSuspended - Exit"));
+    return ret;
+    }
+
+void CMTPConnection::CompleteCloseConnection()
+    {
+    __FLOG(_L8("CompleteCloseConnection - Entry"));
+    
+    CloseAllSessions();
+    iSessions.Reset();
+	if (iTransportConnection != NULL)
+		{
+		iTransportConnection->Unbind(*this);
+		}
+    
+    //notify ConnectionMgr and corresponding transports of completion of connection close
+    iSingletons.ConnectionMgr().ConnectionCloseComplete(iConnectionId);    
+    iSingletons.Close();
+
+    __FLOG(_L8("CompleteCloseConnection - Exit"));
     }
 
 /*
@@ -439,24 +429,18 @@ void CMTPConnection::TransactionCompleteL(const TMTPTypeRequest& aRequest)
     if (ValidFrameworkRequest(&session, KValidPhases, NULL))
         {
         session.SetTransactionPhase(EIdlePhase);
-        if (State() == EStateShutdown)
-            {
-            if (ActiveSessions() == 0)
-                {        
-                CloseAllSessions();
-                iSessions.Reset();
-                iSingletons.Close();
-                
-                // Move the log here because ShutdownComplete will delete this object.
-                __FLOG(_L8("TransactionCompleteL - Exit"));
-                }
-            }
-        else
+        
+		if (iTransportConnection != NULL)
             {
             iTransportConnection->TransactionCompleteL(aRequest);
-            __FLOG(_L8("TransactionCompleteL - Exit"));
+            }
+			
+        if (State() == EStateShutdown && ActiveSessions() == 0)
+            {     
+            CompleteCloseConnection();
             }
         }
+    __FLOG(_L8("TransactionCompleteL - Exit"));
     }
     
 TUint CMTPConnection::ConnectionId() const
@@ -698,6 +682,11 @@ void CMTPConnection::SendResponseCompleteL(TInt aErr, const TMTPTypeResponse& /*
     	session.CompletePendingRequest(aErr);
 		}
     __FLOG(_L8("SendResponseCompleteL - Exit"));
+    }
+
+void CMTPConnection::Unbind(MMTPTransportConnection& /*aConnection*/)
+    {
+    iTransportConnection = NULL;
     }
 
    

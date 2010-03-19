@@ -32,7 +32,7 @@ const TUint KInvalidDpId = 0xFF;
 /**
 Verification data for the MoveObject request
 */    
-const TMTPRequestElementInfo CMTPMoveObject::KMTPMoveObjectPolicy[] = 
+const TMTPRequestElementInfo KMTPMoveObjectPolicy[] = 
     {
     	{TMTPTypeRequest::ERequestParameter1, EMTPElementTypeObjectHandle, EMTPElementAttrFileOrDir | EMTPElementAttrWrite, 0, 0, 0},   	
         {TMTPTypeRequest::ERequestParameter2, EMTPElementTypeStorageId, EMTPElementAttrWrite, 0, 0, 0},                

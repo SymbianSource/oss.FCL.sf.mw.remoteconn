@@ -164,10 +164,17 @@ public:
 	IMPORT_C TBool IsConnected() const;
 	IMPORT_C TBool IsStrictPeer() const;
 	IMPORT_C const TObexConnectInfo& LocalInfo() const;
-	IMPORT_C TInt SetLocalWho(const TDesC8& aInfo); 
-    IMPORT_C const TObexConnectInfo& RemoteInfo() const;
-   	IMPORT_C void SuppressAuthenticationHeaderElements(TObexSuppressedAuthElements aSuppressedObexAuthElements);
+	IMPORT_C TInt SetLocalWho(const TDesC8& aInfo);
+	IMPORT_C const TObexConnectInfo& RemoteInfo() const;
+	IMPORT_C void SuppressAuthenticationHeaderElements(TObexSuppressedAuthElements aSuppressedObexAuthElements);
 	
+public: // Implementation of MObexNotify Interface (No longer used)
+	virtual void Process(CObexPacket& aPacket);
+	virtual void Error(TInt aError);
+	virtual void TransportUp();
+	virtual void TransportDown(TBool aForceTransportDeletion);
+	
+public:
 	virtual void UserPasswordL( const TDesC& aPassword) = 0; 
 	IMPORT_C void RemoteAddr(TSockAddr& anAddr); 
 
@@ -180,12 +187,6 @@ public:
 	void NotifyError(TInt aError);
 	void NotifyTransportUp();
 	void NotifyTransportDown(TBool);
-	
-public: // Implementation of MObexNotify Interface (No longer used)
-	virtual void Process(CObexPacket& aPacket);
-	virtual void Error(TInt aError) ;
-	virtual void TransportUp();
-	virtual void TransportDown(TBool aForceTransportDeletion);
 	
 protected:
 	CObex();

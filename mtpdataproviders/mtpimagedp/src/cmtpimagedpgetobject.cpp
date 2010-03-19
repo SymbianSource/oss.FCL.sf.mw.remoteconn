@@ -77,7 +77,8 @@ CMTPImageDpGetObject::~CMTPImageDpGetObject()
 Standard c++ constructor
 */	
 CMTPImageDpGetObject::CMTPImageDpGetObject(MMTPDataProviderFramework& aFramework, MMTPConnection& aConnection, CMTPImageDataProvider& aDataProvider) : 
-    CMTPRequestProcessor(aFramework, aConnection, sizeof(KMTPGetObjectPolicy)/sizeof(TMTPRequestElementInfo), KMTPGetObjectPolicy), 
+    CMTPRequestProcessor(aFramework, aConnection, sizeof(KMTPGetObjectPolicy)/sizeof(TMTPRequestElementInfo), KMTPGetObjectPolicy),
+    iFramework(aFramework),
     iDataProvider(aDataProvider)
     {
     
@@ -106,7 +107,7 @@ void CMTPImageDpGetObject::ServiceL()
     __ASSERT_DEBUG(objectInfo, Panic(EMTPImageDpObjectNull));
     
     BuildFileObjectL(objectInfo->DesC(CMTPObjectMetaData::ESuid));
-    SendDataL(*iFileObject);
+    SendDataL(*iFileObject);    
     __FLOG(_L8("<< CMTPImageDpGetObject::ServiceL"));
     }
 		
@@ -126,22 +127,22 @@ void CMTPImageDpGetObject::BuildFileObjectL(const TDesC& aFileName)
 
 TBool CMTPImageDpGetObject::DoHandleCompletingPhaseL()
     {
-    __FLOG(_L8(" CMTPImageDpGetObject::DoHandleResponsePhaseL - Entry"));        
-    TInt currentNewPics = 0;
-    iDataProvider.Repository().Get(ENewImagesCount, currentNewPics);
-    if (currentNewPics != 0)
+    __FLOG(_L8(" CMTPImageDpGetObject::DoHandleResponsePhaseL - Entry"));
+    
+    /**
+     * end-user does not cancel the operation, we think the getobject operation is successful.
+     */
+    if (!iCancelled)
         {
-        /**
-		Zero the new pictures of RProperty.
-		Because we think the end-use has import all pictures as long as MTP receive one getobject operation
-
-        There are two different phases to collect new pictures:
-		1. In enumeration phase, calculate new pictures value from MSS in one go.
-		2. After enumeration phase, dynamically calculate new pictures value from MdS by Notifications
-		*/
-        iDataProvider.Repository().Set(ENewImagesCount, 0);
-        RProperty::Set(TUid::Uid(KMTPServerUID), KMTPNewPicKey, 0);        
-        }    
+        TUint32 objectHandle = Request().Uint32(TMTPTypeRequest::ERequestParameter1);
+        CMTPObjectMetaData* objectInfo = iRequestChecker->GetObjectInfo(objectHandle);    
+        if (MTPImageDpUtilits::IsNewPicture(*objectInfo))
+            {       
+            //update new picture status            
+            MTPImageDpUtilits::UpdateObjectStatusToOldL(iFramework, *objectInfo);
+            iDataProvider.DecreaseNewPictures(1);
+            }
+        }
     
     __FLOG(_L8("CMTPImageDpGetObject::DoHandleResponsePhaseL - Exit"));
     return CMTPRequestProcessor::DoHandleCompletingPhaseL();

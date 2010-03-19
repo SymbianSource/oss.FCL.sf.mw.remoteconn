@@ -25,6 +25,7 @@
 
 class CMTPTypeFile;
 class CMTPImageDataProvider;
+class MMTPDataProviderFramework;
 
 /** 
 Defines file data provider GetObject request processor
@@ -56,6 +57,7 @@ private: // Owned
 	 */
 	__FLOG_DECLARATION_MEMBER_MUTABLE;
 	
+	MMTPDataProviderFramework&    iFramework;
 	CMTPTypeFile*          iFileObject;
 	CMTPImageDataProvider& iDataProvider;
 	};

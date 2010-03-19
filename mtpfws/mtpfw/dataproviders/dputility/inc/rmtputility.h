@@ -64,7 +64,7 @@ private:
 	TBool GetTimeZone(const TDesC& aTimeString, TBool& aPositiveTimeZone, TInt& aTimeZoneInHour, TInt& aTimeZoneInMinute) const;
 	HBufC* OdfMimeTypeL( const TDesC& aFullFileName );
 	void AppendFormatExtensionMapping(const CDesCArray& aFormatExtensionMapping,TUint32 aDpId);
-	
+	void GetAllDecendents(TUint32 aStorageId, TUint aParentHandle, RArray<TUint>& aHandles) const;
 	
 private:
     /**

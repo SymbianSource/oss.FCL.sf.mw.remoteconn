@@ -95,7 +95,6 @@ private:
 	RBuf				iNewParent;
 	TUint32				iStorageId; 
 	CDesCArray*			iPathToCreate;
-	static const TMTPRequestElementInfo KMTPMoveObjectPolicy[];  	   
 	
     CMTPObjectBrowser*      iObjBrowser;
     RArray< TUint32 >      iHandles;

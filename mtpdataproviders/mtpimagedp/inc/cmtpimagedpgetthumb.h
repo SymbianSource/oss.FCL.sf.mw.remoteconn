@@ -57,7 +57,7 @@ private: // Owned
     */
     __FLOG_DECLARATION_MEMBER_MUTABLE;
     CMTPImageDataProvider& imgDp;
-    CMTPTypeOpaqueData*    iThumb;
+    CMTPTypeOpaqueData*    iThumb;    
     CMTPObjectMetaData*    iObjectMeta;
     };
     

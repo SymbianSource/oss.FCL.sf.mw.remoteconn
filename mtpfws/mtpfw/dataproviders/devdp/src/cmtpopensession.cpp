@@ -83,7 +83,7 @@ OpenSession request handler.  Adds the session to the connection.
 void CMTPOpenSession::ServiceL()    
     {
     iSingletons.DpController().WaitForEnumerationComplete();
-    if(iSingletons.DpController().EnumerateState() != CMTPDataProviderController::EEnumerated)
+    if(iSingletons.DpController().EnumerateState() < CMTPDataProviderController::EEnumeratingPhaseOneDone)
     	{
     	SendResponseL(EMTPRespCodeDeviceBusy);
     	}

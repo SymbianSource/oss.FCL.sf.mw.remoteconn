@@ -236,7 +236,7 @@ EXPORT_C void CMTPDataProviderController::NotifyDataProvidersL(TUint aDPId, TMTP
         iEnumeratingStorages.AppendL(params->iStorageId);
         
         // Only schedule the operation start if there is not one currently underway.
-        if (iEnumerationState == EEnumerated)
+        if (iEnumerationState == EEnumeratedFulllyCompleted) 
             {
             iNextDpId           = iDpIdDeviceDp;
             iEnumerationState   = EEnumeratingFrameworkObjects;
@@ -385,7 +385,7 @@ Wait for the enumeration complete.
 */ 
 EXPORT_C void CMTPDataProviderController::WaitForEnumerationComplete()
 {
-	if(EnumerateState() != CMTPDataProviderController::EEnumerated)
+	if((EnumerateState() < CMTPDataProviderController::EEnumeratingPhaseOneDone) && ( !iOpenSessionWaiter->IsStarted()))
 		{
 		iOpenSessionWaiter->Start();
 		}
@@ -406,6 +406,7 @@ Data provider enumeration state change notification callback.
 void CMTPDataProviderController::EnumerationStateChangedL(const CMTPDataProvider& aDp)
     {
     __FLOG(_L8("EnumerationStateChangedL - Entry"));
+    __FLOG_VA((_L8("Entry iEnumerationState: 0x%x iNextDpId: %d"), iEnumerationState, iNextDpId));
     switch (iEnumerationState)
         {        
     case EEnumeratingFrameworkStorages:
@@ -463,27 +464,42 @@ void CMTPDataProviderController::EnumerationStateChangedL(const CMTPDataProvider
             break;
             
         case KMTPImplementationUidFileDp:
-            iSingletons.ObjectMgr().RemoveNonPersistentObjectsL(aDp.DataProviderId());
-            // No other data providers
-            iNextDpId = 0;
-            iEnumeratingStorages.Remove(0);
-            if (iEnumeratingStorages.Count() == 0)
-                {
-                // No queued enumerations.
-                iSingletons.ObjectMgr().ObjectStore().CleanDBSnapshotL();
-                iEnumerationState   = EEnumerated;
-                Cancel();
-                if(iOpenSessionWaiter->IsStarted())
-                    {
-                    iOpenSessionWaiter->AsyncStop();
-                    }
-                }
-            else
-                {
-                // Queued enumerations.
-                iNextDpId           = iDpIdDeviceDp;
-                Schedule();
-                }
+			// No other data providers
+			if(NeedEnumeratingPhase2())
+				{
+				iEnumerationState = EEnumeratingSubDirFiles;
+				if(iOpenSessionWaiter->IsStarted())
+					{
+					iOpenSessionWaiter->AsyncStop();
+					}
+				//Schedule FildDP to enumerate the files in sub-dir
+				iNextDpId           = iDpIdFileDp;
+				Schedule();
+				}
+			else
+				{
+				iNextDpId = 0;
+				iEnumeratingStorages.Remove(0);
+				if (iEnumeratingStorages.Count() == 0)
+					{
+					iSingletons.ObjectMgr().RemoveNonPersistentObjectsL(aDp.DataProviderId());
+					iEnumerationState   = EEnumeratedFulllyCompleted;
+					iSingletons.ObjectMgr().ObjectStore().CleanDBSnapshotL();
+						
+					Cancel();
+					if(iOpenSessionWaiter->IsStarted())
+						{
+						iOpenSessionWaiter->AsyncStop();
+						}
+					}
+				else
+					{
+					// Queued enumerations.
+					iNextDpId           = iDpIdDeviceDp;
+					Schedule();
+					}
+				}
+        		
             }
         break;
         
@@ -496,9 +512,23 @@ void CMTPDataProviderController::EnumerationStateChangedL(const CMTPDataProvider
         if ((iEnumeratingDps.Count() == 0) && iDpIdArrayIndex >= iDataProviderIds.Count())
             {
             // Enumeration complete.
-            iNextDpId = 0;
             iNextDpId           = iDpIdFileDp;
             iEnumerationState   = EEnumeratingFrameworkObjects;
+            			
+			if ( ( iEnumeratingStorages.Count() > 1 ) &&(KErrNotFound != iEnumeratingStorages.Find(KMTPStorageAll)) )
+				{
+				const TUint storageid = iEnumeratingStorages[0];
+				iEnumeratingStorages.Remove(0);
+				if(KMTPStorageAll == storageid)
+					{
+					iEnumeratingStorages.Append(KMTPStorageAll);
+					}
+				
+				if(iEnumeratingStorages[0] != KMTPStorageAll)
+					{
+					iNextDpId = iDpIdDeviceDp;
+					}
+				}
             }
         else
             {
@@ -511,13 +541,39 @@ void CMTPDataProviderController::EnumerationStateChangedL(const CMTPDataProvider
         Schedule();        
         break;
         
+    case EEnumeratingSubDirFiles:
+    	{
+    	if(aDp.ImplementationUid().iUid == KMTPImplementationUidFileDp)
+    		{
+			iSingletons.ObjectMgr().RemoveNonPersistentObjectsL(aDp.DataProviderId());
+			iNextDpId = 0;
+			iEnumeratingStorages.Remove(0);
+			if(iEnumeratingStorages.Count() == 0)
+				{
+				iSingletons.DpController().SetNeedEnumeratingPhase2(EFalse);
+				iEnumerationState   = EEnumeratedFulllyCompleted;
+				iSingletons.ObjectMgr().ObjectStore().CleanDBSnapshotL();
+				}
+			else //removable card plug in
+				{
+				iNextDpId           = iDpIdDeviceDp;
+				iEnumerationState   = EEnumeratingFrameworkObjects;
+				Schedule();
+				}
+    		}
+    	}
+    	break;
+    	
+    case EEnumeratedFulllyCompleted:
     case EUnenumerated:
     case EEnumerationStarting:
-    case EEnumerated:
+    case EEnumeratingPhaseOneDone:
     default:
         __DEBUG_ONLY(User::Invariant());
         break;
         }
+    
+    __FLOG_VA((_L8("Exit iEnumerationState: 0x%x, iNextDpId: %d, UID=0x%x"), iEnumerationState, iNextDpId, aDp.ImplementationUid().iUid));
     __FLOG(_L8("EnumerationStateChangedL - Exit"));
     }
 
@@ -556,8 +612,6 @@ void CMTPDataProviderController::RunL()
             iNextDpId           = iDpIdDeviceDp;
             iEnumerationState   = EEnumeratingFrameworkObjects;
 	
-            
-        
             Schedule();
             }
         break;
@@ -573,7 +627,7 @@ void CMTPDataProviderController::RunL()
             iEnumeratingStorages.Remove(0);
             if (iEnumeratingStorages.Count() == 0)
                 {
-                iEnumerationState = EEnumerated;
+                iEnumerationState = EEnumeratedFulllyCompleted;
                 }
             else
                 {
@@ -591,21 +645,22 @@ void CMTPDataProviderController::RunL()
                     {
                     iSingletons.ObjectMgr().ObjectStore().EstablishDBSnapshotL(storageId);
                     }
-                else
+                else 
                     {
-                    const CMTPStorageMetaData& storage(iSingletons.StorageMgr().StorageL(storageId));
-                    if(storage.Uint(CMTPStorageMetaData::EStorageSystemType) == CMTPStorageMetaData::ESystemTypeDefaultFileSystem)
-                        {
-                        const RArray<TUint>& logicalIds(storage.UintArray(CMTPStorageMetaData::EStorageLogicalIds));
-                        const TUint KCountLogicalIds(logicalIds.Count());
-                        for (TUint i(0); (i < KCountLogicalIds); i++)
-                            {
-                            __FLOG_VA((_L8("Establish snapshot for storage: 0x%x"), storageId));
-                            iSingletons.ObjectMgr().ObjectStore().EstablishDBSnapshotL(storageId);
-                            }
-                        }
+					const CMTPStorageMetaData& storage(iSingletons.StorageMgr().StorageL(storageId));
+                	if(storage.Uint(CMTPStorageMetaData::EStorageSystemType) == CMTPStorageMetaData::ESystemTypeDefaultFileSystem)
+                		{
+						const RArray<TUint>& logicalIds(storage.UintArray(CMTPStorageMetaData::EStorageLogicalIds));
+						const TUint KCountLogicalIds(logicalIds.Count());
+						for (TUint i(0); (i < KCountLogicalIds); i++)
+							{
+							__FLOG_VA((_L8("Establish snapshot for storage: 0x%x"), logicalIds[i]));
+							iSingletons.ObjectMgr().ObjectStore().EstablishDBSnapshotL(logicalIds[i]);
+							}	
+                		}
                     }
                 }
+            	
             EnumerateDataProviderObjectsL(iNextDpId);          
             }
         	}
@@ -624,11 +679,19 @@ void CMTPDataProviderController::RunL()
             iEnumeratingDps.InsertInOrderL(currentDp);
             EnumerateDataProviderObjectsL(currentDp);
             }
+        
+        __FLOG_VA((_L8("iDpIdArrayIndex = %d, KLoadedDps = %d"), iDpIdArrayIndex, KLoadedDps));
         }
         break;
         
+    case EEnumeratingSubDirFiles:
+    	{
+    	EnumerateDataProviderObjectsL(iNextDpId); 
+    	}
+    	break;
+    case EEnumeratedFulllyCompleted:
     case EUnenumerated:
-    case EEnumerated:
+    case EEnumeratingPhaseOneDone:
     default:
         __DEBUG_ONLY(User::Invariant());
         break;
@@ -666,7 +729,7 @@ TInt CMTPDataProviderController::RunError(TInt /*aError*/)
         break;
         
     case EUnenumerated:
-    case EEnumerated:
+    case EEnumeratingPhaseOneDone:
     default:
         User::Invariant();
         break;
@@ -709,7 +772,7 @@ void CMTPDataProviderController::ConstructL()
 	iMode = (TMTPOperationalMode)tMTPMode;
 	CreateRegistrySessionAndEntryL();
     
-	iFlagDb = 0;
+	SetNeedEnumeratingPhase2(EFalse);
 	
     iOpenSessionWaiter = new(ELeave) CActiveSchedulerWait();
     __FLOG(_L8("ConstructL - Exit"));
@@ -1146,5 +1209,20 @@ void  CMTPDataProviderController::CloseRegistrySessionAndEntryL()
 		iSisEntry.Close();	
 		}
 	iSisSession.Close();
+	}
+
+EXPORT_C void CMTPDataProviderController::SetNeedEnumeratingPhase2(TBool aNeed)
+	{
+	__FLOG(_L8("SetNeedEnumeratingPhase2 - Entry"));
+	__FLOG_VA((_L8("Need = %d"), aNeed)); 
+	
+	iNeedEnumeratingPhase2 = aNeed;
+	
+	__FLOG(_L8("SetNeedEnumeratingPhase2 - Exit"));
+	}
+
+EXPORT_C TBool CMTPDataProviderController::NeedEnumeratingPhase2() const
+	{
+	return iNeedEnumeratingPhase2;
 	}
 

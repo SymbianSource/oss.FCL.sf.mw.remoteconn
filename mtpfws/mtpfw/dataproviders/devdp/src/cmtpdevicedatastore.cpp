@@ -875,7 +875,7 @@ TInt CMTPDeviceDataStore::SetDateTimeL(const TDesC& aDateTime )
     TInt errorCode = ValidateString(aDateTime, dateTime, offset);
     if(KErrNone == errorCode)
 	{
-	    StringToDateTime(dateTime);
+	    StringToDateTimeL(dateTime);
 	    iDateTime->SetL(dateTime);
 	    StoreL();
 	    //now set the system time by calling user SetUTCTime
@@ -923,7 +923,7 @@ void CMTPDeviceDataStore::DateTimeToStringL(TDes& aDateTime)
 *TTime time format YYYYMMDD:hhmmss.ssssss. Right now microsecond part is
 * not implemented.
 **/
-void CMTPDeviceDataStore::StringToDateTime(TDes& aDateTime )
+void CMTPDeviceDataStore::StringToDateTimeL(TDes& aDateTime )
 	{
     __FLOG(_L8("StringToDateTime - Entry"));
 	TBuf<30> newTime;
@@ -956,8 +956,7 @@ void CMTPDeviceDataStore::StringToDateTime(TDes& aDateTime )
 		}
 	else
 		{
-		_LIT(KPanic, "date time ");
-		User::Panic(KPanic, 3);
+        User::Leave( KErrArgument );
 		}
         __FLOG_1(_L("Processed DateTime: %S"), &aDateTime);	
 	__FLOG(_L8("StringToDateTime - Exit"));

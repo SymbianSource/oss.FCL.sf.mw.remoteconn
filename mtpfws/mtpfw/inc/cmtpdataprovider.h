@@ -124,6 +124,7 @@ public: // From MMTPDataProviderFramework
     MMTPStorageMgr& StorageMgr() const;
     RFs& Fs() const;
     MMTPDataCodeGenerator& DataCodeGenerator() const;
+    void NotifyFrameworkL( TMTPNotificationToFramework aNotification, const TAny* aParams );
 	
 private: // From CActive
 

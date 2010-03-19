@@ -111,7 +111,7 @@ TMTPResponseCode CMTPGetPartialObject::CheckRequestL()
             TEntry fileEntry;
             User::LeaveIfError(iFramework.Fs().Entry(iObjectInfo->DesC(CMTPObjectMetaData::ESuid), fileEntry));
 
-            if((iOffset >= fileEntry.iSize)) 
+            if((iOffset >= fileEntry.FileSize())) 
                 {
                 result = EMTPRespCodeInvalidParameter;
                 }

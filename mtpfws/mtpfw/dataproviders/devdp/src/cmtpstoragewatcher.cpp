@@ -24,7 +24,6 @@
 #include "cmtpstoragemgr.h"
 #include "cmtpobjectmgr.h"
 #include "cmtpstoragewatcher.h"
-#include "rmtpdevicedpsingletons.h"
 #include "cmtpdevicedpconfigmgr.h"
 
 
@@ -61,6 +60,7 @@ CMTPStorageWatcher::~CMTPStorageWatcher()
     iDpSingletons.Close();
     iDrivesExcluded.Close();
     iFrameworkSingletons.Close();
+    iDevDpSingletons.Close();
     __FLOG(_L8("~CMTPStorageWatcher - Exit"));
     __FLOG_CLOSE;
     }
@@ -278,13 +278,10 @@ void CMTPStorageWatcher::ConstructL()
     iFrameworkSingletons.OpenL();
     iFrameworkSingletons.FrameworkConfig().GetValueL(CMTPFrameworkConfig::ELogicalStorageIdsAllocationEnable, iAllocateLogicalStorages);
     
-    RMTPDeviceDpSingletons devSingletons;
-    devSingletons.OpenL(iFramework);
-    CleanupClosePushL(devSingletons);
-    
     iDpSingletons.OpenL(iFramework);
-    iFolderExclusionList = devSingletons.ConfigMgr().GetArrayValueL(CMTPDeviceDpConfigMgr::EFolderExclusionList); 
-    CleanupStack::PopAndDestroy(&devSingletons);
+    iDevDpSingletons.OpenL(iFramework);
+    iFolderExclusionList = iDevDpSingletons.ConfigMgr().GetArrayValueL(CMTPDeviceDpConfigMgr::EFolderExclusionList); 
+
     __FLOG(_L8("ConstructL - Exit"));
     }
     
@@ -475,6 +472,11 @@ void CMTPStorageWatcher::StorageAvailableL(TDriveNumber aDriveNumber)
         {
         TMTPNotificationParamsStorageChange params = {physical};
         iFrameworkSingletons.DpController().NotifyDataProvidersL(EMTPStorageAdded, static_cast<TAny*>(&params));
+        
+        if(iFrameworkSingletons.DpController().EnumerateState() == CMTPDataProviderController::EEnumeratingSubDirFiles)
+			{
+			iDevDpSingletons.PendingStorages().InsertInOrder(logical);
+			}
         }
 
     // Notify any connected Initiator(s).
@@ -515,6 +517,12 @@ void CMTPStorageWatcher::StorageUnavailableL(TDriveNumber aDriveNumber)
     TMTPNotificationParamsStorageChange params = {physical};
     iFrameworkSingletons.DpController().NotifyDataProvidersL(EMTPStorageRemoved, static_cast<TAny*>(&params));
 
+    TInt index = iDevDpSingletons.PendingStorages().FindInOrder( logical);
+	if(KErrNotFound != index)
+		{
+		iDevDpSingletons.PendingStorages().Remove(index);
+		}
+        	
     // Notify any connected Initiator(s).
     if (iAllocateLogicalStorages)
         {

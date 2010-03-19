@@ -47,13 +47,24 @@ public:
     static TUint32 FindParentHandleL(MMTPDataProviderFramework& aFramework, CMTPImageDataProvider& aDataProvider, const TDesC& aFullPath);
     
     /**
-     * Calculate the new pictures value and set RProperty.
-     
-       @param aDataProvider  The image data provider reference
-       @param aNewPics       The new pictures count
-       @param aSetRProperty  Whether should set RProperty value to notify all subscribers.
+     * determine whether the object is new
      */
-    static void UpdateNewPicturesValue(CMTPImageDataProvider& aDataProvider, TInt aNewPics, TBool aSetRProperty);
+    static TBool IsNewPicture(const CMTPObjectMetaData& aMetadata);
+    
+    /**
+     * update object status to old
+     */
+    static void UpdateObjectStatusToOldL(MMTPDataProviderFramework& aFramework, CMTPObjectMetaData& aMetadata);
+    
+    /**
+     * query thumbnail size from metadata of object
+     */
+    static TInt GetThumbnailSize(const CMTPObjectMetaData& aMetadata);
+    
+    /**
+     * update object thumbnail size
+     */
+    static void UpdateObjectThumbnailSizeL(MMTPDataProviderFramework& aFramework, CMTPObjectMetaData& aMetadata, TInt aThumbnailSize);
     };
     
 #endif MTPIMAGEDPUTILITS_H

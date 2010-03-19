@@ -39,7 +39,8 @@ Provides the byte size of the specified array.
 /**
 CMTPParserRouter panic codes.
 */
-_LIT(KMTPPanicCategory, "CMTPParserRouter");
+
+
 enum TMTPPanicReasons
     {
     EMTPPanicRoutingConflict = 0
@@ -49,9 +50,10 @@ enum TMTPPanicReasons
 Produces a "CMTPParserRouter" category panic.
 @param aReason The panic code.
 */
-LOCAL_C void Panic(TInt aReason)
+LOCAL_C void Panic(TInt __DEBUG_ONLY(aReason))
     {
-    User::Panic(KMTPPanicCategory, aReason);
+	__DEBUG_ONLY(_LIT(KMTPPanicCategory, "CMTPParserRouter"));
+    __DEBUG_ONLY(User::Panic(KMTPPanicCategory, aReason));
     }
     
 /**
@@ -1839,44 +1841,39 @@ void CMTPParserRouter::GetRoutingSubTypesGetObjectPropListRequestL(RArray<TRouti
         const TUint KObjectFormatCode(params1.Param(TRoutingParameters::EParamFormatCode));
         const TUint KObjectFormatSubCode(params1.Param(TRoutingParameters::EParamFormatSubCode));
         const TUint KObjectPropCode(params1.Param(TRoutingParameters::EParamObjectPropCode));
-        if ((KObjectHandle == KMTPHandleAll) || 
-            (KObjectHandle == KMTPHandleAllRootLevel))
+        const TUint KDepth(params1.Request().Uint32(TMTPTypeRequest::ERequestParameter5));
+        if ( KDepth==0 )
             {
-            // All objects or all root level objects.
-            if (KObjectFormatCode == KMTPFormatsAll)
+            if ((KObjectHandle == KMTPHandleAll) || 
+                (KObjectHandle == KMTPHandleAllRootLevel))
                 {
                 SelectSubTypeRoutingL(ESubTypeOperationCode, aRoutingSubTypes, aValidationSubTypes, aParams);
                 }
-            else
+            else if (KObjectHandle != KMTPHandleNone)
                 {
-                SelectSubTypeRoutingL(ESubTypeFormatCodeOperationCode, aRoutingSubTypes, aValidationSubTypes, aParams);
-                }
+                 if( (KObjectFormatCode == EMTPFormatCodeAssociation) && (KObjectFormatSubCode == EMTPAssociationTypeGenericFolder) )
+                     {
+                         if ( params1.Param(TRoutingParameters::EFlagRoutingTypes) & ETypeFramework )
+                         {
+                         SelectSubTypeRoutingL(ESubTypeDpProxy, aRoutingSubTypes, aValidationSubTypes, aParams);
+                         }
+                         else
+                         {
+                         SelectSubTypeRoutingL(ESubTypeStorageTypeOperationCode, aRoutingSubTypes, aValidationSubTypes, aParams);
+                         SelectSubTypeRoutingL(ESubTypeOwnerObject, aRoutingSubTypes, aValidationSubTypes, aParams);
+                         }
+                     }
+                 else
+                     {
+                     SelectSubTypeRoutingL(ESubTypeOwnerObject, aRoutingSubTypes, aValidationSubTypes, aParams);
+                     }
+                 } 
             }
-        else if (KObjectHandle != KMTPHandleNone)
+        else
             {
-             if( (KObjectFormatCode == EMTPFormatCodeAssociation) && (KObjectFormatSubCode == EMTPAssociationTypeGenericFolder) )
-                 {
-					 if ( params1.Param(TRoutingParameters::EFlagRoutingTypes) & ETypeFramework )
-					 {
-					 SelectSubTypeRoutingL(ESubTypeDpProxy, aRoutingSubTypes, aValidationSubTypes, aParams);
-					 }
-					 else
-					 {
-					 SelectSubTypeRoutingL(ESubTypeStorageTypeOperationCode, aRoutingSubTypes, aValidationSubTypes, aParams);
-					 SelectSubTypeRoutingL(ESubTypeOwnerObject, aRoutingSubTypes, aValidationSubTypes, aParams);
-					 }
-                 }
-             else
-            	 {
-                 SelectSubTypeRoutingL(ESubTypeOwnerObject, aRoutingSubTypes, aValidationSubTypes, aParams);
-            	 }
-             } 
+            SelectSubTypeRoutingL(ESubTypeOperationCode, aRoutingSubTypes, aValidationSubTypes, aParams);
+            }
         
-
-        if (KObjectPropCode != KMTPObjectPropCodeAll)
-            {
-            SelectSubTypeValidationL(ESubTypeObjectPropCode, aValidationSubTypes);
-            }
         }
     __FLOG(_L8("GetRoutingSubTypesGetObjectPropListRequestL, Exit"));
     }

@@ -158,7 +158,8 @@ void CMTPGetObjectPropDesc::ServiceL()
 			ServiceNonConsumableL();
 			break;
 		default:
-			Panic(EMTPDpUnsupportedProperty);
+		    User::Leave( KErrNotSupported );
+			break;
 		}
 	__ASSERT_DEBUG(iObjectProperty, Panic(EMTPDpObjectPropertyNull));
 	iObjectProperty->SetUint32L(CMTPTypeObjectPropDesc::EGroupCode,GetPropertyGroupNumber(propCode));

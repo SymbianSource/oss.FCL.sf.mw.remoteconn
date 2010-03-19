@@ -434,93 +434,121 @@ EXPORT_C TUint RMTPUtility::GetEnumerationFlag(const TDesC& aExtension)
     return 1;
     }
 
-
 void RMTPUtility::RenameAllChildrenL(TUint32 aStorageId, TUint32 aParentHandle, const TDesC& aNewFolderName, const TDesC& aOldFolderName)
 	{
     __FLOG(_L8("RenameAllChildrenL - Entry"));
-	
-	RMTPObjectMgrQueryContext   context;
-	RArray<TUint>               handles;
-	TMTPObjectMgrQueryParams    params(aStorageId, KMTPFormatsAll, aParentHandle);
-	CleanupClosePushL(context);
-	CleanupClosePushL(handles);
-	
-	CMTPObjectMetaData* objectInfo(CMTPObjectMetaData::NewLC());
-	TInt count = 0;	
-	TEntry entry;
-	
-	do
-	    {
-	    iFramework->ObjectMgr().GetObjectHandlesL(params, context, handles);
-    	count = handles.Count();
-    	
-    	for(TInt i(0); (i < count); i++)
-    		{
-    		if (!iFramework->ObjectMgr().ObjectL(handles[i], *objectInfo))
-    			{
-    			User::Leave(KErrCorrupt);
-    			}
-    		
-    	    /**
-    	     * [SP-Format-0x3002]Special processing for PictBridge DP which own 6 dps file with format 0x3002, 
-    	     * but it does not really own the format 0x3002.
-    	     * 
-    	     * Make the same behavior betwen 0x3000 and 0x3002.
-    	     */
-    		if( (objectInfo->Uint(CMTPObjectMetaData::EFormatCode) != EMTPFormatCodeAssociation)
-    		    && (objectInfo->Uint(CMTPObjectMetaData::EFormatCode) != EMTPFormatCodeUndefined)
-    		    && (objectInfo->Uint(CMTPObjectMetaData::EFormatCode) != EMTPFormatCodeScript) )
-    		   continue;
+    
+    CMTPObjectMetaData* objectInfo(CMTPObjectMetaData::NewLC());
+    TInt count = 0; 
+    RArray<TUint>               handles;
+    CleanupClosePushL(handles);
+    GetAllDecendents(aStorageId, aParentHandle, handles);
+    count = handles.Count();
+    
+    TEntry entry;
+    for(TInt i(0); (i < count); ++i)
+        {
+        if (!iFramework->ObjectMgr().ObjectL(handles[i], *objectInfo))
+            {
+            User::Leave(KErrCorrupt);
+            }
+        
+        /**
+         * [SP-Format-0x3002]Special processing for PictBridge DP which own 6 dps file with format 0x3002, 
+         * but it does not really own the format 0x3002.
+         * 
+         * Make the same behavior betwen 0x3000 and 0x3002.
+         */
+        if( (objectInfo->Uint(CMTPObjectMetaData::EFormatCode) != EMTPFormatCodeAssociation)
+            && (objectInfo->Uint(CMTPObjectMetaData::EFormatCode) != EMTPFormatCodeUndefined)
+            && (objectInfo->Uint(CMTPObjectMetaData::EFormatCode) != EMTPFormatCodeScript) )
+           continue;
 
-			RBuf entryName; 
-			entryName.CreateL(KMaxFileName);
-			entryName.CleanupClosePushL();
-			entryName = objectInfo->DesC(CMTPObjectMetaData::ESuid);
-			
-			RBuf rightPartName;
-			rightPartName.CreateL(KMaxFileName);
-			rightPartName.CleanupClosePushL();
-			rightPartName = entryName.Right(entryName.Length() - aOldFolderName.Length());
-			
-			if ((aNewFolderName.Length() + rightPartName.Length()) > entryName.MaxLength())
-				{
-				entryName.ReAllocL(aNewFolderName.Length() + rightPartName.Length());
-				}
-			
-			entryName.Zero();
-			entryName.Append(aNewFolderName);
-			entryName.Append(rightPartName);
-			
-			if (KErrNone != iFramework->Fs().Entry(entryName, entry))
-				{
-				// Skip objects that don't use the file path as SUID.
-				CleanupStack::PopAndDestroy(&entryName);
-				continue;
-				}
-			
-			// Recursively update all this object's children.
-			// The maximum recursion depth is as deep as the association hierarchy.
-			RenameAllChildrenL(objectInfo->Uint(CMTPObjectMetaData::EStorageId), objectInfo->Uint(CMTPObjectMetaData::EHandle), entryName, objectInfo->DesC(CMTPObjectMetaData::ESuid) );
-			
-			TFileName oldfilename(objectInfo->DesC(CMTPObjectMetaData::ESuid));
-			objectInfo->SetDesCL(CMTPObjectMetaData::ESuid, entryName);
-			iFramework->ObjectMgr().ModifyObjectL(*objectInfo);
-			
-			if(objectInfo->Uint(CMTPObjectMetaData::EFormatCode) == EMTPFormatCodeAssociation)
-				{
-				//Send the Rename notification 
-				TMTPNotificationParamsHandle param = { handles[i], oldfilename};
-				iSingleton.DpController().NotifyDataProvidersL(EMTPRenameObject, static_cast<TAny*>(&param));
-				}
-			CleanupStack::PopAndDestroy(2); // rightPartName, entryName		
-    		}
-	    }
-	while (!context.QueryComplete());
-	
-	CleanupStack::PopAndDestroy(3);//objectInfo; &handles; &context
+        RBuf entryName; 
+        entryName.CreateL(KMaxFileName);
+        entryName.CleanupClosePushL();
+        entryName = objectInfo->DesC(CMTPObjectMetaData::ESuid);
+        
+        RBuf rightPartName;
+        rightPartName.CreateL(KMaxFileName);
+        rightPartName.CleanupClosePushL();
+        rightPartName = entryName.Right(entryName.Length() - aOldFolderName.Length());
+        
+        if ((aNewFolderName.Length() + rightPartName.Length()) > entryName.MaxLength())
+            {
+            entryName.ReAllocL(aNewFolderName.Length() + rightPartName.Length());
+            }
+        
+        entryName.Zero();
+        entryName.Append(aNewFolderName);
+        entryName.Append(rightPartName);
+        
+        if (KErrNone != iFramework->Fs().Entry(entryName, entry))
+            {
+            // Skip objects that don't use the file path as SUID.
+            CleanupStack::PopAndDestroy(&entryName);
+            continue;
+            }        
+        
+        TFileName oldfilename(objectInfo->DesC(CMTPObjectMetaData::ESuid));
+        objectInfo->SetDesCL(CMTPObjectMetaData::ESuid, entryName);
+        iFramework->ObjectMgr().ModifyObjectL(*objectInfo);
+        
+        if(objectInfo->Uint(CMTPObjectMetaData::EFormatCode) == EMTPFormatCodeAssociation)
+            {
+            //Send the Rename notification 
+            TMTPNotificationParamsHandle param = { handles[i], oldfilename};
+            iSingleton.DpController().NotifyDataProvidersL(EMTPRenameObject, static_cast<TAny*>(&param));
+            }
+            
+        CleanupStack::PopAndDestroy(2); // rightPartName, entryName             
+        }
+    
+    CleanupStack::PopAndDestroy(2); //objectInfo; &handles; 
 	
     __FLOG(_L8("RenameAllChildrenL - Exit"));
 	}
+
+void RMTPUtility::GetAllDecendents(TUint32 aStorageId, TUint aParentHandle, RArray<TUint>& aHandles) const
+    {
+    TInt index = 0; 
+    TBool firstLevel = ETrue;
+    
+    do
+        {
+        TUint parentHandle;
+        if (firstLevel)
+            {
+            parentHandle = aParentHandle; //Get the first level children handles
+            firstLevel = EFalse;
+            }        
+        else
+            {
+            parentHandle = aHandles[index];
+            ++index;
+            }        
+        
+        RMTPObjectMgrQueryContext   context;
+        RArray<TUint>               childrenHandles;
+        TMTPObjectMgrQueryParams    params(aStorageId, KMTPFormatsAll, parentHandle);
+        CleanupClosePushL(context);
+        CleanupClosePushL(childrenHandles);
+        
+        do
+            {
+            iFramework->ObjectMgr().GetObjectHandlesL(params, context, childrenHandles);
+            TInt count = childrenHandles.Count(); 
+            for (TUint i = 0; i < count; ++i)
+                {
+                aHandles.Append(childrenHandles[i]);
+                }
+            }
+        while (!context.QueryComplete());
+        CleanupStack::PopAndDestroy(2); //&childrenHandles; &context
+        }
+    while(index < aHandles.Count());
+
+    }
 
 HBufC* RMTPUtility::OdfMimeTypeL( const TDesC& aFullPath )
     {

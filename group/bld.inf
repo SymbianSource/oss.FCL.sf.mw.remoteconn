@@ -18,4 +18,3 @@
 
 
 #include "../remoteconn_plat/group/bld.inf"
-#include "../connectivitymodules/group/bld.inf"

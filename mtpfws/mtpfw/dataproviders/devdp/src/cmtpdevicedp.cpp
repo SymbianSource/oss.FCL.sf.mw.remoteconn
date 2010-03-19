@@ -13,11 +13,15 @@
 // Description:
 //
 
+#include <bautils.h>
 #include <mtp/cmtpstoragemetadata.h>
 #include <mtp/mmtpconnection.h>
 #include <mtp/mmtpdataproviderframework.h>
+#include <mtp/mmtpobjectmgr.h>
 #include <mtp/mtpdataproviderapitypes.h>
 #include <mtp/tmtptyperequest.h>
+#include <mtp/cmtptypestring.h>
+#include <mtp/cmtpobjectmetadata.h>
 
 #include "cmtpdevdpexclusionmgr.h"
 #include "cmtpdevicedatastore.h"
@@ -31,8 +35,6 @@
 #include "mtpdevdppanic.h"
 
 #include "cmtpextndevdp.h"
-#include <mtp/cmtptypestring.h>
-
 
 // Class constants.
 __FLOG_STMT(_LIT8(KComponent,"DeviceDataProvider");)
@@ -109,7 +111,9 @@ void CMTPDeviceDataProvider::ProcessNotificationL(TMTPNotification aNotification
     case EMTPSessionOpened:
         SessionOpenedL(*reinterpret_cast<const TMTPNotificationParamsSessionChange*>(aParams));
         break;
-
+    case EMTPObjectAdded:
+        AddFolderRecursiveL(*reinterpret_cast<const TMTPNotificationParamsFolderChange*>( aParams ));
+        break;
     default:
         // Ignore all other notifications.
         break;
@@ -355,6 +359,159 @@ void CMTPDeviceDataProvider::LoadExtnPluginsL()
 	CleanupStack::PopAndDestroy(&extnUidArray);
 	}
 
+void CMTPDeviceDataProvider::AddFolderRecursiveL( const TMTPNotificationParamsFolderChange& aFolder )
+    {
+    __FLOG(_L8("AddFolderRecursiveL - Entry"));
+    
+    TPtrC folderRight( aFolder.iFolderChanged );
+    __FLOG_VA((_L16("Folder Addition - DriveAndFullPath:%S"), &folderRight ));
+    
+    if ( !BaflUtils::FolderExists( Framework().Fs(), folderRight ))
+    	{
+    	__FLOG(_L8("Folder not exist in file system"));
+    	User::Leave( KErrArgument );
+    	}
+    
+    TUint32 parentHandle( KMTPHandleNoParent );
+    TUint32 handle( KMTPHandleNoParent );
+    TInt pos( KErrNotFound );
+    TInt lengthOfRight( folderRight.Length());
+    TFileName folderLeft;
+    
+    _LIT( KRootFolder, "?:\\");
+    
+    /*
+    Go through from beginning.
+    when this while end, folderLeft keeps the top
+    layer folder which has no handle
+    */
+    do 
+        {
+        pos = folderRight.Locate( KPathDelimiter );
+        if ( KErrNotFound == pos )
+            {
+            break;
+            }
+        folderLeft.Append( folderRight.Left( pos + 1 ));
+        lengthOfRight = folderRight.Length()-pos -1;
+        folderRight.Set( folderRight.Right( lengthOfRight ));
+        
+        if ( KErrNotFound != folderLeft.Match( KRootFolder ))
+        	{
+        	//first time, root folder
+        	//continue
+        	continue;
+        	}
+        parentHandle = handle;
+        handle = Framework().ObjectMgr().HandleL( folderLeft );
+        }
+    while( KMTPHandleNone != handle );
+    
+
+    if ( KMTPHandleNone == handle )
+        {
+        __FLOG(_L8("need to add entry into mtp database"));
+        
+        CMTPObjectMetaData* folderObject = CMTPObjectMetaData::NewL();
+        TUint32 storageId = GetStorageIdL( folderLeft );
+        
+        while( 1 )
+            {
+            parentHandle = AddEntryL( folderLeft, parentHandle, storageId, *folderObject );
+            OnDeviceFolderChangedL( EMTPEventCodeObjectAdded, *folderObject );
+
+            pos = folderRight.Locate( KPathDelimiter );
+            lengthOfRight = folderRight.Length()-pos -1;
+            if ( KErrNotFound == pos )
+            	{
+            	break;
+            	}
+            folderLeft.Append( folderRight.Left( pos + 1  ));
+            folderRight.Set( folderRight.Right( lengthOfRight ));
+            }
+            
+        delete folderObject;
+        }
+    
+    __FLOG(_L8("AddFolderRecursiveL - Exit"));
+    }
+    
+TUint32 CMTPDeviceDataProvider::AddEntryL( const TDesC& aPath, TUint32 aParentHandle, TUint32 aStorageId, CMTPObjectMetaData& aObjectInfo  )
+    {
+    __FLOG(_L8("AddEntryL - Entry"));
+    
+    TBool isFolder( EFalse );
+    BaflUtils::IsFolder( Framework().Fs(), aPath, isFolder );
+    
+    __ASSERT_ALWAYS( isFolder, User::Leave( KErrArgument ));
+    __ASSERT_ALWAYS( aParentHandle != KMTPHandleNone, User::Leave( KErrArgument ));
+    __ASSERT_ALWAYS( Framework().StorageMgr().ValidStorageId( aStorageId ), User::Invariant());
+
+    __FLOG_VA((_L16("Add Entry for Path:%S"), &aPath ));
+    aObjectInfo.SetUint( CMTPObjectMetaData::EDataProviderId, Framework().DataProviderId() );
+    aObjectInfo.SetUint( CMTPObjectMetaData::EFormatCode, EMTPFormatCodeAssociation );
+    aObjectInfo.SetUint( CMTPObjectMetaData::EStorageId, aStorageId );
+    aObjectInfo.SetDesCL( CMTPObjectMetaData::ESuid, aPath );
+    aObjectInfo.SetUint( CMTPObjectMetaData::EFormatSubCode, EMTPAssociationTypeGenericFolder );
+    aObjectInfo.SetUint( CMTPObjectMetaData::EParentHandle, aParentHandle );
+    aObjectInfo.SetUint( CMTPObjectMetaData::ENonConsumable, EMTPConsumable );
+    
+    //For example 
+    //C:\\Documents\\Sample\\Sample1\\
+    //Then "Sample1" is inserted into folderObjects
+    TUint length = aPath.Length()-1;//remove '\'
+    TPtrC tailFolder( aPath.Ptr(), length );
+    TInt pos = tailFolder.LocateReverse( KPathDelimiter ) + 1;
+    tailFolder.Set( tailFolder.Right(length - pos));
+
+    aObjectInfo.SetDesCL( CMTPObjectMetaData::EName, tailFolder );
+    
+    Framework().ObjectMgr().InsertObjectL( aObjectInfo );
+    __FLOG(_L8("AddEntryL - Exit"));
+    
+    return aObjectInfo.Uint( CMTPObjectMetaData::EHandle );
+    }
+
+TUint32 CMTPDeviceDataProvider::GetStorageIdL( const TDesC& aPath )
+    {
+    __FLOG(_L8("GetStorageId - Entry"));
+
+    TChar driveLetter = aPath[0];
+    TInt drive;
+    User::LeaveIfError( Framework().Fs().CharToDrive( driveLetter, drive ));
+    	
+    __FLOG(_L8("GetStorageId - Exit"));
+    
+    return Framework().StorageMgr().FrameworkStorageId( static_cast<TDriveNumber>( drive ));
+    }
+
+void CMTPDeviceDataProvider::OnDeviceFolderChangedL( TMTPEventCode aEventCode, CMTPObjectMetaData& aObjectInfo )
+    {
+    __FLOG(_L8("OnDeviceFolderChangedL - Entry"));
+    
+    iEvent.Reset();
+    
+    switch( aEventCode )
+        {
+    case EMTPEventCodeObjectAdded:
+        {
+        __FLOG(_L8("Send event for object add"));
+        iEvent.SetUint16( TMTPTypeEvent::EEventCode, EMTPEventCodeObjectAdded );
+        iEvent.SetUint32( TMTPTypeEvent::EEventSessionID, KMTPSessionAll );
+        iEvent.SetUint32( TMTPTypeEvent::EEventTransactionID, KMTPTransactionIdNone );
+        TUint32 handle = aObjectInfo.Uint( CMTPObjectMetaData::EHandle );
+        iEvent.SetUint32( TMTPTypeEvent::EEventParameter1, handle );
+        }
+        break;
+    default:
+        break;
+        }
+    
+    Framework().SendEventL(iEvent);
+    
+    __FLOG(_L8("OnDeviceFolderChangedL - Exit"));
+    }
+
 /**
 Second phase constructor.
 */
@@ -381,6 +538,8 @@ void CMTPDeviceDataProvider::ConstructL()
 		}
 
     iEnumerator = CMTPFSEnumerator::NewL(Framework(), iDpSingletons.ExclusionMgrL(), *this, KProcessLimit);
+    
+    
     __FLOG(_L8("ConstructL - Exit"));
 
     }

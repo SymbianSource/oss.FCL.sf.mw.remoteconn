@@ -30,6 +30,7 @@ class TMTPTypeUint32;
 class TMTPTypeUint64;
 class TMTPTypeUint128;
 class CMTPTypeString;
+class CMTPTypeArray;
 class CMTPImageDataProvider;
 
 
@@ -70,6 +71,7 @@ private:
     void ServiceRepresentativeSampleSizeL();
     void ServiceRepresentativeSampleHeightL();
     void ServiceRepresentativeSampleWidthL();
+    void ServiceRepresentativeSampleDataL();
     void ServiceNonConsumableL();
 
 private:
@@ -80,6 +82,7 @@ private:
     TMTPTypeUint64			iMTPTypeUint64;
     TMTPTypeUint128			iMTPTypeUint128;
     CMTPTypeString*			iMTPTypeString;
+    CMTPTypeArray*          iMTPTypeArray;
     CMTPObjectMetaData*     iObjectMeta;
     
     /**

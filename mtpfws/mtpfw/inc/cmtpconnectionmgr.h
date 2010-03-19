@@ -23,8 +23,10 @@
 #define CMTPCONNECTIONMGR_H
 
 #include <e32base.h>
+#include <bttypes.h>
 #include "mmtpconnectionmgr.h"
 #include "mtpdebug.h"
+#include "mtp/rmtpclient.h"
 
 class CMTPConnection;
 class CMTPTransportPlugin;
@@ -54,6 +56,7 @@ public:
     IMPORT_C CMTPConnection& ConnectionL(TUint aConnectionId) const;
     TUint ConnectionCount() const;
     CMTPConnection& operator[](TInt aIndex) const;
+	void ConnectionCloseComplete(const TUint& aConnUid);
     IMPORT_C void StartTransportL(TUid aTransport);
     IMPORT_C void StartTransportL(TUid aTransport, const TAny* aParameter);  
     IMPORT_C void QueueTransportL( TUid aTransport, const TAny* aParameter );
@@ -63,13 +66,12 @@ public:
     IMPORT_C void StopTransports();
     IMPORT_C TInt TransportCount() const;
     IMPORT_C TUid TransportUid();
-	
-	    
+    IMPORT_C void SetBTResumeParameter(const TBTDevAddr& aBTAddr, const TUint16& aPSMPort);
+		    
 private: // From MMTPConnectionMgr
 
-    void ConnectionClosed(MMTPTransportConnection& aTransportConnection);
+    TBool ConnectionClosed(MMTPTransportConnection& aTransportConnection);
     void ConnectionOpenedL(MMTPTransportConnection& aTransportConnection);
-    TBool DeleteConnection(TUint aConnectionId);
     TUid ClientSId();
     
 private:
@@ -102,6 +104,11 @@ private:
      * Active object which starts suspended transport asynchronously
      */
     CAsyncCallBack*                 iTransportTrigger;
+    
+    /**
+     * It will store the bluetooth address of remote device.
+     */ 
+    TMTPBTRemoteDevice iRemoteDevice;
     
     /**
     FLOGGER debug trace member variable.

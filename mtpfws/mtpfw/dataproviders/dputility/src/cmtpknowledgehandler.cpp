@@ -39,6 +39,183 @@ _LIT(KMTPSlash, "\\");
 _LIT(KMTPKnowledgeObjFileName, "mtp_knowledgeobj.dat");
 _LIT(KMTPKnowledgeObjSwpFileName, "mtp_knowledgeobj.swp");
 
+
+CKnowledgeObject* CKnowledgeObject::NewL(CRepository& aRepository)
+	{
+	CKnowledgeObject *self = new (ELeave) CKnowledgeObject(aRepository);
+	CleanupStack::PushL(self);
+	self->ConstructL();
+	CleanupStack::Pop(self);
+	return self;
+	}
+
+CKnowledgeObject::CKnowledgeObject(CRepository& aRepository) : iRepository(aRepository)
+	{
+	
+	}
+CKnowledgeObject::~CKnowledgeObject()
+	{
+	__FLOG(_L8("~CKnowledgeObject - Entry")); 
+	iDateModified.Close();
+	iName.Close();
+	__FLOG(_L8("~CKnowledgeObject - Exit")); 
+	__FLOG_CLOSE;
+	}
+void CKnowledgeObject::ConstructL()
+	{
+	__FLOG_OPEN(KMTPSubsystem, KComponent);
+	__FLOG(_L8("CKnowledgeObject Construct - Entry"));
+	iKnowledgeObjectSize = KObjectSizeNotAvaiable;
+	iDateModified.CreateL(KDateTimeMaxLength);
+	iName.CreateL(KNameMaxLength);
+	iLastAuthorProxyID.Set(KMTPUnInitialized64, KMTPUnInitialized64);
+	iDirty = EBitFlagAll;
+	__FLOG(_L8("CKnowledgeObject Construct - Exit"));
+	}
+
+void CKnowledgeObject::LoadL()
+	{
+	__FLOG(_L8("CKnowledgeObject LoadL - Entry"));
+	// Load ObjectSize
+	TInt objSize;
+	User::LeaveIfError(iRepository.Get(ESize, objSize));
+	iKnowledgeObjectSize = objSize;
+
+	// Load DateModify
+	iDateModified.Zero();
+	User::LeaveIfError(iRepository.Get(EDateModified, iDateModified));
+	
+	// Load Name
+	iName.Zero();
+	User::LeaveIfError(iRepository.Get(EName, iName));
+
+	// Load LastAuthorProxyID:
+	TPtr8 writeBuf(NULL, 0); //walkaroud for the TMTPTypeUint128
+	iLastAuthorProxyID.FirstWriteChunk(writeBuf);
+	User::LeaveIfError(iRepository.Get(ELastAuthorProxyID, writeBuf));
+	iDirty = EBitFlagNone;
+	__FLOG(_L8("CKnowledgeObject LoadL - Exit"));
+	return;
+	}
+
+
+void CKnowledgeObject::Clear()
+	{
+	__FLOG(_L8("CKnowledgeObject Clear - Entry"));
+	iKnowledgeObjectSize = KObjectSizeNotAvaiable;
+	iDateModified.Zero();
+	iName.Zero();
+	iLastAuthorProxyID.Set(KMTPUnInitialized64, KMTPUnInitialized64);
+	iDirty = EBitFlagAll;
+	__FLOG(_L8("CKnowledgeObject Clear - Exit"));
+	}
+
+void CKnowledgeObject::SetSize(TUint64 aSize)
+	{
+	iKnowledgeObjectSize = aSize;
+	iDirty |= EBitFlagSize;
+	}
+
+void CKnowledgeObject::SetDateModified(const TDesC& /*aDateModified*/)
+	{
+	/**
+	 * DateModifed will be auto updated when commit. If PC set this prop, it will be ignored.
+	 * If someday PC want to force the DateModifed be saved, the following code piece should 
+	 * be opened, and add check in commit when save DateModified.
+	 *iDateModified.Copy(aDateModified);
+	 *iDirty |= EBitFlagDateModified;
+	**/
+	}
+
+void CKnowledgeObject::SetName(const TDesC& aName)
+	{
+	iName.Copy(aName);
+	iDirty |= EBitFlagName;
+	}
+
+void CKnowledgeObject::SetLastAuthorProxyID(TUint64 aHigh, TUint64 aLow) 
+	{
+	iLastAuthorProxyID.Set(aHigh, aLow);
+	iDirty |= EBitFlagLastAuthorProxyID;
+	}
+
+void CKnowledgeObject::CommitL()
+	{
+	__FLOG(_L8("CKnowledgeObject CommitL - Entry"));
+	if (EBitFlagSize == (iDirty & EBitFlagSize))
+		{
+		// TUint64 -> TInt, some capability is lost, 
+		// anyway, it's enough for knowledge object.   
+		User::LeaveIfError(iRepository.Set(ESize, (TInt)iKnowledgeObjectSize));
+		}
+
+	if (EBitFlagName == (iDirty & EBitFlagName))
+		{
+		User::LeaveIfError(iRepository.Set(EName, iName));
+		}
+	
+	if (EBitFlagLastAuthorProxyID == (iDirty & EBitFlagLastAuthorProxyID))
+		{
+		if (EMTPRespCodeOK != SetColumnType128Value(ELastAuthorProxyID, iLastAuthorProxyID))
+			{
+			User::Leave(KErrGeneral);
+			}
+		}
+	
+	// update DateModified to be the time of Commit
+	RefreshDateModifed();
+	User::LeaveIfError(iRepository.Set(EDateModified, iDateModified));
+
+	iDirty = EBitFlagNone;
+	__FLOG(_L8("CKnowledgeObject KnowledgeObject CommitL - Exit"));
+	return;
+	}
+
+TMTPResponseCode CKnowledgeObject::SetColumnType128Value(TMTPKnowledgeStoreKeyNum aColumnNum, TMTPTypeUint128& aNewData)
+	{
+	__FLOG(_L8("CKnowledgeObject SetColumnType128ValueL - Entry"));
+	TInt ret;
+	TMTPResponseCode responseCode = EMTPRespCodeOK;
+	TBuf8<KMTPTypeINT128Size>  data;
+	data.FillZ(data.MaxLength());
+	TUint64 upperValue = aNewData.UpperValue();
+	TUint64 lowerValue = aNewData.LowerValue();
+	
+	/**
+	Least significant 64-bit buffer offset.
+	*/
+	const TInt           KMTPTypeUint128OffsetLS = 0;
+	/**
+	Most significant 64-bit buffer offset.
+	*/
+	const TInt           KMTPTypeUint128OffsetMS = 8;
+	
+	memcpy(&data[KMTPTypeUint128OffsetMS], &upperValue, sizeof(upperValue));
+	memcpy(&data[KMTPTypeUint128OffsetLS], &lowerValue, sizeof(lowerValue));
+	
+	ret = iRepository.Set(aColumnNum, data);
+	if (KErrNone != ret)
+		{
+		responseCode = EMTPRespCodeGeneralError;
+		}
+	__FLOG_VA((_L8("CKnowledgeObject SetColumnType128ValueL - Exit with responseCode = 0x%04X"), responseCode));
+	return responseCode;
+	}
+
+
+void CKnowledgeObject::RefreshDateModifed()
+	{
+	__FLOG(_L8("CKnowledgeObject RefreshDateModifed - Entry"));
+	//get current time
+	TTime now;	
+	now.UniversalTime();
+	_LIT(KFormat,"%F%Y%M%DT%H%T%SZ");
+	iDateModified.Zero();
+	now.FormatL(iDateModified, KFormat);
+	__FLOG(_L8("CKnowledgeObject RefreshDateModifed - Exit"));
+	return;
+	}
+
 EXPORT_C CMTPKnowledgeHandler* CMTPKnowledgeHandler::NewL(MMTPDataProviderFramework& aFramework, TUint16 aFormatCode, 
 												CRepository& aReposotry, const TDesC& aKwgSuid)
 	{
@@ -52,18 +229,16 @@ EXPORT_C CMTPKnowledgeHandler* CMTPKnowledgeHandler::NewL(MMTPDataProviderFramew
 EXPORT_C CMTPKnowledgeHandler::~CMTPKnowledgeHandler()
 	{
 	__FLOG(_L8("~CMTPKnowledgeHandler - Entry")); 
-	delete iDateModified;
-	delete iName;
 	delete iKnowledgeObj;
 	delete iKnowledgeSwpBuffer;
+	delete iCachedKnowledgeObject;
 	__FLOG(_L8("~CMTPKnowledgeHandler - Exit"));
 	__FLOG_CLOSE;
 	}
 
 CMTPKnowledgeHandler::CMTPKnowledgeHandler(MMTPDataProviderFramework& aFramework, TUint16 aFormatCode, 
 										CRepository& aReposotry, const TDesC& aKwgSuid) :
-	iFramework(aFramework), iRepository(aReposotry), iKnowledgeFormatCode(aFormatCode),
-	iKnowledgeObjectSize(KObjectSizeNotAvaiable), iCacheStatus(EOK), iSuid(aKwgSuid)
+	iFramework(aFramework), iRepository(aReposotry), iKnowledgeFormatCode(aFormatCode), iSuid(aKwgSuid)
 	{
 	}
 
@@ -93,7 +268,9 @@ void CMTPKnowledgeHandler::ConstructL()
 		User::LeaveIfError(iFramework.Fs().Delete(iKnowObjSwpFileName));
 		}
 
-	LoadKnowledgeObjPropertiesL();
+	// create and load knowledge object properties
+	iCachedKnowledgeObject = CKnowledgeObject::NewL(iRepository);
+	iCachedKnowledgeObject->LoadL();
 	__FLOG(_L8("ConstructL - Exit"));
 	}
 
@@ -105,26 +282,11 @@ EXPORT_C void CMTPKnowledgeHandler::SetStorageId(TUint32 aStorageId)
 void CMTPKnowledgeHandler::CommitL()
 	{
 	__FLOG(_L8("CommitL - Entry"));
-
 	User::LeaveIfError(iRepository.StartTransaction(CRepository::EReadWriteTransaction));
 	iRepository.CleanupCancelTransactionPushL();
-	if(iKnowledgeObjectSize != KObjectSizeNotAvaiable)
-		{
-		User::LeaveIfError(iRepository.Set(ESize, (TInt)iKnowledgeObjectSize));
-		}
-	if(iDateModified)
-		{
-		User::LeaveIfError(iRepository.Set(EDateModified, *iDateModified));
-		}
-	if(iName)
-		{
-		User::LeaveIfError(iRepository.Set(EName, *iName));
-		}
 	
-	if (EMTPRespCodeOK != SetColumnType128Value(ELastAuthorProxyID, iLastAuthorProxyID))
-		{
-		User::Leave(KErrGeneral);
-		}
+	iCachedKnowledgeObject->CommitL();
+	
 	// Close all knowledge file and reset pointer.
 	if (iKnowledgeObj)
 		{
@@ -144,10 +306,11 @@ void CMTPKnowledgeHandler::CommitL()
 		User::LeaveIfError(iFramework.Fs().Replace(iKnowObjSwpFileName, iKnowObjFileName));
 		}
 	// If swp file isn't exsited, that means 0 sized object received, need do nothing.
-	
+
 	TUint32 keyInfo;
 	User::LeaveIfError(iRepository.CommitTransaction(keyInfo));
 	CleanupStack::Pop(&iRepository);
+
 	__FLOG(_L8("CommitL - Exit"));
 	}
 
@@ -160,78 +323,19 @@ void CMTPKnowledgeHandler::CommitForNewObjectL(TDes& aSuid)
 void CMTPKnowledgeHandler::RollBack()
 	{
 	__FLOG(_L8("Rollback - Entry"));
-	TRAP_IGNORE(LoadKnowledgeObjPropertiesL());
+	iCachedKnowledgeObject->Clear();
+	TRAP_IGNORE(iCachedKnowledgeObject->LoadL());
 	__FLOG(_L8("Rollback - Exit"));
 	}
 
 EXPORT_C void CMTPKnowledgeHandler::GetObjectSuidL(TDes& aSuid) const
 	{
 	__FLOG(_L8("GetObjectSuidL - Entry"));
-	if(iKnowledgeObjectSize != KObjectSizeNotAvaiable)
+	if(iCachedKnowledgeObject->Size() != KObjectSizeNotAvaiable)
 		{
 		aSuid.Append(iSuid);
 		}
 	__FLOG(_L8("GetObjectSuidL - Exit"));
-	}
-
-void CMTPKnowledgeHandler::LoadKnowledgeObjPropertiesL()
-	{
-	__FLOG(_L8("LoadKnowledgeObjPropertiesL - Entry"));
-	iCacheStatus = EOK;
-	iCacheStatusFlag = EDirty;
-	TCleanupItem cacheDroper(DropCacheWrapper, this);
-	CleanupStack::PushL(cacheDroper);
-	TInt objSize;
-	User::LeaveIfError(iRepository.Get(ESize, objSize));
-	iKnowledgeObjectSize = objSize;
-
-	// Load DateModify
-	delete iDateModified;
-	iDateModified = NULL;
-	iDateModified = HBufC::NewL(KDateTimeMaxLength);
-	TPtr ptrDate(iDateModified->Des());
-	User::LeaveIfError(iRepository.Get(EDateModified, ptrDate));
-	
-	// Load Name
-	delete iName;
-	iName = NULL;
-	iName = HBufC::NewL(KNameMaxLength);
-	TPtr ptrName(iName->Des());
-	User::LeaveIfError(iRepository.Get(EName, ptrName));
-
-	// Load LastAuthorProxyID:
-	TPtr8 writeBuf(NULL, 0); //walkaroud for the TMTPTypeUint128
-	iLastAuthorProxyID.FirstWriteChunk(writeBuf);
-	User::LeaveIfError(iRepository.Get(ELastAuthorProxyID, writeBuf));
-	CleanupStack::Pop(this);
-	// Doesn't load object content to cache beacause it can grow up to 100KB
-	__FLOG(_L8("LoadKnowledgeObjPropertiesL - Exit"));
-	}
-
-void CMTPKnowledgeHandler::DropCacheWrapper(TAny* aObject)
-	{
-	reinterpret_cast<CMTPKnowledgeHandler*>(aObject)->DropKnowledgeObjPropertiesCache();
-	}
-
-void CMTPKnowledgeHandler::DropKnowledgeObjPropertiesCache()
-	{
-	__FLOG(_L8("DropKnowledgeObjPropertiesCache - Entry"));
-	iCacheStatus = iCacheStatusFlag;
-	iKnowledgeObjectSize = KObjectSizeNotAvaiable;
-	
-	// Load DateModify
-	delete iDateModified;
-	iDateModified = NULL;
-	
-	// Load Name
-	delete iName;
-	iName = NULL;
-	
-	// Reset LastAuthorProxyID
-	TMTPTypeUint128 tmp(MAKE_TINT64(KMTPUnInitialized32, KMTPUnInitialized32), 
-						MAKE_TINT64(KMTPUnInitialized32, KMTPUnInitialized32));
-	iLastAuthorProxyID.Set(tmp.UpperValue(), tmp.LowerValue());
-	__FLOG(_L8("DropKnowledgeObjPropertiesCache - Exit"));
 	}
 
 TMTPResponseCode CMTPKnowledgeHandler::SendObjectInfoL(const CMTPTypeObjectInfo& aObjectInfo, TUint32& aParentHandle, TDes& aSuid)
@@ -245,21 +349,22 @@ TMTPResponseCode CMTPKnowledgeHandler::SendObjectInfoL(const CMTPTypeObjectInfo&
 	else
 		{
 		//if there's a read error reread
-		if(EDirty == iCacheStatus)
+		if(iCachedKnowledgeObject->IsDirty())
 			{
-			LoadKnowledgeObjPropertiesL();
+			__FLOG(_L8("Warning: The cached knowledge is dirty"));
+			iCachedKnowledgeObject->Clear();
+			iCachedKnowledgeObject->LoadL();
 			}
 		//already has a knowledge object
-		if(iKnowledgeObjectSize != KObjectSizeNotAvaiable)
+		if(iCachedKnowledgeObject->Size() != KObjectSizeNotAvaiable)
 			{
 			responseCode = EMTPRespCodeAccessDenied;
 			}
 		else
 			{
-			iKnowledgeObjectSize = aObjectInfo.Uint32L(CMTPTypeObjectInfo::EObjectCompressedSize);
-			delete iDateModified;
-			iDateModified = NULL;
-			iDateModified = aObjectInfo.StringCharsL(CMTPTypeObjectInfo::EDateModified).AllocL();
+			iCachedKnowledgeObject->Clear();
+			iCachedKnowledgeObject->SetSize(aObjectInfo.Uint32L(CMTPTypeObjectInfo::EObjectCompressedSize));
+			// DateModified will be updated when commit.
 			aSuid = iSuid;
 			}
 		}
@@ -280,18 +385,21 @@ TMTPResponseCode CMTPKnowledgeHandler::SendObjectPropListL(TUint64 aObjectSize, 
 		{
 		//if there's a read error reread
 		aParentHandle = KMTPHandleNoParent;
-		if(EDirty == iCacheStatus)
+		if(iCachedKnowledgeObject->IsDirty())
 			{
-			LoadKnowledgeObjPropertiesL();
+			__FLOG(_L8("Warning: The cached knowledge is dirty"));
+			iCachedKnowledgeObject->Clear();
+			iCachedKnowledgeObject->LoadL();
 			}
 		//already has a knowledge object
-		if(iKnowledgeObjectSize != KObjectSizeNotAvaiable)
+		if(iCachedKnowledgeObject->Size() != KObjectSizeNotAvaiable)
 			{
 			responseCode = EMTPRespCodeAccessDenied;
 			}
 		else
 			{
-			iKnowledgeObjectSize = aObjectSize;
+			iCachedKnowledgeObject->Clear();
+			iCachedKnowledgeObject->SetSize(aObjectSize);
 			aSuid = iSuid;
 			}
 		}
@@ -307,6 +415,12 @@ TMTPResponseCode CMTPKnowledgeHandler::GetObjectPropertyL(const CMTPObjectMetaDa
 	CMTPTypeObjectPropListElement* propertyElement = NULL;
 	TUint32 aHandle = aObjectMetaData.Uint(CMTPObjectMetaData::EHandle);
 	
+	if(iCachedKnowledgeObject->IsDirty())
+		{
+		__FLOG(_L8("Warning: The cached knowledge is dirty"));
+		iCachedKnowledgeObject->LoadL();
+		}
+	
 	switch (aPropertyCode)
 		{
 		case EMTPGenObjPropCodeParentID:
@@ -319,9 +433,9 @@ TMTPResponseCode CMTPKnowledgeHandler::GetObjectPropertyL(const CMTPObjectMetaDa
 		case EMTPGenObjPropCodeName:
 			{
 			propertyElement = &(aPropList.ReservePropElemL(aHandle, aPropertyCode));
-			if (iName && iName->Length() > 0)
+			if (iCachedKnowledgeObject->Name().Length() > 0)
 				{
-				propertyElement->SetStringL(CMTPTypeObjectPropListElement::EValue, *iName);			
+				propertyElement->SetStringL(CMTPTypeObjectPropListElement::EValue, iCachedKnowledgeObject->Name());
 				}
 			else
 				{
@@ -349,10 +463,10 @@ TMTPResponseCode CMTPKnowledgeHandler::GetObjectPropertyL(const CMTPObjectMetaDa
 
 		case EMTPGenObjPropCodeObjectSize:
 			{
-			if (iKnowledgeObjectSize != ~0)
+			if (iCachedKnowledgeObject->Size() != KObjectSizeNotAvaiable)
 				{
 				propertyElement = &(aPropList.ReservePropElemL(aHandle, aPropertyCode));
-				propertyElement->SetUint64L(CMTPTypeObjectPropListElement::EValue,iKnowledgeObjectSize);
+				propertyElement->SetUint64L(CMTPTypeObjectPropListElement::EValue, iCachedKnowledgeObject->Size());
 				}
 			break;
 			}
@@ -380,34 +494,24 @@ TMTPResponseCode CMTPKnowledgeHandler::GetObjectPropertyL(const CMTPObjectMetaDa
 
 		case EMTPGenObjPropCodeDateModified:
 			{
+			if(iCachedKnowledgeObject->DateModified().Length() == 0)
+				{
+				iCachedKnowledgeObject->RefreshDateModifed();
+				}
 			propertyElement = &(aPropList.ReservePropElemL(aHandle, aPropertyCode));
-			if(iDateModified && iDateModified->Length() > 0)
-				{
-				propertyElement->SetStringL(CMTPTypeObjectPropListElement::EValue, *iDateModified);	
-				}
-			else
-				{
-				TTime now;	
-				now.UniversalTime();
-				const TInt KMaxTimeStringSize = 50;
-				TBuf<KMaxTimeStringSize> dateTimeBuf;
-				_LIT(KFormat,"%F%Y%M%DT%H%T%S");
-				now.FormatL(dateTimeBuf, KFormat);
-				propertyElement->SetStringL(CMTPTypeObjectPropListElement::EValue, dateTimeBuf);	
-				}
+			propertyElement->SetStringL(CMTPTypeObjectPropListElement::EValue, iCachedKnowledgeObject->DateModified());
 			break;
 			}
 			
 		case EMTPSvcObjPropCodeLastAuthorProxyID:
 			{
-			const TMTPTypeUint128 unInitValue(MAKE_TUINT64(KMTPUnInitialized32, KMTPUnInitialized32), 
-										MAKE_TUINT64(KMTPUnInitialized32, KMTPUnInitialized32));
-			if(!unInitValue.Equal(iLastAuthorProxyID))
+			if ((iCachedKnowledgeObject->LastAuthorProxyID().UpperValue() != KMTPUnInitialized64)
+				 && (iCachedKnowledgeObject->LastAuthorProxyID().LowerValue() !=KMTPUnInitialized64))
 				{
 				propertyElement = &(aPropList.ReservePropElemL(aHandle, aPropertyCode));
 				propertyElement->SetUint128L(CMTPTypeObjectPropListElement::EValue,
-											iLastAuthorProxyID.UpperValue(),
-											iLastAuthorProxyID.LowerValue());
+						iCachedKnowledgeObject->LastAuthorProxyID().UpperValue(),
+						iCachedKnowledgeObject->LastAuthorProxyID().LowerValue());
 				}
 			break;	
 			}
@@ -437,43 +541,27 @@ TMTPResponseCode CMTPKnowledgeHandler::SetObjectPropertyL(const TDesC& /*aSuid*/
 		switch (propertyCode)
 			{
 			case EMTPGenObjPropCodeObjectSize:
-				if(aOperationCode == EMTPOpCodeSetObjectPropList)
-					{
-					ret = iRepository.Set(ESize, (TInt)aElement.Uint64L(CMTPTypeObjectPropListElement::EValue));
-					}
-				iKnowledgeObjectSize = aElement.Uint64L(CMTPTypeObjectPropListElement::EValue);
+				{
+				iCachedKnowledgeObject->SetSize(aElement.Uint64L(CMTPTypeObjectPropListElement::EValue));
 				break;
-				
+				}
 			case EMTPGenObjPropCodeDateModified:
-				if(aOperationCode == EMTPOpCodeSetObjectPropList)
-					{
-					ret = iRepository.Set(EDateModified, aElement.StringL(CMTPTypeObjectPropListElement::EValue));
-					}
-				delete iDateModified;
-				iDateModified = NULL;
-				iDateModified = aElement.StringL(CMTPTypeObjectPropListElement::EValue).AllocL();
+				{
+				// DateModified will be updated when Commit
+				iCachedKnowledgeObject->SetDateModified(aElement.StringL(CMTPTypeObjectPropListElement::EValue));
 				break;
-				
+				}
 			case EMTPGenObjPropCodeName:
-				if(aOperationCode == EMTPOpCodeSetObjectPropList)
-					{
-					ret = iRepository.Set(EName, aElement.StringL(CMTPTypeObjectPropListElement::EValue));
-					}
-				delete iName;
-				iName = NULL;
-				iName = aElement.StringL(CMTPTypeObjectPropListElement::EValue).AllocL();
+				{
+				iCachedKnowledgeObject->SetName(aElement.StringL(CMTPTypeObjectPropListElement::EValue));
 				break;
-				
+				}
 			case EMTPSvcObjPropCodeLastAuthorProxyID:
 				{
 				TUint64 high_value = 0;
 				TUint64 low_value  = 0;
 				aElement.Uint128L(CMTPTypeObjectPropListElement::EValue, high_value, low_value);
-				if(aOperationCode == EMTPOpCodeSetObjectPropList)
-					{
-					responseCode = SetColumnType128Value(ELastAuthorProxyID, iLastAuthorProxyID);
-					}
-				iLastAuthorProxyID.Set(high_value, low_value);
+				iCachedKnowledgeObject->SetLastAuthorProxyID(high_value, low_value);
 				break;
 				}
 				
@@ -494,16 +582,31 @@ TMTPResponseCode CMTPKnowledgeHandler::SetObjectPropertyL(const TDesC& /*aSuid*/
 TMTPResponseCode CMTPKnowledgeHandler::DeleteObjectL(const CMTPObjectMetaData& /*aObjectMetaData*/)
 	{
 	__FLOG(_L8("DeleteObjectL - Entry"));
-	iCacheStatusFlag = EDirty;
-	TCleanupItem cacheDroper(DropCacheWrapper, this);
-	CleanupStack::PushL(cacheDroper);
+
+	User::LeaveIfError(iRepository.StartTransaction(CRepository::EReadWriteTransaction));
+	iRepository.CleanupCancelTransactionPushL();
+
 	// Delete obejct properties in transaction, if leave, mgr will rollback all properties.
-	DeleteAllObjectPropertiesL();
-	CleanupStack::Pop(this);
-	// Drop all cached properties.
-	iCacheStatusFlag = EDeleted;
-	CMTPKnowledgeHandler::DropCacheWrapper(this);
-	LoadKnowledgeObjPropertiesL();
+	iCachedKnowledgeObject->Clear();
+	iCachedKnowledgeObject->CommitL();
+	
+	// Reset knowledgeobject pointer and close the file.
+	if (iKnowledgeObj)
+		{
+		delete iKnowledgeObj;
+		iKnowledgeObj = NULL;
+		}
+	
+	// Keep file delete is atomic.
+	if (BaflUtils::FileExists(iFramework.Fs(), iKnowObjFileName))
+		{
+		User::LeaveIfError(iFramework.Fs().Delete(iKnowObjFileName));
+		}
+
+	TUint32 keyInfo;
+	User::LeaveIfError(iRepository.CommitTransaction(keyInfo));
+	CleanupStack::Pop(&iRepository);
+
 	__FLOG(_L8("DeleteObjectL - Exit"));
 	return EMTPRespCodeOK;
 	}
@@ -538,19 +641,12 @@ TMTPResponseCode CMTPKnowledgeHandler::DeleteObjectPropertyL(const CMTPObjectMet
 	switch (aPropertyCode)
 		{
 		case EMTPGenObjPropCodeDateModified:
-			delete iDateModified;
-			iDateModified = NULL;
-			if (KErrNone != iRepository.Set(EDateModified, KEmptyContent16))
-				{
-				responseCode = EMTPRespCodeGeneralError;
-				}
+			// DateModified will be updated when Commit
+			iCachedKnowledgeObject->SetDateModified(KEmptyContent16);
 			break;
 		case EMTPSvcObjPropCodeLastAuthorProxyID:
 			{
-			TMTPTypeUint128 tmp(MAKE_TINT64(KMTPUnInitialized32, KMTPUnInitialized32), 
-								MAKE_TINT64(KMTPUnInitialized32, KMTPUnInitialized32));
-			iLastAuthorProxyID.Set(tmp.UpperValue(), tmp.LowerValue());
-			responseCode = SetColumnType128Value(ELastAuthorProxyID, iLastAuthorProxyID);
+			iCachedKnowledgeObject->SetLastAuthorProxyID(KMTPUnInitialized64, KMTPUnInitialized64);
 			break;
 			}
 			
@@ -594,7 +690,7 @@ void CMTPKnowledgeHandler::BuildObjectInfoL(CMTPTypeObjectInfo& aObjectInfo) con
 	aObjectInfo.SetUint16L(CMTPTypeObjectInfo::EObjectFormat, iKnowledgeFormatCode);
 	// Not use
 	aObjectInfo.SetUint16L(CMTPTypeObjectInfo::EProtectionStatus, 0x0000);
-	aObjectInfo.SetUint32L(CMTPTypeObjectInfo::EObjectCompressedSize, iKnowledgeObjectSize);
+	aObjectInfo.SetUint32L(CMTPTypeObjectInfo::EObjectCompressedSize, iCachedKnowledgeObject->Size());
 	aObjectInfo.SetUint16L(CMTPTypeObjectInfo::EThumbFormat, 0);
 	aObjectInfo.SetUint32L(CMTPTypeObjectInfo::EThumbCompressedSize, 0);
 	aObjectInfo.SetUint32L(CMTPTypeObjectInfo::EThumbPixWidth, 0);
@@ -615,7 +711,7 @@ void CMTPKnowledgeHandler::BuildObjectInfoL(CMTPTypeObjectInfo& aObjectInfo) con
 TMTPResponseCode CMTPKnowledgeHandler::GetObjectInfoL(const CMTPObjectMetaData& /*aObjectMetaData*/, CMTPTypeObjectInfo& aObjectInfo)
 	{
 	__FLOG(_L8("GetObjectInfoL - Entry"));
-	if(iKnowledgeObjectSize != KObjectSizeNotAvaiable)
+	if(iCachedKnowledgeObject->Size() != KObjectSizeNotAvaiable)
 		{
 		BuildObjectInfoL(aObjectInfo);
 		}
@@ -623,42 +719,6 @@ TMTPResponseCode CMTPKnowledgeHandler::GetObjectInfoL(const CMTPObjectMetaData& 
 	return EMTPRespCodeOK;
 	}
 
-
-void CMTPKnowledgeHandler::DeleteAllObjectPropertiesL()
-	{
-	__FLOG(_L8("DeleteAllObjectPropertiesL - Entry"));
-	User::LeaveIfError(iRepository.StartTransaction(CRepository::EReadWriteTransaction));
-	iRepository.CleanupCancelTransactionPushL();
-	User::LeaveIfError(iRepository.Set(EDateModified, KEmptyContent16));
-	User::LeaveIfError(iRepository.Set(EName, KEmptyContent16));
-	User::LeaveIfError(iRepository.Set(ESize, static_cast<TInt>(KObjectSizeNotAvaiable)));
-	
-	TMTPTypeUint128 tmp(MAKE_TINT64(KMTPUnInitialized32, KMTPUnInitialized32), 
-						MAKE_TINT64(KMTPUnInitialized32, KMTPUnInitialized32));
-	if (EMTPRespCodeOK != SetColumnType128Value(ELastAuthorProxyID, tmp))
-		{
-		User::Leave(KErrGeneral);
-		}
-	// Reset knowledgeobject pointer and close the file.
-	if (iKnowledgeObj)
-		{
-		delete iKnowledgeObj;
-		iKnowledgeObj = NULL;
-		}
-	
-	// Keep file delete is atomic.
-	if (BaflUtils::FileExists(iFramework.Fs(), iKnowObjFileName))
-		{
-		User::LeaveIfError(iFramework.Fs().Delete(iKnowObjFileName));
-		}
-	
-	TUint32 keyInfo;
-	User::LeaveIfError(iRepository.CommitTransaction(keyInfo));
-	CleanupStack::Pop(&iRepository);
-	
-	__FLOG(_L8("DeleteAllObjectPropertiesL - Exit"));
-	return;
-	}
 
 void CMTPKnowledgeHandler::ReleaseObjectBuffer()
 	{
@@ -678,40 +738,9 @@ TMTPResponseCode CMTPKnowledgeHandler::GetObjectSizeL(const TDesC& aSuid, TUint6
 		{
 		return EMTPRespCodeGeneralError;
 		}
-	aObjectSize = iKnowledgeObjectSize;
+	aObjectSize = iCachedKnowledgeObject->Size();
 	__FLOG(_L8("GetObjectSizeL - Exit"));
 	return EMTPRespCodeOK;
-	}
-
-TMTPResponseCode CMTPKnowledgeHandler::SetColumnType128Value(TMTPKnowledgeStoreKeyNum aColumnNum, TMTPTypeUint128& aNewData)
-	{
-	__FLOG(_L8("SetColumnType128ValueL - Entry"));
-	TInt ret;
-	TMTPResponseCode responseCode = EMTPRespCodeOK;
-	TBuf8<KMTPTypeINT128Size>  data;
-	data.FillZ(data.MaxLength());
-	TUint64 upperValue = aNewData.UpperValue();
-	TUint64 lowerValue = aNewData.LowerValue();
-	
-	/**
-	Least significant 64-bit buffer offset.
-	*/
-	const TInt           KMTPTypeUint128OffsetLS = 0;
-	/**
-	Most significant 64-bit buffer offset.
-	*/
-	const TInt           KMTPTypeUint128OffsetMS = 8;
-	
-	memcpy(&data[KMTPTypeUint128OffsetMS], &upperValue, sizeof(upperValue));
-	memcpy(&data[KMTPTypeUint128OffsetLS], &lowerValue, sizeof(lowerValue));
-	
-	ret = iRepository.Set(aColumnNum, data);
-	if (KErrNone != ret)
-		{
-		responseCode = EMTPRespCodeGeneralError;
-		}
-	__FLOG_VA((_L8("SetColumnType128ValueL - Exit with responseCode = 0x%04X"), responseCode));
-	return responseCode;
 	}
 
 TMTPResponseCode CMTPKnowledgeHandler::GetAllObjectPropCodeByGroupL(TUint32 aGroupId, RArray<TUint32>& aPropCodes)
@@ -749,3 +778,5 @@ TMTPResponseCode CMTPKnowledgeHandler::GetAllObjectPropCodeByGroupL(TUint32 aGro
 	__FLOG(_L8("GetAllObjectPropCodeByGroupL - Exit"));
 	return responseCode;
 	}
+
+

@@ -141,6 +141,7 @@ RMTPDeviceDpSingletons::CSingletons::~CSingletons()
     __FLOG(_L8("CSingletons::~CSingletons - Entry"));
     delete iConfigMgr;
     delete iDeviceDataStore;
+    iPendingStorages.Close();
     __FLOG(_L8("CSingletons::~CSingletons - Exit"));
     __FLOG_CLOSE;
     }
@@ -153,4 +154,12 @@ void RMTPDeviceDpSingletons::CSingletons::ConstructL(MMTPDataProviderFramework& 
     iConfigMgr = CMTPDeviceDpConfigMgr::NewL(aFramework);
     __FLOG(_L8("CSingletons::ConstructL - Exit"));
     }
+
+RArray<TUint>& RMTPDeviceDpSingletons::PendingStorages()
+	{
+    __FLOG(_L8("PendingStorages - Entry"));
+    __ASSERT_DEBUG(iSingletons, User::Invariant());
+    __FLOG(_L8("PendingStorages - Exit"));
+    return iSingletons->iPendingStorages;
+	}
 

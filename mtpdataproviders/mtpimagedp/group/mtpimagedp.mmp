@@ -67,6 +67,7 @@ SOURCE          cmtpimagedpsetobjectreferences.cpp
 SOURCE          mtpimagedprequestprocessor.cpp 
 SOURCE          cmtpimagedpsetobjectprotection.cpp
 SOURCE          cmtpimagedprenameobject.cpp
+SOURCE          cmtpimagedpnewpicturesnotifier.cpp
 
 // ECOM resource
 START RESOURCE     mtpimagedp.rss    

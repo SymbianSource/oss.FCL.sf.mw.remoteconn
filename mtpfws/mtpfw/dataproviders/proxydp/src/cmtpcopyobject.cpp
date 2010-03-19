@@ -27,6 +27,17 @@ __FLOG_STMT( _LIT8( KComponent,"PrxyCopyObj" ); )
 const TUint KInvalidDpId = 0xFF;
 
 /**
+Verification data for the CopyObject request
+*/    
+const TMTPRequestElementInfo KMTPCopyObjectPolicy[] = 
+    {
+    	{TMTPTypeRequest::ERequestParameter1, EMTPElementTypeObjectHandle, EMTPElementAttrFileOrDir, 0, 0, 0},   	
+        {TMTPTypeRequest::ERequestParameter2, EMTPElementTypeStorageId, EMTPElementAttrWrite, 0, 0, 0},                
+        {TMTPTypeRequest::ERequestParameter3, EMTPElementTypeObjectHandle, EMTPElementAttrDir | EMTPElementAttrWrite, 1, 0, 0}
+    };
+
+
+/**
 Two-phase construction method
 @param aFramework    The data provider framework
 @param aConnection    The connection from which the request comes
@@ -61,7 +72,7 @@ CMTPCopyObject::~CMTPCopyObject()
 Constructor
 */    
 CMTPCopyObject::CMTPCopyObject(MMTPDataProviderFramework& aFramework, MMTPConnection& aConnection) :
-    CMTPRequestProcessor(aFramework, aConnection, 0, NULL)
+    CMTPRequestProcessor(aFramework, aConnection, sizeof(KMTPCopyObjectPolicy)/sizeof(TMTPRequestElementInfo), KMTPCopyObjectPolicy)
     {
     __FLOG_OPEN( KMTPSubsystem, KComponent );
     __FLOG( _L8("+/-Ctor") );

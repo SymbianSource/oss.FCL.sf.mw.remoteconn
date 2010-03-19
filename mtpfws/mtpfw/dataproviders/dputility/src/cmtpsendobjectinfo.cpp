@@ -365,7 +365,7 @@ TMTPResponseCode CMTPSendObjectInfo::CheckSendingStateL()
         }
     else 
         {
-        Panic(EMTPDpSendObjectStateInvalid);
+        User::Leave( KErrGeneral );
         }
     __FLOG(_L8("CheckSendingState - Exit"));
     return result;    

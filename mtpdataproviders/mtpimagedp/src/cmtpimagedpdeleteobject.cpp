@@ -238,8 +238,13 @@ void CMTPImageDpDeleteObject::DeleteObjectL( TUint32 aHandle )
                 iDataProvider.AppendDeleteObjectsArrayL(iObjectMeta->DesC(CMTPObjectMetaData::ESuid));
             case KErrNone:
                 //add for test
-                __FLOG(_L8("KErrNone"));
-                iFramework.ObjectMgr().RemoveObjectL( iObjectMeta->Uint(CMTPObjectMetaData::EHandle ));
+                __FLOG(_L8("KErrNone"));                
+                //if the image object is new, we should update new picture count
+                if (MTPImageDpUtilits::IsNewPicture(*iObjectMeta))
+                    {
+                    iDataProvider.DecreaseNewPictures(1);                 
+                    }                
+                iFramework.ObjectMgr().RemoveObjectL( iObjectMeta->Uint(CMTPObjectMetaData::EHandle ));              
                 iObjectsNotDelete--;
                 iResponseCode = EMTPRespCodePartialDeletion;
                 break;
@@ -260,6 +265,15 @@ void CMTPImageDpDeleteObject::DeleteObjectL( TUint32 aHandle )
 void CMTPImageDpDeleteObject::StartL()
     {
     __FLOG(_L8(">> CMTPImageDpDeleteObject::StartL"));
+    
+    if(iCancelled)
+        {
+        __FLOG(_L8("Cancell the delete"));
+        CMTPRequestProcessor::SendResponseL(EMTPRespCodeTransactionCancelled);
+        iObjectsToDelete.Reset();
+        iCancelled = EFalse;
+        return;
+        }
     
     TInt numObjectsToDelete = iObjectsToDelete.Count();
 

@@ -35,6 +35,7 @@ enum TMTPDevDpPanic
     EMTPDevDpInvalidRequest             = 7,
     EMTPDevDpUnknownDeviceProperty      = 8,
     EMTPDevDpUnknownServiceID           = 9,
+    EMTPDevDpObjectNull					= 10,
 
     };
 

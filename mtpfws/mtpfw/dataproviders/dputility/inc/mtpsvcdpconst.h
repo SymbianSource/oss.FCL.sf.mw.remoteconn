@@ -230,6 +230,7 @@ const TUint32 KMTPDefaultBaseServiceID = 0x00;
 const TUint32 KMTPServicePropertyAll = 0x00000000;
 
 const TUint32 KMTPUnInitialized32 = 0xFFFFFFFF;
+const TUint64 KMTPUnInitialized64 = ~0; //MAKE_TINT64(KMTPUnInitialized32, KMTPUnInitialized32);
 const TUint32 KMaxSUIDLength = 50;
 const TUint64 KObjectSizeNotAvaiable = ~0;
 const TUint32 KLongStringMaxLength = 0x1000;

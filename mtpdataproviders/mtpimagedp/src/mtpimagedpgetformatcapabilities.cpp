@@ -169,6 +169,14 @@ void CMTPImageDpGetFormatCapabilities::BuildFormatExifJpegL()
     CleanupStack::Pop(1, desc);
     CleanupStack::PopAndDestroy(expectedForm);
     
+    const TUint32 KMaxLength = 0x0000FFFF;
+    TMTPTypeUint32 maxLengthForm(KMaxLength);
+    info.iDataType     = EMTPTypeAUINT8;
+    info.iFormFlag     = CMTPTypeObjectPropDesc::EByteArrayForm;       
+    desc = CMTPTypeObjectPropDesc::NewLC(EMTPObjectPropCodeRepresentativeSampleData, info, &maxLengthForm);
+    frmCap->AppendL(desc);
+    CleanupStack::Pop(1, desc);
+    
     info.iDataType = EMTPTypeUINT16;
     info.iFormFlag = CMTPTypeObjectPropDesc::EEnumerationForm;
     CMTPTypeObjectPropDescEnumerationForm* expectedEnumForm = CMTPTypeObjectPropDescEnumerationForm::NewL(EMTPTypeUINT16);

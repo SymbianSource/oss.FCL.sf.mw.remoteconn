@@ -449,7 +449,7 @@ void CMTPGetObjectPropList::ServiceOneObjectPropertyL(TUint32 aHandle, TUint32 a
         	}
         	break;    
         default:
-            Panic(EMTPDpUnsupportedProperty);
+            User::Leave( KErrNotSupported );
             break;
             }       
         } 

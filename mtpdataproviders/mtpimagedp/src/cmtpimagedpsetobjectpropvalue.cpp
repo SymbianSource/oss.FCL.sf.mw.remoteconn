@@ -99,7 +99,8 @@ TBool CMTPImageDpSetObjectPropValue::IsPropCodeReadonly(TUint32 aObjectPropCode)
 		|| aObjectPropCode == EMTPObjectPropCodeRepresentativeSampleFormat
 		|| aObjectPropCode == EMTPObjectPropCodeRepresentativeSampleSize
 		|| aObjectPropCode == EMTPObjectPropCodeRepresentativeSampleHeight
-		|| aObjectPropCode == EMTPObjectPropCodeRepresentativeSampleWidth)
+		|| aObjectPropCode == EMTPObjectPropCodeRepresentativeSampleWidth
+		|| aObjectPropCode == EMTPObjectPropCodeRepresentativeSampleData)
 		{
 		returnCode = ETrue;
 		}

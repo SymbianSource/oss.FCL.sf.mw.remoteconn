@@ -346,7 +346,7 @@ TMTPResponseCode CMTPPictBridgeDpSendObjectInfo::CheckSendingStateL()
         }
     else 
         {
-        Panic(EMTPPictBridgeDpSendObjectStateInvalid);
+        User::Leave( KErrGeneral );
         }
     __FLOG(_L8("<< CMTPPictBridgeDpSendObjectInfo::CheckSendingStateL"));    
     return result;    
@@ -621,7 +621,7 @@ TBool CMTPPictBridgeDpSendObjectInfo::DoHandleSendObjectCompleteL()
 
     if (fileEntry.FileSize() != iObjectSize)
         {
-        __FLOG_VA((_L8("   sizes differ %d!=%d"),fileEntry.iSize, iObjectSize));
+        __FLOG_VA((_L8("   sizes differ %d!=%d"),fileEntry.FileSize(), iObjectSize));
         iFramework.RouteRequestUnregisterL(iExpectedSendObjectRequest, iConnection);
          
         iFramework.Fs().Delete(iFullPath);

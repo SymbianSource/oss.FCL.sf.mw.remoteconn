@@ -182,7 +182,7 @@ protected:
 	const TMTPTypeRequest*		    iRequest;			//the pending requst object
 	MMTPConnection&				    iConnection;		//the connection from which the request comes
 	TMTPTypeResponse			    iResponse;			//the response object to send to the initiator
-	TBool						    iCancelled;			//indicates whether the data phase (send/receive) has been cancelled
+	TBool						    iCancelled;			//indicates whether this request has been cancelled
 	CMTPRequestChecker*		    	iRequestChecker;	//a utility class providing generic request verification service
 	TInt					    	iElementCount;		//number of verification elements used for request checker
 	const TMTPRequestElementInfo*	iElements;	 		//pointer to an array of verification elements

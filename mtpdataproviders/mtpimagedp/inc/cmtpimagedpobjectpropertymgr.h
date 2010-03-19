@@ -41,6 +41,9 @@ class MMTPDataProviderFramework;
 class CFileStore;
 class CMTPTypeString;
 class CMTPObjectMetaData;
+class CMTPImageDataProvider;
+class CMTPTypeOpaqueData;
+class CMTPTypeArray;
 
 /** 
 Manage picture object properties
@@ -52,7 +55,7 @@ class CMTPImageDpObjectPropertyMgr : public CBase, public MMdESessionObserver
    {    
    
 public:
-    static CMTPImageDpObjectPropertyMgr* NewL(MMTPDataProviderFramework& aFramework);
+    static CMTPImageDpObjectPropertyMgr* NewL(MMTPDataProviderFramework& aFramework, CMTPImageDataProvider& aDataProvider);
     ~CMTPImageDpObjectPropertyMgr();
     void SetCurrentObjectL(CMTPObjectMetaData& aObjectInfo, TBool aRequireForModify, TBool aSaveToCache = EFalse);
     
@@ -67,11 +70,15 @@ public:
     void GetPropertyL(TMTPObjectPropertyCode aProperty, TUint32& aValue);
     void GetPropertyL(TMTPObjectPropertyCode aProperty, TUint64& aValue);
     void GetPropertyL(TMTPObjectPropertyCode aProperty, TMTPTypeUint128& aValue);
-    void GetPropertyL(TMTPObjectPropertyCode aProperty, CMTPTypeString& aValue);    
+    void GetPropertyL(TMTPObjectPropertyCode aProperty, CMTPTypeString& aValue);
+    void GetPropertyL(TMTPObjectPropertyCode aProperty, CMTPTypeArray& aValue);
     
     //clear the cache
     void ClearCacheL();
     void ConvertMTPTimeStr2TTimeL(const TDesC& aTimeString, TTime& aModifiedTime) const;
+    
+    void StoreThunmnail(TUint aHandle, HBufC8* aData);
+    HBufC8* Thumbnail(TUint aHandle);
     
 public:
     void SetMdeSessionError(TInt aError);
@@ -82,7 +89,7 @@ public:
     void HandleSessionError(CMdESession& aSession, TInt aError);
    
 private:
-    CMTPImageDpObjectPropertyMgr(MMTPDataProviderFramework& aFramework);
+    CMTPImageDpObjectPropertyMgr(MMTPDataProviderFramework& aFramework, CMTPImageDataProvider& aDataProvider);
     void ConstructL(MMTPDataProviderFramework& aFramework);
     
     TBool GetYear(const TDesC& aDateString, TInt& aYear) const;
@@ -96,8 +103,10 @@ private:
     void SetProperty2CacheL(TMTPObjectPropertyCode aProperty, TAny* aValue);
     void GetPropertyFromMdsL(TMTPObjectPropertyCode aProperty, TAny* aValue);
 
-    TUint32 ParseImageFileL(const TDesC& aUri, TMTPObjectPropertyCode aPropCode);
     void RemoveProperty(CMdEObject& aObject, CMdEPropertyDef& aPropDef);
+    
+    void OpenMdeObjectL();
+    void ClearThumnailCache();
     
 private:
     
@@ -177,21 +186,38 @@ private:
         static const TElementMetaData   KElements[];        
     };
     
+    /**
+     * Thumbnail cache used for winlogo test
+     */
+    struct TThumbnailCache
+        {
+        TUint    iObjectHandle;
+        HBufC8*  iThumbnailData;
+        };   
+    
 private:
     /**
     FLOGGER debug trace member variable.
     */    
     __FLOG_DECLARATION_MEMBER_MUTABLE;
     
+    MMTPDataProviderFramework&  iFramework;
+    CMTPImageDataProvider&      iDataProvider;
     CActiveSchedulerWait*       iActiveSchedulerWait;
     CMdESession*                iMetaDataSession;
     TInt                        iMdeSessionError;
-    CMdEObject*                 iObject;
+    CMdEObject*                 iObject;//used for read properties from MdS
 
     RFs&                        iFs;
     MMTPObjectMgr&              iObjectMgr;
     CMTPObjectMetaData*         iObjectInfo;  //not owned
     TBool                       iCacheHit;//flag to indicate cache is available
+    TBool                       iNeedParse;//flag to indicate whether we need to parse image file by our self
+	
+    /*
+     * Cache thumbnail, thumbnail size is inconsistent in winlogo test
+     */
+    TThumbnailCache              iThumbnailCache;
     
     /**
      * Cache the latest image properties which PC send to device,

@@ -122,7 +122,7 @@ TBool CMTPImageDpGetPartialObject::VerifyParametersL()
 
     TEntry fileEntry;
     User::LeaveIfError(iFs.Entry(iObjectMeta->DesC(CMTPObjectMetaData::ESuid), fileEntry));
-    if((iOffset < fileEntry.iSize)) 
+    if((iOffset < fileEntry.FileSize())) 
         {
         result = ETrue;
         }

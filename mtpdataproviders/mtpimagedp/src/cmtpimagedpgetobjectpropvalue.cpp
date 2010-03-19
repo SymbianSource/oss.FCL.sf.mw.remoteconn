@@ -25,6 +25,7 @@
 #include <mtp/tmtptypeuint64.h>
 #include <mtp/tmtptypeuint128.h>
 #include <mtp/cmtptypestring.h>
+#include <mtp/cmtptypearray.h>
 #include <mtp/mmtpdataproviderframework.h>
 #include <mtp/mtpprotocolconstants.h>
 #include <mtp/mmtpobjectmgr.h>
@@ -64,6 +65,7 @@ Destructor
 CMTPImageDpGetObjectPropValue::~CMTPImageDpGetObjectPropValue()
     {
     delete iMTPTypeString;	
+    delete iMTPTypeArray;
     delete iObjectMeta;
     __FLOG_CLOSE;
     }
@@ -86,6 +88,7 @@ Second-phase construction
 void CMTPImageDpGetObjectPropValue::ConstructL()
     {
     iMTPTypeString = CMTPTypeString::NewL();
+    iMTPTypeArray = CMTPTypeArray::NewL(EMTPTypeAUINT8);
     iObjectMeta = CMTPObjectMetaData::NewL();
     }
 
@@ -181,6 +184,9 @@ void CMTPImageDpGetObjectPropValue::ServiceL()
         case EMTPObjectPropCodeRepresentativeSampleWidth:
             ServiceRepresentativeSampleWidthL();
             break; 
+        case EMTPObjectPropCodeRepresentativeSampleData:
+            ServiceRepresentativeSampleDataL();
+            break;
         case EMTPObjectPropCodeNonConsumable:
             ServiceNonConsumableL();
             break;            
@@ -331,6 +337,13 @@ void CMTPImageDpGetObjectPropValue::ServiceRepresentativeSampleWidthL()
     iMTPTypeUint32.Set(representativeSampleWidth);
     
     SendDataL(iMTPTypeUint32);
+    }
+
+void CMTPImageDpGetObjectPropValue::ServiceRepresentativeSampleDataL()
+    {
+    iObjectPropertyMgr.GetPropertyL(EMTPObjectPropCodeRepresentativeSampleData, *iMTPTypeArray);
+    
+    SendDataL(*iMTPTypeArray);
     }
 
 void CMTPImageDpGetObjectPropValue::ServiceNonConsumableL()

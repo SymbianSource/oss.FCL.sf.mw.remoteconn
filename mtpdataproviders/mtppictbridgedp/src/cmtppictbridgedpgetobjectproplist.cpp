@@ -461,7 +461,7 @@ void CMTPPictBridgeDpGetObjectPropList::ServiceOneObjectPropertyL( TUint32 aHand
             break;
             default:
                 {
-                Panic( EMTPPictBridgeDpUnsupportedProperty );
+                User::Leave( KErrNotSupported );
                 }
                 break;
             }

@@ -170,6 +170,9 @@ void CMTPImageDpGetObjectPropDesc::ServiceL()
         case EMTPObjectPropCodeRepresentativeSampleWidth:
             ServiceRepresentativeSampleWidthL();
             break;
+        case EMTPObjectPropCodeRepresentativeSampleData:
+            ServiceRepresentativeSampleDataL();
+            break;
         case EMTPObjectPropCodeNonConsumable:
             ServiceNonConsumableL();
             break;            
@@ -402,6 +405,19 @@ void CMTPImageDpGetObjectPropDesc::ServiceRepresentativeSampleWidthL()
     iObjectProperty = CMTPTypeObjectPropDesc::NewL(EMTPObjectPropCodeRepresentativeSampleWidth, info, expectedForm);
     
     CleanupStack::PopAndDestroy(expectedForm);
+    }
+
+void CMTPImageDpGetObjectPropDesc::ServiceRepresentativeSampleDataL()
+    {
+    CMTPTypeObjectPropDesc::TPropertyInfo info;
+    info.iDataType     = EMTPTypeAUINT8;
+    info.iFormFlag     = CMTPTypeObjectPropDesc::EByteArrayForm;
+    info.iGetSet       = CMTPTypeObjectPropDesc::EReadOnly;
+    
+    const TUint32 KMaxLength = 0x0000FFFF;
+    TMTPTypeUint32 expectedForm(KMaxLength);
+    
+    iObjectProperty = CMTPTypeObjectPropDesc::NewL(EMTPObjectPropCodeRepresentativeSampleData, info, &expectedForm);
     }
 
 void CMTPImageDpGetObjectPropDesc::ServiceNonConsumableL()

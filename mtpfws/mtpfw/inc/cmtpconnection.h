@@ -90,7 +90,7 @@ public:
     IMPORT_C void SessionClosedL(TUint32 aSessionMTPId);
     IMPORT_C void SessionOpenedL(TUint32 aSessionMTPId);
     IMPORT_C TInt GetDataReceiveResult() const;
-    void ConnectionSuspended();
+    TBool ConnectionSuspended();
     void ConnectionResumedL(MMTPTransportConnection& aTransportConnection);
     void TransactionCompleteL(const TMTPTypeRequest& aRequest);
     
@@ -116,7 +116,7 @@ private: // From MMTPConnectionProtocol
     void SendDataCompleteL(TInt aErr, const MMTPType& aData, const TMTPTypeRequest& aRequest);
     void SendEventCompleteL(TInt aErr, const TMTPTypeEvent& aEvent);
     void SendResponseCompleteL(TInt aErr, const TMTPTypeResponse& aResponse, const TMTPTypeRequest& aRequest);
-	void Unbind(MMTPTransportConnection& aConnection);
+    void Unbind(MMTPTransportConnection& aConnection);
 
 private:
 
@@ -132,6 +132,7 @@ private:
     TUint ActiveSessions() const;
     void CloseAllSessions();
     void CloseSession(TUint aIdx);
+    void CompleteCloseConnection();
     CMTPSession& SessionL(const TMTPTypeFlatBase& aDataset, TInt aSessionIdElementNo) const;
     
     static TInt SessionOrder(const TUint32* aL, const CMTPSession& aR);

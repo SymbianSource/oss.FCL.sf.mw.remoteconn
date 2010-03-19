@@ -30,6 +30,20 @@
 #include "mtpimagedputilits.h"
 #include "cmtpimagedp.h"
 
+/*
+ * The most significant bit represents whether the image object has been imported.
+ * 0 means does not be imported
+ * 1 means has been imported
+ */
+#define IMAGE_OBJECT_STATUS_BITMASK            0x8000
+
+/**
+ * The other left bits represent the thumbnail size of image object.
+ * The type of EFormatSubCode column is UINT16, so these bits are enought for thumbnail size.
+ * e.g. The image file of 57M bytes only has 2440 bytes of thumbnail. 
+ */
+#define IMAGE_OBJECT_THUMBNAIL_SIZE_BITMASK    0x7fff
+
 TMTPResponseCode MTPImageDpUtilits::VerifyObjectHandleL(MMTPDataProviderFramework& aFramework, const TMTPTypeUint32& aHandle, CMTPObjectMetaData& aMetaData)
 	{
 	if (!aFramework.ObjectMgr().ObjectL(aHandle, aMetaData))
@@ -60,13 +74,9 @@ TUint32 MTPImageDpUtilits::FindParentHandleL(MMTPDataProviderFramework& aFramewo
         if (!aDataProvider.GetCacheParentHandle(parse.DriveAndPath(), parentHandle))
             {
             parentHandle = aFramework.ObjectMgr().HandleL(parse.DriveAndPath());
-            if (parentHandle == KMTPHandleNone)
+            if (parentHandle != KMTPHandleNone)
                 {
-                parentHandle = KMTPHandleNoParent;
-                }        
-            else
-                {
-                aDataProvider.SetCacheParentHandle(parse.DriveAndPath(), parentHandle);
+                aDataProvider.SetCacheParentHandle(parse.DriveAndPath(), parentHandle);                
                 }
             }
         }
@@ -74,19 +84,46 @@ TUint32 MTPImageDpUtilits::FindParentHandleL(MMTPDataProviderFramework& aFramewo
     return parentHandle;    
     }
 
-void MTPImageDpUtilits::UpdateNewPicturesValue(CMTPImageDataProvider& aDataProvider, TInt aNewPics, TBool aSetRProperty)
+TBool MTPImageDpUtilits::IsNewPicture(const CMTPObjectMetaData& aMetadata)
+    {
+    /**
+     * we use EFormatSubCode column to save sentinel whether this object has been imported by PC
+     * 
+     */    
+    return ((aMetadata.Uint(CMTPObjectMetaData::EFormatSubCode) & IMAGE_OBJECT_STATUS_BITMASK) == 0);
+    }
+
+
+void MTPImageDpUtilits::UpdateObjectStatusToOldL(MMTPDataProviderFramework& aFramework, CMTPObjectMetaData& aMetadata)
+    {
+    TInt status = aMetadata.Uint(CMTPObjectMetaData::EFormatSubCode) | IMAGE_OBJECT_STATUS_BITMASK;
+    aMetadata.SetUint(CMTPObjectMetaData::EFormatSubCode, status);
+    aFramework.ObjectMgr().ModifyObjectL(aMetadata);
+    }
+
+TInt MTPImageDpUtilits::GetThumbnailSize(const CMTPObjectMetaData& aMetadata)
     {    
-    TInt preNewPic = 0;
-    aDataProvider.Repository().Get(ENewImagesCount, preNewPic);
-    
-    TInt newPics = aNewPics + preNewPic;
-    aDataProvider.Repository().Set(ENewImagesCount, newPics);
-    
-    TInt curValue = 0;
-    RProperty::Get(TUid::Uid(KMTPServerUID), KMTPNewPicKey, curValue);
-    
-    if (aSetRProperty && curValue != newPics)
+    /**
+     * query thumbnail size from EFormatSubCode column
+     */
+    return (aMetadata.Uint(CMTPObjectMetaData::EFormatSubCode) & IMAGE_OBJECT_THUMBNAIL_SIZE_BITMASK);
+    }
+
+void MTPImageDpUtilits::UpdateObjectThumbnailSizeL(MMTPDataProviderFramework& aFramework, CMTPObjectMetaData& aMetadata, TInt aThumbnailSize)
+    {
+    //check thumbnail size whether it is overflow
+    if (aThumbnailSize <= IMAGE_OBJECT_THUMBNAIL_SIZE_BITMASK)
         {
-        RProperty::Set(TUid::Uid(KMTPServerUID), KMTPNewPicKey, newPics);
+        TBool newPic = MTPImageDpUtilits::IsNewPicture(aMetadata);
+        if (newPic)
+            {
+            aMetadata.SetUint(CMTPObjectMetaData::EFormatSubCode, aThumbnailSize);
+            }
+        else
+            {
+            aThumbnailSize |= IMAGE_OBJECT_STATUS_BITMASK;
+            aMetadata.SetUint(CMTPObjectMetaData::EFormatSubCode, aThumbnailSize);
+            }
+        aFramework.ObjectMgr().ModifyObjectL(aMetadata);
         }
     }

@@ -35,6 +35,8 @@ class CMTPTypeOpaqueData;
 
 #include "mtpdebug.h"
 
+class CMTPImageDataProvider;
+
 #define MTPTHUMBSCALING
 
 // CLASS DECLARATION
@@ -54,7 +56,7 @@ public:
      * @param None.
      * @return An instance of CMTPImageDpThumbnailCreator.
      */
-    static CMTPImageDpThumbnailCreator* NewL();
+    static CMTPImageDpThumbnailCreator* NewL(CMTPImageDataProvider& aDataProvider);
 
     /**
      * C++ destructor.
@@ -62,16 +64,7 @@ public:
     ~CMTPImageDpThumbnailCreator();
     
 public:
-
-    /**
-     * Gets a thumbnail from the image.
-     * @since S60 3.2
-     * @param aSession, Reference to file server.
-     * @param aFileName, Name of the image file. Caller must ensure that the referenced object exists until the asynchronous call is completed.
-     * @param aThumbName, Name of the thumbnail file to be created. Caller must ensure that the referenced object exists until the asynchronous call is completed.
-     * @param aGetThumbnailStatus, status when 
-     */
-    void GetThumbnailL(const TDesC& aFileName, CMTPTypeOpaqueData& aThumbName, TInt& result);
+    void GetThumbnailL(const TDesC& aFileName, HBufC8*& aDestinationData, TInt& result);
 
 
     void ClearThumbnailData();
@@ -105,7 +98,7 @@ private:
     /**
      * Default C++ constructor. Not used.
      */
-    CMTPImageDpThumbnailCreator();
+    CMTPImageDpThumbnailCreator(CMTPImageDataProvider& aDataProvider);
 
     /**
      * 2nd phase constructor.
@@ -124,6 +117,8 @@ private:
         EGetted,
         EScaling,
         EEncoding}          iState;
+        
+    CMTPImageDataProvider&  iDataProvider;
     TThumbnailRequestId     iCurrentReq;
     TInt*                   iCreationErr;
     CFbsBitmap*             iBitmap;
@@ -134,7 +129,6 @@ private:
     HBufC8*                 iData;
     CThumbnailManager*      iThumbMgr;
     CThumbnailObjectSource* iObjectSource;
-    CMTPTypeOpaqueData*     iBuffer;             //not owned
     CActiveSchedulerWait*   iActiveSchedulerWait;
     };
 

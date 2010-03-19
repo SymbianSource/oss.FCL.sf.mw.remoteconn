@@ -26,14 +26,16 @@
 #include <mtp/mtpprotocolconstants.h>
 #include <comms-infras/commsdebugutility.h> // for __FLOG debugging
 
-// for thumb creation
-const TUint32 KThumbWidht=160;
-const TUint32 KThumbHeigth=120;
+/*
+ * [Thumbnail SIZE]: performance improvement
+ */
+const TUint32 KThumbWidht=104;//avoid to scale width to 160
+const TUint32 KThumbHeigth=74;//avoid to scale width to 120
 const TUint32 KThumbCompressedSize=KThumbWidht * KThumbHeigth * 4; // from TNM
 const TUint32 KThumbFormatCode = 0x3801;
 const TUint32 KFileSizeMax = 10 * 1000 * 1000;
+const TUint32 KImageDpNotifyDelay = 1000000 * 15;// set delay time, in microseconds, default is 15s.
 
-_LIT(KJpegMimeType, "image/jpeg");
 _LIT8(KPtpMimeJPEG, "image/jpeg");
 
 /**
@@ -95,6 +97,7 @@ static const TUint16 KMTPImageDpSupportedProperties[] =
   	EMTPObjectPropCodeRepresentativeSampleSize,
   	EMTPObjectPropCodeRepresentativeSampleHeight,
   	EMTPObjectPropCodeRepresentativeSampleWidth,
+  	EMTPObjectPropCodeRepresentativeSampleData,
   	EMTPObjectPropCodeNonConsumable
   	};
 
@@ -130,7 +133,8 @@ static const TUint16 KMTPImageDpGroupOneProperties[] =
     EMTPObjectPropCodeRepresentativeSampleFormat,
     EMTPObjectPropCodeRepresentativeSampleSize,
     EMTPObjectPropCodeRepresentativeSampleHeight,
-    EMTPObjectPropCodeRepresentativeSampleWidth
+    EMTPObjectPropCodeRepresentativeSampleWidth,
+    EMTPObjectPropCodeRepresentativeSampleData
     };
 
 /**
@@ -161,6 +165,13 @@ struct SMTPValidCodeExtensionMapping
     const TText*   iExtension;
     };
 
+struct SMTPExtensionMimeTypeMapping
+    {
+    public:    
+    const TText*   iExtension;
+    const TText*   iMimeType;
+    };
+
 // Note when adding extensions: 
 // same value for iExtension can be in the file only once, 
 // values for iFormatCode code can be multiple times
@@ -173,9 +184,26 @@ struct SMTPValidCodeExtensionMapping
 
 static const SMTPValidCodeExtensionMapping KMTPValidCodeExtensionMappings[] =
     {
-    {EMTPFormatCodeEXIFJPEG, CASTING("jpg")},   // jpeg
-    {EMTPFormatCodeEXIFJPEG, CASTING("jpe")},   // jpeg
-    {EMTPFormatCodeEXIFJPEG, CASTING("jpeg")}  // jpeg
+    {EMTPFormatCodeEXIFJPEG, CASTING("jpg")},  // jpeg
+    {EMTPFormatCodeEXIFJPEG, CASTING("jpe")},  // jpeg
+    {EMTPFormatCodeEXIFJPEG, CASTING("jpeg")}, // jpeg
+//    {EMTPFormatCodeBMP,      CASTING("bmp")},  // bmp
+//    {EMTPFormatCodeGIF,      CASTING("gif")},  // gif
+//    {EMTPFormatCodePNG,      CASTING("png")},  // png
+//    {EMTPFormatCodeTIFF,     CASTING("tif")},  // tiff, TNM does not support
+//    {EMTPFormatCodeTIFF,     CASTING("tiff")}, // tiff, TNM does not support
+    };
+
+static const SMTPExtensionMimeTypeMapping KMTPExtensionMimeTypeMappings[] =
+    {
+    {CASTING("jpg"),         CASTING("image/jpeg")}, // jpeg
+    {CASTING("jpe"),         CASTING("image/jpeg")}, // jpeg
+    {CASTING("jpeg"),        CASTING("image/jpeg")}, // jpeg
+//    {CASTING("bmp"),         CASTING("image/bmp")},  // bmp
+//    {CASTING("gif"),         CASTING("image/gif")},  // gif
+//    {CASTING("png"),         CASTING("image/png")},  // png
+//    {CASTING("tif"),         CASTING("image/tiff")}, // tiff, TNM does not support
+//    {CASTING("tiff"),        CASTING("image/tiff")}, // tiff, TNM does not support
     };
 
 /**

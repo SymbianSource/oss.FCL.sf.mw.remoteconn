@@ -58,6 +58,15 @@ private:
     void GetRootObjectHandlesL( TUint32 aCurDepth, TUint32 aFormatCode, TUint32 aDepth, const TBrowseCallback& aBrowseCallback ) const;
     void GetObjectHandlesTreeL( TUint32 aCurDepth, TUint32 aFormatCode, TUint32 aDepth, TUint32 aParentHandle, const TBrowseCallback& aBrowseCallback ) const;
     
+    /**
+     * This function retrives all the object handles with the format code of aFormatCode.
+     * 
+     * If aFormatCode == KMTPFormatsAll, only Legacy dp's object handles are returned. Object
+     * Handles of service dp's will not be returned.
+     * 
+     */
+    void GetAllObjectHandlesL( TUint32 aFormatCode,const TBrowseCallback& aBrowseCallback ) const;
+    
 private:
     __FLOG_DECLARATION_MEMBER_MUTABLE;
     

@@ -35,6 +35,14 @@ __FLOG_STMT( _LIT8( KComponent,"PrxyDelObj" ); )
 const TUint KInvalidDpId = 0xFF;
 
 /**
+Verification data for the DeleteObject request
+*/
+const TMTPRequestElementInfo KMTPDeleteObjectPolicy[] = 
+    {
+        { TMTPTypeRequest::ERequestParameter1, EMTPElementTypeObjectHandle, (EMTPElementAttrDir | EMTPElementAttrWrite), 1, KMTPHandleAll, 0 }
+    };
+
+/**
 Two-phase construction method
 @param aFramework    The data provider framework
 @param aConnection    The connection from which the request comes
@@ -67,7 +75,7 @@ CMTPDeleteObject::~CMTPDeleteObject()
 Constructor
 */    
 CMTPDeleteObject::CMTPDeleteObject(MMTPDataProviderFramework& aFramework, MMTPConnection& aConnection) :
-    CMTPRequestProcessor(aFramework, aConnection, 0, NULL),
+    CMTPRequestProcessor(aFramework, aConnection, sizeof(KMTPDeleteObjectPolicy)/sizeof(TMTPRequestElementInfo), KMTPDeleteObjectPolicy),
     iDeletedObjectsNumber(0)
     {
     __FLOG_OPEN( KMTPSubsystem, KComponent );
@@ -86,6 +94,19 @@ void CMTPDeleteObject::ConstructL()
     __FLOG( _L8("-ConstructL") );
     }
     
+TMTPResponseCode CMTPDeleteObject::CheckRequestL()
+	{
+    __FLOG(_L8("CheckRequestL - Entry"));
+    TMTPResponseCode responseCode = CMTPRequestProcessor::CheckRequestL();   
+    if ((EMTPRespCodeOK == responseCode) && (iSingletons.DpController().EnumerateState() == CMTPDataProviderController::EEnumeratingSubDirFiles))
+        {
+		responseCode = EMTPRespCodeDeviceBusy;
+        }
+    
+	__FLOG_VA((_L8("CheckRequestL - Exit with responseCode = 0x%04X"), responseCode));
+    return responseCode;
+	}
+
 /**
 DeleteObject request handler
 */ 
@@ -158,11 +179,21 @@ void CMTPDeleteObject::RunL()
     
     if ( iStatus == KErrNone )
         {
-        NextObjectHandleL();
-        if ( iOwnerDp != KInvalidDpId )
+        //First check if the operation has been cancelled or not
+        if(iCancelled)
             {
-            CMTPDataProvider& dp = iSingletons.DpController().DataProviderL( iOwnerDp );
-            dp.ExecuteProxyRequestL( iCurrentRequest, Connection(), *this );
+            __FLOG(_L8("Initiator cancell delete, send response with cancelled code "));
+            SendResponseL(EMTPRespCodeTransactionCancelled);
+            iCancelled = EFalse;
+            }
+        else
+            {
+            NextObjectHandleL();
+            if ( iOwnerDp != KInvalidDpId )
+                {
+                CMTPDataProvider& dp = iSingletons.DpController().DataProviderL( iOwnerDp );
+                dp.ExecuteProxyRequestL( iCurrentRequest, Connection(), *this );
+                }
             }
         }
     else
@@ -209,6 +240,7 @@ void CMTPDeleteObject::BrowseHandlesL()
     iHandles.Reset();
     iCurrentHandle = 0;
     iDeletedObjectsNumber = 0;
+    
     MMTPType::CopyL( Request(), iCurrentRequest );
     
     CMTPObjectBrowser::TBrowseCallback callback = { CMTPDeleteObject::OnBrowseObjectL, this };
