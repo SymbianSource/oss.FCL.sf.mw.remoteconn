@@ -148,8 +148,8 @@ public:
     IMPORT_C static CMTPTypeDevicePropDesc* NewL(TUint16 aPropertyCode, const MMTPType& aForm);
     IMPORT_C static CMTPTypeDevicePropDesc* NewLC(TUint16 aPropertyCode, const MMTPType& aForm);
     
-    IMPORT_C static CMTPTypeDevicePropDesc* CMTPTypeDevicePropDesc::NewL(TUint16 aPropertyCode, TUint8 aGetSet, TUint8 aFormFlag, const MMTPType* aForm);
-    IMPORT_C static CMTPTypeDevicePropDesc* CMTPTypeDevicePropDesc::NewLC(TUint16 aPropertyCode, TUint8 aGetSet, TUint8 aFormFlag, const MMTPType* aForm);
+    IMPORT_C static CMTPTypeDevicePropDesc* NewL(TUint16 aPropertyCode, TUint8 aGetSet, TUint8 aFormFlag, const MMTPType* aForm);
+    IMPORT_C static CMTPTypeDevicePropDesc* NewLC(TUint16 aPropertyCode, TUint8 aGetSet, TUint8 aFormFlag, const MMTPType* aForm);
     
     IMPORT_C static CMTPTypeDevicePropDesc* NewL(TUint16 aPropertyCode, const TPropertyInfo& aInfo, const MMTPType* aForm);
     IMPORT_C static CMTPTypeDevicePropDesc* NewLC(TUint16 aPropertyCode, const TPropertyInfo& aInfo, const MMTPType* aForm);
