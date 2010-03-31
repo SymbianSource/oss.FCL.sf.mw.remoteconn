@@ -298,16 +298,8 @@ void CMTPUsbConnection::SendResponseL(const TMTPTypeResponse& aResponse, const T
    		*/
    		iUsbBulkParameterBlock.Reset();
         TBool isNullParamValid = EFalse;
-        TUint numberOfNullParam = 0;    
-        /*
-        A special case: for GetNumObjects the first response parameter can be null, which means 0 objects.
-        */
-        if(opCode == EMTPOpCodeGetNumObjects)
-            {
-            isNullParamValid = ETrue;
-            numberOfNullParam = 1;
-            }
-        iUsbBulkParameterBlock.CopyIn(aResponse, TMTPTypeResponse::EResponseParameter1, TMTPTypeResponse::EResponseParameter5, isNullParamValid, numberOfNullParam);
+        TUint numberOfNullParam = 0;
+        iUsbBulkParameterBlock.CopyIn(aResponse, TMTPTypeResponse::EResponseParameter1, TMTPTypeResponse::EResponseParameter1 + aResponse.GetNumOfValidParams(), isNullParamValid, numberOfNullParam);
 
    		// Setup the bulk container.
    		iUsbBulkContainer->SetPayloadL(const_cast<TMTPUsbParameterPayloadBlock*>(&iUsbBulkParameterBlock));
@@ -1567,6 +1559,12 @@ void CMTPUsbConnection::DataEndpointsStop()
             {
             __FLOG(_L8("Aborting active R to I data phase"));
             TRAPD(err, BoundProtocolLayer().SendDataCompleteL(KErrAbort, *iUsbBulkContainer->Payload(), iMTPRequest));
+            UNUSED_VAR(err);
+            }
+		else if ((iBulkTransactionState == EResponsePhase) && iUsbBulkContainer->Payload())
+            {
+            __FLOG(_L8("Aborting active response phase"));
+            TRAPD(err, BoundProtocolLayer().SendResponseCompleteL(KErrAbort, *static_cast<TMTPTypeResponse*>(iUsbBulkContainer->Payload()), iMTPRequest));
             UNUSED_VAR(err);
             }
         }

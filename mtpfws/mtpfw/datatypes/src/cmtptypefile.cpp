@@ -17,9 +17,15 @@
  @file
  @publishedPartner
  */
-
+#include <centralrepository.h>
 #include <mtp/cmtptypefile.h>
 #include <mtp/mtpdatatypeconstants.h>
+
+#include "mtpframeworkconst.h"
+
+//This file is exported from s60 sdk, now just copy it
+//to make sure onb can run
+#include "UiklafInternalCRKeys.h"
 
 // File type constants.
 const TInt KMTPFileChunkSizeForLargeFile(0x00080000); // 512K
@@ -31,8 +37,6 @@ const TInt KMTPFileChunkSizeForSmallFile(0x00010000); //64K
 const TInt64 KMTPFileSetSizeChunk(1<<30); //1G
 
 const TUint KUSBHeaderLen = 12;
-
-
 
 CMTPTypeFile::CFileWriter* CMTPTypeFile::CFileWriter::NewL(RFile&  aFile, RBuf8& aWriteBuf)
     {
@@ -87,6 +91,7 @@ CMTPTypeFile::CFileWriter::~CFileWriter()
         {
         iFile.SetSize(0);
         }
+    
     }
 
 
@@ -178,6 +183,55 @@ EXPORT_C CMTPTypeFile::~CMTPTypeFile()
  */
 EXPORT_C void CMTPTypeFile::SetSizeL(TUint64 aSize)
     {
+    //Firstly, check the disk free space, at anytime, we must make sure
+    //the free space can not be lower than the threshold value after this 
+    //file syncing
+    TInt driveNo;
+    TDriveInfo driveInfo;
+    iFile.Drive(driveNo,driveInfo);
+    RFs fs;
+    TVolumeInfo volumeInfo;
+    fs.Connect();
+    fs.Volume(volumeInfo,driveNo);
+    fs.Close();
+    
+    //Read the threshold value from Central Repository and check against it
+    CRepository* repository(NULL);
+    TInt thresholdValue(0);
+    TRAPD(err,repository = CRepository::NewL(KCRUidUiklaf));
+    if (err == KErrNone)
+        {
+        if (driveNo == EDriveC)
+            {
+            TInt warningUsagePercent(0);
+            err = repository->Get(KUikOODDiskFreeSpaceWarningNoteLevel,warningUsagePercent);
+            if (err == KErrNone)
+                {
+                thresholdValue = ((volumeInfo.iSize*(100-warningUsagePercent))/100)
+                    + KFreeSpaceExtraReserved;
+                }
+            }
+        else 
+            {
+            err = repository->Get(KUikOODDiskFreeSpaceWarningNoteLevelMassMemory,thresholdValue);
+            if (err == KErrNone)
+                {
+                thresholdValue += KFreeSpaceExtraReserved;
+                }
+            }
+        delete repository;
+        }
+    
+    if (err != KErrNone)
+        {
+        thresholdValue = KFreeSpaceThreshHoldDefaultValue + KFreeSpaceExtraReserved;
+        }
+    
+    if(volumeInfo.iFree <= thresholdValue + aSize)
+        {
+        User::Leave(KErrDiskFull);
+        }
+    
     iTargetFileSize = (TInt64)aSize; //keep a record for the target file size
     
     iRemainingDataSize = (TInt64)aSize;//Current implemenation does not support file size with 2 x64 
@@ -205,6 +259,7 @@ EXPORT_C void CMTPTypeFile::SetSizeL(TUint64 aSize)
         }
     iFileWriter1 = CFileWriter::NewL(iFile, iBuffer1);
     iFileWriter2 = CFileWriter::NewL(iFile, iBuffer2);
+  
     }
 
 /**
@@ -581,13 +636,14 @@ void CMTPTypeFile::ConstructL(RFs& aFs, const TDesC& aName, TFileMode aMode, TIn
 #endif
         User::LeaveIfError(iFile.Size(size));
         
-        if(aRequiredSize < size)
+        
+        if(aOffSet + aRequiredSize <= size)
             {
             iTargetFileSize = aRequiredSize;
             }
         else
             {
-            iTargetFileSize = size;
+            iTargetFileSize = size - aOffSet;
             }
         iRemainingDataSize = iTargetFileSize;
         

@@ -76,7 +76,8 @@ SOURCE              mmtpservicehandler.cpp
 SOURCE              cmtpfullenumservicehandler.cpp
 SOURCE              cmtpcommonrequestprocessor.cpp
 SOURCE              cmtpgetpartialobject.cpp
-SOURCE			cmtpsetobjectprotection.cpp
+SOURCE              cmtpsetobjectprotection.cpp
+SOURCE              cmtpfsentrycache.cpp
 
 LIBRARY             euser.lib
 LIBRARY             bafl.lib

@@ -22,7 +22,6 @@
 
 #include "cmtprequestprocessor.h"
 #include "cmtprequestchecker.h"
-
 const static TInt KNullBufferSize = 4096;
 __FLOG_STMT(_LIT8(KComponent,"MTPRequestProcessor");)
 
@@ -75,31 +74,19 @@ Send a response to the initiator
 @param aParmas	The pointer to array of parameters
 */	
 EXPORT_C void CMTPRequestProcessor::SendResponseL(TMTPResponseCode aResponseCode, TInt aParameterCount, TUint32* aParams)
-	{
-	__ASSERT_DEBUG(aParameterCount < TMTPTypeRequest::ENumElements, User::Invariant());
-    
-	iResponse.SetUint16(TMTPTypeResponse::EResponseCode, aResponseCode);
-		    
+    {
+    __ASSERT_DEBUG(aParameterCount < TMTPTypeRequest::ENumElements, User::Invariant());
+    iResponse.Reset();
+    iResponse.SetUint16(TMTPTypeResponse::EResponseCode, aResponseCode);
     iResponse.SetUint32(TMTPTypeResponse::EResponseSessionID, iSessionId);
-	
-	iResponse.SetUint32(TMTPTypeResponse::EResponseTransactionID, iTransactionCode);
-   
-    TInt i = 0;	
-	for(i = 0; i < aParameterCount; i++)
-		{
-		iResponse.SetUint32(TMTPTypeResponse::EResponseParameter1 + i, aParams[i]);
-		}
-
-	i += TMTPTypeResponse::EResponseParameter1;
-	while(i <= TMTPTypeResponse::EResponseParameter5)
-	    {
-	    iResponse.SetUint32(i, KMTPNotSpecified32);
-	    i++;
-	    }
-
-	__ASSERT_DEBUG(iRequest, User::Invariant()); 
-	iFramework.SendResponseL(iResponse, *iRequest, iConnection);
-	}
+    iResponse.SetUint32(TMTPTypeResponse::EResponseTransactionID, iTransactionCode);
+    for(TInt i = 0; i < aParameterCount; ++ i)
+        {
+        iResponse.SetUint32(TMTPTypeResponse::EResponseParameter1 + i, aParams[i]);
+        }
+    __ASSERT_DEBUG(iRequest, User::Invariant());
+    iFramework.SendResponseL(iResponse, *iRequest, iConnection);
+    }
 
 /**
 The current active request
@@ -156,6 +143,14 @@ EXPORT_C void CMTPRequestProcessor::ReceiveDataL(MMTPType& aData)
 	iFramework.ReceiveDataL(aData, *iRequest, iConnection);
 	}
 	
+/**
+Register self as a pending request
+*/
+EXPORT_C void CMTPRequestProcessor::RegisterPendingRequest(TUint aTimeOut)
+    {
+    iFramework.RegisterPendingRequest(aTimeOut);
+    }
+
 /**
 Handle the request
 @param aRequest	The request to be processed

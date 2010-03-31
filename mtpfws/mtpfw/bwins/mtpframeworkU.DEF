@@ -150,4 +150,7 @@ EXPORTS
 	?SetNeedEnumeratingPhase2@CMTPDataProviderController@@QAEXH@Z @ 149 NONAME ; void CMTPDataProviderController::SetNeedEnumeratingPhase2(int)
 	?SetBTResumeParameter@CMTPConnectionMgr@@QAEXABVTBTDevAddr@@ABG@Z @ 150 NONAME ; void CMTPConnectionMgr::SetBTResumeParameter(class TBTDevAddr const &, unsigned short const &)
 	?IsReadWriteStorage@CMTPStorageMgr@@QBEHK@Z @ 151 NONAME ; int CMTPStorageMgr::IsReadWriteStorage(unsigned long) const
+	?StorageEnumerateState@CMTPDataProviderController@@QAEII@Z @ 152 NONAME ; unsigned int CMTPDataProviderController::StorageEnumerateState(unsigned int)
+	?ExecutePendingRequestL@CMTPDataProviderController@@QAEXXZ @ 153 NONAME ; void CMTPDataProviderController::ExecutePendingRequestL(void)
+	?RegisterPendingRequestDP@CMTPDataProviderController@@QAEXII@Z @ 154 NONAME ; void CMTPDataProviderController::RegisterPendingRequestDP(unsigned int, unsigned int)
 

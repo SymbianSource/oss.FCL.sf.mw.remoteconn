@@ -24,11 +24,14 @@
 #include "rmtpframework.h"
 #include "cmtprequestprocessor.h"
 #include "mtpdebug.h"
+#include "rmtpdpsingletons.h"
 
 class RFs;
 class CFileMan;
 class CMTPObjectMetaData;
 class CMTPObjectPropertyMgr;
+
+const TInt KCopyObjectTimeOut = 180000000; // 180s
 
 /** 
 Defines data provider CopyObject request processor
@@ -53,6 +56,8 @@ private:
 private:	//from CMTPRequestProcessor
 	virtual void ServiceL();
     TMTPResponseCode CheckRequestL();
+    TBool DoHandleCompletingPhaseL();
+    TBool Match(const TMTPTypeRequest& aRequest, MMTPConnection& aConnection) const;
     
 private:
 	void ConstructL();
@@ -62,19 +67,26 @@ private:
 	TMTPResponseCode CanCopyObjectL(const TDesC& aOldName, const TDesC& aNewName) const;
 	void GetPreviousPropertiesL(const TDesC& aFileName);
 	void SetPreviousPropertiesL(const TDesC& aFileName);
-	TUint32 CopyFileL(const TDesC& aNewFileName);
+	void CopyFileL(const TDesC& aNewFileName);
 	TUint32 CopyFolderL(const TDesC& aNewFolderName);
 	void SetPropertiesL(TUint32 aSourceHandle, const CMTPObjectMetaData& aTargetObject);	
 	TUint32 UpdateObjectInfoL(const TDesC& aNewObject);
+	static TInt OnTimeoutL(TAny* aPtr);
+	void DoOnTimeoutL();
+	void RunL();
 	
 private:
-	CFileMan*				iFileMan;
+	CFileMan*							iFileMan;
 	CMTPObjectMetaData*		iObjectInfo;	//Not owned.
-	HBufC*					iDest;
-	TUint32					iNewParentHandle;
-	TUint32					iStorageId;
-	TTime					iPreviousModifiedTime;
-    RMTPFramework           iSingletons;
+	HBufC*								iDest;
+	HBufC*								iNewFileName;
+	TBool									iIsFolder;
+	TUint32								iNewParentHandle;
+	TUint32								iStorageId;
+	TTime									iPreviousModifiedTime;
+  RMTPFramework					iSingletons;
+  RMTPDpSingletons			iDpSingletons;
+  CPeriodic*						iTimer;
 	/**
     FLOGGER debug trace member variable.
     */

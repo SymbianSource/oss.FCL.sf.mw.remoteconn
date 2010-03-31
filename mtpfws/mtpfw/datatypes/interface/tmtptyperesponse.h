@@ -80,9 +80,15 @@ public:
         */
         EResponseParameter5, 
         
+        /*
+         * Number of valid parameter
+         */
+        
+        ENumValidParam,
         /**
         The number of dataset elements.
         */
+        
         ENumElements, 
         }; 
     
@@ -90,10 +96,13 @@ public:
 
     IMPORT_C TMTPTypeResponse();
     IMPORT_C TMTPTypeResponse(const TMTPTypeResponse& aResponse);
+    IMPORT_C TInt GetNumOfValidParams() const;
     
 public: // From TMTPTypeFlatBase
 
     IMPORT_C TUint Type() const;
+    
+    IMPORT_C void SetUint32(TInt aElementId, TUint32 aData);
     
 private: // From TMTPTypeFlatBase
     
@@ -104,7 +113,7 @@ private:
     /**
     The dataset size in bytes.
     */
-    static const TInt                               KSize = 30;
+    static const TInt                               KSize = 34;
     
     /**
     The dataset element metadata table content.
@@ -120,6 +129,8 @@ private:
     The data buffer.
     */
     TBuf8<KSize>                                    iBuffer; 
+    
+
     };
 
 #endif // TMTPTYPERESPONSE_H

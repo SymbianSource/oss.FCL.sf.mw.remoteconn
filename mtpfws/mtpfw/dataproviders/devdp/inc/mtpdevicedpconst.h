@@ -141,7 +141,6 @@ DeviceInfo dataset field defaults.
 _LIT(KMTPDefaultSerialNumber, "350149101482769");
 _LIT(KMTPDefaultManufacturer, "Symbian");
 _LIT(KMTPDefaultModel, "1234567890");
-_LIT(KMTPDefaultDeviceVersion, "1.0");
 
 /**
  *This enumerator to identify resource file prameters.

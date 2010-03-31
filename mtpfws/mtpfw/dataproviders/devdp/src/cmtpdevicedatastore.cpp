@@ -15,7 +15,6 @@
 
 #include <badesca.h>
 #include <bautils.h>
-#include <hal.h>
 #include <s32file.h>
 #include  <f32file.h>
 #include <tz.h>
@@ -23,6 +22,7 @@
 #include <mtp/mtpdatatypeconstants.h>
 #include <mtp/cmtpdataproviderplugin.h>
 #include <mtp/cmtptypefile.h>
+#include <sysutil.h>
 
 #include "cmtpdataprovider.h"
 #include "cmtpdataprovidercontroller.h"
@@ -394,10 +394,25 @@ void CMTPDeviceDataStore::RunL()
 
     case EEnumeratingDeviceVersion:
         {
-        TInt buildNo(0);
-        User::LeaveIfError(HAL::Get(HALData::EManufacturerSoftwareBuild, buildNo));
-        __FLOG_VA((_L8("EManufacturerSoftwareBuild = %d "), buildNo));
-        iDeviceVersion.Format(_L("%d"), buildNo);
+		    HBufC* verBuf = HBufC::NewLC( KSysUtilVersionTextLength );
+		    TPtr ver = verBuf->Des();
+		    SysUtil::GetSWVersion( ver );
+				
+		    // parse sw fields and append to iDeviceVersion
+		    /*
+		    "010.007\n2010-03-08\nRM-596\nNokia"
+		    */
+		    TChar separator('\n');
+		    TInt pos = ver.Locate( separator );
+		    if ( pos == KErrNotFound )
+			      {
+			      iDeviceVersion.Append( ver );
+			      }
+			  else
+			  	  {
+			  		iDeviceVersion.Append( ver.Mid( 0, pos ) );
+			  	  }
+			  CleanupStack::PopAndDestroy(verBuf);	  
         Schedule(EEnumeratingPhoneId);
         }
         break;
@@ -495,7 +510,7 @@ void CMTPDeviceDataStore::ConstructL()
     iSynchronisationPartner = CMTPTypeString::NewL(*iSyncPartnerNameDefault);
 
     //  3.  Device Version.
-    iDeviceVersion.CreateL(KMTPDefaultDeviceVersion);
+    iDeviceVersion.CreateL(KSysUtilVersionTextLength);
 
     //  4.  Manufacturer.
     iPhoneIdV1.iManufacturer    = KMTPDefaultManufacturer;

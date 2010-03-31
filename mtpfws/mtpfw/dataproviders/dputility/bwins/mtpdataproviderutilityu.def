@@ -202,4 +202,15 @@ EXPORTS
 	?NewL@CMTPGetInterDependentPropDesc@@SAPAVMMTPRequestProcessor@@AAVMMTPDataProviderFramework@@AAVMMTPConnection@@@Z @ 201 NONAME ; class MMTPRequestProcessor * CMTPGetInterDependentPropDesc::NewL(class MMTPDataProviderFramework &, class MMTPConnection &)
 	??1CMTPGetInterDependentPropDesc@@UAE@XZ @ 202 NONAME ; CMTPGetInterDependentPropDesc::~CMTPGetInterDependentPropDesc(void)
 	?StartL@CMTPFSEnumerator@@QAEXKH@Z @ 203 NONAME ; void CMTPFSEnumerator::StartL(unsigned long, int)
+	?SetFileEntry@CMTPFSEntryCache@@QAEXABVTEntry@@@Z @ 204 NONAME ; void CMTPFSEntryCache::SetFileEntry(class TEntry const &)
+	??1CMTPFSEntryCache@@UAE@XZ @ 205 NONAME ; CMTPFSEntryCache::~CMTPFSEntryCache(void)
+	?SetOnGoing@CMTPFSEntryCache@@QAEXH@Z @ 206 NONAME ; void CMTPFSEntryCache::SetOnGoing(int)
+	?MovingBigFileCache@RMTPDpSingletons@@QBEAAVCMTPFSEntryCache@@XZ @ 207 NONAME ; class CMTPFSEntryCache & RMTPDpSingletons::MovingBigFileCache(void) const
+	?CopyingBigFileCache@RMTPDpSingletons@@QBEAAVCMTPFSEntryCache@@XZ @ 208 NONAME ; class CMTPFSEntryCache & RMTPDpSingletons::CopyingBigFileCache(void) const
+	?IsOnGoing@CMTPFSEntryCache@@QBEHXZ @ 209 NONAME ; int CMTPFSEntryCache::IsOnGoing(void) const
+	?SetTargetHandle@CMTPFSEntryCache@@QAEXK@Z @ 210 NONAME ; void CMTPFSEntryCache::SetTargetHandle(unsigned long)
+	?TargetHandle@CMTPFSEntryCache@@QBEKXZ @ 211 NONAME ; unsigned long CMTPFSEntryCache::TargetHandle(void) const
+	?NewL@CMTPFSEntryCache@@SAPAV1@XZ @ 212 NONAME ; class CMTPFSEntryCache * CMTPFSEntryCache::NewL(void)
+	?FileEntry@CMTPFSEntryCache@@QAEAAVTEntry@@XZ @ 213 NONAME ; class TEntry & CMTPFSEntryCache::FileEntry(void)
+	?RegisterPendingRequest@CMTPRequestProcessor@@IAEXI@Z @ 214 NONAME ; void CMTPRequestProcessor::RegisterPendingRequest(unsigned int)
 

@@ -20,6 +20,7 @@
 #include <mtp/mtpdatatypeconstants.h>
 #include <mtp/mmtpstoragemgr.h>  
 
+#include "cmtpdataprovidercontroller.h"
 #include "cmtpdevicedatastore.h"
 #include "cmtpgetobjecthandles.h"
 #include "mtpdevicedpconst.h"
@@ -27,6 +28,8 @@
 
 // Class constants.
 __FLOG_STMT(_LIT8(KComponent,"GetObjectHandles");)
+
+static const TInt KMTPGetObjectHandlesTimeOut(1);
 
 /**
 Two-phase construction method
@@ -77,6 +80,33 @@ GetObjectHandles request handler
 void CMTPGetObjectHandles::ServiceL()
 	{
     __FLOG(_L8("ServiceL - Entry"));
+    
+    if(iSingletons.DpController().EnumerateState() != CMTPDataProviderController::EEnumeratedFulllyCompleted)
+        {
+        TUint storageId = Request().Uint32(TMTPTypeRequest::ERequestParameter1);
+        TUint handle = Request().Uint32(TMTPTypeRequest::ERequestParameter3);
+        TUint enumerateState = iSingletons.DpController().StorageEnumerateState(storageId);
+        if ( (enumerateState < CMTPDataProviderController::EEnumeratingPhaseOneDone)
+            || (enumerateState != CMTPDataProviderController::EEnumeratedFulllyCompleted && handle != KMTPHandleAll))
+            {
+            if (iTimeoutCount++ >= KMTPGetObjectHandlesTimeOut)
+                {
+                __FLOG(_L8("Wait for enumeration time out, return busy."));
+                SendResponseL(EMTPRespCodeDeviceBusy);
+                iTimeoutCount = 0;
+                return;
+                }
+            else
+                {
+                __FLOG(_L8("Enumeration not completed, suspend request."));
+                RegisterPendingRequest(20);
+                return; 
+                }
+            }
+        }
+    
+    iTimeoutCount = 0;
+    
 	RMTPObjectMgrQueryContext   context;
 	RArray<TUint>               handles;
 	CleanupClosePushL(context);

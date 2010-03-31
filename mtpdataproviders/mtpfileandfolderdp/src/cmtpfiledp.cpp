@@ -136,14 +136,11 @@ void CMTPFileDataProvider::ProcessRequestPhaseL(TMTPTransactionPhase aPhase, con
 void CMTPFileDataProvider::StartObjectEnumerationL(TUint32 aStorageId, TBool /*aPersistentFullEnumeration*/)
     {
     __FLOG(_L8("StartObjectEnumerationL - Entry"));
-
     iPendingEnumerations.AppendL(aStorageId);
-    if (iPendingEnumerations.Count() == 1)
-        {
-		CMTPDataProviderController& dpController(iSingletons.DpController());
-		TBool bOnlyScanRoot = ( (dpController.EnumerateState() == CMTPDataProviderController::EEnumeratingFrameworkObjects) && (dpController.NeedEnumeratingPhase2()) );
-		iFileEnumerator->StartL(iPendingEnumerations[KActiveEnumeration], bOnlyScanRoot);
-        }
+    CMTPDataProviderController& dpController(iSingletons.DpController());
+    //must read this NeedEnumeratingPhase2 before this function return
+    TBool bScanAll = dpController.NeedEnumeratingPhase2();
+    iFileEnumerator->StartL(iPendingEnumerations[KActiveEnumeration], bScanAll);
     __FLOG(_L8("StartObjectEnumerationL - Exit"));
     }
     
@@ -222,12 +219,6 @@ void CMTPFileDataProvider::NotifyEnumerationCompleteL(TUint32 /*aStorageId*/, TI
     
     Framework().ObjectEnumerationCompleteL(iPendingEnumerations[KActiveEnumeration]);
     iPendingEnumerations.Remove(KActiveEnumeration);
-    if (iPendingEnumerations.Count())
-        {
-		CMTPDataProviderController& dpController(iSingletons.DpController());
-		TBool bOnlyScanRoot = ( (dpController.EnumerateState() == CMTPDataProviderController::EEnumeratingFrameworkObjects) && (dpController.NeedEnumeratingPhase2()) );
-        iFileEnumerator->StartL(iPendingEnumerations[KActiveEnumeration], bOnlyScanRoot);
-        }
     __FLOG(_L8("HandleEnumerationCompletedL - Exit"));
     }
     

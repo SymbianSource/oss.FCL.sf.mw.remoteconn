@@ -64,7 +64,8 @@ public:
         EEnumeratingDataProviderObjects     = 5,
         EEnumeratingPhaseOneDone            = 6,
         EEnumeratingSubDirFiles				= 7, //Only File DP care the status.
-        EEnumeratedFulllyCompleted			= 8,
+        EEnumeratingCleanDBSnapshot         = 8,
+        EEnumeratedFulllyCompleted			= 9,
         };
         
 public:
@@ -95,6 +96,12 @@ public:
     
     IMPORT_C void SetNeedEnumeratingPhase2(TBool aNeed);
     IMPORT_C TBool NeedEnumeratingPhase2() const;
+    
+    IMPORT_C void RegisterPendingRequestDP(TUint aDpUid, TUint aTimeOut = 0);
+    IMPORT_C void ExecutePendingRequestL();
+    IMPORT_C TUint StorageEnumerateState(TUint aStorageId);
+    
+
 private: // From CActive
 
     void DoCancel();
@@ -105,6 +112,7 @@ private:
 
     CMTPDataProviderController();
     void ConstructL();
+    void EstablishDBSnapshotL(TUint32 aStorage);
     
     CMTPDataProviderConfig* CreateConfigLC(const TDesC& aResourceFilename);
     void EnumerateDataProviderObjectsL(TUint aId);
@@ -122,6 +130,32 @@ private:
     static TInt ImplementationsLinearOrderUid(const CImplementationInformation& aL, const CImplementationInformation& aR);
     
 private: // Owned
+    
+    friend class CMTPObjectStore;
+    class CMTPPendingReqestTimer : public CTimer
+        {
+    public:
+
+        static CMTPPendingReqestTimer* NewL(CMTPDataProviderController* aDPController); 
+        virtual ~CMTPPendingReqestTimer();
+          
+        void Start(TUint aTimeOut);
+        
+    private: // From CTimer
+
+        void RunL();
+        
+    private:
+
+        CMTPPendingReqestTimer(CMTPDataProviderController* aDPController);
+        void ConstructL();
+        
+    private:
+        __FLOG_DECLARATION_MEMBER_MUTABLE;
+        
+        CMTPDataProviderController* iDPController;
+        };
+    
     /**
     FLOGGER debug trace member variable.
     */
@@ -219,6 +253,10 @@ private: // Owned
      */
     TBool		iNeedEnumeratingPhase2;
     TUint32 	iNeedEnumeratingPhase2StorageId;
+    
+    TUint       iPendingRequestDpUid;
+    
+    CMTPPendingReqestTimer *iPendingRequestTimer;
 
     };
 

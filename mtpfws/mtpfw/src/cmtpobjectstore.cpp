@@ -53,6 +53,56 @@ const TInt KMaxLimitCommitInEnumeration = 1024;
 const TInt KMaxLimitCommitAfterEnumeration = 256;
 const TInt KMaxLimitCompactInEnumeration = 2048;
 const TInt KMaxLimitCompactAfterEnumeration = 1024;
+const TInt KSnapshotGranularity = 128; 
+
+
+
+
+
+CMTPObjectStore::CSnapshotWorker* CMTPObjectStore::CSnapshotWorker::NewL(CMTPObjectStore* aObjectStore, TBool aOnlyRoot)
+    {
+    CSnapshotWorker* self = new (ELeave) CMTPObjectStore::CSnapshotWorker(aObjectStore, aOnlyRoot);
+    CleanupStack::PushL(self);
+    self->ConstructL();
+    CleanupStack::Pop(self);
+    return self;
+
+    }
+
+void CMTPObjectStore::CSnapshotWorker::RunL()
+    {
+    iObjectStore->CleanDBSnapshotL(iOnlyRoot);
+    }
+
+void CMTPObjectStore::CSnapshotWorker::DoCancel()
+    {
+    //nothing to do
+    }
+
+TInt CMTPObjectStore::CSnapshotWorker::RunErr()
+    {
+    return KErrNone;
+    }
+
+void CMTPObjectStore::CSnapshotWorker::ActiveSelf()
+    {
+    TRequestStatus *status = &iStatus;
+    iStatus = KRequestPending;
+    User::RequestComplete(status, KErrNone);
+    SetActive();
+    }
+
+CMTPObjectStore::CSnapshotWorker::CSnapshotWorker(CMTPObjectStore* aObjectStore, TBool aOnlyRoot):
+        CActive(EPriorityLow), iObjectStore(aObjectStore), iOnlyRoot(aOnlyRoot)
+    {
+
+    }
+
+void CMTPObjectStore::CSnapshotWorker::ConstructL()
+    {
+    CActiveScheduler::Add(this);
+    }
+
 /**
  MTP object meta data store factory method. 
  @return A pointer to a new CMTPObjectStore instance, ownership IS transferred.
@@ -79,6 +129,7 @@ CMTPObjectStore::~CMTPObjectStore()
 	delete iDPIDStore;
 	delete iPkgIDStore;
 	delete iSentinal;
+	delete iSnapshotWorker;
 	TRAP_IGNORE(CommitTransactionL());
 	iDatabase.Compact();
 	iBatched.Close();
@@ -383,8 +434,6 @@ void CMTPObjectStore::DBUpdateFailRecover(TAny* aTable)
 
 void CMTPObjectStore::InsertObjectL(CMTPObjectMetaData& aObject)
 	{
-	//_LIT(KInsert, "CMTPObjectStore::InsertObjectL");
-	//volatile TTimer t(KInsert);
 	__FLOG(_L8("InsertObjectL - Entry"));
 	iCachedHandle = 0;
 	iCachedSuidHash = 0;
@@ -435,6 +484,7 @@ void CMTPObjectStore::InsertObjectL(CMTPObjectMetaData& aObject)
 				delete iEnumeratingCacheObjList[found];
 				iEnumeratingCacheObjList.Remove(found);
 				}
+			__FLOG_VA(_L8("Found in Snapshot"));
 			}
 		else
 			{//This is a totally new object. insert it after check the db to prevent user wrong operation
@@ -445,10 +495,13 @@ void CMTPObjectStore::InsertObjectL(CMTPObjectMetaData& aObject)
 				}
 			else
 				{
+				aObject.SetUint(CMTPObjectMetaData::EHandle, handle);
 				//while enumerating, we ignore the repeatedly INSERT operations.
 				//User::Leave(KErrAlreadyExists);
 				}
+			__FLOG_VA(_L8("Not Found in Snapshot"));
 			}
+		__FLOG_VA((_L8("InsertObjectL Under enmueration, needUpdateOwner %d needToInsert %d"), needUpdateOwner, needToInsert));
 		}
 	else
 		{
@@ -460,6 +513,7 @@ void CMTPObjectStore::InsertObjectL(CMTPObjectMetaData& aObject)
 			}
 		// dp is not enumerating, do a plain insert
 		needToInsert = ETrue;
+		__FLOG_VA((_L8("InsertObjectL After enmueration, needUpdateOwner %d needToInsert %d"), needUpdateOwner, needToInsert));
 		}
 	if (needToInsert)//needToInsert and needUpdateOwner can't be true at same time
 		{
@@ -540,10 +594,12 @@ void CMTPObjectStore::BeginTransactionL()
 
 void CMTPObjectStore::CommitTransactionL()
 	{
+	__FLOG(_L8("CommitTransactionL Entry"));
 	if (iDatabase.InTransaction())
 		{
 		User::LeaveIfError(iDatabase.Commit());
 		}
+	__FLOG(_L8("CommitTransactionL Exit"));
 	}
 
 void CMTPObjectStore::InsertObjectsL(RPointerArray<CMTPObjectMetaData>& aObjects)
@@ -699,20 +755,25 @@ TMTPTypeUint128 CMTPObjectStore::PuidL(const TDesC& aSuid)
 	}
 
 void CMTPObjectStore::RemoveObjectL(const TMTPTypeUint32& aHandle)
-	{
-	if (LocateByHandleL(aHandle.Value()))
-		{
-		if (iSingletons.DpController().EnumerateState() != CMTPDataProviderController::EEnumeratedFulllyCompleted &&
-			IsMediaFormat(iBatched.ColUint16(EObjectStoreFormatCode)))
-			{
-			iMtpDeltaDataMgr->UpdateDeltaDataTableL(iBatched.ColInt64(EObjectStorePOUID), CMtpDeltaDataMgr::EDeleted);
-			}
-		iCachedSuidHash = 0;
-		iCachedHandle = 0;
-		iBatched.DeleteL();
-		IncTranOpsNumL();
-		}
-	}
+    {
+    __FLOG_VA((_L8("RemoveObjectL Entry Handle = 0x%x"), aHandle.Value()));
+    if (LocateByHandleL(aHandle.Value()))
+        {
+        if (iSingletons.DpController().EnumerateState() != CMTPDataProviderController::EEnumeratedFulllyCompleted &&
+                IsMediaFormat(iBatched.ColUint16(EObjectStoreFormatCode)))
+            {
+            
+            iMtpDeltaDataMgr->UpdateDeltaDataTableL(iBatched.ColInt64(EObjectStorePOUID), CMtpDeltaDataMgr::EDeleted);
+            }
+        iCachedSuidHash = 0;
+        iCachedHandle = 0;
+        
+        iBatched.DeleteL();
+        __FLOG(_L8("RemoveObjectL From iBacthed"));
+        IncTranOpsNumL();
+        }
+    __FLOG(_L8("RemoveObjectL Exit"));
+    }
 
 void CMTPObjectStore::RemoveObjectL(const TDesC& aSuid)
 	{
@@ -833,12 +894,12 @@ void CMTPObjectStore::ConstructL()
 	iReferenceMgr = CMTPReferenceMgr::NewL(*this);
 	iDPIDStore = CMTPDPIDStore::NewL(iDatabase);
 	iPkgIDStore = CMTPPkgIDStore::NewL(iDatabase);
-	iBatched.Open(iDatabase, KSQLHandleTableName, RDbRowSet::EUpdatable);
-	iBatched.SetIndex(KSQLHandleId);
-	iBatched_SuidHashID.Open(iDatabase, KSQLHandleTableName, RDbRowSet::EUpdatable);
-	iBatched_SuidHashID.SetIndex(KSQLSuidHash);
+	User::LeaveIfError(iBatched.Open(iDatabase, KSQLHandleTableName, RDbRowSet::EUpdatable));
+	User::LeaveIfError(iBatched.SetIndex(KSQLHandleId));
+	User::LeaveIfError(iBatched_SuidHashID.Open(iDatabase, KSQLHandleTableName, RDbRowSet::EUpdatable));
+	User::LeaveIfError(iBatched_SuidHashID.SetIndex(KSQLSuidHash));
 	iHandleAllocator = CMTPHandleAllocator::NewL(*this);
-	iSentinal = CEnumertingCacheItem::NewL(0, 0, 0, 0, 0);
+	iSentinal = CEnumertingCacheItem::NewL(0, 0, 0, 0, 0, 0);
 	BeginTransactionL();
 	}
 
@@ -861,7 +922,7 @@ void CMTPObjectStore::InitializeDbL()
 	else
 		{
 		err = OpenDb(fullName);
-		if (iDatabase.IsDamaged())
+		if (err==KErrNone && iDatabase.IsDamaged())
 			{
 			err = iDatabase.Recover();
 			}
@@ -981,14 +1042,17 @@ void CMTPObjectStore::RestorePersistentObjectsL(TUint)
 
 TBool CMTPObjectStore::LocateByHandleL(const TUint aHandle, const TBool aReadTable /*default = ETrue*/) const
 	{
+	__FLOG_VA((_L8("LocateByHandleL - Entry aHandle 0x%x"), aHandle));
 	TBool result = EFalse;
 	if(IsInvalidHandle(aHandle))
 		{
+		__FLOG_VA((_L8("LocateByHandleL - Exit result 0x%x"), result));
 		return result;
 		}
 	
 	if (iCachedHandle == aHandle)
 		{
+		__FLOG(_L8("CacheHit"));
 		result = ETrue;
 		}
 	else
@@ -1007,6 +1071,7 @@ TBool CMTPObjectStore::LocateByHandleL(const TUint aHandle, const TBool aReadTab
 		{
 		iBatched.GetL();
 		}
+	__FLOG_VA((_L8("LocateByHandleL - Exit result 0x%x"), result));
 	return result;
 	}
 
@@ -1171,107 +1236,152 @@ void CMTPObjectStore::CalcFreeHandlesL(TUint aDataProviderId)
 		}
 	}
 
+
+
 void CMTPObjectStore::EstablishDBSnapshotL(TUint32 aStorageId)
-	{
-	//Currently, i only do this for File DP since it is non-persistent, later, if we take the proposal that 
-	//1. FileDP is the last DP to be enumerated.
-	//2. FileDP will san the whole file system, and will try to enumerate all of the objects(might on behalf of another DP) if the objects is still not
-	// in the object store after all other DP finish its enumeration.
-	//3. Then notify the related DP about the newly added objects by notification API;
-	//_LIT(KInsert, "CMTPObjectStore::EstablishDBSnapshotL");
-	//volatile TTimer t(KInsert);
-	RDbTable temp;
-	CleanupClosePushL(temp);
-	temp.Open(iDatabase, KSQLHandleTableName, RDbRowSet::EUpdatable);
+    {
+    //Currently, i only do this for File DP since it is non-persistent, later, if we take the proposal that 
+    //1. FileDP is the last DP to be enumerated.
+    //2. FileDP will san the whole file system, and will try to enumerate all of the objects(might on behalf of another DP) if the objects is still not
+    // in the object store after all other DP finish its enumeration.
+    //3. Then notify the related DP about the newly added objects by notification API;
+    __FLOG(_L8("EstablishDBSnapshotL - Entry"));
+    RDbTable temp;
+    CleanupClosePushL(temp);
+    User::LeaveIfError(temp.Open(iDatabase, KSQLHandleTableName, RDbRowSet::EUpdatable));
     if(!iCacheExist)
         {
-	TInt32 count = temp.CountL(RDbRowSet::EQuick);
+        TInt32 count = temp.CountL(RDbRowSet::EQuick);
         iEnumeratingCacheObjList.ReserveL(count);
         }
-	temp.FirstL();
-	while (!temp.AtEnd())
-		{
-		temp.GetL();
-        if (temp.ColUint8(EObjectStoreDPFlag) == 1 && (KMTPStorageAll == aStorageId || temp.ColUint32(EObjectStoreStorageId) == aStorageId))
-			{
-			TUint32 handleID = temp.ColUint32(EObjectStoreHandleId);
-			TInt64 pUID = temp.ColInt64(EObjectStorePOUID);
-			iHandleAllocator->SetIdL(handleID, pUID);
-			CEnumertingCacheItem* item = CEnumertingCacheItem::NewLC(
-					temp.ColUint32(EObjectStoreSUIDHash), handleID,
-					temp.ColUint16(EObjectStoreFormatCode), pUID, temp.ColUint8(EObjectStoreDataProviderId));
-			TInt result = iEnumeratingCacheObjList.InsertInOrder(item, TLinearOrder<CEnumertingCacheItem>(CEnumertingCacheItem::Compare));
-			if (KErrAlreadyExists == result) //hash collision
-				{
-				TInt found = iEnumeratingCacheObjList.FindInOrder(item, TLinearOrder<CEnumertingCacheItem>(CEnumertingCacheItem::Compare));
-				CEnumertingCacheItem* colliItem = iEnumeratingCacheObjList[found];
+    temp.FirstL();
+
+    while (!temp.AtEnd())
+        {
+        temp.GetL();
+        if (temp.ColUint8(EObjectStoreDPFlag) == 1 
+                && (KMTPStorageAll == aStorageId || temp.ColUint32(EObjectStoreStorageId) == aStorageId))
+            {
+            TUint32 handleID = temp.ColUint32(EObjectStoreHandleId);
+            TUint32 parentID = temp.ColUint32(EObjectStoreParentHandle);
+            TInt64 pUID = temp.ColInt64(EObjectStorePOUID);
+            iHandleAllocator->SetIdL(handleID, pUID);
+            CEnumertingCacheItem* item = CEnumertingCacheItem::NewLC(
+                    temp.ColUint32(EObjectStoreSUIDHash), handleID, parentID,
+                    temp.ColUint16(EObjectStoreFormatCode), pUID, temp.ColUint8(EObjectStoreDataProviderId));
+            TInt result = iEnumeratingCacheObjList.InsertInOrder(item, TLinearOrder<CEnumertingCacheItem>(CEnumertingCacheItem::Compare));
+            if (KErrAlreadyExists == result) //hash collision
+                {
+                TInt found = iEnumeratingCacheObjList.FindInOrder(item, TLinearOrder<CEnumertingCacheItem>(CEnumertingCacheItem::Compare));
+                CEnumertingCacheItem* colliItem = iEnumeratingCacheObjList[found];
                 TFileName suid;
-				if (colliItem->iSuid == NULL)
-					{
-					if (!LocateByHandleL(colliItem->iObjHandleId))
-					    {
-					    DbColReadStreamL(iBatched, EObjectStoreSUID, suid);
-					    
-					    colliItem->iSuid = suid.AllocL();
-					    
-					    colliItem->iSuidPtr.Set(*colliItem->iSuid);
-					    }
-					}
+                if (colliItem->iSuid == NULL)
+                    {
+                    if (LocateByHandleL(colliItem->iObjHandleId))
+                        {
+                        DbColReadStreamL(iBatched, EObjectStoreSUID, suid);
+                        colliItem->iSuid = suid.AllocL();
+                        colliItem->iSuidPtr.Set(*colliItem->iSuid);
+                        }
+                    }
+
                 DbColReadStreamL(temp, EObjectStoreSUID, suid);
-				
+                
                 item->iSuid = suid.AllocL();
                 
-				item->iSuidPtr.Set(*item->iSuid);
+                item->iSuidPtr.Set(*item->iSuid);
                 result = iEnumeratingCacheObjList.InsertInOrder(item, TLinearOrder<CEnumertingCacheItem>(CEnumertingCacheItem::Compare));
-				}
+                }
+            
             if(result != KErrAlreadyExists)
-				{
-				User::LeaveIfError(result);
-				}
-			CleanupStack::Pop(item);
-			}
-		temp.NextL();
-		}
-	CleanupStack::PopAndDestroy(&temp);
-	iCacheExist = ETrue;
-	}
+                {
+                User::LeaveIfError(result);
+                CleanupStack::Pop(item);
+                }
+            else
+                {
+                CleanupStack::PopAndDestroy(item);
+                }
 
-void CMTPObjectStore::CleanDBSnapshotL()
-	{
-	//For those items left in the iEnumeratingCacheObjList, remove the object entry if the DPID of the handle is not persistent. and populate the 
-	//roundtrip table if needed.
-	//and then close the iEnumeratingCacheObjList to release the memory.
-	//_LIT(KInsert, "CMTPObjectStore::CleanDBSnapshot");
-	//volatile TTimer t(KInsert);
-	if(iCacheExist)
-	    {
-	        iCacheExist = EFalse;
-	    }
-	else 
-	    return;
+            }
+        temp.NextL();
+        }
 
-	for (TInt i = iEnumeratingCacheObjList.Count() - 1; i >= 0; i--)
-		{
-		TInt rc = iNonPersistentDPList.FindInOrder(iEnumeratingCacheObjList[i]->iDpID);
-		if (rc != KErrNotFound)
-			{//This is a non persistent DP.
-			RemoveObjectL(iEnumeratingCacheObjList[i]->iObjHandleId);
-			}
-		}
-	iNonPersistentDPList.Close();
-	iEnumeratingCacheObjList.ResetAndDestroy();
-	iUpdateDeltaDataTable = ETrue;
-	iMaxCommitLimit = KMaxLimitCommitAfterEnumeration;
-	iMaxCompactLimit = KMaxLimitCompactAfterEnumeration;
+    CleanupStack::PopAndDestroy(&temp);
+    iCacheExist = ETrue;
+    __FLOG_VA((_L8("EstablishDBSnapshotL - Exit build %d items"), iEnumeratingCacheObjList.Count()));
+    }
+/*
+ * All Objects enumeration complete
+ */
+void CMTPObjectStore::ObjectsEnumComplete()
+    {
+    if(iCacheExist)
+        {
+        iCacheExist = EFalse;
+        }
+    iNonPersistentDPList.Close();
+    iEnumeratingCacheObjList.ResetAndDestroy();
+    iUpdateDeltaDataTable = ETrue;
+    iMaxCommitLimit = KMaxLimitCommitAfterEnumeration;
+    iMaxCompactLimit = KMaxLimitCompactAfterEnumeration;
     CommitTransactionL();
     User::LeaveIfError(iDatabase.Compact());
     BeginTransactionL();
-	}
+    }
 
-CMTPObjectStore::CEnumertingCacheItem::CEnumertingCacheItem(TUint32 aSuidHash, TUint32 aHandle, TUint32 aFormat, TUint64 aId, TUint8 aDpID)
+
+void CMTPObjectStore::CleanDBSnapshotL(TBool aOnlyRoot/* = EFalse*/)
+    {
+    //For those items left in the iEnumeratingCacheObjList, remove the object entry if the DPID of the handle is not persistent. and populate the 
+    //roundtrip table if needed.
+    //and then close the iEnumeratingCacheObjList to release the memory.
+    //_LIT(KInsert, "CMTPObjectStore::CleanDBSnapshot");
+    //volatile TTimer t(KInsert);
+    __FLOG(_L8("CleanDBSnapshotL Entry"));
+    if (iSnapshotWorker == NULL)
+        {
+        iSnapshotCleanPos = iEnumeratingCacheObjList.Count() - 1;
+        iSnapshotWorker = CSnapshotWorker::NewL(this, aOnlyRoot);
+        }
+    
+    //for (TInt i = iEnumeratingCacheObjList.Count() - 1; i >= 0; i--)
+    for (TInt i = 0; iSnapshotCleanPos >= 0 && i <= KSnapshotGranularity; --iSnapshotCleanPos, ++i)
+        {
+        if((aOnlyRoot && iEnumeratingCacheObjList[iSnapshotCleanPos]->iObjParentId == KMTPHandleNoParent) //only root 
+           ||(!aOnlyRoot)) //everything
+            {
+            TInt rc = iNonPersistentDPList.FindInOrder(iEnumeratingCacheObjList[iSnapshotCleanPos]->iDpID);
+            if (rc != KErrNotFound)
+                {//This is a non persistent DP.
+                __FLOG_VA((_L8("Remove Object 0x%x"), iEnumeratingCacheObjList[iSnapshotCleanPos]->iObjHandleId));
+                RemoveObjectL(iEnumeratingCacheObjList[iSnapshotCleanPos]->iObjHandleId);
+                }
+            }
+        }
+    
+    if (iSnapshotCleanPos >= 0)
+        {
+        iSnapshotWorker->ActiveSelf();
+        }
+    else
+        {
+        //TRequestStatus *status = &aStatus;
+        //User::RequestComplete(status, KErrNone);
+        iSingletons.DpController().Schedule();
+        iSnapshotCleanPos = 0;
+        delete iSnapshotWorker;
+        iSnapshotWorker = NULL;
+        }
+    
+    __FLOG(_L8("CleanDBSnapshotL Exit"));
+    }
+
+CMTPObjectStore::CEnumertingCacheItem::CEnumertingCacheItem(TUint32 aSuidHash, TUint32 aHandle, TUint32 aParent, TUint32 aFormat, TUint64 aId, TUint8 aDpID)
 	{
 	iObjSuiIdHash = aSuidHash;
 	iObjHandleId = aHandle;
+	iObjParentId = aParent;
 	iFormatcode = aFormat;
 	iPOUID = aId;
 	iDpID = aDpID;

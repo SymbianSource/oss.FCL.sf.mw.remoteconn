@@ -113,8 +113,13 @@ MoveObject request handler
 */		
 void CMTPMoveObject::ServiceL()
 	{	
-	TMTPResponseCode ret = MoveObjectL();
-	if (EMTPRespCodeOK != ret)
+	TMTPResponseCode ret = EMTPRespCodeOK;
+	TRAPD(err, ret = MoveObjectL());
+	if (err != KErrNone)
+		{
+		SendResponseL(EMTPRespCodeAccessDenied);
+		}
+	else if (EMTPRespCodeOK != ret)
 		{
 		SendResponseL(ret);
 		}

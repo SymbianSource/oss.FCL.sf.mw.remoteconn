@@ -73,8 +73,7 @@ private:
     TBool DoHandleSendObjectCompleteL();
         
     TBool GetFullPathNameL(const TDesC& aFileName);
-    
-    TBool CanStoreFileL(TUint32 aStorageId, TInt64 aObjectSize) const;
+
     TBool IsTooLarge(TUint64 aObjectSize) const;
     TBool Exists(const TDesC& aName) const;
     TMTPResponseCode ExtractPropertyL(const CMTPTypeObjectPropListElement& aElement);

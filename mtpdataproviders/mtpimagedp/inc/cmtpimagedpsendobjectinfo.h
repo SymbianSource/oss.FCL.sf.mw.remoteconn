@@ -124,7 +124,7 @@ private:
     static TBool FsmDoHandleSendObjectCompleteL(CMTPImageDpSendObjectInfo* aObject, TAny *aPtr);    
     
     TBool GetFullPathName(const TDesC& aFileName);    
-    TBool CanStoreFileL(TUint32 aStorageId, TInt64 aObjectSize) const;
+    
     TBool Exists(const TDesC& aName) const;
         
     void ReserveObjectL();
@@ -148,6 +148,8 @@ private:
     void SetPropertiesL();
     TBool IsFormatValid(TMTPFormatCode aFormat) const;
     
+    void CreateFsObjectL();
+    TMTPResponseCode ErrorToMTPError(TInt err)const;
 private: // Owned
 
     /**

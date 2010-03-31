@@ -1998,6 +1998,10 @@ void CMTPParserRouter::ParseOperationRequestParameterL(TMTPTypeRequest::TElement
                 // Object does not exist.
                 aParams.SetParam(TRoutingParameters::EFlagInvalid, ETrue);
                 }
+            else if(!iSingletons.StorageMgr().ValidStorageId(obj->Uint(CMTPObjectMetaData::EStorageId)))
+            	{ 
+				aParams.SetParam(TRoutingParameters::EFlagInvalid, ETrue);
+            	}
             else
                 {
                 aParams.SetParam(CMTPParserRouter::TRoutingParameters::EParamFormatCode, obj->Uint(CMTPObjectMetaData::EFormatCode));

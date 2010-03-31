@@ -73,7 +73,7 @@ Destructor
 EXPORT_C CMTPSendObjectInfo::~CMTPSendObjectInfo()
     {
     __FLOG(_L8("~CMTPSendObjectInfo - Entry"));
-    
+    __FLOG_2(_L8("iProgress:%d NoRollback:%d"),iProgress,iNoRollback);
     if ((iProgress == EObjectInfoSucceed ||
         iProgress == EObjectInfoFail || 
         iProgress == EObjectInfoInProgress) && !iNoRollback)
@@ -158,12 +158,6 @@ TMTPResponseCode CMTPSendObjectInfo::CheckRequestL()
                 result = EMTPRespCodeObjectTooLarge;            
                 }
          	   
-            //File size is limited to KMaxTInt64 that is 8ExaBytes
-            //if the object size is more,then report this error.
-            if (!CanStoreFileL(iStorageId, iObjectSize)||(iObjectSize > (KMaxTInt64)))
-                {
-                result = EMTPRespCodeStoreFull;
-                }
             }
         }
         
@@ -313,7 +307,7 @@ TBool CMTPSendObjectInfo::DoHandleCompletingPhaseL()
         result = EFalse;
         }
     
-    __FLOG(_L8("DoHandleCompletingPhaseL - Exit"));
+    __FLOG_2(_L8("DoHandleCompletingPhaseL - Exit result:%d progress:%d"),result,iProgress);
     return result;    
     }
 
@@ -529,11 +523,6 @@ TBool CMTPSendObjectInfo::DoHandleSendObjectInfoCompleteL()
             SendResponseL(EMTPRespCodeObjectTooLarge);
             result = EFalse;            
             }
-        if(result && !CanStoreFileL(iStorageId, iObjectSize))
-            {
-            SendResponseL(EMTPRespCodeStoreFull);
-            result = EFalse;            
-            }
         }
 
     if (result)
@@ -571,7 +560,9 @@ TBool CMTPSendObjectInfo::DoHandleSendObjectInfoCompleteL()
         
         if (err != KErrNone)
             {
+            __FLOG_1(_L8("Fail to create fs object %d"),err);
             SendResponseL(ErrorToMTPError(err));
+            result = EFalse;
             }
         else
             {
@@ -640,7 +631,9 @@ TBool CMTPSendObjectInfo::DoHandleSendObjectPropListCompleteL()
         
         if (err != KErrNone)
             {
+            __FLOG_1(_L8("Fail to create fs object %d"),err);
             SendResponseL(ErrorToMTPError(err));
+            result = EFalse;
             }
         else
             {
@@ -795,31 +788,6 @@ TBool CMTPSendObjectInfo::GetFullPathNameL(const TDesC& aFileName)
     __FLOG(_L8("GetFullPathNameL - Exit"));
 #endif
     return result;
-    }
-
-/**
-Check if we can store the file on the storage
-@return ETrue if yes, otherwise EFalse
-*/
-TBool CMTPSendObjectInfo::CanStoreFileL(TUint32 aStorageId, TInt64 aObjectSize) const
-    {
-    __FLOG(_L8("CanStoreFileL - Entry"));
-    TBool result(ETrue);
-    if (aStorageId == KMTPStorageDefault)
-        {
-        aStorageId = iFramework.StorageMgr().DefaultStorageId();
-        }
-    TInt drive( iFramework.StorageMgr().DriveNumber(aStorageId) );
-    User::LeaveIfError(drive);
-    TVolumeInfo volumeInfo;
-    User::LeaveIfError(iFramework.Fs().Volume(volumeInfo, drive));
-    if (volumeInfo.iFree < aObjectSize)
-        {        
-        result = EFalse;
-        }
-    __FLOG_VA((_L8("Result = %d"), result));
-    __FLOG(_L8("CanStoreFileL - Exit"));
-    return result;        
     }
 
 /**
@@ -1157,14 +1125,16 @@ void CMTPSendObjectInfo::Rollback()
     {
     if(iIsFolder)
         {
-        __FLOG(_L8("It is a folder cancel process."));
+        __FLOG(_L8("Rollback the dir created."));
         iFramework.Fs().RmDir(iFullPath);
         // If it is folder, delete it from MTP database, i.e ObjectStore.
         TRAP_IGNORE(iFramework.ObjectMgr().RemoveObjectL(iFullPath));
         }
     else
         {
-        __FLOG(_L8("It is a file cancel process."));
+        __FLOG(_L8("Rollback the file created."));
+        delete iFileReceived;
+        iFileReceived = NULL;
         // Delete this object from file system.
         iFramework.Fs().Delete(iFullPath);
         TRAP_IGNORE(iFramework.ObjectMgr().UnreserveObjectHandleL(*iReceivedObject));
@@ -1187,6 +1157,9 @@ TMTPResponseCode CMTPSendObjectInfo::ErrorToMTPError(TInt aError) const
         
     case KErrDiskFull:
         resp = EMTPRespCodeStoreFull;
+        break;
+        
+    default:
         break;
         }
         

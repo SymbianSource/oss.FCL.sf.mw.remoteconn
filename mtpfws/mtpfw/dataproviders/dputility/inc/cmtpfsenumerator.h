@@ -46,7 +46,7 @@ public:
     IMPORT_C static CMTPFSEnumerator* NewL(MMTPDataProviderFramework& aFramework, CMTPFSExclusionMgr& aExclusionMgr, MMTPEnumerationCallback& aCallback, TInt aProcessLimit);
     IMPORT_C ~CMTPFSEnumerator();
 
-	IMPORT_C void StartL(TUint32 aStorageId, TBool aOnlyRoot = EFalse);	
+	IMPORT_C void StartL(TUint32 aStorageId, TBool aScanAll = EFalse);	
 	
 private:
 	//from CActive
@@ -69,6 +69,19 @@ private:
 	void NotifyObjectAddToDP(const TUint32 aHandle,const TUint DpId);
 	
 	
+private:
+    static  const TUint KMTPMaxFullFileName = 259;
+    class TStackItem
+        {
+        public:
+            TStackItem(const TDesC& aPath, const TUint32 aHandle):iPath(aPath), iHandle(aHandle)
+                {
+               
+                }
+        public:
+            TBuf<KMTPMaxFullFileName> iPath;
+            TUint32                   iHandle;
+        };
 private: 
 	// Owned
 	MMTPDataProviderFramework&  iFramework;
@@ -76,11 +89,11 @@ private:
 	MMTPEnumerationCallback& 	iCallback;
 	RMTPDpSingletons			iDpSingletons;
 	TUint32 					iParentHandle;
-	TParse						iPath;
+	TBuf<KMTPMaxFullFileName>	iCurrentPath;
 	RDir						iDir;
 	TEntryArray					iEntries;
 	TInt						iFirstUnprocessed;
-	RArray<TEntry>				iDirStack;
+	RArray<TStackItem>			iDirStack;
 	RArray<TUint>				iStorages;
 	TUint32						iStorageId;
 	// How many entries should be processed in one go
@@ -89,10 +102,13 @@ private:
 	TUint						iDpID;
 	RMTPFramework               iSingletons;
 	TBool                       iSkipCurrentStorage;
+	TBool                       iScanAll;
+	TBool                       iAllRootScaned;
+	TUint                       iScanPos;
+	TInt                        iObjectNeedToScan;
+
 	
-	TBool						iIsFileEnumerator;
-	TBool						iOnlyScanRoot;
-	TInt						iNumOfFoldersAndFiles;
+	
 	/**
     FLOGGER debug trace member variable.
     */

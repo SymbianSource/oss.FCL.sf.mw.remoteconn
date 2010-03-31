@@ -21,8 +21,8 @@
 #include <mtp/mmtpstoragemgr.h>
 
 #include "cmtprequestchecker.h"
-#include "rmtpdpsingletons.h"
 #include "cmtpfsexclusionmgr.h"
+#include "cmtpfsentrycache.h"
 
 static const TInt KMTPRequestCheckerHandleGranularity = 2;
 __FLOG_STMT(_LIT8(KComponent,"MTPRequestChecker");)
@@ -36,6 +36,9 @@ Two-phase construction method
 EXPORT_C CMTPRequestChecker* CMTPRequestChecker::NewL(MMTPDataProviderFramework& aFramework, MMTPConnection& aConnection)
 	{
 	CMTPRequestChecker* self = new (ELeave) CMTPRequestChecker(aFramework, aConnection);
+	CleanupStack::PushL(self);
+	self->ConstructL();
+	CleanupStack::Pop(self);
 	return self;
 	}
 
@@ -44,6 +47,7 @@ Destructor
 */	
 EXPORT_C CMTPRequestChecker::~CMTPRequestChecker()
 	{
+	iDpSingletons.Close();
 	iHandles.Close();
 	iObjectArray.ResetAndDestroy();
 	__FLOG_CLOSE;
@@ -215,6 +219,11 @@ TMTPResponseCode CMTPRequestChecker::VerifyObjectHandleL(TUint32 aHandle, const 
 	if (result)
 		{
 	    TUint storageID = object->Uint(CMTPObjectMetaData::EStorageId);
+	    if(!iFramework.StorageMgr().ValidStorageId(storageID))
+	    	{
+			return EMTPRespCodeInvalidObjectHandle;
+	    	}
+	    
 		CMTPStorageMetaData* storageMetaData = (CMTPStorageMetaData *)& iFramework.StorageMgr().StorageL(storageID);
 		if (storageMetaData->Uint(CMTPStorageMetaData::EStorageSystemType) != CMTPStorageMetaData::ESystemTypeDefaultFileSystem)
 			{
@@ -233,6 +242,25 @@ TMTPResponseCode CMTPRequestChecker::VerifyObjectHandleL(TUint32 aHandle, const 
             }   
         else
             {
+            if ( err != KErrNone )
+            	{
+            	if( (iDpSingletons.CopyingBigFileCache().TargetHandle() == aHandle) &&
+            			(iDpSingletons.CopyingBigFileCache().IsOnGoing()))
+            		{
+            		// The object is being copied, it is not created in fs yet. Use its cache entry for check
+            		__FLOG(_L8("VerifyObjectHandleL - The object is being copied, use its cache entry for check"));
+            		entry = iDpSingletons.CopyingBigFileCache().FileEntry();
+            		err = KErrNone;
+            		}
+            	else if( (iDpSingletons.MovingBigFileCache().TargetHandle() == aHandle) &&
+            						(iDpSingletons.MovingBigFileCache().IsOnGoing()))
+            		{
+            		// The object is being moved, it is not created in fs yet. Use its cache entry for check
+            		__FLOG(_L8("VerifyObjectHandleL - The object is being moved, use its cache entry for check"));
+            		entry = iDpSingletons.MovingBigFileCache().FileEntry();
+            		err = KErrNone;
+            		}            	
+            	}
             User::LeaveIfError(err);
             }
 		
@@ -388,5 +416,12 @@ CMTPRequestChecker::CMTPRequestChecker(MMTPDataProviderFramework& aFramework, MM
 	__FLOG_OPEN(KMTPSubsystem, KComponent);
 	}
 
+/**
+ Second phase constructor
+*/
+void CMTPRequestChecker::ConstructL()
+	{
+	iDpSingletons.OpenL(iFramework);
+	}
 
 

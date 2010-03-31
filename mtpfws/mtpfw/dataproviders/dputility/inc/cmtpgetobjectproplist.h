@@ -69,8 +69,12 @@ private: // Owned
     CMTPTypeArray*          iHandles;
     CMTPTypeObjectPropList* iPropertyList;   
     RMTPDpSingletons		iDpSingletons; 
-	CMTPObjectMetaData*		iObjMeta;
-	TEntry 					iFileEntry;
+    CMTPObjectMetaData*		iObjMeta;
+    TEntry 					iFileEntry;
+	/**
+    FLOGGER debug trace member variable.
+  */
+	__FLOG_DECLARATION_MEMBER_MUTABLE; 
     };
     
 #endif // CMTPGETOBJECTPROPLIST_H

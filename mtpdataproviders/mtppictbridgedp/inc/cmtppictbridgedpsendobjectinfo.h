@@ -72,7 +72,6 @@ private:
         
     TBool GetFullPathNameL(const TDesC& aFileName);
     
-    TBool CanStoreFileL(TUint32 aStorageId, TInt64 aObjectSize) const;
     TBool IsTooLarge(TUint64 aObjectSize) const;
     void ReserveObjectL();
     void CreateFsObjectL();

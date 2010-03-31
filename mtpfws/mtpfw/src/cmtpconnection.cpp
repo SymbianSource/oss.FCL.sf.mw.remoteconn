@@ -780,7 +780,7 @@ void CMTPConnection::UnrecoverableMTPError()
     SetState(EStateErrorShutdown);
     PublishConnState(EDisconnectedFromHost);		
     iTransportConnection->CloseConnection();
-    __FLOG(_L8("UnrecoverableMTPError - Entry"));
+    __FLOG(_L8("UnrecoverableMTPError - Exit"));
     }
 
 /**

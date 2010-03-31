@@ -139,6 +139,7 @@ protected:	//utility methods
 	IMPORT_C void CompleteRequestL();
 	IMPORT_C void SendDataL(const MMTPType& aData);
 	IMPORT_C void ReceiveDataL(MMTPType& aData);
+    IMPORT_C void RegisterPendingRequest(TUint aTimeOut = 0);
 		
 protected:	//	from MMTPRequestProcessor	
 	IMPORT_C virtual TBool HandleRequestL(const TMTPTypeRequest& aRequest, TMTPTransactionPhase aPhase);

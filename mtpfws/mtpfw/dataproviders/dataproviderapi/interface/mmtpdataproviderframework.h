@@ -305,7 +305,13 @@ public:
     in the framework.
     */
     virtual void NotifyFrameworkL( TMTPNotificationToFramework aNotification, const TAny* aParams ) = 0;
-   
+    
+    /**
+    Register the current request as pending request. The pending request will be handled
+    after enumeration done.
+    */
+    virtual void RegisterPendingRequest(TUint aTimeOut = 0) = 0;
+     
     };
 
 #endif // MMTPDATAPROVIDERFRAMEWORK_H

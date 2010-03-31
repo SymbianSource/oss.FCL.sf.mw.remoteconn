@@ -27,6 +27,7 @@
 #include <mtp/mtpprotocolconstants.h>
 #include <mtp/tmtptyperequest.h>
 #include "mtpdebug.h"
+#include "rmtpdpsingletons.h"
 
 class CMTPObjectMetaData;
 class MMTPDataProviderFramework;
@@ -138,12 +139,14 @@ private:
 	TBool IsSpecialValue(TUint32 aParameter, const TMTPRequestElementInfo& aElementInfo) const;
 private:
 	CMTPRequestChecker(MMTPDataProviderFramework& aFramework, MMTPConnection& aConnection);	
+	void ConstructL();
 	
 private:
     MMTPDataProviderFramework&		    iFramework;
     MMTPConnection& 				    iConnection;
 	RArray<TUint32>					    iHandles;			//these two arrays contain the mapping from the handle to objectinfo 
-	RPointerArray<CMTPObjectMetaData>   iObjectArray; 
+	RPointerArray<CMTPObjectMetaData>   iObjectArray;
+	RMTPDpSingletons										iDpSingletons;
 	/**
     FLOGGER debug trace member variable.
     */

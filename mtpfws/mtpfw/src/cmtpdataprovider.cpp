@@ -134,6 +134,18 @@ EXPORT_C void CMTPDataProvider::ExecuteProxyRequestL(const TMTPTypeRequest& aReq
     __FLOG_VA((_L8("ExecuteProxyRequestL - Exit, data provider %d "), iId));
     }
     
+void CMTPDataProvider::ExecutePendingRequestL()
+    {
+    __FLOG_VA((_L8("SchedulePendingRequestL - Entry")));
+    
+    if (iCurrentRequest != NULL && !IsActive())
+        {
+        Schedule();
+        }
+    
+    __FLOG_VA((_L8("SchedulePendingRequestL - Exit")));
+    }
+
 void CMTPDataProvider::EnumerateObjectsL(TUint32 aStorageId)
     {
     __FLOG_VA((_L8("EnumerateObjectsL - Entry, data provider %d "), iId));
@@ -503,6 +515,15 @@ void CMTPDataProvider::NotifyFrameworkL( TMTPNotificationToFramework aNotificati
     __FLOG(_L8("NotifyFrameworkL - Exit"));
     }
 
+void CMTPDataProvider::RegisterPendingRequest(TUint aTimeOut)
+    {
+    __FLOG(_L8("RegisterPendingRequestL - Entry"));
+    
+    iSingletons.DpController().RegisterPendingRequestDP(iImplementationUid.iUid, aTimeOut);
+    
+    __FLOG(_L8("RegisterPendingRequestL - Exit"));
+    }
+
 void CMTPDataProvider::DoCancel()
     {
     __FLOG_VA((_L8("DoCancel - Entry, data provider %d "), iId));
@@ -607,6 +628,7 @@ void CMTPDataProvider::RunL()
         case EMTPOpCodeGetObjectPropsSupported:
         case EMTPOpCodeGetObjectPropDesc:
         case EMTPOpCodeVendorExtextensionEnd:
+        case EMTPOpCodeGetServicePropList:
             iImplementation->ProcessRequestPhaseL(iCurrentTransactionPhase, *iCurrentRequest, *iCurrentConnection);
     	break;
 
@@ -642,7 +664,7 @@ void CMTPDataProvider::RunL()
 			iImplementation->ProcessRequestPhaseL(iCurrentTransactionPhase, *iCurrentRequest, *iCurrentConnection);
 			break; 		   
 	  case ECompletingPhase:
-	   	TransactionCompleteL(*iCurrentRequest, *iCurrentConnection);   
+		  iImplementation->ProcessRequestPhaseL(iCurrentTransactionPhase, *iCurrentRequest, *iCurrentConnection);
 		  break;
 	  default:
 		  break;
@@ -795,7 +817,9 @@ void CMTPDataProvider::SendErrorResponseL(TInt aError)
     case KMTPDataTypeInvalid:
         code = EMTPRespCodeInvalidDataset;
         break;
-        
+    case KErrDiskFull:
+        code = EMTPRespCodeStoreFull;
+        break;
     default:
         code = EMTPRespCodeGeneralError;
         break;

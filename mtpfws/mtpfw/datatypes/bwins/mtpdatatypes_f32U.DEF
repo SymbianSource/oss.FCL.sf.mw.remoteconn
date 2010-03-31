@@ -645,9 +645,9 @@ EXPORTS
 	?NewL@CMTPTypeServiceEventElement@@SAPAV1@GABVTMTPTypeGuid@@ABVTDesC16@@@Z @ 644 NONAME ; class CMTPTypeServiceEventElement * CMTPTypeServiceEventElement::NewL(unsigned short, class TMTPTypeGuid const &, class TDesC16 const &)
 	?SerivceDataBlockL@CMTPTypeServiceInfo@@QBEXIAAVTMTPTypeGuid@@@Z @ 645 NONAME ; void CMTPTypeServiceInfo::SerivceDataBlockL(unsigned int, class TMTPTypeGuid &) const
 	?Set@TMTPTypeGuid@@QAEX_K0@Z @ 646 NONAME ; void TMTPTypeGuid::Set(unsigned long long, unsigned long long)
-	?SetL@TMTPTypeGuid@@QAEHABVTDesC16@@@Z @ 647 NONAME ; int TMTPTypeGuid::SetL(class TDesC16 const &)
+	?SetL@TMTPTypeGuid@@QAEHABVTDesC16@@@Z @ 647 NONAME ABSENT ; int TMTPTypeGuid::SetL(class TDesC16 const &)
 	?NewL@CMTPTypeServicePropertyElement@@SAPAV1@GABVTMTPTypeGuid@@KABVTDesC16@@@Z @ 648 NONAME ; class CMTPTypeServicePropertyElement * CMTPTypeServicePropertyElement::NewL(unsigned short, class TMTPTypeGuid const &, unsigned long, class TDesC16 const &)
-	??0TMTPTypeGuid@@QAE@ABVTPtrC8@@@Z @ 649 NONAME ; TMTPTypeGuid::TMTPTypeGuid(class TPtrC8 const &)
+	??0TMTPTypeGuid@@QAE@ABVTPtrC8@@@Z @ 649 NONAME ABSENT ; TMTPTypeGuid::TMTPTypeGuid(class TPtrC8 const &)
 	?NewL@CMTPTypeServiceObjPropExtnForm@@SAPAV1@IVTMTPTypeGuid@@IABVTDesC16@@EPBVMMTPType@@@Z @ 650 NONAME ; class CMTPTypeServiceObjPropExtnForm * CMTPTypeServiceObjPropExtnForm::NewL(unsigned int, class TMTPTypeGuid, unsigned int, class TDesC16 const &, unsigned char, class MMTPType const *)
 	?NewLC@CMTPTypeServiceMethodParamExtnForm@@SAPAV1@IVTMTPTypeGuid@@IABVTDesC16@@EEEPBVMMTPType@@@Z @ 651 NONAME ; class CMTPTypeServiceMethodParamExtnForm * CMTPTypeServiceMethodParamExtnForm::NewLC(unsigned int, class TMTPTypeGuid, unsigned int, class TDesC16 const &, unsigned char, unsigned char, unsigned char, class MMTPType const *)
 	?NewLC@CMTPTypeServiceEventElement@@SAPAV1@GABVTMTPTypeGuid@@ABVTDesC16@@@Z @ 652 NONAME ; class CMTPTypeServiceEventElement * CMTPTypeServiceEventElement::NewLC(unsigned short, class TMTPTypeGuid const &, class TDesC16 const &)
@@ -672,3 +672,11 @@ EXPORTS
 	?FirstReadChunk@CMTPTypeTrivialData@@UBEHAAVTPtrC8@@@Z @ 671 NONAME ; int CMTPTypeTrivialData::FirstReadChunk(class TPtrC8 &) const
 	?SetArrayL@CMTPTypeObjectPropListElement@@QAEXHABVTDesC16@@@Z @ 672 NONAME ; void CMTPTypeObjectPropListElement::SetArrayL(int, class TDesC16 const &)
 	?NextWriteChunk@CMTPTypeList@@UAEHAAVTPtr8@@I@Z @ 673 NONAME ; int CMTPTypeList::NextWriteChunk(class TPtr8 &, unsigned int)
+	??0TMTPTypeGuid@@QAE@ABVTDesC16@@@Z @ 674 NONAME ; TMTPTypeGuid::TMTPTypeGuid(class TDesC16 const &)
+	?SetL@TMTPTypeGuid@@QAEXABVTDesC16@@@Z @ 675 NONAME ; void TMTPTypeGuid::SetL(class TDesC16 const &)
+	?ToString@TMTPTypeGuid@@QBEHAAVTDes16@@@Z @ 676 NONAME ; int TMTPTypeGuid::ToString(class TDes16 &) const
+	?IsGuidFormat@TMTPTypeGuid@@SAHABVTDesC16@@@Z @ 677 NONAME ; int TMTPTypeGuid::IsGuidFormat(class TDesC16 const &)
+	?GetNumOfValidParams@TMTPTypeResponse@@QBEHXZ @ 678 NONAME ; int TMTPTypeResponse::GetNumOfValidParams(void) const
+	?SetUint32@TMTPTypeResponse@@UAEXHK@Z @ 679 NONAME ; void TMTPTypeResponse::SetUint32(int, unsigned long)
+
+

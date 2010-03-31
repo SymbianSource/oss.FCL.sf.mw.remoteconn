@@ -23,6 +23,7 @@
 #include <mtp/cmtptypearray.h>
 #include <mtp/cmtptypestring.h>
 
+#include "cmtpfsentrycache.h"
 #include "cmtpstoragemgr.h"
 #include "cmtpcopyobject.h"
 #include "mtpdppanic.h"
@@ -61,9 +62,17 @@ Destructor
 */	
 EXPORT_C CMTPCopyObject::~CMTPCopyObject()
 	{	
-	delete iDest;
-	delete iFileMan;
+	__FLOG(_L8("~CMTPCopyObject - Entry"));
+	Cancel();
+	iDpSingletons.Close();
 	iSingletons.Close();
+	
+	delete iTimer;
+	delete iDest;
+	delete iNewFileName;
+	delete iFileMan;
+	
+	__FLOG(_L8("~CMTPCopyObject - Exit"));
 	__FLOG_CLOSE;
 	}
 
@@ -71,7 +80,8 @@ EXPORT_C CMTPCopyObject::~CMTPCopyObject()
 Standard c++ constructor
 */	
 CMTPCopyObject::CMTPCopyObject(MMTPDataProviderFramework& aFramework, MMTPConnection& aConnection) :
-	CMTPRequestProcessor(aFramework, aConnection, sizeof(KMTPCopyObjectPolicy)/sizeof(TMTPRequestElementInfo), KMTPCopyObjectPolicy)
+	CMTPRequestProcessor(aFramework, aConnection, sizeof(KMTPCopyObjectPolicy)/sizeof(TMTPRequestElementInfo), KMTPCopyObjectPolicy),
+	iTimer(NULL)
 	{
 	__FLOG_OPEN(KMTPSubsystem, KComponent);
 	}
@@ -80,14 +90,33 @@ CMTPCopyObject::CMTPCopyObject(MMTPDataProviderFramework& aFramework, MMTPConnec
 
 TMTPResponseCode CMTPCopyObject::CheckRequestL()
 	{
-    __FLOG(_L8("CheckRequestL - Entry"));
+	__FLOG(_L8("CheckRequestL - Entry"));
 	TMTPResponseCode result = CMTPRequestProcessor::CheckRequestL();
 	if ( (EMTPRespCodeOK == result) && (!iSingletons.StorageMgr().IsReadWriteStorage(Request().Uint32(TMTPTypeRequest::ERequestParameter2))) )
 		{
 		result = EMTPRespCodeStoreReadOnly;
 		}
-	
-    __FLOG(_L8("CheckRequestL - Exit"));
+	if(result == EMTPRespCodeOK)
+		{
+		const TUint32 KHandle(Request().Uint32(TMTPTypeRequest::ERequestParameter1));
+		CMTPObjectMetaData* object(CMTPObjectMetaData::NewLC());
+		if(iFramework.ObjectMgr().ObjectL(KHandle, *object))
+			{
+			const TDesC& suid(object->DesC(CMTPObjectMetaData::ESuid));
+			iIsFolder = EFalse;
+			User::LeaveIfError(BaflUtils::IsFolder(iFramework.Fs(), suid, iIsFolder));
+			if(!iIsFolder)
+				{
+				if(iDpSingletons.CopyingBigFileCache().IsOnGoing())
+					{
+					__FLOG(_L8("CheckRequestL - A big file copying is ongoing, respond with access denied"));
+					result = EMTPRespCodeAccessDenied;
+					}
+				}
+			}
+		CleanupStack::PopAndDestroy(object); 
+		}
+	__FLOG(_L8("CheckRequestL - Exit"));
 	return result;	
 	} 
 
@@ -96,16 +125,20 @@ CopyObject request handler
 */		
 void CMTPCopyObject::ServiceL()
 	{	
+	__FLOG(_L8("ServiceL - Entry"));
 	TUint32 handle = KMTPHandleNone;
 	TMTPResponseCode responseCode = CopyObjectL(handle);
-	if(responseCode == EMTPRespCodeOK)
+	if(responseCode != EMTPRespCodeOK)
 		{
-		SendResponseL(EMTPRespCodeOK, 1, &handle);
-		}
-	else
-		{
+		__FLOG_VA((_L8("ServiceL, sending response with respond code %d"), responseCode));
 		SendResponseL(responseCode);
 		}
+	else if (iIsFolder)
+		{
+		__FLOG_VA((_L8("ServiceL, sending response with handle=%d, respond code OK"), handle));
+		SendResponseL(EMTPRespCodeOK, 1, &handle);
+		}
+	__FLOG(_L8("ServiceL - Exit"));
 	}
 
 
@@ -113,9 +146,10 @@ void CMTPCopyObject::ServiceL()
  Second phase constructor
 */
 void CMTPCopyObject::ConstructL()
-    {
+	{
 	iSingletons.OpenL();
-    }
+	iDpSingletons.OpenL(iFramework);
+	}
 
 	
 /**
@@ -123,19 +157,28 @@ A helper function of CopyObjectL.
 @param aNewFileName the new full filename after copy.
 @return objectHandle of new copy of object.
 */
-TUint32 CMTPCopyObject::CopyFileL(const TDesC& aNewFileName)
+void CMTPCopyObject::CopyFileL(const TDesC& aNewFileName)
 	{
 	__FLOG(_L8("CopyFileL - Entry"));
+	delete iNewFileName;
+	iNewFileName = NULL;
+	iNewFileName = aNewFileName.AllocL(); // Store the new file name	
 	const TDesC& suid(iObjectInfo->DesC(CMTPObjectMetaData::ESuid));
 	GetPreviousPropertiesL(suid);
-	User::LeaveIfError(iFileMan->Copy(suid, *iDest));
-	SetPreviousPropertiesL(aNewFileName);
 	
-	TUint32 handle = UpdateObjectInfoL(aNewFileName);
+	User::LeaveIfError(iFileMan->Copy(suid, *iDest, CFileMan::EOverWrite, iStatus));
+	if ( !IsActive() )
+	{  
+	SetActive();
+	}
+	
+	delete iTimer;
+	iTimer = NULL;
+	iTimer = CPeriodic::NewL(EPriorityStandard);
+	TTimeIntervalMicroSeconds32 KCopyObjectIntervalNone = 0;	
+	iTimer->Start(TTimeIntervalMicroSeconds32(KCopyObjectTimeOut), KCopyObjectIntervalNone, TCallBack(CMTPCopyObject::OnTimeoutL, this));
 	
 	__FLOG(_L8("CopyFileL - Exit"));
-	
-	return handle;
 	}
 
 /**
@@ -183,11 +226,7 @@ TMTPResponseCode CMTPCopyObject::CopyObjectL(TUint32& aNewHandle)
 	const TDesC& suid(iObjectInfo->DesC(CMTPObjectMetaData::ESuid));
 	TParsePtrC fileNameParser(suid);
 	
-	// Check if the object is a folder or a file.
-	TBool isFolder = EFalse;
-	User::LeaveIfError(BaflUtils::IsFolder(iFramework.Fs(), suid, isFolder));	
-	
-	if(!isFolder)
+	if(!iIsFolder)
 		{
 		if((newObjectName.Length() + fileNameParser.NameAndExt().Length()) <= newObjectName.MaxLength())
 			{
@@ -213,9 +252,9 @@ TMTPResponseCode CMTPCopyObject::CopyObjectL(TUint32& aNewHandle)
 		iFileMan = NULL;
 		iFileMan = CFileMan::NewL(iFramework.Fs());
 		
-		if(!isFolder) // It is a file.
+		if(!iIsFolder) // It is a file.
 			{
-			aNewHandle = CopyFileL(newObjectName);
+			CopyFileL(newObjectName);
 			}
 		else // It is a folder.
 			{
@@ -356,4 +395,123 @@ TUint32 CMTPCopyObject::UpdateObjectInfoL(const TDesC& aNewObjectName)
 	__FLOG(_L8("UpdateObjectInfoL - Exit"));
 	
 	return handle;	
+	}
+
+/**
+ Call back function, called when the timer expired for big file copying.
+ Send response to initiator and cache the target file entry info, which is used to send response 
+ to getobjectproplist and getobjectinfo.
+*/
+TInt CMTPCopyObject::OnTimeoutL(TAny* aPtr)
+	{
+	CMTPCopyObject* copyObjectProcessor = static_cast<CMTPCopyObject*>(aPtr);
+	copyObjectProcessor->DoOnTimeoutL();
+	return KErrNone;
+	}
+
+void CMTPCopyObject::DoOnTimeoutL()
+	{
+	__FLOG(_L8("DoOnTimeoutL - Entry"));
+	
+	if (iTimer)
+		{
+		if (iTimer->IsActive())
+			{
+			iTimer->Cancel();
+			}
+		delete iTimer;
+		iTimer = NULL;
+		}
+	
+	const TDesC& suid(iObjectInfo->DesC(CMTPObjectMetaData::ESuid));
+	TEntry fileEntry;
+	User::LeaveIfError(iFramework.Fs().Entry(suid, fileEntry));
+	TUint32 handle = KMTPHandleNone;
+	handle = UpdateObjectInfoL(*iNewFileName);
+	CMTPFSEntryCache& aCache = iDpSingletons.CopyingBigFileCache();
+	
+	// Cache the target file entry info, which is used to send response to getobjectproplist and getobjectinfo
+	aCache.SetOnGoing(ETrue);
+	aCache.SetTargetHandle(handle);
+	aCache.SetFileEntry(fileEntry);
+	
+	__FLOG_VA((_L8("UpdateFSEntryCache, sending response with handle=%d, respond code OK for a big file copy"), handle));
+	SendResponseL(EMTPRespCodeOK, 1, &handle);
+	
+	__FLOG(_L8("DoOnTimeoutL - Exit"));
+	}
+
+/**
+ CMTPCopyObject::RunL
+*/
+void CMTPCopyObject::RunL()
+	{
+	__FLOG(_L8("RunL - Entry"));
+	
+	User::LeaveIfError(iStatus.Int());
+	SetPreviousPropertiesL(*iNewFileName);
+	CMTPFSEntryCache& aCache = iDpSingletons.CopyingBigFileCache();
+	// Check to see if we are copying a big file
+	if(aCache.IsOnGoing())
+		{
+		__FLOG(_L8("RunL - Big file copy complete"));
+		aCache.SetOnGoing(EFalse);
+		aCache.SetTargetHandle(KMTPHandleNone);
+		}	
+	else
+		{
+		//Cancel the timer
+		if(iTimer)
+			{
+			if (iTimer->IsActive())
+				{
+				iTimer->Cancel();
+				}
+			delete iTimer;
+			iTimer = NULL;
+			}
+		
+		TUint32 handle = UpdateObjectInfoL(*iNewFileName);
+		__FLOG_VA((_L8("RunL, sending response with handle=%d, respond code OK for a normal file copy"), handle));
+		SendResponseL(EMTPRespCodeOK, 1, &handle);
+		}
+	__FLOG(_L8("RunL - Exit"));
+	}
+
+/**
+Override to handle the complete phase of copy object
+@return EFalse
+*/
+TBool CMTPCopyObject::DoHandleCompletingPhaseL()
+	{
+	CMTPRequestProcessor::DoHandleCompletingPhaseL();
+	
+	CMTPFSEntryCache& aCache = iDpSingletons.CopyingBigFileCache();
+	if(aCache.IsOnGoing())
+		{
+		return EFalse;
+		}
+	else
+		{
+		return ETrue;
+		}
+	}
+
+/**
+Override to match CopyObject request
+@param aRequest    The request to match
+@param aConnection The connection from which the request comes
+@return ETrue if the processor can handle the request, otherwise EFalse
+*/        
+TBool CMTPCopyObject::Match(const TMTPTypeRequest& aRequest, MMTPConnection& aConnection) const
+	{
+	__FLOG(_L8("Match - Entry"));
+	TBool result = EFalse;
+	TUint16 operationCode = aRequest.Uint16(TMTPTypeRequest::ERequestOperationCode);
+	if ((operationCode == EMTPOpCodeCopyObject) && &iConnection == &aConnection)
+	{
+	result = ETrue;
+	}    
+	__FLOG_VA((_L8("Match -- Exit with result = %d"), result));
+	return result;    
 	}

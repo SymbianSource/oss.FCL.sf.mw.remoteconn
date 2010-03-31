@@ -70,7 +70,8 @@ Destructor
 CMTPPictBridgeDpSendObjectInfo::~CMTPPictBridgeDpSendObjectInfo()
     {
     __FLOG_VA((_L8(">> CMTPPictBridgeDpSendObjectInfo::~CMTPPictBridgeDpSendObjectInfo iProgress=%d iNoRollback=%d "), iProgress, iNoRollback));
-
+    __FLOG_2(_L8("iProgress:%d NoRollback:%d"),iProgress,iNoRollback);
+    
     if ((iProgress == EObjectInfoSucceed || 
         iProgress == EObjectInfoFail || 
         iProgress == EObjectInfoInProgress) && !iNoRollback)
@@ -146,11 +147,7 @@ TMTPResponseCode CMTPPictBridgeDpSendObjectInfo::CheckRequestL()
         if (IsTooLarge(iObjectSize))
             {
              result = EMTPRespCodeObjectTooLarge;            
-            }
-        if(result && !CanStoreFileL(iStorageId, iObjectSize))
-           {
-           result = EMTPRespCodeStoreFull;            
-           }        
+            }       
         }
     // If the previous request is not SendObjectInfo, SendObject fails
     if (result == EMTPRespCodeOK && iOperationCode == EMTPOpCodeSendObject)
@@ -295,7 +292,7 @@ TBool CMTPPictBridgeDpSendObjectInfo::DoHandleCompletingPhaseL()
         result = EFalse;
         }
     
-    __FLOG(_L8("<< CMTPPictBridgeDpSendObjectInfo::DoHandleCompletingPhaseL"));    
+    __FLOG_2(_L8("<< CMTPPictBridgeDpSendObjectInfo::DoHandleCompletingPhaseL result:%d progress %d"),result,iProgress);    
     return result;    
     }
 
@@ -477,11 +474,6 @@ TBool CMTPPictBridgeDpSendObjectInfo::DoHandleSendObjectInfoCompleteL()
             SendResponseL(EMTPRespCodeObjectTooLarge);
             result = EFalse;            
             }
-        if(result && !CanStoreFileL(iStorageId, iObjectSize))
-            {
-            SendResponseL(EMTPRespCodeStoreFull);
-            result = EFalse;            
-            }
         }
 
     if (result)
@@ -528,7 +520,9 @@ TBool CMTPPictBridgeDpSendObjectInfo::DoHandleSendObjectInfoCompleteL()
         
         if (err != KErrNone)
             {
+            __FLOG_1(_L8("Fail to create fs object %d"),err);
             SendResponseL(ErrorToMTPError(err));
+            result = EFalse;
             }
         else
             {
@@ -574,7 +568,9 @@ TBool CMTPPictBridgeDpSendObjectInfo::DoHandleSendObjectPropListCompleteL()
         TRAPD(err, CreateFsObjectL());
         if ( err != KErrNone )
             {
+            __FLOG_1(_L8("Fail to create fs object %d"),err);
             SendResponseL(ErrorToMTPError(err));
+            result = EFalse;
             }
         else
             {
@@ -692,28 +688,6 @@ TBool CMTPPictBridgeDpSendObjectInfo::GetFullPathNameL(const TDesC& aFileName)
 
     __FLOG_VA((_L16("<< CMTPPictBridgeDpSendObjectInfo::GetFullPathNameL full path %S"), &iFullPath));
     return result;
-    }
-
-/**
-Check if we can store the file on the storage
-@return ETrue if yes, otherwise EFalse
-*/
-TBool CMTPPictBridgeDpSendObjectInfo::CanStoreFileL(TUint32 aStorageId, TInt64 aObjectSize) const
-    {
-    TBool result(ETrue);
-    if (aStorageId == KMTPStorageDefault)
-        {
-        aStorageId = iFramework.StorageMgr().DefaultStorageId();
-        }
-    TInt drive(iFramework.StorageMgr().DriveNumber(aStorageId));
-    User::LeaveIfError(drive);
-    TVolumeInfo volumeInfo;
-    User::LeaveIfError(iFramework.Fs().Volume(volumeInfo, drive));
-    if (volumeInfo.iFree < aObjectSize)
-        {        
-        result = EFalse;
-        }
-    return result;        
     }
 
 /**

@@ -162,6 +162,26 @@ class CMTPObjectStore : public CBase
 		CMTPObjectStore& iStore;
 		};
 	
+	class CSnapshotWorker: public CActive
+        {
+        public:
+            static CSnapshotWorker* NewL(CMTPObjectStore* aObjectStore, TBool aOnlyRoot); 
+            
+            void RunL();
+            TInt RunErr();
+            void ActiveSelf();
+            
+        private:
+            CSnapshotWorker(CMTPObjectStore* aObjectStore, TBool aOnlyRoot);
+            void ConstructL();
+
+        private:
+            void DoCancel();
+            
+        private:
+        CMTPObjectStore* iObjectStore;
+        TBool            iOnlyRoot;
+        };
 public:
 
 	static CMTPObjectStore* NewL();
@@ -179,7 +199,8 @@ public:
 	void RemoveNonPersistentObjectsL(TUint aDataProviderId);
 	void MarkNonPersistentObjectsL(TUint aDataProviderId, TUint32 aStorageId);
 	void EstablishDBSnapshotL(TUint32 aStorageId);
-	void CleanDBSnapshotL();
+	void CleanDBSnapshotL(TBool aOnlyRoot = EFalse);
+	void ObjectsEnumComplete();
 	void MarkDPLoadedL(TUint aDataProviderId, TBool aFlag);
 
 public:
@@ -252,25 +273,26 @@ private:
 	class CEnumertingCacheItem : public CBase
 		{
 	public:
-		static CEnumertingCacheItem* NewLC(TUint32 aSuidHash, TUint32 aHandle, TUint32 aFormat, TUint64 aId, TUint8 aDpID)
+		static CEnumertingCacheItem* NewLC(TUint32 aSuidHash, TUint32 aHandle, TUint32 aParent, TUint32 aFormat, TUint64 aId, TUint8 aDpID)
 			{
-			CEnumertingCacheItem* self = new (ELeave) CEnumertingCacheItem(aSuidHash, aHandle, aFormat, aId, aDpID);
+			CEnumertingCacheItem* self = new (ELeave) CEnumertingCacheItem(aSuidHash, aHandle, aParent, aFormat, aId, aDpID);
 			CleanupStack::PushL(self);
 			return self;
 			}
-		static CEnumertingCacheItem* NewL(TUint32 aSuidHash, TUint32 aHandle, TUint32 aFormat, TUint64 aId, TUint8 aDpID)
+		static CEnumertingCacheItem* NewL(TUint32 aSuidHash, TUint32 aHandle, TUint32 aParent, TUint32 aFormat, TUint64 aId, TUint8 aDpID)
 			{
-			CEnumertingCacheItem* self = CEnumertingCacheItem::NewLC(aSuidHash, aHandle, aFormat, aId, aDpID);
+			CEnumertingCacheItem* self = CEnumertingCacheItem::NewLC(aSuidHash, aHandle, aParent, aFormat, aId, aDpID);
 			CleanupStack::Pop();
 			return self;
 			}
 		static TInt Compare(const CEnumertingCacheItem& aFirst, const CEnumertingCacheItem& aSecond);
-		CEnumertingCacheItem(TUint32 aSuidHash, TUint32 aHandle, TUint32 aFormat, TUint64 aId, TUint8 aDpID);
+		CEnumertingCacheItem(TUint32 aSuidHash, TUint32 aHandle, TUint32 aParent, TUint32 aFormat, TUint64 aId, TUint8 aDpID);
 		~CEnumertingCacheItem()
 			{
 			delete iSuid;
 			}
 		TUint32 iObjHandleId;
+		TUint32 iObjParentId;
 		TUint32 iObjSuiIdHash;
 		TUint32 iFormatcode;
 		TUint64 iPOUID;
@@ -339,6 +361,8 @@ private:
 	CMTPPkgIDStore*							iPkgIDStore;
 	CMtpDeltaDataMgr* 						iMtpDeltaDataMgr;
 	CDbCompactor*							iCompactor;
+	TInt                                    iSnapshotCleanPos;
+	CSnapshotWorker*                        iSnapshotWorker;
 	mutable TFileName                       iSuidBuf;
 	/**
 	 FLOGGER debug trace member variable.

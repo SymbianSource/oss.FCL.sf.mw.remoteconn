@@ -23,6 +23,9 @@
 
 #include "cmtpgetobjectinfo.h"
 #include "mtpdppanic.h"
+#include "cmtpfsentrycache.h"
+
+__FLOG_STMT(_LIT8(KComponent,"MTPGetObjectInfo");)
 
 /**
 Verification data for GetObjectInfo request
@@ -55,6 +58,7 @@ EXPORT_C CMTPGetObjectInfo::~CMTPGetObjectInfo()
 	{	
 	delete iObjectInfoToBuild;
 	iDpSingletons.Close();
+	__FLOG_CLOSE;
 	}
 
 /**
@@ -65,6 +69,7 @@ CMTPGetObjectInfo::CMTPGetObjectInfo(MMTPDataProviderFramework& aFramework,
 	:CMTPRequestProcessor(aFramework, aConnection, sizeof(KMTPGetObjectInfoPolicy)/sizeof(TMTPRequestElementInfo), KMTPGetObjectInfoPolicy),
 	iRfs(aFramework.Fs())
 	{
+	__FLOG_OPEN(KMTPSubsystem, KComponent);
 	}
 
 /**
@@ -97,7 +102,29 @@ void CMTPGetObjectInfo::BuildObjectInfoL()
 	__ASSERT_DEBUG(objectInfoFromStore, Panic(EMTPDpObjectNull));
 	
 	TEntry fileEntry;
-	User::LeaveIfError(iRfs.Entry(objectInfoFromStore->DesC(CMTPObjectMetaData::ESuid), fileEntry));
+	TInt err = iRfs.Entry(objectInfoFromStore->DesC(CMTPObjectMetaData::ESuid), fileEntry);
+	
+	if ( err != KErrNone )
+		{
+		if( (iDpSingletons.CopyingBigFileCache().TargetHandle() == objectHandle) &&
+				(iDpSingletons.CopyingBigFileCache().IsOnGoing()))
+			{
+			// The object is being copied, it is not created in fs yet. Use its cache entry to get objectinfo
+			__FLOG(_L8("BuildObjectInfoL - The object is being copied, use its cache entry to get objectinfo"));
+			fileEntry = iDpSingletons.CopyingBigFileCache().FileEntry();
+			err = KErrNone;
+			}
+		else if( (iDpSingletons.MovingBigFileCache().TargetHandle() == objectHandle) &&
+							(iDpSingletons.MovingBigFileCache().IsOnGoing()))
+			{
+			// The object is being moved, it is not created in fs yet. Use its cache entry to get objectinfo
+			__FLOG(_L8("BuildObjectInfoL - The object is being moved, use its cache entry to get objectinfo"));
+			fileEntry = iDpSingletons.MovingBigFileCache().FileEntry();
+			err = KErrNone;
+			}	
+		}
+	
+	User::LeaveIfError(err);	
 			
 	//1. storage id
 	iObjectInfoToBuild->SetUint32L(CMTPTypeObjectInfo::EStorageID, objectInfoFromStore->Uint(CMTPObjectMetaData::EStorageId));	
