@@ -56,4 +56,4 @@ public:
     static void UpdateNewPicturesValue(CMTPImageDataProvider& aDataProvider, TInt aNewPics, TBool aSetRProperty);
     };
     
-#endif MTPIMAGEDPUTILITS_H
+#endif // MTPIMAGEDPUTILITS_H
