@@ -496,6 +496,7 @@ void CMTPObjectStore::InsertObjectL(CMTPObjectMetaData& aObject)
 			else
 				{
 				aObject.SetUint(CMTPObjectMetaData::EHandle, handle);
+				needUpdateOwner = ETrue;
 				//while enumerating, we ignore the repeatedly INSERT operations.
 				//User::Leave(KErrAlreadyExists);
 				}
@@ -947,10 +948,7 @@ void CMTPObjectStore::CreateDbL(const TDesC& aFileName)
 	// Create table and index
 	CreateHandleTableL();
 	CreateHandleIndexL();
-	//This is the very very 1st time of MTP server running, therefore, all of the objects in the HandleStore should be added items
-	//roundtrip table will fetch the added items directly from the handlestore, do not popluate the added items to round-trip table
-	//until the enumeration is finished.
-	iUpdateDeltaDataTable = EFalse;
+	iUpdateDeltaDataTable = ETrue;
 	}
 
 /**

@@ -137,6 +137,7 @@ private:
     TInt                    iActiveProcessor;
     TBool                   iActiveProcessorRemoved;    
     TBool                   iEnumerated;
+    TBool                   iEnumerationNotified;
 	
 	RPointerArray<HBufC>    iDeleteObjectsArray;
     };

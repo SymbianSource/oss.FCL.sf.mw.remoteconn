@@ -132,12 +132,7 @@ void CMTPServerSession::DoStartTransportL(const RMessage2& aMessage)
     iSingletons.ConnectionMgr().SetClientSId(secureid);
     
     TInt length = aMessage.GetDesLength( 1 );
-    
-    if((!CheckIsBlueToothTransport(newUID) || (length!=0)) && (iSingletons.DpController().Count()==0))
-    	{
-    	iSingletons.DpController().LoadDataProvidersL();
-    	iSingletons.Router().ConfigureL();
-    	}
+
    
     if (length > 0)
     	{
@@ -163,6 +158,13 @@ void CMTPServerSession::DoStartTransportL(const RMessage2& aMessage)
     	{
     	iSingletons.ConnectionMgr().StartTransportL(newUID, NULL);
     	aMessage.Complete(KErrNone);
+    	}
+    
+    // Fix TSW error MHAN-7ZU96Z
+    if((!CheckIsBlueToothTransport(newUID) || (length!=0)) && (iSingletons.DpController().Count()==0))
+    	{
+    	iSingletons.DpController().LoadDataProvidersL();
+    	iSingletons.Router().ConfigureL();
     	}
     
     
