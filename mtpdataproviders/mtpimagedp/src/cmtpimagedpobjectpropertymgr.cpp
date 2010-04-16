@@ -185,14 +185,6 @@ void CMTPImageDpObjectPropertyMgr::ConstructL(MMTPDataProviderFramework& /*aFram
     __FLOG(_L8("CMTPImageDpObjectPropertyMgr::ConstructL - Entry"));
     iPropertiesCache = CMTPImagePropertiesCache::NewL();    
     iMetaDataSession = CMdESession::NewL(*this);
-    __FLOG(_L8("CMTPImageDpObjectPropertyMgr::ConstructL - Open Mde session"));
-    
-    iActiveSchedulerWait = new (ELeave) CActiveSchedulerWait();
-    iActiveSchedulerWait->Start(); // wait for mdesession to start
-    if (iMdeSessionError != KErrNone) 
-        {
-        User::Leave(iMdeSessionError);
-        }
     __FLOG(_L8("CMTPImageDpObjectPropertyMgr::ConstructL - Exit"));
     }
     
@@ -202,7 +194,6 @@ CMTPImageDpObjectPropertyMgr::~CMTPImageDpObjectPropertyMgr()
     delete iPropertiesCache;
     delete iObject;
     delete iMetaDataSession;
-    delete iActiveSchedulerWait; 
     delete iThumbnailCache.iThumbnailData;
     __FLOG(_L8("CMTPImageDpObjectPropertyMgr::~CMTPImageDpObjectPropertyMgr - Exit"));
     __FLOG_CLOSE;
@@ -957,10 +948,7 @@ CMdESession& CMTPImageDpObjectPropertyMgr::MdeSession()
 void CMTPImageDpObjectPropertyMgr::HandleSessionOpened(CMdESession& /*aSession*/, TInt aError)
     {   
     SetMdeSessionError(aError);
-    if (iActiveSchedulerWait && iActiveSchedulerWait->IsStarted())
-        {
-        iActiveSchedulerWait->AsyncStop();  
-        }
+    TRAP_IGNORE(iDataProvider.HandleMdeSessionCompleteL(aError));
     }
 
 /**
@@ -969,10 +957,7 @@ void CMTPImageDpObjectPropertyMgr::HandleSessionOpened(CMdESession& /*aSession*/
 void CMTPImageDpObjectPropertyMgr::HandleSessionError(CMdESession& /*aSession*/, TInt aError)
     {
     SetMdeSessionError(aError);
-    if (iActiveSchedulerWait && iActiveSchedulerWait->IsStarted())
-        {
-        iActiveSchedulerWait->AsyncStop();  
-        }  
+    TRAP_IGNORE(iDataProvider.HandleMdeSessionCompleteL(aError));
     }
 
 void CMTPImageDpObjectPropertyMgr::SetMdeSessionError(TInt aError)

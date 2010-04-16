@@ -25,8 +25,6 @@
 
 #include <mtp/mtpprotocolconstants.h>
 
-#include "rmediasyncserver.h"
-
 class MMTPDataProviderFramework;
 class CMTPObjectMetaData;
 class TMTPTypeUint32;

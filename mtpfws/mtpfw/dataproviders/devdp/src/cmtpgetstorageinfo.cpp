@@ -26,6 +26,13 @@
 #include "rmtpdevicedpsingletons.h"
 #include "cmtpdevicedpconfigmgr.h"
 
+//MTP should reserve some disk space to prevent ood monitor popup
+//'Out of memory' note.When syncing music through ovi suite,
+//sometimes device screen get freeze with this note
+//If you need to adjust this value,please also update the definition
+//in file 'cmtptypefile.cpp'
+const TInt KFreeSpaceThreshHoldValue(11*1024*1024);//11M
+
 // Class constants.
 __FLOG_STMT(_LIT8(KComponent,"GetStorageInfo");)
 
@@ -129,6 +136,7 @@ Populate the storage info data set
 */	
 void CMTPGetStorageInfo::BuildStorageInfoL()
 	{
+	iIsCDrive = EFalse;
 	SetupDriveVolumeInfoL();
     SetStorageTypeL();
     SetFileSystemTypeL();
@@ -151,6 +159,13 @@ void CMTPGetStorageInfo::SetupDriveVolumeInfoL()
 	RFs& fs = iFramework.Fs();
 	User::LeaveIfError(fs.Drive(iDriveInfo, driveNo));
 	User::LeaveIfError(fs.Volume(iVolumeInfo, driveNo));
+	
+	const TInt KCDriveNo = 2;
+	if(KCDriveNo == driveNo)
+		{
+		iDriveInfo.iType = EMediaRom;
+		iIsCDrive = ETrue;
+		}
 	}
 	
 /**
@@ -231,7 +246,20 @@ Set the free space of the drive in the storage info data set
 */
 void CMTPGetStorageInfo::SetFreeSpaceInBytesL()
 	{
-	TMTPTypeUint64 mtpFreeSpace(iVolumeInfo.iFree);
+	TMTPTypeUint64 mtpFreeSpace;
+	if(iIsCDrive)
+	    {
+	    mtpFreeSpace.Set(0);
+	    }
+	else
+	    {
+	    //Exclude the reserved disk space when reporting free space
+	    TInt64 free = (iVolumeInfo.iFree > KFreeSpaceThreshHoldValue) ?
+	        (iVolumeInfo.iFree - KFreeSpaceThreshHoldValue) : 0;
+	    mtpFreeSpace.Set(free);
+	    }
+	__FLOG_2(_L8("SetFreeSpaceInBytesL volume free:%d report:%d"),
+	        iVolumeInfo.iFree,mtpFreeSpace.Value());
 	iStorageInfo->SetL(CMTPTypeStorageInfo::EFreeSpaceInBytes, mtpFreeSpace);	
 	}
 	

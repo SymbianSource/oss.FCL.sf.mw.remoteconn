@@ -28,6 +28,8 @@
 class MMTPDataProviderFramework;
 class CMTPDpConfigMgr;
 class CMTPFSExclusionMgr;
+class CMTPFSEntryCache;
+
 /** 
 Implements the MTP data processor singletons reference manager.
 @internalComponent
@@ -45,6 +47,8 @@ public:
     IMPORT_C void SetExclusionMgrL(CMTPFSExclusionMgr& aExclusionMgr);
     
     IMPORT_C RMTPUtility& MTPUtility() const;
+    IMPORT_C CMTPFSEntryCache& CopyingBigFileCache() const;
+    IMPORT_C CMTPFSEntryCache& MovingBigFileCache() const;
     
 private:
     class TExclusionMgrEntry
@@ -93,6 +97,9 @@ private:
     	 * The utility for DPutility 
     	 */
     	RMTPUtility					iMTPUtility;
+    	
+    	CMTPFSEntryCache*   iCopyingBigFileCache;
+    	CMTPFSEntryCache*   iMovingBigFileCache;
       };
       
 private: //Not owned

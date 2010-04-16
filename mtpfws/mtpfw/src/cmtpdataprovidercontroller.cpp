@@ -281,6 +281,13 @@ EXPORT_C void CMTPDataProviderController::NotifyDataProvidersL(TUint aDPId, TMTP
                 {
                 dp->Plugin().ProcessNotificationL(aNotification, aParams);
                 }
+            
+            //DeviceDP need handle the SessionClose Notification
+            if ((dp->DataProviderId() == iDpIdDeviceDp) &&
+                ( EMTPSessionClosed == aNotification))
+                {
+                dp->Plugin().ProcessNotificationL(aNotification, aParams);
+                }            
             }
         }
     else

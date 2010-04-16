@@ -164,7 +164,7 @@ void CMTPDeleteObject::ProxyTransactionCompleteL(const TMTPTypeRequest& /*aReque
     //if object is write-protected or assocation object is not empty, we continue to schedule the AO to delete the 
     //following objects. If it is not the 2 cases, just schedule with KErrGeneral so that we can sendresponse directly 
     //in RunL
-    else if (responseCode != EMTPRespCodeObjectWriteProtected && responseCode != EMTPRespCodeAccessDenied)
+    else if (responseCode != EMTPRespCodeObjectWriteProtected && responseCode != EMTPRespCodeAccessDenied && responseCode != EMTPRespCodeStoreReadOnly)
         {
         err = KErrGeneral;
         }

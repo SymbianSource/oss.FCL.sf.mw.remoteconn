@@ -229,7 +229,7 @@ void CMTPPictBridgePrinter::CreateRequestObjectTransfer(TUint32 aHandle,
 
     aEvent.SetUint16(TMTPTypeEvent::EEventCode, EMTPEventCodeRequestObjectTransfer);
     aEvent.SetUint32(TMTPTypeEvent::EEventSessionID, KMTPSessionAll); 
-    aEvent.SetUint32(TMTPTypeEvent::EEventTransactionID, KMTPNotSpecified32);
+    aEvent.SetUint32(TMTPTypeEvent::EEventTransactionID, KMTPTransactionIdLast);
     
     aEvent.SetUint32(TMTPTypeEvent::EEventParameter1, aHandle);
     aEvent.SetUint32(TMTPTypeEvent::EEventParameter2, KPtpNoValue);

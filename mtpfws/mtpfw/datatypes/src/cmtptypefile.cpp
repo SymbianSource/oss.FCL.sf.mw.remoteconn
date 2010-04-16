@@ -32,6 +32,12 @@ const TInt64 KMTPFileSetSizeChunk(1<<30); //1G
 
 const TUint KUSBHeaderLen = 12;
 
+//MTP should reserve some disk space to prevent ood monitor popup
+//'Out of memory' note.When syncing music through ovi suite,
+//sometimes device screen get freeze with this note
+//If you need to adjust this value,please also update the definition
+//in file 'cmtpgetstorageinfo.cpp'
+const TInt KFreeSpaceThreshHoldValue(11*1024*1024);//11M
 
 
 CMTPTypeFile::CFileWriter* CMTPTypeFile::CFileWriter::NewL(RFile&  aFile, RBuf8& aWriteBuf)
@@ -87,6 +93,7 @@ CMTPTypeFile::CFileWriter::~CFileWriter()
         {
         iFile.SetSize(0);
         }
+    
     }
 
 
@@ -178,6 +185,23 @@ EXPORT_C CMTPTypeFile::~CMTPTypeFile()
  */
 EXPORT_C void CMTPTypeFile::SetSizeL(TUint64 aSize)
     {
+    //Firstly, check the disk free space, at anytime, we must make sure
+    //the free space can not be lower than the threshold value after this 
+    //file syncing
+    TInt driveNo;
+    TDriveInfo driveInfo;
+    iFile.Drive(driveNo,driveInfo);
+    RFs fs;
+    TVolumeInfo volumeInfo;
+    fs.Connect();
+    fs.Volume(volumeInfo,driveNo);
+    fs.Close();
+    
+    if(volumeInfo.iFree <= KFreeSpaceThreshHoldValue + aSize)
+        {
+        User::Leave(KErrDiskFull);
+        }
+    
     iTargetFileSize = (TInt64)aSize; //keep a record for the target file size
     
     iRemainingDataSize = (TInt64)aSize;//Current implemenation does not support file size with 2 x64 
@@ -205,6 +229,7 @@ EXPORT_C void CMTPTypeFile::SetSizeL(TUint64 aSize)
         }
     iFileWriter1 = CFileWriter::NewL(iFile, iBuffer1);
     iFileWriter2 = CFileWriter::NewL(iFile, iBuffer2);
+  
     }
 
 /**
@@ -526,7 +551,11 @@ void CMTPTypeFile::ConstructL(RFs& aFs, const TDesC& aName, TFileMode aMode)
     if (aMode & EFileWrite)
         {
         iFileOpenForRead = EFalse;
-        User::LeaveIfError(iFile.Replace(aFs, aName, aMode|EFileWriteDirectIO));
+        TInt err = iFile.Create(aFs, aName, aMode|EFileWriteDirectIO);
+        if (err != KErrNone)
+            {
+            User::LeaveIfError(iFile.Replace(aFs, aName, aMode|EFileWriteDirectIO));
+            }
         }
     else
         {
@@ -559,7 +588,11 @@ void CMTPTypeFile::ConstructL(RFs& aFs, const TDesC& aName, TFileMode aMode, TIn
     if (aMode & EFileWrite)
         {
         iFileOpenForRead = EFalse;
-        User::LeaveIfError(iFile.Replace(aFs, aName, aMode|EFileWriteDirectIO));
+        TInt err = iFile.Create(aFs, aName, aMode|EFileWriteDirectIO);
+        if (err != KErrNone)
+            {
+            User::LeaveIfError(iFile.Replace(aFs, aName, aMode|EFileWriteDirectIO));
+            }
         }
     else
         {
@@ -573,13 +606,14 @@ void CMTPTypeFile::ConstructL(RFs& aFs, const TDesC& aName, TFileMode aMode, TIn
 #endif
         User::LeaveIfError(iFile.Size(size));
         
-        if(aRequiredSize < size)
+        
+        if(aOffSet + aRequiredSize <= size)
             {
             iTargetFileSize = aRequiredSize;
             }
         else
             {
-            iTargetFileSize = size;
+            iTargetFileSize = size - aOffSet;
             }
         iRemainingDataSize = iTargetFileSize;
         

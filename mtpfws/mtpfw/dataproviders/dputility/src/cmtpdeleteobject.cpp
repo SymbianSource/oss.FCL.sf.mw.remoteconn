@@ -23,6 +23,7 @@
 #include <mtp/mmtpstoragemgr.h>
 #include <mtp/tmtptyperequest.h>
 
+#include "cmtpstoragemgr.h"
 #include "cmtpdeleteobject.h"
 #include "mtpdpconst.h"
 #include "mtpdppanic.h"
@@ -46,9 +47,6 @@ Standard c++ constructor
 CMTPDeleteObject::CMTPDeleteObject(MMTPDataProviderFramework& aFramework, MMTPConnection& aConnection) :
     CMTPRequestProcessor(aFramework, aConnection, sizeof(KMTPDeleteObjectPolicy)/sizeof(TMTPRequestElementInfo), KMTPDeleteObjectPolicy)
     {
-	__FLOG_OPEN(KMTPSubsystem, KComponent);
-    __FLOG(_L8("CMTPDeleteObject - Entry"));
-    __FLOG(_L8("CMTPDeleteObject - Exit"));
     }
 
 
@@ -62,8 +60,19 @@ EXPORT_C MMTPRequestProcessor* CMTPDeleteObject::NewL(MMTPDataProviderFramework&
                                             MMTPConnection& aConnection)
     {
     CMTPDeleteObject* self = new (ELeave) CMTPDeleteObject(aFramework, aConnection);
+    CleanupStack::PushL(self);
+    self->ConstructL();
+    CleanupStack::Pop(self);
     return self;
     }
+
+void CMTPDeleteObject::ConstructL()
+	{
+	__FLOG_OPEN(KMTPSubsystem, KComponent);
+    __FLOG(_L8("ConstructL - Entry"));
+    iSingletons.OpenL();
+    __FLOG(_L8("ConstructL - Exit"));
+	}
 
 /**
 Destructor
@@ -71,6 +80,7 @@ Destructor
 EXPORT_C CMTPDeleteObject::~CMTPDeleteObject()
     {
     __FLOG(_L8("~CMTPDeleteObject - Entry"));
+    iSingletons.Close();
     __FLOG(_L8("~CMTPDeleteObject - Exit"));
     __FLOG_CLOSE;
     }
@@ -84,15 +94,13 @@ Verify the request
 TMTPResponseCode CMTPDeleteObject::CheckRequestL()
 	{
     __FLOG(_L8("CheckRequestL - Entry"));
-	TMTPResponseCode result(EMTPRespCodeOK);
-	if (IsStoreReadOnlyL(Request().Uint32(TMTPTypeRequest::ERequestParameter1)))
+	TMTPResponseCode result = CMTPRequestProcessor::CheckRequestL();
+	const TUint32 KObjectHandle = Request().Uint32(TMTPTypeRequest::ERequestParameter1);
+	if ((EMTPRespCodeOK == result) && (IsStoreReadOnlyL(KObjectHandle)) )
 		{
 		result = EMTPRespCodeStoreReadOnly;
 		}
-	else
-		{
-		result = CMTPRequestProcessor::CheckRequestL();
-		}		
+		
     __FLOG(_L8("CheckRequestL - Exit"));
 	return result;	
 	} 
@@ -233,14 +241,7 @@ TBool CMTPDeleteObject::IsStoreReadOnlyL(TUint32 aObjectHandle)
 	CMTPObjectMetaData *info(CMTPObjectMetaData::NewLC());
     if (iFramework.ObjectMgr().ObjectL(aObjectHandle, *info))
         {
-    	TInt drive(iFramework.StorageMgr().DriveNumber(info->Uint(CMTPObjectMetaData::EStorageId)));
-    	User::LeaveIfError(drive);
-    	TVolumeInfo volumeInfo;
-    	User::LeaveIfError(iFramework.Fs().Volume(volumeInfo, drive));			
-    	if (volumeInfo.iDrive.iMediaAtt == KMediaAttWriteProtected) 
-    		{
-    		result = ETrue;
-    		}
+		result = !iSingletons.StorageMgr().IsReadWriteStorage(info->Uint(CMTPObjectMetaData::EStorageId));
         }
 	CleanupStack::PopAndDestroy(info);
     __FLOG(_L8("IsStoreReadOnlyL - Exit"));

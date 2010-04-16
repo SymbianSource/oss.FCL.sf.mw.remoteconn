@@ -14,6 +14,7 @@
 //
 
 #include "rmtpdpsingletons.h"
+#include "cmtpfsentrycache.h"
 
 #include <mtp/mmtpdataproviderframework.h>
 #include <mtp/cmtpobjectmetadata.h>
@@ -137,6 +138,8 @@ RMTPDpSingletons::CSingletons::~CSingletons()
     __FLOG(_L8("CSingletons::~CSingletons - Entry"));
     iExclusionList.Close();
     iMTPUtility.Close();
+    delete iCopyingBigFileCache;
+    delete iMovingBigFileCache;
     __FLOG(_L8("CSingletons::~CSingletons - Exit"));
     __FLOG_CLOSE;
     }
@@ -147,6 +150,8 @@ void RMTPDpSingletons::CSingletons::ConstructL(MMTPDataProviderFramework& aFrame
     __FLOG(_L8("CSingletons::ConstructL - Entry"));
     
     iMTPUtility.OpenL(aFramework);
+    iCopyingBigFileCache = CMTPFSEntryCache::NewL();
+    iMovingBigFileCache = CMTPFSEntryCache::NewL();
     
     __FLOG(_L8("CSingletons::ConstructL - Exit"));
     }
@@ -155,3 +160,14 @@ EXPORT_C RMTPUtility& RMTPDpSingletons::MTPUtility() const
 	{
 	return iSingletons->iMTPUtility;
 	}
+
+EXPORT_C CMTPFSEntryCache& RMTPDpSingletons::CopyingBigFileCache() const
+  {
+  return *(iSingletons->iCopyingBigFileCache);
+  }
+
+EXPORT_C CMTPFSEntryCache& RMTPDpSingletons::MovingBigFileCache() const
+  {
+  return *(iSingletons->iMovingBigFileCache);
+  }
+

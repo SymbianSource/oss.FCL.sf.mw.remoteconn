@@ -467,7 +467,8 @@ Constructor.
 CMTPDeviceDataStore::CMTPDeviceDataStore() :
     CActive(EPriorityStandard),
 	iBatteryInfoV1Pckg(iBatteryInfoV1),
-	iPhoneIdV1Pckg(iPhoneIdV1)
+	iPhoneIdV1Pckg(iPhoneIdV1),
+	iIsConnectMac(EFalse)
     {
     CActiveScheduler::Add(this);
     }
@@ -1211,3 +1212,11 @@ void CMTPDeviceDataStore::CheckDeviceIconProperties( RArray<TUint> &aSupportedDe
 	}//else nothing to do.
 	}
 
+TBool CMTPDeviceDataStore::IsConnectMac()
+    {
+    return iIsConnectMac;
+    }
+void CMTPDeviceDataStore::SetConnectMac(TBool aConnectMac)
+    {
+    iIsConnectMac = aConnectMac;
+    }

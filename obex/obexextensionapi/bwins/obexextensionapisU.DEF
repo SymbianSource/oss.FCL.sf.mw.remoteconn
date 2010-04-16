@@ -1,0 +1,6 @@
+EXPORTS
+	?NewL@CObexServerPacketAccessExtension@@SAPAV1@AAVCObexServer@@AAVMObexServerRequestPacketNotify@@@Z @ 1 NONAME ; class CObexServerPacketAccessExtension * CObexServerPacketAccessExtension::NewL(class CObexServer &, class MObexServerRequestPacketNotify &)
+	?LastError@CObexClientErrorResolver@@QBEIXZ @ 2 NONAME ; unsigned int CObexClientErrorResolver::LastError(void) const
+	?NewL@CObexClientErrorResolver@@SAPAV1@AAVCObexClient@@@Z @ 3 NONAME ; class CObexClientErrorResolver * CObexClientErrorResolver::NewL(class CObexClient &)
+	?NewL@CObexClientErrorResolver@@SAPAV1@AAVCObexClient@@W4TObexClientErrorResolutionSetType@@@Z @ 4 NONAME ; class CObexClientErrorResolver * CObexClientErrorResolver::NewL(class CObexClient &, enum TObexClientErrorResolutionSetType)
+

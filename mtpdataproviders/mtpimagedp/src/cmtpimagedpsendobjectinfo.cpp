@@ -322,12 +322,7 @@ TBool CMTPImageDpSendObjectInfo::CheckObjectPropListParamsL(TAny *aPtr)
             {
             iStorageId = iFramework.StorageMgr().DefaultStorageId();
             }
-           
-        //if the object size is more,then report this error.
-        if (!CanStoreFileL(iStorageId, iObjectSize))
-            {
-            *ret = EMTPRespCodeStoreFull;
-            }        
+             
         }
     
     __FLOG(_L8("CMTPImageDpSendObjectInfo::CheckObjectPropListParamsL - Exit"));
@@ -515,15 +510,8 @@ TBool CMTPImageDpSendObjectInfo::ServiceSendObjectL(TAny* /*aPtr*/)
          
     iFramework.ObjectMgr().CommitReservedObjectHandleL(*iReceivedObject);
     //prepare for rollback
-    iRollbackList.Append(RemoveObjectFromDb);    
+    iRollbackList.Append(RemoveObjectFromDb);        
     
-    delete iFileReceived;
-    iFileReceived = NULL;    
-    iFileReceived = CMTPTypeFile::NewL(iFramework.Fs(), iFullPath, EFileWrite);
-    iFileReceived->SetSizeL(iObjectSize);
-    
-    //prepare for rollback
-    iRollbackList.Append(RemoveObjectFromFs);    
     ReceiveDataL(*iFileReceived);
     
     __FLOG(_L8("CMTPImageDpSendObjectInfo::ServiceSendObjectL - Exit"));
@@ -620,11 +608,6 @@ TBool CMTPImageDpSendObjectInfo::DoHandleSendObjectInfoCompleteL(TAny* /*aPtr*/)
     if (result)
         {
         iObjectSize = iObjectInfo->Uint32L(CMTPTypeObjectInfo::EObjectCompressedSize);
-        if(!CanStoreFileL(iStorageId, iObjectSize))
-            {
-            SendResponseL(EMTPRespCodeStoreFull);
-            result = EFalse;            
-            }
         }
 
     if (result)
@@ -656,14 +639,25 @@ TBool CMTPImageDpSendObjectInfo::DoHandleSendObjectInfoCompleteL(TAny* /*aPtr*/)
             SendResponseL(EMTPRespCodeAccessDenied);
             }
         else
-            {
-            ReserveObjectL();            
-            imageWidth = iObjectInfo->Uint32L(CMTPTypeObjectInfo::EImagePixWidth);
-            imageHeight = iObjectInfo->Uint32L(CMTPTypeObjectInfo::EImagePixHeight);
-            imageBitDepth = iObjectInfo->Uint32L(CMTPTypeObjectInfo::EImageBitDepth);            
-            iReceivedObject->SetUint(CMTPObjectMetaData::EFormatCode, format);
-            SetPropertiesL();                            
-            ReturnResponseL();
+            {            
+            TRAPD(err,CreateFsObjectL());
+            if (err != KErrNone)
+                {
+                __FLOG_1(_L8("Fail to create fs object %d"),err);
+                SendResponseL(ErrorToMTPError(err));
+                Rollback();
+                result = EFalse;
+                }
+            else
+                {
+                ReserveObjectL();            
+                imageWidth = iObjectInfo->Uint32L(CMTPTypeObjectInfo::EImagePixWidth);
+                imageHeight = iObjectInfo->Uint32L(CMTPTypeObjectInfo::EImagePixHeight);
+                imageBitDepth = iObjectInfo->Uint32L(CMTPTypeObjectInfo::EImageBitDepth);            
+                iReceivedObject->SetUint(CMTPObjectMetaData::EFormatCode, format);
+                SetPropertiesL();                            
+                ReturnResponseL();
+                }
             }
         }
     
@@ -719,10 +713,21 @@ TBool CMTPImageDpSendObjectInfo::DoHandleSendObjectPropListCompleteL(TAny* /*aPt
     
     if (result)
         {
-        //the EFormatCode property has been set in ServiceSendObjectPropListL() function
-        ReserveObjectL();
-        SetPropertiesL();
-        ReturnResponseL();      
+        TRAPD(err,CreateFsObjectL());
+        if (err != KErrNone)
+            {
+            __FLOG_1(_L8("Fail to create fs object %d"),err);
+            SendResponseL(ErrorToMTPError(err));
+            Rollback();
+            result = EFalse;
+            }
+        else
+            {
+            //the EFormatCode property has been set in ServiceSendObjectPropListL() function
+            ReserveObjectL();
+            SetPropertiesL();
+            ReturnResponseL();
+            }
         }
         
     iSuccessful = result;
@@ -789,14 +794,18 @@ TBool CMTPImageDpSendObjectInfo::DoHandleSendObjectCompleteL(TAny* /*aPtr*/)
                 }
             User::LeaveIfError(iFileReceived->File().SetAtt(attValue, ~attValue));
             }
-        
+        TTime modifiedTime;
         //update datemodified property.
         if(iDateMod != NULL && iDateMod->Length())
-           {
-           TTime modifiedTime;
+           {           
            iObjectPropertyMgr.ConvertMTPTimeStr2TTimeL(*iDateMod, modifiedTime);
            User::LeaveIfError(iFileReceived->File().SetModified(modifiedTime));
-           }  
+           }
+        else if(iDateCreated != NULL && iDateCreated->Length())
+           {
+           iObjectPropertyMgr.ConvertMTPTimeStr2TTimeL(*iDateCreated, modifiedTime);
+           User::LeaveIfError(iFileReceived->File().SetModified(modifiedTime));
+           }
                                    
 	     iFramework.RouteRequestUnregisterL(iExpectedSendObjectRequest, iConnection);
         
@@ -841,7 +850,8 @@ void CMTPImageDpSendObjectInfo::UnreserveObject()
     }
 
 void CMTPImageDpSendObjectInfo::RemoveObjectFromFs()
-    {    
+    {  
+    __FLOG(_L8("RemoveObjectFromFs"));
     delete iFileReceived;
     iFileReceived = NULL;
     TInt err = iFramework.Fs().Delete(iFullPath);
@@ -915,31 +925,6 @@ TBool CMTPImageDpSendObjectInfo::GetFullPathName(const TDesC& aFileName)
 
     __FLOG(_L8("CMTPImageDpSendObjectInfo::GetFullPathNameL - Exit"));
     return result;
-    }
-
-/**
-Check if we can store the file on the storage
-@return ETrue if yes, otherwise EFalse
-*/
-TBool CMTPImageDpSendObjectInfo::CanStoreFileL(TUint32 aStorageId, TInt64 aObjectSize) const
-    {
-    __FLOG(_L8("CMTPImageDpSendObjectInfo::CanStoreFileL - Entry"));
-    TBool result(ETrue);
-    if (aStorageId == KMTPStorageDefault)
-        {
-        aStorageId = iFramework.StorageMgr().DefaultStorageId();
-        }
-    
-    TDriveNumber drive(static_cast<TDriveNumber>(iFramework.StorageMgr().DriveNumber(aStorageId)));
-    User::LeaveIfError(drive);
-    TVolumeInfo volumeInfo;
-    User::LeaveIfError(iFramework.Fs().Volume(volumeInfo, drive));
-    if (volumeInfo.iFree < aObjectSize)
-        {        
-        result = EFalse;
-        }
-    __FLOG(_L8("CMTPImageDpSendObjectInfo::CanStoreFileL - Exit"));
-    return result;        
     }
 
 /**
@@ -1255,4 +1240,40 @@ void CMTPImageDpSendObjectInfo::CleanUndoList()
     iRollbackList.Reset();
     
     __FLOG(_L8("CMTPImageDpSendObjectInfo::CleanUndoList - Exit"));  
+    }
+
+void CMTPImageDpSendObjectInfo::CreateFsObjectL()
+    {
+    delete iFileReceived;
+    iFileReceived = NULL;
+    //prepare for rollback
+    iRollbackList.Append(RemoveObjectFromFs);
+        
+    iFileReceived = CMTPTypeFile::NewL(iFramework.Fs(), iFullPath, EFileWrite);
+    iFileReceived->SetSizeL(iObjectSize);
+    }
+
+TMTPResponseCode CMTPImageDpSendObjectInfo::ErrorToMTPError(TInt aError) const
+    {
+    TMTPResponseCode resp = EMTPRespCodeGeneralError;
+    
+    switch (aError)
+        {
+    case KErrNone:
+        resp = EMTPRespCodeOK;
+        break;
+        
+    case KErrAccessDenied:
+        resp = EMTPRespCodeAccessDenied;
+        break;
+        
+    case KErrDiskFull:
+        resp = EMTPRespCodeStoreFull;
+        break;
+        
+    default:
+        break;
+        }
+        
+    return resp;
     }

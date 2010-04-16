@@ -99,17 +99,24 @@ void CMTPGetObject::ServiceL()
 	    // The object handle has already been checked, so an invalid handle can
 	    // only occur if it was invalidated during a context switch between
 	    // the validation time and now.
-	    iError = EMTPRespCodeInvalidObjectHandle;
+	    SendResponseL(EMTPRespCodeInvalidObjectHandle);
 	    }
 	else if ( objectInfo->Uint(CMTPObjectMetaData::EFormatCode)==EMTPFormatCodeAssociation 
 	        && objectInfo->Uint(CMTPObjectMetaData::EFormatSubCode)==EMTPAssociationTypeGenericFolder)
 	    {
-	    iError = EMTPRespCodeInvalidObjectHandle;
+	    SendResponseL(EMTPRespCodeInvalidObjectHandle);
 	    }
     else
         {
-    	BuildFileObjectL(objectInfo->DesC(CMTPObjectMetaData::ESuid));
-    	SendDataL(*iFileObject);	
+    		TRAPD(err, BuildFileObjectL(objectInfo->DesC(CMTPObjectMetaData::ESuid)));
+    		if (err == KErrNone)
+    			{
+    			SendDataL(*iFileObject);	
+    			}
+    		else
+    			{
+    			SendResponseL(EMTPRespCodeAccessDenied);
+    			}
         }
     __FLOG(_L8("ServiceL - Exit"));
 	}

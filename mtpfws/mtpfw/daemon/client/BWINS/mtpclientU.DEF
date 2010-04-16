@@ -1,0 +1,11 @@
+EXPORTS
+	??0RMTPClient@@QAE@XZ @ 1 NONAME ; RMTPClient::RMTPClient(void)
+	?Close@RMTPClient@@QAEXXZ @ 2 NONAME ; void RMTPClient::Close(void)
+	?Connect@RMTPClient@@QAEHXZ @ 3 NONAME ; int RMTPClient::Connect(void)
+	?IsAvailable@RMTPClient@@QAEHVTUid@@@Z @ 4 NONAME ; int RMTPClient::IsAvailable(class TUid)
+	?IsProcessRunning@RMTPClient@@QAEHXZ @ 5 NONAME ; int RMTPClient::IsProcessRunning(void)
+	?StartTransport@RMTPClient@@QAEHVTUid@@@Z @ 6 NONAME ; int RMTPClient::StartTransport(class TUid)
+	?StopTransport@RMTPClient@@QAEHVTUid@@@Z @ 7 NONAME ; int RMTPClient::StopTransport(class TUid)
+	?Version@RMTPClient@@QBEABVTVersion@@XZ @ 8 NONAME ; class TVersion const & RMTPClient::Version(void) const
+    ?StartTransport@RMTPClient@@QAEHVTUid@@ABVTDesC8@@@Z @ 9 NONAME ; int RMTPClient::StartTransport(class TUid, class TDesC8 const &)
+

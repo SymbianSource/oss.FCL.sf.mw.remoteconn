@@ -1,0 +1,89 @@
+EXPORTS
+	??1CDataOwnerInfo@conn@@UAE@XZ @ 1 NONAME ; conn::CDataOwnerInfo::~CDataOwnerInfo(void)
+	??1CSBEClient@conn@@UAE@XZ @ 2 NONAME ; conn::CSBEClient::~CSBEClient(void)
+	??1CSBGenericDataType@conn@@UAE@XZ @ 3 NONAME ; conn::CSBGenericDataType::~CSBGenericDataType(void)
+	??1CSBGenericTransferType@conn@@UAE@XZ @ 4 NONAME ; conn::CSBGenericTransferType::~CSBGenericTransferType(void)
+	??1CSBJavaId@conn@@UAE@XZ @ 5 NONAME ; conn::CSBJavaId::~CSBJavaId(void)
+	??1CSBJavaTransferType@conn@@UAE@XZ @ 6 NONAME ; conn::CSBJavaTransferType::~CSBJavaTransferType(void)
+	??1CSBPackageId@conn@@UAE@XZ @ 7 NONAME ; conn::CSBPackageId::~CSBPackageId(void)
+	??1CSBPackageTransferType@conn@@UAE@XZ @ 8 NONAME ; conn::CSBPackageTransferType::~CSBPackageTransferType(void)
+	??1CSBSIDTransferType@conn@@UAE@XZ @ 9 NONAME ; conn::CSBSIDTransferType::~CSBSIDTransferType(void)
+	??1CSBSecureId@conn@@UAE@XZ @ 10 NONAME ; conn::CSBSecureId::~CSBSecureId(void)
+	?ActiveSettings@CDataOwnerInfo@conn@@QBEKXZ @ 11 NONAME ; unsigned long conn::CDataOwnerInfo::ActiveSettings(void) const
+	?AllSnapshotsSuppliedL@CSBEClient@conn@@QAEXXZ @ 12 NONAME ; void conn::CSBEClient::AllSnapshotsSuppliedL(void)
+	?AllSystemFilesRestored@CSBEClient@conn@@QAEXXZ @ 13 NONAME ; void conn::CSBEClient::AllSystemFilesRestored(void)
+	?CommonSettings@CDataOwnerInfo@conn@@QBEKXZ @ 14 NONAME ; unsigned long conn::CDataOwnerInfo::CommonSettings(void) const
+	?DataChecksum@CSBEClient@conn@@QAEIW4TDriveNumber@@VTSecureId@@@Z @ 15 NONAME ; unsigned int conn::CSBEClient::DataChecksum(enum TDriveNumber, class TSecureId)
+	?DataTypeL@CSBJavaTransferType@conn@@QBE?AW4TJavaTransferType@2@XZ @ 16 NONAME ; enum conn::TJavaTransferType conn::CSBJavaTransferType::DataTypeL(void) const
+	?DataTypeL@CSBPackageTransferType@conn@@QBE?AW4TPackageDataType@2@XZ @ 17 NONAME ; enum conn::TPackageDataType conn::CSBPackageTransferType::DataTypeL(void) const
+	?DataTypeL@CSBSIDTransferType@conn@@QBE?AW4TTransferDataType@2@XZ @ 18 NONAME ; enum conn::TTransferDataType conn::CSBSIDTransferType::DataTypeL(void) const
+	?DerivedTypeL@CSBGenericDataType@conn@@QBE?AW4TSBDerivedType@2@XZ @ 19 NONAME ; enum conn::TSBDerivedType conn::CSBGenericDataType::DerivedTypeL(void) const
+	?DriveList@CDataOwnerInfo@conn@@QAEAAV?$TBuf8@$0BK@@@XZ @ 20 NONAME ; class TBuf8<26> & conn::CDataOwnerInfo::DriveList(void)
+	?DriveList@CDataOwnerInfo@conn@@QBEABV?$TBuf8@$0BK@@@XZ @ 21 NONAME ; class TBuf8<26> const & conn::CDataOwnerInfo::DriveList(void) const
+	?DriveNumberL@CSBGenericTransferType@conn@@QBE?AW4TDriveNumber@@XZ @ 22 NONAME ; enum TDriveNumber conn::CSBGenericTransferType::DriveNumberL(void) const
+	?ExpectedDataSizeL@CSBEClient@conn@@QAEIAAVCSBGenericTransferType@2@@Z @ 23 NONAME ; unsigned int conn::CSBEClient::ExpectedDataSizeL(class conn::CSBGenericTransferType &)
+	?Externalise@CSBGenericDataType@conn@@QBEABVTDesC8@@XZ @ 24 NONAME ; class TDesC8 const & conn::CSBGenericDataType::Externalise(void) const
+	?ExternaliseL@CDataOwnerInfo@conn@@QAEPAVHBufC8@@XZ @ 25 NONAME ; class HBufC8 * conn::CDataOwnerInfo::ExternaliseL(void)
+	?ExternaliseLC@CDataOwnerInfo@conn@@QAEPAVHBufC8@@XZ @ 26 NONAME ; class HBufC8 * conn::CDataOwnerInfo::ExternaliseLC(void)
+	?Identifier@CDataOwnerInfo@conn@@QAEAAVCSBGenericDataType@2@XZ @ 27 NONAME ; class conn::CSBGenericDataType & conn::CDataOwnerInfo::Identifier(void)
+	?Identifier@CDataOwnerInfo@conn@@QBEABVCSBGenericDataType@2@XZ @ 28 NONAME ; class conn::CSBGenericDataType const & conn::CDataOwnerInfo::Identifier(void) const
+	?ListOfDataOwnersL@CSBEClient@conn@@QAEXAAV?$RPointerArray@VCDataOwnerInfo@conn@@@@@Z @ 29 NONAME ; void conn::CSBEClient::ListOfDataOwnersL(class RPointerArray<class conn::CDataOwnerInfo> &)
+	?NewL@CDataOwnerInfo@conn@@SAPAV12@ABVTDesC8@@@Z @ 30 NONAME ; class conn::CDataOwnerInfo * conn::CDataOwnerInfo::NewL(class TDesC8 const &)
+	?NewL@CDataOwnerInfo@conn@@SAPAV12@PAVCSBGenericDataType@2@KKKABV?$TBuf8@$0BK@@@@Z @ 31 NONAME ; class conn::CDataOwnerInfo * conn::CDataOwnerInfo::NewL(class conn::CSBGenericDataType *, unsigned long, unsigned long, unsigned long, class TBuf8<26> const &)
+	?NewL@CSBEClient@conn@@SAPAV12@XZ @ 32 NONAME ; class conn::CSBEClient * conn::CSBEClient::NewL(void)
+	?NewL@CSBGenericDataType@conn@@SAPAV12@ABVTDesC8@@@Z @ 33 NONAME ; class conn::CSBGenericDataType * conn::CSBGenericDataType::NewL(class TDesC8 const &)
+	?NewL@CSBGenericTransferType@conn@@SAPAV12@ABVTDesC8@@@Z @ 34 NONAME ; class conn::CSBGenericTransferType * conn::CSBGenericTransferType::NewL(class TDesC8 const &)
+	?NewL@CSBJavaId@conn@@SAPAV12@ABVTDesC16@@000@Z @ 35 NONAME ; class conn::CSBJavaId * conn::CSBJavaId::NewL(class TDesC16 const &, class TDesC16 const &, class TDesC16 const &, class TDesC16 const &)
+	?NewL@CSBJavaId@conn@@SAPAV12@PAVCSBGenericDataType@2@@Z @ 36 NONAME ; class conn::CSBJavaId * conn::CSBJavaId::NewL(class conn::CSBGenericDataType *)
+	?NewL@CSBJavaTransferType@conn@@SAPAV12@ABVTDesC16@@W4TDriveNumber@@W4TJavaTransferType@2@@Z @ 37 NONAME ; class conn::CSBJavaTransferType * conn::CSBJavaTransferType::NewL(class TDesC16 const &, enum TDriveNumber, enum conn::TJavaTransferType)
+	?NewL@CSBJavaTransferType@conn@@SAPAV12@PAVCSBGenericTransferType@2@@Z @ 38 NONAME ; class conn::CSBJavaTransferType * conn::CSBJavaTransferType::NewL(class conn::CSBGenericTransferType *)
+	?NewL@CSBPackageId@conn@@SAPAV12@PAVCSBGenericDataType@2@@Z @ 39 NONAME ; class conn::CSBPackageId * conn::CSBPackageId::NewL(class conn::CSBGenericDataType *)
+	?NewL@CSBPackageId@conn@@SAPAV12@VTUid@@VTSecureId@@ABVTDesC16@@@Z @ 40 NONAME ; class conn::CSBPackageId * conn::CSBPackageId::NewL(class TUid, class TSecureId, class TDesC16 const &)
+	?NewL@CSBPackageTransferType@conn@@SAPAV12@PAVCSBGenericTransferType@2@@Z @ 41 NONAME ; class conn::CSBPackageTransferType * conn::CSBPackageTransferType::NewL(class conn::CSBGenericTransferType *)
+	?NewL@CSBPackageTransferType@conn@@SAPAV12@VTUid@@W4TDriveNumber@@W4TPackageDataType@2@@Z @ 42 NONAME ; class conn::CSBPackageTransferType * conn::CSBPackageTransferType::NewL(class TUid, enum TDriveNumber, enum conn::TPackageDataType)
+	?NewL@CSBSIDTransferType@conn@@SAPAV12@PAVCSBGenericTransferType@2@@Z @ 43 NONAME ; class conn::CSBSIDTransferType * conn::CSBSIDTransferType::NewL(class conn::CSBGenericTransferType *)
+	?NewL@CSBSIDTransferType@conn@@SAPAV12@VTSecureId@@W4TDriveNumber@@W4TTransferDataType@2@@Z @ 44 NONAME ; class conn::CSBSIDTransferType * conn::CSBSIDTransferType::NewL(class TSecureId, enum TDriveNumber, enum conn::TTransferDataType)
+	?NewL@CSBSecureId@conn@@SAPAV12@PAVCSBGenericDataType@2@@Z @ 45 NONAME ; class conn::CSBSecureId * conn::CSBSecureId::NewL(class conn::CSBGenericDataType *)
+	?NewL@CSBSecureId@conn@@SAPAV12@VTSecureId@@@Z @ 46 NONAME ; class conn::CSBSecureId * conn::CSBSecureId::NewL(class TSecureId)
+	?PackageIdL@CSBPackageId@conn@@QBE?AVTUid@@XZ @ 47 NONAME ; class TUid conn::CSBPackageId::PackageIdL(void) const
+	?PackageIdL@CSBPackageTransferType@conn@@QBE?AVTUid@@XZ @ 48 NONAME ; class TUid conn::CSBPackageTransferType::PackageIdL(void) const
+	?PackageNameL@CSBPackageId@conn@@QBE?AV?$TBufC@$0IA@@@XZ @ 49 NONAME ; class TBufC<128> conn::CSBPackageId::PackageNameL(void) const
+	?PassiveSettings@CDataOwnerInfo@conn@@QBEKXZ @ 50 NONAME ; unsigned long conn::CDataOwnerInfo::PassiveSettings(void) const
+	?PublicFileListL@CSBEClient@conn@@QAEXW4TDriveNumber@@AAVCSBGenericDataType@2@AAV?$RExternalisableArray@VTEntry@@@2@@Z @ 51 NONAME ; void conn::CSBEClient::PublicFileListL(enum TDriveNumber, class conn::CSBGenericDataType &, class conn::RExternalisableArray<class TEntry> &)
+	?PublicFileListXMLL@CSBEClient@conn@@QAEXW4TDriveNumber@@VTSecureId@@AAPAVHBufC16@@@Z @ 52 NONAME ; void conn::CSBEClient::PublicFileListXMLL(enum TDriveNumber, class TSecureId, class HBufC16 * &)
+	?RawPublicFileListL@CSBEClient@conn@@QAEXW4TDriveNumber@@AAVCSBGenericDataType@2@AAV?$RExternalisableArray@VTRestoreFileFilter@conn@@@2@@Z @ 53 NONAME ; void conn::CSBEClient::RawPublicFileListL(enum TDriveNumber, class conn::CSBGenericDataType &, class conn::RExternalisableArray<class conn::TRestoreFileFilter> &)
+	?RequestDataL@CSBEClient@conn@@QAEXAAVCSBGenericTransferType@2@@Z @ 54 NONAME ; void conn::CSBEClient::RequestDataL(class conn::CSBGenericTransferType &)
+	?RequestDataL@CSBEClient@conn@@QAEXAAVCSBGenericTransferType@2@AAVTRequestStatus@@@Z @ 55 NONAME ; void conn::CSBEClient::RequestDataL(class conn::CSBGenericTransferType &, class TRequestStatus &)
+	?SIDStatusL@CSBEClient@conn@@QAEXAAV?$RExternalisableArray@VTDataOwnerAndStatus@conn@@@2@@Z @ 56 NONAME ; void conn::CSBEClient::SIDStatusL(class conn::RExternalisableArray<class conn::TDataOwnerAndStatus> &)
+	?SecureIdL@CSBPackageId@conn@@QBE?AVTSecureId@@XZ @ 57 NONAME ; class TSecureId conn::CSBPackageId::SecureIdL(void) const
+	?SecureIdL@CSBSIDTransferType@conn@@QBE?AVTSecureId@@XZ @ 58 NONAME ; class TSecureId conn::CSBSIDTransferType::SecureIdL(void) const
+	?SecureIdL@CSBSecureId@conn@@QBE?AVTSecureId@@XZ @ 59 NONAME ; class TSecureId conn::CSBSecureId::SecureIdL(void) const
+	?SetBURModeL@CSBEClient@conn@@QAEXABV?$TBuf8@$0BK@@@W4TBURPartType@2@W4TBackupIncType@2@@Z @ 60 NONAME ; void conn::CSBEClient::SetBURModeL(class TBuf8<26> const &, enum conn::TBURPartType, enum conn::TBackupIncType)
+	?SetSIDListForPartialBURL@CSBEClient@conn@@QAEXAAV?$RExternalisableArray@VTSecureId@@@2@@Z @ 61 NONAME ; void conn::CSBEClient::SetSIDListForPartialBURL(class conn::RExternalisableArray<class TSecureId> &)
+	?Size@CDataOwnerInfo@conn@@QBEHXZ @ 62 NONAME ; int conn::CDataOwnerInfo::Size(void) const
+	?SuiteHashL@CSBJavaId@conn@@QBEABVTDesC16@@XZ @ 63 NONAME ; class TDesC16 const & conn::CSBJavaId::SuiteHashL(void) const
+	?SuiteHashL@CSBJavaTransferType@conn@@QBEABVTDesC16@@XZ @ 64 NONAME ; class TDesC16 const & conn::CSBJavaTransferType::SuiteHashL(void) const
+	?SuiteNameL@CSBJavaId@conn@@QBEABVTDesC16@@XZ @ 65 NONAME ; class TDesC16 const & conn::CSBJavaId::SuiteNameL(void) const
+	?SuiteVendorL@CSBJavaId@conn@@QBEABVTDesC16@@XZ @ 66 NONAME ; class TDesC16 const & conn::CSBJavaId::SuiteVendorL(void) const
+	?SuiteVersionL@CSBJavaId@conn@@QBEABVTDesC16@@XZ @ 67 NONAME ; class TDesC16 const & conn::CSBJavaId::SuiteVersionL(void) const
+	?SupplyDataL@CSBEClient@conn@@QAEXAAVCSBGenericTransferType@2@H@Z @ 68 NONAME ; void conn::CSBEClient::SupplyDataL(class conn::CSBGenericTransferType &, int)
+	?SupplyDataL@CSBEClient@conn@@QAEXAAVCSBGenericTransferType@2@HAAVTRequestStatus@@@Z @ 69 NONAME ; void conn::CSBEClient::SupplyDataL(class conn::CSBGenericTransferType &, int, class TRequestStatus &)
+	?TransferDataAddressL@CSBEClient@conn@@QAEAAVTPtr8@@XZ @ 70 NONAME ; class TPtr8 & conn::CSBEClient::TransferDataAddressL(void)
+	?TransferDataInfoL@CSBEClient@conn@@QAEAAVTPtrC8@@AAPAVCSBGenericTransferType@2@AAH@Z @ 71 NONAME ; class TPtrC8 & conn::CSBEClient::TransferDataInfoL(class conn::CSBGenericTransferType * &, int &)
+	?AllSnapshotsSuppliedL@CSBEClient@conn@@QAEXAAVTRequestStatus@@@Z @ 72 NONAME ; void conn::CSBEClient::AllSnapshotsSuppliedL(class TRequestStatus &)
+	?AllSystemFilesRestoredL@CSBEClient@conn@@QAEXAAVTRequestStatus@@@Z @ 73 NONAME ; void conn::CSBEClient::AllSystemFilesRestoredL(class TRequestStatus &)
+	?ListOfDataOwnersL@CSBEClient@conn@@QAEXAAV?$RPointerArray@VCDataOwnerInfo@conn@@@@AAVTRequestStatus@@@Z @ 74 NONAME ; void conn::CSBEClient::ListOfDataOwnersL(class RPointerArray<class conn::CDataOwnerInfo> &, class TRequestStatus &)
+	?PublicFileListL@CSBEClient@conn@@QAEXW4TDriveNumber@@AAVCSBGenericDataType@2@AAV?$RExternalisableArray@VTEntry@@@2@AAVTRequestStatus@@@Z @ 75 NONAME ; void conn::CSBEClient::PublicFileListL(enum TDriveNumber, class conn::CSBGenericDataType &, class conn::RExternalisableArray<class TEntry> &, class TRequestStatus &)
+	?SetBURModeL@CSBEClient@conn@@QAEXABV?$TBuf8@$0BK@@@W4TBURPartType@2@W4TBackupIncType@2@AAVTRequestStatus@@@Z @ 76 NONAME ; void conn::CSBEClient::SetBURModeL(class TBuf8<26> const &, enum conn::TBURPartType, enum conn::TBackupIncType, class TRequestStatus &)
+	??1CSBEFileEntry@conn@@UAE@XZ @ 77 NONAME ; conn::CSBEFileEntry::~CSBEFileEntry(void)
+	?ExternaliseLC@CSBEFileEntry@conn@@QBEPAVHBufC8@@XZ @ 78 NONAME ; class HBufC8 * conn::CSBEFileEntry::ExternaliseLC(void) const
+	?FileAttributes@CSBEFileEntry@conn@@QBEIXZ @ 79 NONAME ; unsigned int conn::CSBEFileEntry::FileAttributes(void) const
+	?FileSize@CSBEFileEntry@conn@@QBEHXZ @ 80 NONAME ; int conn::CSBEFileEntry::FileSize(void) const
+	?Filename@CSBEFileEntry@conn@@QBEAAVTDesC16@@XZ @ 81 NONAME ; class TDesC16 & conn::CSBEFileEntry::Filename(void) const
+	?LastModified@CSBEFileEntry@conn@@QBE?AVTTime@@XZ @ 82 NONAME ; class TTime conn::CSBEFileEntry::LastModified(void) const
+	?MIMEType@CSBEFileEntry@conn@@QBEAAVTDesC16@@XZ @ 83 NONAME ; class TDesC16 & conn::CSBEFileEntry::MIMEType(void) const
+	?MIMEUid@CSBEFileEntry@conn@@QAEAAVTUidType@@XZ @ 84 NONAME ; class TUidType & conn::CSBEFileEntry::MIMEUid(void)
+	?NewLC@CSBEFileEntry@conn@@SAPAV12@ABVTDesC8@@AAH@Z @ 85 NONAME ; class conn::CSBEFileEntry * conn::CSBEFileEntry::NewLC(class TDesC8 const &, int &)
+	?NewLC@CSBEFileEntry@conn@@SAPAV12@ABVTEntry@@AAVRApaLsSession@@@Z @ 86 NONAME ; class conn::CSBEFileEntry * conn::CSBEFileEntry::NewLC(class TEntry const &, class RApaLsSession &)
+	?PublicFileListL@CSBEClient@conn@@QAEXW4TDriveNumber@@AAVCSBGenericDataType@2@AAV?$RPointerArray@VCSBEFileEntry@conn@@@@AAHHHAAVTRequestStatus@@@Z @ 87 NONAME ; void conn::CSBEClient::PublicFileListL(enum TDriveNumber, class conn::CSBGenericDataType &, class RPointerArray<class conn::CSBEFileEntry> &, int &, int, int, class TRequestStatus &)
+

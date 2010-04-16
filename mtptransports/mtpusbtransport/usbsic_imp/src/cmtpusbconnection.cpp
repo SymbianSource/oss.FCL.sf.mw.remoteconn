@@ -1569,6 +1569,12 @@ void CMTPUsbConnection::DataEndpointsStop()
             TRAPD(err, BoundProtocolLayer().SendDataCompleteL(KErrAbort, *iUsbBulkContainer->Payload(), iMTPRequest));
             UNUSED_VAR(err);
             }
+		else if ((iBulkTransactionState == EResponsePhase) && iUsbBulkContainer->Payload())
+            {
+            __FLOG(_L8("Aborting active response phase"));
+            TRAPD(err, BoundProtocolLayer().SendResponseCompleteL(KErrAbort, *static_cast<TMTPTypeResponse*>(iUsbBulkContainer->Payload()), iMTPRequest));
+            UNUSED_VAR(err);
+            }
         }
 #ifdef __FLOG_ACTIVE
     else

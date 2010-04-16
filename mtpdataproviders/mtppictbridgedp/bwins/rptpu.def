@@ -1,0 +1,16 @@
+EXPORTS
+	?IsDpsPrinter@RPtp@@QAEXAAVTRequestStatus@@@Z @ 1 NONAME ; void RPtp::IsDpsPrinter(class TRequestStatus &)
+	?CancelSendObject@RPtp@@QAEXXZ @ 2 NONAME ; void RPtp::CancelSendObject(void)
+	?ObjectReceivedNotify@RPtp@@QAEXABVTDesC16@@AAVTDes16@@AAVTRequestStatus@@H@Z @ 3 NONAME ; void RPtp::ObjectReceivedNotify(class TDesC16 const &, class TDes16 &, class TRequestStatus &, int)
+	?GetObjectHandleByName@RPtp@@QAEHABVTDesC16@@AAKH@Z @ 4 NONAME ; int RPtp::GetObjectHandleByName(class TDesC16 const &, unsigned long &, int)
+	?DestroyPtpStatck@RPtp@@QAEXXZ @ 5 NONAME ; void RPtp::DestroyPtpStatck(void)
+	?CancelIsDpsPrinter@RPtp@@QAEXXZ @ 6 NONAME ; void RPtp::CancelIsDpsPrinter(void)
+	?GetNameByObjectHandle@RPtp@@QAEHAAVTDes16@@K@Z @ 7 NONAME ; int RPtp::GetNameByObjectHandle(class TDes16 &, unsigned long)
+	?CreatePtpStack@RPtp@@QAEHVTUid@@@Z @ 8 NONAME ; int RPtp::CreatePtpStack(class TUid)
+	?SendObject@RPtp@@QAEXABVTDesC16@@AAVTRequestStatus@@HHH@Z @ 9 NONAME ; void RPtp::SendObject(class TDesC16 const &, class TRequestStatus &, int, int, int)
+	?Connect@RPtp@@QAEHXZ @ 10 NONAME ; int RPtp::Connect(void)
+	?Close@RPtp@@QAEXXZ @ 11 NONAME ; void RPtp::Close(void)
+	?PtpFolder@RPtp@@QAEABVTDesC16@@XZ @ 12 NONAME ; class TDesC16 const & RPtp::PtpFolder(void)
+	?CancelObjectReceivedNotify@RPtp@@QAEXXZ @ 13 NONAME ; void RPtp::CancelObjectReceivedNotify(void)
+	??0RPtp@@QAE@XZ @ 14 NONAME ; RPtp::RPtp(void)
+

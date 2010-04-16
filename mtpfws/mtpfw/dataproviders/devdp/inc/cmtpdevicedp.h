@@ -20,7 +20,8 @@
 
 #ifndef CMTPDEVICEDP_H
 #define CMTPDEVICEDP_H
-
+#include <e32base.h>
+#include <d32usbc.h>
 #include <mtp/cmtpdataproviderplugin.h>
 #include "mtpdebug.h"
 #include "mmtpenumerationcallback.h"
@@ -28,6 +29,7 @@
 #include "rmtpdpsingletons.h"
 #include "mextndevplugincallback.h"
 #include "mmtpdevdpextn.h"
+#include "rmtpframework.h"
 
 #include "cmtpgetdevicepropdesc.h"
 #include "cmtpdevicedatastore.h"
@@ -40,7 +42,7 @@ class CMTPStorageWatcher;
 class MMTPRequestProcessor;
 class CMtpExtnDevicePropPlugin;
 class CMTPDeviceDataStore;
-
+class CMTPDeviceInfoTimer;
 /** 
 Implements the MTP device data provider plug-in.
 @internalComponent
@@ -62,7 +64,7 @@ public:
 
     static TAny* NewL(TAny* aParams);
     ~CMTPDeviceDataProvider();
-    
+    void SetConnectMac();    
 private: // From CMTPDataProviderPlugin
 
     void Cancel();
@@ -166,6 +168,56 @@ private: // Owned
     TInt								iActiveProcessor;
     TBool								iActiveProcessorRemoved;
 
+    //Timer for  DeviceInfo
+    CMTPDeviceInfoTimer*                iDeviceInfoTimer;
+    RMTPFramework                       iFrameWork;
+    enum TCommandState
+        {
+        EIdle,
+        EOpenSession,
+        EStartDeviceInfoTimer,
+        ESetIsMac
+        };
+    TCommandState                       iCommandState;
+
+
     };
+	/**
+	Implements the MTP GetDeviceinfo timer. 
+	@internalComponent
+	*/
+class CMTPDeviceInfoTimer : public CTimer
+    {
+public:
+
+    static CMTPDeviceInfoTimer* NewL(CMTPDeviceDataProvider& aDeviceProvider); 
+    virtual ~CMTPDeviceInfoTimer();
+    void Start();
     
+private: // From CTimer
+
+    void RunL();
+    
+private:
+
+    CMTPDeviceInfoTimer(CMTPDeviceDataProvider& aDeviceProvider);
+    void ConstructL();    
+
+private:
+/**
+FLOGGER debug trace member variable.
+*/
+__FLOG_DECLARATION_MEMBER_MUTABLE;        
+    
+    CMTPDeviceDataProvider& iDeviceProvider;
+    RDevUsbcClient          iLdd;
+
+enum TTimerState
+    {
+    EIdle,
+    EStartTimer,
+    EUSBReEnumerate
+    };
+    TTimerState iState;
+    };    
 #endif // CMTPDEVICEDP_H

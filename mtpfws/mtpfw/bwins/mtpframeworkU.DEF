@@ -1,0 +1,153 @@
+EXPORTS
+	??0RMTPFramework@@QAE@XZ @ 1 NONAME ; RMTPFramework::RMTPFramework(void)
+	??0TRoutingParameters@CMTPParserRouter@@QAE@ABVTMTPTypeRequest@@AAVMMTPConnection@@@Z @ 2 NONAME ; CMTPParserRouter::TRoutingParameters::TRoutingParameters(class TMTPTypeRequest const &, class MMTPConnection &)
+	??1CMTPStorageMgr@@UAE@XZ @ 3 NONAME ; CMTPStorageMgr::~CMTPStorageMgr(void)
+	?AllocateLogicalStorageIdL@CMTPStorageMgr@@UAEKIKABVCMTPStorageMetaData@@@Z @ 4 NONAME ; unsigned long CMTPStorageMgr::AllocateLogicalStorageIdL(unsigned int, unsigned long, class CMTPStorageMetaData const &)
+	?AllocateLogicalStorageIdL@CMTPStorageMgr@@UAEKIW4TDriveNumber@@ABVCMTPStorageMetaData@@@Z @ 5 NONAME ; unsigned long CMTPStorageMgr::AllocateLogicalStorageIdL(unsigned int, enum TDriveNumber, class CMTPStorageMetaData const &)
+	?AllocatePhysicalStorageIdL@CMTPStorageMgr@@UAEKIABVCMTPStorageMetaData@@@Z @ 6 NONAME ; unsigned long CMTPStorageMgr::AllocatePhysicalStorageIdL(unsigned int, class CMTPStorageMetaData const &)
+	?Close@RMTPFramework@@QAEXXZ @ 7 NONAME ; void RMTPFramework::Close(void)
+	?ConfigureL@CMTPParserRouter@@QAEXXZ @ 8 NONAME ; void CMTPParserRouter::ConfigureL(void)
+	?Connection@TRoutingParameters@CMTPParserRouter@@QBEAAVMMTPConnection@@XZ @ 9 NONAME ; class MMTPConnection & CMTPParserRouter::TRoutingParameters::Connection(void) const
+	?ConnectionL@CMTPConnectionMgr@@QBEAAVCMTPConnection@@I@Z @ 10 NONAME ; class CMTPConnection & CMTPConnectionMgr::ConnectionL(unsigned int) const
+	?ConnectionMgr@RMTPFramework@@QBEAAVCMTPConnectionMgr@@XZ @ 11 NONAME ; class CMTPConnectionMgr & RMTPFramework::ConnectionMgr(void) const
+	?Count@CMTPDataProviderController@@QAEIXZ @ 12 NONAME ; unsigned int CMTPDataProviderController::Count(void)
+	?DataProviderL@CMTPDataProviderController@@QAEAAVCMTPDataProvider@@I@Z @ 13 NONAME ; class CMTPDataProvider & CMTPDataProviderController::DataProviderL(unsigned int)
+	?DeallocateLogicalStorageId@CMTPStorageMgr@@UAEHIK@Z @ 14 NONAME ; int CMTPStorageMgr::DeallocateLogicalStorageId(unsigned int, unsigned long)
+	?DeallocateLogicalStorageIds@CMTPStorageMgr@@UAEXIK@Z @ 15 NONAME ; void CMTPStorageMgr::DeallocateLogicalStorageIds(unsigned int, unsigned long)
+	?DeallocatePhysicalStorageId@CMTPStorageMgr@@UAEHIK@Z @ 16 NONAME ; int CMTPStorageMgr::DeallocatePhysicalStorageId(unsigned int, unsigned long)
+	?DefaultStorageId@CMTPStorageMgr@@UBEKXZ @ 17 NONAME ; unsigned long CMTPStorageMgr::DefaultStorageId(void) const
+	?DeviceDpId@CMTPDataProviderController@@QAEHXZ @ 18 NONAME ; int CMTPDataProviderController::DeviceDpId(void)
+	?DpController@RMTPFramework@@QBEAAVCMTPDataProviderController@@XZ @ 19 NONAME ; class CMTPDataProviderController & RMTPFramework::DpController(void) const
+	?DpId@CMTPDataProviderController@@QAEHI@Z @ 20 NONAME ; int CMTPDataProviderController::DpId(unsigned int)
+	?DriveNumber@CMTPStorageMgr@@UBEHK@Z @ 21 NONAME ; int CMTPStorageMgr::DriveNumber(unsigned long) const
+	?EnumerationState@CMTPDataProvider@@QBEIXZ @ 22 NONAME ; unsigned int CMTPDataProvider::EnumerationState(void) const
+	?ExecuteProxyRequestL@CMTPDataProvider@@QAEXABVTMTPTypeRequest@@AAVMMTPConnection@@AAVMMTPTransactionProxy@@@Z @ 23 NONAME ; void CMTPDataProvider::ExecuteProxyRequestL(class TMTPTypeRequest const &, class MMTPConnection &, class MMTPTransactionProxy &)
+	?FrameworkConfig@RMTPFramework@@QBEAAVCMTPFrameworkConfig@@XZ @ 24 NONAME ; class CMTPFrameworkConfig & RMTPFramework::FrameworkConfig(void) const
+	?FrameworkStorageId@CMTPStorageMgr@@UBEJW4TDriveNumber@@@Z @ 25 NONAME ; long CMTPStorageMgr::FrameworkStorageId(enum TDriveNumber) const
+	?Fs@RMTPFramework@@QBEAAVRFs@@XZ @ 26 NONAME ; class RFs & RMTPFramework::Fs(void) const
+	?GetAvailableDrivesL@CMTPStorageMgr@@UBEXAAV?$RArray@W4TDriveNumber@@@@@Z @ 27 NONAME ; void CMTPStorageMgr::GetAvailableDrivesL(class RArray<enum TDriveNumber> &) const
+	?GetLogicalStoragesL@CMTPStorageMgr@@UBEXABVTMTPStorageMgrQueryParams@@AAV?$RPointerArray@$$CBVCMTPStorageMetaData@@@@@Z @ 28 NONAME ; void CMTPStorageMgr::GetLogicalStoragesL(class TMTPStorageMgrQueryParams const &, class RPointerArray<class CMTPStorageMetaData const > &) const
+	?GetPhysicalStoragesL@CMTPStorageMgr@@UBEXABVTMTPStorageMgrQueryParams@@AAV?$RPointerArray@$$CBVCMTPStorageMetaData@@@@@Z @ 29 NONAME ; void CMTPStorageMgr::GetPhysicalStoragesL(class TMTPStorageMgrQueryParams const &, class RPointerArray<class CMTPStorageMetaData const > &) const
+	?GetValueL@CMTPFrameworkConfig@@UBEXW4TParameter@MMTPFrameworkConfig@@AAH@Z @ 30 NONAME ; void CMTPFrameworkConfig::GetValueL(enum MMTPFrameworkConfig::TParameter, int &) const
+	?GetValueL@CMTPFrameworkConfig@@UBEXW4TParameter@MMTPFrameworkConfig@@AAI@Z @ 31 NONAME ; void CMTPFrameworkConfig::GetValueL(enum MMTPFrameworkConfig::TParameter, unsigned int &) const
+	?GetValueL@CMTPFrameworkConfig@@UBEXW4TParameter@MMTPFrameworkConfig@@AAV?$RArray@I@@@Z @ 32 NONAME ; void CMTPFrameworkConfig::GetValueL(enum MMTPFrameworkConfig::TParameter, class RArray<unsigned int> &) const
+	?GetValueL@CMTPFrameworkConfig@@UBEXW4TParameter@MMTPFrameworkConfig@@AAVTDes16@@@Z @ 33 NONAME ; void CMTPFrameworkConfig::GetValueL(enum MMTPFrameworkConfig::TParameter, class TDes16 &) const
+	?LoadDataProvidersL@CMTPDataProviderController@@QAEXXZ @ 34 NONAME ; void CMTPDataProviderController::LoadDataProvidersL(void)
+	?LogicalStorageId@CMTPStorageMgr@@UBEJABVTDesC16@@@Z @ 35 NONAME ; long CMTPStorageMgr::LogicalStorageId(class TDesC16 const &) const
+	?LogicalStorageId@CMTPStorageMgr@@UBEKK@Z @ 36 NONAME ; unsigned long CMTPStorageMgr::LogicalStorageId(unsigned long) const
+	?LogicalStorageNumber@CMTPStorageMgr@@SAIK@Z @ 37 NONAME ; unsigned int CMTPStorageMgr::LogicalStorageNumber(unsigned long)
+	?LogicalStorageOwner@CMTPStorageMgr@@SAIK@Z @ 38 NONAME ; unsigned int CMTPStorageMgr::LogicalStorageOwner(unsigned long)
+	?NewL@CMTPStorageMgr@@SAPAV1@XZ @ 39 NONAME ; class CMTPStorageMgr * CMTPStorageMgr::NewL(void)
+	?NotifyDataProvidersL@CMTPDataProviderController@@QAEXW4TMTPNotification@@PBX@Z @ 40 NONAME ; void CMTPDataProviderController::NotifyDataProvidersL(enum TMTPNotification, void const *)
+	?ObjectMgr@RMTPFramework@@QBEAAVCMTPObjectMgr@@XZ @ 41 NONAME ; class CMTPObjectMgr & RMTPFramework::ObjectMgr(void) const
+	?OpenL@RMTPFramework@@QAEXXZ @ 42 NONAME ; void RMTPFramework::OpenL(void)
+	?OpenLC@RMTPFramework@@QAEXXZ @ 43 NONAME ; void RMTPFramework::OpenLC(void)
+	?OperationSupportedL@CMTPParserRouter@@QBEHG@Z @ 44 NONAME ; int CMTPParserRouter::OperationSupportedL(unsigned short) const
+	?Param@TRoutingParameters@CMTPParserRouter@@QBEIW4TParameterType@12@@Z @ 45 NONAME ; unsigned int CMTPParserRouter::TRoutingParameters::Param(enum CMTPParserRouter::TRoutingParameters::TParameterType) const
+	?ParseOperationRequestL@CMTPParserRouter@@QBEXAAVTRoutingParameters@1@@Z @ 46 NONAME ; void CMTPParserRouter::ParseOperationRequestL(class CMTPParserRouter::TRoutingParameters &) const
+	?PhysicalStorageId@CMTPStorageMgr@@UBEJW4TDriveNumber@@@Z @ 47 NONAME ; long CMTPStorageMgr::PhysicalStorageId(enum TDriveNumber) const
+	?PhysicalStorageId@CMTPStorageMgr@@UBEKK@Z @ 48 NONAME ; unsigned long CMTPStorageMgr::PhysicalStorageId(unsigned long) const
+	?PhysicalStorageNumber@CMTPStorageMgr@@SAIK@Z @ 49 NONAME ; unsigned int CMTPStorageMgr::PhysicalStorageNumber(unsigned long)
+	?PhysicalStorageOwner@CMTPStorageMgr@@SAIK@Z @ 50 NONAME ; unsigned int CMTPStorageMgr::PhysicalStorageOwner(unsigned long)
+	?Plugin@CMTPDataProvider@@QBEAAVCMTPDataProviderPlugin@@XZ @ 51 NONAME ; class CMTPDataProviderPlugin & CMTPDataProvider::Plugin(void) const
+	?ProxyDpId@CMTPDataProviderController@@QAEHXZ @ 52 NONAME ; int CMTPDataProviderController::ProxyDpId(void)
+	?ReferenceMgr@RMTPFramework@@QBEAAVCMTPReferenceMgr@@XZ @ 53 NONAME ; class CMTPReferenceMgr & RMTPFramework::ReferenceMgr(void) const
+	?RemoveObjectsByStorageIdL@CMTPObjectMgr@@QAEXK@Z @ 54 NONAME ; void CMTPObjectMgr::RemoveObjectsByStorageIdL(unsigned long)
+	?Request@TRoutingParameters@CMTPParserRouter@@QBEABVTMTPTypeRequest@@XZ @ 55 NONAME ; class TMTPTypeRequest const & CMTPParserRouter::TRoutingParameters::Request(void) const
+	?Reset@TRoutingParameters@CMTPParserRouter@@QAEXXZ @ 56 NONAME ; void CMTPParserRouter::TRoutingParameters::Reset(void)
+	?RouteOperationRequestL@CMTPParserRouter@@QBEXABVTRoutingParameters@1@AAV?$RArray@I@@@Z @ 57 NONAME ; void CMTPParserRouter::RouteOperationRequestL(class CMTPParserRouter::TRoutingParameters const &, class RArray<unsigned int> &) const
+	?RouteRequestRegisteredL@CMTPParserRouter@@QBEHABVTMTPTypeRequest@@AAVMMTPConnection@@@Z @ 58 NONAME ; int CMTPParserRouter::RouteRequestRegisteredL(class TMTPTypeRequest const &, class MMTPConnection &) const
+	?Router@RMTPFramework@@QBEAAVCMTPParserRouter@@XZ @ 59 NONAME ; class CMTPParserRouter & RMTPFramework::Router(void) const
+	?SessionClosedL@CMTPConnection@@QAEXK@Z @ 60 NONAME ; void CMTPConnection::SessionClosedL(unsigned long)
+	?SessionOpenedL@CMTPConnection@@QAEXK@Z @ 61 NONAME ; void CMTPConnection::SessionOpenedL(unsigned long)
+	?SetDefaultStorageId@CMTPStorageMgr@@QAEXK@Z @ 62 NONAME ; void CMTPStorageMgr::SetDefaultStorageId(unsigned long)
+	?SetDriveMappingL@CMTPStorageMgr@@QAEXW4TDriveNumber@@K@Z @ 63 NONAME ; void CMTPStorageMgr::SetDriveMappingL(enum TDriveNumber, unsigned long)
+	?SetFrameworkId@CMTPStorageMgr@@QAEXI@Z @ 64 NONAME ; void CMTPStorageMgr::SetFrameworkId(unsigned int)
+	?SetParam@TRoutingParameters@CMTPParserRouter@@QAEXW4TParameterType@12@I@Z @ 65 NONAME ; void CMTPParserRouter::TRoutingParameters::SetParam(enum CMTPParserRouter::TRoutingParameters::TParameterType, unsigned int)
+	?StartTransportL@CMTPConnectionMgr@@QAEXVTUid@@@Z @ 66 NONAME ; void CMTPConnectionMgr::StartTransportL(class TUid)
+	?StopTransport@CMTPConnectionMgr@@QAEXVTUid@@@Z @ 67 NONAME ; void CMTPConnectionMgr::StopTransport(class TUid)
+	?StopTransports@CMTPConnectionMgr@@QAEXXZ @ 68 NONAME ; void CMTPConnectionMgr::StopTransports(void)
+	?StorageId@CMTPStorageMgr@@UBEKKK@Z @ 69 NONAME ; unsigned long CMTPStorageMgr::StorageId(unsigned long, unsigned long) const
+	?StorageL@CMTPStorageMgr@@UBEABVCMTPStorageMetaData@@K@Z @ 70 NONAME ; class CMTPStorageMetaData const & CMTPStorageMgr::StorageL(unsigned long) const
+	?StorageMgr@RMTPFramework@@QBEAAVCMTPStorageMgr@@XZ @ 71 NONAME ; class CMTPStorageMgr & RMTPFramework::StorageMgr(void) const
+	?Supported@CMTPDataProvider@@QBEHW4TMTPSupportCategory@@I@Z @ 72 NONAME ; int CMTPDataProvider::Supported(enum TMTPSupportCategory, unsigned int) const
+	?SupportedCodes@CMTPDataProvider@@QBEABV?$RArray@I@@W4TMTPSupportCategory@@@Z @ 73 NONAME ; class RArray<unsigned int> const & CMTPDataProvider::SupportedCodes(enum TMTPSupportCategory) const
+	?TransportCount@CMTPConnectionMgr@@QBEHXZ @ 74 NONAME ; int CMTPConnectionMgr::TransportCount(void) const
+	?UnloadDataProviders@CMTPDataProviderController@@QAEXXZ @ 75 NONAME ; void CMTPDataProviderController::UnloadDataProviders(void)
+	?ValidStorageId@CMTPStorageMgr@@UBEHK@Z @ 76 NONAME ; int CMTPStorageMgr::ValidStorageId(unsigned long) const
+	?ValueL@CMTPFrameworkConfig@@UBEPAVHBufC16@@W4TParameter@MMTPFrameworkConfig@@@Z @ 77 NONAME ; class HBufC16 * CMTPFrameworkConfig::ValueL(enum MMTPFrameworkConfig::TParameter) const
+	?VolumeIdL@CMTPStorageMgr@@UBEPAVCMTPTypeString@@IKABVTDesC16@@@Z @ 78 NONAME ; class CMTPTypeString * CMTPStorageMgr::VolumeIdL(unsigned int, unsigned long, class TDesC16 const &) const
+	?EnumerateState@CMTPDataProviderController@@QAEIXZ @ 79 NONAME ; unsigned int CMTPDataProviderController::EnumerateState(void)
+	?GetDataReceiveResult@CMTPConnection@@QBEHXZ @ 80 NONAME ; int CMTPConnection::GetDataReceiveResult(void) const
+	?TransportUid@CMTPConnectionMgr@@QAE?AVTUid@@XZ @ 81 NONAME ; class TUid CMTPConnectionMgr::TransportUid(void)
+	?ClientSId@CMTPConnectionMgr@@EAE?AVTUid@@XZ @ 82 NONAME ; class TUid CMTPConnectionMgr::ClientSId(void)
+	?SetClientSId@CMTPConnectionMgr@@QAEXVTUid@@@Z @ 83 NONAME ; void CMTPConnectionMgr::SetClientSId(class TUid)
+	?WaitForEnumerationComplete@CMTPDataProviderController@@QAEXXZ @ 84 NONAME ; void CMTPDataProviderController::WaitForEnumerationComplete(void)
+	?ImplementationUid@CMTPDataProvider@@QBE?AVTUid@@XZ @ 85 NONAME ; class TUid CMTPDataProvider::ImplementationUid(void) const
+	?ServiceInfo@CMTPServiceMgr@@QBEPAVCMTPServiceInfo@@ABVTMTPTypeUint128@@@Z @ 86 NONAME ABSENT ; class CMTPServiceInfo * CMTPServiceMgr::ServiceInfo(class TMTPTypeUint128 const &) const
+	?SetCode@CServiceElementBase@@UAEXI@Z @ 87 NONAME ; void CServiceElementBase::SetCode(unsigned int)
+	?GetSet@CServiceProperty@@QBEIXZ @ 88 NONAME ; unsigned int CServiceProperty::GetSet(void) const
+	?ServiceMgr@RMTPFramework@@QBEAAVCMTPServiceMgr@@XZ @ 89 NONAME ; class CMTPServiceMgr & RMTPFramework::ServiceMgr(void) const
+	?FormatBase@CServiceFormat@@QBEIXZ @ 90 NONAME ; unsigned int CServiceFormat::FormatBase(void) const
+	?ServicePersistentGUID@CMTPServiceInfo@@QBEABVTMTPTypeUint128@@XZ @ 91 NONAME ABSENT ; class TMTPTypeUint128 const & CMTPServiceInfo::ServicePersistentGUID(void) const
+	?ServiceName@CMTPServiceInfo@@QBEABVTDesC16@@XZ @ 92 NONAME ; class TDesC16 const & CMTPServiceInfo::ServiceName(void) const
+	?ServiceType@CMTPServiceInfo@@QBEIXZ @ 93 NONAME ; unsigned int CMTPServiceInfo::ServiceType(void) const
+	?UsedServiceGUIDs@CMTPServiceInfo@@QBEABV?$RArray@VTMTPTypeUint128@@@@XZ @ 94 NONAME ABSENT ; class RArray<class TMTPTypeUint128> const & CMTPServiceInfo::UsedServiceGUIDs(void) const
+	?IsServiceFormatCode@CMTPServiceMgr@@QBEHK@Z @ 95 NONAME ; int CMTPServiceMgr::IsServiceFormatCode(unsigned long) const
+	?ServiceMethods@CMTPServiceInfo@@QBEABV?$RPointerArray@VCServiceMethod@@@@XZ @ 96 NONAME ; class RPointerArray<class CServiceMethod> const & CMTPServiceInfo::ServiceMethods(void) const
+	?ServiceGUID@CMTPServiceInfo@@QBEABVTMTPTypeUint128@@XZ @ 97 NONAME ABSENT ; class TMTPTypeUint128 const & CMTPServiceInfo::ServiceGUID(void) const
+	?IsSupportedService@CMTPServiceMgr@@QBEHI@Z @ 98 NONAME ; int CMTPServiceMgr::IsSupportedService(unsigned int) const
+	?FormFlag@CServiceProperty@@QBEIXZ @ 99 NONAME ; unsigned int CServiceProperty::FormFlag(void) const
+	?IsUsed@CServiceElementBase@@UAEHXZ @ 100 NONAME ; int CServiceElementBase::IsUsed(void)
+	?Code@CServiceElementBase@@UBEIXZ @ 101 NONAME ; unsigned int CServiceElementBase::Code(void) const
+	?DataBlockGUIDs@CMTPServiceInfo@@QBEABV?$RArray@VTMTPTypeUint128@@@@XZ @ 102 NONAME ABSENT ; class RArray<class TMTPTypeUint128> const & CMTPServiceInfo::DataBlockGUIDs(void) const
+	?Name@CServiceElementBase@@UBEABVTDesC16@@XZ @ 103 NONAME ; class TDesC16 const & CServiceElementBase::Name(void) const
+	?PKeyID@CServiceProperty@@QBEIXZ @ 104 NONAME ; unsigned int CServiceProperty::PKeyID(void) const
+	?GUID@CServiceElementBase@@UBEABVTMTPTypeUint128@@XZ @ 105 NONAME ABSENT ; class TMTPTypeUint128 const & CServiceElementBase::GUID(void) const
+	?DataType@CServiceProperty@@QBEIXZ @ 106 NONAME ; unsigned int CServiceProperty::DataType(void) const
+	?GetServiceIDs@CMTPServiceMgr@@QBEABV?$RArray@I@@XZ @ 107 NONAME ; class RArray<unsigned int> const & CMTPServiceMgr::GetServiceIDs(void) const
+	?ServiceEvents@CMTPServiceInfo@@QBEABV?$RPointerArray@VCServiceEvent@@@@XZ @ 108 NONAME ; class RPointerArray<class CServiceEvent> const & CMTPServiceInfo::ServiceEvents(void) const
+	?ServiceFormats@CMTPServiceInfo@@QBEABV?$RPointerArray@VCServiceFormat@@@@XZ @ 109 NONAME ; class RPointerArray<class CServiceFormat> const & CMTPServiceInfo::ServiceFormats(void) const
+	?ServiceID@CMTPServiceInfo@@QBEIXZ @ 110 NONAME ; unsigned int CMTPServiceInfo::ServiceID(void) const
+	?DataCodeGenerator@RMTPFramework@@QBEAAVCMTPDataCodeGenerator@@XZ @ 111 NONAME ; class CMTPDataCodeGenerator & RMTPFramework::DataCodeGenerator(void) const
+	?MIMEType1@CServiceFormat@@QBEABVTDesC16@@XZ @ 112 NONAME ; class TDesC16 const & CServiceFormat::MIMEType1(void) const
+	?ServiceProperties@CMTPServiceInfo@@QBEABV?$RPointerArray@VCServiceProperty@@@@XZ @ 113 NONAME ; class RPointerArray<class CServiceProperty> const & CMTPServiceInfo::ServiceProperties(void) const
+	?ServiceVersion@CMTPServiceInfo@@QBEIXZ @ 114 NONAME ; unsigned int CMTPServiceInfo::ServiceVersion(void) const
+	?ObjAssociateFormatCode@CServiceMethod@@QBEIXZ @ 115 NONAME ; unsigned int CServiceMethod::ObjAssociateFormatCode(void) const
+	?Namespace@CServiceProperty@@QBEABVTMTPTypeUint128@@XZ @ 116 NONAME ABSENT ; class TMTPTypeUint128 const & CServiceProperty::Namespace(void) const
+	?ServiceStorageID@CMTPServiceInfo@@QBEIXZ @ 117 NONAME ; unsigned int CMTPServiceInfo::ServiceStorageID(void) const
+	?ServiceInfo@CMTPServiceMgr@@QBEPAVCMTPServiceInfo@@I@Z @ 118 NONAME ; class CMTPServiceInfo * CMTPServiceMgr::ServiceInfo(unsigned int) const
+	?BaseServiceID@CMTPServiceInfo@@QBEIXZ @ 119 NONAME ; unsigned int CMTPServiceInfo::BaseServiceID(void) const
+	?IsSupportedService@CMTPServiceMgr@@QBEHABVTMTPTypeUint128@@@Z @ 120 NONAME ABSENT ; int CMTPServiceMgr::IsSupportedService(class TMTPTypeUint128 const &) const
+	?StartTransportL@CMTPConnectionMgr@@QAEXVTUid@@PBX@Z @ 121 NONAME ; void CMTPConnectionMgr::StartTransportL(class TUid, void const *)
+	?DataProviderByIndexL@CMTPDataProviderController@@QAEAAVCMTPDataProvider@@I@Z @ 122 NONAME ; class CMTPDataProvider & CMTPDataProviderController::DataProviderByIndexL(unsigned int)
+	?IsDataProviderLoaded@CMTPDataProviderController@@QBEHI@Z @ 123 NONAME ; int CMTPDataProviderController::IsDataProviderLoaded(unsigned int) const
+	?GetModifiedPuidsL@CMtpDeltaDataMgr@@QAEHHAAHAAVCMTPTypeArray@@@Z @ 124 NONAME ; int CMtpDeltaDataMgr::GetModifiedPuidsL(int, int &, class CMTPTypeArray &)
+	?UpdatePersistentIndexL@CMtpDeltaDataMgr@@QAEXHH@Z @ 125 NONAME ; void CMtpDeltaDataMgr::UpdatePersistentIndexL(int, int)
+	?GetDeletedPuidsL@CMtpDeltaDataMgr@@QAEHHAAHAAVCMTPTypeArray@@@Z @ 126 NONAME ; int CMtpDeltaDataMgr::GetDeletedPuidsL(int, int &, class CMTPTypeArray &)
+	?UpdateAnchorIdL@CMtpDeltaDataMgr@@QAEXHH@Z @ 127 NONAME ; void CMtpDeltaDataMgr::UpdateAnchorIdL(int, int)
+	?InsertAnchorIdL@CMtpDeltaDataMgr@@QAEXHH@Z @ 128 NONAME ; void CMtpDeltaDataMgr::InsertAnchorIdL(int, int)
+	?GetPersistentIndexL@CMtpDeltaDataMgr@@QAEHH@Z @ 129 NONAME ; int CMtpDeltaDataMgr::GetPersistentIndexL(int)
+	?CreateAnchorIdTableL@CMtpDeltaDataMgr@@QAEXXZ @ 130 NONAME ; void CMtpDeltaDataMgr::CreateAnchorIdTableL(void)
+	?CreateDeltaDataTableL@CMtpDeltaDataMgr@@QAEXXZ @ 131 NONAME ; void CMtpDeltaDataMgr::CreateDeltaDataTableL(void)
+	?GetChangedPuidsL@CMtpDeltaDataMgr@@QAEHHAAHAAVCMTPTypeArray@@1@Z @ 132 NONAME ; int CMtpDeltaDataMgr::GetChangedPuidsL(int, int &, class CMTPTypeArray &, class CMTPTypeArray &)
+	?ResetMTPDeltaDataTableL@CMtpDeltaDataMgr@@QAEXXZ @ 133 NONAME ; void CMtpDeltaDataMgr::ResetMTPDeltaDataTableL(void)
+	?GetAnchorIdL@CMtpDeltaDataMgr@@QAEHH@Z @ 134 NONAME ; int CMtpDeltaDataMgr::GetAnchorIdL(int)
+	?GetAddedPuidsL@CMtpDeltaDataMgr@@QAEHHAAHAAVCMTPTypeArray@@@Z @ 135 NONAME ; int CMtpDeltaDataMgr::GetAddedPuidsL(int, int &, class CMTPTypeArray &)
+	?NotifyDataProvidersL@CMTPDataProviderController@@QAEXIW4TMTPNotification@@PBX@Z @ 136 NONAME ; void CMTPDataProviderController::NotifyDataProvidersL(unsigned int, enum TMTPNotification, void const *)
+	?ServiceInfo@CMTPServiceMgr@@QBEPAVCMTPServiceInfo@@ABVTMTPTypeGuid@@@Z @ 137 NONAME ; class CMTPServiceInfo * CMTPServiceMgr::ServiceInfo(class TMTPTypeGuid const &) const
+	?DataBlockGUIDs@CMTPServiceInfo@@QBEABV?$RArray@VTMTPTypeGuid@@@@XZ @ 138 NONAME ; class RArray<class TMTPTypeGuid> const & CMTPServiceInfo::DataBlockGUIDs(void) const
+	?Namespace@CServiceProperty@@QBEABVTMTPTypeGuid@@XZ @ 139 NONAME ; class TMTPTypeGuid const & CServiceProperty::Namespace(void) const
+	?IsSupportedService@CMTPServiceMgr@@QBEHABVTMTPTypeGuid@@@Z @ 140 NONAME ; int CMTPServiceMgr::IsSupportedService(class TMTPTypeGuid const &) const
+	?ServiceGUID@CMTPServiceInfo@@QBEABVTMTPTypeGuid@@XZ @ 141 NONAME ; class TMTPTypeGuid const & CMTPServiceInfo::ServiceGUID(void) const
+	?UsedServiceGUIDs@CMTPServiceInfo@@QBEABV?$RArray@VTMTPTypeGuid@@@@XZ @ 142 NONAME ; class RArray<class TMTPTypeGuid> const & CMTPServiceInfo::UsedServiceGUIDs(void) const
+	?GUID@CServiceElementBase@@UBEABVTMTPTypeGuid@@XZ @ 143 NONAME ; class TMTPTypeGuid const & CServiceElementBase::GUID(void) const
+	?ServicePersistentGUID@CMTPServiceInfo@@QBEABVTMTPTypeGuid@@XZ @ 144 NONAME ; class TMTPTypeGuid const & CMTPServiceInfo::ServicePersistentGUID(void) const
+	?FileDpId@CMTPDataProviderController@@QAEHXZ @ 145 NONAME ; int CMTPDataProviderController::FileDpId(void)
+	?StopTransport@CMTPConnectionMgr@@QAEXVTUid@@H@Z @ 146 NONAME ; void CMTPConnectionMgr::StopTransport(class TUid, int)
+	?QueueTransportL@CMTPConnectionMgr@@QAEXVTUid@@PBX@Z @ 147 NONAME ; void CMTPConnectionMgr::QueueTransportL(class TUid, void const *)
+	?NeedEnumeratingPhase2@CMTPDataProviderController@@QBEHXZ @ 148 NONAME ; int CMTPDataProviderController::NeedEnumeratingPhase2(void) const
+	?SetNeedEnumeratingPhase2@CMTPDataProviderController@@QAEXH@Z @ 149 NONAME ; void CMTPDataProviderController::SetNeedEnumeratingPhase2(int)
+	?SetBTResumeParameter@CMTPConnectionMgr@@QAEXABVTBTDevAddr@@ABG@Z @ 150 NONAME ; void CMTPConnectionMgr::SetBTResumeParameter(class TBTDevAddr const &, unsigned short const &)
+	?IsReadWriteStorage@CMTPStorageMgr@@QBEHK@Z @ 151 NONAME ; int CMTPStorageMgr::IsReadWriteStorage(unsigned long) const
+

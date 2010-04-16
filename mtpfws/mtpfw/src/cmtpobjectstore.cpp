@@ -861,7 +861,7 @@ void CMTPObjectStore::InitializeDbL()
 	else
 		{
 		err = OpenDb(fullName);
-		if (iDatabase.IsDamaged())
+		if (err==KErrNone && iDatabase.IsDamaged())
 			{
 			err = iDatabase.Recover();
 			}
@@ -1208,7 +1208,7 @@ void CMTPObjectStore::EstablishDBSnapshotL(TUint32 aStorageId)
                 TFileName suid;
 				if (colliItem->iSuid == NULL)
 					{
-					if (!LocateByHandleL(colliItem->iObjHandleId))
+					if (LocateByHandleL(colliItem->iObjHandleId))
 					    {
 					    DbColReadStreamL(iBatched, EObjectStoreSUID, suid);
 					    

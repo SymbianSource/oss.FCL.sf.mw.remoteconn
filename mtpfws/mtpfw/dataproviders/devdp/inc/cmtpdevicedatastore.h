@@ -86,6 +86,9 @@ public:
 	void SetExtnDevicePropDp(MExtnDevicePropDp* aExtnDevicePropDp);
 	MExtnDevicePropDp* ExtnDevicePropDp();
 
+    TBool IsConnectMac();
+    void SetConnectMac(TBool aConnectMac);	
+	
 private: // Form CActive
 
     void DoCancel();
@@ -167,6 +170,8 @@ private: // Not owned.
     TUint*                          iPendingBatteryLevel;
     
     MExtnDevicePropDp*              iExtnDevicePropDp;
+
+    TBool                           iIsConnectMac; 
     };
    
 #endif // CMTPDEVICEDATASTORE_H

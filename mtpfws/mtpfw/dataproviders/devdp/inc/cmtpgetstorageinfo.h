@@ -76,6 +76,7 @@ private:
 	TDriveInfo					iDriveInfo;
 	TVolumeInfo 				iVolumeInfo;
 	RMTPFramework               iSingletons;
+	TBool						iIsCDrive;
 	};
 	
 #endif

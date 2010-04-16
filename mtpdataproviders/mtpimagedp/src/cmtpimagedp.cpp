@@ -97,10 +97,7 @@ void CMTPImageDataProvider::ConstructL()
     __FLOG_OPEN(KMTPSubsystem, KComponent);
     __FLOG(_L8(">> CMTPImageDataProvider::ConstructL"));
     
-    iPropertyMgr = CMTPImageDpObjectPropertyMgr::NewL(Framework(), *this);
     iThumbnailManager = CMTPImageDpThumbnailCreator::NewL(*this);
-    iMdeObserver = CMTPImageDpMdeObserver::NewL(Framework(), *this);
-    iMdeObserver->SubscribeForChangeNotificationL();
     iNewPicNotifier = CMTPImageDpNewPicturesNotifier::NewL();
     
     //Setup central repository connection
@@ -273,16 +270,26 @@ void CMTPImageDataProvider::StartObjectEnumerationL(TUint32 aStorageId, TBool /*
     {
     __FLOG(_L8(">> StartObjectEnumerationL"));
     
+    TBool isComplete = ETrue;
     if (aStorageId == KMTPStorageAll)
         {
         /*
          * framework notify data provider to enumerate
          * 
          */
+        if (iPropertyMgr == NULL)
+            {
+            iPropertyMgr = CMTPImageDpObjectPropertyMgr::NewL(Framework(), *this);
+            isComplete = EFalse;
+            }
+  
         iEnumerated = ETrue;
         }
 
-    NotifyEnumerationCompleteL(aStorageId, KErrNone);
+    if (isComplete)
+        {
+        NotifyEnumerationCompleteL(aStorageId, KErrNone);
+        }
     
     __FLOG(_L8("<< StartObjectEnumerationL"));
     }
@@ -398,20 +405,20 @@ void CMTPImageDataProvider::SupportedL(TMTPSupportCategory aCategory, CDesCArray
         /*
          * bmp files
          */
-//        _LIT(KFormatExtensionBmp, "0x3804:bmp::3");
-//        aStrings.AppendL(KFormatExtensionBmp);
+        _LIT(KFormatExtensionBmp, "0x3804:bmp::3");
+        aStrings.AppendL(KFormatExtensionBmp);
         
         /*
          * gif files
          */
-//        _LIT(KFormatExtensionGif, "0x3807:gif::3");
-//        aStrings.AppendL(KFormatExtensionGif);
+        _LIT(KFormatExtensionGif, "0x3807:gif::3");
+        aStrings.AppendL(KFormatExtensionGif);
         
         /*
          * png files
          */
-//        _LIT(KFormatExtensionPng, "0x380B:png::3");
-//        aStrings.AppendL(KFormatExtensionPng);
+        _LIT(KFormatExtensionPng, "0x380B:png::3");
+        aStrings.AppendL(KFormatExtensionPng);
         
         /*
          * tif, tiff files
@@ -768,3 +775,18 @@ void CMTPImageDataProvider::DecreaseNewPictures(TInt aCount)
     
     __FLOG(_L8("<< DecreaseNewPictures "));    
     }
+
+void CMTPImageDataProvider::HandleMdeSessionCompleteL(TInt aError)
+    {
+    __FLOG(_L8(">> HandleMdeSessionComplete"));    
+
+    NotifyEnumerationCompleteL(KMTPStorageAll, KErrNone);
+    if (aError == KErrNone)
+        {
+        iMdeObserver = CMTPImageDpMdeObserver::NewL(Framework(), *this);
+        iMdeObserver->SubscribeForChangeNotificationL();
+        }
+    
+    __FLOG(_L8("<< HandleMdeSessionComplete "));    
+    }
+

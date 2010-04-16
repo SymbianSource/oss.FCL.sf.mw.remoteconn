@@ -33,6 +33,7 @@
 #include "mtpdevicedpconst.h"
 #include "mtpdevicedpprocessor.h"
 #include "mtpdevdppanic.h"
+#include "cmtpconnectionmgr.h"
 
 #include "cmtpextndevdp.h"
 
@@ -79,6 +80,8 @@ CMTPDeviceDataProvider::~CMTPDeviceDataProvider()
     iExtnPluginMapArray.Close();
 	iEvent.Reset();
 
+    delete iDeviceInfoTimer;
+    iFrameWork.Close();
     __FLOG(_L8("~CMTPDeviceDataProvider - Exit"));
     __FLOG_CLOSE;
     }
@@ -124,6 +127,7 @@ void CMTPDeviceDataProvider::ProcessNotificationL(TMTPNotification aNotification
 void CMTPDeviceDataProvider::ProcessRequestPhaseL(TMTPTransactionPhase aPhase, const TMTPTypeRequest& aRequest, MMTPConnection& aConnection)
     {
     __FLOG(_L8("ProcessRequestPhaseL - Entry"));
+    TUint16 opCode( aRequest.Uint16( TMTPTypeRequest::ERequestOperationCode ) );    
     TInt index = LocateRequestProcessorL(aRequest, aConnection);
     __ASSERT_DEBUG(index != KErrNotFound, Panic(EMTPDevDpNoMatchingProcessor));
     MMTPRequestProcessor* processor = iActiveProcessors[index];
@@ -140,6 +144,49 @@ void CMTPDeviceDataProvider::ProcessRequestPhaseL(TMTPTransactionPhase aPhase, c
 	    iActiveProcessors.Remove(index);
 	    }
     iActiveProcessor = -1;
+    
+    __FLOG_VA((_L8("opCode = 0x%x"), opCode));
+    __FLOG_VA((_L8("TranPort UID = 0x%x"), iFrameWork.ConnectionMgr().TransportUid().iUid));
+    __FLOG_VA((_L8("CommandState = 0x%x"), iCommandState));    
+    const static TInt32 KMTPUsbTransportUid = 0x102827B2;
+
+    if((EMTPOpCodeGetDeviceInfo == opCode)&&(KMTPUsbTransportUid == iFrameWork.ConnectionMgr().TransportUid().iUid))
+        {
+        __FLOG(_L8("EMTPOpCodeGetDeviceInfo == opCode"));
+        //If GetDeviceInfo comes and there is no OpenSession before, the timer will start. And tread the host as Mac. 
+        //Only the first GetDeviceInfo in one session will start the timer.
+        if((EIdle == iCommandState)&&(NULL == iDeviceInfoTimer))
+            {
+            __FLOG(_L8("EMTPOpCodeGetDeviceInfo == opCode, start timer"));
+            iCommandState = EStartDeviceInfoTimer;
+            iDeviceInfoTimer = CMTPDeviceInfoTimer::NewL(*this);
+            iDeviceInfoTimer->Start();
+            }
+        else
+            {
+            __FLOG(_L8("EMTPOpCodeGetDeviceInfo == opCode, Not start timer"));            
+            }
+        }
+    else
+       {       
+       __FLOG(_L8("EMTPOpCodeGetDeviceInfo != opCode"));
+       if((EMTPOpCodeOpenSession == opCode)&&(EIdle == iCommandState))
+            {
+            __FLOG(_L8("EMTPOpCodeGetDeviceInfo == opCode, set CommandState to be EOpenSession"));
+            iCommandState = EOpenSession;
+            }
+       
+       if(iDeviceInfoTimer)
+           {
+           __FLOG(_L8("iDeviceInfoTimer != NULL, stop timer"));
+           delete iDeviceInfoTimer;
+           iDeviceInfoTimer = NULL;
+           }
+       else
+           {
+           __FLOG(_L8("iDeviceInfoTimer == NULL, NOT stop timer"));            
+           }
+       }    
     __FLOG(_L8("ProcessRequestPhaseL - Exit"));
     }
 
@@ -328,7 +375,9 @@ Constructor.
 CMTPDeviceDataProvider::CMTPDeviceDataProvider(TAny* aParams) :
     CMTPDataProviderPlugin(aParams),
     iActiveProcessors(KMTPDeviceDpSessionGranularity),
-    iActiveProcessor(-1)
+    iActiveProcessor(-1),
+    iDeviceInfoTimer(NULL),
+    iCommandState(EIdle)
     {
 
     }
@@ -538,7 +587,7 @@ void CMTPDeviceDataProvider::ConstructL()
 		}
 
     iEnumerator = CMTPFSEnumerator::NewL(Framework(), iDpSingletons.ExclusionMgrL(), *this, KProcessLimit);
-    
+    iFrameWork.OpenL();
     
     __FLOG(_L8("ConstructL - Exit"));
 
@@ -665,6 +714,17 @@ void CMTPDeviceDataProvider::SessionClosedL(const TMTPNotificationParamsSessionC
     		} 
 		}
         }
+    __FLOG_VA((_L8("current state is =%d"), iCommandState));    
+    if(iCommandState != EIdle)
+        {
+        if(iDeviceInfoTimer)
+            {
+            delete iDeviceInfoTimer;
+            iDeviceInfoTimer = NULL;
+            }
+        iCommandState = EIdle;
+        iDevDpSingletons.DeviceDataStore().SetConnectMac(EFalse);
+        }
     __FLOG(_L8("SessionClosedL - Exit"));
     }
 
@@ -683,3 +743,94 @@ void CMTPDeviceDataProvider::SessionOpenedL(const TMTPNotificationParamsSessionC
     __FLOG(_L8("SessionOpenedL - Exit"));
     }
 
+void CMTPDeviceDataProvider::SetConnectMac()
+    {
+    __FLOG(_L8("SetConnectMac - Entry"));   
+    iDevDpSingletons.DeviceDataStore().SetConnectMac(ETrue);
+    __FLOG_VA((_L8("previous state = %d, current is ESetIsMac"), iCommandState));    
+    iCommandState = ESetIsMac;
+    __FLOG(_L8("SetConnectMac - Exit"));     
+    }
+
+/**
+CMTPDeviceInfoTimer factory method. 
+@return A pointer to a new CMTPDeviceInfoTimer instance. Ownership IS transfered.
+@leave One of the system wide error codes if a processing failure occurs.
+*/
+CMTPDeviceInfoTimer* CMTPDeviceInfoTimer::NewL(CMTPDeviceDataProvider& aDeviceProvider)
+    {
+    CMTPDeviceInfoTimer* self = new (ELeave) CMTPDeviceInfoTimer(aDeviceProvider);
+    CleanupStack::PushL(self);
+    self->ConstructL();
+    CleanupStack::Pop(self);
+    return self;
+    }
+    
+/**
+Destructor.
+*/
+CMTPDeviceInfoTimer::~CMTPDeviceInfoTimer()
+    {
+    Cancel();
+    iLdd.Close();
+    __FLOG_CLOSE;    
+    }
+    
+/**
+Starts the deviceinfo timer.
+*/
+// DeviceInfo delay, in microseconds. 5s
+const TUint KMTPDeviceInfoDelay = (1000000 * 5);
+void CMTPDeviceInfoTimer::Start()
+    {
+    __FLOG(_L8("CMTPDeviceInfoTimer::Start - Entry"));    
+
+    After(KMTPDeviceInfoDelay);
+    iState = EStartTimer;
+    __FLOG(_L8("CMTPDeviceInfoTimer::Start - Exit"));     
+    }
+    
+void CMTPDeviceInfoTimer::RunL()
+    {
+    __FLOG(_L8("CMTPDeviceInfoTimer::RunL - Entry"));
+    __FLOG_VA((_L8("iStatus == %d"), iStatus.Int()));    
+
+    switch(iState)
+        {
+        case EStartTimer:
+            __FLOG(_L8("CMTPDeviceInfoTimer::RunL - EStartTimer"));
+            // Open the USB device interface.
+            User::LeaveIfError(iLdd.Open(0));
+            iLdd.ReEnumerate(iStatus);
+            iDeviceProvider.SetConnectMac();
+            iState = EUSBReEnumerate;
+            SetActive();
+            break;
+        case EUSBReEnumerate:          
+            __FLOG(_L8("CMTPDeviceInfoTimer::RunL - EUSBReEnumerate"));            
+            break;
+        default:
+            __FLOG(_L8("CMTPDeviceInfoTimer::RunL - default")); 
+            break;
+        }
+    __FLOG(_L8("CMTPDeviceInfoTimer::RunL - Exit"));    
+    }
+    
+/** 
+Constructor
+*/
+CMTPDeviceInfoTimer::CMTPDeviceInfoTimer(CMTPDeviceDataProvider& aDeviceProvider) : 
+    CTimer(EPriorityNormal),iDeviceProvider(aDeviceProvider),iState(EIdle)
+    {
+    
+    }    
+
+/**
+Second phase constructor.
+*/    
+void CMTPDeviceInfoTimer::ConstructL()
+    {
+    __FLOG_OPEN(KMTPSubsystem, KComponent);
+    CTimer::ConstructL();
+    CActiveScheduler::Add(this);
+    }

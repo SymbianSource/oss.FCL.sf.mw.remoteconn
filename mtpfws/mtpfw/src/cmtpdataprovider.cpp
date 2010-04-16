@@ -795,7 +795,9 @@ void CMTPDataProvider::SendErrorResponseL(TInt aError)
     case KMTPDataTypeInvalid:
         code = EMTPRespCodeInvalidDataset;
         break;
-        
+    case KErrDiskFull:
+        code = EMTPRespCodeStoreFull;
+        break;
     default:
         code = EMTPRespCodeGeneralError;
         break;

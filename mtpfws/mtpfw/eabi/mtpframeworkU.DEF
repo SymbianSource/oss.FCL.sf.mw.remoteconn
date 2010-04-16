@@ -1,0 +1,235 @@
+EXPORTS
+	_ZN13CMTPObjectMgr25RemoveObjectsByStorageIdLEm @ 1 NONAME
+	_ZN13RMTPFramework5CloseEv @ 2 NONAME
+	_ZN13RMTPFramework5OpenLEv @ 3 NONAME
+	_ZN13RMTPFramework6OpenLCEv @ 4 NONAME
+	_ZN13RMTPFrameworkC1Ev @ 5 NONAME
+	_ZN13RMTPFrameworkC2Ev @ 6 NONAME
+	_ZN14CMTPConnection14SessionClosedLEm @ 7 NONAME
+	_ZN14CMTPConnection14SessionOpenedLEm @ 8 NONAME
+	_ZN14CMTPStorageMgr14SetFrameworkIdEj @ 9 NONAME
+	_ZN14CMTPStorageMgr16SetDriveMappingLE12TDriveNumberm @ 10 NONAME
+	_ZN14CMTPStorageMgr19LogicalStorageOwnerEm @ 11 NONAME
+	_ZN14CMTPStorageMgr19SetDefaultStorageIdEm @ 12 NONAME
+	_ZN14CMTPStorageMgr20LogicalStorageNumberEm @ 13 NONAME
+	_ZN14CMTPStorageMgr20PhysicalStorageOwnerEm @ 14 NONAME
+	_ZN14CMTPStorageMgr21PhysicalStorageNumberEm @ 15 NONAME
+	_ZN14CMTPStorageMgr25AllocateLogicalStorageIdLEj12TDriveNumberRK19CMTPStorageMetaData @ 16 NONAME
+	_ZN14CMTPStorageMgr25AllocateLogicalStorageIdLEjmRK19CMTPStorageMetaData @ 17 NONAME
+	_ZN14CMTPStorageMgr26AllocatePhysicalStorageIdLEjRK19CMTPStorageMetaData @ 18 NONAME
+	_ZN14CMTPStorageMgr26DeallocateLogicalStorageIdEjm @ 19 NONAME
+	_ZN14CMTPStorageMgr27DeallocateLogicalStorageIdsEjm @ 20 NONAME
+	_ZN14CMTPStorageMgr27DeallocatePhysicalStorageIdEjm @ 21 NONAME
+	_ZN14CMTPStorageMgr4NewLEv @ 22 NONAME
+	_ZN14CMTPStorageMgrD0Ev @ 23 NONAME
+	_ZN14CMTPStorageMgrD1Ev @ 24 NONAME
+	_ZN14CMTPStorageMgrD2Ev @ 25 NONAME
+	_ZN16CMTPDataProvider20ExecuteProxyRequestLERK15TMTPTypeRequestR14MMTPConnectionR20MMTPTransactionProxy @ 26 NONAME
+	_ZN16CMTPParserRouter10ConfigureLEv @ 27 NONAME
+	_ZN16CMTPParserRouter18TRoutingParameters5ResetEv @ 28 NONAME
+	_ZN16CMTPParserRouter18TRoutingParameters8SetParamENS0_14TParameterTypeEj @ 29 NONAME
+	_ZN16CMTPParserRouter18TRoutingParametersC1ERK15TMTPTypeRequestR14MMTPConnection @ 30 NONAME
+	_ZN16CMTPParserRouter18TRoutingParametersC2ERK15TMTPTypeRequestR14MMTPConnection @ 31 NONAME
+	_ZN17CMTPConnectionMgr13StopTransportE4TUid @ 32 NONAME
+	_ZN17CMTPConnectionMgr14StopTransportsEv @ 33 NONAME
+	_ZN17CMTPConnectionMgr15StartTransportLE4TUid @ 34 NONAME
+	_ZN26CMTPDataProviderController10DeviceDpIdEv @ 35 NONAME
+	_ZN26CMTPDataProviderController13DataProviderLEj @ 36 NONAME
+	_ZN26CMTPDataProviderController18LoadDataProvidersLEv @ 37 NONAME
+	_ZN26CMTPDataProviderController19UnloadDataProvidersEv @ 38 NONAME
+	_ZN26CMTPDataProviderController20NotifyDataProvidersLE16TMTPNotificationPKv @ 39 NONAME
+	_ZN26CMTPDataProviderController4DpIdEj @ 40 NONAME
+	_ZN26CMTPDataProviderController5CountEv @ 41 NONAME
+	_ZN26CMTPDataProviderController9ProxyDpIdEv @ 42 NONAME
+	_ZNK13RMTPFramework10StorageMgrEv @ 43 NONAME
+	_ZNK13RMTPFramework12DpControllerEv @ 44 NONAME
+	_ZNK13RMTPFramework12ReferenceMgrEv @ 45 NONAME
+	_ZNK13RMTPFramework13ConnectionMgrEv @ 46 NONAME
+	_ZNK13RMTPFramework15FrameworkConfigEv @ 47 NONAME
+	_ZNK13RMTPFramework2FsEv @ 48 NONAME
+	_ZNK13RMTPFramework6RouterEv @ 49 NONAME
+	_ZNK13RMTPFramework9ObjectMgrEv @ 50 NONAME
+	_ZNK14CMTPStorageMgr11DriveNumberEm @ 51 NONAME
+	_ZNK14CMTPStorageMgr14ValidStorageIdEm @ 52 NONAME
+	_ZNK14CMTPStorageMgr16DefaultStorageIdEv @ 53 NONAME
+	_ZNK14CMTPStorageMgr16LogicalStorageIdERK7TDesC16 @ 54 NONAME
+	_ZNK14CMTPStorageMgr16LogicalStorageIdEm @ 55 NONAME
+	_ZNK14CMTPStorageMgr17PhysicalStorageIdE12TDriveNumber @ 56 NONAME
+	_ZNK14CMTPStorageMgr17PhysicalStorageIdEm @ 57 NONAME
+	_ZNK14CMTPStorageMgr18FrameworkStorageIdE12TDriveNumber @ 58 NONAME
+	_ZNK14CMTPStorageMgr19GetAvailableDrivesLER6RArrayI12TDriveNumberE @ 59 NONAME
+	_ZNK14CMTPStorageMgr19GetLogicalStoragesLERK25TMTPStorageMgrQueryParamsR13RPointerArrayIK19CMTPStorageMetaDataE @ 60 NONAME
+	_ZNK14CMTPStorageMgr20GetPhysicalStoragesLERK25TMTPStorageMgrQueryParamsR13RPointerArrayIK19CMTPStorageMetaDataE @ 61 NONAME
+	_ZNK14CMTPStorageMgr8StorageLEm @ 62 NONAME
+	_ZNK14CMTPStorageMgr9StorageIdEmm @ 63 NONAME
+	_ZNK14CMTPStorageMgr9VolumeIdLEjmRK7TDesC16 @ 64 NONAME
+	_ZNK16CMTPDataProvider14SupportedCodesE19TMTPSupportCategory @ 65 NONAME
+	_ZNK16CMTPDataProvider16EnumerationStateEv @ 66 NONAME
+	_ZNK16CMTPDataProvider6PluginEv @ 67 NONAME
+	_ZNK16CMTPDataProvider9SupportedE19TMTPSupportCategoryj @ 68 NONAME
+	_ZNK16CMTPParserRouter18TRoutingParameters10ConnectionEv @ 69 NONAME
+	_ZNK16CMTPParserRouter18TRoutingParameters5ParamENS0_14TParameterTypeE @ 70 NONAME
+	_ZNK16CMTPParserRouter18TRoutingParameters7RequestEv @ 71 NONAME
+	_ZNK16CMTPParserRouter19OperationSupportedLEt @ 72 NONAME
+	_ZNK16CMTPParserRouter22ParseOperationRequestLERNS_18TRoutingParametersE @ 73 NONAME
+	_ZNK16CMTPParserRouter22RouteOperationRequestLERKNS_18TRoutingParametersER6RArrayIjE @ 74 NONAME
+	_ZNK16CMTPParserRouter23RouteRequestRegisteredLERK15TMTPTypeRequestR14MMTPConnection @ 75 NONAME
+	_ZNK17CMTPConnectionMgr11ConnectionLEj @ 76 NONAME
+	_ZNK17CMTPConnectionMgr14TransportCountEv @ 77 NONAME
+	_ZNK19CMTPFrameworkConfig6ValueLEN19MMTPFrameworkConfig10TParameterE @ 78 NONAME
+	_ZNK19CMTPFrameworkConfig9GetValueLEN19MMTPFrameworkConfig10TParameterER6RArrayIjE @ 79 NONAME
+	_ZNK19CMTPFrameworkConfig9GetValueLEN19MMTPFrameworkConfig10TParameterER6TDes16 @ 80 NONAME
+	_ZNK19CMTPFrameworkConfig9GetValueLEN19MMTPFrameworkConfig10TParameterERi @ 81 NONAME
+	_ZNK19CMTPFrameworkConfig9GetValueLEN19MMTPFrameworkConfig10TParameterERj @ 82 NONAME
+	_ZTI11CMTPPuidMgr @ 83 NONAME ABSENT ; #<TI>#
+	_ZTI11CMTPSession @ 84 NONAME ; #<TI>#
+	_ZTI11CMTPSuidMap @ 85 NONAME ABSENT ; #<TI>#
+	_ZTI13CMTPObjectMgr @ 86 NONAME ; #<TI>#
+	_ZTI14CMTPConnection @ 87 NONAME ; #<TI>#
+	_ZTI14CMTPStorageMgr @ 88 NONAME ; #<TI>#
+	_ZTI15CMTPObjectStore @ 89 NONAME ; #<TI>#
+	_ZTI16CMTPDataProvider @ 90 NONAME ; #<TI>#
+	_ZTI16CMTPParserRouter @ 91 NONAME ; #<TI>#
+	_ZTI16CMTPReferenceMgr @ 92 NONAME ; #<TI>#
+	_ZTI17CMTPConnectionMgr @ 93 NONAME ; #<TI>#
+	_ZTI19CMTPFrameworkConfig @ 94 NONAME ; #<TI>#
+	_ZTI19CMTPHandleAllocator @ 95 NONAME ; #<TI>#
+	_ZTI22CMTPDataProviderConfig @ 96 NONAME ; #<TI>#
+	_ZTI26CMTPDataProviderController @ 97 NONAME ; #<TI>#
+	_ZTIN13RMTPFramework11CSingletonsE @ 98 NONAME ; #<TI>#
+	_ZTIN16CMTPDataProvider15CSupportedCodesE @ 99 NONAME ; #<TI>#
+	_ZTIN16CMTPParserRouter4CMapE @ 100 NONAME ; #<TI>#
+	_ZTV11CMTPPuidMgr @ 101 NONAME ABSENT ; #<VT>#
+	_ZTV11CMTPSession @ 102 NONAME ; #<VT>#
+	_ZTV11CMTPSuidMap @ 103 NONAME ABSENT ; #<VT>#
+	_ZTV13CMTPObjectMgr @ 104 NONAME ; #<VT>#
+	_ZTV14CMTPConnection @ 105 NONAME ; #<VT>#
+	_ZTV14CMTPStorageMgr @ 106 NONAME ; #<VT>#
+	_ZTV15CMTPObjectStore @ 107 NONAME ; #<VT>#
+	_ZTV16CMTPDataProvider @ 108 NONAME ; #<VT>#
+	_ZTV16CMTPParserRouter @ 109 NONAME ; #<VT>#
+	_ZTV16CMTPReferenceMgr @ 110 NONAME ; #<VT>#
+	_ZTV17CMTPConnectionMgr @ 111 NONAME ; #<VT>#
+	_ZTV19CMTPFrameworkConfig @ 112 NONAME ; #<VT>#
+	_ZTV19CMTPHandleAllocator @ 113 NONAME ; #<VT>#
+	_ZTV22CMTPDataProviderConfig @ 114 NONAME ; #<VT>#
+	_ZTV26CMTPDataProviderController @ 115 NONAME ; #<VT>#
+	_ZTVN13RMTPFramework11CSingletonsE @ 116 NONAME ; #<VT>#
+	_ZTVN16CMTPDataProvider15CSupportedCodesE @ 117 NONAME ; #<VT>#
+	_ZTVN16CMTPParserRouter4CMapE @ 118 NONAME ; #<VT>#
+	_ZThn4_N14CMTPStorageMgr25AllocateLogicalStorageIdLEj12TDriveNumberRK19CMTPStorageMetaData @ 119 NONAME ; #<thunk>#
+	_ZThn4_N14CMTPStorageMgr25AllocateLogicalStorageIdLEjmRK19CMTPStorageMetaData @ 120 NONAME ; #<thunk>#
+	_ZThn4_N14CMTPStorageMgr26AllocatePhysicalStorageIdLEjRK19CMTPStorageMetaData @ 121 NONAME ; #<thunk>#
+	_ZThn4_N14CMTPStorageMgr26DeallocateLogicalStorageIdEjm @ 122 NONAME ; #<thunk>#
+	_ZThn4_N14CMTPStorageMgr27DeallocateLogicalStorageIdsEjm @ 123 NONAME ; #<thunk>#
+	_ZThn4_N14CMTPStorageMgr27DeallocatePhysicalStorageIdEjm @ 124 NONAME ; #<thunk>#
+	_ZThn4_NK14CMTPStorageMgr11DriveNumberEm @ 125 NONAME ; #<thunk>#
+	_ZThn4_NK14CMTPStorageMgr14ValidStorageIdEm @ 126 NONAME ; #<thunk>#
+	_ZThn4_NK14CMTPStorageMgr16DefaultStorageIdEv @ 127 NONAME ; #<thunk>#
+	_ZThn4_NK14CMTPStorageMgr16LogicalStorageIdERK7TDesC16 @ 128 NONAME ; #<thunk>#
+	_ZThn4_NK14CMTPStorageMgr16LogicalStorageIdEm @ 129 NONAME ; #<thunk>#
+	_ZThn4_NK14CMTPStorageMgr17PhysicalStorageIdE12TDriveNumber @ 130 NONAME ; #<thunk>#
+	_ZThn4_NK14CMTPStorageMgr17PhysicalStorageIdEm @ 131 NONAME ; #<thunk>#
+	_ZThn4_NK14CMTPStorageMgr18FrameworkStorageIdE12TDriveNumber @ 132 NONAME ; #<thunk>#
+	_ZThn4_NK14CMTPStorageMgr19GetAvailableDrivesLER6RArrayI12TDriveNumberE @ 133 NONAME ; #<thunk>#
+	_ZThn4_NK14CMTPStorageMgr19GetLogicalStoragesLERK25TMTPStorageMgrQueryParamsR13RPointerArrayIK19CMTPStorageMetaDataE @ 134 NONAME ; #<thunk>#
+	_ZThn4_NK14CMTPStorageMgr20GetPhysicalStoragesLERK25TMTPStorageMgrQueryParamsR13RPointerArrayIK19CMTPStorageMetaDataE @ 135 NONAME ; #<thunk>#
+	_ZThn4_NK14CMTPStorageMgr8StorageLEm @ 136 NONAME ; #<thunk>#
+	_ZThn4_NK14CMTPStorageMgr9StorageIdEmm @ 137 NONAME ; #<thunk>#
+	_ZThn4_NK14CMTPStorageMgr9VolumeIdLEjmRK7TDesC16 @ 138 NONAME ; #<thunk>#
+	_ZThn4_NK19CMTPFrameworkConfig6ValueLEN19MMTPFrameworkConfig10TParameterE @ 139 NONAME ; #<thunk>#
+	_ZThn4_NK19CMTPFrameworkConfig9GetValueLEN19MMTPFrameworkConfig10TParameterER6RArrayIjE @ 140 NONAME ; #<thunk>#
+	_ZThn4_NK19CMTPFrameworkConfig9GetValueLEN19MMTPFrameworkConfig10TParameterER6TDes16 @ 141 NONAME ; #<thunk>#
+	_ZThn4_NK19CMTPFrameworkConfig9GetValueLEN19MMTPFrameworkConfig10TParameterERi @ 142 NONAME ; #<thunk>#
+	_ZThn4_NK19CMTPFrameworkConfig9GetValueLEN19MMTPFrameworkConfig10TParameterERj @ 143 NONAME ; #<thunk>#
+	_ZN26CMTPDataProviderController14EnumerateStateEv @ 144 NONAME
+	_ZNK14CMTPConnection20GetDataReceiveResultEv @ 145 NONAME
+	_ZTI13CMTPDPIDStore @ 146 NONAME ; #<TI>#
+	_ZTI8CDummyDp @ 147 NONAME ; #<TI>#
+	_ZTV13CMTPDPIDStore @ 148 NONAME ; #<VT>#
+	_ZTV8CDummyDp @ 149 NONAME ; #<VT>#
+	_ZN17CMTPConnectionMgr12TransportUidEv @ 150 NONAME
+	_ZN17CMTPConnectionMgr12SetClientSIdE4TUid @ 151 NONAME
+	_ZN17CMTPConnectionMgr9ClientSIdEv @ 152 NONAME
+	_ZThn4_N17CMTPConnectionMgr9ClientSIdEv @ 153 NONAME
+	_ZN26CMTPDataProviderController26WaitForEnumerationCompleteEv @ 154 NONAME
+	_ZNK16CMTPDataProvider17ImplementationUidEv @ 155 NONAME
+	_ZTI14CMTPPkgIDStore @ 156 NONAME
+	_ZTV14CMTPPkgIDStore @ 157 NONAME
+	_ZN19CServiceElementBase6IsUsedEv @ 158 NONAME
+	_ZN19CServiceElementBase7SetCodeEj @ 159 NONAME
+	_ZNK13RMTPFramework10ServiceMgrEv @ 160 NONAME
+	_ZNK13RMTPFramework17DataCodeGeneratorEv @ 161 NONAME
+	_ZNK14CMTPServiceMgr11ServiceInfoERK15TMTPTypeUint128 @ 162 NONAME ABSENT
+	_ZNK14CMTPServiceMgr11ServiceInfoEj @ 163 NONAME
+	_ZNK14CMTPServiceMgr13GetServiceIDsEv @ 164 NONAME
+	_ZNK14CMTPServiceMgr18IsSupportedServiceERK15TMTPTypeUint128 @ 165 NONAME ABSENT
+	_ZNK14CMTPServiceMgr18IsSupportedServiceEj @ 166 NONAME
+	_ZNK14CMTPServiceMgr19IsServiceFormatCodeEm @ 167 NONAME
+	_ZNK14CServiceFormat10FormatBaseEv @ 168 NONAME
+	_ZNK14CServiceFormat9MIMEType1Ev @ 169 NONAME
+	_ZNK14CServiceMethod22ObjAssociateFormatCodeEv @ 170 NONAME
+	_ZNK15CMTPServiceInfo11ServiceGUIDEv @ 171 NONAME
+	_ZNK15CMTPServiceInfo11ServiceNameEv @ 172 NONAME
+	_ZNK15CMTPServiceInfo11ServiceTypeEv @ 173 NONAME
+	_ZNK15CMTPServiceInfo13BaseServiceIDEv @ 174 NONAME
+	_ZNK15CMTPServiceInfo13ServiceEventsEv @ 175 NONAME
+	_ZNK15CMTPServiceInfo14DataBlockGUIDsEv @ 176 NONAME
+	_ZNK15CMTPServiceInfo14ServiceFormatsEv @ 177 NONAME
+	_ZNK15CMTPServiceInfo14ServiceMethodsEv @ 178 NONAME
+	_ZNK15CMTPServiceInfo14ServiceVersionEv @ 179 NONAME
+	_ZNK15CMTPServiceInfo16ServiceStorageIDEv @ 180 NONAME
+	_ZNK15CMTPServiceInfo16UsedServiceGUIDsEv @ 181 NONAME
+	_ZNK15CMTPServiceInfo17ServicePropertiesEv @ 182 NONAME
+	_ZNK15CMTPServiceInfo21ServicePersistentGUIDEv @ 183 NONAME
+	_ZNK15CMTPServiceInfo9ServiceIDEv @ 184 NONAME
+	_ZNK16CServiceProperty6GetSetEv @ 185 NONAME
+	_ZNK16CServiceProperty6PKeyIDEv @ 186 NONAME
+	_ZNK16CServiceProperty8DataTypeEv @ 187 NONAME
+	_ZNK16CServiceProperty8FormFlagEv @ 188 NONAME
+	_ZNK16CServiceProperty9NamespaceEv @ 189 NONAME
+	_ZNK19CServiceElementBase4CodeEv @ 190 NONAME
+	_ZNK19CServiceElementBase4GUIDEv @ 191 NONAME
+	_ZNK19CServiceElementBase4NameEv @ 192 NONAME
+	_ZTI14CMTPServiceMgr @ 193 NONAME
+	_ZTI14CServiceFormat @ 194 NONAME
+	_ZTI15CMTPServiceInfo @ 195 NONAME
+	_ZTI17CMTPServiceConfig @ 196 NONAME
+	_ZTI19CServiceElementBase @ 197 NONAME
+	_ZTI21CMTPDataCodeGenerator @ 198 NONAME
+	_ZTV14CMTPServiceMgr @ 199 NONAME
+	_ZTV14CServiceFormat @ 200 NONAME
+	_ZTV15CMTPServiceInfo @ 201 NONAME
+	_ZTV17CMTPServiceConfig @ 202 NONAME
+	_ZTV19CServiceElementBase @ 203 NONAME
+	_ZTV21CMTPDataCodeGenerator @ 204 NONAME
+	_ZN17CMTPConnectionMgr15StartTransportLE4TUidPKv @ 205 NONAME
+	_ZN26CMTPDataProviderController20DataProviderByIndexLEj @ 206 NONAME
+	_ZNK26CMTPDataProviderController20IsDataProviderLoadedEj @ 207 NONAME
+	_ZN16CMtpDeltaDataMgr12GetAnchorIdLEi @ 208 NONAME
+	_ZN16CMtpDeltaDataMgr14GetAddedPuidsLEiRiR13CMTPTypeArray @ 209 NONAME
+	_ZN16CMtpDeltaDataMgr15InsertAnchorIdLEii @ 210 NONAME
+	_ZN16CMtpDeltaDataMgr15UpdateAnchorIdLEii @ 211 NONAME
+	_ZN16CMtpDeltaDataMgr16GetChangedPuidsLEiRiR13CMTPTypeArrayS2_ @ 212 NONAME
+	_ZN16CMtpDeltaDataMgr16GetDeletedPuidsLEiRiR13CMTPTypeArray @ 213 NONAME
+	_ZN16CMtpDeltaDataMgr17GetModifiedPuidsLEiRiR13CMTPTypeArray @ 214 NONAME
+	_ZN16CMtpDeltaDataMgr19GetPersistentIndexLEi @ 215 NONAME
+	_ZN16CMtpDeltaDataMgr20CreateAnchorIdTableLEv @ 216 NONAME
+	_ZN16CMtpDeltaDataMgr21CreateDeltaDataTableLEv @ 217 NONAME
+	_ZN16CMtpDeltaDataMgr22UpdatePersistentIndexLEii @ 218 NONAME
+	_ZN16CMtpDeltaDataMgr23ResetMTPDeltaDataTableLEv @ 219 NONAME
+	_ZTI16CMtpDeltaDataMgr @ 220 NONAME
+	_ZTV16CMtpDeltaDataMgr @ 221 NONAME
+	_ZTIN19CMTPHandleAllocator14CDPHandleCacheE @ 222 NONAME
+	_ZTVN19CMTPHandleAllocator14CDPHandleCacheE @ 223 NONAME
+	_ZN26CMTPDataProviderController20NotifyDataProvidersLEj16TMTPNotificationPKv @ 224 NONAME
+	_ZNK14CMTPServiceMgr11ServiceInfoERK12TMTPTypeGuid @ 225 NONAME
+	_ZNK14CMTPServiceMgr18IsSupportedServiceERK12TMTPTypeGuid @ 226 NONAME
+	_ZN26CMTPDataProviderController8FileDpIdEv @ 227 NONAME
+	_ZN17CMTPConnectionMgr13StopTransportE4TUidi @ 228 NONAME
+	_ZN17CMTPConnectionMgr15QueueTransportLE4TUidPKv @ 229 NONAME
+	_ZN26CMTPDataProviderController24SetNeedEnumeratingPhase2Ei @ 230 NONAME
+	_ZNK26CMTPDataProviderController21NeedEnumeratingPhase2Ev @ 231 NONAME
+	_ZN17CMTPConnectionMgr20SetBTResumeParameterERK10TBTDevAddrRKt @ 232 NONAME
+	_ZNK14CMTPStorageMgr18IsReadWriteStorageEm @ 233 NONAME
+

@@ -203,7 +203,6 @@ private:
     
     MMTPDataProviderFramework&  iFramework;
     CMTPImageDataProvider&      iDataProvider;
-    CActiveSchedulerWait*       iActiveSchedulerWait;
     CMdESession*                iMetaDataSession;
     TInt                        iMdeSessionError;
     CMdEObject*                 iObject;//used for read properties from MdS

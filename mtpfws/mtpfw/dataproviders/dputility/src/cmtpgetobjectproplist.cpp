@@ -27,6 +27,9 @@
 #include "cmtpfsexclusionmgr.h"
 #include "mtpdpconst.h"
 #include "mtpdppanic.h"
+#include "cmtpfsentrycache.h"
+
+__FLOG_STMT(_LIT8(KComponent,"MTPGetObjectPropList");)
 
 /**
 Verification data for the GetNumObjects request
@@ -51,11 +54,13 @@ EXPORT_C CMTPGetObjectPropList::~CMTPGetObjectPropList()
     delete iPropertyList;
     iDpSingletons.Close();
     delete iObjMeta;
+    __FLOG_CLOSE;
     }
 
 void CMTPGetObjectPropList::ServiceL()
-    {
-    TUint32 propCode(Request().Uint32(TMTPTypeRequest::ERequestParameter3));
+	{
+	__FLOG(_L8("ServiceL - Entry"));
+	TUint32 propCode(Request().Uint32(TMTPTypeRequest::ERequestParameter3));
 	TUint32 groupCode(Request().Uint32(TMTPTypeRequest::ERequestParameter4));
 	
 	if( ( propCode != 0 ) || ( (groupCode !=0) && (groupCode <= KMTPDpPropertyGroupNumber) ) )
@@ -66,8 +71,30 @@ void CMTPGetObjectPropList::ServiceL()
 			{
 			TUint32 handle(iHandles->ElementUint(i));
 			iFramework.ObjectMgr().ObjectL(handle, *iObjMeta);
-			TFileName file(iObjMeta->DesC(CMTPObjectMetaData::ESuid));
-			User::LeaveIfError(iFramework.Fs().Entry(iObjMeta->DesC(CMTPObjectMetaData::ESuid), iFileEntry));
+			
+			TInt err = iFramework.Fs().Entry(iObjMeta->DesC(CMTPObjectMetaData::ESuid), iFileEntry);
+
+			if ( err != KErrNone )
+				{
+				if( (iDpSingletons.CopyingBigFileCache().TargetHandle() == handle) &&
+						(iDpSingletons.CopyingBigFileCache().IsOnGoing()))
+					{
+					// The object is being copied, it is not created in fs yet. Use its cache entry to get properties
+					__FLOG(_L8("ServiceL - The object is being copied, use its cache entry to get properties"));
+					iFileEntry = iDpSingletons.CopyingBigFileCache().FileEntry();
+					err = KErrNone;
+					}
+				else if( (iDpSingletons.MovingBigFileCache().TargetHandle() == handle) &&
+									(iDpSingletons.MovingBigFileCache().IsOnGoing()))
+					{
+					// The object is being moved, it is not created in fs yet. Use its cache entry to get properties
+					__FLOG(_L8("ServiceL - The object is being moved, use its cache entry to get properties"));
+					iFileEntry = iDpSingletons.MovingBigFileCache().FileEntry();
+					err = KErrNone;
+					}	
+				}
+			
+			User::LeaveIfError(err);
 			
 			if (propCode == KMaxTUint)
 				{
@@ -87,9 +114,11 @@ void CMTPGetObjectPropList::ServiceL()
 	//it means the groupcode is not supported, return EMTPRespCodeGroupNotSupported(0xA805) response.
 	//but we use one empty ObjectPropList to replace the EMTPRespCodeGroupNotSupported(0xA805) response.
 	
-    SendDataL(*iPropertyList);    
-    }
-    
+	SendDataL(*iPropertyList);
+	
+	__FLOG(_L8("ServiceL - Exit"));
+	}
+	
 TMTPResponseCode CMTPGetObjectPropList::CheckRequestL()
     {
     TMTPResponseCode result = CMTPRequestProcessor::CheckRequestL();
@@ -114,6 +143,7 @@ TMTPResponseCode CMTPGetObjectPropList::CheckRequestL()
 CMTPGetObjectPropList::CMTPGetObjectPropList(MMTPDataProviderFramework& aFramework, MMTPConnection& aConnection) :
     CMTPRequestProcessor(aFramework, aConnection, (sizeof(KMTPGetObjectPropListPolicy) / sizeof(TMTPRequestElementInfo)), KMTPGetObjectPropListPolicy)
     {
+    __FLOG_OPEN(KMTPSubsystem, KComponent);
     }
     
 void CMTPGetObjectPropList::ConstructL()

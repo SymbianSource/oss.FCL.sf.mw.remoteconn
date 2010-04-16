@@ -36,6 +36,7 @@
 #include "cmtpfsexclusionmgr.h"
 #include "cmtpdataprovidercontroller.h"
 #include "cmtpdataprovider.h"
+#include "cmtpstoragemgr.h"
 
 
 // Class constants.
@@ -72,7 +73,7 @@ Destructor
 EXPORT_C CMTPSendObjectInfo::~CMTPSendObjectInfo()
     {
     __FLOG(_L8("~CMTPSendObjectInfo - Entry"));
-    
+    __FLOG_2(_L8("iProgress:%d NoRollback:%d"),iProgress,iNoRollback);
     if ((iProgress == EObjectInfoSucceed ||
         iProgress == EObjectInfoFail || 
         iProgress == EObjectInfoInProgress) && !iNoRollback)
@@ -157,12 +158,6 @@ TMTPResponseCode CMTPSendObjectInfo::CheckRequestL()
                 result = EMTPRespCodeObjectTooLarge;            
                 }
          	   
-            //File size is limited to KMaxTInt64 that is 8ExaBytes
-            //if the object size is more,then report this error.
-            if (!CanStoreFileL(iStorageId, iObjectSize)||(iObjectSize > (KMaxTInt64)))
-                {
-                result = EMTPRespCodeStoreFull;
-                }
             }
         }
         
@@ -312,7 +307,7 @@ TBool CMTPSendObjectInfo::DoHandleCompletingPhaseL()
         result = EFalse;
         }
     
-    __FLOG(_L8("DoHandleCompletingPhaseL - Exit"));
+    __FLOG_2(_L8("DoHandleCompletingPhaseL - Exit result:%d progress:%d"),result,iProgress);
     return result;    
     }
 
@@ -528,11 +523,6 @@ TBool CMTPSendObjectInfo::DoHandleSendObjectInfoCompleteL()
             SendResponseL(EMTPRespCodeObjectTooLarge);
             result = EFalse;            
             }
-        if(result && !CanStoreFileL(iStorageId, iObjectSize))
-            {
-            SendResponseL(EMTPRespCodeStoreFull);
-            result = EFalse;            
-            }
         }
 
     if (result)
@@ -570,7 +560,9 @@ TBool CMTPSendObjectInfo::DoHandleSendObjectInfoCompleteL()
         
         if (err != KErrNone)
             {
+            __FLOG_1(_L8("Fail to create fs object %d"),err);
             SendResponseL(ErrorToMTPError(err));
+            result = EFalse;
             }
         else
             {
@@ -639,7 +631,9 @@ TBool CMTPSendObjectInfo::DoHandleSendObjectPropListCompleteL()
         
         if (err != KErrNone)
             {
+            __FLOG_1(_L8("Fail to create fs object %d"),err);
             SendResponseL(ErrorToMTPError(err));
+            result = EFalse;
             }
         else
             {
@@ -720,7 +714,7 @@ TBool CMTPSendObjectInfo::DoHandleSendObjectCompleteL()
         	TParsePtrC file( iFullPath );
         	_LIT( KTxtExtensionODF, ".odf" );
         	if ( file.ExtPresent() && file.Ext().CompareF(KTxtExtensionODF)==0 )
-        	    {;
+        	    {
         	    TUint32 DpId = iFramework.DataProviderId();
         	    DpId = iDpSingletons.MTPUtility().GetDpId(file.Ext().Mid(1),KNullDesC);
         	    //The data provider which owns all mimetypes of a file extension is not found 
@@ -794,31 +788,6 @@ TBool CMTPSendObjectInfo::GetFullPathNameL(const TDesC& aFileName)
     __FLOG(_L8("GetFullPathNameL - Exit"));
 #endif
     return result;
-    }
-
-/**
-Check if we can store the file on the storage
-@return ETrue if yes, otherwise EFalse
-*/
-TBool CMTPSendObjectInfo::CanStoreFileL(TUint32 aStorageId, TInt64 aObjectSize) const
-    {
-    __FLOG(_L8("CanStoreFileL - Entry"));
-    TBool result(ETrue);
-    if (aStorageId == KMTPStorageDefault)
-        {
-        aStorageId = iFramework.StorageMgr().DefaultStorageId();
-        }
-    TInt drive( iFramework.StorageMgr().DriveNumber(aStorageId) );
-    User::LeaveIfError(drive);
-    TVolumeInfo volumeInfo;
-    User::LeaveIfError(iFramework.Fs().Volume(volumeInfo, drive));
-    if (volumeInfo.iFree < aObjectSize)
-        {        
-        result = EFalse;
-        }
-    __FLOG_VA((_L8("Result = %d"), result));
-    __FLOG(_L8("CanStoreFileL - Exit"));
-    return result;        
     }
 
 /**
@@ -1080,19 +1049,30 @@ TMTPResponseCode CMTPSendObjectInfo::MatchStoreAndParentL() const
     const TUint32 storeId(Request().Uint32(TMTPTypeRequest::ERequestParameter1));
     const TUint32 parentHandle(Request().Uint32(TMTPTypeRequest::ERequestParameter2));
     
-    // this checking is only valid when the second parameter is not a special value.
-    if (parentHandle != KMTPHandleAll && parentHandle != KMTPHandleNone)
-        {
-        //does not take owernship
-        CMTPObjectMetaData* parentObjInfo = iRequestChecker->GetObjectInfo(parentHandle);
-        __ASSERT_DEBUG(parentObjInfo, Panic(EMTPDpObjectNull));
-        
-        if (parentObjInfo->Uint(CMTPObjectMetaData::EStorageId) != storeId)      
-            {
-            ret = EMTPRespCodeInvalidObjectHandle;
-            }
-        }
-        
+    if( (EMTPOpCodeSendObjectPropList == iOperationCode) || (EMTPOpCodeSendObjectInfo == iOperationCode) )
+    	{
+		if(storeId != KMTPStorageDefault)
+			{
+			if(!iSingletons.StorageMgr().IsReadWriteStorage(storeId))
+				{
+				ret = EMTPRespCodeStoreReadOnly;
+				}
+			}
+		
+		 // this checking is only valid when the second parameter is not a special value.
+		if ((EMTPRespCodeOK == ret) && (parentHandle != KMTPHandleAll && parentHandle != KMTPHandleNone))
+			{
+			//does not take owernship
+			CMTPObjectMetaData* parentObjInfo = iRequestChecker->GetObjectInfo(parentHandle);
+			__ASSERT_DEBUG(parentObjInfo, Panic(EMTPDpObjectNull));
+			
+			if (parentObjInfo->Uint(CMTPObjectMetaData::EStorageId) != storeId)      
+				{
+				ret = EMTPRespCodeInvalidObjectHandle;
+				}
+			}
+    	}
+    
     return ret;
     }
 
@@ -1145,14 +1125,16 @@ void CMTPSendObjectInfo::Rollback()
     {
     if(iIsFolder)
         {
-        __FLOG(_L8("It is a folder cancel process."));
+        __FLOG(_L8("Rollback the dir created."));
         iFramework.Fs().RmDir(iFullPath);
         // If it is folder, delete it from MTP database, i.e ObjectStore.
         TRAP_IGNORE(iFramework.ObjectMgr().RemoveObjectL(iFullPath));
         }
     else
         {
-        __FLOG(_L8("It is a file cancel process."));
+        __FLOG(_L8("Rollback the file created."));
+        delete iFileReceived;
+        iFileReceived = NULL;
         // Delete this object from file system.
         iFramework.Fs().Delete(iFullPath);
         TRAP_IGNORE(iFramework.ObjectMgr().UnreserveObjectHandleL(*iReceivedObject));
@@ -1175,6 +1157,9 @@ TMTPResponseCode CMTPSendObjectInfo::ErrorToMTPError(TInt aError) const
         
     case KErrDiskFull:
         resp = EMTPRespCodeStoreFull;
+        break;
+        
+    default:
         break;
         }
         
@@ -1225,6 +1210,14 @@ void CMTPSendObjectInfo::SetPropertiesL()
             }
         User::LeaveIfError(iFramework.Fs().SetAtt(iFullPath, entry.iAtt, ~entry.iAtt));
         }
+
+    if(iDateMod != NULL && iDateMod->Length())
+       {
+       TTime modifiedTime;
+       iDpSingletons.MTPUtility().MTPTimeStr2TTime(*iDateMod, modifiedTime);
+       User::LeaveIfError(iFramework.Fs().SetModified(iFullPath, modifiedTime));
+       }  
+    
     iReceivedObject->SetDesCL(CMTPObjectMetaData::EName, iName);
     
     __FLOG(_L8("SetPropertiesL - Exit"));

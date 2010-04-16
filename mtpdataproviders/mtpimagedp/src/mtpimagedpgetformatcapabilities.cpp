@@ -51,16 +51,29 @@ void CMTPImageDpGetFormatCapabilities::ServiceL()
     delete iCapabilityList;
     iCapabilityList = NULL;
     iCapabilityList = CMTPTypeFormatCapabilityList::NewL();
-    BuildFormatExifJpegL();
+    
+    if (iFormatCode == KMTPFormatsAll)
+        {
+        TInt count(sizeof(KMTPImageDpSupportFormatCodes) / sizeof(KMTPImageDpSupportFormatCodes[0]));
+        for (TInt i(0); i<count; i++ )
+            {
+            ServiceOneFormatCapabilitiesL(KMTPImageDpSupportFormatCodes[i]);
+            }    
+        }
+    else
+        {
+        ServiceOneFormatCapabilitiesL(iFormatCode);
+        }
+
     SendDataL(*iCapabilityList); 
     __FLOG(_L8("<< CMTPPictureDpGetFormatCapabilities::ServiceL"));   
     }
     
-void CMTPImageDpGetFormatCapabilities::BuildFormatExifJpegL()
+void CMTPImageDpGetFormatCapabilities::ServiceOneFormatCapabilitiesL(TUint aFormatCode)
     {
     __FLOG(_L8(">> CMTPPictureDpGetFormatCapabilities::BuildFormatExifJpegL"));
     CMTPTypeInterdependentPropDesc*  interDesc = CMTPTypeInterdependentPropDesc::NewLC();
-    CMTPTypeFormatCapability* frmCap = CMTPTypeFormatCapability::NewLC( EMTPFormatCodeEXIFJPEG ,interDesc );
+    CMTPTypeFormatCapability* frmCap = CMTPTypeFormatCapability::NewLC(aFormatCode, interDesc);
     
     //EMTPObjectPropCodeStorageID
     CMTPTypeObjectPropDesc* desc = CMTPTypeObjectPropDesc::NewLC(EMTPObjectPropCodeStorageID);
@@ -248,13 +261,24 @@ CMTPTypeObjectPropDesc* CMTPImageDpGetFormatCapabilities::ServiceNonConsumableL(
 TMTPResponseCode CMTPImageDpGetFormatCapabilities::CheckRequestL()
     {
     __FLOG(_L8(">> CMTPPictureDpGetFormatCapabilities::CheckRequestL"));
+    TMTPResponseCode response = EMTPRespCodeOK;
     iFormatCode = Request().Uint32(TMTPTypeRequest::ERequestParameter1);
-    if((iFormatCode != EMTPFormatCodeEXIFJPEG) && (iFormatCode != KMTPFormatsAll))
+    
+    if (iFormatCode != KMTPFormatsAll)
         {
-        return EMTPRespCodeInvalidObjectFormatCode;
+        response = EMTPRespCodeInvalidObjectFormatCode;
+        TInt count(sizeof(KMTPImageDpSupportFormatCodes) / sizeof(KMTPImageDpSupportFormatCodes[0]));
+        for (TInt i(0); i<count; i++ )
+            {
+            if (iFormatCode == KMTPImageDpSupportFormatCodes[i])
+                {
+                response = EMTPRespCodeOK;
+                break;
+                }
+            }        
         }
-    __FLOG(_L8("<< CMTPPictureDpGetFormatCapabilities::CheckRequestL"));   
-    return EMTPRespCodeOK; 
+    __FLOG_VA((_L8("<< CMTPPictureDpGetFormatCapabilities::CheckRequestL - response = 0x%x"), response));   
+    return response; 
     }
     
 
