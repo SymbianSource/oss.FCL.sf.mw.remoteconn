@@ -19,6 +19,7 @@
 #include <mtp/mtpprotocolconstants.h>
 #include <mtp/tmtptyperequest.h>
 #include <mtp/cmtptypearray.h>
+#include <mtp/mtpdataproviderapitypes.h>
 
 #include "cmtpdataprovider.h"
 #include "cmtpdataprovidercontroller.h"
@@ -98,10 +99,6 @@ TMTPResponseCode CMTPDeleteObject::CheckRequestL()
 	{
     __FLOG(_L8("CheckRequestL - Entry"));
     TMTPResponseCode responseCode = CMTPRequestProcessor::CheckRequestL();   
-    if ((EMTPRespCodeOK == responseCode) && (iSingletons.DpController().EnumerateState() == CMTPDataProviderController::EEnumeratingSubDirFiles))
-        {
-		responseCode = EMTPRespCodeDeviceBusy;
-        }
     
 	__FLOG_VA((_L8("CheckRequestL - Exit with responseCode = 0x%04X"), responseCode));
     return responseCode;
@@ -118,6 +115,27 @@ void CMTPDeleteObject::ServiceL()
     CMTPParserRouter::TRoutingParameters params(Request(), iConnection);
     router.ParseOperationRequestL(params);
     router.RouteOperationRequestL(params, iTargetDps);
+    
+    if (iSingletons.DpController().EnumerateState() == CMTPDataProviderController::EEnumeratingSubDirFiles)
+        {
+		TBool hasBaseFileSystemDp = EFalse;
+		for(TInt i=0; i<iTargetDps.Count(); i++)
+			{
+			CMTPDataProvider& dp = iSingletons.DpController().DataProviderL( iTargetDps[i] );
+			if(dp.SupportedCodes(EStorageSystemTypes).Find(CMTPStorageMetaData::ESystemTypeDefaultFileSystem) != KErrNotFound)
+				{
+				hasBaseFileSystemDp = ETrue;
+				break;
+				}
+			}
+		
+		if(hasBaseFileSystemDp)
+			{
+			SendResponseL(EMTPRespCodeDeviceBusy);
+			__FLOG( _L8("-ServiceL with Device_Busy") );
+			return;
+			}
+        }
     
     BrowseHandlesL();
     

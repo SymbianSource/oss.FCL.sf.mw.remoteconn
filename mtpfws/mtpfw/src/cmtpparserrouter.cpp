@@ -2311,6 +2311,8 @@ void CMTPParserRouter::ValidateOperationRequestParametersL(TRoutingParameters& a
 	__FLOG_VA((_L8("Operation Code = 0x%04X"), KOpCode));
 	switch (KOpCode)
 	   {
+		case EMTPOpCodeSetObjectPropValue:
+		case EMTPOpCodeSetObjectProtection:
 		case EMTPOpCodeDeleteObject:
 			{
 			const TUint32 KObjectHandle(aParams.Request().Uint32(TMTPTypeRequest::ERequestParameter1));

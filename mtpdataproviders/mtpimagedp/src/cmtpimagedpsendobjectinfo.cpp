@@ -20,9 +20,9 @@
 
 #include <f32file.h>
 #include <bautils.h>
+#include <e32const.h>
 
 #include <mtp/mmtpdataproviderframework.h>
-
 #include <mtp/cmtpobjectmetadata.h>
 #include <mtp/cmtptypefile.h>
 #include <mtp/cmtptypeobjectinfo.h>
@@ -322,7 +322,11 @@ TBool CMTPImageDpSendObjectInfo::CheckObjectPropListParamsL(TAny *aPtr)
             {
             iStorageId = iFramework.StorageMgr().DefaultStorageId();
             }
-             
+        
+        if(IsTooLarge(iObjectSize))
+            {
+            *ret = EMTPRespCodeObjectTooLarge;
+            }
         }
     
     __FLOG(_L8("CMTPImageDpSendObjectInfo::CheckObjectPropListParamsL - Exit"));
@@ -608,6 +612,11 @@ TBool CMTPImageDpSendObjectInfo::DoHandleSendObjectInfoCompleteL(TAny* /*aPtr*/)
     if (result)
         {
         iObjectSize = iObjectInfo->Uint32L(CMTPTypeObjectInfo::EObjectCompressedSize);
+        if(IsTooLarge(iObjectSize))
+            {
+            SendResponseL(EMTPRespCodeObjectTooLarge);
+            result = EFalse;
+            }
         }
 
     if (result)
@@ -1276,4 +1285,41 @@ TMTPResponseCode CMTPImageDpSendObjectInfo::ErrorToMTPError(TInt aError) const
         }
         
     return resp;
+    }
+
+/**
+Check if the object is too large
+@return ETrue if yes, otherwise EFalse
+*/
+TBool CMTPImageDpSendObjectInfo::IsTooLarge(TUint64 aObjectSize) const
+    {
+    __FLOG(_L8("IsTooLarge - Entry"));
+    TBool ret(aObjectSize > KMaxTInt64);
+    
+    if(!ret)
+        {
+        TBuf<255> fsname;
+        TUint32 storageId = iStorageId;
+        if (storageId == KMTPStorageDefault)
+            {
+            storageId = iFramework.StorageMgr().DefaultStorageId();
+            }
+        TInt drive( iFramework.StorageMgr().DriveNumber(storageId) );
+        if(drive != KErrNotFound)
+            {
+            iFramework.Fs().FileSystemSubType(drive, fsname);        
+        
+            const TUint64 KMaxFatFileSize = 0xFFFFFFFF; //Maximal file size supported by all FAT filesystems (4GB-1)
+            _LIT(KFsFAT16, "FAT16");
+            _LIT(KFsFAT32, "FAT32");
+        
+            if((fsname.CompareF(KFsFAT16) == 0 || fsname.CompareF(KFsFAT32) == 0) && aObjectSize > KMaxFatFileSize)
+                {
+                ret = ETrue;
+                }
+            }
+        }
+    __FLOG_VA((_L8("Result = %d"), ret));
+    __FLOG(_L8("IsTooLarge - Exit"));
+    return ret;
     }

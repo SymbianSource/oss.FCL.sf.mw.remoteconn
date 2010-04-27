@@ -220,6 +220,10 @@ void CMTPSendObjectInfo::ConstructL()
     iDpSingletons.OpenL(iFramework);
     iNoRollback = EFalse;
     iSingletons.OpenL();
+    _LIT(KM4A, ".m4a");
+    _LIT(KODF, ".odf");
+    iExceptionList.AppendL(KM4A());
+    iExceptionList.AppendL(KODF());
     __FLOG(_L8("ConstructL - Exit"));
     }
 
@@ -707,38 +711,48 @@ TBool CMTPSendObjectInfo::DoHandleSendObjectCompleteL()
         //with folder creation.
 
         if(!iIsFolder)
-        	{
-			SetPropertiesL();    
-        	iFramework.ObjectMgr().CommitReservedObjectHandleL(*iReceivedObject);
-        	
-        	TParsePtrC file( iFullPath );
-        	_LIT( KTxtExtensionODF, ".odf" );
-        	if ( file.ExtPresent() && file.Ext().CompareF(KTxtExtensionODF)==0 )
-        	    {
-        	    TUint32 DpId = iFramework.DataProviderId();
-        	    DpId = iDpSingletons.MTPUtility().GetDpId(file.Ext().Mid(1),KNullDesC);
-        	    //The data provider which owns all mimetypes of a file extension is not found 
-        	    if ( 255 == DpId )
-        	        {
-        	        HBufC* mime = NULL;
-        	        mime = iDpSingletons.MTPUtility().ContainerMimeType(iFullPath);
-        	        if ( mime != NULL )
-        	            {
-        	            DpId = iDpSingletons.MTPUtility().GetDpId(file.Ext().Mid(1),*mime);
-        	            delete mime;
-        	            mime = NULL;
-        	            }
-        	        }
-        	    if ( DpId!=iFramework.DataProviderId() && DpId!=255)
-        	        {
-        	        iReceivedObject->SetUint(CMTPObjectMetaData::EDataProviderId,DpId);
-        	        //iReceivedObject->SetUint(CMTPObjectMetaData::EFormatCode,format);
-        	        iFramework.ObjectMgr().ModifyObjectL(*iReceivedObject);
-        	        TUint32 handle = iReceivedObject->Uint(CMTPObjectMetaData::EHandle);
-        	        iSingletons.DpController().NotifyDataProvidersL(DpId,EMTPObjectAdded,(TAny*)&handle);
-        	        }
-        	    }
-        	}
+            {
+            SetPropertiesL();    
+            iFramework.ObjectMgr().CommitReservedObjectHandleL(*iReceivedObject);
+            iFullPath.LowerCase();
+            __FLOG_VA((_L8("File Name %S"), &iFullPath));
+            TParsePtrC file( iFullPath );
+            if ( file.ExtPresent() && iExceptionList.Find(file.Ext()) != KErrNotFound)
+                {
+                TUint32 DpId = iFramework.DataProviderId();
+                HBufC* mime = iDpSingletons.MTPUtility().ContainerMimeType(iFullPath);
+                CleanupStack::PushL(mime);
+                if ( mime != NULL )
+                    {
+                    DpId = iDpSingletons.MTPUtility().GetDpIdL(file.Ext().Mid(1),*mime);
+                    }
+                else
+                    {
+                    DpId = iDpSingletons.MTPUtility().GetDpIdL(file.Ext().Mid(1), KNullDesC);
+                    }
+                if ( DpId!=iFramework.DataProviderId())
+                    {
+                    iReceivedObject->SetUint(CMTPObjectMetaData::EDataProviderId,DpId);
+                    TUint32 format = EMTPFormatCodeUndefined;
+                    TUint16 subFormat = 0;
+                    if(mime != NULL)
+                        {
+                        format = iDpSingletons.MTPUtility().GetFormatCodeByMimeTypeL(file.Ext().Mid(1),*mime);
+                        subFormat = iDpSingletons.MTPUtility().GetSubFormatCodeL(file.Ext().Mid(1),*mime);
+                        }
+                    else
+                        {
+                        format = iDpSingletons.MTPUtility().GetFormatByExtension(file.Ext().Mid(1));
+                        }
+                    iReceivedObject->SetUint(CMTPObjectMetaData::EFormatCode,format);
+                    iReceivedObject->SetUint(CMTPObjectMetaData::EFormatSubCode,subFormat);
+                    iFramework.ObjectMgr().ModifyObjectL(*iReceivedObject);
+                    TUint32 handle = iReceivedObject->Uint(CMTPObjectMetaData::EHandle);
+                    iSingletons.DpController().NotifyDataProvidersL(DpId,EMTPObjectAdded,(TAny*)&handle);
+                    }
+                CleanupStack::PopAndDestroy(mime);
+                }
+            }
         
         SendResponseL(EMTPRespCodeOK);
 	    }

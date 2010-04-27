@@ -127,8 +127,13 @@ void CMTPCopyObject::ServiceL()
 	{	
 	__FLOG(_L8("ServiceL - Entry"));
 	TUint32 handle = KMTPHandleNone;
-	TMTPResponseCode responseCode = CopyObjectL(handle);
-	if(responseCode != EMTPRespCodeOK)
+	TMTPResponseCode responseCode = EMTPRespCodeOK;
+	TRAPD(err, responseCode = CopyObjectL(handle));
+	if(err != KErrNone)
+		{
+		SendResponseL(EMTPRespCodeAccessDenied);
+		}
+	else if(responseCode != EMTPRespCodeOK)
 		{
 		__FLOG_VA((_L8("ServiceL, sending response with respond code %d"), responseCode));
 		SendResponseL(responseCode);

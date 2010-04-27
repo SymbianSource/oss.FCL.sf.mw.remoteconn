@@ -315,7 +315,7 @@ void CMTPImageDpGetObjectPropValue::ServiceRepresentativeSampleFormatL()
 void CMTPImageDpGetObjectPropValue::ServiceRepresentativeSampleSizeL()
     {
     TUint32 representativeSampleSize;
-    iObjectPropertyMgr.GetPropertyL(EMTPObjectPropCodeRepresentativeSampleSize, representativeSampleSize);
+    iObjectPropertyMgr.GetPropertyL(EMTPObjectPropCodeRepresentativeSampleSize, representativeSampleSize, EFalse);
     iMTPTypeUint32.Set(representativeSampleSize);
     
     SendDataL(iMTPTypeUint32);
@@ -341,7 +341,7 @@ void CMTPImageDpGetObjectPropValue::ServiceRepresentativeSampleWidthL()
 
 void CMTPImageDpGetObjectPropValue::ServiceRepresentativeSampleDataL()
     {
-    iObjectPropertyMgr.GetPropertyL(EMTPObjectPropCodeRepresentativeSampleData, *iMTPTypeArray);
+    iObjectPropertyMgr.GetPropertyL(EMTPObjectPropCodeRepresentativeSampleData, *iMTPTypeArray, EFalse);
     
     SendDataL(*iMTPTypeArray);
     }

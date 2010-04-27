@@ -23,6 +23,7 @@
 #include <mtp/cmtptypearray.h>
 #include <mtp/cmtptypestring.h>
 
+#include "cmtpfsentrycache.h"
 #include "cmtpstoragemgr.h"
 #include "cmtpmoveobject.h"
 #include "mtpdppanic.h"
@@ -61,12 +62,17 @@ EXPORT_C MMTPRequestProcessor* CMTPMoveObject::NewL(MMTPDataProviderFramework& a
 Destructor
 */	
 EXPORT_C CMTPMoveObject::~CMTPMoveObject()
-	{	
+	{
+	Cancel();
+	iDpSingletons.Close();
+	iSingletons.Close();
+	
+	delete iTimer;
+	delete iNewFileName;
 	delete iDest;
 	delete iFileMan;
 	delete iPathToMove;
-	delete iNewRootFolder;
-	iSingletons.Close();
+	delete iNewRootFolder;	
 	__FLOG_CLOSE;
 	}
 
@@ -75,7 +81,7 @@ Standard c++ constructor
 */	
 CMTPMoveObject::CMTPMoveObject(MMTPDataProviderFramework& aFramework, MMTPConnection& aConnection) :
 	CMTPRequestProcessor(aFramework, aConnection, sizeof(KMTPMoveObjectPolicy)/sizeof(TMTPRequestElementInfo), KMTPMoveObjectPolicy),
-	iMoveObjectIndex(0)
+	iMoveObjectIndex(0), iTimer(NULL)
 	{
 	__FLOG_OPEN(KMTPSubsystem, KComponent);
 	}
@@ -104,6 +110,21 @@ TMTPResponseCode CMTPMoveObject::CheckRequestL()
 		result = EMTPRespCodeStoreReadOnly;
 		}
 	
+	if(result == EMTPRespCodeOK)
+		{
+		const TDesC& suid(iObjectInfo->DesC(CMTPObjectMetaData::ESuid));
+		iIsFolder = EFalse;
+		User::LeaveIfError(BaflUtils::IsFolder(iFramework.Fs(), suid, iIsFolder));
+		if(!iIsFolder)
+			{
+			if(iDpSingletons.MovingBigFileCache().IsOnGoing())
+				{
+				__FLOG(_L8("CheckRequestL - A big file moving is ongoing, respond with access denied"));
+				result = EMTPRespCodeAccessDenied;
+				}
+			}
+		}
+	
     __FLOG(_L8("CheckRequestL - Exit"));
 	return result;	
 	} 
@@ -112,7 +133,8 @@ TMTPResponseCode CMTPMoveObject::CheckRequestL()
 MoveObject request handler
 */		
 void CMTPMoveObject::ServiceL()
-	{	
+	{
+	__FLOG(_L8("ServiceL - Entry"));
 	TMTPResponseCode ret = EMTPRespCodeOK;
 	TRAPD(err, ret = MoveObjectL());
 	if (err != KErrNone)
@@ -123,6 +145,7 @@ void CMTPMoveObject::ServiceL()
 		{
 		SendResponseL(ret);
 		}
+	__FLOG(_L8("ServiceL - Exit"));
 	}
 
 /**
@@ -131,6 +154,7 @@ void CMTPMoveObject::ServiceL()
 void CMTPMoveObject::ConstructL()
     {
 	iSingletons.OpenL();
+	iDpSingletons.OpenL(iFramework);
     }
     
 
@@ -143,12 +167,38 @@ void CMTPMoveObject::MoveFileL(const TDesC& aNewFileName)
 	__FLOG(_L8("MoveFileL - Entry"));
 	const TDesC& suid(iObjectInfo->DesC(CMTPObjectMetaData::ESuid));
 	GetPreviousPropertiesL(suid);
-	User::LeaveIfError(iFileMan->Move(suid, *iDest));
-	SetPreviousPropertiesL(aNewFileName);
-	iObjectInfo->SetDesCL(CMTPObjectMetaData::ESuid, aNewFileName);
-	iObjectInfo->SetUint(CMTPObjectMetaData::EStorageId, iStorageId);
-	iObjectInfo->SetUint(CMTPObjectMetaData::EParentHandle, iNewParentHandle);
-	iFramework.ObjectMgr().ModifyObjectL(*iObjectInfo);
+	
+	if(iFramework.StorageMgr().DriveNumber(iObjectInfo->Uint(CMTPObjectMetaData::EStorageId)) ==
+			iFramework.StorageMgr().DriveNumber(iStorageId))
+		//Move file to the same storage
+		{
+		User::LeaveIfError(iFileMan->Move(suid, *iDest));
+		SetPreviousPropertiesL(aNewFileName);
+		iObjectInfo->SetDesCL(CMTPObjectMetaData::ESuid, aNewFileName);
+		iObjectInfo->SetUint(CMTPObjectMetaData::EStorageId, iStorageId);
+		iObjectInfo->SetUint(CMTPObjectMetaData::EParentHandle, iNewParentHandle);
+		iFramework.ObjectMgr().ModifyObjectL(*iObjectInfo);
+		SendResponseL(EMTPRespCodeOK);
+		}
+	else
+		//Move file between different storages
+		{
+		delete iNewFileName;
+		iNewFileName = NULL;
+		iNewFileName = aNewFileName.AllocL(); // Store the new file name
+		
+		User::LeaveIfError(iFileMan->Move(suid, *iDest, CFileMan::EOverWrite, iStatus));
+		if ( !IsActive() )
+		{  
+		SetActive();
+		}
+		
+		delete iTimer;
+		iTimer = NULL;
+		iTimer = CPeriodic::NewL(EPriorityStandard);
+		TTimeIntervalMicroSeconds32 KMoveObjectIntervalNone = 0;	
+		iTimer->Start(TTimeIntervalMicroSeconds32(KMoveObjectTimeOut), KMoveObjectIntervalNone, TCallBack(CMTPMoveObject::OnTimeoutL, this));		
+		}
 	__FLOG(_L8("MoveFileL - Exit"));
 	}
 
@@ -206,10 +256,7 @@ TMTPResponseCode CMTPMoveObject::MoveObjectL()
 	TParsePtrC fileNameParser(suid);
 	
 	// Check if the object is a folder or a file.
-	TBool isFolder = EFalse;
-	User::LeaveIfError(BaflUtils::IsFolder(iFramework.Fs(), suid, isFolder));	
-				
-	if(!isFolder)
+	if(!iIsFolder)
 		{
 		if((newObjectName.Length() + fileNameParser.NameAndExt().Length()) <= newObjectName.MaxLength())
 			{
@@ -239,10 +286,9 @@ TMTPResponseCode CMTPMoveObject::MoveObjectL()
 		iFileMan = NULL;
 		iFileMan = CFileMan::NewL(iFramework.Fs());
 		
-		if(!isFolder)
+		if(!iIsFolder)
 			{
 			MoveFileL(newObjectName);
-			SendResponseL(responseCode);
 			}
 		else
 			{		
@@ -347,7 +393,129 @@ void CMTPMoveObject::SetPreviousPropertiesL(const TDesC& aFileName)
 	__FLOG(_L8("SetPreviousPropertiesL - Exit"));
 	}
 
+/**
+ Call back function, called when the timer expired for big file moving.
+ Send response to initiator and cache the target file entry info, which is used to send response 
+ to getobjectproplist and getobjectinfo.
+*/
+TInt CMTPMoveObject::OnTimeoutL(TAny* aPtr)
+	{
+	CMTPMoveObject* moveObjectProcessor = static_cast<CMTPMoveObject*>(aPtr);
+	moveObjectProcessor->DoOnTimeoutL();
+	return KErrNone;
+	}
 
+void CMTPMoveObject::DoOnTimeoutL()
+	{
+	__FLOG(_L8("DoOnTimeoutL - Entry"));
+	
+	if (iTimer)
+		{
+		if (iTimer->IsActive())
+			{
+			iTimer->Cancel();
+			}
+		delete iTimer;
+		iTimer = NULL;
+		}
+	
+	const TDesC& suid(iObjectInfo->DesC(CMTPObjectMetaData::ESuid));
+	TEntry fileEntry;
+	User::LeaveIfError(iFramework.Fs().Entry(suid, fileEntry));
+	TUint32 handle = iObjectInfo->Uint(CMTPObjectMetaData::EHandle);
+	
+	iObjectInfo->SetDesCL(CMTPObjectMetaData::ESuid, *iNewFileName);
+	iObjectInfo->SetUint(CMTPObjectMetaData::EStorageId, iStorageId);
+	iObjectInfo->SetUint(CMTPObjectMetaData::EParentHandle, iNewParentHandle);
+	iFramework.ObjectMgr().ModifyObjectL(*iObjectInfo);
+	
+	CMTPFSEntryCache& aCache = iDpSingletons.MovingBigFileCache();
+	
+	// Cache the target file entry info, which is used to send response to getobjectproplist and getobjectinfo
+	aCache.SetOnGoing(ETrue);
+	aCache.SetTargetHandle(handle);
+	aCache.SetFileEntry(fileEntry);	
+	
+	__FLOG(_L8("UpdateFSEntryCache, sending response with respond code OK for a big file move"));
+	SendResponseL(EMTPRespCodeOK);
+	
+	__FLOG(_L8("DoOnTimeoutL - Exit"));
+	}
 
+/**
+ CMTPMoveObject::RunL
+*/
+void CMTPMoveObject::RunL()
+	{
+	__FLOG(_L8("RunL - Entry"));
+	
+	User::LeaveIfError(iStatus.Int());
+	SetPreviousPropertiesL(*iNewFileName);
+	CMTPFSEntryCache& aCache = iDpSingletons.MovingBigFileCache();
+	// Check to see if we are moving a big file
+	if(aCache.IsOnGoing())
+		{
+		__FLOG(_L8("RunL - Big file move complete"));
+		aCache.SetOnGoing(EFalse);
+		aCache.SetTargetHandle(KMTPHandleNone);
+		}
+	else
+		{
+		//Cancel the timer
+		if(iTimer)
+			{
+			if(iTimer->IsActive())
+				{
+				iTimer->Cancel();
+				}
+			delete iTimer;
+			iTimer = NULL;
+			}
 
+		iObjectInfo->SetDesCL(CMTPObjectMetaData::ESuid, *iNewFileName);
+		iObjectInfo->SetUint(CMTPObjectMetaData::EStorageId, iStorageId);
+		iObjectInfo->SetUint(CMTPObjectMetaData::EParentHandle, iNewParentHandle);
+		iFramework.ObjectMgr().ModifyObjectL(*iObjectInfo);
 
+		__FLOG(_L8("RunL, sending response with respond code OK for a normal file move"));
+		SendResponseL(EMTPRespCodeOK);
+		}
+	__FLOG(_L8("RunL - Exit"));
+	}
+
+/**
+Override to handle the complete phase of move object
+*/
+TBool CMTPMoveObject::DoHandleCompletingPhaseL()
+	{
+	CMTPRequestProcessor::DoHandleCompletingPhaseL();
+	
+	CMTPFSEntryCache& aCache = iDpSingletons.MovingBigFileCache();
+	if(aCache.IsOnGoing())
+		{
+		return EFalse;
+		}
+	else
+		{
+		return ETrue;
+		}
+	}
+
+/**
+Override to match MoveObject request
+@param aRequest    The request to match
+@param aConnection The connection from which the request comes
+@return ETrue if the processor can handle the request, otherwise EFalse
+*/        
+TBool CMTPMoveObject::Match(const TMTPTypeRequest& aRequest, MMTPConnection& aConnection) const
+	{
+	__FLOG(_L8("Match - Entry"));
+	TBool result = EFalse;
+	TUint16 operationCode = aRequest.Uint16(TMTPTypeRequest::ERequestOperationCode);
+	if ((operationCode == EMTPOpCodeMoveObject) && &iConnection == &aConnection)
+	{
+	result = ETrue;
+	}    
+	__FLOG_VA((_L8("Match -- Exit with result = %d"), result));
+	return result;
+	}

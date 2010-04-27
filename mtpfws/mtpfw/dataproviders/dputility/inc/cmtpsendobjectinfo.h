@@ -128,6 +128,8 @@ private: // Owned
     TFileName				iName;
     TBool					iNoRollback;
     RMTPFramework           iSingletons;
+    static const TInt       KExtensionLength = 8; 
+    RArray< TBuf<KExtensionLength> > iExceptionList;
     };
     
 #endif //CMTPSENDOBJECTINFO_H

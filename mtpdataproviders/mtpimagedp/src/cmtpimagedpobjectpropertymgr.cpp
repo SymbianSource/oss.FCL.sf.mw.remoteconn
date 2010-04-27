@@ -422,7 +422,7 @@ void CMTPImageDpObjectPropertyMgr::GetPropertyL(TMTPObjectPropertyCode aProperty
     __FLOG(_L8("<< CMTPImageDpObjectPropertyMgr::GetPropertyL"));
     }
 
-void CMTPImageDpObjectPropertyMgr::GetPropertyL(TMTPObjectPropertyCode aProperty, TUint32 &aValue)
+void CMTPImageDpObjectPropertyMgr::GetPropertyL(TMTPObjectPropertyCode aProperty, TUint32 &aValue, TBool alwaysCreate/* = ETrue*/)
     {
     __FLOG(_L8(">> CMTPImageDpObjectPropertyMgr::GetPropertyL"));
     __ASSERT_DEBUG(iObjectInfo, Panic(EMTPImageDpObjectNull));
@@ -450,10 +450,13 @@ void CMTPImageDpObjectPropertyMgr::GetPropertyL(TMTPObjectPropertyCode aProperty
             TInt err = iFs.Entry(iObjectInfo->DesC(CMTPObjectMetaData::ESuid), fileEntry);
             if (err == KErrNone)
                 {
-                iDataProvider.ThumbnailManager().GetThumbMgr()->SetFlagsL(CThumbnailManager::EDefaultFlags);
-                if(fileEntry.FileSize() > KFileSizeMax)
+                if(fileEntry.FileSize() > KFileSizeMax || !alwaysCreate)
                     {
                     iDataProvider.ThumbnailManager().GetThumbMgr()->SetFlagsL(CThumbnailManager::EDoNotCreate);
+                    }
+                else
+                    {
+                    iDataProvider.ThumbnailManager().GetThumbMgr()->SetFlagsL(CThumbnailManager::EDefaultFlags);
                     }
                 
                 /**
@@ -578,7 +581,7 @@ void CMTPImageDpObjectPropertyMgr::GetPropertyL(TMTPObjectPropertyCode aProperty
     __FLOG(_L8("<< CMTPImageDpObjectPropertyMgr::GetPropertyL"));
     }
 
-void CMTPImageDpObjectPropertyMgr::GetPropertyL(TMTPObjectPropertyCode aProperty, CMTPTypeArray& aValue)
+void CMTPImageDpObjectPropertyMgr::GetPropertyL(TMTPObjectPropertyCode aProperty, CMTPTypeArray& aValue, TBool alwaysCreate /*= ETrue*/)
     {
     __FLOG(_L8(">> CMTPImageDpObjectPropertyMgr::GetPropertyL -- SmapleData"));       
     
@@ -599,10 +602,14 @@ void CMTPImageDpObjectPropertyMgr::GetPropertyL(TMTPObjectPropertyCode aProperty
             TInt err = iFs.Entry(iObjectInfo->DesC(CMTPObjectMetaData::ESuid), fileEntry);
             if (err == KErrNone)
                 {
-                iDataProvider.ThumbnailManager().GetThumbMgr()->SetFlagsL(CThumbnailManager::EDefaultFlags);
-                if(fileEntry.FileSize() > KFileSizeMax)
+                
+                if(fileEntry.FileSize() > KFileSizeMax || !alwaysCreate)
                     {
                     iDataProvider.ThumbnailManager().GetThumbMgr()->SetFlagsL(CThumbnailManager::EDoNotCreate);
+                    }
+                else
+                    {
+                    iDataProvider.ThumbnailManager().GetThumbMgr()->SetFlagsL(CThumbnailManager::EDefaultFlags);
                     }
                 
                 /**

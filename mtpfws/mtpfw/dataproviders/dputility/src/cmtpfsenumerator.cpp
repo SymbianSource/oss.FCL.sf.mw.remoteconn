@@ -456,7 +456,7 @@ void CMTPFSEnumerator::ProcessEntriesL()
         {
         const TEntry& entry = iEntries[i];
         iCurrentPath.Append(entry.iName);
-        __FLOG_VA((_L8("Process path %S name %S"), &iCurrentPath, &entry.iName));
+        __FLOG_VA((_L("Process path %S name %S"), &iCurrentPath, &entry.iName));
 #ifdef __FLOG_ACTIVE    
         TBuf8<KMTPMaxFullFileName> tmp;
         tmp.Copy(iCurrentPath);
@@ -531,7 +531,7 @@ void CMTPFSEnumerator::ProcessEntriesL()
                         if (KMTPHandleNone == iFramework.ObjectMgr().HandleL(iCurrentPath))
                             {
                             format = iDpSingletons.MTPUtility().GetFormatByExtension(parse.Ext().Mid(1));  
-                            TUint32 DpId = iDpSingletons.MTPUtility().GetDpId(parse.Ext().Mid(1), KNullDesC);
+                            TUint32 DpId = iDpSingletons.MTPUtility().GetDpIdL(parse.Ext().Mid(1), KNullDesC);
                             AddFileEntryForOtherDpL(iCurrentPath, handle, format, DpId, entry, iStorages[iScanPos], iParentHandle);
                             }
                         break;
@@ -542,33 +542,23 @@ void CMTPFSEnumerator::ProcessEntriesL()
                         TUint32 DpId = iFramework.DataProviderId();
                         if (parse.Ext().CompareF(KTxtExtensionODF)==0)
                             {
-                            format = iDpSingletons.MTPUtility().FormatFromFilename(parse.Ext().Mid(1));
-                            if ( EMTPFormatCode3GPContainer==format || EMTPFormatCodeMP4Container==format )
+                            HBufC* mime = iDpSingletons.MTPUtility().ContainerMimeType(iCurrentPath);
+                            CleanupStack::PushL(mime);
+                            if ( mime != NULL )
                                 {
-                                DpId = iDpSingletons.MTPUtility().GetDpId(parse.Ext().Mid(1),KNullDesC);
-                                if ( 255 == DpId )
-                                    {
-                                    HBufC* mime = NULL;
-                                    mime = iDpSingletons.MTPUtility().ContainerMimeType(iCurrentPath);
-                                    if ( mime != NULL )
-                                        {
-                                        DpId = iDpSingletons.MTPUtility().GetDpId(parse.Ext().Mid(1),*mime);
-                                        delete mime;
-                                        mime = NULL;
-                                        }
-                                    }
-                                AddFileEntryForOtherDpL(iCurrentPath, handle, format, DpId, entry, iStorages[iScanPos], iParentHandle);
+                                __FLOG_VA((_L("mime %S"), mime));
+                                DpId = iDpSingletons.MTPUtility().GetDpIdL(parse.Ext().Mid(1),*mime);
+                                __FLOG_VA((_L("DpId find %d"), DpId));
                                 }
-                            else
-                                {
-                                format = EMTPFormatCodeUndefined;
-                                AddEntryL(iCurrentPath, handle, format, iDpID, entry, iStorages[iScanPos], iParentHandle);
-                                }
+                            format = iDpSingletons.MTPUtility().GetFormatCodeByMimeTypeL(parse.Ext().Mid(1),*mime);
+                            AddFileEntryForOtherDpL(iCurrentPath, handle, format, DpId, entry, iStorages[iScanPos], 
+                                    iParentHandle, iDpSingletons.MTPUtility().GetSubFormatCodeL(parse.Ext().Mid(1),*mime));
+                            CleanupStack::PopAndDestroy(mime);
                             }
                         else
                             {
                             format = iDpSingletons.MTPUtility().GetFormatByExtension(parse.Ext().Mid(1));  
-                            TUint32 DpId = iDpSingletons.MTPUtility().GetDpId(parse.Ext().Mid(1), KNullDesC);
+                            TUint32 DpId = iDpSingletons.MTPUtility().GetDpIdL(parse.Ext().Mid(1), KNullDesC);
                             AddFileEntryForOtherDpL(iCurrentPath, handle, format, DpId, entry, iStorages[iScanPos], iParentHandle);
                             }
                         }
@@ -637,7 +627,7 @@ void CMTPFSEnumerator::AddEntryL(const TDesC& aPath, TUint32 &aHandle, TMTPForma
 	__FLOG_VA(_L8("AddEntryL - exit"));	
 	}
 
-void CMTPFSEnumerator::AddFileEntryForOtherDpL(const TDesC& aPath, TUint32 &aHandle, TMTPFormatCode format, TUint32 aDPId, const TEntry& /*aEntry*/, TUint32 aStorageId, TUint32 aParentHandle)
+void CMTPFSEnumerator::AddFileEntryForOtherDpL(const TDesC& aPath, TUint32 &aHandle, TMTPFormatCode format, TUint32 aDPId, const TEntry& /*aEntry*/, TUint32 aStorageId, TUint32 aParentHandle, TUint16 aSubFormatCode/* = 0*/)
     {
 #ifdef __FLOG_ACTIVE    
     TBuf8<KMaxFileName> tmp;
@@ -646,7 +636,6 @@ void CMTPFSEnumerator::AddFileEntryForOtherDpL(const TDesC& aPath, TUint32 &aHan
     __FLOG_VA((_L8("AddFileEntryForOtherDpL - entry: %S"), &tmp));
 #endif // __FLOG_ACTIVE
 
-    TUint16 assoc = EMTPAssociationTypeUndefined;
     TParsePtrC pathParser(aPath);
     TPtrC name(pathParser.Name());    
     
@@ -656,7 +645,7 @@ void CMTPFSEnumerator::AddFileEntryForOtherDpL(const TDesC& aPath, TUint32 &aHan
     iObject->SetUint(CMTPObjectMetaData::EFormatCode, format);
     iObject->SetUint(CMTPObjectMetaData::EStorageId, aStorageId);
     iObject->SetDesCL(CMTPObjectMetaData::ESuid, aPath);
-    iObject->SetUint(CMTPObjectMetaData::EFormatSubCode, assoc);
+    iObject->SetUint(CMTPObjectMetaData::EFormatSubCode, aSubFormatCode);
     iObject->SetUint(CMTPObjectMetaData::EParentHandle, aParentHandle);
     iObject->SetUint(CMTPObjectMetaData::ENonConsumable, EMTPConsumable);
     iObject->SetDesCL(CMTPObjectMetaData::EName, name);

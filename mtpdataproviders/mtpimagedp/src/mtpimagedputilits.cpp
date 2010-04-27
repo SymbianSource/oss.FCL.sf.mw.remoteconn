@@ -64,24 +64,17 @@ TInt32 MTPImageDpUtilits::FindStorage(MMTPDataProviderFramework& aFramework, con
     return aFramework.StorageMgr().FrameworkStorageId(static_cast<TDriveNumber>(driveNumber));
     }
 
-TUint32 MTPImageDpUtilits::FindParentHandleL(MMTPDataProviderFramework& aFramework, CMTPImageDataProvider& aDataProvider, const TDesC& aFullPath)
+TUint32 MTPImageDpUtilits::FindParentHandleL(MMTPDataProviderFramework& aFramework, CMTPImageDataProvider& /*aDataProvider*/, const TDesC& aFullPath)
     {
     TUint32 parentHandle = KMTPHandleNoParent;
     TParsePtrC parse(aFullPath);
     
     if(!parse.IsRoot())
-        {   
-        if (!aDataProvider.GetCacheParentHandle(parse.DriveAndPath(), parentHandle))
-            {
-            parentHandle = aFramework.ObjectMgr().HandleL(parse.DriveAndPath());
-            if (parentHandle != KMTPHandleNone)
-                {
-                aDataProvider.SetCacheParentHandle(parse.DriveAndPath(), parentHandle);                
-                }
-            }
+        {
+        parentHandle = aFramework.ObjectMgr().HandleL(parse.DriveAndPath());
         }
     
-    return parentHandle;    
+    return parentHandle;
     }
 
 TBool MTPImageDpUtilits::IsNewPicture(const CMTPObjectMetaData& aMetadata)

@@ -28,6 +28,7 @@
 #include "mtpframeworkconst.h"
 #include "rmtpdpsingletons.h"
 #include "rmtputility.h"
+#include "cmtpstoragemgr.h"
 
 /**
 Verification data for the SetObjectPropValue request
@@ -63,6 +64,7 @@ Destructor
 EXPORT_C CMTPSetObjectProtection::~CMTPSetObjectProtection()
     {   
     delete iObjMeta;
+    iSingletons.Close();
     }
 
 /**
@@ -85,6 +87,11 @@ TMTPResponseCode CMTPSetObjectProtection::CheckRequestL()
         {
         return EMTPRespCodeInvalidObjectHandle;
         }
+    if(!iSingletons.StorageMgr().IsReadWriteStorage(iObjMeta->Uint(CMTPObjectMetaData::EStorageId)))
+		{
+		return EMTPRespCodeAccessDenied; //EMTPRespCodeStoreReadOnly
+		}
+    
     TUint32 statusValue = Request().Uint32(TMTPTypeRequest::ERequestParameter2);
     //Currently we only support EMTPProtectionNoProtection and EMTPProtectionReadOnly
     if ( statusValue!=EMTPProtectionNoProtection && statusValue!=EMTPProtectionReadOnly )
@@ -151,4 +158,5 @@ Second-phase construction
 void CMTPSetObjectProtection::ConstructL()
     {   
     iObjMeta = CMTPObjectMetaData::NewL();
+    iSingletons.OpenL();
     }

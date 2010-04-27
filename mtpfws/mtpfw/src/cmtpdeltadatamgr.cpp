@@ -291,7 +291,7 @@ EXPORT_C TInt CMtpDeltaDataMgr::GetChangedPuidsL(TInt aMaxArraySize, TInt& aPosi
 	TInt64 puidlow = 1;
 	TBuf8<KMTPPuidSize> puidBuffer;
 	
-	for(TInt count=0;count <aMaxArraySize;count++)
+	for(TInt count=0;count <aMaxArraySize && iView.AtRow();count++)
 		{
 		iView.GetL();
 		//Get the data from the current row
@@ -370,7 +370,7 @@ EXPORT_C TInt CMtpDeltaDataMgr::GetAddedPuidsL(TInt aMaxArraySize, TInt &aPositi
 	TInt64 puidlow = 1;
 	TBuf8<KMTPPuidSize> puidBuffer;
 	
-	for(TInt count=0;count <aMaxArraySize;count++)
+	for(TInt count=0;count <aMaxArraySize && iView.AtRow();count++)
 		{
 
 		iView.GetL();
@@ -442,7 +442,7 @@ EXPORT_C TInt CMtpDeltaDataMgr::GetDeletedPuidsL(TInt aMaxArraySize, TInt &aPosi
 	TInt64 puidlow = 1;
 	TBuf8<KMTPPuidSize> puidBuffer;
 	
-	for(TInt count=0;count <aMaxArraySize;count++)
+	for(TInt count=0;count <aMaxArraySize && iView.AtRow();count++)
 		{
 
 		iView.GetL();
@@ -514,7 +514,7 @@ EXPORT_C TInt CMtpDeltaDataMgr::GetModifiedPuidsL(TInt aMaxArraySize, TInt &aPos
 	TInt64 puidlow = 1;
 	TBuf8<KMTPPuidSize> puidBuffer;
 	
-	for(TInt count=0;count <aMaxArraySize;count++)
+	for(TInt count=0;count <aMaxArraySize && iView.AtRow();count++)
 		{
 		iView.GetL();
 		//Get the data from the current row

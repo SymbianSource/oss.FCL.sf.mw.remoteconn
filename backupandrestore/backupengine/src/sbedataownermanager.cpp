@@ -575,12 +575,11 @@ namespace conn
 						CPackageDataTransfer* pak = FindPackageDataContainerL(packageUid);
 						//renews the drive list
 						TRAP(err, pak->GetDriveListL(driveList));
-						if (err != KErrNone)
-                            {//Non-removable, ignore this data owner
-                            iDataOwners.Remove(count);
-                            CleanupStack::PopAndDestroy(pId);
-                            continue;
-                            }
+						if( err == KErrNotSupported)
+							{
+							__LOG("CDataOwnerManager::GetDataOwnersL() - Error KErrNotSupported");
+							err = KErrNone;
+							}
 						} // if
 					else
 						{

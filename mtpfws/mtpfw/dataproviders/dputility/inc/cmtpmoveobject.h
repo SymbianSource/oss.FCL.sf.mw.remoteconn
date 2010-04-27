@@ -24,9 +24,12 @@
 #include "rmtpframework.h"
 #include "cmtprequestprocessor.h"
 #include "mtpdebug.h"
+#include "rmtpdpsingletons.h"
 
 class CFileMan;
 class CMTPObjectMetaData;
+
+const TInt KMoveObjectTimeOut = 180000000; // 180s
 
 /** 
 Defines data provider MoveObject request processor
@@ -48,7 +51,9 @@ private:
 
 private:	//from CMTPRequestProcessor
 	virtual void ServiceL();
-    TMTPResponseCode CheckRequestL();
+	TMTPResponseCode CheckRequestL();
+	TBool DoHandleCompletingPhaseL();
+	TBool Match(const TMTPTypeRequest& aRequest, MMTPConnection& aConnection) const;
 	
 private:
 	void ConstructL();
@@ -60,19 +65,26 @@ private:
 	void SetPreviousPropertiesL(const TDesC& aFileName);
 	void MoveFileL(const TDesC& aNewFileName);
 	void MoveFolderL();
+	static TInt OnTimeoutL(TAny* aPtr);
+	void DoOnTimeoutL();
+	void RunL();
 	
 private:	
-	CFileMan*				iFileMan;
+	CFileMan*							iFileMan;
 	CMTPObjectMetaData*		iObjectInfo;	//Not owned.
-	HBufC*					iDest;
-	HBufC*					iNewRootFolder;
-	TUint32					iNewParentHandle;
-	TUint32					iStorageId;
-	TTime					iPreviousModifiedTime;
-	HBufC*					iPathToMove;
-	RArray<TUint>           iObjectHandles;
-	TInt                    iMoveObjectIndex;
-    RMTPFramework           iSingletons;
+	HBufC*								iDest;
+	HBufC*								iNewRootFolder;
+	TUint32								iNewParentHandle;
+	TUint32								iStorageId;
+	TTime									iPreviousModifiedTime;
+	HBufC*								iPathToMove;
+	RArray<TUint>					iObjectHandles;
+	TInt									iMoveObjectIndex;
+	RMTPFramework					iSingletons;
+	RMTPDpSingletons			iDpSingletons;
+	CPeriodic*						iTimer;
+	HBufC*								iNewFileName;
+	TBool									iIsFolder;
 	/**
     FLOGGER debug trace member variable.
     */
