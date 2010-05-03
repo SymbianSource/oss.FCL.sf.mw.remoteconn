@@ -12,7 +12,7 @@
 //
 // Description:
 //
-
+#include <centralrepository.h>
 #include <mtp/tmtptyperequest.h>
 #include <mtp/mmtpdataproviderframework.h>
 #include <mtp/mmtpobjectmgr.h>
@@ -25,13 +25,11 @@
 #include "mtpdevdppanic.h"
 #include "rmtpdevicedpsingletons.h"
 #include "cmtpdevicedpconfigmgr.h"
+#include "mtpframeworkconst.h"
 
-//MTP should reserve some disk space to prevent ood monitor popup
-//'Out of memory' note.When syncing music through ovi suite,
-//sometimes device screen get freeze with this note
-//If you need to adjust this value,please also update the definition
-//in file 'cmtptypefile.cpp'
-const TInt KFreeSpaceThreshHoldValue(11*1024*1024);//11M
+//This file is exported from s60 sdk, now just copy it
+//to make sure onb can run
+#include "UiklafInternalCRKeys.h"
 
 // Class constants.
 __FLOG_STMT(_LIT8(KComponent,"GetStorageInfo");)
@@ -174,6 +172,7 @@ Set the storage type in the storage info data set
 void CMTPGetStorageInfo::SetStorageTypeL()
 	{
 	TUint16 storageType = EMTPStorageUndefined;
+	
 	switch(iDriveInfo.iType)
 		{
 		case EMediaNotPresent:
@@ -196,7 +195,14 @@ void CMTPGetStorageInfo::SetStorageTypeL()
 		case EMediaFlash:					
 		case EMediaRemote:
 		case EMediaFloppy:
-			storageType = EMTPStorageRemovableRAM;
+		    if (iDriveInfo.iDriveAtt & KDriveAttRemovable)
+		        {
+		        storageType = EMTPStorageRemovableRAM;
+		        }
+		    else
+		        {
+		        storageType = EMTPStorageFixedRAM;
+		        }
 			break;
 		default:
 			break;
@@ -253,12 +259,35 @@ void CMTPGetStorageInfo::SetFreeSpaceInBytesL()
 	    }
 	else
 	    {
+	    CRepository* repository(NULL);
+	    TInt thresholdValue(0);
+	    TRAPD(err,repository = CRepository::NewL(KCRUidUiklaf));
+	    if (err == KErrNone)
+	        {
+	        err = repository->Get(KUikOODDiskFreeSpaceWarningNoteLevelMassMemory,thresholdValue);
+	        if (err == KErrNone)
+	            {
+	            __FLOG_1(_L8("Read from central repo:%d"),thresholdValue);
+	            thresholdValue += KFreeSpaceExtraReserved;
+	            }	  
+	        delete repository;
+	        }
+	    
+	    if (err != KErrNone)
+	        {
+	        __FLOG(_L8("Fail in read ,use default"));
+	        thresholdValue = KFreeSpaceThreshHoldDefaultValue + KFreeSpaceExtraReserved;
+	        }
+	    
+	    __FLOG_2(_L8("threshold:%d free space:%ld"),thresholdValue,iVolumeInfo.iFree);
 	    //Exclude the reserved disk space when reporting free space
-	    TInt64 free = (iVolumeInfo.iFree > KFreeSpaceThreshHoldValue) ?
-	        (iVolumeInfo.iFree - KFreeSpaceThreshHoldValue) : 0;
+	    TInt64 free = (iVolumeInfo.iFree > thresholdValue) ?
+	        (iVolumeInfo.iFree - thresholdValue) : 0;
 	    mtpFreeSpace.Set(free);
+	    __FLOG_1(_L8("set free:%ld"),free);
 	    }
-	__FLOG_2(_L8("SetFreeSpaceInBytesL volume free:%d report:%d"),
+	
+	__FLOG_2(_L8("SetFreeSpaceInBytesL volume free:%ld report:%ld"),
 	        iVolumeInfo.iFree,mtpFreeSpace.Value());
 	iStorageInfo->SetL(CMTPTypeStorageInfo::EFreeSpaceInBytes, mtpFreeSpace);	
 	}

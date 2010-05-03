@@ -414,4 +414,5 @@ EXPORTS
 	_ZNK16RMTPDpSingletons19CopyingBigFileCacheEv @ 413 NONAME
 	_ZTI16CMTPFSEntryCache @ 414 NONAME
 	_ZTV16CMTPFSEntryCache @ 415 NONAME
+	_ZN20CMTPRequestProcessor22RegisterPendingRequestEj @ 416 NONAME
 

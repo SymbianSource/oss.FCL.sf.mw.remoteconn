@@ -29,11 +29,17 @@ EXPORT_C TMTPTypeGuid::TMTPTypeGuid()
     iData.FillZ(iData.MaxLength());
     }
 
-EXPORT_C TMTPTypeGuid::TMTPTypeGuid(const TPtrC8& aData) : 
-TMTPTypeUint128::TMTPTypeUint128(aData)
+EXPORT_C TMTPTypeGuid::TMTPTypeGuid(const TDesC& aData)
     {
+	TGUID guid;
+	if(StrToGUID(aData, guid) != KErrNone)
+		{
+		_LIT(KPainGUID,"TMTPTypeGuid");
+		User::Panic(KPainGUID, KErrArgument);
+		}
+	
+	memcpy(&iData[0], &guid, KMTPTypeUINT128Size);
     }
-
   
 EXPORT_C TMTPTypeGuid::TMTPTypeGuid(const TUint64 aData1,const TUint64 aData2) 
     {  
@@ -86,76 +92,28 @@ EXPORT_C void TMTPTypeGuid::Set(const TUint64 aData1,const TUint64 aData2)
     memcpy(&iData[0], &guid, KMTPTypeUINT128Size);
 	}
 
-EXPORT_C TInt TMTPTypeGuid::SetL(const TDesC& aData)
+EXPORT_C void TMTPTypeGuid::SetL(const TDesC& aData)
 	{
-	TInt ret = KErrNone;
 	TGUID guid;
-	
-	ret = IsGuidFormat(aData);
-	
-	if ( ret != KErrNone )
+	if(StrToGUID(aData, guid) != KErrNone)
 		{
-		return ret;
-		}
-	
-	RBuf buf;
-	buf.CleanupClosePushL();
-	buf.Create(aData);		
-	TPtr8 guidPtr = buf.Collapse();			
-	TInt length = guidPtr.Length();
-	TInt offset = 0;
-	
-	TPtrC8 dataStr1(&guidPtr[offset], 8);
-	TLex8 t1(dataStr1);
-	offset += 9;
-	ret = t1.Val(guid.iUint32, EHex);
-	
-	TPtrC8 dataStr2(&guidPtr[offset], 4);
-	TLex8 t2(dataStr2);
-	offset += 5;
-	ret = t2.Val(guid.iUint16[0], EHex);
-	
-	TPtrC8 dataStr3(&guidPtr[offset], 4);
-	TLex8 t3(dataStr3);
-	offset += 5;
-	ret = t3.Val(guid.iUint16[1], EHex);
-	
-	TInt index = 0;
-	for (TInt i(offset); (i<23); i = i+2)
-		{
-		TPtrC8 dataStr4(&guidPtr[offset], 2);
-		TLex8 t4(dataStr4);
-		offset += 2;
-		ret = t4.Val(guid.iByte[index++], EHex);
-		}
-	offset++;
-	for (TInt i(offset); (i<length); i = i+2)
-		{
-		TPtrC8 dataStr5(&guidPtr[offset], 2);
-		TLex8 t5(dataStr5);
-		offset += 2;
-		ret = t5.Val(guid.iByte[index++], EHex);
+		User::Leave(KErrArgument);
 		}
 	
 	memcpy(&iData[0], &guid, KMTPTypeUINT128Size);
-	
-	CleanupStack::PopAndDestroy(&buf);
-	
-	return ret;
 	}
  
-TInt TMTPTypeGuid::IsGuidFormat(const TDesC& aData)
+EXPORT_C TBool TMTPTypeGuid::IsGuidFormat(const TDesC& aData)
 	{
-	TInt ret = KErrNone;
+	TBool ret = ETrue;
 	
 	//verify GUID style data xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
-	RBuf buf;
-	buf.CleanupClosePushL();
-	buf.Create(aData);		
+	TBuf<KGUIDFormatStringLength> buf(aData); 		
 	TPtr8 guidPtr = buf.Collapse();			
 	TInt length = guidPtr.Length();
-	
-	if ( length == 36 )
+    const TInt KSeparatorCount = 4;
+    TInt separatorcount = 0;
+	if ( length == KGUIDFormatStringLength )
 		{
 		for ( TInt i=0;i<length;++i)
 			{
@@ -163,23 +121,129 @@ TInt TMTPTypeGuid::IsGuidFormat(const TDesC& aData)
 			if ( !c.IsHexDigit() )
 				{
 				if ( (guidPtr[i]=='-') && (i==8 || i==13 || i==18 || i==23) )
-					{}
+					{
+					++separatorcount;
+					}
 				else
 					{
-					ret = KErrArgument;
+					ret = EFalse;
+					break;
 					}
 				}
 			}
 		}
 	else
 		{
-		ret = KErrArgument;
+		ret = EFalse;
 		}
-	CleanupStack::PopAndDestroy(&buf);
-	
+
+	if((ret) && (KSeparatorCount != separatorcount))
+		{
+		ret = EFalse;
+		}
+		
 	return ret;
 	}
 
+TInt TMTPTypeGuid::StrToGUID(const TDesC& aData, TGUID& aGUID) const
+	{
+	TInt ret = KErrNone;
+	if ( !IsGuidFormat(aData) )
+		{
+		return KErrArgument;
+		}
+	
+	TBuf<KGUIDFormatStringLength> buf(aData); 
+	TPtr8 guidPtr = buf.Collapse();			
+	TInt length = guidPtr.Length();
+	TInt offset = 0;
+	
+	TPtrC8 dataStr(&guidPtr[offset], 8);
+	TLex8 t(dataStr);
+	offset += 9;
+	ret = t.Val(aGUID.iUint32, EHex);
+	if(KErrNone != ret)
+		{
+		return ret;
+		}
+	
+	dataStr.Set(&guidPtr[offset], 4);
+	t.Assign(dataStr);
+	offset += 5;
+	ret = t.Val(aGUID.iUint16[0], EHex);
+	if(KErrNone != ret)
+		{
+		return ret;
+		}
+	
+	dataStr.Set(&guidPtr[offset], 4);
+	t.Assign(dataStr);
+	offset += 5;
+	ret = t.Val(aGUID.iUint16[1], EHex);
+	if(KErrNone != ret)
+		{
+		return ret;
+		}
+	
+	TInt index = 0;
+	for (TInt i(offset); (i<23); i = i+2)
+		{
+		dataStr.Set(&guidPtr[offset], 2);
+		t.Assign(dataStr);
+		offset += 2;
+		ret = t.Val(aGUID.iByte[index++], EHex);
+		if(KErrNone != ret)
+			{
+			return ret;
+			}
+		}
+	
+	offset++;
+	for (TInt i(offset); (i<length); i = i+2)
+		{
+		dataStr.Set(&guidPtr[offset], 2);
+		t.Assign(dataStr);
+		offset += 2;
+		ret = t.Val(aGUID.iByte[index++], EHex);
+		if(KErrNone != ret)
+			{
+			return ret;
+			}
+		}
+	
+	return KErrNone;
+	}
 
-
-
+EXPORT_C TInt TMTPTypeGuid::ToString( TDes& aRetDes ) const
+	{
+	if(aRetDes.MaxLength() < KGUIDFormatStringLength)
+		return KErrOverflow;
+	
+	if(aRetDes.Length() > 0)
+		aRetDes.Zero();
+		
+	//xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+	_LIT(KSeparatorChar, "-");
+	const TGUID* guid = reinterpret_cast< const TGUID*>(&iData[0]);
+	aRetDes.AppendNumFixedWidth(guid->iUint32, EHex, 8);
+	aRetDes.Append(KSeparatorChar);
+	for(TInt i = 0; i < KMTPGUIDUint16Num; i++)
+		{
+		aRetDes.AppendNumFixedWidth(guid->iUint16[i], EHex, 4);
+		aRetDes.Append(KSeparatorChar);
+		}
+	
+	TInt j = 0;
+	for(; j < 2; j++)
+		{
+		aRetDes.AppendNumFixedWidth(guid->iByte[j], EHex, 2);
+		}
+	aRetDes.Append(KSeparatorChar);
+	
+	for(; j < KMTPGUIDUint8Num; j++)
+		{
+		aRetDes.AppendNumFixedWidth(guid->iByte[j], EHex, 2);
+		}
+		
+	return KErrNone;
+	}

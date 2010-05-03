@@ -28,6 +28,7 @@
 #include <mtp/mtpdatatypeconstants.h>
 #include <mtp/tmtptypeuint128.h>
 
+
 /**
 Defines the MTP Guid data type.
 @publishedPartner
@@ -39,13 +40,12 @@ class TMTPTypeGuid : public TMTPTypeUint128
 public:
 
 	IMPORT_C TMTPTypeGuid();	
-	IMPORT_C TMTPTypeGuid(const TPtrC8& aData);
+	IMPORT_C TMTPTypeGuid(const TDesC& aData);
 	IMPORT_C TMTPTypeGuid(const TUint64 aData1,const TUint64 aData2);
     IMPORT_C void Set(const TUint64 aData1,const TUint64 aData2);
-    IMPORT_C TInt SetL(const TDesC& aData);
-    
-private:
-    TInt IsGuidFormat(const TDesC& aData);
+    IMPORT_C void SetL(const TDesC& aData);
+    IMPORT_C TInt ToString( TDes& aRetDes ) const;
+    IMPORT_C static TBool IsGuidFormat(const TDesC& aData);
     
 private:
     /*
@@ -69,21 +69,7 @@ private:
         } TGUID;
     
 private:
-   
-    /**
-    Least significant 64-bit buffer offset.
-    */
-    //static const TInt           KMTPTypeUint128OffsetLS = 0;
-   
-    /**
-    Most significant 64-bit buffer offset.
-    */
-    //static const TInt           KMTPTypeUint128OffsetMS = 8;
-    
-    /**
-    The data buffer.
-    */
-	//TBuf8<KMTPTypeUINT128Size>  iData;
+    TInt StrToGUID(const TDesC& aData, TGUID& aGUID) const;
     };
 
 #endif // TMTPTYPEGUID_H

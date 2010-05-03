@@ -128,6 +128,7 @@ void CMTPImageDataProvider::ConstructL()
         User::LeaveIfError(error);
         }    
     
+    iEnumerationNotified = ETrue;
     __FLOG(_L8("<< CMTPImageDataProvider::ConstructL"));
     }
 
@@ -271,6 +272,8 @@ void CMTPImageDataProvider::StartObjectEnumerationL(TUint32 aStorageId, TBool /*
     __FLOG(_L8(">> StartObjectEnumerationL"));
     
     TBool isComplete = ETrue;
+    iEnumerationNotified = EFalse;
+
     if (aStorageId == KMTPStorageAll)
         {
         /*
@@ -479,7 +482,11 @@ void CMTPImageDataProvider::NotifyEnumerationCompleteL(TUint32 aStorageId, TInt 
     __FLOG(_L8(">> NotifyEnumerationCompletedL"));
     __FLOG_VA((_L8("Enumeration of storage 0x%08X completed with error status %d"), aStorageId, aError));
         
-    Framework().ObjectEnumerationCompleteL(aStorageId);
+    if (!iEnumerationNotified)
+        {
+        iEnumerationNotified = ETrue;
+        Framework().ObjectEnumerationCompleteL(aStorageId);
+        }
     
     __FLOG(_L8("<< HandleEnumerationCompletedL"));
     }
@@ -656,6 +663,11 @@ const TDesC& CMTPImageDataProvider::FindMimeType(const TDesC& aExtension)
     /**
      * copy file extension by insensitive case
      */
+    if (aExtension.Length() > KMaxExtNameLength)
+        {
+        return KNullDesC;
+        }
+    
     TBuf<KMaxExtNameLength> extension;
     extension.CopyLC(aExtension);
     

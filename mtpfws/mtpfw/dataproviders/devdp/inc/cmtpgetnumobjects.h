@@ -54,14 +54,14 @@ private:
 
 	TBool IsSupportedFormatL(TUint32 aFormatCode);
 			
-private:
+protected:
 	/**
     FLOGGER debug trace member variable.
     */
     __FLOG_DECLARATION_MEMBER_MUTABLE;
 
+    TUint iTimeoutCount;
 	RMTPFramework iSingletons;
-protected:
     RMTPDeviceDpSingletons              iDevDpSingletons;
 	};
 	

@@ -232,4 +232,11 @@ EXPORTS
 	_ZNK26CMTPDataProviderController21NeedEnumeratingPhase2Ev @ 231 NONAME
 	_ZN17CMTPConnectionMgr20SetBTResumeParameterERK10TBTDevAddrRKt @ 232 NONAME
 	_ZNK14CMTPStorageMgr18IsReadWriteStorageEm @ 233 NONAME
+	_ZN26CMTPDataProviderController21StorageEnumerateStateEj @ 234 NONAME
+	_ZN26CMTPDataProviderController22ExecutePendingRequestLEv @ 235 NONAME
+	_ZN26CMTPDataProviderController24RegisterPendingRequestDPEjj @ 236 NONAME
+	_ZTIN15CMTPObjectStore15CSnapshotWorkerE @ 237 NONAME
+	_ZTIN26CMTPDataProviderController22CMTPPendingReqestTimerE @ 238 NONAME
+	_ZTVN15CMTPObjectStore15CSnapshotWorkerE @ 239 NONAME
+	_ZTVN26CMTPDataProviderController22CMTPPendingReqestTimerE @ 240 NONAME
 

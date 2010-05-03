@@ -261,10 +261,17 @@ void CMTPImageDpThumbnailCreator::GetThumbL(const TDesC& aFileName)
     iObjectSource = NULL;
     
     TParsePtrC parse(aFileName);
-    const TDesC& mimeType = iDataProvider.FindMimeType(parse.Ext().Mid(1));
-    __FLOG_VA((_L16("CMtpImageDphumbnailCreator::GetThumbL() - FileName:%S, MimeType:%S"), &aFileName, &mimeType));
+    if (parse.Ext().Length() >= 1)
+        {
+        const TDesC& mimeType = iDataProvider.FindMimeType(parse.Ext().Mid(1));
+        __FLOG_VA((_L16("CMtpImageDphumbnailCreator::GetThumbL() - FileName:%S, MimeType:%S"), &aFileName, &mimeType));
     
-    iObjectSource = CThumbnailObjectSource::NewL(aFileName, mimeType);
+        iObjectSource = CThumbnailObjectSource::NewL(aFileName, mimeType);
+        }
+    else
+        {
+        iObjectSource = CThumbnailObjectSource::NewL(aFileName, KNullDesC);
+        }
     iCurrentReq = iThumbMgr->GetThumbnailL( *iObjectSource );
     iState = EGetting;
     __FLOG(_L8("<< CMtpImageDphumbnailCreator::GetThumbL()"));

@@ -77,7 +77,6 @@ LIBRARY             efsrv.lib
 LIBRARY             etel3rdparty.lib 
 LIBRARY             estor.lib 
 LIBRARY             euser.lib
-LIBRARY             hal.lib 
 LIBRARY             edbms.lib
 LIBRARY      		centralrepository.lib
 
@@ -88,4 +87,5 @@ LIBRARY		        tzclient.lib
 LIBRARY             mtpdataproviderutility.lib 
 LIBRARY             ecom.lib 
 LIBRARY             mtpdevdpextnapi.lib
+LIBRARY             sysutil.lib 
 SMPSAFE

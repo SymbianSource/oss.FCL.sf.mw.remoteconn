@@ -354,12 +354,14 @@ namespace conn
             if(KErrNotSupported == err)
                 {//Non-Removable package, nothing to backup
                 iState.iState = ENone;
+                aLastSection = ETrue;
                 Cleanup();
                 return;
                 }
             else if(KErrNone != err)
                 {
                 iState.iState = ENone;
+                aLastSection = ETrue;
                 Cleanup();
                 User::Leave(err);
                 }
@@ -1413,12 +1415,22 @@ namespace conn
 		// We now no longer return the Z drive, it has been decided that the Z drive will always be the
 		// ROM. Backing up and restoring the ROM drive should not be possible, as what is the point
 		
-		// build package files
+		// build package files        
 		if (iMetaData == NULL)
 			{
-			iMetaData = iSWIBackup.GetMetaDataL(iPackageID, iFiles);
-			iMetaDataSize = iMetaData->Size();
-			BuildPackageFileList();
+			TRAPD( err, iMetaData = iSWIBackup.GetMetaDataL(iPackageID, iFiles) );
+			
+			if( err )
+				{
+				iMetaData = NULL;
+				iMetaDataSize = 0;
+				User::Leave( err );
+				}
+			else
+				{
+				iMetaDataSize = iMetaData->Size();
+				BuildPackageFileList();				
+				}
 			}
 		
 		TDriveList notToBackup = ipDataOwnerManager->Config().ExcludeDriveList();
@@ -1433,6 +1445,7 @@ namespace conn
 			}
 		
 		aDriveList = iDriveList;
+		
 		__LOG1("CPackageDataTransfer::GetDriveListL() - end - SID: 0x%08x", iPackageID.iUid);
 		}
 

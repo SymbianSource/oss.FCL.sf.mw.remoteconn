@@ -200,10 +200,10 @@ void CMTPDeviceDataProvider::StartObjectEnumerationL(TUint32 aStorageId, TBool /
         iEnumeratingState = EEnumeratingDeviceDataStore;
         iStorageWatcher->Start();
         }
-    else if (iPendingEnumerations.Count() == 1)
+    else
         {
     	iEnumeratingState = EEnumeratingFolders;
-    	iEnumerator->StartL(iPendingEnumerations[KMTPDeviceDpActiveEnumeration]);
+    	NotifyEnumerationCompleteL(aStorageId, KErrNone);
         }
     __FLOG(_L8("StartObjectEnumerationL - Exit"));
     }
@@ -332,35 +332,22 @@ void CMTPDeviceDataProvider::Supported(TMTPSupportCategory aCategory, RArray<TUi
     __FLOG(_L8("Supported - Exit"));
     }
 
-#ifdef __FLOG_ACTIVE
-void CMTPDeviceDataProvider::NotifyEnumerationCompleteL(TUint32 aStorageId, TInt aError)
-#else
 void CMTPDeviceDataProvider::NotifyEnumerationCompleteL(TUint32 aStorageId, TInt /*aError*/)
-#endif // __FLOG_ACTIVE
 	{
     __FLOG(_L8("NotifyEnumerationCompleteL - Entry"));
     __ASSERT_DEBUG((aStorageId == iPendingEnumerations[KMTPDeviceDpActiveEnumeration]), User::Invariant());
+    if (iPendingEnumerations.Count() > 0)
+        {
+        iPendingEnumerations.Remove(KMTPDeviceDpActiveEnumeration);
+        }
 	switch(iEnumeratingState)
 		{
 	case EEnumeratingDeviceDataStore:
-		iEnumeratingState = EEnumeratingFolders;
-		iEnumerator->StartL(iPendingEnumerations[KMTPDeviceDpActiveEnumeration]);
-		break;
-
 	case EEnumeratingFolders:
-        __FLOG_VA((_L8("Enumeration of storage 0x%08X completed with error status %d"), aStorageId, aError));
-        iPendingEnumerations.Remove(KMTPDeviceDpActiveEnumeration);
-        Framework().ObjectEnumerationCompleteL(aStorageId);
-        if (iPendingEnumerations.Count() > 0)
-            {
-        	iEnumerator->StartL(iPendingEnumerations[KMTPDeviceDpActiveEnumeration]);
-            }
-        else
-            {
-    		iEnumeratingState = EEnumerationComplete;
-            }
+	    iEnumeratingState = EEnumerationComplete;
+	    Framework().ObjectEnumerationCompleteL(aStorageId);
+		//iEnumerator->StartL(iPendingEnumerations[KMTPDeviceDpActiveEnumeration]);
 		break;
-
 	case EEnumerationComplete:
 	default:
 		__DEBUG_ONLY(User::Invariant());

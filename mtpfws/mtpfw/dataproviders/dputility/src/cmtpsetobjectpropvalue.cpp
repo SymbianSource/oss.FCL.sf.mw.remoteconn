@@ -28,6 +28,7 @@
 #include "mtpframeworkconst.h"
 #include "rmtpdpsingletons.h"
 #include "rmtputility.h"
+#include "cmtpstoragemgr.h"
 
 /**
 Verification data for the SetObjectPropValue request
@@ -108,6 +109,11 @@ TMTPResponseCode CMTPSetObjectPropValue::CheckRequestL()
     TUint32 handle = Request().Uint32(TMTPTypeRequest::ERequestParameter1);
     CMTPObjectMetaData* meta = iRequestChecker->GetObjectInfo(handle);
     __ASSERT_DEBUG(meta, Panic(EMTPDpObjectNull));
+    
+    if(!iSingleton.StorageMgr().IsReadWriteStorage(meta->Uint(CMTPObjectMetaData::EStorageId)))
+   		{
+		responseCode = EMTPRespCodeAccessDenied;
+   		}
     
 	if(responseCode == EMTPRespCodeOK)
 		{

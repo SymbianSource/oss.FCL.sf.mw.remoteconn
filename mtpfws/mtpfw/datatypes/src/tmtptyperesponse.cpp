@@ -20,7 +20,6 @@
 
 #include <mtp/mtpdatatypeconstants.h>
 #include <mtp/tmtptyperesponse.h>
-
 // Dataset element metadata.
 const TMTPTypeResponse::TElementInfo TMTPTypeResponse::iElementMetaData[ENumElements] = 
     {
@@ -32,6 +31,8 @@ const TMTPTypeResponse::TElementInfo TMTPTypeResponse::iElementMetaData[ENumElem
         {EMTPTypeUINT32,    18, KMTPTypeUINT32Size},    // EResponseParameter3
         {EMTPTypeUINT32,    22, KMTPTypeUINT32Size},    // EResponseParameter4
         {EMTPTypeUINT32,    26, KMTPTypeUINT32Size},    // EResponseParameter5
+        {EMTPTypeINT32,    30, KMTPTypeUINT32Size},    // ENumValidParam
+                
     };
 
 /**
@@ -42,6 +43,7 @@ EXPORT_C TMTPTypeResponse::TMTPTypeResponse() :
     iBuffer(KSize)
     {
     SetBuffer(iBuffer);
+    TMTPTypeFlatBase::Reset();
     }
 
 EXPORT_C TMTPTypeResponse::TMTPTypeResponse(const TMTPTypeResponse& aResponse):
@@ -60,4 +62,21 @@ EXPORT_C TUint TMTPTypeResponse::Type() const
 EXPORT_C const TMTPTypeFlatBase::TElementInfo& TMTPTypeResponse::ElementInfo(TInt aElementId) const
     {
     return iElementInfo[aElementId];
+    }
+
+EXPORT_C void TMTPTypeResponse::SetUint32(TInt aElementId, TUint32 aData)
+    {
+    // Recalculate iNumOfValidParams
+    if(aElementId - EResponseTransactionID > TMTPTypeFlatBase::Int32(ENumValidParam))
+        {
+        TMTPTypeFlatBase::SetInt32(ENumValidParam, aElementId - EResponseTransactionID);
+        }
+    //  Set the element value.
+    TMTPTypeFlatBase::SetUint32(aElementId, aData);
+    }
+
+
+EXPORT_C TInt TMTPTypeResponse::GetNumOfValidParams() const
+    {
+    return TMTPTypeFlatBase::Int32(ENumValidParam);
     }

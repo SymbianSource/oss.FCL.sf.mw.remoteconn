@@ -77,6 +77,19 @@ that support the request, then starts an active object to send it to them all.
 */	
 void CMTPGetObjectPropList::ServiceL()
     {
+    if(iSingletons.DpController().EnumerateState() != CMTPDataProviderController::EEnumeratedFulllyCompleted)
+        {
+        TUint32 handle = Request().Uint32( TMTPTypeRequest::ERequestParameter1 );
+        TUint32 depth = Request().Uint32( TMTPTypeRequest::ERequestParameter5 );  
+        if (depth > 0)
+            {
+            if (handle != KMTPHandleNone || depth != 1)
+                {
+                RegisterPendingRequest();
+                return;
+                }
+            }
+        }
     iTargetDps.Reset();
     CMTPParserRouter& router(iSingletons.Router());
     CMTPParserRouter::TRoutingParameters params(Request(), iConnection);

@@ -26,7 +26,7 @@
 #if defined(__WINS__)
 _LIT(KRequestCaptureRootDir, "c:\\test\\data\\");
 #elif defined(__SERIES60_) 
-_LIT(KRequestCaptureRootDir, "f:\\test\\data\\");
+_LIT(KRequestCaptureRootDir, "c:\\test\\data\\");
 #else
 _LIT(KRequestCaptureRootDir, "e:\\test\\data\\");
 #endif

@@ -25,6 +25,7 @@ RESOURCE MTP_DATA_PROVIDER dpConfig
     server_name = "";
     server_image_name = "";
     opaque_resource = fileConfig;
+    enumeration_phase = 1;
     }
 
 RESOURCE MTP_FILEDP_CONFIG fileConfig

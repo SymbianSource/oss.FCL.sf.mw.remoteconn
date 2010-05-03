@@ -212,4 +212,5 @@ EXPORTS
 	?TargetHandle@CMTPFSEntryCache@@QBEKXZ @ 211 NONAME ; unsigned long CMTPFSEntryCache::TargetHandle(void) const
 	?NewL@CMTPFSEntryCache@@SAPAV1@XZ @ 212 NONAME ; class CMTPFSEntryCache * CMTPFSEntryCache::NewL(void)
 	?FileEntry@CMTPFSEntryCache@@QAEAAVTEntry@@XZ @ 213 NONAME ; class TEntry & CMTPFSEntryCache::FileEntry(void)
+	?RegisterPendingRequest@CMTPRequestProcessor@@IAEXI@Z @ 214 NONAME ; void CMTPRequestProcessor::RegisterPendingRequest(unsigned int)
 

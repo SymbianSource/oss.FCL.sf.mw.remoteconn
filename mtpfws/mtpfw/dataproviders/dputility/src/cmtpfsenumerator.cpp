@@ -33,11 +33,12 @@
 // Class constants.
 __FLOG_STMT(_LIT8(KComponent,"FSEnumerator");)
 
-const TUint KMTPMaxFullFileName = 259;
 /*
  * 
  */
-#define KMAX_FILECOUNT_ENUMERATINGPHASE1 5000
+#define KMAX_FILECOUNT_ENUMERATINGPHASE1 1
+
+#define KMAX_FILECOUNT_ENUMERATINGPHASE2 0x7FFFFFFF
 
 /**
  * the files should not be owned by any dp. 
@@ -94,22 +95,29 @@ EXPORT_C CMTPFSEnumerator::~CMTPFSEnumerator()
 Kick off the enumeration on the specified storage
 @param aStorageId storage to be enumerated
 */
-EXPORT_C void CMTPFSEnumerator::StartL(TUint32 aStorageId, TBool aOnlyRoot)
-	{
-	__ASSERT_DEBUG(!IsActive(), User::Invariant());
-	iNumOfFoldersAndFiles = 0;
-	iOnlyScanRoot = aOnlyRoot;
-	__FLOG_VA((_L8("iOnlyScanRoot == %d "), iOnlyScanRoot));
-	
-	MMTPStorageMgr& storageMgr(iFramework.StorageMgr());
-	if (aStorageId == KMTPStorageAll)
-	    {
+EXPORT_C void CMTPFSEnumerator::StartL(TUint32 aStorageId, TBool aScanAll)
+    {
+    __ASSERT_DEBUG(!IsActive(), User::Invariant());
+    iScanAll = aScanAll;
+    iAllRootScaned = EFalse;
+    iStorages.Reset();
+    if(iScanAll)
+        {
+        iObjectNeedToScan = KMAX_FILECOUNT_ENUMERATINGPHASE2;
+        }
+    else
+        {
+        iObjectNeedToScan = KMAX_FILECOUNT_ENUMERATINGPHASE1;
+        }
+    __FLOG_VA((_L8("iScanAll %d files %d Storage 0x%x"), iScanAll, iObjectNeedToScan, aStorageId));
+    MMTPStorageMgr& storageMgr(iFramework.StorageMgr());
+    if (aStorageId == KMTPStorageAll)
+        {
         // Retrieve the available logical StorageIDs
         RPointerArray<const CMTPStorageMetaData> storages;
         CleanupClosePushL(storages);
         TMTPStorageMgrQueryParams params(KNullDesC, CMTPStorageMetaData::ESystemTypeDefaultFileSystem);
         storageMgr.GetLogicalStoragesL(params, storages);
-        
         // Construct the StorageIDs list.
         const TUint KCount(storages.Count());
         for (TUint i(0); (i < KCount); i++)
@@ -118,72 +126,67 @@ EXPORT_C void CMTPFSEnumerator::StartL(TUint32 aStorageId, TBool aOnlyRoot)
             __FLOG_VA((_L8("FileEnumerator is doing storage id = %x\r\n"), storages[i]->Uint(CMTPStorageMetaData::EStorageId) ));
             }
         CleanupStack::PopAndDestroy(&storages);
-	    }
+        }
     else if (aStorageId != KMTPNotSpecified32)
         {
-		__ASSERT_DEBUG(storageMgr.ValidStorageId(aStorageId), User::Invariant());
-		const CMTPStorageMetaData& storage(storageMgr.StorageL(aStorageId));
-		if (storage.Uint(CMTPStorageMetaData::EStorageSystemType) == CMTPStorageMetaData::ESystemTypeDefaultFileSystem)
-		    {
-    	    if (storageMgr.LogicalStorageId(aStorageId))
-    		    {
-    		    // Logical StorageID.
-    			iStorages.AppendL(aStorageId);
-    		    }
-    		else
-    		    {
-    		    // Physical StorageID. Enumerate all eligible logical storages.
-    		    const RArray<TUint>& logicalIds(storage.UintArray(CMTPStorageMetaData::EStorageLogicalIds));
-    		    const TUint KCountLogicalIds(logicalIds.Count());
+        __ASSERT_DEBUG(storageMgr.ValidStorageId(aStorageId), User::Invariant());
+        const CMTPStorageMetaData& storage(storageMgr.StorageL(aStorageId));
+        if (storage.Uint(CMTPStorageMetaData::EStorageSystemType) == CMTPStorageMetaData::ESystemTypeDefaultFileSystem)
+            {
+            if (storageMgr.LogicalStorageId(aStorageId))
+                {
+                // Logical StorageID.
+                iStorages.AppendL(aStorageId);
+                }
+            else
+                {
+                // Physical StorageID. Enumerate all eligible logical storages.
+                const RArray<TUint>& logicalIds(storage.UintArray(CMTPStorageMetaData::EStorageLogicalIds));
+                const TUint KCountLogicalIds(logicalIds.Count());
                 for (TUint i(0); (i < KCountLogicalIds); i++)
                     {
                     iStorages.AppendL(logicalIds[i]);
                     }
-    		    }
-		    }
-		}
+                }
+            }
+        }
 
-	iStorageId = aStorageId;
-	iSkipCurrentStorage = EFalse;
+    iStorageId = aStorageId;
+    iSkipCurrentStorage = EFalse;
 	
-	if (iStorages.Count() > 0)
-		{
-		 TRAPD(err, ScanStorageL(iStorages[0]));        
-		 if(err != KErrNone)
-			 {
-			 if( !storageMgr.ValidStorageId(iStorages[0]) )
-				 {
-				 //Scan storage leave because storage(memory card) removed.
-				 //Scan next specified storage in RunL, if there is.
-				 __FLOG_VA(_L8("StartL - iSkipCurrentStorage - ETrue."));
-				 iSkipCurrentStorage = ETrue;
-				TRequestStatus* status = &iStatus;
-				User::RequestComplete(status, iStatus.Int());
-				 SetActive();
-				 }
-			 else
-				 {
-				 User::Leave(err);
-				 }
-			 }
-		}
-	else
-		{
-		if((!iIsFileEnumerator) &&(iNumOfFoldersAndFiles > KMAX_FILECOUNT_ENUMERATINGPHASE1))
-			{
-			iSingletons.DpController().SetNeedEnumeratingPhase2(ETrue);
-			}
-		
-		iCallback.NotifyEnumerationCompleteL(iStorageId, KErrNone);
-		
-		TMTPTypeEvent event;
-		
-		event.SetUint16(TMTPTypeEvent::EEventCode, EMTPEventCodeUnreportedStatus);
-		event.SetUint32(TMTPTypeEvent::EEventSessionID, KMTPSessionAll);
-		
-		iFramework.SendEventL(event);
-		}
-	}
+    if (iStorages.Count() > 0)
+        {
+        iScanPos = 0;
+        TRAPD(err, ScanStorageL(iStorages[iScanPos]));        
+        if(err != KErrNone)
+            {
+            if( !storageMgr.ValidStorageId(iStorages[iScanPos]) )
+                {
+                //Scan storage leave because storage(memory card) removed.
+                //Scan next specified storage in RunL, if there is.
+                __FLOG_VA(_L8("StartL - iSkipCurrentStorage - ETrue."));
+                iSkipCurrentStorage = ETrue;
+                TRequestStatus* status = &iStatus;
+                User::RequestComplete(status, iStatus.Int());
+                SetActive();
+                }
+            else
+                {
+                User::Leave(err);
+                }
+            }
+        }
+    else
+        {
+        iCallback.NotifyEnumerationCompleteL(iStorageId, KErrNone);
+        TMTPTypeEvent event;
+
+        event.SetUint16(TMTPTypeEvent::EEventCode, EMTPEventCodeUnreportedStatus);
+        event.SetUint32(TMTPTypeEvent::EEventSessionID, KMTPSessionAll);
+
+        iFramework.SendEventL(event);
+        }
+    }
 	
 /**
 Cancel the enumeration process
@@ -194,33 +197,33 @@ void CMTPFSEnumerator::DoCancel()
 	}
 
 void CMTPFSEnumerator::ScanStorageL(TUint32 aStorageId)
-	{
-	__FLOG_VA(_L8("ScanStorageL - entry"));
+    {
+    __FLOG_VA(_L8("ScanStorageL - entry"));
     const CMTPStorageMetaData& storage(iFramework.StorageMgr().StorageL(aStorageId));
     __ASSERT_DEBUG((storage.Uint(CMTPStorageMetaData::EStorageSystemType) == CMTPStorageMetaData::ESystemTypeDefaultFileSystem), User::Invariant());
     TFileName root(storage.DesC(CMTPStorageMetaData::EStorageSuid));
     
     #ifdef __FLOG_ACTIVE    
-	TBuf8<KMaxFileName> tmp;
-	tmp.Copy(root);
- 	__FLOG_VA((_L8("StorageSuid - %S"), &tmp));	
-	#endif // __FLOG_ACTIVE
- 	
- 	if ( iExclusionMgr.IsFolderAcceptedL(root, aStorageId) )
- 	    {
- 	    iParentHandle = KMTPHandleNoParent;
- 	    iPath.Set(root, NULL, NULL);
- 	    User::LeaveIfError(iDir.Open(iFramework.Fs(), iPath.DriveAndPath(), KEntryAttNormal | KEntryAttHidden | KEntryAttDir));
- 	    ScanDirL();
- 	    }
- 	else
- 	    {
- 	    TRequestStatus* status = &iStatus;
- 	    User::RequestComplete(status, iStatus.Int());
- 	    SetActive();
- 	    }
- 	__FLOG_VA(_L8("ScanStorageL - exit"));
-	}
+    TBuf8<KMaxFileName> tmp;
+    tmp.Copy(root);
+    __FLOG_VA((_L8("StorageSuid - %S"), &tmp));	
+    #endif // __FLOG_ACTIVE
+    
+    if ( iExclusionMgr.IsFolderAcceptedL(root, aStorageId) )
+        {
+        iParentHandle = KMTPHandleNoParent;
+        iCurrentPath = root;
+        User::LeaveIfError(iDir.Open(iFramework.Fs(), iCurrentPath, KEntryAttNormal | KEntryAttHidden | KEntryAttDir));
+        ScanDirL();
+        }
+    else
+        {
+        TRequestStatus* status = &iStatus;
+        User::RequestComplete(status, iStatus.Int());
+        SetActive();
+        }
+    __FLOG_VA(_L8("ScanStorageL - exit"));
+    }
 
 /**
 Scans directory at aPath recursing into subdirectories on a depth first basis.
@@ -252,45 +255,69 @@ void CMTPFSEnumerator::ScanDirL()
 	}
 
 void CMTPFSEnumerator::ScanNextStorageL()
-	{
-	__FLOG_VA(_L8("ScanNextStorageL - entry"));
-	// If there are one or more unscanned storages left
-	// (the currently scanned one is still on the list)
-	if (iStorages.Count() > 1)
-		{
-		iStorages.Remove(0);
-		ScanStorageL(iStorages[0]);
-		}
-	else
-		{
-		// We are done
-		iStorages.Reset();
-		if((!iIsFileEnumerator) &&(iNumOfFoldersAndFiles > KMAX_FILECOUNT_ENUMERATINGPHASE1))
-			{
-			iSingletons.DpController().SetNeedEnumeratingPhase2(ETrue);
-			}
-		iCallback.NotifyEnumerationCompleteL(iStorageId, KErrNone);
-		
-		}
-	__FLOG_VA(_L8("ScanNextStorageL - exit"));
-	}
+    {
+    iDirStack.Reset();
+    __FLOG_VA(_L8("ScanNextStorageL - entry"));
+    // If there are one or more unscanned storages left
+    // (the currently scanned one is still on the list)
+    if (++ iScanPos < iStorages.Count())
+        {
+        ScanStorageL(iStorages[iScanPos]);
+        }
+    else
+        {
+        // We are done
+        iScanPos = 0;
+        
+        if(iScanAll) //all object scaned or first time limit reached.
+            {
+            iStorages.Reset();
+            if(iObjectNeedToScan <= 0)
+                {
+                iSingletons.DpController().SetNeedEnumeratingPhase2(ETrue);
+                }
+            iDir.Close();
+            iCallback.NotifyEnumerationCompleteL(iStorageId, KErrNone);
+            }
+        iAllRootScaned = ETrue;
+        if(!iScanAll)
+            {
+            if(iObjectNeedToScan > 0)//partial scan didn't finish means root didn't have KMAX_FILECOUNT_ENUMERATINGPHASE1 files
+                {
+                iScanAll = ETrue;
+                iObjectNeedToScan = KMAX_FILECOUNT_ENUMERATINGPHASE1;
+                ScanStorageL(iStorages[iScanPos]);
+                }
+            else //root has more than KMAX_FILECOUNT_ENUMERATINGPHASE1 files
+                {
+                iDir.Close();
+                iStorages.Reset();
+                iSingletons.DpController().SetNeedEnumeratingPhase2(ETrue);
+                iCallback.NotifyEnumerationCompleteL(iStorageId, KErrNone);
+                }
+            }
+        }
+    __FLOG_VA(_L8("ScanNextStorageL - exit"));
+    }
 
 void CMTPFSEnumerator::ScanNextSubdirL()
 	{
 	__FLOG_VA(_L8("ScanNextSubdirL - entry"));
 	// A empty (non-constructed) TEntry is our marker telling us to pop a directory 
 	// from iPath when we see this
-	iDirStack.AppendL(TEntry());
+	//iDirStack.AppendL(TEntry());
 			
 	// Leave with KErrNotFound if we don't find the object handle since it shouldn't be on the 
 	// dirstack if the entry wasn't added
-	TPtrC suid = iPath.DriveAndPath().Left(iPath.DriveAndPath().Length());
+	//TPtrC suid = iPath.DriveAndPath().Left(iPath.DriveAndPath().Length());
 	// Update the current parentId with object of the directory
-	iParentHandle = iFramework.ObjectMgr().HandleL(suid);
-				
+	iParentHandle = iDirStack[iDirStack.Count() - 1].iHandle;//iFramework.ObjectMgr().HandleL(suid);
+	iCurrentPath = iDirStack[iDirStack.Count() - 1].iPath;
+	iDirStack.Remove(iDirStack.Count() - 1);
+	__FLOG_VA((_L8("ScanNextSubdirL path %S"), &iCurrentPath));		
 	// Kick-off a scan of the next directory
 	iDir.Close();
-	User::LeaveIfError(iDir.Open(iFramework.Fs(), iPath.DriveAndPath(), KEntryAttNormal | KEntryAttHidden | KEntryAttDir));
+	User::LeaveIfError(iDir.Open(iFramework.Fs(), iCurrentPath, KEntryAttNormal | KEntryAttHidden | KEntryAttDir));    
 	ScanDirL();
 	__FLOG_VA(_L8("ScanNextSubdirL - exit"));
 	}
@@ -305,38 +332,15 @@ void CMTPFSEnumerator::ScanNextL()
 	__FLOG_VA(_L8("ScanNextL - entry"));
 	TInt count = iDirStack.Count();
 	
-	if ((count == 0) || iOnlyScanRoot )
+	if ((count == 0) || !iScanAll)
 		{
 		// No more directories on the stack, try the next storage
 		ScanNextStorageL();
 		}
 	else
 		{
-		TEntry& entry = iDirStack[count - 1];
-		
-		// Empty TEntry, no more subdirectories in
-		// the current path
-		if (entry.iName == KNullDesC)
-			{
-			// Remove current dir from path
-			iPath.PopDir();
-			iDirStack.Remove(count - 1);
-			iDir.Close();
-			
-			// Scan the next directory of the parent
-			ScanNextL();
-			}
-			
-		// Going into a subdirectory of current
-		else 
-			{
-			// Add directory to path		
-			iPath.AddDir(entry.iName);
-			// Remove directory so we don't think it's a subdirectory
-			iDirStack.Remove(count - 1);
-	
-			ScanNextSubdirL();
-			}
+		// Remove directory so we don't think it's a subdirectory
+		ScanNextSubdirL();
 		}
 	__FLOG_VA(_L8("ScanNextL - exit"));
 	}
@@ -392,9 +396,9 @@ Ignore the error, continue with the next one
 TInt CMTPFSEnumerator::RunError(TInt aError)
 	{
 	__FLOG_VA((_L8("RunError - entry with error %d"), aError));
-	 if(!iFramework.StorageMgr().ValidStorageId(iStorages[0]))
+	 if(!iFramework.StorageMgr().ValidStorageId(iStorages[iScanPos]))
 		 {
-		 __FLOG_VA((_L8("Invalid StorageID = %d"),iStorages[0] ));
+		 __FLOG_VA((_L8("Invalid StorageID = %d"),iStorages[iScanPos] ));
 		 if (iStorages.Count()>1)
 			 {
 			 //Not necessary to process any entry on the storage, since the storage removed.
@@ -434,7 +438,6 @@ void CMTPFSEnumerator::ConstructL()
 	iDpSingletons.OpenL(iFramework);
 	iObject = CMTPObjectMetaData::NewL();	
 	iDpID = iFramework.DataProviderId();
-	iIsFileEnumerator = (KMTPFileDPID == iDpID);
 	}
 
 /**
@@ -442,114 +445,148 @@ Iterates iEntries adding entries as needed to object manager and iDirStack.
 */
 
 void CMTPFSEnumerator::ProcessEntriesL()
-	{
-	TBuf<KMTPMaxFullFileName> path = iPath.DriveAndPath();
-	
-	// Start looping through entries at where we left off
-	TInt count = iEntries.Count() - iFirstUnprocessed;
-	// Process no more than KProcessLimit entries
-	count = Min(count, iProcessLimit);
-	iFirstUnprocessed += count;		
-	
-	if(!iIsFileEnumerator)
-		{
-		iNumOfFoldersAndFiles +=count;
-		}	
-	
-	for (TInt i = (iFirstUnprocessed - count); i < iFirstUnprocessed; ++i)
-		{
-		const TEntry& entry = iEntries[i];
-		path.Append(entry.iName);
-		
+    {
+    // Start looping through entries at where we left off
+    TInt count = iEntries.Count() - iFirstUnprocessed;
+    // Process no more than KProcessLimit entries
+    count = Min(count, iProcessLimit);
+    iFirstUnprocessed += count;		
+
+    for (TInt i = (iFirstUnprocessed - count); i < iFirstUnprocessed; ++i)
+        {
+        const TEntry& entry = iEntries[i];
+        iCurrentPath.Append(entry.iName);
+        __FLOG_VA((_L8("Process path %S name %S"), &iCurrentPath, &entry.iName));
 #ifdef __FLOG_ACTIVE    
-		TBuf8<KMTPMaxFullFileName> tmp;
-        tmp.Copy(path);
-        TInt pathLen=path.Length();
+        TBuf8<KMTPMaxFullFileName> tmp;
+        tmp.Copy(iCurrentPath);
+        TInt pathLen=iCurrentPath.Length();
         if(pathLen > KLogBufferSize)
             {
             TBuf8<KLogBufferSize> tmp1;
             tmp1.Copy(tmp.Ptr(),KLogBufferSize);
-			__FLOG_VA(_L8("Entry - "));
-	        __FLOG_VA((_L8("%S"), &tmp1));
+            __FLOG_VA(_L8("Entry - "));
+            __FLOG_VA((_L8("%S"), &tmp1));
 
-	        tmp1.Copy(tmp.Ptr()+KLogBufferSize, pathLen-KLogBufferSize);
-	        __FLOG_VA((_L8("%S"), &tmp1));
+            tmp1.Copy(tmp.Ptr()+KLogBufferSize, pathLen-KLogBufferSize);
+            __FLOG_VA((_L8("%S"), &tmp1));
             }
         else
             {
             __FLOG_VA(_L8("Entry - "));
-			__FLOG_VA((_L8("%S"), &tmp));
+            __FLOG_VA((_L8("%S"), &tmp));
             }
 #endif // __FLOG_ACTIVE
-		
-		TInt len = entry.iName.Length();
-		TInt totalLen = path.Length();
-		if(totalLen > KMaxFileName)
-		    {
-			// Remove filename part
-		    path.SetLength(totalLen - len);
-		    __FLOG_VA(_L8("Full name exceeds KMaxFileName, ignored."));
-		    continue;
-		    }
-		TUint32 handle = 0;
-		TMTPFormatCode format;
-		  TParsePtrC parse(path);
-		if (entry.IsDir())
-			{
-			if (iExclusionMgr.IsFolderAcceptedL(path, iStorages[0]))
-				{
-				path.Append('\\');
-				++len;
-				format = EMTPFormatCodeAssociation;
-				AddEntryL(path, handle, format, iDpID, entry, iStorages[0], iParentHandle);
-				iDirStack.AppendL(entry);
-				}
-			}
-		else if ( iExclusionMgr.IsFileAcceptedL(path,iStorages[0]) )
-			{
-			format = EMTPFormatCodeUndefined;
-			AddEntryL(path, handle, format, iDpID, entry, iStorages[0], iParentHandle);
-			}
-		else if ( parse.ExtPresent() )
-		    {
-		    switch(iDpSingletons.MTPUtility().GetEnumerationFlag(parse.Ext().Mid(1)))
-		        {
-            case MISSED_FILES_OWNED_BY_FILE_DP:
-                if (KMTPHandleNone == iFramework.ObjectMgr().HandleL(path))
-                    {
-                    format = EMTPFormatCodeUndefined;
-                    AddEntryL(path, handle, format, iDpID, entry, iStorages[0], iParentHandle);		   
-                    }
-                break;
-                
-            case MISSED_FILES_OWNED_BY_OTHER_DP:
-                if (KMTPHandleNone == iFramework.ObjectMgr().HandleL(path))
-                    {
-                    format = iDpSingletons.MTPUtility().GetFormatByExtension(parse.Ext().Mid(1));  
-                    TUint32 DpId = iDpSingletons.MTPUtility().GetDpId(parse.Ext().Mid(1), KNullDesC);
-                    AddFileEntryForOtherDpL(path, handle, format, DpId, entry, iStorages[0], iParentHandle);
-                    }
-                break;
-                
-            case FILES_OWNED_BY_OTHER_DP:
+
+        TInt len = entry.iName.Length();
+        TInt totalLen = iCurrentPath.Length();
+        if(totalLen > KMaxFileName)
+            {
+            // Remove filename part
+            iCurrentPath.SetLength(totalLen - len);
+            __FLOG_VA(_L8("Full name exceeds KMaxFileName, ignored."));
+            continue;
+            }
+        TUint32 handle = 0;
+        TMTPFormatCode format;
+        if(-- iObjectNeedToScan <=0 && iAllRootScaned)
+            {
+            iSkipCurrentStorage = ETrue;
+            return;
+            }
+        if (entry.IsDir())
+            {
+            if (iExclusionMgr.IsFolderAcceptedL(iCurrentPath, iStorages[iScanPos]))
                 {
-                format = iDpSingletons.MTPUtility().GetFormatByExtension(parse.Ext().Mid(1));  
-                TUint32 DpId = iDpSingletons.MTPUtility().GetDpId(parse.Ext().Mid(1), KNullDesC);
-                AddFileEntryForOtherDpL(path, handle, format, DpId, entry, iStorages[0], iParentHandle);
+                iCurrentPath.Append('\\');
+                ++len;
+                format = EMTPFormatCodeAssociation;
+                AddEntryL(iCurrentPath, handle, format, KMTPDeviceDPID, entry, iStorages[iScanPos], iParentHandle);
+                iDirStack.Append(TStackItem(iCurrentPath, handle));
                 }
-                break;
-                
-//          case FILES_OWNED_BY_NONE:
-            default:
-                //nothing to do
-                break;
-		        }    
-		    }
-		// Remove filename part					
-		path.SetLength(path.Length() - len);
-		}
-		
-	}
+            }
+        else
+            {
+            if ( iExclusionMgr.IsFileAcceptedL(iCurrentPath,iStorages[iScanPos]) )
+                {
+                format = EMTPFormatCodeUndefined;
+                AddEntryL(iCurrentPath, handle, format, iDpID, entry, iStorages[iScanPos], iParentHandle);
+                }
+            else 
+                {
+                    TParsePtrC parse(iCurrentPath);
+                    if ( parse.ExtPresent() )
+                    {
+                    switch(iDpSingletons.MTPUtility().GetEnumerationFlag(parse.Ext().Mid(1)))
+                        {
+                    case MISSED_FILES_OWNED_BY_FILE_DP:
+                        if (KMTPHandleNone == iFramework.ObjectMgr().HandleL(iCurrentPath))
+                            {
+                            format = EMTPFormatCodeUndefined;
+                            AddEntryL(iCurrentPath, handle, format, iDpID, entry, iStorages[iScanPos], iParentHandle);		   
+                            }
+                        break;
+                        
+                    case MISSED_FILES_OWNED_BY_OTHER_DP:
+                        if (KMTPHandleNone == iFramework.ObjectMgr().HandleL(iCurrentPath))
+                            {
+                            format = iDpSingletons.MTPUtility().GetFormatByExtension(parse.Ext().Mid(1));  
+                            TUint32 DpId = iDpSingletons.MTPUtility().GetDpId(parse.Ext().Mid(1), KNullDesC);
+                            AddFileEntryForOtherDpL(iCurrentPath, handle, format, DpId, entry, iStorages[iScanPos], iParentHandle);
+                            }
+                        break;
+                        
+                    case FILES_OWNED_BY_OTHER_DP:
+                        {
+                        _LIT( KTxtExtensionODF, ".odf" );
+                        TUint32 DpId = iFramework.DataProviderId();
+                        if (parse.Ext().CompareF(KTxtExtensionODF)==0)
+                            {
+                            format = iDpSingletons.MTPUtility().FormatFromFilename(parse.Ext().Mid(1));
+                            if ( EMTPFormatCode3GPContainer==format || EMTPFormatCodeMP4Container==format )
+                                {
+                                DpId = iDpSingletons.MTPUtility().GetDpId(parse.Ext().Mid(1),KNullDesC);
+                                if ( 255 == DpId )
+                                    {
+                                    HBufC* mime = NULL;
+                                    mime = iDpSingletons.MTPUtility().ContainerMimeType(iCurrentPath);
+                                    if ( mime != NULL )
+                                        {
+                                        DpId = iDpSingletons.MTPUtility().GetDpId(parse.Ext().Mid(1),*mime);
+                                        delete mime;
+                                        mime = NULL;
+                                        }
+                                    }
+                                AddFileEntryForOtherDpL(iCurrentPath, handle, format, DpId, entry, iStorages[iScanPos], iParentHandle);
+                                }
+                            else
+                                {
+                                format = EMTPFormatCodeUndefined;
+                                AddEntryL(iCurrentPath, handle, format, iDpID, entry, iStorages[iScanPos], iParentHandle);
+                                }
+                            }
+                        else
+                            {
+                            format = iDpSingletons.MTPUtility().GetFormatByExtension(parse.Ext().Mid(1));  
+                            TUint32 DpId = iDpSingletons.MTPUtility().GetDpId(parse.Ext().Mid(1), KNullDesC);
+                            AddFileEntryForOtherDpL(iCurrentPath, handle, format, DpId, entry, iStorages[iScanPos], iParentHandle);
+                            }
+                        }
+                        break;
+                        
+        //          case FILES_OWNED_BY_NONE:
+                    default:
+                        //nothing to do
+                        break;
+                        }    
+                    }
+                }
+            }
+        // Remove filename part					
+        iCurrentPath.SetLength(iCurrentPath.Length() - len);
+        }
+    
+    }
 
 /**
 Add a file entry to the object store
@@ -574,14 +611,14 @@ void CMTPFSEnumerator::AddEntryL(const TDesC& aPath, TUint32 &aHandle, TMTPForma
         TParsePtrC pathParser(aPath.Left(aPath.Length() - 1)); // Ignore the trailing "\".
 		name.Set(aEntry.iName);
         }
-    else
+    else 
         {
         assoc = EMTPAssociationTypeUndefined;
         TParsePtrC pathParser(aPath);
 		name.Set(pathParser.Name());	
         }
     
-    if(iExclusionMgr.IsFormatValid(format))
+    //if(iExclusionMgr.IsFormatValid(format))
         {
         aHandle = KMTPHandleNone;
         
@@ -594,6 +631,8 @@ void CMTPFSEnumerator::AddEntryL(const TDesC& aPath, TUint32 &aHandle, TMTPForma
         iObject->SetUint(CMTPObjectMetaData::ENonConsumable, EMTPConsumable);
         iObject->SetDesCL(CMTPObjectMetaData::EName, name);
         iFramework.ObjectMgr().InsertObjectL(*iObject);
+        aHandle = iObject->Uint(CMTPObjectMetaData::EHandle);
+        
         }
 	__FLOG_VA(_L8("AddEntryL - exit"));	
 	}

@@ -57,7 +57,7 @@ private:    //from CMTPRequestProcessor
 private:
     RFs&                    iRfs;
     CMTPObjectMetaData*     iObjMeta;
-    
+    RMTPFramework           iSingletons;
     };
     
 #endif

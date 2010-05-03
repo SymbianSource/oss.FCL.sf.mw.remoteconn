@@ -470,22 +470,21 @@ TUint8 CMTPGetDevicePropDesc::GetFormatOrdered()
 
 TMTPTypeGuid* CMTPGetDevicePropDesc::GetGUIDL(const TUint aKey)
     {
+    TBuf<KGUIDFormatStringLength> buf;
     
-    TBuf8<KMTPTypeUINT128Size> ptr;
-    
-    iRepository->Get(aKey,ptr);
-    
-    TMTPTypeGuid* ret = new (ELeave) TMTPTypeGuid( ptr );
+    User::LeaveIfError(iRepository->Get(aKey,buf));
+
+    TMTPTypeGuid* ret = new (ELeave) TMTPTypeGuid( buf );
     
     return ret;
     }
 
 void CMTPGetDevicePropDesc::SaveGUID( const TUint aKey,  TMTPTypeGuid& aValue )
     {
-    TPtrC8 ptr;
-    if ( KMTPChunkSequenceCompletion == aValue.FirstReadChunk(ptr) )
-    	{
-    	iRepository->Set(aKey,ptr);
-    	}
+	TBuf<KGUIDFormatStringLength> buf;
+	if(aValue.ToString(buf) == KErrNone)
+		{
+		iRepository->Set(aKey,buf);
+		}
     }
 

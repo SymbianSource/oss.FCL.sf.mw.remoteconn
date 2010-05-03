@@ -27,6 +27,7 @@
 #include "cmtpsetobjectproplist.h"
 #include "mtpproxydppanic.h"
 #include "rmtpframework.h"
+#include "cmtpstoragemgr.h"
 
 /**
 Two-phase construction method
@@ -174,6 +175,10 @@ void CMTPSetObjectPropList::RunL()
                     // Invalid object handle.
                     iResponseCode = EMTPRespCodeInvalidObjectHandle;
                     }
+                else if(!iSingletons.StorageMgr().IsReadWriteStorage(meta->Uint(CMTPObjectMetaData::EStorageId)))
+                	{
+					iResponseCode = EMTPRespCodeAccessDenied;
+                	}
                 else
                     {
                     RArray<TUint> targets;

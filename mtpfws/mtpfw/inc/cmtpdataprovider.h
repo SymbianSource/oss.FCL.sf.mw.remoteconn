@@ -86,7 +86,8 @@ public:
 	void ExecuteEventL(const TMTPTypeEvent& aEvent, MMTPConnection& aConnection);
 	void ExecuteRequestL(const TMTPTypeRequest& aRequest, MMTPConnection& aConnection);
 	IMPORT_C void ExecuteProxyRequestL(const TMTPTypeRequest& aRequest, MMTPConnection& aConnection, MMTPTransactionProxy& aProxy);
-    
+    void ExecutePendingRequestL();
+
     void EnumerateObjectsL(TUint32 aStorageId);
     void EnumerateStoragesL();
     IMPORT_C TUint EnumerationState() const;
@@ -125,7 +126,8 @@ public: // From MMTPDataProviderFramework
     RFs& Fs() const;
     MMTPDataCodeGenerator& DataCodeGenerator() const;
     void NotifyFrameworkL( TMTPNotificationToFramework aNotification, const TAny* aParams );
-	
+    void RegisterPendingRequest(TUint aTimeOut = 0);
+    
 private: // From CActive
 
 	void DoCancel();

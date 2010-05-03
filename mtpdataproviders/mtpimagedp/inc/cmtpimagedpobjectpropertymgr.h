@@ -67,11 +67,11 @@ public:
     
     void GetPropertyL(TMTPObjectPropertyCode aProperty, TUint8& aValue);
     void GetPropertyL(TMTPObjectPropertyCode aProperty, TUint16& aValue);
-    void GetPropertyL(TMTPObjectPropertyCode aProperty, TUint32& aValue);
+    void GetPropertyL(TMTPObjectPropertyCode aProperty, TUint32& aValue, TBool alwaysCreate = ETrue);
     void GetPropertyL(TMTPObjectPropertyCode aProperty, TUint64& aValue);
     void GetPropertyL(TMTPObjectPropertyCode aProperty, TMTPTypeUint128& aValue);
     void GetPropertyL(TMTPObjectPropertyCode aProperty, CMTPTypeString& aValue);
-    void GetPropertyL(TMTPObjectPropertyCode aProperty, CMTPTypeArray& aValue);
+    void GetPropertyL(TMTPObjectPropertyCode aProperty, CMTPTypeArray& aValue, TBool alwaysCreate = ETrue);
     
     //clear the cache
     void ClearCacheL();

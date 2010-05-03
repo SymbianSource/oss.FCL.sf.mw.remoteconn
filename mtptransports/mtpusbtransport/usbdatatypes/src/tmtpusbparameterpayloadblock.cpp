@@ -65,26 +65,17 @@ source dataset parameter values.
 @param aIsNullParamValid a boolean value to check if a null parameter is valid. A value of ETrue means a null parameter is valid; EFalse means invalid.
 @param aNumOfNullParam the number of valid null parameters to be copied.
 */
-EXPORT_C void TMTPUsbParameterPayloadBlock::CopyIn(const TMTPTypeFlatBase& aFrom, TUint aParamStartOffset, TUint aParamEndOffset, TBool aIsNullParamValid, TUint aNumOfNullParam)
+EXPORT_C void TMTPUsbParameterPayloadBlock::CopyIn(const TMTPTypeFlatBase& aFrom, TUint aParamStartOffset, TUint aParamEndOffset, TBool /*aIsNullParamValid*/, TUint /*aNumOfNullParam*/)
     {
-    __ASSERT_DEBUG((aParamEndOffset >= aParamStartOffset && (aParamEndOffset - aParamStartOffset + 1) <= ENumElements), User::Invariant());
+    __ASSERT_DEBUG((aParamEndOffset >= aParamStartOffset && (aParamEndOffset - aParamStartOffset) <= ENumElements), User::Invariant());
     TUint32 parameter = KMTPNotSpecified32;
-    TUint numberOfNullParam = 0;
     TUint loopCount =  aParamEndOffset - aParamStartOffset;  
-	
-	for (TUint i(TMTPUsbParameterPayloadBlock::EParameter1); i <= loopCount; i++)
-	    {
-	    parameter = aFrom.Uint32(aParamStartOffset + i);
-	    if (parameter != KMTPNotSpecified32)
-	        {
-	        SetUint32(i, parameter);
-	        }
-	    else if(aIsNullParamValid && (numberOfNullParam < aNumOfNullParam))
-	        {
-	        SetUint32(i, parameter);
-	        numberOfNullParam++;
-	        }
-	    }     		
+
+    for (TUint i(TMTPUsbParameterPayloadBlock::EParameter1); i < loopCount; i++)
+        {
+        parameter = aFrom.Uint32(aParamStartOffset + i);
+        SetUint32(i, parameter);
+        }
     }
 
 /**

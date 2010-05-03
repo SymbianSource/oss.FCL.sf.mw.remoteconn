@@ -146,12 +146,7 @@ TMTPResponseCode CMTPImageDpGetObjectPropList::CheckPropCode() const
     TUint32 propCode = Request().Uint32(TMTPTypeRequest::ERequestParameter3);
     if (propCode == 0)
         {
-            TUint32 groupCode = Request().Uint32(TMTPTypeRequest::ERequestParameter4);
-            if(groupCode != KMTPImageDpPropertyGroupOneNumber)
-            {
-            //Only supported group one
-            response = EMTPRespCodeSpecificationByGroupUnsupported;
-            }
+            /*Do nothing */
         }
     else if (propCode != KMaxTUint)
         {
@@ -309,15 +304,18 @@ void CMTPImageDpGetObjectPropList::ServiceAllPropertiesL(TUint32 aHandle)
 void CMTPImageDpGetObjectPropList::ServiceGroupPropertiesL(TUint32 aHandle,TUint16 /*aGroupCode*/)
     {
     __FLOG(_L8(">> CMTPImageDpGetObjectPropList::ServiceGroupPropertiesL"));
-    
-    if (iFramework.ObjectMgr().ObjectOwnerId(aHandle) == iFramework.DataProviderId())
+    TUint32 groupCode = Request().Uint32(TMTPTypeRequest::ERequestParameter4);
+    if (KMTPImageDpPropertyGroupOneNumber == groupCode) //only return data for group one
         {
-        for (TUint propCodeIndex(0); propCodeIndex < KMTPImageDpGroupOneSize; propCodeIndex++)
+        if (iFramework.ObjectMgr().ObjectOwnerId(aHandle) == iFramework.DataProviderId())
             {
-            TUint16 propCode = KMTPImageDpGroupOneProperties[propCodeIndex];  
-            if(propCode != 0)
+            for (TUint propCodeIndex(0); propCodeIndex < KMTPImageDpGroupOneSize; propCodeIndex++)
                 {
-                ServiceOneObjectPropertyL(aHandle, propCode);
+                TUint16 propCode = KMTPImageDpGroupOneProperties[propCodeIndex];  
+                if(propCode != 0)
+                    {
+                    ServiceOneObjectPropertyL(aHandle, propCode);
+                    }
                 }
             }
         }
@@ -366,7 +364,7 @@ void CMTPImageDpGetObjectPropList::ServiceOneObjectPropertyL(TUint32 aHandle, TU
         case EMTPObjectPropCodeRepresentativeSampleWidth:
             {
             TUint32 value;
-            iPropertyMgr.GetPropertyL(TMTPObjectPropertyCode(aPropCode), value);
+            iPropertyMgr.GetPropertyL(TMTPObjectPropertyCode(aPropCode), value, EFalse);
             CMTPTypeObjectPropListElement& propElem = iPropertyList->ReservePropElemL(aHandle, propCode); 
             propElem.SetUint32L(CMTPTypeObjectPropListElement::EValue, value);
             iPropertyList->CommitPropElemL(propElem);
@@ -376,7 +374,7 @@ void CMTPImageDpGetObjectPropList::ServiceOneObjectPropertyL(TUint32 aHandle, TU
         case EMTPObjectPropCodeRepresentativeSampleData:
             {
             CMTPTypeArray* value = CMTPTypeArray::NewLC(EMTPTypeAUINT8);
-            iPropertyMgr.GetPropertyL(TMTPObjectPropertyCode(aPropCode), *value);            
+            iPropertyMgr.GetPropertyL(TMTPObjectPropertyCode(aPropCode), *value, EFalse);            
             CMTPTypeObjectPropListElement& propElem = iPropertyList->ReservePropElemL(aHandle, propCode);
             propElem.SetArrayL(CMTPTypeObjectPropListElement::EValue, *value);            
             iPropertyList->CommitPropElemL(propElem);

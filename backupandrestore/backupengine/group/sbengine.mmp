@@ -75,7 +75,7 @@ LIBRARY ezlib.lib sbencrypt.lib cryptography.lib
 
 #endif
 
-CAPABILITY ProtServ AllFiles WriteDeviceData ReadUserData
+CAPABILITY ProtServ AllFiles WriteDeviceData ReadUserData TrustedUi
 
 START WINS      
 // ?wins_specific_information

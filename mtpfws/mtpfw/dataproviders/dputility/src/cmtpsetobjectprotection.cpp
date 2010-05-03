@@ -28,6 +28,7 @@
 #include "mtpframeworkconst.h"
 #include "rmtpdpsingletons.h"
 #include "rmtputility.h"
+#include "cmtpstoragemgr.h"
 
 /**
 Verification data for the SetObjectPropValue request
@@ -37,6 +38,8 @@ const TMTPRequestElementInfo KMTPSetObjectProtectionPolicy[] =
         {TMTPTypeRequest::ERequestParameter1, EMTPElementTypeObjectHandle, EMTPElementAttrWrite, 0, 0, 0},      
      };
 
+const TInt KRetryTimes = 10;
+const TInt KRetryInterval = 150 * 1000; //150ms
 /**
 Two-phase construction method
 @param aPlugin  The data provider plugin
@@ -61,6 +64,7 @@ Destructor
 EXPORT_C CMTPSetObjectProtection::~CMTPSetObjectProtection()
     {   
     delete iObjMeta;
+    iSingletons.Close();
     }
 
 /**
@@ -83,6 +87,11 @@ TMTPResponseCode CMTPSetObjectProtection::CheckRequestL()
         {
         return EMTPRespCodeInvalidObjectHandle;
         }
+    if(!iSingletons.StorageMgr().IsReadWriteStorage(iObjMeta->Uint(CMTPObjectMetaData::EStorageId)))
+		{
+		return EMTPRespCodeAccessDenied; //EMTPRespCodeStoreReadOnly
+		}
+    
     TUint32 statusValue = Request().Uint32(TMTPTypeRequest::ERequestParameter2);
     //Currently we only support EMTPProtectionNoProtection and EMTPProtectionReadOnly
     if ( statusValue!=EMTPProtectionNoProtection && statusValue!=EMTPProtectionReadOnly )
@@ -97,20 +106,42 @@ void CMTPSetObjectProtection::ServiceL()
     {
     TUint32 handle = Request().Uint32(TMTPTypeRequest::ERequestParameter1);
     TUint32 statusValue = Request().Uint32(TMTPTypeRequest::ERequestParameter2);
-    TMTPResponseCode rsp = EMTPRespCodeOK;
+    TMTPResponseCode rsp = EMTPRespCodeAccessDenied;
     //iFramework.ObjectMgr().ObjectL(TMTPTypeUint32(handle), *iObjMeta);
     
     switch(statusValue)
         {
         case EMTPProtectionNoProtection:
             {
-            iRfs.SetAtt(iObjMeta->DesC(CMTPObjectMetaData::ESuid),KEntryAttNormal,KEntryAttReadOnly);
+            for(TInt i = 0; i < KRetryTimes; ++ i)
+                {
+                if(KErrNone == iRfs.SetAtt(iObjMeta->DesC(CMTPObjectMetaData::ESuid),KEntryAttNormal,KEntryAttReadOnly))
+                    {
+                    rsp = EMTPRespCodeOK;
+                    break;
+                    }
+                else
+                    {
+                    User::After(KRetryInterval);	
+                    }
+                }
             }
             break;
         case EMTPProtectionReadOnly:
         case EMTPProtectionReadOnlyData:
             {
-            iRfs.SetAtt(iObjMeta->DesC(CMTPObjectMetaData::ESuid),KEntryAttReadOnly,KEntryAttNormal);
+            for(TInt i = 0; i < KRetryTimes; ++ i)
+                {
+                if(KErrNone == iRfs.SetAtt(iObjMeta->DesC(CMTPObjectMetaData::ESuid),KEntryAttReadOnly,KEntryAttNormal))
+                    {
+                        rsp = EMTPRespCodeOK;
+                        break;
+                    }
+                    else
+                    {
+                        User::After(KRetryInterval);	
+                    }
+                }
             }
             break;
         default:
@@ -127,4 +158,5 @@ Second-phase construction
 void CMTPSetObjectProtection::ConstructL()
     {   
     iObjMeta = CMTPObjectMetaData::NewL();
+    iSingletons.OpenL();
     }

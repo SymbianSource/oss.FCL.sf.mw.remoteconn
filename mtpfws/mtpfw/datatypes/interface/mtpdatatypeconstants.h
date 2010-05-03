@@ -234,6 +234,14 @@ The MTP String data type maximum character content length.
 */
 const TUint     KMTPMaxStringCharactersLength(KMTPMaxStringLength - KMTPNullCharLen);
 
+/**
+The stardand format GUID string length, 
+the GUID format should be :xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+@publishedPartner
+@released  
+*/
+const TUint KGUIDFormatStringLength(36);
+
 #endif // MTPDATATYPECONSTANTS_H
 
 

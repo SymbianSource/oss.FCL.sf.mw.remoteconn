@@ -23,6 +23,7 @@
 #include "cmtpdataprovidercontroller.h"
 #include "cmtpdataprovider.h"
 #include "cmtpdevicedatastore.h"
+#include "cmtpdataprovidercontroller.h"
 
 #include "cmtpgetnumobjects.h"
 #include "mtpdevicedpconst.h"
@@ -30,6 +31,7 @@
 
 // Class constants.
 __FLOG_STMT(_LIT8(KComponent,"GetNumObjects");)
+static const TInt KMTPGetObjectNumTimeOut(1);
 
 /**
 Verification data for GetNumObjects request
@@ -99,33 +101,16 @@ TMTPResponseCode CMTPGetNumObjects::CheckRequestL()
 		return EMTPRespCodeInvalidObjectFormatCode;
 		}
 	
+	/*
 	if(iSingletons.DpController().EnumerateState() != CMTPDataProviderController::EEnumeratedFulllyCompleted)
 		{
-		TUint storageID = Request().Uint32(TMTPTypeRequest::ERequestParameter1);
 		TUint handle = Request().Uint32(TMTPTypeRequest::ERequestParameter3);
-		if(iDevDpSingletons.PendingStorages().FindInOrder(storageID) != KErrNotFound)
-			{
-			responseCode = EMTPRespCodeDeviceBusy;
-			}
-		else if( (handle != KMTPHandleNone) && (handle != KMTPHandleAll)  )
-			{
-			CMTPObjectMetaData* meta = iRequestChecker->GetObjectInfo(handle);
-			__ASSERT_DEBUG(meta, Panic(EMTPDevDpObjectNull));
-			
-			if( meta->Uint(CMTPObjectMetaData::EFormatCode) == EMTPFormatCodeAssociation )
-				{
-				responseCode = EMTPRespCodeDeviceBusy;
-				}
-			}
-		else if(EMTPFormatCodeUndefined == formatCode)
+		if(handle != KMTPHandleAll)
 			{
 			responseCode = EMTPRespCodeDeviceBusy;
 			}
 		}
-	else if(iDevDpSingletons.PendingStorages().Count() > 0)
-		{
-		iDevDpSingletons.PendingStorages().Close();
-		}
+		*/
 	
 	return responseCode;	
 	}
@@ -138,6 +123,33 @@ void CMTPGetNumObjects::ServiceL()
 	{
     __FLOG(_L8("ServiceL - Entry"));
     __FLOG_VA((_L8("IsConnectMac = %d; ERequestParameter2 = %d" ), iDevDpSingletons.DeviceDataStore().IsConnectMac(), Request().Uint32(TMTPTypeRequest::ERequestParameter2)));
+    
+    if(iSingletons.DpController().EnumerateState() != CMTPDataProviderController::EEnumeratedFulllyCompleted)
+        {
+        TUint storageId = Request().Uint32(TMTPTypeRequest::ERequestParameter1);
+        TUint handle = Request().Uint32(TMTPTypeRequest::ERequestParameter3);
+        TUint enumerateState = iSingletons.DpController().StorageEnumerateState(storageId);
+        if ( (enumerateState < CMTPDataProviderController::EEnumeratingPhaseOneDone)
+            || (enumerateState != CMTPDataProviderController::EEnumeratedFulllyCompleted && handle != KMTPHandleAll))
+            {
+            if (iTimeoutCount++ >= KMTPGetObjectNumTimeOut)
+                {
+                __FLOG(_L8("Wait for enumeration time out, return busy."));
+                SendResponseL(EMTPRespCodeDeviceBusy);
+                iTimeoutCount = 0;
+                return;
+                }
+            else
+                {
+                __FLOG(_L8("Enumeration not completed, suspend request."));
+                RegisterPendingRequest(20);
+                return; 
+                }
+            }
+        }
+    
+    iTimeoutCount = 0;
+    
 	if(iDevDpSingletons.DeviceDataStore().IsConnectMac()
         &&(KMTPFormatsAll == Request().Uint32(TMTPTypeRequest::ERequestParameter2)))
         {

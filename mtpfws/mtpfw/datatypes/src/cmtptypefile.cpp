@@ -17,9 +17,15 @@
  @file
  @publishedPartner
  */
-
+#include <centralrepository.h>
 #include <mtp/cmtptypefile.h>
 #include <mtp/mtpdatatypeconstants.h>
+
+#include "mtpframeworkconst.h"
+
+//This file is exported from s60 sdk, now just copy it
+//to make sure onb can run
+#include "UiklafInternalCRKeys.h"
 
 // File type constants.
 const TInt KMTPFileChunkSizeForLargeFile(0x00080000); // 512K
@@ -31,14 +37,6 @@ const TInt KMTPFileChunkSizeForSmallFile(0x00010000); //64K
 const TInt64 KMTPFileSetSizeChunk(1<<30); //1G
 
 const TUint KUSBHeaderLen = 12;
-
-//MTP should reserve some disk space to prevent ood monitor popup
-//'Out of memory' note.When syncing music through ovi suite,
-//sometimes device screen get freeze with this note
-//If you need to adjust this value,please also update the definition
-//in file 'cmtpgetstorageinfo.cpp'
-const TInt KFreeSpaceThreshHoldValue(11*1024*1024);//11M
-
 
 CMTPTypeFile::CFileWriter* CMTPTypeFile::CFileWriter::NewL(RFile&  aFile, RBuf8& aWriteBuf)
     {
@@ -197,7 +195,39 @@ EXPORT_C void CMTPTypeFile::SetSizeL(TUint64 aSize)
     fs.Volume(volumeInfo,driveNo);
     fs.Close();
     
-    if(volumeInfo.iFree <= KFreeSpaceThreshHoldValue + aSize)
+    //Read the threshold value from Central Repository and check against it
+    CRepository* repository(NULL);
+    TInt thresholdValue(0);
+    TRAPD(err,repository = CRepository::NewL(KCRUidUiklaf));
+    if (err == KErrNone)
+        {
+        if (driveNo == EDriveC)
+            {
+            TInt warningUsagePercent(0);
+            err = repository->Get(KUikOODDiskFreeSpaceWarningNoteLevel,warningUsagePercent);
+            if (err == KErrNone)
+                {
+                thresholdValue = ((volumeInfo.iSize*(100-warningUsagePercent))/100)
+                    + KFreeSpaceExtraReserved;
+                }
+            }
+        else 
+            {
+            err = repository->Get(KUikOODDiskFreeSpaceWarningNoteLevelMassMemory,thresholdValue);
+            if (err == KErrNone)
+                {
+                thresholdValue += KFreeSpaceExtraReserved;
+                }
+            }
+        delete repository;
+        }
+    
+    if (err != KErrNone)
+        {
+        thresholdValue = KFreeSpaceThreshHoldDefaultValue + KFreeSpaceExtraReserved;
+        }
+    
+    if(volumeInfo.iFree <= thresholdValue + aSize)
         {
         User::Leave(KErrDiskFull);
         }

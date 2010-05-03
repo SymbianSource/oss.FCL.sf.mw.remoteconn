@@ -198,11 +198,7 @@ void CMTPDataProviderConfig::ConstructL(TResourceReader& aReader, const TDesC& a
 
     // BYTE enumeration_phase
     iEnumerationPhase = aReader.ReadUint8();
-    if (iEnumerationPhase == 0)
-      {
-      // The default value 0 is treated as 255
-      iEnumerationPhase = 255;
-      }
+    
     
     }
 
