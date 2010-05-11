@@ -30,6 +30,15 @@
 //forward declaration
 class CMTPTypeStorageInfo;
 
+//Default drive name used when failed to read drive name from
+//System
+_LIT(KPhoneMemory,"Phone memory");
+_LIT(KMassMemory,"Mass memory");
+_LIT(KMemoryCard,"Memory card");
+_LIT(KNoName,"No name");
+//The last resort for drive name:DriveChar + drive, eg 'A drive'
+_LIT(KDefaultName," drive");
+
 /** 
 Defines device data provider GetStorageInfo request processor
 

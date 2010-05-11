@@ -93,30 +93,3 @@ void MTPImageDpUtilits::UpdateObjectStatusToOldL(MMTPDataProviderFramework& aFra
     aMetadata.SetUint(CMTPObjectMetaData::EFormatSubCode, status);
     aFramework.ObjectMgr().ModifyObjectL(aMetadata);
     }
-
-TInt MTPImageDpUtilits::GetThumbnailSize(const CMTPObjectMetaData& aMetadata)
-    {    
-    /**
-     * query thumbnail size from EFormatSubCode column
-     */
-    return (aMetadata.Uint(CMTPObjectMetaData::EFormatSubCode) & IMAGE_OBJECT_THUMBNAIL_SIZE_BITMASK);
-    }
-
-void MTPImageDpUtilits::UpdateObjectThumbnailSizeL(MMTPDataProviderFramework& aFramework, CMTPObjectMetaData& aMetadata, TInt aThumbnailSize)
-    {
-    //check thumbnail size whether it is overflow
-    if (aThumbnailSize <= IMAGE_OBJECT_THUMBNAIL_SIZE_BITMASK)
-        {
-        TBool newPic = MTPImageDpUtilits::IsNewPicture(aMetadata);
-        if (newPic)
-            {
-            aMetadata.SetUint(CMTPObjectMetaData::EFormatSubCode, aThumbnailSize);
-            }
-        else
-            {
-            aThumbnailSize |= IMAGE_OBJECT_STATUS_BITMASK;
-            aMetadata.SetUint(CMTPObjectMetaData::EFormatSubCode, aThumbnailSize);
-            }
-        aFramework.ObjectMgr().ModifyObjectL(aMetadata);
-        }
-    }
