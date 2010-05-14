@@ -42,7 +42,7 @@ SOURCE          cmtpbearermonitor.cpp
 SOURCE          cmtpcontrollerbase.cpp
 SOURCE          cmtpbluetoothcontroller.cpp
 SOURCE          cmtpoperator.cpp
-SOURCE          proxy.cpp
+SOURCE          proxy.cpp cmtpcontrollertimer.cpp
 
 LIBRARY         euser.lib
 LIBRARY         ecom.lib

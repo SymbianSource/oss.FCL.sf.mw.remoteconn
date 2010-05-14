@@ -437,55 +437,46 @@ void CMTPImageDpObjectPropertyMgr::GetPropertyL(TMTPObjectPropertyCode aProperty
         aValue = iObjectInfo->Uint(CMTPObjectMetaData::EParentHandle);
         break;        
        
-    case EMTPObjectPropCodeRepresentativeSampleSize: 
-        aValue = MTPImageDpUtilits::GetThumbnailSize(*iObjectInfo);
-        if (aValue == 0)
+    case EMTPObjectPropCodeRepresentativeSampleSize:
+        {
+        __FLOG_VA((_L16("Query smaple size from MdS - URI:%S"), &iObjectInfo->DesC(CMTPObjectMetaData::ESuid)));
+        ClearThumnailCache();                                
+        /**
+         * try to query thumbnail from TNM, and then store thumbnail to cache
+         */
+        TEntry fileEntry;
+        TInt err = iFs.Entry(iObjectInfo->DesC(CMTPObjectMetaData::ESuid), fileEntry);
+        if (err == KErrNone)
             {
-            __FLOG_VA((_L16("Query smaple size from MdS - URI:%S"), &iObjectInfo->DesC(CMTPObjectMetaData::ESuid)));
-            ClearThumnailCache();                                
+            if(fileEntry.FileSize() > KFileSizeMax || !alwaysCreate)
+                {
+                iDataProvider.ThumbnailManager().GetThumbMgr()->SetFlagsL(CThumbnailManager::EDoNotCreate);
+                }
+            else
+                {
+                iDataProvider.ThumbnailManager().GetThumbMgr()->SetFlagsL(CThumbnailManager::EDefaultFlags);
+                }
+            
             /**
-             * try to query thumbnail from TNM, and then store thumbnail to cache
+             * trap the leave to avoid return general error when PC get object property list
              */
-            TEntry fileEntry;
-            TInt err = iFs.Entry(iObjectInfo->DesC(CMTPObjectMetaData::ESuid), fileEntry);
+            TRAP(err, iDataProvider.ThumbnailManager().GetThumbnailL(iObjectInfo->DesC(CMTPObjectMetaData::ESuid), iThumbnailCache.iThumbnailData, err));
             if (err == KErrNone)
                 {
-                if(fileEntry.FileSize() > KFileSizeMax || !alwaysCreate)
+                iThumbnailCache.iObjectHandle = iObjectInfo->Uint(CMTPObjectMetaData::EHandle);                        
+                if (iThumbnailCache.iThumbnailData != NULL)
                     {
-                    iDataProvider.ThumbnailManager().GetThumbMgr()->SetFlagsL(CThumbnailManager::EDoNotCreate);
+                    aValue = static_cast<TUint32>(iThumbnailCache.iThumbnailData->Size());
                     }
-                else
+                                            
+                if (aValue <= 0)
                     {
-                    iDataProvider.ThumbnailManager().GetThumbMgr()->SetFlagsL(CThumbnailManager::EDefaultFlags);
-                    }
-                
-                /**
-                 * trap the leave to avoid return general error when PC get object property list
-                 */
-                TRAP(err, iDataProvider.ThumbnailManager().GetThumbnailL(iObjectInfo->DesC(CMTPObjectMetaData::ESuid), iThumbnailCache.iThumbnailData, err));
-                if (err == KErrNone)
-                    {
-                    iThumbnailCache.iObjectHandle = iObjectInfo->Uint(CMTPObjectMetaData::EHandle);                        
-                    if (iThumbnailCache.iThumbnailData != NULL)
-                        {
-                        aValue = static_cast<TUint32>(iThumbnailCache.iThumbnailData->Size());
-                        }
-                                                
-                    if (aValue > 0)
-                        {
-                        //update metadata column
-                        MTPImageDpUtilits::UpdateObjectThumbnailSizeL(iFramework, *iObjectInfo, aValue);
-                        }
-                    else
-                        {
-                        //trigger initiator to re-query thumbnail again if the thumbnail size of response is zero
-                        aValue = KThumbCompressedSize;
-                        }
-
-                    __FLOG_VA((_L16("Cache miss:GetThumbnailSize - URI:%S, Size:%u"), &iObjectInfo->DesC(CMTPObjectMetaData::ESuid), aValue));
+                    //trigger initiator to re-query thumbnail again if the thumbnail size of response is zero
+                    aValue = KThumbCompressedSize;
                     }
                 }
-            }	    
+            }
+        }
         break;       
        
     case EMTPObjectPropCodeRepresentativeSampleHeight:
@@ -618,17 +609,10 @@ void CMTPImageDpObjectPropertyMgr::GetPropertyL(TMTPObjectPropertyCode aProperty
                 TRAP(err, iDataProvider.ThumbnailManager().GetThumbnailL(iObjectInfo->DesC(CMTPObjectMetaData::ESuid), iThumbnailCache.iThumbnailData, err));
                 if (err == KErrNone)
                     {
-                    TInt size = MTPImageDpUtilits::GetThumbnailSize(*iObjectInfo);
                     iThumbnailCache.iObjectHandle = iObjectInfo->Uint(CMTPObjectMetaData::EHandle);                        
                     if (iThumbnailCache.iThumbnailData != NULL)
                         {
                         aValue.SetByDesL(*iThumbnailCache.iThumbnailData);
-                        if (size == 0)
-                            {
-                            //update metadata column
-                            MTPImageDpUtilits::UpdateObjectThumbnailSizeL(iFramework, *iObjectInfo, iThumbnailCache.iThumbnailData->Size());
-                            __FLOG_VA((_L16("Cache miss:GetThumbnailSize - URI:%S, Size:%u"), &iObjectInfo->DesC(CMTPObjectMetaData::ESuid), size));
-                            }
                         }                                
                     }
                 }

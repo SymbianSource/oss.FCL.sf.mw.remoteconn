@@ -24,9 +24,13 @@
 #define CMTPOPERATOR_H_
 
 #include <e32base.h>
-#include <mtp/rmtpclient.h>
+#include <e32property.h>
+
 #include "mmtpoperatornotifier.h"
+#include "cmtpcontrollertimer.h"
 #include "mtpdebug.h"
+
+
 
 NONSHARABLE_CLASS( CMTPOperator ) : public CActive
     {
@@ -52,6 +56,9 @@ public:
     void StartTransport( TUid aTransport );
     void StopTransport( TUid aTransport );
     
+    void StartTimer (TInt aSecond);
+    void SubscribeConnState();
+    
 private:// From CActive
     void DoCancel();
     void RunL();
@@ -62,6 +69,7 @@ private:
     TInt AppendOperation( TOperationType aType, TUid aTransport );
     void Schedule( TInt aError );
     void HandleOperationL( const TOperation& aOperation );
+    
 private:
     /**
      * FLOGGER debug trace member variable.
@@ -73,6 +81,19 @@ private:
     RArray< TOperation > iPendingOperations;
     
     RMTPClient iMTPClient;
+    
+    RProperty       iProperty;
+    
+    TBool           iConSubscribed;
+    
+    TInt            iConnState;
+    
+    CMTPControllerTimer*  iTimer;
+
     };
+
+
+const TInt KInitialValue = -1;
+const TInt KStopMTPSeconds = 30;
 
 #endif /* CMTPOPERATOR_H_ */

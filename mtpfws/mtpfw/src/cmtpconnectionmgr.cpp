@@ -182,7 +182,7 @@ EXPORT_C void CMTPConnectionMgr::StartTransportL(TUid aTransport, const TAny* aP
                 {
                 iTransport->Stop(*this);
                 delete iTransport;
-                
+                iTransportCount--;
                 iTransport = CMTPTransportPlugin::NewL(aTransport, aParameter);
                 
                 TRAPD(err, iTransport->StartL(*this));
@@ -191,11 +191,12 @@ EXPORT_C void CMTPConnectionMgr::StartTransportL(TUid aTransport, const TAny* aP
                     __FLOG_VA( ( _L8("StartTransportL error, error code = %d"), err) );
                     delete iTransport;
                     iTransport = NULL;
+                    
                     User::Leave(err);
                     }
+                iTransportCount++;
                 iTransportUid = aTransport;       
              
-                iTransportCount++;
                 }
 
             }

@@ -49,9 +49,20 @@ public:
 	IMPORT_C TMTPFormatCode FormatFromFilename( const TDesC& aFullFileName );
 	IMPORT_C void FormatExtensionMapping();
 	IMPORT_C TMTPFormatCode GetFormatByExtension(const TDesC& aExtension);
-	IMPORT_C TUint32 GetDpId(const TDesC& aExtension,const TDesC& aMIMEType);
+	IMPORT_C TUint32 GetDpIdL(const TDesC& aExtension,const TDesC& aMIMEType);
+    IMPORT_C TUint16 GetSubFormatCodeL(const TDesC& aExtension,const TDesC& aMIMEType);
+    IMPORT_C TMTPFormatCode GetFormatCodeByMimeTypeL(const TDesC& aExtension,const TDesC& aMIMEType);
     IMPORT_C TUint GetEnumerationFlag(const TDesC& aExtension);	
-	
+private:
+    enum TParseState
+        {
+        EFormatCode,
+        Extension,
+        EMimeType,
+        ESubFormatCode,
+        EnumerationFlag,
+        EParseStateEnd
+        };
 private:
 	void RenameAllChildrenL(TUint32 aStorageId, TUint32 aParentHandle, const TDesC& aNewFolderName, const TDesC& aOldFolderName);
 	TBool GetYear(const TDesC& aTimeString, TInt& aYear) const;
@@ -63,18 +74,24 @@ private:
 	TBool GetTenthSecond(const TDesC& aTimeString, TInt& aTenthSecond) const;
 	TBool GetTimeZone(const TDesC& aTimeString, TBool& aPositiveTimeZone, TInt& aTimeZoneInHour, TInt& aTimeZoneInMinute) const;
 	HBufC* OdfMimeTypeL( const TDesC& aFullFileName );
-	void AppendFormatExtensionMapping(const CDesCArray& aFormatExtensionMapping,TUint32 aDpId);
+	void AppendFormatExtensionMappingL(const CDesCArray& aFormatExtensionMapping,TUint32 aDpId);
 	void GetAllDecendents(TUint32 aStorageId, TUint aParentHandle, RArray<TUint>& aHandles) const;
 	
+	void ParseFormatCode(const TDesC& aString, CMTPExtensionMapping& aMapping, TParseState& aState);
+	void ParseExtension(const TDesC& aString, CMTPExtensionMapping& aMapping, TParseState& aState);
+	void ParseMimeType(const TDesC& aString, CMTPExtensionMapping& aMapping, TParseState& aState);
+	void ParseSubFormatCode(const TDesC& aString, CMTPExtensionMapping& aMapping, TParseState& aState);
+	void ParseEnumerationFlag(const TDesC& aString, CMTPExtensionMapping& aMapping, TParseState& aState);
+	void Parse(const TDesC& aString, CMTPExtensionMapping& aMapping, TParseState& aState);
 private:
     /**
     FLOGGER debug trace member variable.
     */
     __FLOG_DECLARATION_MEMBER_MUTABLE;
-    
 	MMTPDataProviderFramework*  iFramework;
 	RMTPFramework				iSingleton;
     RPointerArray<CMTPExtensionMapping> iFormatMappings;
+    TUint                iEnumFlag; //temp code will remove after the correct their format string
     
 	};
 

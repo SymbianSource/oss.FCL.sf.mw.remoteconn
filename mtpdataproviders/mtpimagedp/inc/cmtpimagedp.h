@@ -63,8 +63,6 @@ public:
     
     TMTPFormatCode FindFormat(const TDesC& aExtension);
     const TDesC& FindMimeType(const TDesC& aExtension);
-    TBool GetCacheParentHandle(const TDesC& aParentPath, TUint32& aParentHandle);
-    void  SetCacheParentHandle(const TDesC& aParentPath, TUint32 aParentHandle);
     void AppendDeleteObjectsArrayL(const TDesC& aSuid);
     void HandleDeleteObjectsArray();
     void IncreaseNewPictures(TInt aCount);
@@ -95,14 +93,7 @@ private:
     void SessionOpenedL(const TMTPNotificationParamsSessionChange& aSession);
     void RenameObjectL(const TMTPNotificationParamsHandle& aParam);
     
-    TUint QueryImageObjectCountL();
-    
-private:
-    struct SMTPImageDpParentCache
-        {        
-        TPath   iPath;
-        TUint32 iHandle;
-        };
+    TUint QueryImageObjectCountL();    
     
 private:
 	/**
@@ -130,9 +121,7 @@ private:
     /**
      * contain the mapping image's extension to mime type
      */
-    RHashMap<TBuf<KMaxExtNameLength>, TBuf<KMaxMimeNameLength> > iMimeMappings;    
-    
-    SMTPImageDpParentCache  iParentCache;
+    RHashMap<TBuf<KMaxExtNameLength>, TBuf<KMaxMimeNameLength> > iMimeMappings;
     
     TInt                    iActiveProcessor;
     TBool                   iActiveProcessorRemoved;    

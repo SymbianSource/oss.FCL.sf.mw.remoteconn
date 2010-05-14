@@ -21,6 +21,7 @@
 #include <connect/sbtypes.h>
 #include "t_teststepbackup2.h"
 #include <apgcli.h>
+#include <connect/javamanagerinterface.h>
 
 namespace bur_ts
 	{	
@@ -738,7 +739,7 @@ namespace bur_ts
 		{
 		//Coverage test get large public file list
 		RPointerArray<CSBGenericDataType> transferTypes;
-		CleanupClosePushL(transferTypes);
+		CleanupResetAndDestroyPushL(transferTypes);
 		TRAP_IGNORE(GeneratePublicTransferTypesL(transferTypes));
 		RFileArray array;
 		CleanupClosePushL(array);

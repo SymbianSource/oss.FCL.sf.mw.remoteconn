@@ -197,11 +197,20 @@ EXPORT_C void CMTPTypeFile::SetSizeL(TUint64 aSize)
     
     //Read the threshold value from Central Repository and check against it
     CRepository* repository(NULL);
-    TInt thresholdValue(0);
+    TInt64 thresholdValue(0);
     TRAPD(err,repository = CRepository::NewL(KCRUidUiklaf));
     if (err == KErrNone)
         {
-        if (driveNo == EDriveC)
+        if (driveNo == EDriveE || driveNo == EDriveF)
+            {
+            TInt warningValue(0);
+            err = repository->Get(KUikOODDiskFreeSpaceWarningNoteLevelMassMemory,warningValue);
+            if (err == KErrNone)
+                {
+                thresholdValue = warningValue + KFreeSpaceExtraReserved;
+                }
+            }
+        else
             {
             TInt warningUsagePercent(0);
             err = repository->Get(KUikOODDiskFreeSpaceWarningNoteLevel,warningUsagePercent);
@@ -211,14 +220,7 @@ EXPORT_C void CMTPTypeFile::SetSizeL(TUint64 aSize)
                     + KFreeSpaceExtraReserved;
                 }
             }
-        else 
-            {
-            err = repository->Get(KUikOODDiskFreeSpaceWarningNoteLevelMassMemory,thresholdValue);
-            if (err == KErrNone)
-                {
-                thresholdValue += KFreeSpaceExtraReserved;
-                }
-            }
+        
         delete repository;
         }
     

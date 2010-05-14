@@ -18,7 +18,6 @@
 
 file=ABI_DIR\BUILD_DIR\burtestserver.exe                            Sys\bin\burtestserver.exe
 data=EPOCROOT##Epoc32\data\z\testdata\scripts\sbetestdata\test.ini                         testdata\scripts\sbetestdata\test.ini
-data=EPOCROOT##Epoc32\data\z\testdata\scripts\sbetestdata\sbeconfig.xml                    private\10202d56\sbeconfig.xml
 data=EPOCROOT##Epoc32\data\z\testdata\scripts\sbetestdata\backup_registration.xml          testdata\scripts\sbetestdata\backup_registration.xml
 data=EPOCROOT##Epoc32\data\z\testdata\scripts\sbetestdata\increamenttest.xml               testdata\scripts\sbetestdata\increamenttest.xml
 data=EPOCROOT##Epoc32\data\z\testdata\scripts\sbetestdata\test_registration.xml            testdata\scripts\sbetestdata\test_registration.xml
@@ -35,5 +34,9 @@ data=EPOCROOT##Epoc32\data\z\testdata\scripts\sbetestdata\test_restorepackage.sc
 data=EPOCROOT##Epoc32\data\z\testdata\scripts\sbetestdata\test_backuppackage.script        testdata\scripts\sbetestdata\test_backuppackage.script
 data=EPOCROOT##Epoc32\data\z\testdata\scripts\sbetestdata\test_activebackuprestore.script  testdata\scripts\sbetestdata\test_activebackuprestore.script
 data=EPOCROOT##Epoc32\data\z\testdata\scripts\sbetestdata\test_increament.script           testdata\scripts\sbetestdata\test_increament.script
+
+#ifndef __SERIES60_ 
+data=EPOCROOT##Epoc32\data\z\testdata\scripts\sbetestdata\sbeconfig.xml                    private\10202d56\sbeconfig.xml
+#endif
 
 #endif // __BUR_TEST_SERVER_IBY__

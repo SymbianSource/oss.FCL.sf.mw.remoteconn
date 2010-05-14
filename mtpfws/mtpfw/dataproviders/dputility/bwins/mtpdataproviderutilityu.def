@@ -115,7 +115,7 @@ EXPORTS
 	?FormatFromFilename@RMTPUtility@@QAE?AW4TMTPFormatCode@@ABVTDesC16@@@Z @ 114 NONAME ; enum TMTPFormatCode RMTPUtility::FormatFromFilename(class TDesC16 const &)
 	?TTime2MTPTimeStr@RMTPUtility@@QBEHABVTTime@@AAVTDes16@@@Z @ 115 NONAME ; int RMTPUtility::TTime2MTPTimeStr(class TTime const &, class TDes16 &) const
 	?MTPUtility@RMTPDpSingletons@@QBEAAVRMTPUtility@@XZ @ 116 NONAME ; class RMTPUtility & RMTPDpSingletons::MTPUtility(void) const
-	?GetDpId@RMTPUtility@@QAEKABVTDesC16@@0@Z @ 117 NONAME ; unsigned long RMTPUtility::GetDpId(class TDesC16 const &, class TDesC16 const &)
+	?GetDpId@RMTPUtility@@QAEKABVTDesC16@@0@Z @ 117 NONAME ABSENT ; unsigned long RMTPUtility::GetDpId(class TDesC16 const &, class TDesC16 const &)
 	?GetFormatByExtension@RMTPUtility@@QAE?AW4TMTPFormatCode@@ABVTDesC16@@@Z @ 118 NONAME ; enum TMTPFormatCode RMTPUtility::GetFormatByExtension(class TDesC16 const &)
 	?SessionId@CMTPRequestProcessor@@MAEKXZ @ 119 NONAME ; unsigned long CMTPRequestProcessor::SessionId(void)
 	?GetEnumerationFlag@RMTPUtility@@QAEIABVTDesC16@@@Z @ 120 NONAME ; unsigned int RMTPUtility::GetEnumerationFlag(class TDesC16 const &)
@@ -213,4 +213,7 @@ EXPORTS
 	?NewL@CMTPFSEntryCache@@SAPAV1@XZ @ 212 NONAME ; class CMTPFSEntryCache * CMTPFSEntryCache::NewL(void)
 	?FileEntry@CMTPFSEntryCache@@QAEAAVTEntry@@XZ @ 213 NONAME ; class TEntry & CMTPFSEntryCache::FileEntry(void)
 	?RegisterPendingRequest@CMTPRequestProcessor@@IAEXI@Z @ 214 NONAME ; void CMTPRequestProcessor::RegisterPendingRequest(unsigned int)
+	?GetDpIdL@RMTPUtility@@QAEKABVTDesC16@@0@Z @ 215 NONAME ; unsigned long RMTPUtility::GetDpIdL(class TDesC16 const &, class TDesC16 const &)
+	?GetSubFormatCodeL@RMTPUtility@@QAEGABVTDesC16@@0@Z @ 216 NONAME ; unsigned short RMTPUtility::GetSubFormatCodeL(class TDesC16 const &, class TDesC16 const &)
+	?GetFormatCodeByMimeTypeL@RMTPUtility@@QAE?AW4TMTPFormatCode@@ABVTDesC16@@0@Z @ 217 NONAME ; enum TMTPFormatCode RMTPUtility::GetFormatCodeByMimeTypeL(class TDesC16 const &, class TDesC16 const &)
 

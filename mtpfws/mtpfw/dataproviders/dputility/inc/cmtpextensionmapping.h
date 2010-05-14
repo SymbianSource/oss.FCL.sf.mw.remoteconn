@@ -34,6 +34,7 @@ public:
 	
 	const TDesC& Extension() const;
 	TMTPFormatCode FormatCode() const;
+	TUint16 SubFormatCode() const;
 	const TDesC& MIMEType() const;
 	TUint32 DpId() const;
 	TUint EnumerationFlag() const;
@@ -42,6 +43,7 @@ public:
 	void SetMIMETypeL(const TDesC& aMIMEType);
 	void SetDpId(const TUint32 aDpId);
 	void SetFormatCode(const TMTPFormatCode aFormatCode);
+	void SetSubFormatCode(TUint16  aSubFormatCode);
 	void SetEnumerationFlag(const TUint aNeedFileDp);
 	
 	static TInt Compare(const CMTPExtensionMapping& aFirst, const CMTPExtensionMapping& aSecond);
@@ -57,6 +59,7 @@ private:
 	HBufC* iMIMEType;
 	TUint32 iDpId;
 	TUint   iNeedFileDp;
+	TUint16  iSubFormatCode;
 	};
 
 #endif // CMTPEXTENSIONMAPPING_H
