@@ -21,8 +21,6 @@
 #include <mtp/cmtptypefile.h>
 #include <mtp/mtpdatatypeconstants.h>
 
-#include "mtpframeworkconst.h"
-
 //This file is exported from s60 sdk, now just copy it
 //to make sure onb can run
 #include "UiklafInternalCRKeys.h"
@@ -141,9 +139,9 @@ EXPORT_C CMTPTypeFile* CMTPTypeFile::NewL(RFs& aFs, const TDesC& aName, TFileMod
  */
 EXPORT_C CMTPTypeFile* CMTPTypeFile::NewLC(RFs& aFs, const TDesC& aName, TFileMode aMode)
     {
-    CMTPTypeFile* self = new(ELeave) CMTPTypeFile;
+    CMTPTypeFile* self = new(ELeave) CMTPTypeFile(aFs);
     CleanupStack::PushL(self);
-    self->ConstructL(aFs, aName, aMode);
+    self->ConstructL(aName, aMode);
     return self;
     }
 
@@ -156,9 +154,9 @@ EXPORT_C CMTPTypeFile* CMTPTypeFile::NewL(RFs& aFs, const TDesC& aName, TFileMod
 
 EXPORT_C CMTPTypeFile* CMTPTypeFile::NewLC(RFs& aFs, const TDesC& aName, TFileMode aMode, TInt64 aRequiredSize, TInt64 aOffSet)
     {
-    CMTPTypeFile* self = new(ELeave) CMTPTypeFile;
+    CMTPTypeFile* self = new(ELeave) CMTPTypeFile(aFs);
     CleanupStack::PushL(self);
-    self->ConstructL(aFs, aName, aMode, aRequiredSize, aOffSet);
+    self->ConstructL(aName, aMode, aRequiredSize, aOffSet);
     return self;
     }
 
@@ -188,12 +186,10 @@ EXPORT_C void CMTPTypeFile::SetSizeL(TUint64 aSize)
     //file syncing
     TInt driveNo;
     TDriveInfo driveInfo;
-    iFile.Drive(driveNo,driveInfo);
-    RFs fs;
+    User::LeaveIfError(iFile.Drive(driveNo,driveInfo));
+    
     TVolumeInfo volumeInfo;
-    fs.Connect();
-    fs.Volume(volumeInfo,driveNo);
-    fs.Close();
+    User::LeaveIfError(iFs.Volume(volumeInfo,driveNo));
     
     //Read the threshold value from Central Repository and check against it
     CRepository* repository(NULL);
@@ -571,28 +567,29 @@ EXPORT_C Int64 CMTPTypeFile::GetByteSent()
     return iByteSent;
     }
 
-CMTPTypeFile::CMTPTypeFile() :
+CMTPTypeFile::CMTPTypeFile(RFs& aFs) :
     CActive(EPriorityUserInput), iBuffer1AvailForWrite(ETrue),
-        iFileRdWrError(EFalse), iCurrentCommitChunk(NULL, 0)
+        iFileRdWrError(EFalse), iCurrentCommitChunk(NULL, 0),
+        iFs(aFs)
     {
     CActiveScheduler::Add(this);
     }
 
-void CMTPTypeFile::ConstructL(RFs& aFs, const TDesC& aName, TFileMode aMode)
+void CMTPTypeFile::ConstructL(const TDesC& aName, TFileMode aMode)
     {
     if (aMode & EFileWrite)
         {
         iFileOpenForRead = EFalse;
-        TInt err = iFile.Create(aFs, aName, aMode|EFileWriteDirectIO);
+        TInt err = iFile.Create(iFs, aName, aMode|EFileWriteDirectIO);
         if (err != KErrNone)
             {
-            User::LeaveIfError(iFile.Replace(aFs, aName, aMode|EFileWriteDirectIO));
+            User::LeaveIfError(iFile.Replace(iFs, aName, aMode|EFileWriteDirectIO));
             }
         }
     else
         {
         iFileOpenForRead = ETrue;
-        User::LeaveIfError(iFile.Open(aFs, aName, aMode|EFileReadDirectIO|EFileShareReadersOnly));
+        User::LeaveIfError(iFile.Open(iFs, aName, aMode|EFileReadDirectIO|EFileShareReadersOnly));
 #ifdef SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API
         TInt64 size = 0;
 #else
@@ -615,22 +612,22 @@ void CMTPTypeFile::ConstructL(RFs& aFs, const TDesC& aName, TFileMode aMode)
         }
     }
 
-void CMTPTypeFile::ConstructL(RFs& aFs, const TDesC& aName, TFileMode aMode, TInt64 aRequiredSize, TInt64 aOffSet)
+void CMTPTypeFile::ConstructL(const TDesC& aName, TFileMode aMode, TInt64 aRequiredSize, TInt64 aOffSet)
 	{
     if (aMode & EFileWrite)
         {
         iFileOpenForRead = EFalse;
-        TInt err = iFile.Create(aFs, aName, aMode|EFileWriteDirectIO);
+        TInt err = iFile.Create(iFs, aName, aMode|EFileWriteDirectIO);
         if (err != KErrNone)
             {
-            User::LeaveIfError(iFile.Replace(aFs, aName, aMode|EFileWriteDirectIO));
+            User::LeaveIfError(iFile.Replace(iFs, aName, aMode|EFileWriteDirectIO));
             }
         }
     else
         {
         iFileOpenForRead = ETrue;
         iOffSet = aOffSet;
-        User::LeaveIfError(iFile.Open(aFs, aName, aMode|EFileReadDirectIO|EFileShareReadersOnly));
+        User::LeaveIfError(iFile.Open(iFs, aName, aMode|EFileReadDirectIO|EFileShareReadersOnly));
 #ifdef SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API
         TInt64 size = 0;
 #else

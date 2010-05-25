@@ -508,11 +508,29 @@ namespace conn
             __LOG1("CBufferFileReader::WriteToFile() - making directory resulted in fatal error: %d", err);
 			User::Leave(err);
 			} // if
-
-        
+		
+		TEntry entry;
+		TBool isReadOnly = EFalse;
+		err = iFs.Entry(iFileName, entry);
+		if(KErrNone == err)
+			{
+			if(entry.iAtt & KEntryAttReadOnly)
+				{
+				isReadOnly = ETrue;
+				entry.iAtt &= ~KEntryAttReadOnly;
+				iFs.SetAtt(iFileName, entry.iAtt, ~entry.iAtt);
+				}
+			}				
+				
         err = iFileHandle.Replace(iFs, iFileName, EFileWrite);
         __LOG1("CBufferFileReader::WriteToFile() - replacing file returned err: %d", err);
         User::LeaveIfError( err );
+        
+        if(isReadOnly)
+        	{
+			entry.iAtt |= KEntryAttReadOnly;
+        	iFs.SetAtt(iFileName, entry.iAtt, ~entry.iAtt);
+        	}
 			
 		iFileOpen = ETrue;
         __LOG("CBufferFileReader::RecreateFileL() - END");

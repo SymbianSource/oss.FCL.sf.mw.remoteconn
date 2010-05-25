@@ -616,7 +616,8 @@ void CMTPDataProvider::RunL()
 		else if (iSingletons.DpController().EnumerateState() < CMTPDataProviderController::EEnumeratingPhaseOneDone)
     	{
         __FLOG(_L8("DP Enumeration is not complete"));
-
+        if (iCurrentRequest != NULL)
+        {
         TUint16 opCode = iCurrentRequest->Uint16(TMTPTypeRequest::ERequestOperationCode);
 
         switch(opCode)
@@ -669,6 +670,7 @@ void CMTPDataProvider::RunL()
 	  default:
 		  break;
 		    }
+        }
 	    }
 		}
     else
@@ -678,16 +680,19 @@ void CMTPDataProvider::RunL()
         
         //Make ActiveRequest processor and CancelRequest processing to occur synchronously
         if( iCurrentTransactionPhase == ERequestPhase )
-        	{
-        	CMTPSession& session(static_cast<CMTPSession&>(iCurrentConnection->SessionWithMTPIdL(iCurrentRequest->Uint32(TMTPTypeRequest::ERequestSessionID))));
-        	MMTPConnectionProtocol& connection(static_cast<MMTPConnectionProtocol&>(*iCurrentConnection)); 
+            {
+                if( iCurrentRequest != NULL )
+                	{  
+        	        CMTPSession& session(static_cast<CMTPSession&>(iCurrentConnection->SessionWithMTPIdL(iCurrentRequest->Uint32(TMTPTypeRequest::ERequestSessionID))));
+        	        MMTPConnectionProtocol& connection(static_cast<MMTPConnectionProtocol&>(*iCurrentConnection)); 
         	
-        	// Pass transaction to session to check against any pending events
-           	if ( session.CheckPendingEvent(*iCurrentRequest) )
-            	{
-                //Current request matches a pending event, pass event to connection layer event processing
-                connection.ReceivedEventL(session.PendingEvent());
-                }
+        	        // Pass transaction to session to check against any pending events
+           	      if ( session.CheckPendingEvent(*iCurrentRequest) )
+            	    {
+                      //Current request matches a pending event, pass event to connection layer event processing
+                  connection.ReceivedEventL(session.PendingEvent());
+                  }
+                  }
         	}
         
         }

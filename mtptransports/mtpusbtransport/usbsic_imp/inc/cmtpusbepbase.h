@@ -53,6 +53,8 @@ public:
     void CancelReceiveL(TInt aReason);
     void CancelSendL(TInt aReason);
     
+    void FlushRxDataL();
+    
 protected:
 
     CMTPUsbEpBase(TUint aId, TPriority aPriority, CMTPUsbConnection& aConnection);
@@ -92,7 +94,6 @@ private:
     TBool ValidateUSBHeaderL();
     void InitiateFirstChunkReceiveL();
     void ProcessFirstReceivedChunkL();
-    void FlushRxDataL();
     
 protected: // Owned
 
@@ -203,7 +204,6 @@ private: // Owned
     The amount of data expected.
     */    
     TUint64 			iDataLength;
-    
     
 private: // Not owned
 

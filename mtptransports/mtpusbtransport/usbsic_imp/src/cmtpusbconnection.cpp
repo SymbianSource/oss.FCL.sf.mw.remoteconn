@@ -131,21 +131,30 @@ void CMTPUsbConnection::CloseConnection()
     __FLOG(_L8("CloseConnection - Exit"));
     }
     
-void CMTPUsbConnection::ReceiveDataL(MMTPType& aData, const TMTPTypeRequest& /*aRequest*/)
+void CMTPUsbConnection::ReceiveDataL(MMTPType& aData, const TMTPTypeRequest& aRequest)
     {
     __FLOG(_L8("ReceiveDataL - Entry"));
     
     // Update the transaction state.
     SetBulkTransactionState(EDataIToRPhase);
     
-    // Setup the bulk container and initiate the bulk data receive sequence.
-    iUsbBulkContainer->SetPayloadL(&aData);
-    
-    //Expected containerType pre-setup here in case we don't receive IToR dataphase at all so 
-    //Cancel operation can trigger right call inside ReceiveBulkDataCompleteL(). 
-    iUsbBulkContainer->SetUint16L(CMTPUsbContainer::EContainerType, EMTPUsbContainerTypeDataBlock);
-    
-    static_cast<CMTPUsbEpBulkOut*>(iEndpoints[EMTPUsbEpBulkOut])->ReceiveBulkDataL(*iUsbBulkContainer);
+    if (iIsCancelReceived) //cancel received
+        {
+        __FLOG(_L8("Transaction has been cancelled, just flush trash data and complete"));
+        static_cast<CMTPUsbEpBulkOut*>(iEndpoints[EMTPUsbEpBulkOut])->FlushRxDataL();
+        BoundProtocolLayer().ReceiveDataCompleteL(KErrCancel, aData, iMTPRequest);
+        }
+    else
+        {  
+        // Setup the bulk container and initiate the bulk data receive sequence.
+        iUsbBulkContainer->SetPayloadL(&aData);
+        
+        //Expected containerType pre-setup here in case we don't receive IToR dataphase at all so 
+        //Cancel operation can trigger right call inside ReceiveBulkDataCompleteL(). 
+        iUsbBulkContainer->SetUint16L(CMTPUsbContainer::EContainerType, EMTPUsbContainerTypeDataBlock);
+        
+        static_cast<CMTPUsbEpBulkOut*>(iEndpoints[EMTPUsbEpBulkOut])->ReceiveBulkDataL(*iUsbBulkContainer);
+        }
     
     __FLOG(_L8("ReceiveDataL - Exit"));       
     }
@@ -472,11 +481,9 @@ void CMTPUsbConnection::ReceiveControlRequestDataCompleteL(TInt aError, MMTPType
 			#endif
             
             isResponseTransactionCancelledNeeded = true;
-            if(  BoundProtocolLayer().TransactionPhaseL(iMTPSessionId) > EIdlePhase   ) 
+            TMTPTransactionPhase transPhase = BoundProtocolLayer().TransactionPhaseL(iMTPSessionId);
+            if( transPhase > EIdlePhase && transPhase < ECompletingPhase ) 
             	{
-            	
-               	  
-
 	            iMTPEvent.Reset();
 	            iMTPEvent.SetUint16(TMTPTypeEvent::EEventCode, iUsbControlRequestCancelData.Uint16(TMTPUsbControlRequestCancelData::ECancellationCode));
 	            iMTPEvent.SetUint32(TMTPTypeEvent::EEventSessionID, iMTPSessionId);
@@ -496,45 +503,27 @@ void CMTPUsbConnection::ReceiveControlRequestDataCompleteL(TInt aError, MMTPType
 	                BoundProtocolLayer().ReceivedEventL(iMTPEvent);
 	                }
             	}
+            else if (transPhase == ECompletingPhase)
+                {
+                __FLOG(_L8("cancel event received at completing phase, flush rx data"));
+
+                //flush rx data.
+                static_cast<CMTPUsbEpBulkOut*>(iEndpoints[EMTPUsbEpBulkOut])->FlushRxDataL();
+                }
             else
             	{
-
-				#ifdef _DEBUG 
-            	RDebug::Print(_L("cancel evnet received at idle state, stop data EPs, flush rx data, restart data eps,statusOK\n"));
-				#endif
-
+                __FLOG(_L8("cancel event received at idle phase, stop data EPs, flush rx data, restart data eps"));
+                
             	// stop data endpoint
             	DataEndpointsStop();
       
-            	//flush rx data
-            	TInt  nbytes = 0;
-            	TInt err = iLdd.QueryReceiveBuffer(EndpointNumber(EMTPUsbEpBulkOut), nbytes);
-				#ifdef _DEBUG
-            	RDebug::Print(_L("QueryReceiveBuffer()-----err is %d , nbytes is %d"), err, nbytes);
-				#endif	  
-
-            	// has data, read it
-            	if( (err == KErrNone) && (nbytes > 0) )
-            		{
-            		// create the read buff
-            		RBuf8 readBuf;
-            		readBuf.CreateL(nbytes);
-            		// synchronously read the data
-            		TRequestStatus status;
-            		iLdd.ReadOneOrMore(status, EndpointNumber(EMTPUsbEpBulkOut), readBuf);
-            		User::WaitForRequest(status);
-            		if (KErrNone == status.Int())
-            			{
-	      		 		#ifdef _DEBUG
-            			RDebug::Print(_L("%d bytes is flushed"), nbytes);
-	      		  		#endif
-            			}
-            		readBuf.Close(); 
-            		}
+                //flush rx data.
+                static_cast<CMTPUsbEpBulkOut*>(iEndpoints[EMTPUsbEpBulkOut])->FlushRxDataL();
+                
             	// initiate bulk request sequence.
-            	InitiateBulkRequestSequenceL();
-                       
-            	SetDeviceStatus(EMTPUsbDeviceStatusOK);                   
+            	InitiateBulkRequestSequenceL();   
+            	
+                SetDeviceStatus(EMTPUsbDeviceStatusOK);
             	}
             }
 
@@ -1052,6 +1041,7 @@ void CMTPUsbConnection::InitiateControlRequestSequenceL()
     CMTPUsbEpControl& ctrl(*static_cast<CMTPUsbEpControl*>(iEndpoints[EMTPUsbEpControl]));
     if (!ctrl.Stalled())
         {
+
         ctrl.ReceiveControlRequestSetupL(iUsbControlRequestSetup);
         }
     __FLOG(_L8("InitiateControlRequestSequenceL - Exit"));        
@@ -1400,6 +1390,7 @@ TBool CMTPUsbConnection::ControlRequestErrorHandled(TInt aError)
         case KErrUsbDeviceClosing:
         case KErrUsbCableDetached:
         case KErrUsbDeviceBusReset:
+        case KErrUsbEpNotReady:
             // Interface state is changing (@see RunL).
             break;
 

@@ -96,9 +96,9 @@ public: // From MMTPType
 	IMPORT_C TInt64 GetByteSent();
     
 private:
-    CMTPTypeFile();
-    void ConstructL(RFs& aFs, const TDesC& aName, TFileMode aMode);
-	void ConstructL(RFs& aFs, const TDesC& aName, TFileMode aMode, TInt64 aRequiredSize, TInt64 aOffSet);
+    CMTPTypeFile(RFs& aFs);
+    void ConstructL(const TDesC& aName, TFileMode aMode);
+	void ConstructL(const TDesC& aName, TFileMode aMode, TInt64 aRequiredSize, TInt64 aOffSet);
     void ToggleRdWrBuffer();
 
 protected: // From CActive
@@ -108,8 +108,10 @@ private: // From CActive
 	
     TInt RunError(TInt aError);
     void RunL();
+    
 private:
 
+    
     /**
     The read and write data stream states.
     */
@@ -213,6 +215,7 @@ private:
      */
     CFileWriter    *iFileWriter2;
 
+    RFs&            iFs;
     };
     
 #endif // CMTPTYPEFILE_H
