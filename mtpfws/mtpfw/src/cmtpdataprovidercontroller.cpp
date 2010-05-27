@@ -372,7 +372,17 @@ UID.
 */  
 EXPORT_C TInt CMTPDataProviderController::DpId(TUint aUid)
     {
-    return iDataProviders.FindInOrder(TUid::Uid(aUid), CMTPDataProvider::LinearOrderUid);
+    TInt dpId = KErrNotFound;
+    for (TUint index=0; index < iDataProviders.Count(); index++)
+      {
+      if (iDataProviders[index]->ImplementationUid().iUid == aUid)
+        {
+        dpId = iDataProviders[index]->DataProviderId();
+        break;
+        }
+      }
+    
+    return dpId;
     }
 
 /**

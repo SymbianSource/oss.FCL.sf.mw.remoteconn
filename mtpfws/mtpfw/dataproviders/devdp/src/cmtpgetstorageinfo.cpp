@@ -197,10 +197,22 @@ void CMTPGetStorageInfo::SetStorageTypeL()
 		case EMediaFloppy:
 		    if (iDriveInfo.iDriveAtt & KDriveAttRemovable)
 		        {
-		        storageType = EMTPStorageRemovableRAM;
+		        //E: is set as logically removable after eMMC image updated
+		        //So here we need to deal with this case to set it as FixedRam
+		        if(iDriveInfo.iDriveAtt & KDriveAttInternal)
+		            {
+		            __FLOG(_L8("removable but internal drive, set as Fixed RAM"));
+		            storageType = EMTPStorageFixedRAM;
+		            }
+		        else
+		            {
+		            __FLOG(_L8("non internal,set as removable RAM"));
+		            storageType = EMTPStorageRemovableRAM;
+		            }
 		        }
 		    else
 		        {
+		        __FLOG(_L8("Non removable, set as Fixed RAM"));
 		        storageType = EMTPStorageFixedRAM;
 		        }
 			break;
@@ -309,30 +321,68 @@ void CMTPGetStorageInfo::SetStorageDescriptionL()
 	__FLOG(_L8("SetStorageDescriptionL - Entry"));
     TUint32 storage(Request().Uint32(TMTPTypeRequest::ERequestParameter1));
     TInt driveNumber = iFramework.StorageMgr().DriveNumber(storage);
-	RBuf volumeName;
-	volumeName.CreateL(KMaxFileName);
-	volumeName.CleanupClosePushL();
-	RMTPDeviceDpSingletons devSingletons;
-	devSingletons.OpenL(iFramework);
-	CleanupClosePushL(devSingletons);
-	TRAPD(resError, devSingletons.ConfigMgr().GetFriendlyVolumeNameL(driveNumber, volumeName));
-	if ((KErrNone == resError) && (0 < volumeName.Length()))
-		{
-		__FLOG(_L8("Using volume name from resource file"));
-		CMTPTypeString* mtpDescription = CMTPTypeString::NewLC(volumeName);
-		iStorageInfo->SetL(CMTPTypeStorageInfo::EStorageDescription, *mtpDescription);
-		CleanupStack::PopAndDestroy(mtpDescription);
-		}
-	else if (0 < iVolumeInfo.iName.Length())
-		{
-		__FLOG(_L8("Using standard volume name"));
-		CMTPTypeString* mtpDescription = CMTPTypeString::NewLC(iVolumeInfo.iName);
-		iStorageInfo->SetL(CMTPTypeStorageInfo::EStorageDescription, *mtpDescription);
-	    CleanupStack::PopAndDestroy(mtpDescription);
-		}
-		
-	CleanupStack::PopAndDestroy(&devSingletons);
-	CleanupStack::PopAndDestroy(&volumeName);
+	__FLOG_1(_L8("driveNumber:%d"),driveNumber);
+	
+	CMTPTypeString* mtpDescription = CMTPTypeString::NewLC();
+	            
+	//Firstly, read name from VolumeInfo
+	if (0 < iVolumeInfo.iName.Length())
+	    {
+	        __FLOG_1(_L8("Using standard volume name:%S"),&iVolumeInfo.iName);
+	        mtpDescription->SetL(iVolumeInfo.iName);	        
+	    }
+	else //If name not set, set name according to type
+	    {
+	    TMTPTypeUint16 storageType(EMTPStorageUndefined);
+	    iStorageInfo->GetL(CMTPTypeStorageInfo::EStorageType,storageType);
+	    __FLOG_1(_L8("Set name according to storage type: %d"),storageType.Value());
+	    
+	    switch (storageType.Value())
+	        {
+	        case EMTPStorageFixedROM:
+	            if (driveNumber == EDriveC)//Phone Memory
+	                {
+	                __FLOG(_L8("drive c"));
+	                mtpDescription->SetL(KPhoneMemory);
+	                }
+	            break;
+	        case EMTPStorageRemovableROM:
+	            break;
+	        case EMTPStorageFixedRAM: // Mass Memory
+	            mtpDescription->SetL(KMassMemory);
+	            break;
+	        case EMTPStorageRemovableRAM: // Memory Card
+	            mtpDescription->SetL(KMemoryCard);
+	            break;
+	        case EMTPStorageUndefined:
+	        default:
+	            break;
+	        }
+	    
+	    //Finally, it the name still not set, use default value:
+	    //eg, 'A drive'
+	    if(mtpDescription->NumChars() == 0)
+	        {
+	        TChar driveChar;
+	        TInt err = iFramework.Fs().DriveToChar(driveNumber,driveChar);
+	        __FLOG_2(_L8("Use default name,driveNumber:%d err:%d"),driveNumber,err);
+	        if (err == KErrNone)
+	            {
+	            TBuf<sizeof(KDefaultName) + 1> driveName;
+	            driveName.Append(driveChar);
+	            driveName.Append(KDefaultName);
+	            mtpDescription->SetL(driveName);
+	            }
+	        else
+	            {
+	            mtpDescription->SetL(KNoName);
+	            }
+	        }
+	    }
+	
+	iStorageInfo->SetL(CMTPTypeStorageInfo::EStorageDescription,*mtpDescription);
+	CleanupStack::PopAndDestroy(mtpDescription);	
+	
 	__FLOG(_L8("SetStorageDescriptionL - Exit"));
 	}
 	

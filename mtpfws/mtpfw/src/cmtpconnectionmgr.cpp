@@ -40,8 +40,7 @@ Destructor.
 CMTPConnectionMgr::~CMTPConnectionMgr()
     {
     StopTransport( iTransportUid, ETrue );
-    iConnections.ResetAndDestroy();
-    iSuspendedTransports.Reset();
+    iConnections.ResetAndDestroy();    
     iSuspendedTransports.Close();
     delete iTransportTrigger;
     __FLOG_CLOSE;

@@ -403,16 +403,18 @@ void CMTPImageDpObjectPropertyMgr::GetPropertyL(TMTPObjectPropertyCode aProperty
         aValue = KThumbFormatCode;
        break;        
     case EMTPObjectPropCodeProtectionStatus:
-        iFs.Entry(iObjectInfo->DesC(CMTPObjectMetaData::ESuid), entry);
-        if (entry.IsReadOnly())
+        {
+        TInt err = iFs.Entry(iObjectInfo->DesC(CMTPObjectMetaData::ESuid), entry);        
+        if ( err == KErrNone && entry.IsReadOnly())
             {
             aValue = EMTPProtectionReadOnly;
             }
         else
             {
             aValue = EMTPProtectionNoProtection;
-            }
-        break;        
+            }        
+        }    
+        break;    
     default:
         aValue = 0;//initialization
         //ingore the failure if we can't get properties form MdS

@@ -73,7 +73,7 @@ CMTPUsbEpBase::CMTPUsbEpBase(TUint aId, TPriority aPriority, CMTPUsbConnection& 
     iReceiveData(NULL, 0),
     iSendChunkData(NULL, 0),
     iSendData(NULL, 0),
-    iIsFirstChunk(EFalse), 
+    iIsFirstChunk(EFalse),
     iConnection(aConnection)
     {
     CActiveScheduler::Add(this);
@@ -254,7 +254,6 @@ void CMTPUsbEpBase::ReceiveDataL(MMTPType& aSink)
     	Cancel();
       }
     
-
     __ASSERT_DEBUG(iState == EIdle, Panic(EMTPUsbBadState));
     
     iReceiveDataSink    = &aSink;
@@ -528,6 +527,12 @@ TBool CMTPUsbEpBase::ValidateUSBHeaderL()
 	TUint16 containerType(Connection().BulkContainer().Uint16L(CMTPUsbContainer::EContainerType));
 	iDataLength = Connection().BulkContainer().Uint32L(CMTPUsbContainer::EContainerLength);
 	
+#ifdef __FLOG_ACTIVE
+    TUint32 transactionId(Connection().BulkContainer().Uint32L(CMTPUsbContainer::ETransactionID));
+	TUint16 code(Connection().BulkContainer().Uint16L(CMTPUsbContainer::ECode));
+    __FLOG_VA((_L8("ContainerLength = %lu, containerType = 0x%x, code = 0x%x, transactionID = 0x%x"), iDataLength, containerType, code, transactionId));
+#endif
+	
 	//Due to an issue of Windows OS, the value of CMTPUsbContainer::EContainerLength is incorrect if the
 	//object >= 4G-12. The value should be KMaxTUint32 in this kind of cases, but in current Windows
 	//implementation it will be a value between 0 and 11.
@@ -540,23 +545,14 @@ TBool CMTPUsbEpBase::ValidateUSBHeaderL()
 	
 	__FLOG_VA((_L8("containerType = %u , dataLength = %lu bytes"), containerType, iDataLength));
 	
-	if (iDataLength >= KUSBHeaderSize && 
-		(containerType == EMTPUsbContainerTypeCommandBlock || containerType == EMTPUsbContainerTypeDataBlock))
-		{
-		result = ETrue;
-		iDataCounter = 0;
-#ifdef _DEBUG
- 		RDebug::Print(_L("Find the valid usb header------------------------------------------------------\n"));
- 		TUint16 code(Connection().BulkContainer().Uint16L(CMTPUsbContainer::ECode));
- 		TUint32 transactionID(Connection().BulkContainer().Uint32L(CMTPUsbContainer::ETransactionID));
- 		RDebug::Print(_L("ContainerLength = 0x%x, containerType = 0x%x , code = 0x%x , transactionID = 0x%x "),  iDataLength, containerType, code, transactionID);
- 		}
- 	else
- 		{
- 		RDebug::Print(_L("inValid usb Header read..........................................................."));
-#endif
- 		}
-	__FLOG(_L8("CMTPUsbEpBase::ValidateUSBHeader - Exit"));
+    if (iDataLength >= KUSBHeaderSize && 
+        (containerType == EMTPUsbContainerTypeCommandBlock || containerType == EMTPUsbContainerTypeDataBlock))
+        {	
+        result = ETrue;
+        iDataCounter = 0;
+        }
+	
+	__FLOG_VA((_L8("CMTPUsbEpBase::ValidateUSBHeader - Exit with the result of %d"), result));
 	return result;
 	}
 
@@ -606,15 +602,23 @@ void CMTPUsbEpBase::ProcessFirstReceivedChunkL()
 		    TRequestStatus status;
   	  		do
 				{
-				// Keep looking for headers.
-				// The case we are trying to catch is when we have 12 garbage bytes followed by 12 good bytes.
-				// In this case the ReadOneOrMore is acting on the next packet rather than the current packet.
-				// If the garbage data is a multiple of 12 bytes, we should still be able to catch the next good
-				// header. Otherwise the ReadOneOrMore will return will <12 bytes and we will fall through
-				// to the retry code below. 
+  	  		    //trash data, continue to flush.
+                iReceiveData.Zero();
+                Connection().Ldd().ReadPacket(status, EndpointNumber(), iReceiveData, KUSBHeaderSize);
+                User::WaitForRequest(status);
+                
+                //check the first 12 bytes of next packet to see whether it's an expected USB header
 				iReceiveData.Zero();
 				Connection().Ldd().ReadOneOrMore(status, EndpointNumber(), iReceiveData, KUSBHeaderSize);
 				User::WaitForRequest(status);
+
+#ifdef __FLOG_ACTIVE				
+			    __FLOG_VA((_L8("Keep looking for headers, length = %d"), iReceiveData.Length()));
+		         for (int i=0; i<3&&(i*4+4)<=iReceiveData.Length(); i++)
+		             {
+		             __FLOG_VA((_L8("0x%x 0x%x 0x%x 0x%x"), iReceiveData[i*4], iReceiveData[i*4+1], iReceiveData[i*4+2], iReceiveData[i*4+3]));            
+		             }
+#endif
 				} while (iReceiveData.Length()==KUSBHeaderSize && !ValidateUSBHeaderL());
 
 			if(!ValidateUSBHeaderL())
@@ -1034,7 +1038,7 @@ const TInt KFlushBufferMaxLen = 50*1024; // 50K bytes
 
 void CMTPUsbEpBase::FlushRxDataL()
     {
-    				  
+    __FLOG(_L8("FlushRxDataL - Entry"));    				  
     // create the read buff
     RBuf8 readBuf;
     readBuf.CreateL(KFlushBufferMaxLen);
@@ -1046,27 +1050,42 @@ void CMTPUsbEpBase::FlushRxDataL()
       // get the data size in the receive buffer ready to read
       TInt nbytes = 0;
       TInt err = Connection().Ldd().QueryReceiveBuffer(EndpointNumber(), nbytes);
-#ifdef _DEBUG
-      RDebug::Print(_L("FlushRxDataL()--1---err is %d , nbytes is %d"), err, nbytes);	  
-#endif
+
+      __FLOG_VA((_L8("FlushRxDataL()--1---err is %d , nbytes is %d"), err, nbytes));	  
  					  
       // has data, read it
       if( (err == KErrNone) && (nbytes > 0) )
-         {
-   
+         {   
          // synchronously read the data
          TRequestStatus status;
          Connection().Ldd().ReadOneOrMore(status, EndpointNumber(), readBuf);
          User::WaitForRequest(status);
 	 		 
          if(status.Int() != KErrNone)  break;
-         			               
-         // whenever some data read, reset the rest wait time .
+
+#ifdef __FLOG_ACTIVE
+         TInt length =  readBuf.Length();
+         __FLOG_VA((_L8("The length of trash data is %d"), length));
+         
+         __FLOG(_L8("Begining of trash data"));       
+         for (int i=0; i<4&&(i*4+4)<=length; i++)
+             {
+             __FLOG_VA((_L8("0x%x 0x%x 0x%x 0x%x"), readBuf[i*4], readBuf[i*4+1], readBuf[i*4+2], readBuf[i*4+3]));            
+             }
+         
+         __FLOG(_L8("Residual of trash data if any"));          
+         TInt residualLength = length%512;
+         for (int i=0; i<4&&(i*4+4)<=residualLength; i++)
+             {
+             TInt beginIndex = length - residualLength;
+             __FLOG_VA((_L8("0x%x 0x%x 0x%x 0x%x"), readBuf[beginIndex + i*4], readBuf[beginIndex + i*4+1], readBuf[beginIndex + i*4+2], readBuf[beginIndex + i*4+3]));            
+             }
+#endif
+         
+         // whenever some data read, reset the rest wait time.
          uRestTimeToWait = INTERVAL_FOR_FLUSH_TRASH_DATA;
- 			               
-#ifdef _DEBUG 			               
-         RDebug::Print(_L("FlushRxDataL()---Reset the rest wait time"));	  
-#endif             
+ 			                          
+         __FLOG(_L8("FlushRxDataL()---Reset the rest wait time"));	          
          }
        else 
          {	
@@ -1075,13 +1094,11 @@ void CMTPUsbEpBase::FlushRxDataL()
          // reduce the rest time to wait 
          uRestTimeToWait -=  INTERVAL_FOR_READ_TRASH_DATA ;
          }	
- 	  
-#ifdef _DEBUG 	  
-       RDebug::Print(_L("FlushRxDataL()---uRestTimeToWait is %d"), uRestTimeToWait);	  
-#endif
+ 	    
+      __FLOG_VA((_L8("FlushRxDataL()---uRestTimeToWait is %d"), uRestTimeToWait));
  			    	
     }while( uRestTimeToWait > 0);
 			    	
     readBuf.Close();
- 
+    __FLOG(_L8("FlushRxDataL - Exit"));    
 }

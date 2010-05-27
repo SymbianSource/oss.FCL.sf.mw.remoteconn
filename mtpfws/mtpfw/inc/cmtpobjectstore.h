@@ -27,7 +27,7 @@
 #include "mtpframeworkconst.h"
 #include "rmtpframework.h"
 #include "mtpdebug.h"
-
+#include "cmtpreferencemgr.h"
 class CFileStore;
 class CMTPHandleAllocator;
 class CMTPObjectMetaData;
@@ -155,6 +155,8 @@ class CMTPObjectStore : public CBase
 			}
 		void DoL(RDbTable& aTable)
 			{
+			//no need to call GetL already all it in TraverseL
+			iStore.ReferenceMgr().RemoveReferencesL(aTable.ColUint32(EObjectStoreHandleId));
 			aTable.DeleteL();
 			iStore.IncTranOpsNumL();
 			}
@@ -200,6 +202,7 @@ public:
 	void MarkNonPersistentObjectsL(TUint aDataProviderId, TUint32 aStorageId);
 	void EstablishDBSnapshotL(TUint32 aStorageId);
 	void CleanDBSnapshotL(TBool aOnlyRoot = EFalse);
+    void RemoveUndefinedObjectsL();
 	void ObjectsEnumComplete();
 	void MarkDPLoadedL(TUint aDataProviderId, TBool aFlag);
 
@@ -364,6 +367,7 @@ private:
 	TInt                                    iSnapshotCleanPos;
 	CSnapshotWorker*                        iSnapshotWorker;
 	mutable TFileName                       iSuidBuf;
+	TBool                                   iCleanUndefined;
 	/**
 	 FLOGGER debug trace member variable.
 	 */
