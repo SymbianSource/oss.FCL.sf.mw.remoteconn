@@ -3553,6 +3553,17 @@ namespace conn
 					iActiveInformation.iActiveType = EProxyImpOnly;
 					}
 				}
+			else if(!localName.CompareF(KCallbackDelayTime))
+				{
+				const TDesC8& value = aAttributes[x].Value().DesC();
+				TInt timeValue = 0;
+				TLex8 lex(value);
+				TInt err = lex.Val(timeValue);
+				if( err == KErrNone && timeValue > 0)
+					iActiveInformation.iCallbackDelayTime = TTimeIntervalMicroSeconds32(timeValue);
+				else
+					iActiveInformation.iCallbackDelayTime = KABCallbackDefaultTimeout;
+				}
 			} // for x
 		
 		return KErrNone;

@@ -425,9 +425,10 @@ namespace conn
 		iCallbackWatchdog = NULL;
 		iCallbackWatchdog = CPeriodic::NewL(EPriorityHigh);
 		TTimeIntervalMicroSeconds32 KWatchdogIntervalNone = 0;
-		iCallbackWatchdog->Start(KABCallbackWatchdogTimeout, KWatchdogIntervalNone, iWatchdogHandler);
+		iCallbackWatchdog->Start(DataOwnerL().ActiveInformation().iCallbackDelayTime, KWatchdogIntervalNone, iWatchdogHandler);
 		#endif
-
+		
+		
 		// Send the message back to the callback handler
 		iMessage.Complete(KErrNone);
 		

@@ -556,7 +556,10 @@ void CMTPDataProvider::RunL()
         }
     else
         {
-        iCurrentTransactionPhase = iCurrentConnection->TransactionPhaseL(iCurrentRequest->Uint32(TMTPTypeRequest::ERequestSessionID));        
+        if (iCurrentRequest != NULL)
+            {
+            iCurrentTransactionPhase = iCurrentConnection->TransactionPhaseL(iCurrentRequest->Uint32(TMTPTypeRequest::ERequestSessionID));
+            }
         }
     __FLOG_VA((_L8("Current transaction phase = 0x%08X"), iCurrentTransactionPhase));
     

@@ -67,6 +67,8 @@ namespace conn
 	_LIT8(KRequiresReboot, "requires_reboot");
 	_LIT8(KDeleteBeforeRestore, "delete_before_restore");
 	_LIT8(KBaseBackupOnly, "base_backup_only");
+	
+	_LIT8(KCallbackDelayTime, "callback_delay_time");
 
 	}
 #endif // __SBEPARSERDEFS_H__

@@ -159,6 +159,7 @@ private: // data
     TBool iVideoClipReady;
     TInt iVideoUtilErr;
     TInt iVideoClipErr;
+    TBool iAsyncStopCalled;
 };
 
 #endif // SCONVIDEOPARSER_H

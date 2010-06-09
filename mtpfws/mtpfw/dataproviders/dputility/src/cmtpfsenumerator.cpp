@@ -455,7 +455,15 @@ void CMTPFSEnumerator::ProcessEntriesL()
     for (TInt i = (iFirstUnprocessed - count); i < iFirstUnprocessed; ++i)
         {
         const TEntry& entry = iEntries[i];
+        TInt len = entry.iName.Length();
+        if(iCurrentPath.Length()  + len > KMaxFileName)
+            {
+            __FLOG_VA(_L8("Full name exceeds KMaxFileName, ignored."));
+            continue;
+            }
+        
         iCurrentPath.Append(entry.iName);
+
         __FLOG_VA((_L("Process path %S name %S"), &iCurrentPath, &entry.iName));
 #ifdef __FLOG_ACTIVE    
         TBuf8<KMTPMaxFullFileName> tmp;
@@ -478,15 +486,6 @@ void CMTPFSEnumerator::ProcessEntriesL()
             }
 #endif // __FLOG_ACTIVE
 
-        TInt len = entry.iName.Length();
-        TInt totalLen = iCurrentPath.Length();
-        if(totalLen > KMaxFileName)
-            {
-            // Remove filename part
-            iCurrentPath.SetLength(totalLen - len);
-            __FLOG_VA(_L8("Full name exceeds KMaxFileName, ignored."));
-            continue;
-            }
         TUint32 handle = 0;
         TMTPFormatCode format;
         if(-- iObjectNeedToScan <=0 && iAllRootScaned)

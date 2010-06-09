@@ -438,6 +438,7 @@ void CMTPDeviceDataStore::RunL()
     	if (isCompleted)
     		{
     		Schedule(EEnumerated);
+
     		}
     	else
     		{
@@ -453,12 +454,20 @@ void CMTPDeviceDataStore::RunL()
         break;
 
     case EEnumerated:
+        {
+        if (iHasPendingRequest)
+            {
+            iHasPendingRequest = EFalse;
+            iSingletons.DpController().ExecutePendingRequestL();
+            }
+        
         if (iCallback)
             {
             iCallback->NotifyEnumerationCompleteL(iStorageId, KErrNone);
             iCallback = NULL;
             iStorageId = KMTPNotSpecified32;
             }
+        }
         break;
 
 case EEnumeratedBatteryLevel :
@@ -483,7 +492,8 @@ CMTPDeviceDataStore::CMTPDeviceDataStore() :
     CActive(EPriorityStandard),
 	iBatteryInfoV1Pckg(iBatteryInfoV1),
 	iPhoneIdV1Pckg(iPhoneIdV1),
-	iIsConnectMac(EFalse)
+	iIsConnectMac(EFalse),
+	iHasPendingRequest(EFalse)
     {
     CActiveScheduler::Add(this);
     }
@@ -1235,3 +1245,10 @@ void CMTPDeviceDataStore::SetConnectMac(TBool aConnectMac)
     {
     iIsConnectMac = aConnectMac;
     }
+
+void CMTPDeviceDataStore::RegisterPendingRequest()
+    {
+    iHasPendingRequest = ETrue;
+    }
+
+

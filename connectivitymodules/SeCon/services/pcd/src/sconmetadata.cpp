@@ -568,7 +568,7 @@ HBufC8* SConMetadata::GetFileDataLC( const TDesC& aFilename, RFs& aFs )
     CleanupStack::PopAndDestroy( &file );
     
     CleanupStack::PushL( readBuffer );
-    
+    TRACE_FUNC_EXIT;
     return readBuffer;
 	}
 
@@ -1023,19 +1023,21 @@ TInt SConMetadata::ConvertRationalTag( const CExifTag& aTag, TDes& aPosDegrees )
 		denom = 0;
 		Mem::Copy(&numer, ratData + ((y * 2) * sizeof(numer)), sizeof(numer));
 		Mem::Copy(&denom, ratData + (((y * 2) + 1) * sizeof(numer)), sizeof(denom));	
-		
-		if ( y == 0 )// degrees
-			{
-			degrees = numer/denom;
-			}
-		else if ( y == 1 )// minutes
-			{
-			minutes = numer/denom;
-			}
-		else if ( y == 2 )// seconds
-			{
-			seconds = numer/denom;
-			}
+		if (denom != 0)
+		    {
+            if ( y == 0 )// degrees
+                {
+                degrees = numer/denom;
+                }
+            else if ( y == 1 )// minutes
+                {
+                minutes = numer/denom;
+                }
+            else if ( y == 2 )// seconds
+                {
+                seconds = numer/denom;
+                }
+		    }
 		}
 	_LIT(KFormat, "%.0f°%.0f'%.2f\"" );
 	aPosDegrees.Format( KFormat, degrees, minutes, seconds );
