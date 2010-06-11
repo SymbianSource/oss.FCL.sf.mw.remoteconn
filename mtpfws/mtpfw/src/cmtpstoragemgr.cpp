@@ -348,54 +348,8 @@ EXPORT_C TInt CMTPStorageMgr::DeallocatePhysicalStorageId(TUint aDataProviderId,
 EXPORT_C TUint32 CMTPStorageMgr::DefaultStorageId() const
     {
     __FLOG(_L8("DefaultStorageId - Entry"));
-    
-    TUint32 ret = iDefaultStorageId;
-    TBool check = EFalse;
-	TInt driveNo = DriveNumber(ret);
-	const TUint KMinFreeSpace(1024 * 512);  
-	if( (KErrNotFound == driveNo) || ( !IsReadWriteStorage(ret) ) )
-		{
-		check = ETrue;
-		}
-	else
-		{
-		TVolumeInfo volumeInfo;
-		if(iSingletons.Fs().Volume(volumeInfo, driveNo) != KErrNone)
-			{
-			check = ETrue;
-			}
-		else if (volumeInfo.iFree < KMinFreeSpace)
-			{
-			check = ETrue;
-			}
-		}
-    	
-    if(check)
-    	{ 
-		const TUint KCount(iMapDriveToStorage.Count());
-		for (TInt i = 0; i < KCount; i++)
-			{
-			if (iMapDriveToStorage[i] == KErrNotFound)
-				{
-				continue;
-				}
-			TVolumeInfo volume;
-			if( !IsReadWriteStorage(iMapDriveToStorage[i]) 
-					|| (iSingletons.Fs().Volume(volume, i) != KErrNone) )
-				{
-				continue;
-				}
-			
-			if (volume.iFree > KMinFreeSpace )
-				{
-				ret = iMapDriveToStorage[i];
-				break;
-				}
-			}
-    	}
-    
     __FLOG(_L8("DefaultStorageId - Exit"));
-    return ret;
+    return iDefaultStorageId;
     }
 
 EXPORT_C TInt CMTPStorageMgr::DriveNumber(TUint32 aStorageId) const

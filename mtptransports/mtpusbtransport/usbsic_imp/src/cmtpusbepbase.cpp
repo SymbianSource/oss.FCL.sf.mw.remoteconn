@@ -596,36 +596,19 @@ void CMTPUsbEpBase::ProcessFirstReceivedChunkL()
 	    // USB Header validation
 	    if (!ValidateUSBHeaderL())
 		    {
-			// If device has received trash data, flush the rest of the packet and try again.
-  	  	 	// This will occur when cancelling a transfer and the PC sends buffered data after 
-  	  	 	// the cancellation.
-		    TRequestStatus status;
-  	  		do
-				{
-  	  		    //trash data, continue to flush.
-                iReceiveData.Zero();
-                Connection().Ldd().ReadPacket(status, EndpointNumber(), iReceiveData, KUSBHeaderSize);
-                User::WaitForRequest(status);
-                
-                //check the first 12 bytes of next packet to see whether it's an expected USB header
-				iReceiveData.Zero();
-				Connection().Ldd().ReadOneOrMore(status, EndpointNumber(), iReceiveData, KUSBHeaderSize);
-				User::WaitForRequest(status);
+            //trash data, continue to flush.
+            TRequestStatus status;
+            RBuf8 readBuf;
+            readBuf.CreateL(KMaxPacketTypeBulkHS);
+            Connection().Ldd().ReadPacket(status, EndpointNumber(), readBuf, KMaxPacketTypeBulkHS);
+            User::WaitForRequest(status);    
+            RDebug::Print(_L("CMTPUsbEpBase::ProcessFirstReceivedChunkL(), trash data length = %d"), readBuf.Length());
+            readBuf.Close();
+            
+            InitiateFirstChunkReceiveL();  
+            return;
+            
 
-#ifdef __FLOG_ACTIVE				
-			    __FLOG_VA((_L8("Keep looking for headers, length = %d"), iReceiveData.Length()));
-		         for (int i=0; i<3&&(i*4+4)<=iReceiveData.Length(); i++)
-		             {
-		             __FLOG_VA((_L8("0x%x 0x%x 0x%x 0x%x"), iReceiveData[i*4], iReceiveData[i*4+1], iReceiveData[i*4+2], iReceiveData[i*4+3]));            
-		             }
-#endif
-				} while (iReceiveData.Length()==KUSBHeaderSize && !ValidateUSBHeaderL());
-
-			if(!ValidateUSBHeaderL())
-				{ 
-				InitiateFirstChunkReceiveL();  
-				return;
-				}
 			}
 			
 		if ((iDataLength - KUSBHeaderSize) == 0)

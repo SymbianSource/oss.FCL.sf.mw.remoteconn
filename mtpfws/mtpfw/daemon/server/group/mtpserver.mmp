@@ -22,12 +22,7 @@ VENDORID 			0x70000001
 
 CAPABILITY			CommDD PowerMgmt ReadDeviceData WriteDeviceData TrustedUI ProtServ NetworkControl NetworkServices LocalServices ReadUserData WriteUserData
 
-#ifdef WINSCW
-//EPOCHEAPSIZE        0x1400000   0x1400000   // 20MB
 EPOCHEAPSIZE        0x80000   0x800000   // 8MB
-#else
-EPOCHEAPSIZE        0x80000   0x800000   // 8MB
-#endif
 
 EPOCSTACKSIZE       0x14000
 

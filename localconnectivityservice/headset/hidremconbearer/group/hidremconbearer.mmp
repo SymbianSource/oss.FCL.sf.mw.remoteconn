@@ -1,0 +1,53 @@
+/*
+* Copyright (c) 2007-2007 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Project definition file for project hidremconbearer
+*
+*/
+
+#include <data_caging_paths.hrh>
+#include <remcon/remconservercaps.mmh>
+#include <platform_paths.hrh>
+#include "../../inc/headsetuids.h"
+
+
+TARGET			hidremconbearer.dll
+
+// CAPABILITY      CAP_ECOM_PLUGIN 
+// capabilities are required as that of remconbearerplugin.dll
+// getting it from #include <remcon/remconservercaps.mmh>
+
+TARGETTYPE		PLUGIN
+UID 			0x10009d8d HIDREMCON_UID
+VENDORID		VID_DEFAULT
+
+SOURCEPATH		../src
+SOURCE			hidremconbearermain.cpp
+SOURCE			hidremconbearerimplementation.cpp
+SOURCE			hidremconbearerobserver.cpp
+
+
+START RESOURCE ../data/hidremconbearer.rss
+TARGET hidremconbearer.rsc
+END // ECOM resource definition
+
+
+USERINCLUDE 	. ../inc ../../inc
+
+MW_LAYER_SYSTEMINCLUDE
+
+LIBRARY 		euser.lib 
+LIBRARY			ecom.lib
+LIBRARY 		remconbearerplugin.lib 
+LIBRARY 		remcontypes.lib
+

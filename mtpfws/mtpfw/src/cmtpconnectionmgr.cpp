@@ -24,6 +24,9 @@
 // Class constants.
 __FLOG_STMT(_LIT8(KComponent,"ConnectionMgr");)
 
+const TUint KMTPUsbTransportUid  = 0x102827B2;
+const TUint KMTPBTTransportUid  = 0x10286FCB;
+
 /**
 CMTPConnectionMgr factory method.
 @leave If a failure occurs, one of the system wide error codes.
@@ -97,17 +100,25 @@ EXPORT_C TUid CMTPConnectionMgr::TransportUid()
 void CMTPConnectionMgr::ConnectionCloseComplete(const TUint& /*aConnUid*/)
     {
     __FLOG(_L8("ConnectionCloseComplete - Entry"));
-    ResumeSuspendedTransport();
+    if (iTransportUid.iUid != KMTPUsbTransportUid )
+        {
+        ResumeSuspendedTransport();
+        }
+    else
+        {
+        iResumeCalled = ETrue;
+        }
+    
     __FLOG(_L8("ConnectionCloseComplete - exit"));
     }
 
 EXPORT_C void CMTPConnectionMgr::StartTransportL(TUid aTransport)
     {
-    
-    TInt32 bluetoothUid = 0x10286FCB;
-    
+    __FLOG(_L8("StartTransportL - Entry"));
+  
     RUsb usb;
     User::LeaveIfError(usb.Connect());
+    __FLOG(_L8("after connect, and before call get currentpersonalityid"));
     TInt usbMode;
     TUsbServiceState usbStat;
     TInt err = usb.GetCurrentPersonalityId(usbMode);
@@ -133,7 +144,7 @@ EXPORT_C void CMTPConnectionMgr::StartTransportL(TUid aTransport)
     
     
     //When USB plug out, BT will start Master mode to reconnect remote device. Else BT will start slave mode to listen connection.
-    if(aTransport.iUid == bluetoothUid && iRemoteDevice.iDeviceAddr != 0 && aTransport != iTransportUid)
+    if(aTransport.iUid == KMTPBTTransportUid && iRemoteDevice.iDeviceAddr != 0 && aTransport != iTransportUid)
         {
         __FLOG(_L8("StartTransportL with parameter!"));
         TMTPBTRemoteDeviceBuf tmpdata(iRemoteDevice);
@@ -146,7 +157,7 @@ EXPORT_C void CMTPConnectionMgr::StartTransportL(TUid aTransport)
         __FLOG(_L8("StartTransportL without parameter!"));
         StartTransportL( aTransport, NULL );
         }
-    
+    __FLOG(_L8("StartTransportL - Exit"));
     }
 
 /**
@@ -163,8 +174,6 @@ EXPORT_C void CMTPConnectionMgr::StartTransportL(TUid aTransport, const TAny* aP
     {
     __FLOG(_L8("StartTransportL - Entry"));
     
-    TInt32 bluetoothUid = 0x10286FCB;
-    
     if (iTransport)
         {
         __FLOG(_L8("The transport is not none."));
@@ -177,7 +186,7 @@ EXPORT_C void CMTPConnectionMgr::StartTransportL(TUid aTransport, const TAny* aP
         else
             {
             __FLOG_1(_L8("Relaunch the transport 0x%X"), iTransportUid.iUid);
-            if(aTransport.iUid == bluetoothUid)
+            if(aTransport.iUid == KMTPBTTransportUid)
                 {
                 iTransport->Stop(*this);
                 delete iTransport;
@@ -217,7 +226,7 @@ EXPORT_C void CMTPConnectionMgr::StartTransportL(TUid aTransport, const TAny* aP
         
         iTransportCount++;
         
-        if(iTransportUid.iUid != bluetoothUid)
+        if(iTransportUid.iUid != KMTPBTTransportUid)
             {
             UnsuspendTransport( iTransportUid );
             }
@@ -272,7 +281,9 @@ EXPORT_C void CMTPConnectionMgr::StopTransport( TUid aTransport, TBool aByBearer
 	
 
     __FLOG_1(_L8("aTransport is 0x%X"), aTransport.iUid);
-    __FLOG_1(_L8("iTransportUid is 0x%X"), aTransport.iUid);
+    __FLOG_1(_L8("iTransportUid is 0x%X"), iTransportUid.iUid);
+    
+    TInt transportId = iTransportUid.iUid;
 
     if ( aByBearer )
         {
@@ -290,6 +301,13 @@ EXPORT_C void CMTPConnectionMgr::StopTransport( TUid aTransport, TBool aByBearer
         iTransport = NULL;
         iTransportUid = KNullUid;
         iTransportCount--;
+        //To be sure Resume is done after StopTransport
+        if( transportId == KMTPUsbTransportUid && iResumeCalled)
+            {
+            ResumeSuspendedTransport();
+			iResumeCalled = EFalse;            
+            }
+
         }
     
 	__FLOG(_L8("StopTransport - Exit"));
@@ -390,6 +408,7 @@ CMTPConnectionMgr::CMTPConnectionMgr() :
     __FLOG_OPEN(KMTPSubsystem, KComponent);
     iRemoteDevice.iDeviceAddr = 0;
     iRemoteDevice.iDeviceServicePort = 0;
+    iResumeCalled = EFalse;
     }
 
 /**
@@ -471,21 +490,28 @@ void CMTPConnectionMgr::ResumeSuspendedTransport()
     __FLOG_1(_L8("The count number is %d"), count);
     __FLOG_1(_L8("The transportport id is 0x%X"), iTransportUid.iUid);
     
-    TInt32 bluetoothUid = 0x10286FCB;
-    
     if ( ( count > 0 )
         // If the transport was just switched and suspended, it shouldn't be resumed.
-        && (( iTransportUid != iSuspendedTransports[count-1] ) || iTransportUid.iUid == bluetoothUid))
+        && (( iTransportUid != iSuspendedTransports[count-1] ) || iTransportUid.iUid == KMTPBTTransportUid))
         {
         __FLOG( _L8("Found suspended transport(s).") );
         if ( !iTransportTrigger )
             {
             iTransportTrigger = new( ELeave ) CAsyncCallBack( CActive::EPriorityStandard );
             }
-        __ASSERT_DEBUG( ( !iTransportTrigger->IsActive() ), User::Invariant() );
-        TCallBack callback( CMTPConnectionMgr::DoResumeSuspendedTransport, this );
-        iTransportTrigger->Set( callback );
-        iTransportTrigger->CallBack();
+       
+        if ( !iTransportTrigger->IsActive())
+            {
+            __FLOG( _L8("Set call back function!") );
+            TCallBack callback( CMTPConnectionMgr::DoResumeSuspendedTransport, this );
+            iTransportTrigger->Set( callback );
+            iTransportTrigger->CallBack();            
+            }
+        else
+            {
+            __FLOG( _L8("Call back has been set!") );
+            }
+
         }
     __FLOG( _L8("-ResumeSuspendedTransport") );
     }

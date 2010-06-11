@@ -22,7 +22,6 @@
 
 PRJ_PLATFORMS
 ARMV5
-WINSCW
 
 PRJ_EXPORTS
 mtp_controller.iby          /epoc32/rom/include/mtp_controller.iby

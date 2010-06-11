@@ -1,0 +1,88 @@
+/*
+* Copyright (c) 2006-2008 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Project definition file for project DUN utilities
+*
+*/
+
+
+// Define the following flag to enable network side logging.
+// This makes it possible to test AT commands with idle Telephony/RComm.
+// Note that because RComm is a stub the only way to test the connection
+// is via RSocket (Bluetooth).
+
+#undef ENABLE_NETWORK_STUBS
+
+#include <data_caging_paths.hrh>
+#include <platform_paths.hrh>
+
+#ifdef ENABLE_NETWORK_STUBS
+MACRO PRJ_USE_NETWORK_STUBS
+#define PRJ_USE_NETWORK_STUBS
+#endif  // ENABLE_NETWORK_STUBS
+
+TARGET                  dunutils.dll
+TARGETTYPE              DLL
+UID                     0x1000008d 0x101F6E2A
+
+CAPABILITY              CAP_GENERAL_DLL
+VENDORID                VID_DEFAULT
+
+SOURCEPATH              ../src
+SOURCE                  DunStream.cpp
+SOURCE                  DunUpstream.cpp
+SOURCE                  DunDownstream.cpp
+SOURCE                  DunSignalCopy.cpp
+SOURCE                  DunSignalNotify.cpp
+SOURCE                  DunSignalWaiter.cpp
+SOURCE                  DunDataWaiter.cpp
+SOURCE                  DunNetDataport.cpp
+SOURCE                  DunTransUtils.cpp
+SOURCE                  DunTransporter.cpp
+SOURCE                  DunChanMan.cpp
+SOURCE                  DunDataPusher.cpp
+SOURCE                  DunNoteHandler.cpp
+SOURCE                  DunUtils.cpp
+
+START RESOURCE          ../data/dunutils.rss
+TARGETPATH              RESOURCE_FILES_DIR
+HEADER
+LANGUAGE_IDS
+END // RESOURCE
+
+USERINCLUDE             ../inc ../../atext/inc
+
+MW_LAYER_SYSTEMINCLUDE
+
+// Note:
+// The only other SYSTEMINCLUDE should you shall add are Symbian specific ones.
+// If there is a S60 header in the subdirectory then that should be
+// added into the include statements (like #include <phonebook/header.h>)
+//SYSTEMINCLUDE           /epoc32/include/ecom
+SYSTEMINCLUDE           ../../../inc
+
+LIBRARY                 aknnotify.lib
+LIBRARY                 bafl.lib
+#ifdef PRJ_USE_NETWORK_STUBS
+LIBRARY                 c32comm_stub.lib
+LIBRARY                 etelmm_stub.lib
+#else
+LIBRARY                 c32.lib
+LIBRARY                 etel.lib
+LIBRARY                 etelmm.lib
+#endif
+LIBRARY                 esock.lib
+LIBRARY                 dunatext.lib
+LIBRARY                 efsrv.lib
+LIBRARY                 euser.lib
+DEBUGLIBRARY            flogger.lib

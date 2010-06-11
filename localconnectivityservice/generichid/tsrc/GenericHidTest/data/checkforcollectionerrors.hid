@@ -1,0 +1,16 @@
+0xA1, 0x81, //main collection
+0xC0, //end collection
+
+0xA1, 0x07, //main collection
+0xC0, //end collection
+
+0x09, 0xc8, // add local usage
+0x05, 0xc8, // add local usage page
+
+0xA1, 0x01, //main collection
+0xC0, //end collection
+
+0x79, 0xc8, //local string index - KUnusedLocalItemsMask
+
+0xA1, 0x01, //main collection
+0xC0, //end collection

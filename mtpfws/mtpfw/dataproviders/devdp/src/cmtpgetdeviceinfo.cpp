@@ -101,6 +101,15 @@ GetDeviceInfo request handler. Build and send device info data set.
 void CMTPGetDeviceInfo::ServiceL()
     {
     __FLOG(_L8("ServiceL - Entry"));
+    
+    if (!iDpSingletons.DeviceDataStore().Enumerated())
+        {
+        __FLOG(_L8("MTPExtensionReady not ready, reschedule request")); 
+        iDpSingletons.DeviceDataStore().RegisterPendingRequest();
+        RegisterPendingRequest();
+        return;
+        }
+    
     BuildDeviceInfoL();
     SendDataL(*iDeviceInfo);
     __FLOG(_L8("ServiceL - Exit"));

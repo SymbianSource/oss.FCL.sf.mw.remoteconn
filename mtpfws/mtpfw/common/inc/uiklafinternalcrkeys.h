@@ -69,6 +69,25 @@ const TUint32 KUikOODDiskFreeSpaceWarningNoteLevel = 0x00000006;
  */
 const TUint32 KUikOODDiskFreeSpaceWarningNoteLevelMassMemory = 0x00000007;
 
+#ifdef __MTP_NAVIENGINE_TEST
+//The free size of C-Drive of NaviEngine env is less than 21M,
+//it will block many ONB test cases
+const TInt KFreeSpaceThreshHoldDefaultValue(0);
+const TInt KFreeSpaceExtraReserved(0);
+
+#else
+//MTP should reserve some disk space to prevent OOD(Out of Disk) monitor 
+//popup 'Out of memory' note.When syncing music through ovi player,
+//sometimes device screen get freeze with this note
+//Be default, this value is read from Central Respository, if error while
+//reading, use this one
+const TInt KFreeSpaceThreshHoldDefaultValue(20*1024*1024);//20M bytes
+
+//Beside the OOD threshold value, we need to reserve extra disk space
+//for harvest server do the harvest, set this as 1M
+const TInt KFreeSpaceExtraReserved(1024*1024);//1M bytes
+
+#endif
 
 #endif __UIKLAF_INTERNAL_CR_KEYS_H__
 

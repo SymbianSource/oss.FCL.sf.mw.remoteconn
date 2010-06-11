@@ -497,9 +497,15 @@ void CMTPObjectStore::InsertObjectL(CMTPObjectMetaData& aObject)
 			else
 				{
 				aObject.SetUint(CMTPObjectMetaData::EHandle, handle);
-				needUpdateOwner = ETrue;
-				//while enumerating, we ignore the repeatedly INSERT operations.
-				//User::Leave(KErrAlreadyExists);
+				CMTPObjectMetaData* object(CMTPObjectMetaData::NewLC());
+				if(ObjectL(aObject.DesC(CMTPObjectMetaData::ESuid), *object))
+					{
+					if(object->Uint(CMTPObjectMetaData::EDataProviderId) != aObject.Uint(CMTPObjectMetaData::EDataProviderId))
+						{
+						needUpdateOwner = ETrue;
+						}
+					}
+				CleanupStack::PopAndDestroy(object);
 				}
 			__FLOG_VA(_L8("Not Found in Snapshot"));
 			}

@@ -131,7 +131,7 @@ void CMTPUsbConnection::CloseConnection()
     __FLOG(_L8("CloseConnection - Exit"));
     }
     
-void CMTPUsbConnection::ReceiveDataL(MMTPType& aData, const TMTPTypeRequest& aRequest)
+void CMTPUsbConnection::ReceiveDataL(MMTPType& aData, const TMTPTypeRequest& /*aRequest*/)
     {
     __FLOG(_L8("ReceiveDataL - Entry"));
     
@@ -521,7 +521,9 @@ void CMTPUsbConnection::ReceiveControlRequestDataCompleteL(TInt aError, MMTPType
                 static_cast<CMTPUsbEpBulkOut*>(iEndpoints[EMTPUsbEpBulkOut])->FlushRxDataL();
                 
             	// initiate bulk request sequence.
-            	InitiateBulkRequestSequenceL();                 
+            	InitiateBulkRequestSequenceL();   
+            	
+                SetDeviceStatus(EMTPUsbDeviceStatusOK);
             	}
             }
 
@@ -1039,10 +1041,7 @@ void CMTPUsbConnection::InitiateControlRequestSequenceL()
     CMTPUsbEpControl& ctrl(*static_cast<CMTPUsbEpControl*>(iEndpoints[EMTPUsbEpControl]));
     if (!ctrl.Stalled())
         {
-        // wait 100 miliseconds before issue control request.
-		// This line is to fix winlogo transport cancel test issue due to that ReadUntilShort never complete sometimes
-		// If USB team fixed the issue, this line could be removed.
-//        User::After(1000*100); // 100 Miliseconds 
+
         ctrl.ReceiveControlRequestSetupL(iUsbControlRequestSetup);
         }
     __FLOG(_L8("InitiateControlRequestSequenceL - Exit"));        
@@ -1255,7 +1254,7 @@ Processes received USB SIC class specific Get Device Status requests
 @param aRequest The USB SIC class specific request setup data.
 @leave One of the system wide error codes, if a processing failure occurs.
 */ 
-void CMTPUsbConnection::ProcessControlRequestDeviceStatusL(const TMTPUsbControlRequestSetup& aRequest)
+void CMTPUsbConnection::ProcessControlRequestDeviceStatusL(const TMTPUsbControlRequestSetup& /*aRequest*/)
     {
     __FLOG(_L8("ProcessControlRequestDeviceStatusL - Entry"));
     iUsbControlRequestDeviceStatus.Reset();
