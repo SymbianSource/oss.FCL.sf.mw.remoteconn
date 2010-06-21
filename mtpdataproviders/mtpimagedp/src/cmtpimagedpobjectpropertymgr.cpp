@@ -51,6 +51,9 @@
 // Class constants.
 __FLOG_STMT(_LIT8(KComponent,"MTPImageDpPropertyMgr");)
 
+// Indicate how many cache can be stored
+const TUint KCacheThreshold = 16;
+
 /**
 The properties cache table content.
 */
@@ -112,13 +115,10 @@ void CMTPImageDpObjectPropertyMgr::CMTPImagePropertiesCache::ConstructL()
             break;
             }         
         }
-    
-    iObjectHandle = KMTPHandleNone;   
     }
 
 void CMTPImageDpObjectPropertyMgr::CMTPImagePropertiesCache::ResetL()
     {
-    iObjectHandle = KMTPHandleNone;
     SetUint(EImagePixWidth, 0);
     SetUint(EImagePixHeight, 0);
     SetUint(EImageBitDepth, 0);
@@ -137,11 +137,6 @@ TUint CMTPImageDpObjectPropertyMgr::CMTPImagePropertiesCache::Uint(TUint aId) co
     return iElementsUint[iElements[aId].iOffset];
     }
 
-TUint CMTPImageDpObjectPropertyMgr::CMTPImagePropertiesCache::ObjectHandle() const
-    {
-    return iObjectHandle;
-    }
-
 void CMTPImageDpObjectPropertyMgr::CMTPImagePropertiesCache::SetDesCL(TUint aId, const TDesC& aValue)
     {
     const TElementMetaData& KElement(iElements[aId]);
@@ -157,11 +152,6 @@ void CMTPImageDpObjectPropertyMgr::CMTPImagePropertiesCache::SetUint(TUint aId, 
     iElementsUint[iElements[aId].iOffset] = aValue;
     }
 
-void CMTPImageDpObjectPropertyMgr::CMTPImagePropertiesCache::SetObjectHandle(TUint aObjectHandle)
-    {
-    iObjectHandle = aObjectHandle;
-    }
-
 CMTPImageDpObjectPropertyMgr* CMTPImageDpObjectPropertyMgr::NewL(MMTPDataProviderFramework& aFramework, CMTPImageDataProvider& aDataProvider)
     {
     CMTPImageDpObjectPropertyMgr* self = new (ELeave) CMTPImageDpObjectPropertyMgr(aFramework, aDataProvider);
@@ -175,7 +165,7 @@ CMTPImageDpObjectPropertyMgr::CMTPImageDpObjectPropertyMgr(MMTPDataProviderFrame
     iFramework(aFramework),
     iDataProvider(aDataProvider),
     iFs(aFramework.Fs()),
-    iObjectMgr(aFramework.ObjectMgr())
+    iObjectMgr(aFramework.ObjectMgr())    
     {
     __FLOG_OPEN(KMTPSubsystem, KComponent);
     }
@@ -183,7 +173,6 @@ CMTPImageDpObjectPropertyMgr::CMTPImageDpObjectPropertyMgr(MMTPDataProviderFrame
 void CMTPImageDpObjectPropertyMgr::ConstructL(MMTPDataProviderFramework& /*aFramework*/)
     {
     __FLOG(_L8("CMTPImageDpObjectPropertyMgr::ConstructL - Entry"));
-    iPropertiesCache = CMTPImagePropertiesCache::NewL();    
     iMetaDataSession = CMdESession::NewL(*this);
     __FLOG(_L8("CMTPImageDpObjectPropertyMgr::ConstructL - Exit"));
     }
@@ -191,10 +180,13 @@ void CMTPImageDpObjectPropertyMgr::ConstructL(MMTPDataProviderFramework& /*aFram
 CMTPImageDpObjectPropertyMgr::~CMTPImageDpObjectPropertyMgr()
     {
     __FLOG(_L8("CMTPImageDpObjectPropertyMgr::~CMTPImageDpObjectPropertyMgr - Entry"));
-    delete iPropertiesCache;
     delete iObject;
     delete iMetaDataSession;
     delete iThumbnailCache.iThumbnailData;
+    
+    //Clear propreties cache map
+    ClearAllCache();
+    iPropretiesCacheMap.Close();
     __FLOG(_L8("CMTPImageDpObjectPropertyMgr::~CMTPImageDpObjectPropertyMgr - Exit"));
     __FLOG_CLOSE;
     }
@@ -212,26 +204,12 @@ void CMTPImageDpObjectPropertyMgr::SetCurrentObjectL(CMTPObjectMetaData& aObject
         /**
          * determine whether the cache hit is occured
          */
-        if (iPropertiesCache->ObjectHandle() == iObjectInfo->Uint(CMTPObjectMetaData::EHandle))
+        iCacheHit = FindPropertiesCache(iObjectInfo->Uint(CMTPObjectMetaData::EHandle));
+        if (!iCacheHit)
             {
-            iCacheHit = ETrue;
-            }
-        else
-            {            
-            iCacheHit = EFalse;
-
-            /**
-             * if cache miss, we should clear the cache content
-             */
-            ClearCacheL();
-            
-			//need parse image file by our self if fail to get properties from MdS
-            iNeedParse = ETrue;
-
-			//clear previous Mde object
             delete iObject;
-            iObject = NULL;            
-            }        
+            iObject = NULL; 
+            }          
         }    
     else
         {        
@@ -241,13 +219,27 @@ void CMTPImageDpObjectPropertyMgr::SetCurrentObjectL(CMTPObjectMetaData& aObject
          * other operations will not use cache, such as setobjectvalue/setobjectproplist
          */
         if (aSaveToCache)
-            {
+            {            
             TUint objectHandle = iObjectInfo->Uint(CMTPObjectMetaData::EHandle);
-            if (iPropertiesCache->ObjectHandle() != objectHandle)
+            if (FindPropertiesCache(objectHandle))
                 {
-                iPropertiesCache->ResetL();
+                __FLOG_VA((_L16("SetCurrentObjectL - find object in cache:%u"), objectHandle));
+                iCurrentPropertiesCache->ResetL();
                 }
-            iPropertiesCache->SetObjectHandle(objectHandle);            
+            else
+                {
+                if (iPropretiesCacheMap.Count() > KCacheThreshold)
+                    {
+                    // Find the first object handle from cache map and then destory it
+                    RHashMap<TUint, CMTPImagePropertiesCache*>::TIter iter(iPropretiesCacheMap);
+                    DestroyPropertiesCahce(*iter.NextKey());
+                    __FLOG_VA((_L16("SetCurrentObjectL - destory object:%u"), objectHandle));
+                    }                
+                
+                iCurrentPropertiesCache = CMTPImagePropertiesCache::NewL();
+                iPropretiesCacheMap.Insert(objectHandle, iCurrentPropertiesCache);
+                __FLOG_VA((_L16("SetCurrentObjectL - create new object:%u"), objectHandle));
+                }
             }
         }
     
@@ -304,13 +296,22 @@ void CMTPImageDpObjectPropertyMgr::SetPropertyL(TMTPObjectPropertyCode aProperty
         iObjectInfo->SetUint(CMTPObjectMetaData::EParentHandle, aValue);
         break;
     case EMTPObjectPropCodeWidth:
-        iPropertiesCache->SetUint(CMTPImageDpObjectPropertyMgr::CMTPImagePropertiesCache::EImagePixWidth, aValue);
+        if (iCurrentPropertiesCache != NULL)
+            {
+            iCurrentPropertiesCache->SetUint(CMTPImageDpObjectPropertyMgr::CMTPImagePropertiesCache::EImagePixWidth, aValue);
+            }
         break;
     case EMTPObjectPropCodeHeight:
-        iPropertiesCache->SetUint(CMTPImageDpObjectPropertyMgr::CMTPImagePropertiesCache::EImagePixHeight, aValue);
+        if (iCurrentPropertiesCache != NULL)
+            {        
+            iCurrentPropertiesCache->SetUint(CMTPImageDpObjectPropertyMgr::CMTPImagePropertiesCache::EImagePixHeight, aValue);
+            }
         break; 
     case EMTPObjectPropCodeImageBitDepth:
-        iPropertiesCache->SetUint(CMTPImageDpObjectPropertyMgr::CMTPImagePropertiesCache::EImageBitDepth, aValue);
+        if (iCurrentPropertiesCache != NULL)
+            {        
+            iCurrentPropertiesCache->SetUint(CMTPImageDpObjectPropertyMgr::CMTPImagePropertiesCache::EImageBitDepth, aValue);
+            }
         break;          
     default:
         //nothing to do
@@ -363,7 +364,10 @@ void CMTPImageDpObjectPropertyMgr::SetPropertyL(TMTPObjectPropertyCode aProperty
         break;
       
     case EMTPObjectPropCodeDateCreated://MdS property
-        iPropertiesCache->SetDesCL(CMTPImageDpObjectPropertyMgr::CMTPImagePropertiesCache::EDateCreated, aValue);
+        if (iCurrentPropertiesCache != NULL)
+            {
+            iCurrentPropertiesCache->SetDesCL(CMTPImageDpObjectPropertyMgr::CMTPImagePropertiesCache::EDateCreated, aValue);
+            }
         break;
         
     default:
@@ -640,19 +644,19 @@ void CMTPImageDpObjectPropertyMgr::GetPropertyFromMdsL(TMTPObjectPropertyCode aP
         switch (aProperty)
             {
         case EMTPObjectPropCodeDateCreated:
-            (*(static_cast<CMTPTypeString*>(aValue))).SetL(iPropertiesCache->DesC(CMTPImageDpObjectPropertyMgr::CMTPImagePropertiesCache::EDateCreated));            
+            (*(static_cast<CMTPTypeString*>(aValue))).SetL(iCurrentPropertiesCache->DesC(CMTPImageDpObjectPropertyMgr::CMTPImagePropertiesCache::EDateCreated));            
             break;
           
         case EMTPObjectPropCodeWidth:
-            *static_cast<TUint32*>(aValue) = iPropertiesCache->Uint(CMTPImageDpObjectPropertyMgr::CMTPImagePropertiesCache::EImagePixWidth);            
+            *static_cast<TUint32*>(aValue) = iCurrentPropertiesCache->Uint(CMTPImageDpObjectPropertyMgr::CMTPImagePropertiesCache::EImagePixWidth);            
             break;
             
         case EMTPObjectPropCodeHeight:
-            *static_cast<TUint32*>(aValue) = iPropertiesCache->Uint(CMTPImageDpObjectPropertyMgr::CMTPImagePropertiesCache::EImagePixHeight);           
+            *static_cast<TUint32*>(aValue) = iCurrentPropertiesCache->Uint(CMTPImageDpObjectPropertyMgr::CMTPImagePropertiesCache::EImagePixHeight);           
             break;
             
         case EMTPObjectPropCodeImageBitDepth:
-            *static_cast<TUint32*>(aValue) = iPropertiesCache->Uint(CMTPImageDpObjectPropertyMgr::CMTPImagePropertiesCache::EImageBitDepth);            
+            *static_cast<TUint32*>(aValue) = iCurrentPropertiesCache->Uint(CMTPImageDpObjectPropertyMgr::CMTPImagePropertiesCache::EImageBitDepth);            
             break;
             
         default:
@@ -958,9 +962,18 @@ void CMTPImageDpObjectPropertyMgr::SetMdeSessionError(TInt aError)
     iMdeSessionError = aError;
     }
 
-void CMTPImageDpObjectPropertyMgr::ClearCacheL()
+void CMTPImageDpObjectPropertyMgr::ClearAllCache()
     {
-    iPropertiesCache->ResetL();
+    while (iPropretiesCacheMap.Count())
+        {
+        RHashMap<TUint, CMTPImagePropertiesCache*>::TIter iter(iPropretiesCacheMap);
+        DestroyPropertiesCahce(*iter.NextKey());
+        };
+    }
+
+void CMTPImageDpObjectPropertyMgr::ClearCache(TUint aHandle)
+    {
+    DestroyPropertiesCahce(aHandle);    
     }
 
 void CMTPImageDpObjectPropertyMgr::OpenMdeObjectL()
@@ -985,4 +998,33 @@ void CMTPImageDpObjectPropertyMgr::ClearThumnailCache()
     iThumbnailCache.iThumbnailData = NULL;
     
     iThumbnailCache.iObjectHandle = KMTPHandleNone;
+    }
+
+TBool CMTPImageDpObjectPropertyMgr::FindPropertiesCache(TUint aObjectHandle)
+    {
+    TBool ret = EFalse;
+    CMTPImagePropertiesCache** ppCache = iPropretiesCacheMap.Find(aObjectHandle);
+    if (ppCache)
+        {
+        iCurrentPropertiesCache = *ppCache;
+        ret = (iCurrentPropertiesCache != NULL) ? ETrue : EFalse;
+        }
+    else
+        {
+        iCurrentPropertiesCache = NULL;
+        ret = EFalse;
+        }
+    
+    return ret;
+    }
+
+void CMTPImageDpObjectPropertyMgr::DestroyPropertiesCahce(TUint aObjectHandle)
+    {
+    CMTPImagePropertiesCache** ppCache = iPropretiesCacheMap.Find(aObjectHandle);  
+    if (ppCache)
+        {
+        CMTPImagePropertiesCache* pCache = *ppCache;
+        delete pCache;
+        iPropretiesCacheMap.Remove(aObjectHandle);
+        }    
     }

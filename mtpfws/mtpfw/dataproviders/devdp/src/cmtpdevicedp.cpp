@@ -388,7 +388,7 @@ void CMTPDeviceDataProvider::LoadExtnPluginsL()
 
 		if(extnpluginMap )
 			{
-			iExtnPluginMapArray.Append(extnpluginMap);
+			iExtnPluginMapArray.AppendL(extnpluginMap);
 			}
 
 		}

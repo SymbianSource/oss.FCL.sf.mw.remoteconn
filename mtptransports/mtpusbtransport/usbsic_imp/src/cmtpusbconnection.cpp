@@ -508,7 +508,7 @@ void CMTPUsbConnection::ReceiveControlRequestDataCompleteL(TInt aError, MMTPType
                 __FLOG(_L8("cancel event received at completing phase, flush rx data"));
 
                 //flush rx data.
-                static_cast<CMTPUsbEpBulkOut*>(iEndpoints[EMTPUsbEpBulkOut])->FlushRxDataL();
+                iEndpoints[EMTPUsbEpBulkOut]->FlushRxDataL();
                 }
             else
             	{
@@ -518,7 +518,7 @@ void CMTPUsbConnection::ReceiveControlRequestDataCompleteL(TInt aError, MMTPType
             	DataEndpointsStop();
       
                 //flush rx data.
-                static_cast<CMTPUsbEpBulkOut*>(iEndpoints[EMTPUsbEpBulkOut])->FlushRxDataL();
+                iEndpoints[EMTPUsbEpBulkOut]->FlushRxDataL();
                 
             	// initiate bulk request sequence.
             	InitiateBulkRequestSequenceL();   
@@ -1669,7 +1669,6 @@ TBool CMTPUsbConnection::StopConnection()
         SetBulkTransactionState(EUndefined);
         SetConnectionState(EIdle);
         SetSuspendState(ENotSuspended);
-        SetDeviceStatus(EMTPUsbDeviceStatusBusy);
         }
     
     __FLOG(_L8("StopConnection - Exit"));
@@ -1688,6 +1687,9 @@ void CMTPUsbConnection::SuspendConnectionL()
         {    
         // Stop all data transfer activity.
         DataEndpointsStop();
+        
+        //flush buffered rx data.
+        iEndpoints[EMTPUsbEpBulkOut]->FlushBufferedRxDataL();
         }
     ControlEndpointStop();
 
@@ -1846,12 +1848,24 @@ void CMTPUsbConnection::SetInterfaceDescriptorL()
 	ifc().iClass.iProtocolNum   = KMTPUsbInterfaceProtocolSIC;
     ifc().iTotalEndpointsUsed   = KMTPUsbRequiredNumEndpoints;
     
-    // Allocate 512KB buffer for OUT EndPoint, and 64KB for IN EndPoint
+    // Allocate 512KB*2 buffer for OUT EndPoint, and 64KB for IN EndPoint
     TUint32 bandwidthPriority = EUsbcBandwidthINPlus2 | EUsbcBandwidthOUTMaximum;
         
     // Write the active interface descriptor.
-    User::LeaveIfError(iLdd.SetInterface(KMTPUsbAlternateInterface, ifc, bandwidthPriority));
-        
+    TInt err = iLdd.SetInterface(KMTPUsbAlternateInterface, ifc, bandwidthPriority);
+    
+    if (err == KErrNoMemory)
+        {
+        __FLOG(_L8("NoMem when setinterface, try with lower priority"));
+        // Allocate 64KB*2 buffer for OUT EndPoint, and 64KB for IN EndPoint
+        bandwidthPriority = EUsbcBandwidthINPlus2 | EUsbcBandwidthOUTPlus2;
+        err = iLdd.SetInterface(KMTPUsbAlternateInterface, ifc, bandwidthPriority);
+        __FLOG_1(_L8("setinterface return for lower priority:%d"),err);
+        }
+     
+    __FLOG_1(_L8("setinterface error code:%d"),err);
+    User::LeaveIfError(err);
+    
     __FLOG(_L8("SetInterfaceDescriptorL - Exit"));
     }
 

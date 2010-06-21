@@ -96,7 +96,7 @@ void CMTPFileDpExclusionMgr::AppendFormatExclusionListL()
                 formatcode = playbackFormatExclusionList[index];
                 if(KErrNotFound == capFormatExclusionList.FindInOrder(formatcode))
                     {
-                    capFormatExclusionList.InsertInOrder(formatcode);
+                    capFormatExclusionList.InsertInOrderL(formatcode);
                     }
                 }
 

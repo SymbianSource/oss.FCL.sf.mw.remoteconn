@@ -122,7 +122,7 @@ EXPORT_C void CMTPFSEnumerator::StartL(TUint32 aStorageId, TBool aScanAll)
         const TUint KCount(storages.Count());
         for (TUint i(0); (i < KCount); i++)
             {
-            iStorages.Insert(storages[i]->Uint(CMTPStorageMetaData::EStorageId),0);
+            iStorages.InsertL(storages[i]->Uint(CMTPStorageMetaData::EStorageId),0);
             __FLOG_VA((_L8("FileEnumerator is doing storage id = %x\r\n"), storages[i]->Uint(CMTPStorageMetaData::EStorageId) ));
             }
         CleanupStack::PopAndDestroy(&storages);
@@ -501,7 +501,7 @@ void CMTPFSEnumerator::ProcessEntriesL()
                 ++len;
                 format = EMTPFormatCodeAssociation;
                 AddEntryL(iCurrentPath, handle, format, KMTPDeviceDPID, entry, iStorages[iScanPos], iParentHandle);
-                iDirStack.Append(TStackItem(iCurrentPath, handle));
+                iDirStack.AppendL(TStackItem(iCurrentPath, handle));
                 }
             }
         else

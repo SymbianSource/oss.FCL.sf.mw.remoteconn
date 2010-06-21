@@ -54,6 +54,7 @@ public:
     void CancelSendL(TInt aReason);
     
     void FlushRxDataL();
+    void FlushBufferedRxDataL();
     
 protected:
 

@@ -1,0 +1,94 @@
+<?xml version="1.0" standalone="yes"?>
+
+
+<backup_registration>
+   <passive_backup supports_selective="no" delete_before_restore="no" base_backup_only="yes">
+      <include_file name = "privatedata.txt"/>
+      
+      <include_file name = "sbetest1.txt"/>
+      <include_file name = "sbetest2.txt"/>
+      <include_file name = "\sbetest3.txt"/>
+      <include_file name = "sys\install\log.txt"/>
+      <include_file name = "b:\system\System.ini"/>
+      <include_file name = "z:\resource\locales.txt"/>
+      <include_file name = "\resource2\locales.txt"/>
+      <include_file name = "!:\resource2\locales.txt"/>
+      <include_file name = "?:\resource2\locales.txt"/>
+      <include_file name = "*:\resource2\locales.txt"/>
+      <include_directory name="\" />
+      <include_directory name="c:\private\0AB7E58C" />
+      <include_directory name="c:\private\0AB7E58C\" />
+      <include_directory name="z:\private\0AB7E58C" />
+      <include_directory name="z:\private\0AB7E58C\" />
+      <include_directory name2="\" />
+      <include_directory name="" />
+      <include_directory name2="" />
+      
+      <include_directory name="c:\" />
+      <include_directory name="!:\mydatabases\"/>
+      <exclude name = "sbetest1.txt"/>
+      <exclude name = "sbetest2.txt"/>
+      <exclude name = "\sbetest3.txt"/>
+      <exclude name = "sys\install\log.txt"/>
+      <exclude name = "a:\sbetest3_ex.txt"/>
+      <exclude name = "\:\sbetest1_ex.txt"/>
+      <exclude name = "sbetest2_ex.txt"/>
+      <exclude name = "\sys\install\log_ex.txt"/>
+      <exclude name = "\system\System_ex.ini"/>
+      <exclude name = "\resource\locales_ex.txt"/>
+      <exclude name = "\resource2\locales_ex.txt"/>
+      <exclude name = "!:\resource2\locales_ex.txt"/>
+      <exclude name = "?:\resource2\locales_ex.txt"/>
+      <exclude name = "*:\resource2\locales_ex.txt"/>
+      <exclude name="\a_ex" />
+      <exclude name="?:\b_ex" />
+      <exclude name="!:\mydatabases_ex\"/>
+    </passive_backup>
+    <public_backup delete_before_restore="yes">
+      <include_file name = "c:\sbetest1.txt"/>
+      <include_file name = "c:\sbetest2.txt"/>
+      <include_file name = "\sbetest3.txt"/>
+      <include_file name = "c:\sys\install\log.txt"/>
+      <include_file name = "c:\system\System.ini"/>
+      <include_file name = "c:\resource\locales.txt"/>
+      <include_file name = "\resource2\locales.txt"/>
+      <include_file name = "!:\resource2\locales.txt"/>
+      <include_file name = "?:\resource2\locales.txt"/>
+      <include_file name = "*:\resource2\locales.txt"/>
+      <include_directory name="\" />
+      <include_directory name="c:\private\0AB7E58C" />
+      <include_directory name="c:\private\0AB7E58C\" />
+      <include_directory name="z:\private\0AB7E58C" />
+      <include_directory name="z:\private\0AB7E58C\" />
+      <include_directory name2="\" />
+      <include_directory name="" />
+      <include_directory name2="" />
+      
+      <include_directory name="c:\" />
+      <include_directory name="!:\mydatabases\"/>
+      <exclude name = "c:\sbetest3_ex.txt"/>
+      <exclude name = "c:\sbetest1_ex.txt"/>
+      <exclude name = "c:\sbetest2_ex.txt"/>
+      <exclude name = "\sbetest3.txt"/>
+      <exclude name = "c:\sys\install\log_ex.txt"/>
+      <exclude name = "c:\system\System_ex.ini"/>
+      <exclude name = "c:\resource\locales_ex.txt"/>
+      <exclude name = "\resource2\locales_ex.txt"/>
+      <exclude name = "!:\resource2\locales_ex.txt"/>
+      <exclude name = "?:\resource2\locales_ex.txt"/>
+      <exclude name = "*:\resource2\locales_ex.txt"/>
+      <exclude name="\a_ex" />
+      <exclude name="c:\b_ex" />
+      <exclude name="!:\mydatabases_ex\"/>
+      
+   </public_backup>
+   <dbms_backup policy="AABBCCDDsdfsdafsdfsdafqw2332"/>
+   <dbms_backup policy=""/>
+   <dbms_backup/>
+   <dbms_backup policy="0x0AB7E58C"/>
+   <dbms_backup database="0x0AB7E58C"/>
+   <dbms_backup test1="0x0AB7E58C"/>
+   <system_backup />
+   <proxy_data_manager test2="0x10202BE9" />
+   <restore requires_reboot = "no"/>
+</backup_registration>

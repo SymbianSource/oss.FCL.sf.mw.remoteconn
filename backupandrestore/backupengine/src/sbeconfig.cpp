@@ -19,7 +19,7 @@
  @file
 */
 #include <e32std.h>
-#include <connect/panic.h>
+#include "sbepanic.h"
 #include "sbeconfig.h"
 #include "sblog.h"
 #include <xml/parser.h>

@@ -148,7 +148,7 @@ void CMTPDeleteObjectPropList::BuildSubRequestsL()
         dpid = iSingletons.ObjectMgr().ObjectOwnerId( temp.Uint32(TMTPTypeDataPair::EOwnerHandle) );
         if ( tmpDpid != dpid )
             {
-            iTargetDps.Append(dpid);
+            iTargetDps.AppendL(dpid);
             CMTPTypeDeleteObjectPropList* dataset = CMTPTypeDeleteObjectPropList::NewLC();
             iSubDatasets.AppendL( dataset );
             dataset->AppendL( element);

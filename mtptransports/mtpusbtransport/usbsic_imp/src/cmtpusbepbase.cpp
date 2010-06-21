@@ -1085,3 +1085,28 @@ void CMTPUsbEpBase::FlushRxDataL()
     readBuf.Close();
     __FLOG(_L8("FlushRxDataL - Exit"));    
 }
+
+/*
+ * The difference with FlushRxDataL() is FlushBufferedRxDataL only flush current buffered trash data
+ * if currently no data is buffered in usb driver, just return rather than wait some time like what 
+ * FlushRxDataL() does
+ */
+void CMTPUsbEpBase::FlushBufferedRxDataL()
+    {
+    //flush buffered rx data
+    TInt  nbytes = 0;
+    TInt err = Connection().Ldd().QueryReceiveBuffer(EndpointNumber(), nbytes);
+
+    // has data, read it
+    if( (err == KErrNone) && (nbytes > 0) )
+        {
+        // create the read buff
+        RBuf8 readBuf;
+        readBuf.CreateL(nbytes);
+        // synchronously read the data
+        TRequestStatus status;
+        Connection().Ldd().ReadOneOrMore(status, EndpointNumber(), readBuf);
+        User::WaitForRequest(status);
+        readBuf.Close(); 
+        }
+    }

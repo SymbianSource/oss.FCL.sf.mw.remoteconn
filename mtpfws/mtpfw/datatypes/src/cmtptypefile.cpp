@@ -234,16 +234,8 @@ EXPORT_C void CMTPTypeFile::SetSizeL(TUint64 aSize)
     
     iRemainingDataSize = (TInt64)aSize;//Current implemenation does not support file size with 2 x64 
 
-    if(iRemainingDataSize> KMTPFileChunkSizeForLargeFile) //512K
-        {
-        iBuffer1.CreateMaxL(KMTPFileChunkSizeForLargeFile);
-        iBuffer2.CreateMaxL(KMTPFileChunkSizeForLargeFile);
-        }
-    else
-        {
-        iBuffer1.CreateMaxL(KMTPFileChunkSizeForSmallFile);
-        iBuffer2.CreateMaxL(KMTPFileChunkSizeForSmallFile);
-        }
+    CreateDoubleBufferL(iRemainingDataSize);
+    
     if(iRemainingDataSize> KMTPFileSetSizeChunk)
         {
         //split the setSize to multiple calling of 512M
@@ -599,16 +591,7 @@ void CMTPTypeFile::ConstructL(const TDesC& aName, TFileMode aMode)
         iRemainingDataSize = size;
 
         //For File reading, NO "SetSizeL()" will be called, therefore, create the buffer here.
-        if (iRemainingDataSize > KMTPFileChunkSizeForLargeFile) //512K
-            {
-            iBuffer1.CreateMaxL(KMTPFileChunkSizeForLargeFile);
-            iBuffer2.CreateMaxL(KMTPFileChunkSizeForLargeFile);
-            }
-        else
-            {
-            iBuffer1.CreateMaxL(KMTPFileChunkSizeForSmallFile);
-            iBuffer2.CreateMaxL(KMTPFileChunkSizeForSmallFile);
-            }
+        CreateDoubleBufferL(iRemainingDataSize);
         }
     }
 
@@ -647,16 +630,7 @@ void CMTPTypeFile::ConstructL(const TDesC& aName, TFileMode aMode, TInt64 aRequi
         iRemainingDataSize = iTargetFileSize;
         
         //For File reading, NO "SetSizeL()" will be called, therefore, create the buffer here.
-        if (iRemainingDataSize > KMTPFileChunkSizeForLargeFile) //512K
-            {
-            iBuffer1.CreateMaxL(KMTPFileChunkSizeForLargeFile);
-            iBuffer2.CreateMaxL(KMTPFileChunkSizeForLargeFile);
-            }
-        else
-            {
-            iBuffer1.CreateMaxL(KMTPFileChunkSizeForSmallFile);
-            iBuffer2.CreateMaxL(KMTPFileChunkSizeForSmallFile);
-            }
+        CreateDoubleBufferL(iRemainingDataSize);
         }
 	}
 
@@ -742,4 +716,47 @@ void CMTPTypeFile::ToggleRdWrBuffer()
         }
 
     iBuffer1AvailForWrite = !iBuffer1AvailForWrite;//toggle the flag.
+    }
+
+/**
+ * Allocate double buffers to write to/read from file
+ * @param aFileSize: the size of the file to be written to or read from
+ * @return void
+ * leave code: KErrNoMemory if there is insufficient memory
+ */
+void CMTPTypeFile::CreateDoubleBufferL(TInt64 aFileSize)
+    {
+    if(aFileSize > KMTPFileChunkSizeForLargeFile) //512KB
+        {
+        TInt err = iBuffer1.CreateMax(KMTPFileChunkSizeForLargeFile);
+        TInt err2 = iBuffer2.CreateMax(KMTPFileChunkSizeForLargeFile);
+        TInt bufferSize = KMTPFileChunkSizeForLargeFile;
+        
+        //if one of buffer allocation fails, decrease the buffer size by 
+        //a half of it until :
+        //we finally succeed in the allocation Or 
+        //the smallest acceptable buffer size KMTPFileChunkSizeForSmallFile(64KB) reaches.
+        while ((err != KErrNone || err2 != KErrNone) && bufferSize != KMTPFileChunkSizeForSmallFile)
+            {
+            iBuffer1.Close();
+            iBuffer2.Close();
+            
+            bufferSize /= 2;
+            err = iBuffer1.CreateMax(bufferSize);
+            err2 = iBuffer2.CreateMax(bufferSize);
+            }
+        
+        if ( err != KErrNone || err2 != KErrNone)
+            {
+            //We still can not allocate 2*64KB buffer, just leave under this case
+            iBuffer1.Close();
+            iBuffer2.Close();
+            User::Leave(KErrNoMemory);
+            }
+        }
+    else
+        {
+        iBuffer1.CreateMaxL(KMTPFileChunkSizeForSmallFile);
+        iBuffer2.CreateMaxL(KMTPFileChunkSizeForSmallFile);
+        }
     }

@@ -514,7 +514,7 @@ TBool CMTPImageDpSendObjectInfo::ServiceSendObjectL(TAny* /*aPtr*/)
          
     iFramework.ObjectMgr().CommitReservedObjectHandleL(*iReceivedObject);
     //prepare for rollback
-    iRollbackList.Append(RemoveObjectFromDb);        
+    iRollbackList.AppendL(RemoveObjectFromDb);        
     
     ReceiveDataL(*iFileReceived);
     
@@ -878,7 +878,7 @@ void CMTPImageDpSendObjectInfo::RemoveObjectFromDb()
      */
     TRAP_IGNORE(
             iFramework.ObjectMgr().RemoveObjectL(iReceivedObject->Uint(CMTPObjectMetaData::EHandle));
-            iObjectPropertyMgr.ClearCacheL();            
+            iObjectPropertyMgr.ClearCache(iReceivedObject->Uint(CMTPObjectMetaData::EHandle));            
             );
     }
 
@@ -1195,7 +1195,7 @@ void CMTPImageDpSendObjectInfo::ReserveObjectL()
     iFramework.ObjectMgr().ReserveObjectHandleL(*iReceivedObject, iObjectSize);    
     
     // prepare for rollback
-    iRollbackList.Append(UnreserveObject);    
+    iRollbackList.AppendL(UnreserveObject);    
     __FLOG(_L8("CMTPImageDpSendObjectInfo::ReserveObjectL - Exit"));   
     }
 
@@ -1256,7 +1256,7 @@ void CMTPImageDpSendObjectInfo::CreateFsObjectL()
     delete iFileReceived;
     iFileReceived = NULL;
     //prepare for rollback
-    iRollbackList.Append(RemoveObjectFromFs);
+    iRollbackList.AppendL(RemoveObjectFromFs);
         
     iFileReceived = CMTPTypeFile::NewL(iFramework.Fs(), iFullPath, EFileWrite);
     iFileReceived->SetSizeL(iObjectSize);

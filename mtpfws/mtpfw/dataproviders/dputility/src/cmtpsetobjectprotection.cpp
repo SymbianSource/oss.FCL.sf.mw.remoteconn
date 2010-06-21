@@ -35,6 +35,7 @@ Verification data for the SetObjectPropValue request
 */
 const TMTPRequestElementInfo KMTPSetObjectProtectionPolicy[] = 
     {
+        //This policy does not taks effect, see CheckRequestL
         {TMTPTypeRequest::ERequestParameter1, EMTPElementTypeObjectHandle, EMTPElementAttrWrite, 0, 0, 0},      
      };
 

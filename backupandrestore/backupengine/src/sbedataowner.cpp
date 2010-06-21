@@ -25,7 +25,7 @@
 #include "sbtypes.h"
 #include "sblog.h"
 #include "sbeparserdefs.h"
-#include <connect/panic.h>
+#include "sbepanic.h"
 
 namespace conn
 	{	

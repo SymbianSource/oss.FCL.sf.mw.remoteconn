@@ -136,7 +136,7 @@ void CMTPReferenceMgr::SetReferencesL(const TDesC& aParentSuid, const CDesCArray
 		for(TInt i = 0; i < count; i++)
 			{
 			TUint32 toHandle =  iObjectStore.HandleL(aToSuids[i]);
-			toHandles.Append(toHandle);
+			toHandles.AppendL(toHandle);
 			}	
 		
 		SetReferencesL(fromHandle, toHandles);	
@@ -336,7 +336,7 @@ void CMTPReferenceMgr::SetReferencesL(const TMTPTypeUint32& aFromHandle, const C
 	TInt count = aToHandles.NumElements();
 	for(TInt i = 0; i < count; i++)
 		{
-		tempArray.Append(aToHandles.ElementUint(i));
+		tempArray.AppendL(aToHandles.ElementUint(i));
 		}	
 	SetReferencesL(aFromHandle.Value(), tempArray);
 	CleanupStack::PopAndDestroy(&tempArray);

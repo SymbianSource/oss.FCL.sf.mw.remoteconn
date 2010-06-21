@@ -287,7 +287,7 @@ void CMTPGetDeviceInfo::SetSupportedCaptureFormatsL(CMTPDataProviderController& 
 		{
 		supportedCaptureFormats.Remove(index);
 		//insert at insertindex position to make sure that value inserted at begening.
-		supportedCaptureFormats.Insert(orderedFormats[orderedElements], insertIndex);
+		supportedCaptureFormats.InsertL(orderedFormats[orderedElements], insertIndex);
 		insertIndex++;
 		}//else nothing 	  	
 		}
@@ -350,7 +350,7 @@ void CMTPGetDeviceInfo::SetSupportedPlaybackFormatsL(CMTPDataProviderController&
 			{
 			supportedPlaybackFormats.Remove(index);
 			//insert at insertindex position to make sure that value inserted at begening.
-			supportedPlaybackFormats.Insert(orderedFormats[orderedElements], insertIndex);
+			supportedPlaybackFormats.InsertL(orderedFormats[orderedElements], insertIndex);
 			insertIndex++;
 			}//else nothing 	  	
  		}

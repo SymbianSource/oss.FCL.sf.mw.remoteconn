@@ -586,7 +586,7 @@ void CMTPImageDataProvider::SessionClosedL(const TMTPNotificationParamsSessionCh
     /**
      * We clear property manager cache when receiving session close notification from framework every times
      */
-    iPropertyMgr->ClearCacheL();
+    iPropertyMgr->ClearAllCache();
     
     __FLOG(_L8("<< SessionClosedL"));
     }

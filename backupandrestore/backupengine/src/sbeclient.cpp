@@ -22,7 +22,7 @@
 
 #include "sbeclient.h"
 #include "sbeclientsession.h"
-#include <connect/panic.h>
+#include "sbepanic.h"
 
 namespace conn
 	{

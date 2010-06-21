@@ -1,0 +1,124 @@
+// Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+// All rights reserved.
+// This component and the accompanying materials are made available
+// under the terms of "Eclipse Public License v1.0"
+// which accompanies this distribution, and is available
+// at the URL "http://www.eclipse.org/legal/epl-v10.html".
+//
+// Initial Contributors:
+// Nokia Corporation - initial contribution.
+//
+// Contributors:
+//
+// Description:
+//
+
+
+//////////////////////////////////////////////////////////////////////////////////////
+//
+// test.script
+//
+////////////////////////////////////////////////////////////////////////////////////
+LOAD_SUITE BURTestServer
+
+DELAY 120000
+
+PRINT ----------------------------------------------
+PRINT  Test Backup Restore Async
+PRINT ----------------------------------------------
+RUN_UTILS DeleteDirectory C:\BackupArchive\
+START_TESTCASE MTP-SBE-BACKUPPARTIALBASEASYNC-0000
+//! @SYMTestCaseID MTP-SBE-BACKUPPARTIALBASEASYNC-0000
+//! @SYMTestCaseDesc Backup with partial and base
+//! @SYMPREQ 2492
+//! @SYMTestStatus Released
+//! @SYMTestPriority High
+//! @SYMTestActions   Specify ini file for base and partial backup
+//! @SYMTestExpectedResults no error
+//! @SYMTestType CIT
+RUN_TEST_STEP 100 BURTestServer TestBackupAsync z:\testdata\scripts\sbetestdata\test.ini BACKUP_RESTORE_0010
+END_TESTCASE MTP-SBE-BACKUPPARTIALBASEASYNC-0000
+
+START_TESTCASE MTP-SBE-RESTOREPARTIALBASEASYNC-0001
+//! @SYMTestCaseID MTP-SBE-RESTOREPARTIALBASEASYNC-0001
+//! @SYMTestCaseDesc restore with partial and base
+//! @SYMPREQ 2492
+//! @SYMTestStatus Released
+//! @SYMTestPriority High
+//! @SYMTestActions   Specify ini file for base and partial restore
+//! @SYMTestExpectedResults no error
+//! @SYMTestType CIT
+RUN_TEST_STEP 100 BURTestServer TestRestoreAsync z:\testdata\scripts\sbetestdata\test.ini BACKUP_RESTORE_0010
+END_TESTCASE MTP-SBE-RESTOREPARTIALBASEASYNC-0001
+
+START_TESTCASE MTP-SBE-BACKUPPARTIALASYNC-0002
+//! @SYMTestCaseID MTP-SBE-BACKUPPARTIALASYNC-0002
+//! @SYMTestCaseDesc Backup with partial and increament
+//! @SYMPREQ 2492
+//! @SYMTestStatus Released
+//! @SYMTestPriority High
+//! @SYMTestActions   Specify ini file for increament and partial backup
+//! @SYMTestExpectedResults no error
+//! @SYMTestType CIT
+RUN_TEST_STEP 100 BURTestServer TestBackupAsync z:\testdata\scripts\sbetestdata\test.ini BACKUP_RESTORE_0020
+END_TESTCASE MTP-SBE-BACKUPPARTIALASYNC-0002
+
+START_TESTCASE MTP-SBE-RESTOREPARTIALASYNC-0003
+//! @SYMTestCaseID MTP-SBE-RESTOREPARTIALASYNC-0003
+//! @SYMTestCaseDesc Restore with partial and increament
+//! @SYMPREQ 2492
+//! @SYMTestStatus Released
+//! @SYMTestPriority High
+//! @SYMTestActions   Specify ini file for increament and partial restore
+//! @SYMTestExpectedResults no error
+//! @SYMTestType CIT
+RUN_TEST_STEP 100 BURTestServer TestRestoreAsync z:\testdata\scripts\sbetestdata\test.ini BACKUP_RESTORE_0020
+END_TESTCASE MTP-SBE-RESTOREPARTIALASYNC-0003
+
+START_TESTCASE MTP-SBE-BACKUPFULLBASEASYNC-0004
+//! @SYMTestCaseID MTP-SBE-BACKUPFULLBASEASYNC-0004
+//! @SYMTestCaseDesc Backup with full and base
+//! @SYMPREQ 2492
+//! @SYMTestStatus Released
+//! @SYMTestPriority High
+//! @SYMTestActions   Specify ini file for full and base backup
+//! @SYMTestExpectedResults no error
+//! @SYMTestType CIT
+RUN_TEST_STEP 500 BURTestServer TestBackupAsync z:\testdata\scripts\sbetestdata\test.ini BACKUP_RESTORE_0030
+END_TESTCASE MTP-SBE-BACKUPFULLBASEASYNC-0004
+
+START_TESTCASE MTP-SBE-RESTOREFULLBASEASYNC-0005
+//! @SYMTestCaseID MTP-SBE-RESTOREFULLBASEASYNC-0005
+//! @SYMTestCaseDesc Restore with full and base
+//! @SYMPREQ 2492
+//! @SYMTestStatus Released
+//! @SYMTestPriority High
+//! @SYMTestActions   Specify ini file for full and base restore
+//! @SYMTestExpectedResults no error
+//! @SYMTestType CIT
+RUN_TEST_STEP 500 BURTestServer TestRestoreAsync z:\testdata\scripts\sbetestdata\test.ini BACKUP_RESTORE_0030
+END_TESTCASE MTP-SBE-RESTOREFULLBASEASYNC-0005
+
+START_TESTCASE MTP-SBE-BACKUPFULLASYNC-0006
+//! @SYMTestCaseID MTP-SBE-BACKUPFULLASYNC-0006
+//! @SYMTestCaseDesc Backup with full and increament
+//! @SYMPREQ 2492
+//! @SYMTestStatus Released
+//! @SYMTestPriority High
+//! @SYMTestActions   Specify ini file for full and increament backup
+//! @SYMTestExpectedResults no error
+//! @SYMTestType CIT
+RUN_TEST_STEP 500 BURTestServer TestBackupAsync z:\testdata\scripts\sbetestdata\test.ini BACKUP_RESTORE_0040
+END_TESTCASE MTP-SBE-BACKUPFULLASYNC-0006
+
+START_TESTCASE MTP-SBE-RESTOREFULLASYNC-0007
+//! @SYMTestCaseID MTP-SBE-RESTOREFULLASYNC-0007
+//! @SYMTestCaseDesc Restore with full and increament
+//! @SYMPREQ 2492
+//! @SYMTestStatus Released
+//! @SYMTestPriority High
+//! @SYMTestActions   Specify ini file for full and increament restore
+//! @SYMTestExpectedResults no error 
+//! @SYMTestType CIT
+RUN_TEST_STEP 500 BURTestServer TestRestoreAsync z:\testdata\scripts\sbetestdata\test.ini BACKUP_RESTORE_0040
+END_TESTCASE MTP-SBE-RESTOREFULLASYNC-0007

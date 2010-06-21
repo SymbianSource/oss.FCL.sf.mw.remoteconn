@@ -207,7 +207,7 @@ void CMTPImageDpGetObjectPropList::GetObjectHandlesL()
         }
     else
         {
-        iHandles.Append( handle );
+        iHandles.AppendL( handle );
         }
     
     __FLOG(_L8("<< CMTPImageDpGetObjectPropList::GetObjectHandlesL"));

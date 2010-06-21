@@ -180,7 +180,7 @@ void CMTPFrameworkConfig::ConstructL()
 		}
     
     //Save the AbnormalDown state to ETrue
-    User::LeaveIfError(iRepository->Set(EAbnormalDown, KStartupInitValue ));
-
+    //if connect the phone to PC while backup, this will leave.
+    TRAP_IGNORE(iRepository->Set(EAbnormalDown, KStartupInitValue ));
     }
 

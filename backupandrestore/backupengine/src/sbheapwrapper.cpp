@@ -21,7 +21,7 @@
 */
 
 #include "sbheapwrapper.h"
-#include <connect/panic.h>
+#include "sbepanic.h"
 
 namespace conn
 	{

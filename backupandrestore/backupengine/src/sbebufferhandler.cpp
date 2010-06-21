@@ -22,7 +22,7 @@
 
 #include "sbebufferhandler.h"
 #include "sblog.h"
-#include <connect/panic.h>
+#include "sbepanic.h"
 
 namespace conn
 	{

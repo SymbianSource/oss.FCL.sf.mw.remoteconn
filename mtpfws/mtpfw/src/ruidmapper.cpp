@@ -50,7 +50,7 @@ void RUidMapping::ReadFromResourceFileL()
 		for (TInt n = 0 ; n < entries; ++n)
 			{
 			TUint transportId(resourceReader.ReadInt32());
-			st.iTransportUidList.Append(transportId);
+			st.iTransportUidList.AppendL(transportId);
 			}
 		InsertToMappingStruct(st);	
 		}

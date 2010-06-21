@@ -185,7 +185,7 @@ void CMTPGetObjectHandles::ServiceL()
 	                if ( index != KErrNotFound )
 	                    {
 	                    handles.Remove(index);
-	                    handles.Insert(handle,0);
+	                    handles.InsertL(handle,0);
 	                    }
 	                }   
 	            delete StorageSuid;

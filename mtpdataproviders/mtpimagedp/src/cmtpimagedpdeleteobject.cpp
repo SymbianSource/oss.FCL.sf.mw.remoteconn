@@ -205,7 +205,7 @@ void CMTPImageDpDeleteObject::GetObjectHandlesL( TUint32 aStorageId, TUint32 aFo
         iFramework.ObjectMgr().GetObjectHandlesL( params, context, handles );
         for ( TInt i = 0; i < handles.Count(); i++)
             {
-            iObjectsToDelete.Append( handles[i] );
+            iObjectsToDelete.AppendL( handles[i] );
             }
         }
     while ( !context.QueryComplete() );

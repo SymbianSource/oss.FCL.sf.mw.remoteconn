@@ -26,7 +26,7 @@
 #include "sbedataownermanager.h"
 #include "sbedataowner.h"
 #include <connect/sbtypes.h>
-#include <connect/panic.h>
+#include "sbepanic.h"
 #include "sblog.h"
 
 namespace conn
