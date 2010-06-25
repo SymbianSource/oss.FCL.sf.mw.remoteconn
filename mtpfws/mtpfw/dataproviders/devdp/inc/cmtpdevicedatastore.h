@@ -88,6 +88,9 @@ public:
 
     TBool IsConnectMac();
     void SetConnectMac(TBool aConnectMac);	
+    
+    TBool Enumerated() const;
+    void RegisterPendingRequest();
 	
 private: // Form CActive
 
@@ -101,7 +104,6 @@ private:
     CMTPDeviceDataStore();
     void ConstructL();
 
-    TBool Enumerated() const;
     void ExternalizeL(RWriteStream& aWriteStream) const;
     void InternalizeL(RReadStream& aReadStream);
     const TDesC& PropertyStoreName();
@@ -163,6 +165,7 @@ private: // Owned
     CMTPTypeArray*                                   iSupportedDevProArray;
     TUint8			iFormatOreder; 
     
+    
 private: // Not owned.
 
     MMTPEnumerationCallback* 	    iCallback;
@@ -172,6 +175,7 @@ private: // Not owned.
     MExtnDevicePropDp*              iExtnDevicePropDp;
 
     TBool                           iIsConnectMac; 
+    TBool                           iHasPendingRequest;    
     };
    
 #endif // CMTPDEVICEDATASTORE_H

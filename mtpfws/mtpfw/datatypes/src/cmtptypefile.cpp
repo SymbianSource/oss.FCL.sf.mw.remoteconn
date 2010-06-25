@@ -21,8 +21,6 @@
 #include <mtp/cmtptypefile.h>
 #include <mtp/mtpdatatypeconstants.h>
 
-#include "mtpframeworkconst.h"
-
 //This file is exported from s60 sdk, now just copy it
 //to make sure onb can run
 #include "UiklafInternalCRKeys.h"
@@ -141,9 +139,9 @@ EXPORT_C CMTPTypeFile* CMTPTypeFile::NewL(RFs& aFs, const TDesC& aName, TFileMod
  */
 EXPORT_C CMTPTypeFile* CMTPTypeFile::NewLC(RFs& aFs, const TDesC& aName, TFileMode aMode)
     {
-    CMTPTypeFile* self = new(ELeave) CMTPTypeFile;
+    CMTPTypeFile* self = new(ELeave) CMTPTypeFile(aFs);
     CleanupStack::PushL(self);
-    self->ConstructL(aFs, aName, aMode);
+    self->ConstructL(aName, aMode);
     return self;
     }
 
@@ -156,9 +154,9 @@ EXPORT_C CMTPTypeFile* CMTPTypeFile::NewL(RFs& aFs, const TDesC& aName, TFileMod
 
 EXPORT_C CMTPTypeFile* CMTPTypeFile::NewLC(RFs& aFs, const TDesC& aName, TFileMode aMode, TInt64 aRequiredSize, TInt64 aOffSet)
     {
-    CMTPTypeFile* self = new(ELeave) CMTPTypeFile;
+    CMTPTypeFile* self = new(ELeave) CMTPTypeFile(aFs);
     CleanupStack::PushL(self);
-    self->ConstructL(aFs, aName, aMode, aRequiredSize, aOffSet);
+    self->ConstructL(aName, aMode, aRequiredSize, aOffSet);
     return self;
     }
 
@@ -188,20 +186,27 @@ EXPORT_C void CMTPTypeFile::SetSizeL(TUint64 aSize)
     //file syncing
     TInt driveNo;
     TDriveInfo driveInfo;
-    iFile.Drive(driveNo,driveInfo);
-    RFs fs;
+    User::LeaveIfError(iFile.Drive(driveNo,driveInfo));
+    
     TVolumeInfo volumeInfo;
-    fs.Connect();
-    fs.Volume(volumeInfo,driveNo);
-    fs.Close();
+    User::LeaveIfError(iFs.Volume(volumeInfo,driveNo));
     
     //Read the threshold value from Central Repository and check against it
     CRepository* repository(NULL);
-    TInt thresholdValue(0);
+    TInt64 thresholdValue(0);
     TRAPD(err,repository = CRepository::NewL(KCRUidUiklaf));
     if (err == KErrNone)
         {
-        if (driveNo == EDriveC)
+        if (driveNo == EDriveE || driveNo == EDriveF)
+            {
+            TInt warningValue(0);
+            err = repository->Get(KUikOODDiskFreeSpaceWarningNoteLevelMassMemory,warningValue);
+            if (err == KErrNone)
+                {
+                thresholdValue = warningValue + KFreeSpaceExtraReserved;
+                }
+            }
+        else
             {
             TInt warningUsagePercent(0);
             err = repository->Get(KUikOODDiskFreeSpaceWarningNoteLevel,warningUsagePercent);
@@ -211,14 +216,7 @@ EXPORT_C void CMTPTypeFile::SetSizeL(TUint64 aSize)
                     + KFreeSpaceExtraReserved;
                 }
             }
-        else 
-            {
-            err = repository->Get(KUikOODDiskFreeSpaceWarningNoteLevelMassMemory,thresholdValue);
-            if (err == KErrNone)
-                {
-                thresholdValue += KFreeSpaceExtraReserved;
-                }
-            }
+        
         delete repository;
         }
     
@@ -236,16 +234,8 @@ EXPORT_C void CMTPTypeFile::SetSizeL(TUint64 aSize)
     
     iRemainingDataSize = (TInt64)aSize;//Current implemenation does not support file size with 2 x64 
 
-    if(iRemainingDataSize> KMTPFileChunkSizeForLargeFile) //512K
-        {
-        iBuffer1.CreateMaxL(KMTPFileChunkSizeForLargeFile);
-        iBuffer2.CreateMaxL(KMTPFileChunkSizeForLargeFile);
-        }
-    else
-        {
-        iBuffer1.CreateMaxL(KMTPFileChunkSizeForSmallFile);
-        iBuffer2.CreateMaxL(KMTPFileChunkSizeForSmallFile);
-        }
+    CreateDoubleBufferL(iRemainingDataSize);
+    
     if(iRemainingDataSize> KMTPFileSetSizeChunk)
         {
         //split the setSize to multiple calling of 512M
@@ -569,28 +559,29 @@ EXPORT_C Int64 CMTPTypeFile::GetByteSent()
     return iByteSent;
     }
 
-CMTPTypeFile::CMTPTypeFile() :
+CMTPTypeFile::CMTPTypeFile(RFs& aFs) :
     CActive(EPriorityUserInput), iBuffer1AvailForWrite(ETrue),
-        iFileRdWrError(EFalse), iCurrentCommitChunk(NULL, 0)
+        iFileRdWrError(EFalse), iCurrentCommitChunk(NULL, 0),
+        iFs(aFs)
     {
     CActiveScheduler::Add(this);
     }
 
-void CMTPTypeFile::ConstructL(RFs& aFs, const TDesC& aName, TFileMode aMode)
+void CMTPTypeFile::ConstructL(const TDesC& aName, TFileMode aMode)
     {
     if (aMode & EFileWrite)
         {
         iFileOpenForRead = EFalse;
-        TInt err = iFile.Create(aFs, aName, aMode|EFileWriteDirectIO);
+        TInt err = iFile.Create(iFs, aName, aMode|EFileWriteDirectIO);
         if (err != KErrNone)
             {
-            User::LeaveIfError(iFile.Replace(aFs, aName, aMode|EFileWriteDirectIO));
+            User::LeaveIfError(iFile.Replace(iFs, aName, aMode|EFileWriteDirectIO));
             }
         }
     else
         {
         iFileOpenForRead = ETrue;
-        User::LeaveIfError(iFile.Open(aFs, aName, aMode|EFileReadDirectIO|EFileShareReadersOnly));
+        User::LeaveIfError(iFile.Open(iFs, aName, aMode|EFileReadDirectIO|EFileShareReadersOnly));
 #ifdef SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API
         TInt64 size = 0;
 #else
@@ -600,35 +591,26 @@ void CMTPTypeFile::ConstructL(RFs& aFs, const TDesC& aName, TFileMode aMode)
         iRemainingDataSize = size;
 
         //For File reading, NO "SetSizeL()" will be called, therefore, create the buffer here.
-        if (iRemainingDataSize > KMTPFileChunkSizeForLargeFile) //512K
-            {
-            iBuffer1.CreateMaxL(KMTPFileChunkSizeForLargeFile);
-            iBuffer2.CreateMaxL(KMTPFileChunkSizeForLargeFile);
-            }
-        else
-            {
-            iBuffer1.CreateMaxL(KMTPFileChunkSizeForSmallFile);
-            iBuffer2.CreateMaxL(KMTPFileChunkSizeForSmallFile);
-            }
+        CreateDoubleBufferL(iRemainingDataSize);
         }
     }
 
-void CMTPTypeFile::ConstructL(RFs& aFs, const TDesC& aName, TFileMode aMode, TInt64 aRequiredSize, TInt64 aOffSet)
+void CMTPTypeFile::ConstructL(const TDesC& aName, TFileMode aMode, TInt64 aRequiredSize, TInt64 aOffSet)
 	{
     if (aMode & EFileWrite)
         {
         iFileOpenForRead = EFalse;
-        TInt err = iFile.Create(aFs, aName, aMode|EFileWriteDirectIO);
+        TInt err = iFile.Create(iFs, aName, aMode|EFileWriteDirectIO);
         if (err != KErrNone)
             {
-            User::LeaveIfError(iFile.Replace(aFs, aName, aMode|EFileWriteDirectIO));
+            User::LeaveIfError(iFile.Replace(iFs, aName, aMode|EFileWriteDirectIO));
             }
         }
     else
         {
         iFileOpenForRead = ETrue;
         iOffSet = aOffSet;
-        User::LeaveIfError(iFile.Open(aFs, aName, aMode|EFileReadDirectIO|EFileShareReadersOnly));
+        User::LeaveIfError(iFile.Open(iFs, aName, aMode|EFileReadDirectIO|EFileShareReadersOnly));
 #ifdef SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API
         TInt64 size = 0;
 #else
@@ -648,16 +630,7 @@ void CMTPTypeFile::ConstructL(RFs& aFs, const TDesC& aName, TFileMode aMode, TIn
         iRemainingDataSize = iTargetFileSize;
         
         //For File reading, NO "SetSizeL()" will be called, therefore, create the buffer here.
-        if (iRemainingDataSize > KMTPFileChunkSizeForLargeFile) //512K
-            {
-            iBuffer1.CreateMaxL(KMTPFileChunkSizeForLargeFile);
-            iBuffer2.CreateMaxL(KMTPFileChunkSizeForLargeFile);
-            }
-        else
-            {
-            iBuffer1.CreateMaxL(KMTPFileChunkSizeForSmallFile);
-            iBuffer2.CreateMaxL(KMTPFileChunkSizeForSmallFile);
-            }
+        CreateDoubleBufferL(iRemainingDataSize);
         }
 	}
 
@@ -743,4 +716,47 @@ void CMTPTypeFile::ToggleRdWrBuffer()
         }
 
     iBuffer1AvailForWrite = !iBuffer1AvailForWrite;//toggle the flag.
+    }
+
+/**
+ * Allocate double buffers to write to/read from file
+ * @param aFileSize: the size of the file to be written to or read from
+ * @return void
+ * leave code: KErrNoMemory if there is insufficient memory
+ */
+void CMTPTypeFile::CreateDoubleBufferL(TInt64 aFileSize)
+    {
+    if(aFileSize > KMTPFileChunkSizeForLargeFile) //512KB
+        {
+        TInt err = iBuffer1.CreateMax(KMTPFileChunkSizeForLargeFile);
+        TInt err2 = iBuffer2.CreateMax(KMTPFileChunkSizeForLargeFile);
+        TInt bufferSize = KMTPFileChunkSizeForLargeFile;
+        
+        //if one of buffer allocation fails, decrease the buffer size by 
+        //a half of it until :
+        //we finally succeed in the allocation Or 
+        //the smallest acceptable buffer size KMTPFileChunkSizeForSmallFile(64KB) reaches.
+        while ((err != KErrNone || err2 != KErrNone) && bufferSize != KMTPFileChunkSizeForSmallFile)
+            {
+            iBuffer1.Close();
+            iBuffer2.Close();
+            
+            bufferSize /= 2;
+            err = iBuffer1.CreateMax(bufferSize);
+            err2 = iBuffer2.CreateMax(bufferSize);
+            }
+        
+        if ( err != KErrNone || err2 != KErrNone)
+            {
+            //We still can not allocate 2*64KB buffer, just leave under this case
+            iBuffer1.Close();
+            iBuffer2.Close();
+            User::Leave(KErrNoMemory);
+            }
+        }
+    else
+        {
+        iBuffer1.CreateMaxL(KMTPFileChunkSizeForSmallFile);
+        iBuffer2.CreateMaxL(KMTPFileChunkSizeForSmallFile);
+        }
     }

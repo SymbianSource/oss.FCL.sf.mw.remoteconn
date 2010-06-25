@@ -53,16 +53,6 @@ public:
      * update object status to old
      */
     static void UpdateObjectStatusToOldL(MMTPDataProviderFramework& aFramework, CMTPObjectMetaData& aMetadata);
-    
-    /**
-     * query thumbnail size from metadata of object
-     */
-    static TInt GetThumbnailSize(const CMTPObjectMetaData& aMetadata);
-    
-    /**
-     * update object thumbnail size
-     */
-    static void UpdateObjectThumbnailSizeL(MMTPDataProviderFramework& aFramework, CMTPObjectMetaData& aMetadata, TInt aThumbnailSize);
     };
     
 #endif MTPIMAGEDPUTILITS_H

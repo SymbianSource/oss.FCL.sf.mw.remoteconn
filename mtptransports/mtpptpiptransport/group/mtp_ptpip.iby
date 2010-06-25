@@ -16,7 +16,7 @@
 #ifndef MTP_PTPIP_IBY
 #define MTP_PTPIP_IBY
 
-#if !defined (SYMBIAN_EXCLUDE_MTP) && !defined(SYMBIAN_EXCLUDE_PTPTIP)
+#if defined (__MTP_PROTOCOL_SUPPORT) && !defined(SYMBIAN_EXCLUDE_PTPTIP)
 
 #include <mtp_framework.iby>
 
@@ -30,7 +30,7 @@ file=ABI_DIR\BUILD_DIR\ptpipfilterapi.dll			system\libs\ptpipfilterapi.dll
 ECOM_PLUGIN(ptpipplugin.dll, ptpipplugin.rsc)
 
 
-#endif // SYMBIAN_EXCLUDE_MTP
+#endif // __MTP_PROTOCOL_SUPPORT
 
 #endif // MTP_PTPIP_IBY
 

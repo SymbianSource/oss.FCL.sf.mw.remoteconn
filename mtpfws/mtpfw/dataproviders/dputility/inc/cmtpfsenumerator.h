@@ -65,7 +65,7 @@ private:
 	void ScanNextSubdirL();
 	void ProcessEntriesL();
 	void AddEntryL(const TDesC& aPath, TUint32 &aHandle, TMTPFormatCode format, TUint32 aDPId, const TEntry& aEntry, TUint32 aStorageId, TUint32 aParentHandle);
-	void AddFileEntryForOtherDpL(const TDesC& aPath, TUint32 &aHandle, TMTPFormatCode format, TUint32 aDPId, const TEntry& aEntry, TUint32 aStorageId, TUint32 aParentHandle);
+	void AddFileEntryForOtherDpL(const TDesC& aPath, TUint32 &aHandle, TMTPFormatCode format, TUint32 aDPId, const TEntry& aEntry, TUint32 aStorageId, TUint32 aParentHandle, TUint16 aSubFormatCode = 0);
 	void NotifyObjectAddToDP(const TUint32 aHandle,const TUint DpId);
 	
 	

@@ -39,8 +39,7 @@ MW_LAYER_SYSTEMINCLUDE_SYMBIAN
 USERINCLUDE     ../inc
 //For UiklafInternalCRKeys.h,should be removed, after we switched to DFs
 USERINCLUDE		../../common/inc
-//For mtpframeworkconst.h
-USERINCLUDE		../../inc
+
 
 SOURCEPATH      ../src
 SOURCE          cmtptypearray.cpp

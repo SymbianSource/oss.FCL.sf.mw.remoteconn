@@ -17,7 +17,7 @@
 #ifndef MTP_DEVICEDP_IBY
 #define MTP_DEVICEDP_IBY
 
-#if !defined(SYMBIAN_EXCLUDE_MTP)
+#if defined(__MTP_PROTOCOL_SUPPORT)
 
 
 // MTP Device Data Provider
@@ -30,6 +30,6 @@ data=EPOCROOT##epoc32\data\Z\resource\mtp\102827AF.rsc  resource\mtp\102827AF.rs
 
 
 
-#endif //SYMBIAN_EXCLUDE_MTP
+#endif //__MTP_PROTOCOL_SUPPORT
 
 #endif  //MTP_DEVICEDP_IBY

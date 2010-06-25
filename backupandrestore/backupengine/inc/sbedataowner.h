@@ -50,6 +50,8 @@ namespace conn
 	_LIT(KCentRepProcessName, "centralrepositorysrv.exe");
 	_LIT8(KYes, "yes");
 	
+	const TTimeIntervalMicroSeconds32 KABCallbackDefaultTimeout(200000000);
+	
 	// Forwards
 	class CABServer;
 	class CDataOwnerManager;
@@ -196,7 +198,7 @@ namespace conn
 		*/
 		TActiveInformation() :
 			iSupported(EFalse), iRequiresDelayToPrepareData(EFalse),
-			iSupportsSelective(EFalse), iSupportsIncremental(ETrue), iActiveDataOwner(EFalse), iActiveType(EActiveOnly)
+			iSupportsSelective(EFalse), iSupportsIncremental(ETrue), iActiveDataOwner(EFalse), iActiveType(EActiveOnly), iCallbackDelayTime(KABCallbackDefaultTimeout)
 				{
 				}
 	public:
@@ -207,6 +209,7 @@ namespace conn
 		TUint8	iSupportsIncremental; /*<! Supports Incremental */
 		TUint8	iActiveDataOwner; /*<! Although we say we're active, we're not really */
 		TActiveType	iActiveType; /*<! Type of the Active DO */
+		TTimeIntervalMicroSeconds32  iCallbackDelayTime; /*<! Callback Delay Time */
 		};
 		
 	/** Data Owner support classes and enums */

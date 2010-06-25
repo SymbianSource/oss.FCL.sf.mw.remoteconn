@@ -1,0 +1,15 @@
+<?xml version="1.0" standalone="yes"?>
+
+<backup_registration>
+    <public_backup>
+	  <include_directory name = "\logs"/>
+	  <include_directory name = "C:\public\81113002\"/>
+	  <include_file name = "C:\public\81113002\public_file1.dat"/>
+	  <include_directory name = "I:\"/>
+	  <exclude name = "c:\nkern.txt"/>
+	  <exclude name = "C:\public\81113002\public_file1.dat"/>
+    </public_backup>
+
+    <system_backup/>
+    <restore requires_reboot = "no"/>
+</backup_registration>

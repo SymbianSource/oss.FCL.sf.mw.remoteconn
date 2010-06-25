@@ -609,9 +609,27 @@ EXPORT_C TUint16 CMTPTypeObjectPropListElement::Uint16L(TInt aElementId) const
                 {
                   User::Leave(KErrArgument);
                 }
-            TUint16 retValue;
-            GetValueL(&retValue, sizeof(TUint16));
-			return retValue;
+            
+            //Workaround for partial deletion issue observed on Windows XP/Windows7.
+            //When send an object from PC to device through Windows explorer, it will
+            //include the 'ProtectionStatus' property in the dataset of 'SendObjectPropList' 
+            //command. While syncing through Ovi player or Windows Media Player, this property
+            //will not be included.
+            //When we delete a folder which contains read-only objects,we returns partial 
+            //deletion code, because read-only object should not be deleted according to MTP spec.
+            //On receiving this,Windows popup a dialog saying 'device stops response', this really
+            //give user bad experience, to prevent this, we make this workaround here: when dataprovider
+            //query value of 'ProtectionStatus' property,always return EMTPProtectionNoProtection(0x0000).
+            if (EMTPObjectPropCodeProtectionStatus == iPropertyCode)
+                {
+                return EMTPProtectionNoProtection;
+                }
+            else
+                {
+                TUint16 retValue;
+                GetValueL(&retValue, sizeof(TUint16));
+                return retValue;
+                }
 		default:
 			User::Leave(KErrArgument);
 		}	

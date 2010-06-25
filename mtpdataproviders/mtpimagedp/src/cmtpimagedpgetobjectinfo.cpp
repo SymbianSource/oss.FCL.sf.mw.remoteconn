@@ -141,7 +141,7 @@ void CMTPImageDpGetObjectInfo::BuildObjectInfoL()
     TUint16 thumbFormat;
     iObjectPropertyMgr.GetPropertyL(EMTPObjectPropCodeRepresentativeSampleFormat, thumbFormat);
     iObjectInfoToBuild->SetUint16L(CMTPTypeObjectInfo::EThumbFormat, thumbFormat);
-    TUint32 value;
+    TUint32 value(0);
     iObjectPropertyMgr.GetPropertyL(EMTPObjectPropCodeRepresentativeSampleSize, value);
     iObjectInfoToBuild->SetUint32L(CMTPTypeObjectInfo::EThumbCompressedSize, value);
     iObjectPropertyMgr.GetPropertyL(EMTPObjectPropCodeRepresentativeSampleWidth, value);

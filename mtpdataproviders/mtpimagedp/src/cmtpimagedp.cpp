@@ -121,7 +121,7 @@ void CMTPImageDataProvider::ConstructL()
     
     //Define RProperty of new pictures for status data provider
     _LIT_SECURITY_POLICY_PASS(KAllowReadAll);
-    TInt error = RProperty::Define(TUid::Uid(KMTPServerUID), KMTPNewPicKey, RProperty::EInt, KAllowReadAll, KAllowReadAll);
+    TInt error = RProperty::Define(KMTPNewPicKey, RProperty::EInt, KAllowReadAll, KAllowReadAll);
     if (error != KErrNone && error != KErrAlreadyExists)
         {
         __FLOG_1(_L8("CMTPImageDataProvider::ConstructL - RProperty define error:%d"), error);
@@ -398,29 +398,29 @@ void CMTPImageDataProvider::SupportedL(TMTPSupportCategory aCategory, CDesCArray
         
     case EFormatExtensionSets:
         {
-        _LIT(KFormatExtensionJpg, "0x3801:jpg::3");//3 means file dp will enumerate all image files instead of image dp.
+        _LIT(KFormatExtensionJpg, "0x3801:jpg:::3");//3 means file dp will enumerate all image files instead of image dp.
         aStrings.AppendL(KFormatExtensionJpg);
-        _LIT(KFormatExtensionJpe, "0x3801:jpe::3");
+        _LIT(KFormatExtensionJpe, "0x3801:jpe:::3");
         aStrings.AppendL(KFormatExtensionJpe);
-        _LIT(KFormatExtensionJpeg, "0x3801:jpeg::3");
+        _LIT(KFormatExtensionJpeg, "0x3801:jpeg:::3");
         aStrings.AppendL(KFormatExtensionJpeg);
         
         /*
          * bmp files
          */
-        _LIT(KFormatExtensionBmp, "0x3804:bmp::3");
+        _LIT(KFormatExtensionBmp, "0x3804:bmp:::3");
         aStrings.AppendL(KFormatExtensionBmp);
         
         /*
          * gif files
          */
-        _LIT(KFormatExtensionGif, "0x3807:gif::3");
+        _LIT(KFormatExtensionGif, "0x3807:gif:::3");
         aStrings.AppendL(KFormatExtensionGif);
         
         /*
          * png files
          */
-        _LIT(KFormatExtensionPng, "0x380B:png::3");
+        _LIT(KFormatExtensionPng, "0x380B:png:::3");
         aStrings.AppendL(KFormatExtensionPng);
         
         /*
@@ -586,7 +586,7 @@ void CMTPImageDataProvider::SessionClosedL(const TMTPNotificationParamsSessionCh
     /**
      * We clear property manager cache when receiving session close notification from framework every times
      */
-    iPropertyMgr->ClearCacheL();
+    iPropertyMgr->ClearAllCache();
     
     __FLOG(_L8("<< SessionClosedL"));
     }
@@ -721,29 +721,6 @@ TUint CMTPImageDataProvider::QueryImageObjectCountL()
     CleanupStack::PopAndDestroy(&context);
     
     return newPictures;
-    }
-
-TBool CMTPImageDataProvider::GetCacheParentHandle(const TDesC& aParentPath, TUint32& aParentHandle)
-    {
-    TBool ret = EFalse;
-    
-    if (iParentCache.iPath.Compare(aParentPath) == 0)
-        {
-        aParentHandle = iParentCache.iHandle;
-        ret = ETrue;
-        }
-    else
-        {
-        aParentHandle = KMTPHandleNone;
-        }
-    
-    return ret;
-    }
-
-void CMTPImageDataProvider::SetCacheParentHandle(const TDesC& aParentPath, TUint32 aParentHandle)
-    {
-    iParentCache.iPath.Copy(aParentPath);
-    iParentCache.iHandle = aParentHandle;
     }
 
 void CMTPImageDataProvider::AppendDeleteObjectsArrayL(const TDesC& aSuid)

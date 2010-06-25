@@ -21,6 +21,7 @@
 #include <connect/sbtypes.h>
 #include "t_teststepbackup2.h"
 #include <apgcli.h>
+#include <connect/javamanagerinterface.h>
 
 namespace bur_ts
 	{	
@@ -203,9 +204,13 @@ namespace bur_ts
 		BackupSystemBaseDataL();
 		BackupSystemSnapshotDataL();
 		
-		//active
-		BackupActiveBaseDataL();
-		BackupActiveSnapshotDataL();
+        // do active backup when in partial backup mode
+        if (iIsPartial)
+            {
+            //active
+            BackupActiveBaseDataL();
+            BackupActiveSnapshotDataL();
+            }
 		
 		//passive
 		BackupPassiveBaseDataL();
@@ -240,9 +245,13 @@ namespace bur_ts
 		BackupSystemBaseDataL();
 		BackupSystemSnapshotDataL();
 		
-		// active
-		BackupActiveIncDataL();
-		BackupActiveSnapshotDataL();
+        // do active backup when in partial backup mode
+        if (iIsPartial)
+            {
+            //active
+            BackupActiveIncDataL();
+            BackupActiveSnapshotDataL();
+            }
 		
 		//passive
 		BackupPassiveIncDataL();
@@ -738,7 +747,7 @@ namespace bur_ts
 		{
 		//Coverage test get large public file list
 		RPointerArray<CSBGenericDataType> transferTypes;
-		CleanupClosePushL(transferTypes);
+		CleanupResetAndDestroyPushL(transferTypes);
 		TRAP_IGNORE(GeneratePublicTransferTypesL(transferTypes));
 		RFileArray array;
 		CleanupClosePushL(array);

@@ -30,9 +30,7 @@ PRJ_MMPFILES
 
 PRJ_EXPORTS
 // Note: these files are exported for testing and techview only. Not used in a device
-2001FCA2.txt /epoc32/data/z/private/10202be9/2001FCA2.txt
-2001FCA2.txt /epoc32/release/winscw/udeb/z/private/10202be9/2001FCA2.txt
-2001FCA2.txt /epoc32/release/winscw/urel/z/private/10202be9/2001FCA2.txt
+2001fca2.txt /epoc32/data/z/private/10202be9/2001fca2.txt
 
 ../group/mtp_imagedp.iby  /epoc32/rom/include/mtp_imagedp.iby
 

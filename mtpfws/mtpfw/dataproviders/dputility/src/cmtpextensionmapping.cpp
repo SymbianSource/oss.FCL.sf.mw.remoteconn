@@ -65,6 +65,11 @@ TMTPFormatCode CMTPExtensionMapping::FormatCode() const
 	return iFormatCode;
 	}
 
+TUint16 CMTPExtensionMapping::SubFormatCode() const
+    {
+    return iSubFormatCode;
+    }
+
 TUint32 CMTPExtensionMapping::DpId() const
     {
     return iDpId;
@@ -79,7 +84,6 @@ void CMTPExtensionMapping::SetExtensionL(const TDesC& aExtension)
 	{
 	delete iExtension;
 	iExtension = NULL;
-	
 	iExtension = aExtension.AllocL();	
 	}
 
@@ -99,6 +103,10 @@ void CMTPExtensionMapping::SetDpId(const TUint32 aDpId)
 void CMTPExtensionMapping::SetFormatCode(const TMTPFormatCode aFormatCode)
     {
     iFormatCode = aFormatCode;
+    }
+void CMTPExtensionMapping::SetSubFormatCode(TUint16  aSubFormatCode)
+    {
+    iSubFormatCode = aSubFormatCode;
     }
 
 void CMTPExtensionMapping::SetEnumerationFlag(const TUint aNeedFileDp)

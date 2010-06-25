@@ -1,0 +1,24 @@
+        0x95, 0x01,      //Report count 1
+        0x05, 0x0c,      //Usage page telephony
+        0x09, 0x01,      // Usage Phone
+        0xa1, 0x01,      // COLLECTION (Application)        
+        0x09, 0x01,      //   USAGE (Programmable Button)
+        0xa1, 0x02,      //   COLLECTION (Logical)
+        0x05, 0x0c,      //     USAGE_PAGE (Button)
+        0x19, 0x00,      //     USAGE_MINIMUM (Button 1)
+        0x29, 0x2f,      //     USAGE_MAXIMUM (Button 6)
+        0x75, 0x08,      //     REPORT_SIZE (3)
+        0x15, 0x00,      //     LOGICAL_MINIMUM (1)
+        0x25, 0x06,      //     LOGICAL_MAXIMUM (6)
+        0x81, 0x00,      //     INPUT (Data,Ary,Abs)
+        0xc0,            //   END_COLLECTION 
+        0xa1, 0x02,      //   COLLECTION (Logical)
+        0x05, 0x0b,      //     USAGE_PAGE (Button)
+        0x19, 0x20,      //     USAGE_MINIMUM (Button 1)
+        0x29, 0x2f,      //     USAGE_MAXIMUM (Button 6)
+        0x75, 0x08,      //     REPORT_SIZE (3)
+        0x15, 0x00,      //     LOGICAL_MINIMUM (1)
+        0x25, 0x2f,      //     LOGICAL_MAXIMUM (6)
+        0x81, 0x00,      //     INPUT (Data,Ary,Abs)
+        0xc0,            //   END_COLLECTION        
+        0xc0             //End collection    

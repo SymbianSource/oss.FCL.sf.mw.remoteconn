@@ -31,11 +31,7 @@ mtpframework.mmp
 PRJ_EXPORTS
 // repositories exported for TechView and testing
 10282FCC_ARMV5.cre  /epoc32/data/z/private/10202be9/10282fcc.cre
-10282FCC_WINSCW.cre /epoc32/release/winscw/udeb/z/private/10202be9/10282fcc.cre
-10282FCC_WINSCW.cre /epoc32/release/winscw/urel/z/private/10202be9/10282fcc.cre
 backup_registration.xml  /epoc32/data/z/private/102827a2/backup_registration.xml
-backup_registration.xml /epoc32/release/winscw/udeb/z/private/102827a2/backup_registration.xml
-backup_registration.xml /epoc32/release/winscw/urel/z/private/102827a2/backup_registration.xml
 
 // ConfML Files
 ../conf/mtpframework.confml                 MW_LAYER_EXPORTS_CONFML(mtpframework.confml)

@@ -1,0 +1,109 @@
+// Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+// All rights reserved.
+// This component and the accompanying materials are made available
+// under the terms of "Eclipse Public License v1.0"
+// which accompanies this distribution, and is available
+// at the URL "http://www.eclipse.org/legal/epl-v10.html".
+//
+// Initial Contributors:
+// Nokia Corporation - initial contribution.
+//
+// Contributors:
+//
+// Description:
+//
+
+
+//////////////////////////////////////////////////////////////////////////////////////
+//
+// test_backuppackage.script
+// for testing backup datas of installed applications 
+//
+////////////////////////////////////////////////////////////////////////////////////
+LOAD_SUITE BURTestServer
+
+PRINT ----------------------------------------------
+PRINT  Test Backup and Restore package applications
+PRINT ----------------------------------------------
+RUN_PROGRAM 1000 swiconsole /i Z:\testdata\scripts\sbetestdata\bigexeforbackup.sis /optimal
+RUN_PROGRAM 1000 swiconsole /i Z:\testdata\scripts\sbetestdata\test_dll_nopublic.SIS /optimal
+RUN_UTILS DeleteDirectory C:\BackupArchive\
+RUN_UTILS DeleteDirectory C:\system\temp\
+RUN_UTILS CopyFile  Z:\testdata\scripts\sbetestdata\private_file1.dat C:\private\81000014\private_file1.dat
+RUN_UTILS MakeReadWrite C:\private\81000014\private_file1.dat
+
+RUN_UTILS DeleteDirectory C:\public\
+RUN_UTILS MkDir C:\public\
+RUN_UTILS MkDir C:\public\81113002\
+RUN_UTILS MkDir C:\public\test\
+RUN_UTILS CopyFile  Z:\testdata\scripts\sbetestdata\public_file1.dat  C:\public\81113002\public_file1.dat
+RUN_UTILS CopyFile  Z:\testdata\scripts\sbetestdata\public_file2.dat  C:\public\81113002\public_file2.dat
+RUN_UTILS CopyFile  Z:\testdata\scripts\sbetestdata\private_file1.dat C:\public\test\private_file1.dat
+RUN_UTILS MakeReadWrite C:\public\81113002\public_file1.dat
+RUN_UTILS MakeReadWrite C:\public\81113002\public_file2.dat
+RUN_UTILS MakeReadWrite C:\public\test\private_file1.dat
+
+START_TESTCASE MTP-SBE-BACKUPPACKAGE-0000
+//! @SYMTestCaseID MTP-SBE-BACKUPPACKAGE-0000
+//! @SYMTestCaseDesc	        Backup big data which owner is install application
+//! @SYMPREQ                    PREQ2492      
+//! @SYMTestStatus              Released
+//! @SYMTestPriority            High 
+//! @SYMTestActions             Backup executable files and private data of install application
+//! @SYMTestExpectedResults     1. The success message displayed in the console.
+//!                             2. No any error or warning message displayed in the console.
+//! @SYMTestType                CIT
+RUN_TEST_STEP 100 BURTestServer TestBackup z:\testdata\scripts\sbetestdata\test.ini PACKAGE_0010
+END_TESTCASE MTP-SBE-BACKUPPACKAGE-0000
+RUN_UTILS DeleteFile C:\private\81000014\private_file1.dat
+
+START_TESTCASE MTP-SBE-RESTOREBACKUPPACKAGE-0001
+//! @SYMTestCaseID MTP-SBE-RESTOREBACKUPPACKAGE-0001
+//! @SYMTestCaseDesc            Restore big data which owner is install application
+//! @SYMPREQ                    PREQ2492    
+//! @SYMTestStatus              Released  
+//! @SYMTestPriority            High
+//! @SYMTestActions             Restore executable files and private datas of install application from bakcup file.
+//! @SYMTestExpectedResults     1. The failure message of restore displayed in the console
+//!                             2. The executable files are not be restored.
+//!                             3. The private files are not be restored.
+//! @SYMTestType                CIT
+RUN_TEST_STEP 100 BURTestServer TestRestore z:\testdata\scripts\sbetestdata\test.ini PACKAGE_0020
+END_TESTCASE MTP-SBE-RESTOREBACKUPPACKAGE-0001
+RUN_UTILS DeleteFile C:\private\81000014\private_file1.dat
+
+START_TESTCASE MTP-SBE-BACKUPPACKAGE-0002
+//! @SYMTestCaseID MTP-SBE-BACKUPPACKAGE-0002
+//! @SYMTestCaseDesc            Backup DLLs data which are installed as part of package
+//! @SYMPREQ                    PREQ2492
+//! @SYMTestStatus              Released  
+//! @SYMTestPriority            High
+//! @SYMTestActions             Backup executable files and private data of install DLL
+//! @SYMTestExpectedResults     1. The success message displayed in the console.
+//!                             2. No any error or warning message displayed in the console.
+//! @SYMTestType                CIT
+RUN_TEST_STEP 100 BURTestServer TestBackup z:\testdata\scripts\sbetestdata\test.ini PACKAGE_0030
+END_TESTCASE MTP-SBE-BACKUPPACKAGE-0002
+
+START_TESTCASE MTP-SBE-RESTOREBACKUPPACKAGE-0003
+//! @SYMTestCaseID MTP-SBE-RESTOREBACKUPPACKAGE-0003
+//! @SYMTestCaseDesc            Backup DLLs data which are installed as part of package
+//! @SYMPREQ                    PREQ2492
+//! @SYMTestStatus              Released
+//! @SYMTestPriority            High
+//! @SYMTestActions             Restore executable files and private datas of install DLL from bakcup file.
+//! @SYMTestExpectedResults     1. The failure message of restore displayed in the console
+//!                             2. The executable files are not be restored.
+//!                             3. The private files are not be restored.
+//! @SYMTestType                CIT
+RUN_TEST_STEP 100 BURTestServer TestRestore z:\testdata\scripts\sbetestdata\test.ini PACKAGE_0040
+END_TESTCASE MTP-SBE-RESTOREBACKUPPACKAGE-0003
+
+RUN_UTILS DeleteFile C:\public\81113002\public_file1.dat
+RUN_UTILS DeleteFile C:\public\81113002\public_file2.dat
+RUN_UTILS DeleteFile C:\public\test\private_file1.dat
+RUN_UTILS DeleteDirectory C:\public\81113002\
+RUN_UTILS DeleteDirectory C:\public\test\
+RUN_UTILS DeleteDirectory C:\public\
+RUN_PROGRAM 900 swiconsole /u /uid 0x8111300b /pkg "big exe for backup" /vendor "Unique Vendor Name" /optimal
+RUN_PROGRAM 1000 swiconsole /u /uid 0x81113002 /pkg "tswinocapability" /vendor "Symbian" /optimal

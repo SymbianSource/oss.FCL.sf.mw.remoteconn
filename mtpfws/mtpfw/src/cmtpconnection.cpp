@@ -329,6 +329,8 @@ EXPORT_C void CMTPConnection::SessionOpenedL(TUint32 aMTPId)
     if (aMTPId != KMTPSessionNone)
         {
         // Notify the data providers if other than the null session is closing.
+        // OpenSession Command coming and now it is really connected to host.
+        PublishConnState(EConnectedToHost);
         TMTPNotificationParamsSessionChange params = {aMTPId, *this};
         iSingletons.DpController().NotifyDataProvidersL(EMTPSessionOpened, &params);
         }
@@ -406,7 +408,7 @@ void CMTPConnection::ConnectionResumedL(MMTPTransportConnection& aTransportConne
         iTransportConnection = &aTransportConnection;
         iTransportConnection->BindL(*this); 
         SetState(EStateOpen); 
-        PublishConnState(EConnectedToHost); 
+         
         }
     
     __FLOG(_L8("ConnectionResumed - Exit"));

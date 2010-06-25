@@ -31,13 +31,14 @@
 #include "cmtpdataprovidercontroller.h"
 #include "cmtpextensionmapping.h"
 #include "cmtpdataprovider.h"
+#include "mtpframeworkconst.h"
 
 using namespace ContentAccess;
 // Class constants.
 const TInt KMTPDateStringLength = 15;
 const TInt KMTPDateStringTIndex = 8;
 const TInt KMimeTypeMaxLength = 76;
-const TInt KMAXPackageIDStringLen = 32;
+//const TInt KMAXPackageIDStringLen = 32;
 
 _LIT( KTxtBackSlash, "\\" );
     
@@ -373,8 +374,8 @@ EXPORT_C HBufC* RMTPUtility::ContainerMimeType( const TDesC& aFullPath )
     if ( file.Ext().CompareF( KTxtExtensionODF ) == 0 )
         {
         TRAP( err, mime = OdfMimeTypeL( aFullPath ) );
+        __FLOG_VA((_L("ContainerMimeType err %d mime %S"), err, mime));
         }
-
     return mime;
     }
 
@@ -386,8 +387,10 @@ EXPORT_C void RMTPUtility::FormatExtensionMapping()
         {
         CDesCArraySeg* FormatExtensionMapping = new (ELeave) CDesCArraySeg(4);
         CleanupStack::PushL(FormatExtensionMapping);
-        TRAP_IGNORE(iSingleton.DpController().DataProviderByIndexL(count).Plugin().SupportedL(EFormatExtensionSets,*FormatExtensionMapping));
-        AppendFormatExtensionMapping(*FormatExtensionMapping,iSingleton.DpController().DataProviderByIndexL(count).DataProviderId());
+        TRAP_IGNORE(
+        iSingleton.DpController().DataProviderByIndexL(count).Plugin().SupportedL(EFormatExtensionSets,*FormatExtensionMapping);
+        AppendFormatExtensionMappingL(*FormatExtensionMapping,iSingleton.DpController().DataProviderByIndexL(count).DataProviderId());
+        );
         CleanupStack::PopAndDestroy(FormatExtensionMapping);
         }
     }
@@ -406,7 +409,29 @@ EXPORT_C TMTPFormatCode RMTPUtility::GetFormatByExtension(const TDesC& aExtensio
     return EMTPFormatCodeUndefined;
     }
 
-EXPORT_C TUint32 RMTPUtility::GetDpId(const TDesC& aExtension,const TDesC& aMIMEType)
+EXPORT_C TUint32 RMTPUtility::GetDpIdL(const TDesC& aExtension,const TDesC& aMIMEType)
+    {
+    CMTPExtensionMapping* extensionMapping = CMTPExtensionMapping::NewL(aExtension, EMTPFormatCodeUndefined,aMIMEType);
+    CleanupStack::PushL(extensionMapping);
+    TInt  found = KErrNotFound;
+    if(aMIMEType == KNullDesC)
+        {
+        found = iFormatMappings.FindInOrder(extensionMapping, TLinearOrder<CMTPExtensionMapping>(CMTPExtensionMapping::Compare));
+        }
+    else
+        {
+        found = iFormatMappings.FindInOrder(extensionMapping, TLinearOrder<CMTPExtensionMapping>(CMTPExtensionMapping::ComparewithMIME));
+        }
+    if ( KErrNotFound != found)
+        {
+        CleanupStack::PopAndDestroy(extensionMapping);
+        return iFormatMappings[found]->DpId();
+        }
+    CleanupStack::PopAndDestroy(extensionMapping);
+    return KMTPFileDPID;
+    }
+
+EXPORT_C TUint16 RMTPUtility::GetSubFormatCodeL(const TDesC& aExtension,const TDesC& aMIMEType)
     {
     CMTPExtensionMapping* extensionMapping = CMTPExtensionMapping::NewL(aExtension, EMTPFormatCodeUndefined,aMIMEType);
     CleanupStack::PushL(extensionMapping);
@@ -414,11 +439,26 @@ EXPORT_C TUint32 RMTPUtility::GetDpId(const TDesC& aExtension,const TDesC& aMIME
     if ( KErrNotFound != found)
         {
         CleanupStack::PopAndDestroy(extensionMapping);
-        return iFormatMappings[found]->DpId();
+        return iFormatMappings[found]->SubFormatCode();
         }
     CleanupStack::PopAndDestroy(extensionMapping);
-    return 255;
+    return 0;
     }
+
+EXPORT_C TMTPFormatCode RMTPUtility::GetFormatCodeByMimeTypeL(const TDesC& aExtension,const TDesC& aMIMEType)
+    {
+    CMTPExtensionMapping* extensionMapping = CMTPExtensionMapping::NewL(aExtension, EMTPFormatCodeUndefined,aMIMEType);
+    CleanupStack::PushL(extensionMapping);
+    TInt  found = iFormatMappings.FindInOrder(extensionMapping, TLinearOrder<CMTPExtensionMapping>(CMTPExtensionMapping::ComparewithMIME));
+    if ( KErrNotFound != found)
+        {
+        CleanupStack::PopAndDestroy(extensionMapping);
+        return iFormatMappings[found]->FormatCode();
+        }
+    CleanupStack::PopAndDestroy(extensionMapping);
+    return EMTPFormatCodeUndefined;
+    }
+
 
 EXPORT_C TUint RMTPUtility::GetEnumerationFlag(const TDesC& aExtension)
     {
@@ -558,25 +598,14 @@ HBufC* RMTPUtility::OdfMimeTypeL( const TDesC& aFullPath )
         
     if ( file.Ext().CompareF( KTxtExtensionODF ) == 0 )
         {
-        RFs tempFsSession; 
-        User::LeaveIfError(tempFsSession.Connect());     
-        CleanupClosePushL(tempFsSession);
-        User::LeaveIfError(tempFsSession.ShareProtected());  
-        
-        RFile tempFile; 
-        User::LeaveIfError(tempFile.Open(tempFsSession, aFullPath, EFileRead|EFileShareAny)); 
-        CleanupClosePushL(tempFile); 
-        
-        //CContent* content = CContent::NewL( aFullPath );
-        CContent* content = CContent::NewL( tempFile );
+        CContent* content = CContent::NewL( aFullPath );
         CleanupStack::PushL( content ); // + content
         
         HBufC* buffer = HBufC::NewL( KMimeTypeMaxLength );
         CleanupStack::PushL( buffer ); // + buffer
         
         TPtr data = buffer->Des();
-        TInt err = content->GetStringAttribute( EMimeType, data );
-                
+        TInt err = content->GetStringAttribute( ContentAccess::EMimeType, data );
         if ( err == KErrNone )
             {
             mimebuf = HBufC::New( buffer->Length() );
@@ -585,8 +614,8 @@ HBufC* RMTPUtility::OdfMimeTypeL( const TDesC& aFullPath )
                 {
                 User::LeaveIfError( KErrNotFound );
                 }
-            
             mimebuf->Des().Copy( *buffer );
+            
             }
         
         // leave if NULL
@@ -597,8 +626,6 @@ HBufC* RMTPUtility::OdfMimeTypeL( const TDesC& aFullPath )
         
         CleanupStack::PopAndDestroy( buffer ); // - buffer
         CleanupStack::PopAndDestroy( content ); // - content
-        CleanupStack::PopAndDestroy(&tempFile); // close 
-        CleanupStack::PopAndDestroy(&tempFsSession);    // close 
         }
     else
         {
@@ -607,65 +634,126 @@ HBufC* RMTPUtility::OdfMimeTypeL( const TDesC& aFullPath )
     
     return mimebuf;
     }
+void RMTPUtility::ParseFormatCode(const TDesC& aString, CMTPExtensionMapping& aMapping, TParseState& aState)
+    {
+    
+    TLex lex(aString.Mid(2)); //skip 0x
+    TUint formatCode = EMTPFormatCodeUndefined;
+    lex.Val(formatCode, EHex);
+    aMapping.SetFormatCode(static_cast<TMTPFormatCode>(formatCode));
+    aState = Extension;
+    __FLOG_VA((_L("ParseFormatCode %S, 0x%x"), &aString, formatCode));
+    }
+void RMTPUtility::ParseExtension(const TDesC& aString, CMTPExtensionMapping& aMapping, TParseState& aState)
+    {
+    aMapping.SetExtensionL(aString);
+    aState = EMimeType;
+    __FLOG_VA((_L("ParseExtension %S"), &aString));
+    }
+void RMTPUtility::ParseMimeType(const TDesC& aString, CMTPExtensionMapping& aMapping, TParseState& aState)
+    {
+    aMapping.SetMIMETypeL(aString);
+    aState = ESubFormatCode;
+    __FLOG_VA((_L("ParseMimeType %S"), &aString));
+    }
+void RMTPUtility::ParseSubFormatCode(const TDesC& aString, CMTPExtensionMapping& aMapping, TParseState& aState)
+    {
+    iEnumFlag = 1;
+    TUint32 subFormatCode = 0;
+    if(aString != KNullDesC)
+        {
+        if(aString.Length() > 2) //temp code will remove after the correct their format string
+            {
+            TLex lex(aString.Mid(2)); //skip 0x
+            lex.Val(subFormatCode, EHex);
+            }
+        else//temp code will remove after the correct their format string
+            {
+            TLex lex(aString);
+            lex.Val(iEnumFlag, EDecimal);
+            }
+        }
+    aMapping.SetSubFormatCode(subFormatCode);
+    aState = EnumerationFlag;
+    __FLOG_VA((_L("ParseSubFormatCode %S, 0x%x"), &aString, subFormatCode));
+    }
+void RMTPUtility::ParseEnumerationFlag(const TDesC& aString, CMTPExtensionMapping& aMapping, TParseState& aState)
+    {
+    TUint enumFlag = iEnumFlag;           //default is delegate to file DP
+    //temp code(iEnumFlag is temp the value should be 1) will remove after the correct their format string
+    if(aString != KNullDesC)
+        {
+        TLex lex(aString);
+        lex.Val(enumFlag, EDecimal);
+        }
+    aMapping.SetEnumerationFlag(enumFlag);
+    
+    __FLOG_VA((_L8("ParseEnumerationFlag %S, %d"), &aString, enumFlag));
+    aState = EParseStateEnd;
+    }
+void RMTPUtility::Parse(const TDesC& aString, CMTPExtensionMapping& aMapping, TParseState& aState)
+    {
+    switch(aState)
+        {
+        case EFormatCode:
+            ParseFormatCode(aString, aMapping, aState);
+            break;
+        case Extension:
+            ParseExtension(aString, aMapping, aState);
+            break;
+        case EMimeType:
+            ParseMimeType(aString, aMapping, aState);
+            break;
+        case ESubFormatCode:
+            ParseSubFormatCode(aString, aMapping, aState);
+            break;
+        case EnumerationFlag:
+            ParseEnumerationFlag(aString, aMapping, aState);
+            break;
+        default:
+            //do nothing;
+            break;
+        }
+    }
 
-void  RMTPUtility::AppendFormatExtensionMapping(const CDesCArray& aFormatExtensionMapping,TUint32 aDpId)
+void  RMTPUtility::AppendFormatExtensionMappingL(const CDesCArray& aFormatExtensionMapping,TUint32 aDpId)
     {
     //Parse the descriptor formatcode,fileextension, e.g. 0x3009:mp3
-     TBuf<KMAXPackageIDStringLen> stringSeg;
-     TInt  splitter1(0);
-     TInt  splitter2(0);
-     TInt  found(0);
-     TUint formatCode = 0;
-     TUint isNeedFileDp = 1;
-     
-     for(TInt i=0; i < aFormatExtensionMapping.Count(); ++i)
-         {
-         CMTPExtensionMapping* extensionMapping = CMTPExtensionMapping::NewL(KNullDesC, EMTPFormatCodeUndefined);
-         CleanupStack::PushL(extensionMapping);
-         _LIT(KSPLITTER,":");
-         splitter1 = aFormatExtensionMapping[i].FindF(KSPLITTER);
-         //Skip "0x", 2 is the length of "0x"
-         stringSeg = aFormatExtensionMapping[i].Mid(2, 4);
-         TLex lex(stringSeg);
-         User::LeaveIfError(lex.Val(formatCode, EHex));
-         //Skip ":"
-         stringSeg = aFormatExtensionMapping[i].Mid(splitter1 + 1);
-         splitter2 = stringSeg.FindF(KSPLITTER);
-         if ( splitter2 == KErrNotFound )
-             {
-             extensionMapping->SetExtensionL(stringSeg);
-             }
-         else
-             {
-             extensionMapping->SetExtensionL(aFormatExtensionMapping[i].Mid(splitter1+1,splitter2));
-             stringSeg = stringSeg.Mid(splitter2+1);
-             splitter1 = stringSeg.FindF(KSPLITTER);
-             if ( splitter1==KErrNotFound )
-                 {
-                 extensionMapping->SetMIMETypeL(stringSeg);
-                 }
-             else if ( splitter1==0 )
-                 {
-                 TLex lex1(stringSeg.Mid(splitter1+1));
-                 User::LeaveIfError(lex1.Val(isNeedFileDp, EDecimal));                 
-                 }
-             else
-                 {
-                 extensionMapping->SetMIMETypeL(stringSeg.Mid(0,splitter1));
-                 TLex lex2(stringSeg.Mid(splitter1+1));
-                 User::LeaveIfError(lex2.Val(isNeedFileDp, EDecimal));
-                 }
-             
-             }
+    //FromatCode:extension:MimeType:SubFormatCode:EnumerationFlag
 
-         found = iFormatMappings.FindInOrder(extensionMapping, TLinearOrder<CMTPExtensionMapping>(CMTPExtensionMapping::ComparewithMIME));
-         if (KErrNotFound == found)
-             {
-             extensionMapping->SetFormatCode((TMTPFormatCode)formatCode);
-             extensionMapping->SetDpId(aDpId);
-             extensionMapping->SetEnumerationFlag(isNeedFileDp);
-             iFormatMappings.InsertInOrderL(extensionMapping, TLinearOrder<CMTPExtensionMapping>(CMTPExtensionMapping::ComparewithMIME));
-             }
-         CleanupStack::Pop(extensionMapping);
-         }    
+    TChar spliter(':');
+    for(TInt i=0; i < aFormatExtensionMapping.Count(); ++i)
+        {
+        CMTPExtensionMapping* extensionMapping = CMTPExtensionMapping::NewL(KNullDesC, EMTPFormatCodeUndefined);
+      
+        TParseState state = EFormatCode;
+        TLex lex(aFormatExtensionMapping[i]);
+        lex.Mark();
+        while(!lex.Eos())
+            {
+            if(lex.Peek() == spliter)
+                {
+                Parse(lex.MarkedToken(), *extensionMapping, state);
+                lex.Inc(); //skip :
+                lex.Mark();
+                }
+            else
+                {
+                lex.Inc(); //move to next char
+                }
+            }
+        while(state < EParseStateEnd)
+            {
+            Parse(lex.MarkedToken(), *extensionMapping, state);
+            lex.Mark();
+            }
+        extensionMapping->SetDpId(aDpId);
+        if(iFormatMappings.InsertInOrder(extensionMapping, TLinearOrder<CMTPExtensionMapping>(CMTPExtensionMapping::ComparewithMIME)) != KErrNone)
+            {
+            delete extensionMapping;
+            }
+        }
     }
+
+
+

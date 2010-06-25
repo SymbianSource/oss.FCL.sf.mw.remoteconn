@@ -1,0 +1,3 @@
+0xa9, 0x01,      //   begin delimiter - set iWithinDelimiter
+0xB1, 0xff, // main feature
+0xa9, 0x00      //   end delimiter

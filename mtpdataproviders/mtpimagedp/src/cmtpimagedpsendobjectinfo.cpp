@@ -20,6 +20,7 @@
 
 #include <f32file.h>
 #include <bautils.h>
+#include <e32const.h>
 
 #include <mtp/mmtpdataproviderframework.h>
 
@@ -322,7 +323,11 @@ TBool CMTPImageDpSendObjectInfo::CheckObjectPropListParamsL(TAny *aPtr)
             {
             iStorageId = iFramework.StorageMgr().DefaultStorageId();
             }
-             
+        
+        if(IsTooLarge(iObjectSize))
+            {
+            *ret = EMTPRespCodeObjectTooLarge;
+            }
         }
     
     __FLOG(_L8("CMTPImageDpSendObjectInfo::CheckObjectPropListParamsL - Exit"));
@@ -608,6 +613,11 @@ TBool CMTPImageDpSendObjectInfo::DoHandleSendObjectInfoCompleteL(TAny* /*aPtr*/)
     if (result)
         {
         iObjectSize = iObjectInfo->Uint32L(CMTPTypeObjectInfo::EObjectCompressedSize);
+        if(IsTooLarge(iObjectSize))
+            {
+            SendResponseL(EMTPRespCodeObjectTooLarge);
+            result = EFalse;
+            }
         }
 
     if (result)
@@ -743,6 +753,9 @@ TBool CMTPImageDpSendObjectInfo::DoHandleSendObjectCompleteL(TAny* /*aPtr*/)
     {
     __FLOG(_L8("CMTPImageDpSendObjectInfo::DoHandleSendObjectCompleteL - Entry"));    
     TBool result(ETrue);
+
+    delete iFileReceived;
+    iFileReceived = NULL;  
     
 #ifdef SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API
     TInt64 objectsize = 0;
@@ -750,8 +763,10 @@ TBool CMTPImageDpSendObjectInfo::DoHandleSendObjectCompleteL(TAny* /*aPtr*/)
     TInt objectsize = 0;
 #endif
     
-    iFileReceived->File().Size(objectsize);    
-    
+    TEntry entry;
+    User::LeaveIfError(iFramework.Fs().Entry(iFullPath, entry));
+    objectsize = entry.FileSize();
+   
     if (objectsize != iObjectSize)
         {
         __FLOG_VA((_L8("object sizes differ %lu != %lu"), objectsize, iObjectSize));
@@ -780,34 +795,31 @@ TBool CMTPImageDpSendObjectInfo::DoHandleSendObjectCompleteL(TAny* /*aPtr*/)
         if (iProtectionStatus ==  EMTPProtectionNoProtection ||
             iProtectionStatus == EMTPProtectionReadOnly)
             {
-            TUint attValue = 0;
-            User::LeaveIfError(iFileReceived->File().Att(attValue));
-            attValue &= ~(KEntryAttNormal | KEntryAttReadOnly);
-            
+            entry.iAtt &= ~(KEntryAttNormal | KEntryAttReadOnly);
             if (iProtectionStatus == EMTPProtectionNoProtection)
                 {                        
-                attValue |= KEntryAttNormal;
+                entry.iAtt |= KEntryAttNormal;
                 }
             else
                 {
-                attValue |= KEntryAttReadOnly;
+                entry.iAtt |= KEntryAttReadOnly;
                 }
-            User::LeaveIfError(iFileReceived->File().SetAtt(attValue, ~attValue));
+            User::LeaveIfError(iFramework.Fs().SetAtt(iFullPath, entry.iAtt, ~entry.iAtt));
             }
+
         TTime modifiedTime;
         //update datemodified property.
         if(iDateMod != NULL && iDateMod->Length())
            {           
            iObjectPropertyMgr.ConvertMTPTimeStr2TTimeL(*iDateMod, modifiedTime);
-           User::LeaveIfError(iFileReceived->File().SetModified(modifiedTime));
            }
         else if(iDateCreated != NULL && iDateCreated->Length())
            {
            iObjectPropertyMgr.ConvertMTPTimeStr2TTimeL(*iDateCreated, modifiedTime);
-           User::LeaveIfError(iFileReceived->File().SetModified(modifiedTime));
            }
-                                   
-	     iFramework.RouteRequestUnregisterL(iExpectedSendObjectRequest, iConnection);
+        User::LeaveIfError(iFramework.Fs().SetModified(iFullPath, modifiedTime));
+
+        iFramework.RouteRequestUnregisterL(iExpectedSendObjectRequest, iConnection);
         
         //The MTP spec states that it is not mandatory for SendObjectInfo/SendObjectPropList
         //to be followed by a SendObject.  An object is reserved in the ObjectStore on 
@@ -818,10 +830,8 @@ TBool CMTPImageDpSendObjectInfo::DoHandleSendObjectCompleteL(TAny* /*aPtr*/)
 		
         CleanUndoList();
         SendResponseL(EMTPRespCodeOK);
-	    }        
+	    }
     
-    delete iFileReceived;
-    iFileReceived = NULL;  
     
     iSuccessful = result;
     __FLOG(_L8("CMTPImageDpSendObjectInfo::DoHandleSendObjectCompleteL - Exit"));
@@ -869,7 +879,7 @@ void CMTPImageDpSendObjectInfo::RemoveObjectFromDb()
      */
     TRAP_IGNORE(
             iFramework.ObjectMgr().RemoveObjectL(iReceivedObject->Uint(CMTPObjectMetaData::EHandle));
-            iObjectPropertyMgr.ClearCacheL();            
+            iObjectPropertyMgr.ClearCache(iReceivedObject->Uint(CMTPObjectMetaData::EHandle));            
             );
     }
 
@@ -1276,4 +1286,41 @@ TMTPResponseCode CMTPImageDpSendObjectInfo::ErrorToMTPError(TInt aError) const
         }
         
     return resp;
+    }
+
+/**
+Check if the object is too large
+@return ETrue if yes, otherwise EFalse
+*/
+TBool CMTPImageDpSendObjectInfo::IsTooLarge(TUint64 aObjectSize) const
+    {
+    __FLOG(_L8("IsTooLarge - Entry"));
+    TBool ret(aObjectSize > KMaxTInt64);
+    
+    if(!ret)
+        {
+        TBuf<255> fsname;
+        TUint32 storageId = iStorageId;
+        if (storageId == KMTPStorageDefault)
+            {
+            storageId = iFramework.StorageMgr().DefaultStorageId();
+            }
+        TInt drive( iFramework.StorageMgr().DriveNumber(storageId) );
+        if(drive != KErrNotFound)
+            {
+            iFramework.Fs().FileSystemSubType(drive, fsname);        
+        
+            const TUint64 KMaxFatFileSize = 0xFFFFFFFF; //Maximal file size supported by all FAT filesystems (4GB-1)
+            _LIT(KFsFAT16, "FAT16");
+            _LIT(KFsFAT32, "FAT32");
+        
+            if((fsname.CompareF(KFsFAT16) == 0 || fsname.CompareF(KFsFAT32) == 0) && aObjectSize > KMaxFatFileSize)
+                {
+                ret = ETrue;
+                }
+            }
+        }
+    __FLOG_VA((_L8("Result = %d"), ret));
+    __FLOG(_L8("IsTooLarge - Exit"));
+    return ret;
     }

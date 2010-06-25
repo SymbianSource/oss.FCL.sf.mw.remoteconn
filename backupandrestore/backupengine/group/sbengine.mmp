@@ -29,9 +29,8 @@ EPOCSTACKSIZE 24576
 UID  0 0x10202D56	// Assigned UID
 VENDORID 0x70000001
 
-USERINCLUDE ../../../../../os/ossrv/genericservices/activebackupclient/inc
-SOURCEPATH ../../../../../os/ossrv/genericservices/activebackupclient/src
-SOURCE panic.cpp
+
+
 
 SOURCEPATH ../src
 SOURCE	sbtypes.cpp
@@ -51,6 +50,7 @@ SOURCE	sbpackagedatatransfer.cpp
 SOURCE  sbecompressionandencryption.cpp
 SOURCE  sbeconfig.cpp
 SOURCE	sbeparserproxy.cpp
+SOURCE  sbepanic.cpp
 
 USERINCLUDE . ../inc
 
@@ -66,12 +66,12 @@ LIBRARY ezlib.lib sbencrypt.lib cryptography.lib
 #ifdef __SBE_DISABLE_RELEASE_LOGGING
 
     // Flogger will not be linked do this binary in UREL builds
-    DEBUGLIBRARY flogger.lib
+DEBUGLIBRARY flogger.lib
 
 #else
 
     // Flogger always statically linked to this binary.
-    LIBRARY flogger.lib
+LIBRARY flogger.lib
 
 #endif
 

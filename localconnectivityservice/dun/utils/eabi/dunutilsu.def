@@ -1,0 +1,26 @@
+EXPORTS
+	_ZN15CDunTransporter11FreeChannelEP5RComm @ 1 NONAME
+	_ZN15CDunTransporter11FreeChannelEP7RSocket @ 2 NONAME
+	_ZN15CDunTransporter11InitializeLEv @ 3 NONAME
+	_ZN15CDunTransporter12UnInitializeEv @ 4 NONAME
+	_ZN15CDunTransporter13StopTransfersEP5RComm @ 5 NONAME
+	_ZN15CDunTransporter13StopTransfersEP7RSocket @ 6 NONAME
+	_ZN15CDunTransporter16AddSkippedErrorLEiP5RComm13TDunDirection @ 7 NONAME
+	_ZN15CDunTransporter16AddSkippedErrorLEiP7RSocket13TDunDirection @ 8 NONAME
+	_ZN15CDunTransporter16AllocateChannelLEP5RComm4TUidRK6TDesC8iP20MDunBufferCorrection @ 9 NONAME
+	_ZN15CDunTransporter16AllocateChannelLEP7RSocket4TUidRK6TDesC8iRi @ 10 NONAME
+	_ZN15CDunTransporter19AddConnMonCallbackLEP5RCommP11MDunConnMon13TDunDirectioni @ 11 NONAME
+	_ZN15CDunTransporter19AddConnMonCallbackLEP7RSocketP11MDunConnMon13TDunDirectioni @ 12 NONAME
+	_ZN15CDunTransporter19AdvertisementStatusEv @ 13 NONAME
+	_ZN15CDunTransporter22IssueTransferRequestsLEP5RComm @ 14 NONAME
+	_ZN15CDunTransporter22IssueTransferRequestsLEP7RSocket @ 15 NONAME
+	_ZN15CDunTransporter23NumberOfWaitingChannelsEv @ 16 NONAME
+	_ZN15CDunTransporter24FreeAdvertisementMonitorE4TUidP14MDunServAdvMon @ 17 NONAME
+	_ZN15CDunTransporter24SetAdvertisementMonitorLE4TUidP14MDunServAdvMon @ 18 NONAME
+	_ZN15CDunTransporter25NumberOfAllocatedChannelsEv @ 19 NONAME
+	_ZN15CDunTransporter31GetNumberOfWaitingChannelsByUidE4TUid @ 20 NONAME
+	_ZN15CDunTransporter33GetNumberOfAllocatedChannelsByUidE4TUid @ 21 NONAME
+	_ZN15CDunTransporter4NewLEP17MDunPluginManageri @ 22 NONAME
+	_ZN9CDunUtils18ConnectCommsServerER9RCommServ @ 23 NONAME
+	_ZN9CDunUtils20SetRCommBufferLengthER5RCommi @ 24 NONAME
+

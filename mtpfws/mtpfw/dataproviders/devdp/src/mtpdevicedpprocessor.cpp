@@ -52,6 +52,8 @@
 #include "cmtpgetserviceinfo.h"
 #include "cmtpgetformatcapabilities.h"
 #include "cmtpsetobjectprotection.h"
+#include "cmtpcommonrequestprocessor.h"
+
 /**
 device data provider mapping table from request ID to factory method of the request processor
 */
@@ -89,7 +91,9 @@ static const TMTPRequestProcessorEntry KMTPRequestProcessorTable[] =
 		{EMTPOpCodeGetServiceIDs, CMTPGetServiceIds::NewL},
 		{EMTPOpCodeGetServiceInfo, CMTPGetServiceInfo::NewL},
 		{EMTPOpCodeGetFormatCapabilities,CMTPGetFormatCapabilities::NewL},
-		{EMTPOpCodeSetObjectProtection, CMTPSetObjectProtection::NewL}
+		{EMTPOpCodeSetObjectProtection, CMTPSetObjectProtection::NewL},
+		{EMTPOpCodeSetServicePropList,CMTPCommonRequestProcessor::NewL<EMTPRespCodeInvalidServiceID, ETrue>},		
+        {EMTPOpCodeDeleteServicePropList,CMTPCommonRequestProcessor::NewL<EMTPRespCodeInvalidServiceID, ETrue>}		
 	};
 
 /**

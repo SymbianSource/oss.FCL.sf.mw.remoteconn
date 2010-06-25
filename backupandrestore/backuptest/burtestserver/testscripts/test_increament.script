@@ -1,0 +1,135 @@
+// Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+// All rights reserved.
+// This component and the accompanying materials are made available
+// under the terms of "Eclipse Public License v1.0"
+// which accompanies this distribution, and is available
+// at the URL "http://www.eclipse.org/legal/epl-v10.html".
+//
+// Initial Contributors:
+// Nokia Corporation - initial contribution.
+//
+// Contributors:
+//
+// Description:
+//
+
+
+//////////////////////////////////////////////////////////////////////////////////////
+//
+// test.script
+//
+////////////////////////////////////////////////////////////////////////////////////
+LOAD_SUITE BURTestServer
+
+PRINT ----------------------------------------------
+PRINT  Test Increament
+PRINT ----------------------------------------------
+RUN_UTILS DeleteDirectory c:\BackupArchive\
+RUN_UTILS DeleteDirectory c:\private\0AB7E58F\
+RUN_UTILS DeleteFile c:\publicbackup.xml
+RUN_UTILS MkDir c:\private\0AB7E58F\
+RUN_UTILS CopyFile  z:\testdata\scripts\sbetestdata\increamenttest.xml c:\private\0AB7E58F\backup_registration.xml
+RUN_UTILS MakeReadWrite c:\private\0AB7E58F\backup_registration.xml
+RUN_UTILS CopyFile  c:\private\0AB7E58F\backup_registration.xml c:\private\0AB7E58F\needbackup.xml
+START_TESTCASE MTP-SBE-BACKUPBASE-0000
+//! @SYMTestCaseID MTP-SBE-BACKUPBASE-0000
+//! @SYMTestCaseDesc Backup 0AB7E58F
+//! @SYMPREQ 2492
+//! @SYMTestStatus Released
+//! @SYMTestPriority High
+//! @SYMTestActions   Specify 0AB7E58F need be backup
+//! @SYMTestExpectedResults no error
+//! @SYMTestType CIT
+RUN_TEST_STEP 100 BURTestServer TestBackup z:\testdata\scripts\sbetestdata\test.ini BACKUP_RESTORE_0080
+END_TESTCASE MTP-SBE-BACKUPBASE-0000
+
+RUN_UTILS DeleteFile c:\private\0AB7E58F\needbackup.xml
+RUN_UTILS CopyFile  z:\testdata\scripts\sbetestdata\testbigfile.dat c:\private\0AB7E58F\needbackup.xml
+RUN_UTILS MakeReadWrite c:\private\0AB7E58F\needbackup.xml
+RUN_UTILS CopyFile  c:\private\0AB7E58F\backup_registration.xml c:\publicbackup.xml
+START_TESTCASE MTP-SBE-BACKUPINCREAMENT-0010
+//! @SYMTestCaseID MTP-SBE-BACKUPINCREAMENT-0010
+//! @SYMTestCaseDesc Increament backup 0AB7E58F after some files changed
+//! @SYMPREQ 2492
+//! @SYMTestStatus Released
+//! @SYMTestPriority High
+//! @SYMTestActions   Specify 0AB7E58F need be backup
+//! @SYMTestExpectedResults no error
+//! @SYMTestType CIT
+RUN_TEST_STEP 100 BURTestServer TestBackup z:\testdata\scripts\sbetestdata\test.ini BACKUP_RESTORE_0090
+END_TESTCASE MTP-SBE-BACKUPINCREAMENT-0010
+
+RUN_UTILS DeleteFile c:\publicbackup.xml
+RUN_UTILS DeleteFile c:\private\0AB7E58F\needbackup.xml
+START_TESTCASE MTP-SBE-RESTOREINCREAMENT-0020
+//! @SYMTestCaseID MTP-SBE-RESTOREINCREAMENT-0020
+//! @SYMTestCaseDesc Increament restore
+//! @SYMPREQ 2492
+//! @SYMTestStatus Released
+//! @SYMTestPriority High
+//! @SYMTestActions   Specify 0AB7E58F need be increament restore
+//! @SYMTestExpectedResults no error
+//! @SYMTestType CIT
+RUN_TEST_STEP 500 BURTestServer TestRestore z:\testdata\scripts\sbetestdata\test.ini BACKUP_RESTORE_0090
+END_TESTCASE MTP-SBE-RESTOREINCREAMENT-0020
+
+RUN_UTILS DeleteFile c:\private\0AB7E58F\needbackup.xml
+RUN_UTILS DeleteFile c:\BackupArchive\AB7E58F\C\Passive\Base\data.bkp
+START_TESTCASE MTP-SBE-INVALIDDATARESTORE-0030
+//! @SYMTestCaseID MTP-SBE-INVALIDDATARESTORE-0030
+//! @SYMTestCaseDesc Increament restore with invalid data store
+//! @SYMPREQ 2492
+//! @SYMTestStatus Released
+//! @SYMTestPriority High
+//! @SYMTestActions   Delete some data store data and try restore
+//! @SYMTestExpectedResults no error and SBE do nothing
+//! @SYMTestType CIT
+RUN_TEST_STEP 500 BURTestServer TestRestore z:\testdata\scripts\sbetestdata\test.ini BACKUP_RESTORE_0090
+END_TESTCASE MTP-SBE-INVALIDDATARESTORE-0030
+
+RUN_UTILS DeleteDirectory c:\private\0AB7E58F\
+START_TESTCASE MTP-SBE-ACTIVEBASEBACKUP-0040
+//! @SYMTestCaseID MTP-SBE-ACTIVEBASEBACKUP-0040
+//! @SYMTestCaseDesc Backup an active data owner
+//! @SYMPREQ 2492
+//! @SYMTestStatus Released
+//! @SYMTestPriority High
+//! @SYMTestActions   Specify active data owner need be backup
+//! @SYMTestExpectedResults no error
+//! @SYMTestType CIT
+RUN_TEST_STEP 100 BURTestServer TestBackup z:\testdata\scripts\sbetestdata\test.ini INC_BACKUP_RESTORE_0010
+END_TESTCASE MTP-SBE-ACTIVEBASEBACKUP-0040
+
+START_TESTCASE MTP-SBE-ACTIVEINCBACKUP-0050
+//! @SYMTestCaseID MTP-SBE-ACTIVEINCBACKUP-0050
+//! @SYMTestCaseDesc Increament backup an active data owner
+//! @SYMPREQ 2492
+//! @SYMTestStatus Released
+//! @SYMTestPriority High
+//! @SYMTestActions   Specify active data owner need be backup
+//! @SYMTestExpectedResults no error
+//! @SYMTestType CIT
+RUN_TEST_STEP 100 BURTestServer TestBackup z:\testdata\scripts\sbetestdata\test.ini INC_BACKUP_RESTORE_0020
+END_TESTCASE MTP-SBE-ACTIVEINCBACKUP-0050
+
+START_TESTCASE MTP-SBE-ACTIVEBASERESTORE-0060
+//! @SYMTestCaseID MTP-SBE-ACTIVEBASERESTORE-0060
+//! @SYMTestCaseDesc Base restore
+//! @SYMPREQ 2492
+//! @SYMTestStatus Released
+//! @SYMTestPriority High
+//! @SYMTestActions   Specify the active data owner need be base restore 
+//! @SYMTestType CIT
+RUN_TEST_STEP 500 BURTestServer TestRestore z:\testdata\scripts\sbetestdata\test.ini INC_BACKUP_RESTORE_0010
+END_TESTCASE MTP-SBE-ACTIVEBASERESTORE-0060
+
+START_TESTCASE MTP-SBE-ACTIVEINCRESTORE-0070
+//! @SYMTestCaseID MTP-SBE-ACTIVEINCRESTORE-0070
+//! @SYMTestCaseDesc Increament restore
+//! @SYMPREQ 2492
+//! @SYMTestStatus Released
+//! @SYMTestPriority High
+//! @SYMTestActions   Specify the active data owner need be increament restore  
+//! @SYMTestType CIT
+RUN_TEST_STEP 500 BURTestServer TestRestore z:\testdata\scripts\sbetestdata\test.ini INC_BACKUP_RESTORE_0020
+END_TESTCASE MTP-SBE-ACTIVEINCRESTORE-0070

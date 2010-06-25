@@ -372,7 +372,17 @@ UID.
 */  
 EXPORT_C TInt CMTPDataProviderController::DpId(TUint aUid)
     {
-    return iDataProviders.FindInOrder(TUid::Uid(aUid), CMTPDataProvider::LinearOrderUid);
+    TInt dpId = KErrNotFound;
+    for (TUint index=0; index < iDataProviders.Count(); index++)
+      {
+      if (iDataProviders[index]->ImplementationUid().iUid == aUid)
+        {
+        dpId = iDataProviders[index]->DataProviderId();
+        break;
+        }
+      }
+    
+    return dpId;
     }
 
 /**
@@ -839,29 +849,36 @@ void CMTPDataProviderController::EnumerateDataProviderObjectsL(TUint aId)
     __FLOG(_L8("EnumerateDataProviderObjectsL - Entry"));
     CMTPDataProvider& dp(DataProviderL(aId));
 
-	if (IsObjectsEnumerationNeededL(dp))
-		{   
-		TBool abnormaldown = ETrue;
-		iSingletons.FrameworkConfig().GetValueL(CMTPFrameworkConfig::EAbnormalDown , abnormaldown);
-		if ( (!abnormaldown) && (dp.DataProviderConfig().BoolValue(MMTPDataProviderConfig::EObjectEnumerationPersistent)))
-			{       
-			// Initialize persistent objects store.
+    if (IsObjectsEnumerationNeededL(dp))
+        {   
+        TBool abnormaldown = ETrue;
+        iSingletons.FrameworkConfig().GetValueL(CMTPFrameworkConfig::EAbnormalDown , abnormaldown);
+        if ( (!abnormaldown) && (dp.DataProviderConfig().BoolValue(MMTPDataProviderConfig::EObjectEnumerationPersistent)))
+            {       
+            // Initialize persistent objects store.
             iSingletons.ObjectMgr().RestorePersistentObjectsL(aId);
-			}
+            }
         else
-        	{
-			// Mark all non-persistent objects.    
-			iSingletons.ObjectMgr().MarkNonPersistentObjectsL(aId,iEnumeratingStorages[0]);
-		    }
-    
-        // Initiate the data provider enumeration sequence.
-        dp.EnumerateObjectsL(iEnumeratingStorages[0]);
-		}
-	else 
-		{
-		//The DP does not need enumeration this time, so just change the state to go on.
-		EnumerationStateChangedL(dp);
-		}
+            {
+            // Mark all non-persistent objects.    
+            iSingletons.ObjectMgr().MarkNonPersistentObjectsL(aId,iEnumeratingStorages[0]);
+            }
+        if ((KMTPStorageAll == iEnumeratingStorages[0]) || (iSingletons.StorageMgr().ValidStorageId(iEnumeratingStorages[0])))
+            {
+            //Only initiate the data provider enumeration sequence for valid storage or all storage
+            dp.EnumerateObjectsL(iEnumeratingStorages[0]);
+            }
+        else
+            {
+            EnumerationStateChangedL(dp);
+            }
+       
+        }
+    else 
+        {
+        //The DP does not need enumeration this time, so just change the state to go on.
+        EnumerationStateChangedL(dp);
+        }
 
     __FLOG(_L8("EnumerateDataProviderObjectsL - Exit"));
     }

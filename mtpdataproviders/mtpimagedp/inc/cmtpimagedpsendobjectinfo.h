@@ -150,6 +150,7 @@ private:
     
     void CreateFsObjectL();
     TMTPResponseCode ErrorToMTPError(TInt err)const;
+    TBool IsTooLarge(TUint64 aObjectSize) const;
 private: // Owned
 
     /**

@@ -1,0 +1,33 @@
+/*
+* Copyright (c) 2006 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  File that exports the files belonging to 
+:                Generic HID API
+*
+*/
+
+
+#include <platform_paths.hrh>
+
+PRJ_PLATFORMS
+DEFAULT
+
+PRJ_EXPORTS
+
+../inc/hidcollection.h      MW_LAYER_PLATFORM_EXPORT_PATH(hidcollection.h)
+../inc/hidfield.h           MW_LAYER_PLATFORM_EXPORT_PATH(hidfield.h)
+../inc/hidgeneric.h         MW_LAYER_PLATFORM_EXPORT_PATH(hidgeneric.h)
+../inc/hidinterfaces.h      MW_LAYER_PLATFORM_EXPORT_PATH(hidinterfaces.h)
+../inc/hidreportroot.h      MW_LAYER_PLATFORM_EXPORT_PATH(hidreportroot.h)
+../inc/hidtranslate.h       MW_LAYER_PLATFORM_EXPORT_PATH(hidtranslate.h)
+../inc/hidvalues.h          MW_LAYER_PLATFORM_EXPORT_PATH(hidvalues.h)

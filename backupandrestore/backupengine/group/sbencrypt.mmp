@@ -25,15 +25,14 @@ VENDORID 0x70000001
 USERINCLUDE .
 MW_LAYER_SYSTEMINCLUDE_SYMBIAN
 
-USERINCLUDE ../../../../../os/ossrv/genericservices/activebackupclient/inc
-SOURCEPATH ../../../../../os/ossrv/genericservices/activebackupclient/src
-SOURCE panic.cpp
+
 
 
 USERINCLUDE . ../inc
 SOURCEPATH ../src
 SOURCE	sbencrypt.cpp
-SOURCE	sbencryptimpl.cpp
+SOURCE	sbencryptimpl.cpp 
+SOURCE  sbepanic.cpp
 
 LIBRARY euser.lib
 

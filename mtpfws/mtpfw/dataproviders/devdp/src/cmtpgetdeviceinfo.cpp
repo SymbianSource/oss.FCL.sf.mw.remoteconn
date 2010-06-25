@@ -101,6 +101,15 @@ GetDeviceInfo request handler. Build and send device info data set.
 void CMTPGetDeviceInfo::ServiceL()
     {
     __FLOG(_L8("ServiceL - Entry"));
+    
+    if (!iDpSingletons.DeviceDataStore().Enumerated())
+        {
+        __FLOG(_L8("MTPExtensionReady not ready, reschedule request")); 
+        iDpSingletons.DeviceDataStore().RegisterPendingRequest();
+        RegisterPendingRequest();
+        return;
+        }
+    
     BuildDeviceInfoL();
     SendDataL(*iDeviceInfo);
     __FLOG(_L8("ServiceL - Exit"));
@@ -156,7 +165,7 @@ void CMTPGetDeviceInfo::BuildDeviceInfoL()
     CMTPDataProviderController& dps(iSingletons.DpController());
     SetSupportedOperationsL(dps);
     SetSupportedEventsL(dps);
-    SetSupportedDevicePropertiesL();
+    SetSupportedDevicePropertiesL(dps);
     SetSupportedCaptureFormatsL(dps);
     SetSupportedPlaybackFormatsL(dps);
     
@@ -234,11 +243,42 @@ void CMTPGetDeviceInfo::SetSupportedEventsL(CMTPDataProviderController& aDpContr
 /**
 Populates the supported device properties field in the device info data set
 */       
-void CMTPGetDeviceInfo::SetSupportedDevicePropertiesL()
+void CMTPGetDeviceInfo::SetSupportedDevicePropertiesL(CMTPDataProviderController& aDpController)
 	{ 
-	__FLOG(_L8("SetSupportedDevicePropertiesL - Entry"));  
-	iDeviceInfo->SetL(CMTPTypeDeviceInfo::EDevicePropertiesSupported, 
-	iDpSingletons.DeviceDataStore().GetSupportedDeviceProperties());
+	__FLOG(_L8("SetSupportedDevicePropertiesL - Entry"));	
+    TInt count = aDpController.Count();    
+    RArray<TUint> supportedOperations(KMTPArrayGranularity);
+    CleanupClosePushL(supportedOperations);
+    const TInt32 KMTPImplementationUidDeviceDp(0x102827AF);
+    const TInt32 KMTPImplementationUidFileDp(0x102827B0);
+    const TInt32 KMTPImplementationUidProxyDp(0x102827B1);
+    const TInt32 KMTPFrameworkDpCount(3);
+    TBool bOnlyInternalDpLoad = count > KMTPFrameworkDpCount ? EFalse : ETrue;
+    while(count--)
+        {
+        TInt32 uid = aDpController.DataProviderByIndexL(count).ImplementationUid().iUid;
+        // The filter is added for licencee's request which will filtrate the symbian's internal
+        // dp's supported enhance mode operations to make licencee's dp work.
+        // Every new internal dp need add it's implementation id here to filtrate and increase
+        // the KMTPFrameworkDpCount number.
+        if ((uid == KMTPImplementationUidDeviceDp ||
+            uid == KMTPImplementationUidFileDp ||
+            uid == KMTPImplementationUidProxyDp) && !bOnlyInternalDpLoad)
+            {
+            AddToArrayWithFilterL(supportedOperations, aDpController.DataProviderByIndexL(count).SupportedCodes(EDeviceProperties));
+            }
+        else
+            {
+            AddToArrayL(supportedOperations, aDpController.DataProviderByIndexL(count).SupportedCodes(EDeviceProperties));
+            }
+        }
+
+    CMTPTypeArray* mtpOperationsArray = CMTPTypeArray::NewL(EMTPTypeAUINT16, supportedOperations);
+    CleanupStack::PopAndDestroy(&supportedOperations);
+    CleanupStack::PushL(mtpOperationsArray); //unnecessary if Set operation below does not leave,         
+    iDeviceInfo->SetL(CMTPTypeDeviceInfo::EDevicePropertiesSupported, *mtpOperationsArray);
+    CleanupStack::PopAndDestroy(mtpOperationsArray);  
+	
 	__FLOG(_L8("SetSupportedDevicePropertiesL - Exit"));  
 	}
 
@@ -376,6 +416,13 @@ void CMTPGetDeviceInfo::AddToArrayL(RArray<TUint>& aDestArray, const RArray<TUin
     TInt count(aSrcArray.Count());
     for (TInt i(0); (i < count); i++)
         {
+        // Apply filter
+        if(aSrcArray[i] == EMTPOpCodeResetDevicePropValue)
+            {
+            __FLOG_VA((_L8("Filter ignored operation: %d"), aSrcArray[i]));
+            continue;
+            }
+        
         TInt err(aDestArray.InsertInOrder(aSrcArray[i]));
         if ((err != KErrNone) && (err != KErrAlreadyExists))
             {
