@@ -1,0 +1,93 @@
+// Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
+// All rights reserved.
+// This component and the accompanying materials are made available
+// under the terms of "Eclipse Public License v1.0"
+// which accompanies this distribution, and is available
+// at the URL "http://www.eclipse.org/legal/epl-v10.html".
+//
+// Initial Contributors:
+// Nokia Corporation - initial contribution.
+//
+// Contributors:
+//
+// Description:
+//
+
+/**
+ @file
+ @internalComponent
+*/
+
+#include <comms-infras/commsdebugutility.mmh>
+
+TARGET              mtpplaybackcontroldp.dll
+TARGETTYPE          PLUGIN
+UID                 0x10009D8D 0x2002EA98
+VENDORID            0x70000001
+
+CAPABILITY          CommDD PowerMgmt ReadDeviceData WriteDeviceData TrustedUI ProtServ NetworkControl NetworkServices LocalServices ReadUserData WriteUserData
+
+MW_LAYER_SYSTEMINCLUDE_SYMBIAN
+
+USERINCLUDE           ../inc
+USERINCLUDE           ../../../mtpfws/mtpfw/dataproviders/dputility/inc
+USERINCLUDE           ../../../mtpfws/mtpfw/common/inc
+USERINCLUDE           ../../../mtpfws/mtpfw/inc
+
+USERINCLUDE           ../mtpplaybackinterface/inc
+USERINCLUDE           ../mtpplaybackmpximplementation/inc
+
+SOURCEPATH          ../src
+SOURCE              cmtppbcgetdevicepropdesc.cpp
+SOURCE              cmtppbcgetdevicepropvalue.cpp
+SOURCE              cmtppbcsetdevicepropvalue.cpp
+SOURCE              cmtppbcresetdevicepropvalue.cpp 
+SOURCE              cmtpplaybackcontroldp.cpp
+SOURCE              mtpplaybackcontroldpimplproxy.cpp
+SOURCE              mtpplaybackcontroldpprocessor.cpp
+SOURCE              cmtpplaybackmap.cpp
+SOURCE              cmtpplaybackproperty.cpp
+SOURCE              cmtppbcskip.cpp
+
+SOURCEPATH          ../mtpplaybackinterface/src
+SOURCE              mmtpplaybackinterface.cpp
+SOURCE              cmtpplaybackcommand.cpp
+SOURCE              cmtpplaybackevent.cpp
+SOURCE              cmtpplaybackparam.cpp
+
+SOURCEPATH          ../mtpplaybackmpximplementation/src
+SOURCE              cmtpplaybackcontrolimpl.cpp
+SOURCE              cmtpplaybackplaylisthelper.cpp
+SOURCE              cmtpplaybackresumehelper.cpp
+SOURCE              cmtpplaybackcommandchecker.cpp
+
+SOURCEPATH            ../src
+START RESOURCE        mtpplaybackcontroldp.rss
+TARGET                mtpplaybackcontroldp.rsc
+END
+
+// Data provider configuration resource file. 
+// The target filename corresponds to the implementation UID.
+START RESOURCE      mtpplaybackcontroldp_config.rss   
+TARGETPATH          /resource/mtp
+TARGET              2002EA99.rsc
+END
+
+
+
+
+LIBRARY	            euser.lib
+LIBRARY	            efsrv.lib
+LIBRARY	            ecom.lib
+
+LIBRARY             mtpdatatypes.lib
+LIBRARY             mtpdataproviderapi.lib
+LIBRARY             mtpdataproviderutility.lib 
+LIBRARY             mtpframework.lib
+
+LIBRARY             mpxplaybackutility.lib
+LIBRARY             mpxcommon.lib
+LIBRARY             mpxcollectionhelper.lib
+LIBRARY             mpxcollectionutility.lib
+LIBRARY             platformenv.lib
+

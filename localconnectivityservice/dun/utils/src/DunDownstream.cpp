@@ -116,10 +116,27 @@ TInt CDunDownstream::InitializeForDataPushing(
     }
 
 // ---------------------------------------------------------------------------
+// Checks if data is in queue
+// ---------------------------------------------------------------------------
+//
+TBool CDunDownstream::IsDataInQueue( const TDesC8* aDataToPush )
+    {
+    FTRACE(FPrint( _L("CDunDownstream::IsDataInQueue()" ) ));
+    if ( !iPushData.iDataPusher )
+        {
+        FTRACE(FPrint( _L("CDunDownstream::IsDataInQueue() (iPushData.iDataPusher not initialized!) complete" )));
+        return EFalse;
+        }
+    TInt foundIndex = iPushData.iDataPusher->FindEventFromQueue( aDataToPush );
+    FTRACE(FPrint( _L("CDunDownstream::IsDataInQueue() complete" ) ));
+    return ( foundIndex >= 0 ) ? ETrue : EFalse;
+    }
+
+// ---------------------------------------------------------------------------
 // Adds data to event queue and starts sending if needed
 // ---------------------------------------------------------------------------
 //
-TInt CDunDownstream::AddToQueueAndSend( const TDesC8 *aPushedData,
+TInt CDunDownstream::AddToQueueAndSend( const TDesC8* aDataToPush,
                                         MDunCompletionReporter* aCallback )
     {
     FTRACE(FPrint( _L("CDunDownstream::AddToQueueAndSend()" ) ));
@@ -129,7 +146,7 @@ TInt CDunDownstream::AddToQueueAndSend( const TDesC8 *aPushedData,
         return KErrGeneral;
         }
     // Add to event queue. If something went wrong, just return
-    TInt retTemp = iPushData.iDataPusher->AddToEventQueue( aPushedData, aCallback );
+    TInt retTemp = iPushData.iDataPusher->AddToEventQueue( aDataToPush, aCallback );
     if ( retTemp != KErrNone )
         {
         FTRACE(FPrint( _L("CDunDownstream::AddToQueueAndSend() (ERROR) complete" )));
@@ -149,6 +166,7 @@ TInt CDunDownstream::AddToQueueAndSend( const TDesC8 *aPushedData,
 TInt CDunDownstream::StartStream()
     {
     FTRACE(FPrint( _L("CDunDownstream::StartStream()" ) ));
+    FTRACE(FPrint( _L("CDunDownstream::StartStream() (buffer=0x%08X)" ), iBufferPtr ));
     // Note: only start URC here.
     // The downstream read request is started when command mode ends.
     // This is done to make the data arrive in the correct order (reply vs.
@@ -363,13 +381,13 @@ void CDunDownstream::DoCancel()
 // Gets called when outside party wants to push data to the existing stream
 // ---------------------------------------------------------------------------
 //
-TInt CDunDownstream::NotifyDataPushRequest( const TDesC8 *aPushedData,
+TInt CDunDownstream::NotifyDataPushRequest( const TDesC8* aDataToPush,
                                             MDunCompletionReporter* aCallback )
     {
     FTRACE(FPrint( _L("CDunDownstream::NotifyDataPushRequest()" )));
     // If in data mode push the reply anyway as "CONNECT" or "NO CARRIER"
     // reply could arrive before/after the command mode information itself.
-    TInt retVal = AddToQueueAndSend( aPushedData, aCallback );
+    TInt retVal = AddToQueueAndSend( aDataToPush, aCallback );
     FTRACE(FPrint( _L("CDunDownstream::NotifyDataPushRequest() complete" )));
     return retVal;
     }

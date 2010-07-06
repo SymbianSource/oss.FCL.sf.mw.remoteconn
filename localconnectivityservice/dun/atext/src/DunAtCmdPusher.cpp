@@ -103,19 +103,24 @@ void CDunAtCmdPusher::ResetData()
 // Starts AT command handling
 // ---------------------------------------------------------------------------
 //
-TInt CDunAtCmdPusher::IssueRequest( TDesC8& aCommand, TBool aNormalMode )
+TInt CDunAtCmdPusher::IssueRequest( TDesC8& aInput, TBool aNormalMode )
     {
     FTRACE(FPrint( _L("CDunAtCmdPusher::IssueRequest()") ));
     FTRACE(FPrint( _L("CDunAtCmdPusher::IssueRequest() send ATEXT:") ));
-    FTRACE(FPrintRaw(aCommand) );
+    FTRACE(FPrintRaw(aInput) );
     if ( iAtPushState!=EDunStateIdle && aNormalMode )
         {
         FTRACE(FPrint( _L("CDunAtCmdPusher::IssueRequest() (not ready) complete") ));
         return KErrNotReady;
         }
+    if ( iDownstream->IsDataInQueue(&iRecvBuffer) )
+        {
+        FTRACE(FPrint( _L("CDunAtCmdPusher::IssueRequest() (in queue!) complete") ));
+        return KErrGeneral;
+        }
     iStatus = KRequestPending;
     iAtCmdExt->HandleCommand( iStatus,
-                              aCommand,
+                              aInput,
                               iRecvBuffer,
                               iReplyLeftPckg,
                               iReplyTypePckg );
@@ -132,6 +137,7 @@ TInt CDunAtCmdPusher::IssueRequest( TDesC8& aCommand, TBool aNormalMode )
 TInt CDunAtCmdPusher::Stop()
     {
     FTRACE(FPrint( _L("CDunAtCmdPusher::Stop()") ));
+    SetEndOfCmdLine();
     if ( iAtPushState != EDunStateAtCmdPushing )
         {
         FTRACE(FPrint( _L("CDunAtCmdHandler::Stop() (not ready) complete" )));
@@ -142,7 +148,6 @@ TInt CDunAtCmdPusher::Stop()
     // idle eventually), cancel the actual operation in DoCancel()
     Cancel();
     iAtPushState = EDunStateIdle;
-    SetEndOfCmdLine();
     FTRACE(FPrint( _L("CDunAtCmdPusher::Stop() complete") ));
     return KErrNone;
     }
@@ -480,8 +485,9 @@ void CDunAtCmdPusher::NotifyDataPushComplete( TBool /*aAllPushed*/ )
     // First check if error or stop condition detected
     if ( iReplyType==EReplyTypeError || iStop )
         {
-        iCallback->NotifyEndOfCmdLineProcessing();
+        SetEndOfCmdLine();
         iAtPushState = EDunStateIdle;
+        iCallback->NotifyEndOfCmdLineProcessing();
         FTRACE(FPrint( _L("CDunAtCmdPusher::NotifyDataPushComplete() (error reply) complete") ));
         return;
         }

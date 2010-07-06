@@ -67,6 +67,10 @@
 			<module name="MTP PictBridge Data Provider">
 				<unit name="MTP_Pic_Bri" unitID="smw.mtpdps.mtppicbri" bldFile="sf\mw\remoteconn\mtpdataproviders\mtppictbridgedp\group" mrp="sf\mw\remoteconn\mtpdataproviders\mtppictbridgedp\group\mtp_pictbridgedp.mrp"/>
 			</module>
+			
+			<module name="MTP Playback Control Data Provider">
+				<unit name="MTP_PbcDP" unitID="smw.mtpdps.mtpplaybackcontrol" bldFile="sf\mw\remoteconn\mtpdataproviders\mtpplaybackcontroldp\group" mrp="sf\mw\remoteconn\mtpdataproviders\mtpplaybackcontroldp\group\mtp_playbackcontroldp.mrp"/>
+			</module>
 
 			<module name="MTP Image Data Provider">
 				<unit name="MTP_ImageDP" unitID="smw.mtptsp.mtpimagedp" bldFile="sf\mw\remoteconn\mtpdataproviders\mtpimagedp\group" mrp="sf\mw\remoteconn\mtpdataproviders\mtpimagedp\group\mtp_imagedp.mrp"/>

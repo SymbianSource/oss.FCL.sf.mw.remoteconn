@@ -99,17 +99,17 @@ TInt CDunDataPusher::SetMedia( RSocket* aSocket )
 // Adds event notification to queue
 // ---------------------------------------------------------------------------
 //
-TInt CDunDataPusher::AddToEventQueue( const TDesC8 *aPushedData,
+TInt CDunDataPusher::AddToEventQueue( const TDesC8* aDataToPush,
                                       MDunCompletionReporter* aCallback )
     {
     FTRACE(FPrint( _L("CDunDataPusher::AddToQueue()" )));
-    if ( !aPushedData || aPushedData->Length()<0 )
+    if ( !aDataToPush || aDataToPush->Length()<0 )
         {
         FTRACE(FPrint( _L("CDunDataPusher::AddToQueue() (unknown data) complete" )));
         return KErrGeneral;
         }
     // Check if identical pointer to data already exists
-    TInt foundIndex = FindEventFromQueue( aPushedData );
+    TInt foundIndex = FindEventFromQueue( aDataToPush );
     if ( foundIndex >= 0 )
         {
         FTRACE(FPrint( _L("CDunDataPusher::AddToQueue() (already exists) complete" )));
@@ -117,7 +117,7 @@ TInt CDunDataPusher::AddToEventQueue( const TDesC8 *aPushedData,
         }
     // Unique pointer -> add to event queue
     TDunDataPush dataPush;
-    dataPush.iPushedData = aPushedData;
+    dataPush.iDataToPush = aDataToPush;
     dataPush.iCallback = aCallback;
     TInt retTemp = iEventQueue.Append( dataPush );
     if ( retTemp != KErrNone )
@@ -125,7 +125,7 @@ TInt CDunDataPusher::AddToEventQueue( const TDesC8 *aPushedData,
         FTRACE(FPrint( _L("CDunDataPusher::AddToQueue() (append failed!) complete" )));
         return retTemp;
         }
-    FTRACE(FPrint( _L("CDunDataPusher::AddToQueue() complete (%d)" ), iEventQueue.Count() ));
+    FTRACE(FPrint( _L("CDunDataPusher::AddToQueue() complete (count=%d)" ), iEventQueue.Count() ));
     return KErrNone;
     }
 
@@ -133,14 +133,14 @@ TInt CDunDataPusher::AddToEventQueue( const TDesC8 *aPushedData,
 // Finds an event from queue
 // ---------------------------------------------------------------------------
 //
-TInt CDunDataPusher::FindEventFromQueue( const TDesC8 *aPushedData )
+TInt CDunDataPusher::FindEventFromQueue( const TDesC8* aDataToPush )
     {
     FTRACE(FPrint( _L("CDunDataPusher::FindEventFromQueue()" )));
     TInt i;
     TInt count = iEventQueue.Count();
     for ( i=0; i<count; i++ )
         {
-        if ( iEventQueue[i].iPushedData == aPushedData )
+        if ( iEventQueue[i].iDataToPush == aDataToPush )
             {
             FTRACE(FPrint( _L("CDunDataPusher::FindEventFromQueue() complete" )));
             return i;
@@ -154,15 +154,15 @@ TInt CDunDataPusher::FindEventFromQueue( const TDesC8 *aPushedData )
 // Stops one event in the event queue
 // ---------------------------------------------------------------------------
 //
-TInt CDunDataPusher::StopOneEvent( const TDesC8 *aPushedData )
+TInt CDunDataPusher::StopOneEvent( const TDesC8* aDataToPush )
     {
     FTRACE(FPrint( _L("CDunDataPusher::StopOneEvent()" )));
-    if ( !aPushedData )
+    if ( !aDataToPush )
         {
         FTRACE(FPrint( _L("CDunDataPusher::StopOneEvent() (unknown data) complete" )));
         return KErrGeneral;
         }
-    TInt foundIndex = FindEventFromQueue( aPushedData );
+    TInt foundIndex = FindEventFromQueue( aDataToPush );
     if ( foundIndex >= 0 )
         {
         if ( iEventIndex == foundIndex )
@@ -334,17 +334,18 @@ TInt CDunDataPusher::ManageOneEvent()
         FTRACE(FPrint( _L("CDunDataPusher::ManageOneEvent() (buffer mismatch) complete" )));
         return KErrGeneral;
         }
-    iStatus = KRequestPending;
-    const TDesC8 *pushedData = iEventQueue[iEventIndex].iPushedData;
+    const TDesC8* dataToPush = iEventQueue[iEventIndex].iDataToPush;
     if ( iComm )
         {
-        iComm->Write( iStatus, *pushedData );
-        FTRACE(FPrint( _L("CDunDataPusher::ManageOneEvent() RComm Write() requested" ) ));
+        iStatus = KRequestPending;
+        iComm->Write( iStatus, *dataToPush );
+        FTRACE(FPrint( _L("CDunDataPusher::ManageOneEvent() RComm Write() requested (buffer=0x%08X)" ), dataToPush ));
         }
     else if ( iSocket )
         {
-        iSocket->Send( *pushedData, 0, iStatus );
-        FTRACE(FPrint( _L("CDunDataPusher::ManageOneEvent() RSocket Send() requested" ) ));
+        iStatus = KRequestPending;
+        iSocket->Send( *dataToPush, 0, iStatus );
+        FTRACE(FPrint( _L("CDunDataPusher::ManageOneEvent() RSocket Send() requested (buffer=0x%08X)" ), dataToPush ));
         }
     else
         {
@@ -385,7 +386,7 @@ TInt CDunDataPusher::ProcessErrorCondition( TInt aError, TBool& aIsError )
 //
 void CDunDataPusher::RunL()
     {
-    FTRACE(FPrint( _L("CDunDataPusher::RunL()" )));
+    FTRACE(FPrint( _L("CDunDataPusher::RunL() (buffer=0x%08X)" ), iEventQueue[iEventIndex].iDataToPush ));
 
     TBool isError;
     TInt retTemp = iStatus.Int();

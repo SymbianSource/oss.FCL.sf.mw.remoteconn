@@ -343,11 +343,11 @@ TInt CDunBtListen::ReserveLocalChannel( RSocketServ& aSocketServ,
         return KErrInUse;
         }
     aChannelNum = aListenSocket.LocalPort();
-    
+
     // We try to set the Telephony and Networking bits in our service class.  If this fails we
     // ignore it, as it's better to carry on without it than to fail to start listening.
-    (void)aListenSocket.SetOpt(KBTRegisterCodService, KSolBtRFCOMM, KCoDDunServiceClass);
-    
+    aListenSocket.SetOpt(KBTRegisterCodService, KSolBtRFCOMM, KCoDDunServiceClass);
+
     retTemp = aListenSocket.Listen( KListenQueSize );
     if ( retTemp != KErrNone )
         {

@@ -54,12 +54,6 @@ SOURCE                  DunDataPusher.cpp
 SOURCE                  DunNoteHandler.cpp
 SOURCE                  DunUtils.cpp
 
-START RESOURCE          ../data/dunutils.rss
-TARGETPATH              RESOURCE_FILES_DIR
-HEADER
-LANGUAGE_IDS
-END // RESOURCE
-
 USERINCLUDE             ../inc ../../atext/inc
 
 MW_LAYER_SYSTEMINCLUDE
@@ -70,8 +64,8 @@ MW_LAYER_SYSTEMINCLUDE
 // added into the include statements (like #include <phonebook/header.h>)
 //SYSTEMINCLUDE           /epoc32/include/ecom
 SYSTEMINCLUDE           ../../../inc
+SYSTEMINCLUDE  /epoc32/include/mw/hb/hbwidgets
 
-LIBRARY                 aknnotify.lib
 LIBRARY                 bafl.lib
 #ifdef PRJ_USE_NETWORK_STUBS
 LIBRARY                 c32comm_stub.lib
@@ -85,4 +79,6 @@ LIBRARY                 esock.lib
 LIBRARY                 dunatext.lib
 LIBRARY                 efsrv.lib
 LIBRARY                 euser.lib
+LIBRARY                 HbWidgets.lib
+
 DEBUGLIBRARY            flogger.lib

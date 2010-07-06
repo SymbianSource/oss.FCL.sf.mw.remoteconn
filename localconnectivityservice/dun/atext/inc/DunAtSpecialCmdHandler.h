@@ -21,7 +21,7 @@
 #include <e32base.h>
 #include <badesca.h>
 
-const TInt KInputBufLength = (512 + 1);  // Set this the same as in KDunInputBufLength
+const TInt KLineBufLength = (512 + 1);  // Set this the same as in KDunLineBufLength
 
 /**
  *  Class for special AT command handler
@@ -98,7 +98,7 @@ private:  // data
     /**
      * Buffer for temporary AT command input
      */
-    TBuf8<KInputBufLength> iBuffer;
+    TBuf8<KLineBufLength> iBuffer;
 
     /**
      * Special commands for parsing

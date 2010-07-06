@@ -26,7 +26,7 @@
  *  Notification interface class for ECOM plugin interface status changes
  *
  *  @lib dunatext.lib
- *  @since S60 v5.0
+ *  @since TB9.2
  */
 NONSHARABLE_CLASS( MDunAtEcomListen )
     {
@@ -36,7 +36,7 @@ public:
     /**
      * Notifies about new plugin installation
      *
-     * @since S60 5.0
+     * @since TB9.2
      * @param aPluginUid UID of installed plugin
      * @return Symbian error code on error, KErrNone otherwise
      */
@@ -45,7 +45,7 @@ public:
     /**
      * Notifies about existing plugin uninstallation
      *
-     * @since S60 5.0
+     * @since TB9.2
      * @param aPluginUid UID of uninstalled plugin
      * @return Symbian error code on error, KErrNone otherwise
      */
@@ -57,7 +57,7 @@ public:
  *  Class for ECom plugin install/uninstall/version listener
  *
  *  @lib dunatext.lib
- *  @since S60 v5.0
+ *  @since TB9.2
  */
 NONSHARABLE_CLASS( CDunAtEcomListen ) : public CActive
     {
@@ -81,7 +81,7 @@ public:
      */
     static CDunAtEcomListen* NewLC( RATExt* aAtCmdExt,
                                     MDunAtEcomListen* aCallback );
-	
+
     /**
     * Destructor.
     */
@@ -90,7 +90,7 @@ public:
     /**
      * Resets data to initial values
      *
-     * @since S60 5.0
+     * @since TB9.2
      * @return None
      */
     void ResetData();
@@ -98,7 +98,7 @@ public:
     /**
      * Starts waiting for ECom plugin install/uninstall/version status changes
      *
-     * @since S60 5.0
+     * @since TB9.2
      * @return Symbian error code on error, KErrNone otherwise
      */
     TInt IssueRequest();
@@ -106,7 +106,7 @@ public:
     /**
      * Stops waiting for Ecom plugin install/uninstall/version status changes
      *
-     * @since S60 5.0
+     * @since TB9.2
      * @return Symbian error code on error, KErrNone otherwise
      */
     TInt Stop();
@@ -121,7 +121,7 @@ private:
     /**
      * Initializes this class
      *
-     * @since S60 5.0
+     * @since TB9.2
      * @return None
      */
     void Initialize();
@@ -132,7 +132,7 @@ private:
      * From CActive.
      * Gets called when plugin installed, uninstalled or changed
      *
-     * @since S60 5.0
+     * @since TB9.2
      * @return None
      */
     void RunL();
@@ -141,7 +141,7 @@ private:
      * From CActive.
      * Gets called on cancel
      *
-     * @since S60 5.0
+     * @since TB9.2
      * @return None
      */
     void DoCancel();

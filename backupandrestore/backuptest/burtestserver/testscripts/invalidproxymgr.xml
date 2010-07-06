@@ -1,0 +1,5 @@
+<?xml version="1.0" standalone="yes"?>
+<backup_registration>
+    <proxy_data_manager SID="0x00000000" />
+    <dbms_backup policy="AABBCCDD" /> 
+</backup_registration>

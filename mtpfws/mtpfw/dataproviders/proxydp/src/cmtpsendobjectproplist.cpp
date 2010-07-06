@@ -32,7 +32,7 @@ Verification data for the SendObjectPropList request
 const TMTPRequestElementInfo KMTPSendObjectPropListPolicy[] = 
     {
         {TMTPTypeRequest::ERequestParameter1, EMTPElementTypeStorageId, EMTPElementAttrWrite, 1, 0, 0}, 
-        {TMTPTypeRequest::ERequestParameter2, EMTPElementTypeObjectHandle, (EMTPElementAttrDir | EMTPElementAttrWrite), 2, KMTPHandleAll, KMTPHandleNone}
+        {TMTPTypeRequest::ERequestParameter2, EMTPElementTypeObjectHandle, EMTPElementAttrDir, 2, KMTPHandleAll, KMTPHandleNone}
     };
 
 /**

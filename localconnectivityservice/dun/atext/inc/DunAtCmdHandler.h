@@ -32,7 +32,7 @@
 const TInt KDunChSetMaxCharLen = 1;          // Only ASCII supported for now
 const TInt KDunOkBufLength     = 1+1+2+1+1;  // <CR>+<LF>+"OK"+<CR>+<LF>
 const TInt KDunErrorBufLength  = 1+1+5+1+1;  // <CR>+<LF>+"ERROR"+<CR>+<LF>
-const TInt KDunInputBufLength  = (512 + 1);  // 512 chars for command + <CR>
+const TInt KDunLineBufLength   = (512 + 1);  // 512 chars for command + <CR>
 const TInt KDunEscBufLength    = 1;          // Escape (0x1B) character
 
 class CDunAtUrcHandler;
@@ -43,7 +43,7 @@ class MDunStreamManipulator;
  *  Class used for storing information related to string conversion and parsing
  *
  *  @lib dunatext.lib
- *  @since S60 v3.2
+ *  @since TB9.2
  */
 NONSHARABLE_CLASS( TDunParseInfo )
     {
@@ -51,9 +51,10 @@ NONSHARABLE_CLASS( TDunParseInfo )
 public:
 
     /**
-     * Buffer for sending
+     * Buffer for sending to ATEXT (one command)
+     * (length is part of KDunLineBufLength)
      */
-    TBuf8<KDunInputBufLength> iSendBuffer;
+    TBuf8<KDunLineBufLength> iSendBuffer;
 
     /**
      * Conversion limit for upper case conversion.
@@ -68,7 +69,7 @@ public:
  *  Class used for AT command decoding related functionality
  *
  *  @lib dunatext.lib
- *  @since S60 v5.0
+ *  @since TB9.2
  */
 NONSHARABLE_CLASS( TDunDecodeInfo )
     {
@@ -81,12 +82,12 @@ public:
     TBool iFirstDecode;
 
     /**
-     * Index in iInputBuffer for decoding to iDecodeBuffer
+     * Index in iLineBuffer for decoding to iSendBuffer
      */
     TInt iDecodeIndex;
 
     /**
-     * Index in iInputBuffer for extended character position 
+     * Index in iLineBuffer for extended character position
      */
     TInt iExtendedIndex;
 
@@ -106,7 +107,7 @@ public:
     TBool iAssignFound;
 
     /**
-     * Flag to indicate if processing inside quotes 
+     * Flag to indicate if processing inside quotes
      */
     TBool iInQuotes;
 
@@ -114,11 +115,11 @@ public:
      * Flag to indicate if special subcommand found
      */
     TBool iSpecialFound;
-    
+
     /**
-     * Buffer for parsing
+     * Number of commands handled (for debugging purposes)
      */
-    TBuf8<KDunInputBufLength> iDecodeBuffer;
+    TBool iCmdsHandled;
 
     };
 
@@ -140,7 +141,7 @@ public:
 
     /**
      * AT command decoding related information for peeked data
-     * (not to be used if HandleNextDecodedCommand() returns EFalse)
+     * (not to be used if HandleNextSubCommand() returns EFalse)
      */
     TDunDecodeInfo iPeekInfo;
 
@@ -150,7 +151,7 @@ public:
  *  Notification interface class for command mode start/end
  *
  *  @lib dunutils.lib
- *  @since S60 v5.0
+ *  @since TB9.2
  */
 NONSHARABLE_CLASS( MDunCmdModeMonitor )
     {
@@ -160,7 +161,7 @@ public:
     /**
      * Notifies about command mode start
      *
-     * @since S60 5.0
+     * @since TB9.2
      * @return None
      */
     virtual void NotifyCommandModeStart() = 0;
@@ -168,7 +169,7 @@ public:
     /**
      * Notifies about command mode end
      *
-     * @since S60 5.0
+     * @since TB9.2
      * @return None
      */
     virtual void NotifyCommandModeEnd() = 0;
@@ -179,7 +180,7 @@ public:
  *  Notification interface class for status changes in AT command handling
  *
  *  @lib dunatext.lib
- *  @since S60 v5.0
+ *  @since TB9.2
  */
 NONSHARABLE_CLASS( MDunAtCmdStatusReporter )
     {
@@ -187,21 +188,12 @@ NONSHARABLE_CLASS( MDunAtCmdStatusReporter )
 public:
 
     /**
-     * Notifies about AT command handling start
+     * Notifies about parser's need to get more data
      *
-     * @since S60 5.0
+     * @since TB9.2
      * @return None
      */
-    virtual void NotifyAtCmdHandlingStart() = 0;
-
-    /**
-     * Notifies about AT command handling end
-     *
-     * @since S60 5.0
-     * @param aEndIndex Index to the start of next command
-     * @return None
-     */
-    virtual void NotifyAtCmdHandlingEnd( TInt aStartIndex ) = 0;
+    virtual void NotifyParserNeedsMoreData() = 0;
 
     /**
      * Notifies about editor mode reply
@@ -218,7 +210,7 @@ public:
  *  Class for AT command handler and notifier
  *
  *  @lib dunatext.lib
- *  @since S60 v5.0
+ *  @since TB9.2
  */
 NONSHARABLE_CLASS( CDunAtCmdHandler ) : public CBase,
                                         public MDunAtCmdPusher,
@@ -248,7 +240,7 @@ public:
     /**
      * Resets data to initial values
      *
-     * @since S60 5.0
+     * @since TB9.2
      * @return None
      */
     IMPORT_C void ResetData();
@@ -257,39 +249,29 @@ public:
      * Adds callback for command mode notification
      * The callback will be called when command mode starts or ends
      *
-     * @since S60 5.0
+     * @since TB9.2
      * @param aCallback Callback to call when command mode starts or ends
      * @return Symbian error code on error, KErrNone otherwise
      */
     IMPORT_C TInt AddCmdModeCallback( MDunCmdModeMonitor* aCallback );
 
     /**
-     * Parses an AT command
+     * Adds data for parsing and parses if necessary
      *
-     * @since S60 5.0
-     * @param aCommand Command to parse
-     * @param aPartialInput ETrue if partial input, EFalse otherwise
+     * @since TB9.2
+     * @param aInput Data to add for parsing
+     * @param aMoreNeeded ETrue if more data needed, EFalse otherwise
      * @return Symbian error code on error, KErrNone otherwise
      */
-    IMPORT_C TInt ParseCommand( TDesC8& aCommand, TBool& aPartialInput );
+    IMPORT_C TInt AddDataForParsing( TDesC8& aInput, TBool& aMoreNeeded );
 
     /**
      * Manages request to abort command handling
      *
-     * @since S60 5.0
+     * @since TB9.2
      * @return Symbian error code on error, KErrNone otherwise
      */
     IMPORT_C TInt ManageAbortRequest();
-
-    /**
-     * Sets end of command line marker on for the possible series of AT
-     * commands.
-     *
-     * @since S60 5.0
-     * @param aClearInput ETrue to clear input buffer, EFalse otherwise
-     * @return None
-     */
-    IMPORT_C void SetEndOfCmdLine( TBool aClearInput );
 
     /**
      * Sends a character to be echoed
@@ -305,7 +287,7 @@ public:
     /**
      * Stops sending of AT command from decode buffer
      *
-     * @since S60 3.2
+     * @since TB9.2
      * @return Symbian error code on error, KErrNone otherwise
      */
     IMPORT_C TInt Stop();
@@ -313,7 +295,7 @@ public:
     /**
      * Starts URC message handling
      *
-     * @since S60 5.0
+     * @since TB9.2
      * @return Symbian error code on error, KErrNone otherwise
      */
     IMPORT_C TInt StartUrc();
@@ -321,7 +303,7 @@ public:
     /**
      * Stops URC message handling
      *
-     * @since S60 3.2
+     * @since TB9.2
      * @return Symbian error code on error, KErrNone otherwise
      */
     IMPORT_C TInt StopUrc();
@@ -337,7 +319,7 @@ private:
     /**
      * Initializes this class
      *
-     * @since S60 3.2
+     * @since TB9.2
      * @return None
      */
     void Initialize();
@@ -345,7 +327,7 @@ private:
     /**
      * Creates plugin handlers for this class
      *
-     * @since S60 5.0
+     * @since TB9.2
      * @return None
      */
     void CreatePluginHandlersL();
@@ -353,7 +335,7 @@ private:
     /**
      * Creates the array of special commands
      *
-     * @since S60 5.0
+     * @since TB9.2
      * @return None
      */
     void CreateSpecialCommandsL();
@@ -362,7 +344,7 @@ private:
      * Recreates special command data.
      * This is done when a plugin is installed or uninstalled.
      *
-     * @since S60 5.0
+     * @since TB9.2
      * @return Symbian error code on error, KErrNone otherwise
      */
     TInt RecreateSpecialCommands();
@@ -370,7 +352,7 @@ private:
     /**
      * Gets default settings from RATExtCommon and sets them to RATExt
      *
-     * @since S60 5.0
+     * @since TB9.2
      * @return None
      */
     void GetAndSetDefaultSettingsL();
@@ -378,7 +360,7 @@ private:
     /**
      * Regenerates the reply strings based on settings
      *
-     * @since S60 5.0
+     * @since TB9.2
      * @return ETrue if quiet mode, EFalse otherwise
      */
     TBool RegenerateReplyStrings();
@@ -386,7 +368,7 @@ private:
     /**
      * Regenerates the ok reply based on settings
      *
-     * @since S60 5.0
+     * @since TB9.2
      * @return ETrue if quiet mode, EFalse otherwise
      */
     TBool RegenerateOkReply();
@@ -394,7 +376,7 @@ private:
     /**
      * Regenerates the error reply based on settings
      *
-     * @since S60 5.0
+     * @since TB9.2
      * @return ETrue if quiet mode, EFalse otherwise
      */
     TBool RegenerateErrorReply();
@@ -402,7 +384,7 @@ private:
     /**
      * Gets current mode
      *
-     * @since S60 5.0
+     * @since TB9.2
      * @param aMask Mask for current mode (only one supported)
      * @return New current mode
      */
@@ -412,7 +394,7 @@ private:
      * Instantiates one URC message handling class instance and adds it to
      * the URC message handler array
      *
-     * @since S60 3.2
+     * @since TB9.2
      * @return None
      */
     CDunAtUrcHandler* AddOneUrcHandlerL();
@@ -420,7 +402,7 @@ private:
     /**
      * Deletes all instantiated URC message handlers
      *
-     * @since S60 5.0
+     * @since TB9.2
      * @return None
      */
     void DeletePluginHandlers();
@@ -428,86 +410,131 @@ private:
     /**
      * Manages partial AT command
      *
-     * @since S60 5.0
-     * @param aCommand Command to process
-     * @param aNeedsCarriage ETrue if full and non-consumed AT command needs
-     *                       carriage return (AT command "A/")
-     * @return ETrue if no other processing needed, EFalse otherwise
+     * @since TB9.2
+     * @return ETrue if more data needed, EFalse otherwise
      */
-    TBool ManagePartialCommand( TDesC8& aCommand,
-                                TBool& aNeedsCarriage );
+    TBool ManagePartialCommand();
 
     /**
      * Echoes a command if echo is on
      *
-     * @since S60 5.0
-     * @param aDes String descriptor
+     * @since TB9.2
      * @return ETrue if echo push started, EFalse otherwise
      */
-    TBool EchoCommand( TDesC8& aDes );
+    TBool EchoCommand();
 
     /**
      * Handles backspace and cancel characters
      *
-     * @since S60 5.0
-     * @param aCommand Command to process
+     * @since TB9.2
      * @return ETrue if special character found, EFalse otherwise
      */
-    TBool HandleSpecialCharacters( TDesC8& aCommand );
+    TBool HandleSpecialCharacters();
 
     /**
-     * Appends command to input buffer
-     *
-     * @since S60 5.0
-     * @param aCommand Command to append to input buffer
-     * @param aEndFound ETrue if end (carriage return) was found
-     * @return ETrue if overflow was found, EFalse otherwise
-     */
-    TBool AppendCommandToInputBuffer( TDesC8& aCommand, TBool& aEndFound );
-
-    /**
-     * Handles next decoded command from input buffer
-     *
-     * @since S60 5.0
-     * @return ETrue if last command decoded, EFalse otherwise
-     */
-    TBool HandleNextDecodedCommand();
-
-    /**
-     * Finds the start of the next command
+     * Extracts line from input buffer to line buffer
      *
      * @since TB9.2
-     * @return Index to the next command or Symbian error code on error
+     * @return ETrue if more data needed, EFalse otherwise
      */
-    TInt FindStartOfNextCommand();
+    TBool ExtractLineFromInputBuffer();
+
+    /**
+     * Handles generic buffer management
+     * (explanation in ExtractLineFromInputBuffer())
+     *
+     * @since TB9.2
+     * @param aStartIndex Start index for buffer to be copied
+     * @param aCopyLength Length for data needed to be copied
+     * @param aCopyNeeded ETrue if buffer copy needed
+     * @return ETrue if more data needed, EFalse otherwise
+     */
+    TBool HandleGenericBufferManagement( TInt& aStartIndex,
+                                         TInt& aCopyLength,
+                                         TBool& aCopyNeeded );
+
+    /**
+     * Handles special buffer management
+     * (explanation in ExtractLineFromInputBuffer())
+     *
+     * @since TB9.2
+     * @param aStartIndex Start index for buffer to be copied
+     * @param aCopyLength Length for data needed to be copied
+     * @param aCopyNeeded ETrue if buffer copy needed
+     * @return ETrue if more data needed, EFalse otherwise
+     */
+    TBool HandleSpecialBufferManagement( TInt aStartIndex,
+                                         TInt& aCopyLength,
+                                         TBool& aCopyNeeded );
+
+    /**
+     * Skips end-of-line characters
+     *
+     * @since TB9.2
+     * @param aStartIndex Start index
+     * @return Index to end of non-end-of-line or Symbian error code on error
+     */
+    TInt SkipEndOfLineCharacters( TInt aStartIndex );
+
+    /**
+     * Skips subcommand delimiter characters
+     *
+     * @since TB9.2
+     * @param aStartIndex Start index
+     * @return Index to end of delimiter or Symbian error code on error
+     */
+    TInt SkipSubCommandDelimiterCharacters( TInt aStartIndex );
+
+    /**
+     * Finds the end of the line
+     *
+     * @since TB9.2
+     * @param aStartIndex Start index
+     * @return Index to end of line or Symbian error code on error
+     */
+    TInt FindEndOfLine( TInt aStartIndex );
+
+    /**
+     * Handles next subcommand from line buffer
+     *
+     * @since TB9.2
+     * @return ETrue if last command decoded, EFalse otherwise
+     */
+    TBool HandleNextSubCommand();
 
     /**
      * Manages end of AT command handling
      *
-     * @since S60 5.0
-     * @param aNotifyExternal Notify external parties
+     * @since TB9.2
      * @param aNotifyLocal Notify local parties
-     * @param aClearInput ETrue to clear input buffer, EFalse otherwise
+     * @param aNotifyExternal Notify external parties
      * @return None
      */
-    void ManageEndOfCmdHandling( TBool aNotifyExternal,
-                                 TBool aNotifyLocal,
-                                 TBool aClearInput );
+    void ManageEndOfCmdHandling( TBool aNotifyLocal,
+                                 TBool aNotifyExternal );
 
     /**
-     * Extracts next decoded command from input buffer to decode buffer
+     * Extracts next subcommand from line buffer to send buffer
      *
-     * @since S60 5.0
+     * @since TB9.2
      * @param aPeek Peek for the next command if ETrue, EFalse otherwise
      * @return ETrue if command extracted, EFalse otherwise
      */
-    TBool ExtractNextDecodedCommand( TBool aPeek=EFalse );
+    TBool ExtractNextSubCommand( TBool aPeek=EFalse );
 
     /**
-     * Restores old decode info. For ExtractNextDecodedCommand() when aPeeks is
+     *  Finds the start of subcommand from line buffer
+     *
+     * @since TB9.2
+     * @return Index to the next command or Symbian error code on error
+     */
+    TInt FindStartOfSubCommand();
+
+    /**
+     * Restores old decode info. For ExtractNextSubCommand() when aPeeks is
      * ETrue.
      *
-     * @since S60 5.0
+     * @since TB9.2
      * @param aPeek Peek for the next command if ETrue, EFalse otherwise
      * @param aOldInfo Old information to restore when aPeek is ETrue
      * @return None
@@ -515,39 +542,18 @@ private:
     void RestoreOldDecodeInfo( TBool aPeek, TDunDecodeInfo& aOldInfo );
 
     /**
-     * Finds end of an AT command
+     * Tests for end of AT command line
      *
-     * @since S60 5.0
-     * @param aDes String descriptor
-     * @param aStartIndex Start index for search
-     * @return Index if found, KErrNotFound otherwise
-     */
-    TInt FindEndOfCommand( TDesC8& aDes, TInt aStartIndex=0 );
-
-    /**
-     * Tests for end of AT command character
-     *
-     * @since S60 5.0
+     * @since TB9.2
      * @param aCharacter Character to test
      * @return ETrue if end of command, EFalse otherwise
      */
-    TBool IsEndOfCommand( TChar& aCharacter );
-
-    /**
-     * Finds start of a decoded AT command
-     *
-     * @since S60 5.0
-     * @param aDes String descriptor
-     * @param aStartIndex Start index for search
-     * @return Index if found, KErrNotFound otherwise
-     */
-    TInt FindStartOfDecodedCommand( TDesC8& aDes,
-                                    TInt aStartIndex );
+    TBool IsEndOfLine( TChar& aCharacter );
 
     /**
      * Checks if character is delimiter character
      *
-     * @since S60 5.0
+     * @since TB9.2
      * @param aCharacter Character to test
      * @return ETrue if delimiter character, EFalse otherwise
      */
@@ -556,7 +562,7 @@ private:
     /**
      * Checks if character is of extended group
      *
-     * @since S60 5.0
+     * @since TB9.2
      * @param aCharacter Character to test
      * @return ETrue if extended character, EFalse otherwise
      */
@@ -565,13 +571,11 @@ private:
     /**
      * Checks special command
      *
-     * @since S60 5.0
-     * @param aStartIndex Start index (doesn't change)
+     * @since TB9.2
      * @param aEndIndex End index (changes)
      * @return Symbian error code on error, KErrNone otherwise
      */
-    TBool CheckSpecialCommand( TInt aStartIndex,
-                               TInt& aEndIndex );
+    TBool CheckSpecialCommand( TInt& aEndIndex );
 
     /**
      * Saves character decode state for a found character
@@ -584,7 +588,7 @@ private:
      */
     void SaveFoundCharDecodeState( TChar aCharacter,
                                    TBool aAddSpecial=ETrue );
-    
+
     /**
      * Saves character decode state for a not found character
      *
@@ -616,7 +620,7 @@ private:
      * @return ETrue if in next command's extended border, EFalse otherwise
      */
     TBool IsExtendedBorder( TChar aCharacter, TInt aStartIndex, TInt& aEndIndex );
-    
+
     /**
      * Finds subcommand with alphanumeric borders
      *
@@ -631,16 +635,15 @@ private:
      * Finds subcommand
      *
      * @since TB9.2
-     * @param aStartIndex Start index (doesn't change)
      * @param aEndIndex End index (changes)
      * @return Symbian error code on error, KErrNone otherwise
      */
-    TInt FindSubCommand( TInt aStartIndex, TInt& aEndIndex );
+    TInt FindSubCommand( TInt& aEndIndex );
 
     /**
      * Check if "A/" command
      *
-     * @since S60 5.0
+     * @since TB9.2
      * @return ETrue if "A/" command, EFalse otherwise
      */
     TBool IsASlashCommand();
@@ -648,24 +651,15 @@ private:
     /**
      * Handles "A/" command
      *
-     * @since S60 5.0
+     * @since TB9.2
      * @return ETrue if error reply push started, EFalse otherwise
      */
     TBool HandleASlashCommand();
 
     /**
-     * Resets parse buffers
-     *
-     * @since S60 5.0
-     * @param aClearInput ETrue to clear input buffer, EFalse otherwise
-     * @return None
-     */
-    void ResetParseBuffers( TBool aClearInput=ETrue );
-
-    /**
      * Manages command mode change
      *
-     * @since S60 5.0
+     * @since TB9.2
      * @param aMode Mode to manage
      * @return ETrue if command mode change detected, EFalse otherwise
      */
@@ -674,7 +668,7 @@ private:
     /**
      * Reports command mode start/end change
      *
-     * @since S60 3.2
+     * @since TB9.2
      * @param aStart Command mode start if ETrue, end otherwise
      * @return None
      */
@@ -683,7 +677,7 @@ private:
     /**
      * Manages echo mode change
      *
-     * @since S60 5.0
+     * @since TB9.2
      * @param aMode Mode to manage
      * @return ETrue if echo mode change detected, EFalse otherwise
      */
@@ -692,7 +686,7 @@ private:
     /**
      * Manages quiet mode change
      *
-     * @since S60 5.0
+     * @since TB9.2
      * @param aMode Mode to manage
      * @return ETrue if quiet mode change detected, EFalse otherwise
      */
@@ -701,7 +695,7 @@ private:
     /**
      * Manages verbose mode change
      *
-     * @since S60 5.0
+     * @since TB9.2
      * @param aMode Mode to manage
      * @return ETrue if verbose mode change detected, EFalse otherwise
      */
@@ -710,7 +704,7 @@ private:
     /**
      * Manages character change
      *
-     * @since S60 5.0
+     * @since TB9.2
      * @param aMode Mode to manage
      * @return None
      */
@@ -742,7 +736,7 @@ private:
      * This is after all reply data for an AT command is multiplexed to the
      * downstream.
      *
-     * @since S60 5.0
+     * @since TB9.2
      * @param aError Error code of command processing completion
      * @return None
      */
@@ -752,15 +746,15 @@ private:
      * Notifies about request to stop AT command handling for the rest of the
      * command line data
      *
-     * @since S60 5.0
-     * @return Symbian error code on error, KErrNone otherwise
+     * @since TB9.2
+     * @return None
      */
-    TInt NotifyEndOfCmdLineProcessing();
+    void NotifyEndOfCmdLineProcessing();
 
     /**
      * Notifies about request to peek for the next command
      *
-     * @since S60 5.0
+     * @since TB9.2
      * @return ETrue if next command exists, EFalse otherwise
      */
     TBool NotifyNextCommandPeekRequest();
@@ -789,7 +783,7 @@ private:
      * From MDunAtEcomListen.
      * Notifies about new plugin installation
      *
-     * @since S60 5.0
+     * @since TB9.2
      * @return None
      */
     TInt NotifyPluginInstallation( TUid& aPluginUid );
@@ -798,7 +792,7 @@ private:
      * From MDunAtEcomListen.
      * Notifies about existing plugin uninstallation
      *
-     * @since S60 5.0
+     * @since TB9.2
      * @return None
      */
     TInt NotifyPluginUninstallation( TUid& aPluginUid );
@@ -809,7 +803,7 @@ private:
      * From MDunAtModeListen.
      * Gets called on mode status change
      *
-     * @since S60 5.0
+     * @since TB9.2
      * @param aMode Mode to manage
      * @return Symbian error code on error, KErrNone otherwise
      */
@@ -861,10 +855,10 @@ private:  // data
     TInt8 iBackspace;
 
     /**
-     * Current command to ParseCommand()
+     * Current input to AddDataForParsing()
      * Not own.
      */
-    TDesC8* iCommand;
+    TDesC8* iInput;
 
     /**
      * Special commands for parsing
@@ -887,14 +881,14 @@ private:  // data
     TBuf8<KDunErrorBufLength> iErrorBuffer;
 
     /**
-     * Buffer for AT command input
+     * Buffer for AT command (one line)
      */
-    TBuf8<KDunInputBufLength> iInputBuffer;
+    TBuf8<KDunLineBufLength> iLineBuffer;
 
     /**
      * Buffer for last AT command input (for "A/")
      */
-    TBuf8<KDunInputBufLength> iLastBuffer;
+    TBuf8<KDunLineBufLength> iLastBuffer;
 
     /**
      * Buffer for <ESC> command
@@ -973,7 +967,7 @@ private:  // data
     TBool iVerboseOn;
 
     /**
-     * End index for command delimiter
+     * End index for not added data in iCommand
      */
     TInt iEndIndex;
 

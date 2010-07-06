@@ -509,7 +509,7 @@ void CMTPDeviceDataStore::ConstructL()
         1.  Device friendly name.
     */
     iDeviceFriendlyNameDefault = iSingletons.FrameworkConfig().ValueL(CMTPFrameworkConfig::EDeviceFriendlyName);
-    iDeviceFriendlyName = CMTPTypeString::NewL(*iDeviceFriendlyNameDefault);
+    iDeviceFriendlyName = CMTPTypeString::NewL();
 
     //  2.  Synchronization partner name.
     iSyncPartnerNameDefault = iSingletons.FrameworkConfig().ValueL(CMTPFrameworkConfig::ESynchronizationPartnerName);

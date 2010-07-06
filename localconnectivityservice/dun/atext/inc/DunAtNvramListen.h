@@ -26,7 +26,7 @@
  *  Class for AT NVRAM status change listener
  *
  *  @lib dunatext.lib
- *  @since S60 v5.0
+ *  @since TB9.2
  */
 NONSHARABLE_CLASS( CDunAtNvramListen ) : public CActive
     {
@@ -61,7 +61,7 @@ public:
     /**
      * Resets data to initial values
      *
-     * @since S60 5.0
+     * @since TB9.2
      * @return None
      */
     void ResetData();
@@ -69,7 +69,7 @@ public:
     /**
      * Starts waiting for NVRAM status changes
      *
-     * @since S60 5.0
+     * @since TB9.2
      * @return Symbian error code on error, KErrNone otherwise
      */
     TInt IssueRequest();
@@ -77,7 +77,7 @@ public:
     /**
      * Stops waiting for NVRAM status changes
      *
-     * @since S60 5.0
+     * @since TB9.2
      * @return Symbian error code on error, KErrNone otherwise
      */
     TInt Stop();
@@ -92,7 +92,7 @@ private:
     /**
      * Initializes this class
      *
-     * @since S60 5.0
+     * @since TB9.2
      * @return None
      */
     void Initialize();
@@ -103,7 +103,7 @@ private:
      * From CActive.
      * Gets called when NVRAM has changed
      *
-     * @since S60 5.0
+     * @since TB9.2
      * @return None
      */
     void RunL();
@@ -112,7 +112,7 @@ private:
      * From CActive.
      * Gets called on cancel
      *
-     * @since S60 5.0
+     * @since TB9.2
      * @return None
      */
     void DoCancel();

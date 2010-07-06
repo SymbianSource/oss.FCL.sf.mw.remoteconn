@@ -26,7 +26,7 @@
 #include "absession.h"
 #include "absessionmap.h"
 #include "sbedataownermanager.h"
-#include <connect/panic.h>
+#include "sbepanic.h"
 #include "sblog.h"
 
 namespace conn

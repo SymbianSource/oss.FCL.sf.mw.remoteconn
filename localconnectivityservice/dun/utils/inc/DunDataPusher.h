@@ -38,7 +38,7 @@ public:
     /**
      * Data to push to the stream (not copied)
      */
-    const TDesC8 *iPushedData;
+    const TDesC8* iDataToPush;
 
     /**
      * Callback to call when data is processed by the stream
@@ -127,30 +127,30 @@ public:
      * Adds event notification to queue
      *
      * @since S60 3.2
-     * @param aPushedData Data to push to the stream (not copied)
+     * @param aDataToPush Data to push to the stream (not copied)
      * @param aCallback Callback to call when data is processed by the stream
      * @return Symbian error code on error, KErrNone otherwise
      */
-    TInt AddToEventQueue( const TDesC8 *aPushedData,
+    TInt AddToEventQueue( const TDesC8* aDataToPush,
                           MDunCompletionReporter* aCallback );
 
     /**
      * Finds an event from queue
      *
      * @since S60 5.0
-     * @param aPushedData Data to push to the stream (not copied)
+     * @param aDataToPush Data to push to the stream (not copied)
      * @return Index of found event, Symbian error code otherwise
      */
-    TInt FindEventFromQueue( const TDesC8 *aPushedData );
+    TInt FindEventFromQueue( const TDesC8* aDataToPush );
 
     /**
      * Stops one event in the event queue
      *
      * @since S60 5.0
-     * @param aPushedData Data to push to the stream (not copied)
+     * @param aDataToPush Data to push to the stream (not copied)
      * @return Symbian error code on error, KErrNone otherwise
      */
-    TInt StopOneEvent( const TDesC8 *aPushedData );
+    TInt StopOneEvent( const TDesC8* aDataToPush );
 
     /**
      * Sends queued data in round robin

@@ -77,17 +77,7 @@ public:
     TBool iDataMode;
 
     /**
-     * Flag to indicate whether AT parsing is needed or not
-     */
-    TBool iParseNeeded;
-
-    /**
-     * Flag to be set when AT command handling starts
-     */
-    TBool iHandling;
-
-    /**
-     * AT Command handler. Used if iAtParseNeeded is ETrue
+     * AT Command handler.
      */
     CDunAtCmdHandler* iAtCmdHandler;
 
@@ -270,21 +260,12 @@ private:
 // from base class MDunAtCmdStatusReporter
 
     /**
-     * Notifies about AT command handling start
+     * Notifies about parser's need to get more data
      *
-     * @since S60 5.0
+     * @since TB9.2
      * @return None
      */
-    void NotifyAtCmdHandlingStart();
-
-    /**
-     * Notifies about AT command handling end
-     *
-     * @since S60 5.0
-     * @param aEndIndex Index to the start of next command
-     * @return None
-     */
-    void NotifyAtCmdHandlingEnd( TInt aStartIndex );
+    void NotifyParserNeedsMoreData();
 
     /**
      * Notifies about editor mode reply

@@ -314,7 +314,7 @@ void CMTPImageDpGetObjectPropValue::ServiceRepresentativeSampleFormatL()
 
 void CMTPImageDpGetObjectPropValue::ServiceRepresentativeSampleSizeL()
     {
-    TUint32 representativeSampleSize;
+    TUint32 representativeSampleSize(0);
     iObjectPropertyMgr.GetPropertyL(EMTPObjectPropCodeRepresentativeSampleSize, representativeSampleSize, EFalse);
     iMTPTypeUint32.Set(representativeSampleSize);
     

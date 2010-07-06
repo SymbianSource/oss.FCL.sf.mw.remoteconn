@@ -16,19 +16,8 @@
 */
 
 
-#include <bautils.h>
-#include <featmgr.h>
-#include <aknSDData.h>
-#include <secondarydisplay/dunsecondarydisplayapi.h>
 #include "DunNoteHandler.h"
 #include "DunDebug.h"
-
-_LIT( KDunUtilsDriveSpec, "z:" );
-_LIT( KDunUtilsResourceFileName, "dunutils.rsc" );
-
-const TInt KDunCoverEnumStart     = (ECmdNone + 1);  // start after ECmdNone
-const TInt KDunPtr8toPtr16Divider = 2;               // Divider for converting
-const TInt KDunThreeItemsToPop    = 3;
 
 // ======== MEMBER FUNCTIONS ========
 
@@ -91,7 +80,6 @@ TInt CDunNoteHandler::IssueRequest()
         FTRACE(FPrint( _L("CDunNoteHandler::IssueRequest() (trapped!) complete (%d)"), retTrap));
         return retTrap;
         }
-    SetActive();
     iNoteState = EDunStateUiNoting;
     FTRACE(FPrint( _L("CDunNoteHandler::IssueRequest() complete") ));
     return KErrNone;
@@ -114,8 +102,7 @@ TInt CDunNoteHandler::Stop()
         FTRACE(FPrint( _L("CDunNoteHandler::Stop() (iNote not initialized!) complete") ));
         return KErrGeneral;
         }
-    iNote->CancelConfirmationQuery();
-    Cancel();
+    iNote->Close();
     iNoteState = EDunStateIdle;
     FTRACE(FPrint( _L("CDunNoteHandler::Stop() complete") ));
     return KErrNone;
@@ -125,8 +112,7 @@ TInt CDunNoteHandler::Stop()
 // CDunNoteHandler::CDunNoteHandler
 // ---------------------------------------------------------------------------
 //
-CDunNoteHandler::CDunNoteHandler() :
-    CActive( EPriorityStandard )
+CDunNoteHandler::CDunNoteHandler()
     {
     Initialize();
     }
@@ -138,7 +124,6 @@ CDunNoteHandler::CDunNoteHandler() :
 void CDunNoteHandler::ConstructL()
     {
     FTRACE(FPrint( _L("CDunNoteHandler::ConstructL()") ));
-    CActiveScheduler::Add( this );
     FTRACE(FPrint( _L("CDunNoteHandler::ConstructL() complete") ));
     }
 
@@ -166,83 +151,34 @@ void CDunNoteHandler::DoIssueRequestL()
         FTRACE(FPrint( _L("CDunNoteHandler::DoIssueRequestL() (ERROR) complete") ));
         User::Leave( KErrGeneral );
         }
-    HBufC16* unicodeString = NULL;
-    ReadResourceTextL( R_DUN_MAXIMUM_DIALUPS, unicodeString );
-    CAknGlobalConfirmationQuery* note = CAknGlobalConfirmationQuery::NewLC();
-    // Publish cover UI note data
-    CAknSDData* sdData = CAknSDData::NewL( KDunNoteCategory,
-                                           ECmdMaxNumber - KDunCoverEnumStart,
-                                           KNullDesC8 );
-    note->SetSecondaryDisplayData( sdData );  // ownership transferred
-    // Start to show note
-    iStatus = KRequestPending;
-    note->ShowConfirmationQueryL( iStatus,
-                                  *unicodeString,
-                                  R_AVKON_SOFTKEYS_OK_EMPTY,
-                                  R_QGN_NOTE_ERROR_ANIM,
-                                  KNullDesC,
-                                  0,
-                                  0,
-                                  CAknQueryDialog::EErrorTone );
-    CleanupStack::Pop( note );
-    delete unicodeString;
-    iNote = note;
+
+    CHbDeviceMessageBoxSymbian* messageBox =
+            CHbDeviceMessageBoxSymbian::NewL(
+                    CHbDeviceMessageBoxSymbian::EWarning);
+    CleanupStack::PushL(messageBox);
+    //ToDo: Need to use localised strings.
+    _LIT(KText, "Maximum number of dialup-connections. Dial-up failed.");
+    messageBox->SetTextL(KText);
+    messageBox->SetObserver(this);
+    messageBox->SetTimeout(0);
+    messageBox->ShowL();
+    CleanupStack::Pop(messageBox);
+    iNote = messageBox;
     FTRACE(FPrint( _L("CDunNoteHandler::DoIssueRequestL() complete") ));
     }
 
 // ---------------------------------------------------------------------------
-// Reads resource string
+// From class MHbDeviceMessageBoxObserver.
+// Gets called on dialog close.
 // ---------------------------------------------------------------------------
 //
-void CDunNoteHandler::ReadResourceTextL( TInt aResourceId, HBufC16*& aUnicode )
+void CDunNoteHandler::MessageBoxClosed(
+    const CHbDeviceMessageBoxSymbian* /*aMessageBox*/,
+    CHbDeviceMessageBoxSymbian::TButtonId /*aButton*/ )
     {
-    FTRACE(FPrint( _L("CDunNoteHandler::ReadNoteResourceL()") ));
-    // Connect to file server (for resource file reading)
-    RFs fileSession;
-    CleanupClosePushL<RFs>( fileSession );
-    User::LeaveIfError( fileSession.Connect() );
-    // Create dunutils.rsc path and file name
-    TFileName fileName;
-    fileName = KDunUtilsDriveSpec;
-    fileName += KDC_RESOURCE_FILES_DIR;
-    fileName += KDunUtilsResourceFileName;
-    // Find nearest language file for resource
-    BaflUtils::NearestLanguageFile( fileSession, fileName );
-    // Read note resource
-    RResourceFile resourceFile;
-    CleanupClosePushL<RResourceFile>( resourceFile );
-    resourceFile.OpenL( fileSession, fileName );
-    resourceFile.ConfirmSignatureL();
-    HBufC8* readBuffer = resourceFile.AllocReadLC( aResourceId );
-    // Convert read HBufC8 to HBufC16
-    const TPtrC16 ptr16(reinterpret_cast<const TUint16*>
-                       (readBuffer->Ptr()),
-                       (readBuffer->Size() / KDunPtr8toPtr16Divider) );
-    aUnicode = HBufC16::NewL( ptr16.Length() );
-    *aUnicode = ptr16;
-    CleanupStack::PopAndDestroy( KDunThreeItemsToPop );  // readBuffer, resourceFile, fileSession
-    FTRACE(FPrint( _L("CDunNoteHandler::ReadNoteResourceL() complete") ));
-    }
-
-// ---------------------------------------------------------------------------
-// From class CActive.
-// Gets called when UI note dismissed
-// ---------------------------------------------------------------------------
-//
-void CDunNoteHandler::RunL()
-    {
-    FTRACE(FPrint( _L("CDunNoteHandler::RunL()" ) ));
+    FTRACE(FPrint( _L("CDunNoteHandler::MessageBoxClosed()" ) ));
     iNoteState = EDunStateIdle;
     delete iNote;
     iNote = NULL;
-    FTRACE(FPrint( _L("CDunNoteHandler::RunL() complete" ) ));
-    }
-
-// ---------------------------------------------------------------------------
-// From class CActive.
-// Gets called on cancel
-// ---------------------------------------------------------------------------
-//
-void CDunNoteHandler::DoCancel()
-    {
+    FTRACE(FPrint( _L("CDunNoteHandler::MessageBoxClosed() complete" ) ));
     }

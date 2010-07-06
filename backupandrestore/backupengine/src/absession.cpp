@@ -26,7 +26,7 @@
 #include "sbedataownermanager.h"
 #include "sbedataowner.h"
 #include <connect/sbtypes.h>
-#include <connect/panic.h>
+#include "sbepanic.h"
 #include "sblog.h"
 
 namespace conn
@@ -425,9 +425,10 @@ namespace conn
 		iCallbackWatchdog = NULL;
 		iCallbackWatchdog = CPeriodic::NewL(EPriorityHigh);
 		TTimeIntervalMicroSeconds32 KWatchdogIntervalNone = 0;
-		iCallbackWatchdog->Start(KABCallbackWatchdogTimeout, KWatchdogIntervalNone, iWatchdogHandler);
+		iCallbackWatchdog->Start(DataOwnerL().ActiveInformation().iCallbackDelayTime, KWatchdogIntervalNone, iWatchdogHandler);
 		#endif
-
+		
+		
 		// Send the message back to the callback handler
 		iMessage.Complete(KErrNone);
 		

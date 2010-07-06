@@ -28,7 +28,7 @@ class MDunStreamManipulator;
  *  Class for AT command URC handler
  *
  *  @lib dunatext.lib
- *  @since S60 v5.0
+ *  @since TB9.2
  */
 NONSHARABLE_CLASS( CDunAtUrcHandler ) : public CActive,
                                         public MDunCompletionReporter
@@ -62,7 +62,7 @@ public:
     /**
      * Resets data to initial values
      *
-     * @since S60 5.0
+     * @since TB9.2
      * @return None
      */
     void ResetData();
@@ -70,7 +70,7 @@ public:
     /**
      * Starts waiting for an incoming URC message
      *
-     * @since S60 5.0
+     * @since TB9.2
      * @return Symbian error code on error, KErrNone otherwise
      */
     TInt IssueRequest();
@@ -78,7 +78,7 @@ public:
     /**
      * Stops waiting for an incoming URC message
      *
-     * @since S60 5.0
+     * @since TB9.2
      * @return Symbian error code on error, KErrNone otherwise
      */
     TInt Stop();
@@ -86,7 +86,7 @@ public:
     /**
      * UID of the owning plugin
      *
-     * @since S60 5.0
+     * @since TB9.2
      * @return UID of the owning plugin
      */
     TUid OwnerUid();
@@ -101,7 +101,7 @@ private:
     /**
      * Initializes this class
      *
-     * @since S60 3.2
+     * @since TB9.2
      * @return None
      */
     void Initialize();
@@ -112,7 +112,7 @@ private:
      * From CActive.
      * Gets called when URC command received
      *
-     * @since S60 3.2
+     * @since TB9.2
      * @return None
      */
     void RunL();
@@ -121,7 +121,7 @@ private:
      * From CActive.
      * Gets called on cancel
      *
-     * @since S60 3.2
+     * @since TB9.2
      * @return None
      */
     void DoCancel();
@@ -132,7 +132,7 @@ private:
      * From MDunCompletionReporter.
      * Gets called when data push is complete
      *
-     * @since S60 5.0
+     * @since TB9.2
      * @param aAllPushed ETrue if all in the queue were pushed, EFalse otherwise
      * @return None
      */

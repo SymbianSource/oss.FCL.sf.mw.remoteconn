@@ -23,11 +23,36 @@
  */
 
 /*
+ * This file has the following functionality:
+ * 1) Line buffer filler:
+ *    AddDataForParsing(), ManagePartialCommand(), ExtractLineFromInputBuffer(),
+ *    etc. This buffer is used for parsing. These functions are used for
+ *    splitter-combiner logic described below. CDunAtCmdPusher is used
+ *    separately for each element in the line buffer.
+ * 2) Parser and splitter-combiner to handle the separater elements (subcommands)
+ *    in the line buffer. When end of line is detected, iEndIndex is used to
+ *    extract the next line in iInput to the line buffer (ManageEndOfCmdHandling()
+ *    and ExtractLineFromInputBuffer()).
+ * 3) When end of iEndIndex is found (ExtractLineFromInputBuffer()), more data
+ *    is asked from CDunUpstream.
+ * Note: There is separate handling for "one character input data" and "A/"
+ * command handling which should be supported only for one line based data
+ * (ManagePartialCommand()).
+ */
+
+/*
  * The AT command handling is splitted to two parts on high level:
  * 1) Splitter: splitting the sub-commands in a command line to multiple ones
  *    for ATEXT to process.
  * 2) Combiner: combining the replies coming from ATEXT using a filter
  *    (the filter categories are explained in DunAtCmdPusher.cpp)
+ */
+
+/*
+ * Note1: This file uses AT command parsing based on heuristics.
+ * Refer to test specification if planning to change the heuristic.
+ * Note2: Input buffer management (ExtractLineFromInputBuffer()) can be tested
+ * with non-line based terminals such as HyperTerminal or Realterm.
  */
 
 #include "DunAtCmdHandler.h"
@@ -139,39 +164,38 @@ EXPORT_C TInt CDunAtCmdHandler::AddCmdModeCallback( MDunCmdModeMonitor* aCallbac
     }
 
 // ---------------------------------------------------------------------------
-// Parses an AT command
+// Adds data for parsing and parses if necessary
 // ---------------------------------------------------------------------------
 //
-EXPORT_C TInt CDunAtCmdHandler::ParseCommand( TDesC8& aCommand,
-                                              TBool& aPartialInput )
+EXPORT_C TInt CDunAtCmdHandler::AddDataForParsing( TDesC8& aInput,
+                                                   TBool& aMoreNeeded )
     {
-    FTRACE(FPrint( _L("CDunAtCmdHandler::ParseCommand()") ));
-    FTRACE(FPrint( _L("CDunAtCmdHandler::ParseCommand() received:") ));
-    FTRACE(FPrintRaw(aCommand) );
+    FTRACE(FPrint( _L("CDunAtCmdHandler::AddDataForParsing()") ));
+    FTRACE(FPrint( _L("CDunAtCmdHandler::AddDataForParsing() received (%d bytes):"), aInput.Length() ));
+    FTRACE(FPrintRaw(aInput) );
     TBool editorMode = iCmdPusher->EditorMode();
     if ( editorMode )
         {
-        // Note: return here with "no partial input" and some error to fool
+        // Note: return here with "no more data needed" and some error to fool
         // CDunUpstream into not reissuing the read request.
-        iCmdPusher->IssueRequest( aCommand, EFalse );
-        aPartialInput = EFalse;
+        iCmdPusher->IssueRequest( aInput, EFalse );
+        aMoreNeeded = EFalse;
         return KErrGeneral;
         }
-    iCommand = &aCommand;  // iCommand only for normal mode
+    iInput = &aInput;  // iInput only for normal mode
     // Manage partial AT command
-    TBool needsCarriage = ETrue;
-    TBool okToExit = ManagePartialCommand( aCommand, needsCarriage );
-    if ( okToExit )
+    TBool moreNeeded = ManagePartialCommand();
+    if ( moreNeeded )
         {
-        FTRACE(FPrint( _L("CDunAtCmdHandler::ParseCommand() (ok to exit) complete") ));
-        aPartialInput = ETrue;
+        aMoreNeeded = ETrue;
+        FTRACE(FPrint( _L("CDunAtCmdHandler::AddDataForParsing() (more partial) complete") ));
         return KErrNone;
         }
     if ( iHandleState != EDunStateIdle )
         {
-        aPartialInput = EFalse;
-        ResetParseBuffers();
-        FTRACE(FPrint( _L("CDunAtCmdHandler::ParseCommand() (not ready) complete") ));
+        aMoreNeeded = EFalse;
+        ManageEndOfCmdHandling( EFalse, EFalse );
+        FTRACE(FPrint( _L("CDunAtCmdHandler::AddDataForParsing() (not ready) complete") ));
         return KErrNotReady;
         }
     TBool pushStarted = HandleASlashCommand();
@@ -180,20 +204,21 @@ EXPORT_C TInt CDunAtCmdHandler::ParseCommand( TDesC8& aCommand,
         // Note: return here with "partial input" status to fool CDunUpstream
         // into reissuing the read request. The AT command has not really
         // started yet so this is necessary.
-        aPartialInput = ETrue;
-        ResetParseBuffers();
-        FTRACE(FPrint( _L("CDunAtCmdHandler::ParseCommand() (A/) complete") ));
+        aMoreNeeded = ETrue;
+        ManageEndOfCmdHandling( EFalse, EFalse );
+        FTRACE(FPrint( _L("CDunAtCmdHandler::AddDataForParsing() (A/) complete") ));
         return KErrNone;
         }
-    FTRACE(FPrint( _L("CDunAtCmdHandler::ParseCommand() received total:") ));
-    FTRACE(FPrintRaw(iInputBuffer) );
     iHandleState = EDunStateAtCmdHandling;
-    iUpstream->NotifyAtCmdHandlingStart();
     iDecodeInfo.iFirstDecode = ETrue;
     iDecodeInfo.iDecodeIndex = 0;
-    HandleNextDecodedCommand();
-    FTRACE(FPrint( _L("CDunAtCmdHandler::ParseCommand() complete") ));
-    aPartialInput = EFalse;
+    iDecodeInfo.iPrevExists = EFalse;
+    iParseInfo.iLimit = KErrNotFound;
+    iParseInfo.iSendBuffer.Zero();
+    iEditorModeInfo.iContentFound = EFalse;
+    HandleNextSubCommand();
+    FTRACE(FPrint( _L("CDunAtCmdHandler::AddDataForParsing() complete") ));
+    aMoreNeeded = EFalse;
     return KErrNone;
     }
 
@@ -208,17 +233,6 @@ EXPORT_C TInt CDunAtCmdHandler::ManageAbortRequest()
     TInt retVal = iCmdPusher->ManageAbortRequest();
     FTRACE(FPrint( _L("CDunAtCmdHandler::ManageAbortRequest() complete") ));
     return retVal;
-    }
-
-// ---------------------------------------------------------------------------
-// Sets end of command line marker on for the possible series of AT commands.
-// ---------------------------------------------------------------------------
-//
-EXPORT_C void CDunAtCmdHandler::SetEndOfCmdLine( TBool aClearInput )
-    {
-    FTRACE(FPrint( _L("CDunAtCmdHandler::SetEndOfCmdLine()") ));
-    ManageEndOfCmdHandling( EFalse, ETrue, aClearInput );
-    FTRACE(FPrint( _L("CDunAtCmdHandler::SetEndOfCmdLine() complete") ));
     }
 
 // ---------------------------------------------------------------------------
@@ -250,10 +264,10 @@ EXPORT_C TInt CDunAtCmdHandler::Stop()
     iCmdPusher->Stop();
     // The line below is used in the case when this function is called by
     // CDunUpstream as a result of "data mode ON" change notification.
-    // In this case it is possible that HandleNextDecodedCommand() returns
-    // without resetting the iInputBuffer because of the way it checks the
+    // In this case it is possible that HandleNextSubCommand() returns
+    // without resetting the iSendBuffer because of the way it checks the
     // iHandleState.
-    ManageEndOfCmdHandling( EFalse, ETrue, ETrue );
+    ManageEndOfCmdHandling( ETrue, EFalse );
     FTRACE(FPrint( _L("CDunAtCmdHandler::Stop() complete") ));
     return KErrNone;
     }
@@ -374,7 +388,7 @@ void CDunAtCmdHandler::Initialize()
     iCarriageReturn = 0;
     iLineFeed = 0;
     iBackspace = 0;
-    iCommand = NULL;
+    iInput = NULL;
     iDecodeInfo.iFirstDecode = ETrue;
     iDecodeInfo.iDecodeIndex = KErrNotFound;
     iDecodeInfo.iExtendedIndex = KErrNotFound;
@@ -383,6 +397,7 @@ void CDunAtCmdHandler::Initialize()
     iDecodeInfo.iAssignFound = EFalse;
     iDecodeInfo.iInQuotes = EFalse;
     iDecodeInfo.iSpecialFound = EFalse;
+    iDecodeInfo.iCmdsHandled = 0;
     iEditorModeInfo.iContentFound = EFalse;
     iCmdPusher = NULL;
     iEcomListen = NULL;
@@ -435,19 +450,19 @@ void CDunAtCmdHandler::CreateSpecialCommandsL()
     TBool firstSearch = ETrue;
     for ( ;; )
         {
-        retTemp = iAtCmdExt.GetNextSpecialCommand( iInputBuffer, firstSearch );
+        // Let's borrow iLineBuffer for this purpose
+        retTemp = iAtCmdExt.GetNextSpecialCommand( iLineBuffer, firstSearch );
         if ( retTemp != KErrNone )
             {
             break;
             }
-        HBufC8* specialCmd = HBufC8::NewMaxLC( iInputBuffer.Length() );
-        TPtr8 specialCmdPtr = specialCmd->Des();
-        specialCmdPtr.Copy( iInputBuffer );
-        specialCmdPtr.UpperCase();
+        TInt lineLength = iLineBuffer.Length();
+        HBufC8* specialCmd = HBufC8::NewMaxLC( lineLength );
+        *specialCmd = iLineBuffer;
         iSpecials.AppendL( specialCmd );
         CleanupStack::Pop( specialCmd );
         }
-    iInputBuffer.Zero();
+    iLineBuffer.Zero();
     FTRACE(FPrint( _L("CDunAtCmdHandler::CreateSpecialCommandsL() complete") ));
     }
 
@@ -512,6 +527,11 @@ TBool CDunAtCmdHandler::RegenerateReplyStrings()
 TBool CDunAtCmdHandler::RegenerateOkReply()
     {
     FTRACE(FPrint( _L("CDunAtCmdHandler::RegenerateOkReply()") ));
+    if ( iDownstream->IsDataInQueue(&iOkBuffer) )
+        {
+        FTRACE(FPrint( _L("CDunAtCmdHandler::RegenerateOkReply() (in queue!) complete") ));
+        return iQuietOn;
+        }
     iOkBuffer.Zero();
     if ( iQuietOn )
         {
@@ -544,6 +564,11 @@ TBool CDunAtCmdHandler::RegenerateOkReply()
 TBool CDunAtCmdHandler::RegenerateErrorReply()
     {
     FTRACE(FPrint( _L("CDunAtCmdHandler::RegenerateErrorReply()") ));
+    if ( iDownstream->IsDataInQueue(&iErrorBuffer) )
+        {
+        FTRACE(FPrint( _L("CDunAtCmdHandler::RegenerateErrorReply() (in queue!) complete") ));
+        return iQuietOn;
+        }
     iErrorBuffer.Zero();
     if ( iQuietOn )
         {
@@ -634,57 +659,39 @@ void CDunAtCmdHandler::DeletePluginHandlers()
 // Manages partial AT command
 // ---------------------------------------------------------------------------
 //
-TBool CDunAtCmdHandler::ManagePartialCommand( TDesC8& aCommand,
-                                              TBool& aNeedsCarriage )
+TBool CDunAtCmdHandler::ManagePartialCommand()
     {
     FTRACE(FPrint( _L("CDunAtCmdHandler::ManagePartialCommand()") ));
-    aNeedsCarriage = ETrue;
-    // Check length of command
-    if ( aCommand.Length() == 0 )
-        {
-        FTRACE(FPrint( _L("CDunAtCmdHandler::ManagePartialCommand() (length zero) complete") ));
-        return ETrue;
-        }
     // Check one character (or unit) based input data
-    if ( aCommand.Length() == KDunChSetMaxCharLen )
+    if ( iInput->Length() == KDunChSetMaxCharLen )
         {
-        EchoCommand( aCommand );
+        EchoCommand();
         // Handle backspace and cancel characters
-        TBool found = HandleSpecialCharacters( aCommand );
+        TBool found = HandleSpecialCharacters();
         if ( found )
             {
             FTRACE(FPrint( _L("CDunAtCmdHandler::ManagePartialCommand() (special) complete") ));
             return ETrue;
             }
         }
-    TBool endFound = EFalse;
-    TBool overflow = AppendCommandToInputBuffer( aCommand, endFound );
-    if ( overflow )
+    TBool moreNeeded = ExtractLineFromInputBuffer();
+    if ( moreNeeded )
         {
-        // Overflow occurred so return ETrue (consumed) to skip all the rest
-        // characters until carriage return is found
-        FTRACE(FPrint( _L("CDunAtCmdHandler::ManagePartialCommand() (overflow) complete") ));
-        return ETrue;
+        // More data is not needed with "A/" (no carriage return), check that
+        // special case here, otherwise continue processing
+        if ( !IsASlashCommand() )
+            {
+            FTRACE(FPrint( _L("CDunAtCmdHandler::ManagePartialCommand() (more) complete") ));
+            return ETrue;
+            }
         }
     // If something went wrong, do nothing (return consumed)
-    if ( iInputBuffer.Length() <= 0 )
+    if ( iLineBuffer.Length() <= 0 )
         {
         FTRACE(FPrint( _L("CDunAtCmdHandler::ManagePartialCommand() (length) complete") ));
         return ETrue;
         }
-    // If "A/", no carriage return is needed, check that now
-    if ( IsASlashCommand() )
-        {
-        aNeedsCarriage = EFalse;
-        FTRACE(FPrint( _L("CDunAtCmdHandler::ManagePartialCommand() (A/) complete") ));
-        return EFalse;
-        }
-    // For other commands and if no end, just return with consumed
-    if ( !endFound )
-        {
-        FTRACE(FPrint( _L("CDunAtCmdHandler::ManagePartialCommand() (void) complete") ));
-        return ETrue;
-        }
+    // For other commands, just return with consumed
     FTRACE(FPrint( _L("CDunAtCmdHandler::ManagePartialCommand() complete") ));
     return EFalse;
     }
@@ -693,17 +700,22 @@ TBool CDunAtCmdHandler::ManagePartialCommand( TDesC8& aCommand,
 // Echoes a command if echo is on
 // ---------------------------------------------------------------------------
 //
-TBool CDunAtCmdHandler::EchoCommand( TDesC8& aDes )
+TBool CDunAtCmdHandler::EchoCommand()
     {
     FTRACE(FPrint( _L("CDunAtCmdHandler::EchoCommand()") ));
-    if ( aDes.Length() > KDunChSetMaxCharLen )
+    if ( iInput->Length() > KDunChSetMaxCharLen )
         {
         FTRACE(FPrint( _L("CDunAtCmdHandler::EchoCommand() (wrong length) complete") ));
         return EFalse;
         }
     if ( iEchoOn )
         {
-        iEchoBuffer.Copy( aDes );
+        if ( iDownstream->IsDataInQueue(&iEchoBuffer) )
+            {
+            FTRACE(FPrint( _L("CDunAtCmdHandler::EchoCommand() (in queue!) complete") ));
+            return EFalse;
+            }
+        iEchoBuffer.Copy( *iInput );
         iDownstream->NotifyDataPushRequest( &iEchoBuffer, NULL );
         FTRACE(FPrint( _L("CDunAtCmdHandler::EchoCommand() complete") ));
         return ETrue;
@@ -716,27 +728,27 @@ TBool CDunAtCmdHandler::EchoCommand( TDesC8& aDes )
 // Handles backspace and cancel characters
 // ---------------------------------------------------------------------------
 //
-TBool CDunAtCmdHandler::HandleSpecialCharacters( TDesC8& aCommand )
+TBool CDunAtCmdHandler::HandleSpecialCharacters()
     {
     FTRACE(FPrint( _L("CDunAtCmdHandler::HandleSpecialCharacters()") ));
-    if ( aCommand.Length() != KDunChSetMaxCharLen )
+    if ( iInput->Length() != KDunChSetMaxCharLen )
         {
         FTRACE(FPrint( _L("CDunAtCmdHandler::HandleSpecialCharacters() (wrong length) complete") ));
         return EFalse;
         }
-    if ( aCommand[0] == iBackspace )
+    if ( (*iInput)[0] == iBackspace )
         {
-        TInt bufferLength = iInputBuffer.Length();
-        if ( bufferLength > 0 )
+        TInt lineLength = iLineBuffer.Length();
+        if ( lineLength > 0 )
             {
-            iInputBuffer.SetLength( bufferLength-1 );
+            iLineBuffer.SetLength( lineLength-1 );
             }
         FTRACE(FPrint( _L("CDunAtCmdHandler::HandleSpecialCharacters() (backspace) complete") ));
         return ETrue;
         }
-    if ( aCommand[0] == KDunCancel )
+    if ( (*iInput)[0] == KDunCancel )
         {
-        ResetParseBuffers();  // More processing here?
+        ManageEndOfCmdHandling( EFalse, EFalse );
         FTRACE(FPrint( _L("CDunAtCmdHandler::HandleSpecialCharacters() (cancel) complete") ));
         return ETrue;
         }
@@ -745,167 +757,395 @@ TBool CDunAtCmdHandler::HandleSpecialCharacters( TDesC8& aCommand )
     }
 
 // ---------------------------------------------------------------------------
-// Appends command to parse buffer
+// Extracts line from input buffer to line buffer
 // ---------------------------------------------------------------------------
 //
-TBool CDunAtCmdHandler::AppendCommandToInputBuffer( TDesC8& aCommand,
-                                                    TBool& aEndFound )
+TBool CDunAtCmdHandler::ExtractLineFromInputBuffer()
     {
-    FTRACE(FPrint( _L("CDunAtCmdHandler::AppendCommandToInputBuffer()") ));
-    aEndFound = EFalse;
-    TInt cmdBufIndex = 0;
-    TInt cmdBufLim = aCommand.Length();
-    while ( cmdBufIndex < cmdBufLim )
+    FTRACE(FPrint( _L("CDunAtCmdHandler::ExtractLineFromInputBuffer()") ));
+    FTRACE(FPrint( _L("CDunAtCmdHandler::ExtractLineFromInputBuffer() before (%d bytes):"), iLineBuffer.Length() ));
+    FTRACE(FPrintRaw(iLineBuffer) );
+    // Case1: If no data in iLineBuffer and end-of-line character in iInputBuffer[start]:
+    //     - Skip end-of-line characters, find start-of-line condition, find end-of-line character
+    //     - If partial line found (start-of-line condition and no end-of-line character):
+    //           - Save partial line to iLineBuffer
+    //           - Set iEndIndex to end of iInputBuffer
+    //     - If full line found (start-of-line condition and end-of-line character):
+    //           - Save full line to iLineBuffer
+    //           - Skip multiple end-of-line characters until next start-of-line
+    //             condition or end of iInputBuffer -> save this position to iEndIndex
+    // Case2: If no data in iLineBuffer and non-end-of-line character in iInputBuffer[start]:
+    //     - Find end-of-line character
+    //     - If partial line found (no end-of-line character):
+    //           - Save partial line to iLineBuffer
+    //           - Set iEndIndex to end of iLineBuffer
+    //     - If full line found (end-of-line character):
+    //           - Save full line to iLineBuffer
+    //           - Skip multiple end-of-line characters until next start-of-line
+    //             condition or end of iInputBuffer -> save this position to iEndIndex
+    // Case3: If data in iLineBuffer and end-of-line character in iInputBuffer[start]:
+    //     - Skip end-of-line characters
+    //     - Keep string currently in iLineBuffer
+    //     - Skip end-of-line characters until non-end-of-line or end of
+    //       iInputBuffer -> save this position to iEndIndex
+    // Case4: If data in iLineBuffer and non-end-of-line character in iInputBuffer[start]:
+    //     - Processed the same way as Case1, however "Skip end-of-line characters" does
+    //       not have any effect
+    if ( iInput->Length() <= 0 )
         {
-        if ( iInputBuffer.Length() == iInputBuffer.MaxLength() )
+        FTRACE(FPrint( _L("CDunAtCmdHandler::ExtractLineFromInputBuffer() (wrong length) complete") ));
+        return ETrue;
+        }
+    TBool moreNeeded = ETrue;
+    TBool copyNeeded = EFalse;
+    TInt copyLength = KErrNotFound;
+    TInt lineLength = iLineBuffer.Length();
+    TInt lineMaxLength = iLineBuffer.MaxLength();
+    TInt freeLineSpace = lineMaxLength - lineLength;
+    TInt inputLength = iInput->Length();
+    TInt startIndex = ( iEndIndex>=0 ) ? iEndIndex : 0;
+    if ( startIndex >= inputLength )
+        {
+        iEndIndex = KErrNotFound;
+        FTRACE(FPrint( _L("CDunAtCmdHandler::ExtractLineFromInputBuffer() (input end) complete") ));
+        return ETrue;
+        }
+    // Cases here:
+    // Case1: If no data in iLineBuffer and end-of-line character in iInputBuffer[start]
+    // Case2: If no data in iLineBuffer and non-end-of-line character in iInputBuffer[start]
+    // Case3: If data in iLineBuffer and end-of-line character in iInputBuffer[start]
+    // Case4: If data in iLineBuffer and non-end-of-line character in iInputBuffer[start]
+    // Summary: Cases 1, 2 and 4 can be combined. Case 3 needs a separate check.
+    TChar character = (*iInput)[startIndex];
+    TBool endOfLine = IsEndOfLine(character);
+    if ( lineLength>0 && endOfLine )
+        {
+        moreNeeded = HandleSpecialBufferManagement( startIndex,
+                                                    copyLength,
+                                                    copyNeeded );
+        }
+    else
+        {
+        moreNeeded = HandleGenericBufferManagement( startIndex,
+                                                    copyLength,
+                                                    copyNeeded );
+        }
+    if ( copyNeeded && copyLength>0 )
+        {
+        // Check the case copyLength does not fit to iLineBuffer
+        // This case should be handled by returning "more data needed"
+        // Also reset the iLineBuffer to ensure the handling doesn't stuck
+        // for rest of the commands (usability case)
+        if ( copyLength > freeLineSpace )
             {
-            // 1) If output is full and end found from input
-            //    -> reset buffers and overflow found
-            // 2) If output is full and end not found from input
-            //    -> don't reset buffers and overflow found
-            TInt foundIndex = FindEndOfCommand( aCommand );
-            if ( foundIndex >= 0 )
-                {
-                aEndFound = ETrue;
-                ResetParseBuffers();
-                FTRACE(FPrint( _L("CDunAtCmdHandler::AppendCommandToInputBuffer() (reset) complete") ));
-                }
-            FTRACE(FPrint( _L("CDunAtCmdHandler::AppendCommandToInputBuffer() (overflow) complete") ));
+            iLineBuffer.Zero();
+            iEndIndex = KErrNotFound;
+            FTRACE(FPrint( _L("CDunAtCmdHandler::ExtractLineFromInputBuffer() after (%d bytes):"), iLineBuffer.Length() ));
+            FTRACE(FPrintRaw(iLineBuffer) );
+            FTRACE(FPrint( _L("CDunAtCmdHandler::ExtractLineFromInputBuffer() (overflow) complete") ));
             return ETrue;
             }
-        TChar character = aCommand[cmdBufIndex];
-        if ( IsEndOfCommand(character) )
+        iLineBuffer.Append( &(*iInput)[startIndex], copyLength );
+        FTRACE(FPrint( _L("CDunAtCmdHandler::ExtractLineFromInputBuffer() after (%d bytes):"), iLineBuffer.Length() ));
+        FTRACE(FPrintRaw(iLineBuffer) );
+        }
+    if ( moreNeeded )
+        {
+        iEndIndex = KErrNotFound;
+        FTRACE(FPrint( _L("CDunAtCmdHandler::ExtractLineFromInputBuffer() (more needed) complete") ));
+        return ETrue;
+        }
+    // As a last step adjust the possible multiple IsDelimiterCharacter()
+    // characters and set length of iLineBuffer. Leave iEndIndex untouched.
+    lineLength = iLineBuffer.Length();
+    for ( TInt i=lineLength-1; i>=0; i-- )
+        {
+        TChar character = iLineBuffer[i];
+        if ( !IsDelimiterCharacter(character) )
             {
-            aEndFound = ETrue;
-            iEndIndex = cmdBufIndex;
+            iLineBuffer.SetLength( i + 1 );
+            FTRACE(FPrint( _L("CDunAtCmdHandler::ExtractLineFromInputBuffer() after (%d bytes):"), iLineBuffer.Length() ));
+            FTRACE(FPrintRaw(iLineBuffer) );
             break;
             }
-        iInputBuffer.Append( aCommand[cmdBufIndex] );
-        cmdBufIndex++;
         }
-    FTRACE(FPrint( _L("CDunAtCmdHandler::AppendCommandToInputBuffer() complete") ));
+    FTRACE(FPrint( _L("CDunAtCmdHandler::ExtractLineFromInputBuffer() (line found) complete") ));
     return EFalse;
     }
 
 // ---------------------------------------------------------------------------
-// Handles next decoded command from input buffer
+// Handles generic buffer management
+// (explanation in ExtractLineFromInputBuffer())
 // ---------------------------------------------------------------------------
 //
-TBool CDunAtCmdHandler::HandleNextDecodedCommand()
+TBool CDunAtCmdHandler::HandleGenericBufferManagement( TInt& aStartIndex,
+                                                       TInt& aCopyLength,
+                                                       TBool& aCopyNeeded )
     {
-    FTRACE(FPrint( _L("CDunAtCmdHandler::HandleNextDecodedCommand()") ));
-    if ( iHandleState != EDunStateAtCmdHandling )
+    FTRACE(FPrint( _L("CDunAtCmdHandler::HandleGenericBufferManagement()") ));
+    TInt inputLength = iInput->Length();
+    TInt currentIndex = SkipEndOfLineCharacters( aStartIndex );
+    if ( currentIndex >= inputLength )
         {
-        FTRACE(FPrint( _L("CDunAtCmdHandler::HandleNextDecodedCommand() (not ready) complete") ));
+        // No data in iLineBuffer and only end-of-lines in new buffer
+        // return with "need more data"
+        iEndIndex = inputLength;
+        aCopyLength = 0;
+        aCopyNeeded = EFalse;
+        FTRACE(FPrint( _L("CDunAtCmdHandler::HandleGenericBufferManagement() (new end for old no data) complete") ));
         return ETrue;
         }
-    TBool extracted = ExtractNextDecodedCommand();
-    if ( !extracted )
+    // No data in iLineBuffer and non-end-of-line character found
+    // Try to find the first start-of-line condition
+    TInt lineLength = iLineBuffer.Length();
+    if ( lineLength == 0 )
         {
-        ManageEndOfCmdHandling( ETrue, ETrue, ETrue );
-        FTRACE(FPrint( _L("CDunAtCmdHandler::HandleNextDecodedCommand() (last) complete") ));
+        currentIndex = SkipSubCommandDelimiterCharacters( aStartIndex );
+        if ( currentIndex >= inputLength )
+            {
+            // No data in iLineBuffer and only end-of-lines+delimiter in new buffer
+            // return with "need more data"
+            iEndIndex = inputLength;
+            aCopyLength = 0;
+            aCopyNeeded = EFalse;
+            FTRACE(FPrint( _L("CDunAtCmdHandler::HandleGenericBufferManagement() (new end+delim for old no data) complete") ));
+            return ETrue;
+            }
+        }
+    aStartIndex = currentIndex;
+    // No data in iLineBuffer and other than end-of-line or delimiter character found
+    // Variable currentIndex is now the start of new command
+    // Next try to find the end of the command
+    TInt endIndex = FindEndOfLine( aStartIndex );
+    if ( endIndex >= inputLength )
+        {
+        // No data in iLineBuffer and start of command found without end
+        // return with "need more data"
+        iEndIndex = inputLength;
+        aCopyLength = inputLength - aStartIndex;
+        aCopyNeeded = ETrue;
+        FTRACE(FPrint( _L("CDunAtCmdHandler::HandleGenericBufferManagement() (start but no end for old no data) complete") ));
         return ETrue;
         }
-    // Next convert the decoded AT command to uppercase
-    // Don't check for case status -> let mixed cases pass
-    iParseInfo.iSendBuffer.Copy( iDecodeInfo.iDecodeBuffer );
-    TInt maxLength = iParseInfo.iSendBuffer.MaxLength();
-    TPtr8 upperDes( &iParseInfo.iSendBuffer[0], iParseInfo.iLimit, maxLength );
-    upperDes.UpperCase();
-    // Next always send the command to ATEXT
-    iCmdPusher->IssueRequest( iParseInfo.iSendBuffer );
-    FTRACE(FPrint( _L("CDunAtCmdHandler::HandleNextDecodedCommand() complete") ));
+    // No data in iLineBuffer and end-of-line character found
+    // Try to skip possible multiple end-of-line characters
+    currentIndex = SkipEndOfLineCharacters( endIndex );
+    // Variable currentIndex is now either start of next command or end of iInput
+    // Note that this requires that Case 2 must skip the possible IsDelimiterCharacter()s
+    iEndIndex = currentIndex;
+    aCopyLength = endIndex - aStartIndex;
+    aCopyNeeded = ETrue;
+    FTRACE(FPrint( _L("CDunAtCmdHandler::HandleGenericBufferManagement() (line found) complete") ));
     return EFalse;
     }
 
 // ---------------------------------------------------------------------------
-// Finds the start of the next command
+// Handles special buffer management
+// (explanation in ExtractLineFromInputBuffer())
 // ---------------------------------------------------------------------------
 //
-TInt CDunAtCmdHandler::FindStartOfNextCommand()
+TBool CDunAtCmdHandler::HandleSpecialBufferManagement( TInt aStartIndex,
+                                                       TInt& aCopyLength,
+                                                       TBool& aCopyNeeded )
     {
-    FTRACE(FPrint( _L("CDunAtCmdHandler::FindStartOfNextCommand()") ));
-    // Note: here we need to avoid internal recursion when parsing the
-    // multiple IsEndOfCommand() and IsDelimiterCharacter() markers inside the
-    // same upstream block.
-    // Skip all the extra markers except the one we already know to exist.
-    TInt i;
-    TInt startVal = iEndIndex + 1;
-    TInt foundIndex = KErrNotFound;
-    TInt count = iCommand->Length();
-    for ( i=startVal; i<count; i++ )
+    FTRACE(FPrint( _L("CDunAtCmdHandler::HandleSpecialBufferManagement()") ));
+    TInt currentIndex = SkipEndOfLineCharacters( aStartIndex );
+    // Variable currentIndex is now either start of next command or end of iInput
+    iEndIndex = currentIndex;
+    aCopyLength = 0;
+    aCopyNeeded = EFalse;
+    FTRACE(FPrint( _L("CDunAtCmdHandler::HandleSpecialBufferManagement() complete") ));
+    return EFalse;
+    }
+
+// ---------------------------------------------------------------------------
+// Skips end-of-line characters
+// ---------------------------------------------------------------------------
+//
+TInt CDunAtCmdHandler::SkipEndOfLineCharacters( TInt aStartIndex )
+    {
+    FTRACE(FPrint( _L("CDunAtCmdHandler::SkipEndOfLineCharacters()") ));
+    TInt foundIndex = iInput->Length();
+    TInt inputLength = foundIndex;
+    for ( TInt i=aStartIndex; i<inputLength; i++ )
         {
-        TChar character = (*iCommand)[i];
-        if ( !(IsEndOfCommand(character)||IsDelimiterCharacter(character)) )
+        TChar character = (*iInput)[i];
+        if ( !IsEndOfLine(character) )
             {
             foundIndex = i;
             break;
             }
         }
-    FTRACE(FPrint( _L("CDunAtCmdHandler::FindStartOfNextCommand() complete") ));
+    FTRACE(FPrint( _L("CDunAtCmdHandler::SkipEndOfLineCharacters() complete") ));
     return foundIndex;
+    }
+
+// ---------------------------------------------------------------------------
+// Skips subcommand delimiter characters
+// ---------------------------------------------------------------------------
+//
+TInt CDunAtCmdHandler::SkipSubCommandDelimiterCharacters( TInt aStartIndex )
+    {
+    FTRACE(FPrint( _L("CDunAtCmdHandler::SkipSubCommandDelimiterCharacters()") ));
+    TInt inputLength = iInput->Length();
+    TInt foundIndex = inputLength;
+    for ( TInt i=aStartIndex; i<inputLength; i++ )
+        {
+        TChar character = (*iInput)[i];
+        if ( !IsDelimiterCharacter(character) )
+            {
+            foundIndex = i;
+            break;
+            }
+        }
+    FTRACE(FPrint( _L("CDunAtCmdHandler::SkipSubCommandDelimiterCharacters() complete") ));
+    return foundIndex;
+    }
+
+// ---------------------------------------------------------------------------
+// Finds the end of the line
+// ---------------------------------------------------------------------------
+//
+TInt CDunAtCmdHandler::FindEndOfLine( TInt aStartIndex )
+    {
+    FTRACE(FPrint( _L("CDunAtCmdHandler::FindEndOfLine()") ));
+    TInt inputLength = iInput->Length();
+    TInt foundIndex = inputLength;
+    for ( TInt i=aStartIndex; i<inputLength; i++ )
+        {
+        TChar character = (*iInput)[i];
+        // Checking for IsDelimiterCharacter() here needs more logic (a parser).
+        // Just check with "IsEndOfLine()"
+        if ( IsEndOfLine(character) )
+            {
+            foundIndex = i;
+            break;
+            }
+        }
+    FTRACE(FPrint( _L("CDunAtCmdHandler::FindEndOfLine() complete") ));
+    return foundIndex;
+    }
+
+// ---------------------------------------------------------------------------
+// Handles next subcommand from line buffer
+// ---------------------------------------------------------------------------
+//
+TBool CDunAtCmdHandler::HandleNextSubCommand()
+    {
+    FTRACE(FPrint( _L("CDunAtCmdHandler::HandleNextSubCommand()") ));
+    if ( iHandleState != EDunStateAtCmdHandling )
+        {
+        FTRACE(FPrint( _L("CDunAtCmdHandler::HandleNextSubCommand() (not ready) complete") ));
+        return EFalse;
+        }
+    TBool extracted = ExtractNextSubCommand();
+    if ( !extracted )
+        {
+        ManageEndOfCmdHandling( ETrue, ETrue );
+        FTRACE(FPrint( _L("CDunAtCmdHandler::HandleNextSubCommand() (last) complete") ));
+        return EFalse;
+        }
+    // Next convert the decoded AT command to uppercase
+    // Don't check for case status -> let mixed cases pass
+    TInt oldLength = iParseInfo.iSendBuffer.Length();
+    iParseInfo.iSendBuffer.SetLength( iParseInfo.iLimit );
+    iParseInfo.iSendBuffer.UpperCase();
+    iParseInfo.iSendBuffer.SetLength( oldLength );
+    // Next always send the command to ATEXT
+    iCmdPusher->IssueRequest( iParseInfo.iSendBuffer );
+    FTRACE(FPrint( _L("CDunAtCmdHandler::HandleNextSubCommand() complete") ));
+    return ETrue;
     }
 
 // ---------------------------------------------------------------------------
 // Manages end of AT command handling
 // ---------------------------------------------------------------------------
 //
-void CDunAtCmdHandler::ManageEndOfCmdHandling( TBool aNotifyExternal,
-                                               TBool aNotifyLocal,
-                                               TBool aClearInput )
+void CDunAtCmdHandler::ManageEndOfCmdHandling( TBool aNotifyLocal,
+                                               TBool aNotifyExternal )
     {
     FTRACE(FPrint( _L("CDunAtCmdHandler::ManageEndOfCmdHandling()") ));
-    if ( iInputBuffer.Length() > 0 )
+    FTRACE(FPrint( _L("CDunAtCmdHandler::ManageEndOfCmdHandling() (loc=%d, ext=%d)"), aNotifyLocal, aNotifyExternal ));
+    // If iEndIndex is (>=0 && <iInput.Length()) it means more data waits in
+    // iInput that didn't fit in iInputBuffer.
+    TInt cmdLength = iInput->Length();
+    TBool subBlock = ( iEndIndex>=0&&iEndIndex<cmdLength ) ? ETrue : EFalse;
+    if ( iLineBuffer.Length()>0 && !subBlock )
         {
-        iLastBuffer.Copy( iInputBuffer );
+        // Line buffer set and no partial subblock, copy to lastbuffer
+        iLastBuffer.Copy( iLineBuffer );
         }
-    ResetParseBuffers( aClearInput );
+    iLineBuffer.Zero();
+    iDecodeInfo.iFirstDecode = ETrue;
+    iDecodeInfo.iDecodeIndex = 0;
+    iDecodeInfo.iPrevExists = EFalse;
+    iParseInfo.iLimit = KErrNotFound;
+    iParseInfo.iSendBuffer.Zero();
+    iEditorModeInfo.iContentFound = EFalse;
     iHandleState = EDunStateIdle;
     if ( aNotifyLocal )
         {
         iCmdPusher->SetEndOfCmdLine();
         }
-    if ( !aNotifyExternal )
+    // iEndIndex must not be reset to KErrNotFound only when
+    // ExtractLineFromInputBuffer() found the next line
+    // (when moreNeeded is EFalse)
+    TBool resetIndex = ETrue;
+    if ( aNotifyExternal )
         {
-        FTRACE(FPrint( _L("CDunAtCmdHandler::ManageEndOfCmdHandling() (no external) complete") ));
-        return;
+        TBool moreNeeded = ExtractLineFromInputBuffer();
+        if ( moreNeeded )
+            {
+            iUpstream->NotifyParserNeedsMoreData();
+            }
+        else
+            {
+            // AppendBlockToInputBuffer() was able to fill with known end, handle next
+            iHandleState = EDunStateAtCmdHandling;
+            HandleNextSubCommand();
+            resetIndex = EFalse;
+            }
         }
-    TInt foundIndex = FindStartOfNextCommand();
-    iUpstream->NotifyAtCmdHandlingEnd( foundIndex );
+    if ( resetIndex )
+        {
+        iEndIndex = KErrNotFound;
+        }
     FTRACE(FPrint( _L("CDunAtCmdHandler::ManageEndOfCmdHandling() complete") ));
     }
 
 // ---------------------------------------------------------------------------
-// Extracts next decoded command from input buffer to decode buffer
+// Extracts next subcommand from line buffer to send buffer
 // ---------------------------------------------------------------------------
 //
-TBool CDunAtCmdHandler::ExtractNextDecodedCommand( TBool aPeek )
+TBool CDunAtCmdHandler::ExtractNextSubCommand( TBool aPeek )
     {
-    FTRACE(FPrint( _L("CDunAtCmdHandler::ExtractNextDecodedCommand()") ));
-    iParseInfo.iLimit = KErrNotFound;
+    FTRACE(FPrint( _L("CDunAtCmdHandler::ExtractNextSubCommand()") ));
     TDunDecodeInfo oldInfo = iDecodeInfo;
-    iDecodeInfo.iDecodeBuffer.Zero();
-    // Find start of decode command from input buffer
-    TInt startIndex = iDecodeInfo.iDecodeIndex;
-    startIndex = FindStartOfDecodedCommand( iInputBuffer, startIndex );
+    iParseInfo.iLimit = KErrNotFound;
+    iParseInfo.iSendBuffer.Zero();
+    // Find start of subcommand from line buffer
+    TInt startIndex = FindStartOfSubCommand();
     if ( startIndex < 0 )
         {
         RestoreOldDecodeInfo( aPeek, oldInfo );
         FTRACE(FPrint( _L("CDunAtCmdHandler::ExtractNextDecodedCommand() (no start) complete") ));
         return EFalse;
         }
-    // Find end of decode command from input buffer
+    iDecodeInfo.iDecodeIndex = startIndex;
     TBool specialCmd = EFalse;
     TInt endIndex = KErrNotFound;
-    specialCmd = CheckSpecialCommand( startIndex, endIndex );
+    specialCmd = CheckSpecialCommand( endIndex );
     if ( !specialCmd )
         {
-        FindSubCommand( startIndex, endIndex );
+        FindSubCommand( endIndex );
         }
-    if ( endIndex < startIndex )
+    TInt lineLength = iLineBuffer.Length();
+    TBool inStartLimits = ( startIndex >= 0 && startIndex < lineLength ) ? ETrue : EFalse;
+    TBool inEndLimits   = ( endIndex   >= 0 && endIndex   < lineLength ) ? ETrue : EFalse;
+    if ( !inStartLimits || !inEndLimits )
         {
         RestoreOldDecodeInfo( aPeek, oldInfo );
-        FTRACE(FPrint( _L("CDunAtCmdHandler::ExtractNextDecodedCommand() (no end) complete") ));
+        FTRACE(FPrint( _L("CDunAtCmdHandler::ExtractNextSubCommand() (no end) complete") ));
         return EFalse;
         }
     TInt cmdLength = endIndex - startIndex + 1;
@@ -915,22 +1155,52 @@ TBool CDunAtCmdHandler::ExtractNextDecodedCommand( TBool aPeek )
         iParseInfo.iLimit = cmdLength;
         }
     // Next create a new command
-    if ( !iDecodeInfo.iFirstDecode && !specialCmd )
+    if ( !iDecodeInfo.iFirstDecode )
         {
-        _LIT( KAtMsg, "AT" );
-        iDecodeInfo.iDecodeBuffer.Append( KAtMsg );
-        iParseInfo.iLimit += 2;  // Length of "AT"
+        _LIT( KAtPrefix, "AT" );
+        iParseInfo.iSendBuffer.Append( KAtPrefix );
+        if ( !specialCmd )  // Already added with CheckSpecialCommand()
+            {
+            iParseInfo.iLimit += 2;  // Length of "AT"
+            }
         // Note: The length of iDecodeBuffer is not exceeded here because "AT"
         // is added only for the second commands after that.
         }
-    TPtrC8 decodedCmd = iInputBuffer.Mid( startIndex, cmdLength );
-    iDecodeInfo.iDecodeBuffer.Append( decodedCmd );
-    // Set index for next round
+    iParseInfo.iSendBuffer.Append( &iLineBuffer[startIndex], cmdLength );
+    // Change settings for the next decode round
     iDecodeInfo.iFirstDecode = EFalse;
     iDecodeInfo.iDecodeIndex = endIndex + 1;
     RestoreOldDecodeInfo( aPeek, oldInfo );
-    FTRACE(FPrint( _L("CDunAtCmdHandler::ExtractNextDecodedCommand() complete") ));
+    if ( !aPeek )
+        {
+        iDecodeInfo.iCmdsHandled++;
+        FTRACE(FPrint( _L("CDunAtCmdHandler::ExtractNextSubCommand() (handled=%d)"), iDecodeInfo.iCmdsHandled ));
+        }
+    FTRACE(FPrint( _L("CDunAtCmdHandler::ExtractNextSubCommand() complete") ));
     return ETrue;
+    }
+
+// ---------------------------------------------------------------------------
+// Finds the start of subcommand from line buffer
+// ---------------------------------------------------------------------------
+//
+TBool CDunAtCmdHandler::FindStartOfSubCommand()
+    {
+    FTRACE(FPrint( _L("CDunAtCmdHandler::FindStartOfSubCommand()") ));
+    TInt i;
+    TInt foundIndex = KErrNotFound;
+    TInt lineLength = iLineBuffer.Length();
+    for ( i=iDecodeInfo.iDecodeIndex; i<lineLength; i++ )
+        {
+        TChar character = iLineBuffer[i];
+        if ( !IsDelimiterCharacter(character) )
+            {
+            foundIndex = i;
+            break;
+            }
+        }
+    FTRACE(FPrint( _L("CDunAtCmdHandler::FindStartOfSubCommand() complete") ));
+    return foundIndex;
     }
 
 // ---------------------------------------------------------------------------
@@ -951,32 +1221,10 @@ void CDunAtCmdHandler::RestoreOldDecodeInfo( TBool aPeek,
     }
 
 // ---------------------------------------------------------------------------
-// Finds end of an AT command
+// Tests for end of AT command line
 // ---------------------------------------------------------------------------
 //
-TInt CDunAtCmdHandler::FindEndOfCommand( TDesC8& aDes, TInt aStartIndex )
-    {
-    FTRACE(FPrint( _L("CDunAtCmdHandler::FindEndOfCommand()") ));
-    TInt i;
-    TInt length = aDes.Length();
-    for ( i=aStartIndex; i<length; i++ )
-        {
-        TChar character = aDes[i];
-        if ( IsEndOfCommand(character) )
-            {
-            FTRACE(FPrint( _L("CDunAtCmdHandler::FindEndOfCommand() complete (%d)"), i ));
-            return i;
-            }
-        }
-    FTRACE(FPrint( _L("CDunAtCmdHandler::FindEndOfCommand() (not found) complete") ));
-    return KErrNotFound;
-    }
-
-// ---------------------------------------------------------------------------
-// Tests for end of AT command character
-// ---------------------------------------------------------------------------
-//
-TBool CDunAtCmdHandler::IsEndOfCommand( TChar& aCharacter )
+TBool CDunAtCmdHandler::IsEndOfLine( TChar& aCharacter )
     {
     FTRACE(FPrint( _L("CDunAtCmdHandler::IsEndOfCommand()") ));
     if ( aCharacter==iCarriageReturn || aCharacter==iLineFeed )
@@ -986,29 +1234,6 @@ TBool CDunAtCmdHandler::IsEndOfCommand( TChar& aCharacter )
         }
     FTRACE(FPrint( _L("CDunAtCmdHandler::IsEndOfCommand() (not found) complete") ));
     return EFalse;
-    }
-
-// ---------------------------------------------------------------------------
-// Finds start of a decoded AT command
-// ---------------------------------------------------------------------------
-//
-TInt CDunAtCmdHandler::FindStartOfDecodedCommand( TDesC8& aDes,
-                                                  TInt aStartIndex )
-    {
-    FTRACE(FPrint( _L("CDunAtCmdHandler::FindStartOfDecodedCommand()") ));
-    TInt i;
-    TInt count = aDes.Length();
-    for ( i=aStartIndex; i<count; i++ )
-        {
-        TChar character = aDes[i];
-        if ( !IsDelimiterCharacter(character) )
-            {
-            FTRACE(FPrint( _L("CDunAtCmdHandler::FindStartOfDecodedCommand() complete (%d)"), i ));
-            return i;
-            }
-        }
-    FTRACE(FPrint( _L("CDunAtCmdHandler::FindStartOfDecodedCommand() (not found) complete") ));
-    return KErrNotFound;
     }
 
 // ---------------------------------------------------------------------------
@@ -1049,13 +1274,22 @@ TBool CDunAtCmdHandler::IsExtendedCharacter( TChar aCharacter )
 // Checks special command
 // ---------------------------------------------------------------------------
 //
-TBool CDunAtCmdHandler::CheckSpecialCommand( TInt aStartIndex,
-                                             TInt& aEndIndex )
+TBool CDunAtCmdHandler::CheckSpecialCommand( TInt& aEndIndex )
     {
     FTRACE(FPrint( _L("CDunAtCmdHandler::CheckSpecialCommand()") ));
-    TBuf8<KDunInputBufLength> upperBuf;
-    TInt newLength = iInputBuffer.Length() - aStartIndex;
-    upperBuf.Copy( &iInputBuffer[aStartIndex], newLength );
+    TInt atPrefixLen = 0;
+    TInt startIndex = iDecodeInfo.iDecodeIndex;
+    TInt newLength = iLineBuffer.Length() - startIndex;
+    TBuf8<KDunLineBufLength> upperBuf;
+    if ( !iDecodeInfo.iFirstDecode )
+        {
+        // For cases such as "ATM1L3DT*99#" "DT" must have "AT"
+        _LIT8( KAtPrefix, "AT" );
+        upperBuf.Copy( KAtPrefix );
+        atPrefixLen = 2;  // "AT"
+        newLength += atPrefixLen;
+        }
+    upperBuf.Append( &iLineBuffer[startIndex], newLength );
     upperBuf.UpperCase();
     TInt i;
     TInt count = iSpecials.Count();
@@ -1077,7 +1311,7 @@ TBool CDunAtCmdHandler::CheckSpecialCommand( TInt aStartIndex,
         if ( cmpResult == 0 )
             {
             iParseInfo.iLimit = specialLength;
-            aEndIndex = (origLength-1) + aStartIndex;
+            aEndIndex = (origLength-1) + startIndex - atPrefixLen;
             FTRACE(FPrint( _L("CDunAtCmdHandler::CheckSpecialCommand() complete") ));
             return ETrue;
             }
@@ -1255,21 +1489,22 @@ TBool CDunAtCmdHandler::FindSubCommandAlphaBorder( TChar aCharacter,
 // Finds subcommand
 // ---------------------------------------------------------------------------
 //
-TInt CDunAtCmdHandler::FindSubCommand( TInt aStartIndex, TInt& aEndIndex )
+TInt CDunAtCmdHandler::FindSubCommand( TInt& aEndIndex )
     {
     FTRACE(FPrint( _L("CDunAtCmdHandler::FindSubCommand()") ));
-    aEndIndex = aStartIndex;
+    TInt startIndex = iDecodeInfo.iDecodeIndex;
+    aEndIndex = startIndex;
     TBool found = EFalse;
-    TInt length = iInputBuffer.Length();
+    TInt lineLength = iLineBuffer.Length();
     iDecodeInfo.iAssignFound = EFalse;
     iDecodeInfo.iInQuotes = EFalse;
     iDecodeInfo.iExtendedIndex = KErrNotFound;
     SaveNotFoundCharDecodeState();
     iAtSpecialCmdHandler->ResetComparisonBuffer();  // just to be sure
-    for ( ; aEndIndex<length; aEndIndex++ )
+    for ( ; aEndIndex<lineLength; aEndIndex++ )
         {
-        TChar character = iInputBuffer[aEndIndex];
-        found = FindSubCommandQuotes( character, aStartIndex, aEndIndex );
+        TChar character = iLineBuffer[aEndIndex];
+        found = FindSubCommandQuotes( character, startIndex, aEndIndex );
         if ( found )
             {
             continue;
@@ -1292,7 +1527,7 @@ TInt CDunAtCmdHandler::FindSubCommand( TInt aStartIndex, TInt& aEndIndex )
         // AT+CMD+CMD [second + as delimiter]
         if ( IsExtendedCharacter(character) )
             {
-            found = IsExtendedBorder( character, aStartIndex, aEndIndex );
+            found = IsExtendedBorder( character, startIndex, aEndIndex );
             if ( !found )
                 {
                 continue;
@@ -1320,10 +1555,10 @@ TInt CDunAtCmdHandler::FindSubCommand( TInt aStartIndex, TInt& aEndIndex )
 TBool CDunAtCmdHandler::IsASlashCommand()
     {
     FTRACE(FPrint( _L("CDunAtCmdHandler::IsASlashCommand()") ));
-    if ( iInputBuffer.Length() == 2 )
+    if ( iLineBuffer.Length() == 2 )
         {
-        if ( iInputBuffer[1] == '/' &&
-            (iInputBuffer[0] == 'A' || iInputBuffer[0] == 'a') )
+        if ( iLineBuffer[1] == '/' &&
+            (iLineBuffer[0] == 'A' || iLineBuffer[0] == 'a') )
             {
             FTRACE(FPrint( _L("CDunAtCmdHandler::IsASlashCommand() (found) complete") ));
             return ETrue;
@@ -1346,40 +1581,18 @@ TBool CDunAtCmdHandler::HandleASlashCommand()
         FTRACE(FPrint( _L("CDunAtCmdHandler::HandleASlashCommand() (no push) complete") ));
         return EFalse;
         }
+    iEndIndex = iInput->Length();  // Causes skipping of last '/' in ManageEndOfCmdHandling()
     // If "A/" command and last buffer exist, set the last buffer as the current buffer
     if ( iLastBuffer.Length() > 0 )
         {
-        iInputBuffer.Copy( iLastBuffer );
+        iLineBuffer.Copy( iLastBuffer );
         FTRACE(FPrint( _L("CDunAtCmdHandler::HandleASlashCommand() (copy) complete") ));
         return EFalse;
         }
-    // Last buffer not set so return "ERROR" if quiet mode not on
-    if ( iQuietOn )
-        {
-        FTRACE(FPrint( _L("CDunAtCmdHandler::HandleASlashCommand() (quiet) complete") ));
-        return EFalse;
-        }
+    // Last buffer not set so return "ERROR"
     iDownstream->NotifyDataPushRequest( &iErrorBuffer, NULL );
     FTRACE(FPrint( _L("CDunAtCmdHandler::HandleASlashCommand() complete") ));
     return ETrue;
-    }
-
-// ---------------------------------------------------------------------------
-// Resets parse buffers
-// ---------------------------------------------------------------------------
-//
-void CDunAtCmdHandler::ResetParseBuffers( TBool aClearInput )
-    {
-    FTRACE(FPrint( _L("CDunAtCmdHandler::ResetParseBuffers()") ));
-    if ( aClearInput )
-        {
-        iInputBuffer.Zero();
-        }
-    iDecodeInfo.iFirstDecode = ETrue;
-    iDecodeInfo.iDecodeIndex = 0;
-    iDecodeInfo.iPrevExists = EFalse;
-    iDecodeInfo.iDecodeBuffer.Zero();
-    FTRACE(FPrint( _L("CDunAtCmdHandler::ResetParseBuffers() complete") ));
     }
 
 // ---------------------------------------------------------------------------
@@ -1573,7 +1786,7 @@ TInt CDunAtCmdHandler::ManageEditorModeReply( TBool aStart )
     if ( !nextContentFound )
         {
         iUpstream->NotifyEditorModeReply( aStart );
-        FTRACE(FPrint( _L("CDunAtCmdHandler::NotifyEditorModeReply() complete") ));
+        FTRACE(FPrint( _L("CDunAtCmdHandler::ManageEditorModeReply() complete") ));
         return KErrNone;
         }
     // In block mode end the block mode by sending <ESC> and hope it works.
@@ -1596,22 +1809,23 @@ TBool CDunAtCmdHandler::FindNextContent( TBool aStart )
         FTRACE(FPrint( _L("CDunAtCmdHandler::FindNextContent() (skip) complete" ) ));
         return iEditorModeInfo.iContentFound;
         }
-    iEditorModeInfo.iContentFound = EFalse;
-    TInt foundCmdIndex = KErrNotFound;
-    TBool nextContentFound = ExtractNextDecodedCommand( ETrue );  // peek
-    if ( !nextContentFound )
+    // If iEndIndex is (>=0 && <iInput.Length()) it means more data waits in
+    // iInput that didn't fit in iInputBuffer. Only check FindStartOfCommand()
+    // if iEndIndex < 0, meaning more data is needed from CDunUpstream.
+    TBool contentFound = EFalse;
+    TInt cmdLength = iInput->Length();
+    TBool subBlock = ( iEndIndex>=0&&iEndIndex<cmdLength ) ? ETrue : EFalse;
+    if ( subBlock )
         {
-        // Check the next subblock
-        foundCmdIndex = FindStartOfNextCommand();
+        contentFound = ETrue;
         }
-    if ( !nextContentFound && foundCmdIndex<0 )
+    if ( !contentFound )
         {
-        FTRACE(FPrint( _L("CDunAtCmdHandler::FindNextContent() (not found) complete") ));
-        return EFalse;
+        contentFound = ExtractNextSubCommand( ETrue );  // peek
         }
-    iEditorModeInfo.iContentFound = ETrue;
+    iEditorModeInfo.iContentFound = contentFound;
     FTRACE(FPrint( _L("CDunAtCmdHandler::FindNextContent() complete" ) ));
-    return ETrue;
+    return contentFound;
     }
 
 // ---------------------------------------------------------------------------
@@ -1630,7 +1844,7 @@ TInt CDunAtCmdHandler::NotifyEndOfProcessing( TInt /*aError*/ )
         FTRACE(FPrint( _L("CDunAtCmdHandler::NotifyEndOfProcessing() (editor) complete" ) ));
         return KErrNone;
         }
-    HandleNextDecodedCommand();
+    HandleNextSubCommand();
     FTRACE(FPrint( _L("CDunAtCmdHandler::NotifyEndOfProcessing() complete" ) ));
     return KErrNone;
     }
@@ -1641,13 +1855,11 @@ TInt CDunAtCmdHandler::NotifyEndOfProcessing( TInt /*aError*/ )
 // command line data
 // ---------------------------------------------------------------------------
 //
-TInt CDunAtCmdHandler::NotifyEndOfCmdLineProcessing()
+void CDunAtCmdHandler::NotifyEndOfCmdLineProcessing()
     {
     FTRACE(FPrint( _L("CDunAtCmdHandler::NotifyEndOfCmdLineProcessing()" ) ));
-    TInt retVal = Stop();
-    ManageEndOfCmdHandling( ETrue, EFalse, ETrue );
+    ManageEndOfCmdHandling( ETrue, ETrue );
     FTRACE(FPrint( _L("CDunAtCmdHandler::NotifyEndOfCmdLineProcessing() complete" ) ));
-    return retVal;
     }
 
 // ---------------------------------------------------------------------------
@@ -1658,7 +1870,7 @@ TInt CDunAtCmdHandler::NotifyEndOfCmdLineProcessing()
 TBool CDunAtCmdHandler::NotifyNextCommandPeekRequest()
     {
     FTRACE(FPrint( _L("CDunAtCmdHandler::NotifyNextCommandPeekRequest()") ));
-    TBool extracted = ExtractNextDecodedCommand( ETrue );
+    TBool extracted = ExtractNextSubCommand( ETrue );
     FTRACE(FPrint( _L("CDunAtCmdHandler::NotifyNextCommandPeekRequest() complete") ));
     return extracted;
     }

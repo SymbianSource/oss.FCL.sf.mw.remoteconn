@@ -879,7 +879,7 @@ void CMTPImageDpSendObjectInfo::RemoveObjectFromDb()
      */
     TRAP_IGNORE(
             iFramework.ObjectMgr().RemoveObjectL(iReceivedObject->Uint(CMTPObjectMetaData::EHandle));
-            iObjectPropertyMgr.ClearCacheL();            
+            iObjectPropertyMgr.ClearCache(iReceivedObject->Uint(CMTPObjectMetaData::EHandle));            
             );
     }
 

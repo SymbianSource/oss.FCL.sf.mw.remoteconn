@@ -28,7 +28,7 @@ class MDunStreamManipulator;
  *  Notification interface class for data pushing status changes
  *
  *  @lib dunatext.lib
- *  @since S60 v5.0
+ *  @since TB9.2
  */
 NONSHARABLE_CLASS( MDunAtCmdPusher )
     {
@@ -40,7 +40,7 @@ public:
      * This is after all reply data for an AT command is multiplexed to the
      * downstream.
      *
-     * @since S60 5.0
+     * @since TB9.2
      * @param aError Error code of command processing completion
      * @return Symbian error code on error, KErrNone otherwise
      */
@@ -50,15 +50,15 @@ public:
      * Notifies about request to stop AT command handling for the rest of the
      * command line data
      *
-     * @since S60 5.0
+     * @since TB9.2
      * @return Symbian error code on error, KErrNone otherwise
      */
-    virtual TInt NotifyEndOfCmdLineProcessing() = 0;
+    virtual void NotifyEndOfCmdLineProcessing() = 0;
 
     /**
      * Notifies about request to peek for the next command
      *
-     * @since S60 5.0
+     * @since TB9.2
      * @return ETrue if next command exists, EFalse otherwise
      */
     virtual TBool NotifyNextCommandPeekRequest() = 0;
@@ -77,7 +77,7 @@ public:
  *  Class for AT command URC handler
  *
  *  @lib dunatext.lib
- *  @since S60 v5.0
+ *  @since TB9.2
  */
 NONSHARABLE_CLASS( CDunAtCmdPusher ) : public CActive,
                                        public MDunCompletionReporter
@@ -119,7 +119,7 @@ public:
     /**
      * Resets data to initial values
      *
-     * @since S60 5.0
+     * @since TB9.2
      * @return None
      */
     void ResetData();
@@ -127,17 +127,17 @@ public:
     /**
      * Starts AT command handling
      *
-     * @since S60 5.0
-     * @param aCommand AT command or editor mode input to handle
+     * @since TB9.2
+     * @param aInput AT command or editor mode input to handle
      * @param aNormalMode ETrue if request issue for normal mode
      * @return Symbian error code on error, KErrNone otherwise
      */
-    TInt IssueRequest( TDesC8& aCommand, TBool aNormalMode=ETrue );
+    TInt IssueRequest( TDesC8& aInput, TBool aNormalMode=ETrue );
 
     /**
      * Stops AT command handling
      *
-     * @since S60 5.0
+     * @since TB9.2
      * @return Symbian error code on error, KErrNone otherwise
      */
     TInt Stop();
@@ -145,7 +145,7 @@ public:
     /**
      * Manages request to abort command handling
      *
-     * @since S60 5.0
+     * @since TB9.2
      * @return Symbian error code on error, KErrNone otherwise
      */
     TInt ManageAbortRequest();
@@ -154,7 +154,7 @@ public:
      * Sets end of command line marker on for the possible series of AT
      * commands.
      *
-     * @since S60 5.0
+     * @since TB9.2
      * @param aPushLast ETrue to push last reply, EFalse otherwise
      * @return None
      */
@@ -180,7 +180,7 @@ private:
     /**
      * Initializes this class
      *
-     * @since S60 5.0
+     * @since TB9.2
      * @return None
      */
     void Initialize();
@@ -188,7 +188,7 @@ private:
     /**
      * Sets state to idle and notifies about subcommand handling completion
      *
-     * @since S60 5.0
+     * @since TB9.2
      * @param aError Error code for completion
      * @return None
      */
@@ -198,7 +198,7 @@ private:
      * Checks if "OK" (verbose) or "0" (numeric) string or exists at the end of
      * buffer and removes it
      *
-     * @since S60 5.0
+     * @since TB9.2
      * @return Symbian error code on error, KErrNone otherwise
      */
     TInt CheckAndRemoveOkString();
@@ -206,7 +206,7 @@ private:
     /**
      * Sends reply data to downstream
      *
-     * @since S60 5.0
+     * @since TB9.2
      * @param aRecvBuffer ETrue if using receive buffer
      *                    EFalse if using "OK" buffer
      * @return None
@@ -248,7 +248,7 @@ private:
     /**
      * Manages change in reply type
      *
-     * @since S60 5.0
+     * @since TB9.2
      * @return None
      */
     void ManageReplyTypeChange();
@@ -259,7 +259,7 @@ private:
      * From CActive.
      * Gets called when AT command handled
      *
-     * @since S60 5.0
+     * @since TB9.2
      * @return None
      */
     void RunL();
@@ -268,7 +268,7 @@ private:
      * From CActive.
      * Gets called on cancel
      *
-     * @since S60 5.0
+     * @since TB9.2
      * @return None
      */
     void DoCancel();
@@ -279,7 +279,7 @@ private:
      * From MDunCompletionReporter.
      * Gets called when data push is complete
      *
-     * @since S60 5.0
+     * @since TB9.2
      * @param aAllPushed ETrue if all in the queue were pushed, EFalse otherwise
      * @return None
      */

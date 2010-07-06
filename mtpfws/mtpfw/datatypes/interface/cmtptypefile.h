@@ -25,7 +25,7 @@
 #include <e32base.h>
 #include <f32file.h>
 #include <mtp/mmtptype.h>
-    
+
 /**
 Defines the MTP file object data type. 
 @publishedPartner
@@ -100,7 +100,8 @@ private:
     void ConstructL(const TDesC& aName, TFileMode aMode);
 	void ConstructL(const TDesC& aName, TFileMode aMode, TInt64 aRequiredSize, TInt64 aOffSet);
     void ToggleRdWrBuffer();
-
+    void CreateDoubleBufferL(TInt64 aFileSize);
+    
 protected: // From CActive
     void DoCancel();
 
@@ -110,8 +111,7 @@ private: // From CActive
     void RunL();
     
 private:
-
-    
+        
     /**
     The read and write data stream states.
     */

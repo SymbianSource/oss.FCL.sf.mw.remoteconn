@@ -124,8 +124,6 @@ TInt CDunUpstream::InitializeForAtParsing(
     atCmdHandler->AddCmdModeCallback( aCallbackUp );
     atCmdHandler->AddCmdModeCallback( aCallbackDown );
     iParseData.iDataMode = EFalse;
-    iParseData.iParseNeeded = ETrue;
-    iParseData.iHandling = EFalse;
     iParseData.iAtCmdHandler = atCmdHandler;
     FTRACE(FPrint( _L("CDunUpstream::InitializeForAtParsing() complete" ) ));
     return KErrNone;
@@ -245,8 +243,6 @@ void CDunUpstream::Initialize()
     iActivityData.iDataRead = EFalse;
     iActivityData.iNotified = EFalse;
     iParseData.iDataMode = EFalse;
-    iParseData.iParseNeeded = EFalse;
-    iParseData.iHandling = EFalse;
     iParseData.iAtCmdHandler = NULL;
     }
 
@@ -323,7 +319,7 @@ TBool CDunUpstream::ProcessReadData()
     {
     FTRACE(FPrint( _L("CDunUpstream::ProcessReadData()" )));
     // The following will be transferred to Dataport
-    if ( iParseData.iDataMode || !iParseData.iParseNeeded )
+    if ( iParseData.iDataMode )
         {
         iOperationType = EDunOperationTypeWrite;
         FTRACE(FPrint( _L("CDunUpstream::ProcessReadData() (next write) complete" )));
@@ -336,14 +332,16 @@ TBool CDunUpstream::ProcessReadData()
         }
     // The following will be transferred to parser
     TInt retTemp = KErrNone;
-    TBool partialInput = EFalse;
-    retTemp = iParseData.iAtCmdHandler->ParseCommand( *iBufferPtr,
-                                                      partialInput );
-    if ( retTemp!=KErrNone || !partialInput )
+    TBool moreNeeded = EFalse;
+    retTemp = iParseData.iAtCmdHandler->AddDataForParsing( *iBufferPtr,
+                                                           moreNeeded );
+    if ( retTemp!=KErrNone || !moreNeeded )
         {
+        // If error or no error but no more data needed, don't reissue
         FTRACE(FPrint( _L("CDunUpstream::ProcessReadData() (no reissue) complete" )));
         return EFalse;
         }
+    // If no error and more data needed, reissue
     FTRACE(FPrint( _L("CDunUpstream::ProcessReadData() (reissue) complete" )));
     return ETrue;
     }
@@ -446,56 +444,14 @@ void CDunUpstream::DoCancel()
 
 // ---------------------------------------------------------------------------
 // From class MDunAtCmdStatusReporter
-// Notifies about AT command handling start
+// Notifies about parser's need to get more data
 // ---------------------------------------------------------------------------
 //
-void CDunUpstream::NotifyAtCmdHandlingStart()
+void CDunUpstream::NotifyParserNeedsMoreData()
     {
-    FTRACE(FPrint( _L("CDunUpstream::NotifyAtCmdHandlingStart()" )));
-    if ( iParseData.iHandling )
-        {
-        FTRACE(FPrint( _L("CDunUpstream::NotifyAtCmdHandlingStart() (already set!)" )));
-        }
-    iParseData.iHandling = ETrue;
-    FTRACE(FPrint( _L("CDunUpstream::NotifyAtCmdHandlingStart() complete" )));
-    }
-
-// ---------------------------------------------------------------------------
-// From class MDunAtCmdStatusReporter
-// Notifies about AT command handling end
-// ---------------------------------------------------------------------------
-//
-void CDunUpstream::NotifyAtCmdHandlingEnd( TInt aStartIndex )
-    {
-    FTRACE(FPrint( _L("CDunUpstream::NotifyAtCmdHandlingEnd()" )));
-    if ( !iParseData.iHandling )
-        {
-        FTRACE(FPrint( _L("CDunUpstream::NotifyAtCmdHandlingEnd() (already set!)" )));
-        }
-    iParseData.iHandling = EFalse;
-    // Next check the offset to the next command inside this block
-    TInt length = iBufferPtr->Length();
-    if ( aStartIndex < 0 )
-        {
-        // Start of the next command not found so here we need to just reissue
-        // the read request and not clear the input buffer.
-        iParseData.iAtCmdHandler->SetEndOfCmdLine( EFalse );
-        IssueRequest();  // iOperationType must be read here (don't set)
-        FTRACE(FPrint( _L("CDunUpstream::NotifyAtCmdHandlingEnd() (not found) complete" )));
-        return;
-        }
-    // Here the start of next command was found so try to directly handle that
-    // command using ProcessReadData() for the next subblock.
-    iParseData.iAtCmdHandler->SetEndOfCmdLine( ETrue );
-    TInt maxLength = iBufferPtr->MaxLength();
-    iBufferPtr->Set( &(*iBufferPtr)[aStartIndex], length-aStartIndex, maxLength );
-    TBool reIssue = ProcessReadData();
-    if ( reIssue )
-        {
-        // Note: should come here only if something went wrong
-        IssueRequest();
-        }
-    FTRACE(FPrint( _L("CDunUpstream::NotifyAtCmdHandlingEnd() complete" )));
+    FTRACE(FPrint( _L("CDunUpstream::NotifyParserNeedsMoreData()" )));
+    IssueRequest();  // iOperationType must be read here (don't set)
+    FTRACE(FPrint( _L("CDunUpstream::NotifyParserNeedsMoreData() complete" )));
     }
 
 // ---------------------------------------------------------------------------

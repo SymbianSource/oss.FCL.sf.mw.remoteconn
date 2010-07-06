@@ -73,13 +73,22 @@ public:
      * Gets called when outside party wants to push data to the existing stream
      *
      * @since S60 5.0
-     * @param aPushedData Data to push to the stream (not copied)
+     * @param aDataToPush Data to push to the stream (not copied)
      * @param aCallback Callback to call when data is processed by the stream
      * @return Symbian error code on error, KErrNone otherwise
      */
     virtual TInt NotifyDataPushRequest(
-        const TDesC8 *aPushedData,
+        const TDesC8* aDataToPush,
         MDunCompletionReporter* aCallback ) = 0;
+
+    /**
+     * Checks if data is in queue
+     *
+     * @since TB9.2
+     * @param aDataToPush Data to check
+     * @return ETrue if data is in queue, EFalse otherwise
+     */
+    virtual TBool IsDataInQueue( const TDesC8 *aDataToPush ) = 0;
 
     };
 
@@ -146,14 +155,23 @@ public:
     TInt InitializeForDataPushing( MDunAtCmdHandler* aAtCmdHandler );
 
     /**
+     * Checks if data is in queue
+     *
+     * @since TB9.2
+     * @param aDataToPush Data to check
+     * @return ETrue if data is in queue, EFalse otherwise
+     */
+    TBool IsDataInQueue( const TDesC8* aDataToPush );
+
+    /**
      * Adds data to event queue and starts sending if needed
      *
      * @since S60 5.0
-     * @param aPushedData Data to push to the stream (not copied)
+     * @param aDataToPush Data to push to the stream (not copied)
      * @param aCallback Callback to call when data is processed by the stream
      * @return Symbian error code on error, KErrNone otherwise
      */
-    TInt AddToQueueAndSend( const TDesC8 *aPushedData,
+    TInt AddToQueueAndSend( const TDesC8* aDataToPush,
                             MDunCompletionReporter* aCallback );
 
 private:
@@ -204,11 +222,11 @@ private:
      * Gets called when outside party wants to push data to the existing stream
      *
      * @since S60 3.2
-     * @param aPushedData Data to push to the stream (not copied)
+     * @param aDataToPush Data to push to the stream (not copied)
      * @param aCallback Callback to call when data is processed by the stream
      * @return Symbian error code on error, KErrNone otherwise
      */
-    TInt NotifyDataPushRequest( const TDesC8 *aPushedData,
+    TInt NotifyDataPushRequest( const TDesC8* aDataToPush,
                                 MDunCompletionReporter* aCallback );
 
 // from base class MDunCompletionReporter

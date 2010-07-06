@@ -24,7 +24,7 @@
 #include "sbeclientserver.h"
 #include "sbeserver.h"
 #include "sbesession.h"
-#include <connect/panic.h>
+#include "sbepanic.h"
 #include "sbedataownermanager.h"
 #include "sblog.h"
 //#include <stdlib.h>

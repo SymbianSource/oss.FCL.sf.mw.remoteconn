@@ -24,7 +24,7 @@
 
 #include <e32base.h>
 
-#include <platform/mw/usbwatcherinternalpskeys.h>
+#include <platform/mw/UsbWatcherInternalPSKeys.h>
 #include <platform/mw/usbpersonalityids.h>
 #include <pathinfo.h> 
 #include <featmgr/featmgr.h>

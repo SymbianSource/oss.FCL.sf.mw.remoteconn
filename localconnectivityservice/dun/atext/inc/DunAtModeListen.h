@@ -27,7 +27,7 @@
  *  Notification interface class for modem's mode listener
  *
  *  @lib dunatext.lib
- *  @since S60 v5.0
+ *  @since TB9.2
  */
 NONSHARABLE_CLASS( MDunAtModeListen )
     {
@@ -37,7 +37,7 @@ public:
     /**
      * Notifies about mode status change
      *
-     * @since S60 5.0
+     * @since TB9.2
      * @param aMode Current modem modes
      * @return Symbian error code on error, KErrNone otherwise
      */
@@ -49,7 +49,7 @@ public:
  *  Class for modem's mode listener and notifier
  *
  *  @lib dunatext.lib
- *  @since S60 v5.0
+ *  @since TB9.2
  */
 NONSHARABLE_CLASS( CDunAtModeListen ) : public CActive
     {
@@ -82,7 +82,7 @@ public:
     /**
      * Resets data to initial values
      *
-     * @since S60 5.0
+     * @since TB9.2
      * @return None
      */
     void ResetData();
@@ -90,7 +90,7 @@ public:
     /**
      * Issues request to start monitoring for mode status changes
      *
-     * @since S60 5.0
+     * @since TB9.2
      * @return Symbian error code on error, KErrNone otherwise
      */
     TInt IssueRequest();
@@ -98,7 +98,7 @@ public:
     /**
      * Stops monitoring for mode status changes
      *
-     * @since S60 5.0
+     * @since TB9.2
      * @return Symbian error code on error, KErrNone otherwise
      */
     TInt Stop();
@@ -113,7 +113,7 @@ private:
     /**
      * Initializes this class
      *
-     * @since S60 5.0
+     * @since TB9.2
      * @return None
      */
     void Initialize();
@@ -124,7 +124,7 @@ private:
      * From CActive.
      * Gets called when mode changes
      *
-     * @since S60 5.0
+     * @since TB9.2
      * @return None
      */
     void RunL();
@@ -133,7 +133,7 @@ private:
      * From CActive.
      * Gets called on cancel
      *
-     * @since S60 5.0
+     * @since TB9.2
      * @return None
      */
     void DoCancel();

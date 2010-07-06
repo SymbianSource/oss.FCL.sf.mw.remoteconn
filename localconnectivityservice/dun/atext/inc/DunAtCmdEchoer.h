@@ -105,7 +105,7 @@ private:
      * From MDunCompletionReporter.
      * Gets called when data push is complete
      *
-     * @since S60 5.0
+     * @since TB9.2
      * @param aAllPushed ETrue if all in the queue were pushed, EFalse otherwise
      * @return None
      */
