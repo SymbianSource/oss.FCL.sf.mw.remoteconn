@@ -256,7 +256,7 @@ void CMTPDeviceDpConfigMgr::GetRootDirPathL(TInt aDriveNo, TDes& aRootDirPath)
 			//Ignore the duplicate value.
 			if( aOrderInfoArray.Find(formatInt) == KErrNotFound )
 				{
-				aOrderInfoArray.Append(formatInt);
+				aOrderInfoArray.AppendL(formatInt);
 				}
 			}
 		}

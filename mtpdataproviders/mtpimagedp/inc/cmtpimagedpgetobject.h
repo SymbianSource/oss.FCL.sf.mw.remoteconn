@@ -42,6 +42,7 @@ private: // From CMTPRequestProcessor
 
 	void ServiceL();
 	TBool DoHandleCompletingPhaseL();
+    TMTPResponseCode CheckRequestL();
 	
 private: 
 

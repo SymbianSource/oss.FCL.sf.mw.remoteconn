@@ -237,7 +237,7 @@ void CMTPServiceConfig::StartReadServicePropertyNamespacesL(  RResourceFile& aRe
     TUint num = reader.ReadInt16();
     while( num-- )
         {
-        aNamespaces.Append( ReadGUID(reader) );
+        aNamespaces.AppendL( ReadGUID(reader) );
         }
     
     CleanupStack::PopAndDestroy(buffer);

@@ -185,7 +185,7 @@ EXPORT_C void CMTPDataProviderController::LoadDataProvidersL()
 	  if ((iDataProviders[index]->DataProviderId() != iDpIdDeviceDp)
 	  	  && (iDataProviders[index]->DataProviderId() != iDpIdProxyDp))
 	    {
-	    iDataProviderIds.Append(iDataProviders[index]->DataProviderId());
+	    iDataProviderIds.AppendL(iDataProviders[index]->DataProviderId());
 	    }
 	  }
 	
@@ -484,7 +484,7 @@ void CMTPDataProviderController::EnumerationStateChangedL(const CMTPDataProvider
             Cancel();
 
             //clean the root level snapshot
-            iSingletons.ObjectMgr().ObjectStore().CleanDBSnapshotL(ETrue);
+            TRAP_IGNORE(iSingletons.ObjectMgr().ObjectStore().CleanDBSnapshotL(ETrue));
 
             //Schedule again to scan subdir
             iEnumerationState   = EEnumeratingSubDirFiles;
@@ -500,9 +500,7 @@ void CMTPDataProviderController::EnumerationStateChangedL(const CMTPDataProvider
                 {
                 Cancel();
                 iEnumerationState   = EEnumeratingCleanDBSnapshot;
-                iSingletons.ObjectMgr().ObjectStore().CleanDBSnapshotL(EFalse);
-            
-
+                TRAP_IGNORE(iSingletons.ObjectMgr().ObjectStore().CleanDBSnapshotL(EFalse));
                 }
             else
                 {

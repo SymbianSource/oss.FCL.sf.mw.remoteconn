@@ -55,6 +55,7 @@ public:
     
     void FlushRxDataL();
     void FlushBufferedRxDataL();
+    void FlushOnePacketL();
     
 protected:
 

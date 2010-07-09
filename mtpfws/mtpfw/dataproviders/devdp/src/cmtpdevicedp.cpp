@@ -388,7 +388,7 @@ void CMTPDeviceDataProvider::LoadExtnPluginsL()
 
 		if(extnpluginMap )
 			{
-			iExtnPluginMapArray.Append(extnpluginMap);
+			iExtnPluginMapArray.AppendL(extnpluginMap);
 			}
 
 		}
@@ -481,7 +481,7 @@ TUint32 CMTPDeviceDataProvider::AddEntryL( const TDesC& aPath, TUint32 aParentHa
     
     __ASSERT_ALWAYS( isFolder, User::Leave( KErrArgument ));
     __ASSERT_ALWAYS( aParentHandle != KMTPHandleNone, User::Leave( KErrArgument ));
-    __ASSERT_ALWAYS( Framework().StorageMgr().ValidStorageId( aStorageId ), User::Invariant());
+    __ASSERT_ALWAYS( Framework().StorageMgr().ValidStorageId( aStorageId ), User::Leave( KErrArgument ));
 
     __FLOG_VA((_L16("Add Entry for Path:%S"), &aPath ));
     aObjectInfo.SetUint( CMTPObjectMetaData::EDataProviderId, Framework().DataProviderId() );

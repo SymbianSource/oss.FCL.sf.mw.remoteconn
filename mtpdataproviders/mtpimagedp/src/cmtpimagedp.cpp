@@ -121,7 +121,7 @@ void CMTPImageDataProvider::ConstructL()
     
     //Define RProperty of new pictures for status data provider
     _LIT_SECURITY_POLICY_PASS(KAllowReadAll);
-    TInt error = RProperty::Define(KMTPNewPicKey, RProperty::EInt, KAllowReadAll, KAllowReadAll);
+    TInt error = RProperty::Define(TUid::Uid(KMTPServerUID), KMTPNewPicKey, RProperty::EInt, KAllowReadAll, KAllowReadAll);
     if (error != KErrNone && error != KErrAlreadyExists)
         {
         __FLOG_1(_L8("CMTPImageDataProvider::ConstructL - RProperty define error:%d"), error);
@@ -165,6 +165,7 @@ CMTPImageDataProvider::~CMTPImageDataProvider()
     //Try to delete objects in array
     HandleDeleteObjectsArray();
     iDeleteObjectsArray.ResetAndDestroy();
+    iNewPicHandles.Reset();
     
     __FLOG(_L8("<< ~CMTPImageDataProvider"));
     __FLOG_CLOSE;
@@ -610,8 +611,7 @@ void CMTPImageDataProvider::SessionOpenedL(const TMTPNotificationParamsSessionCh
         /**
          * Get image object count from framework and calculate the new pictures
          */
-        TUint newPictures = QueryImageObjectCountL();
-        RProperty::Set(TUid::Uid(KMTPServerUID), KMTPNewPicKey, newPictures);
+        TUint newPictures = QueryImageObjectCountL();        
         iNewPicNotifier->SetNewPictures(newPictures);
         __FLOG_1(_L16("CMTPImageDpEnumerator::CompleteEnumeration - New Pics: %d"), newPictures);        
         iEnumerated = EFalse;
@@ -693,6 +693,8 @@ TUint CMTPImageDataProvider::QueryImageObjectCountL()
     CleanupClosePushL(context);
     CleanupClosePushL(handles);    
     
+    iNewPicHandles.Reset();
+    
     do
         {
         /*
@@ -712,6 +714,7 @@ TUint CMTPImageDataProvider::QueryImageObjectCountL()
         if (MTPImageDpUtilits::IsNewPicture(*objMetadata))
             {
             ++newPictures;
+            iNewPicHandles.Append(handles[i]);
             }
         }
     
@@ -764,6 +767,32 @@ void CMTPImageDataProvider::DecreaseNewPictures(TInt aCount)
     
     __FLOG(_L8("<< DecreaseNewPictures "));    
     }
+
+void CMTPImageDataProvider::ResetNewPictures()
+	{
+	__FLOG(_L8(">> ResetNewPictures "));
+
+	iNewPicNotifier->SetNewPictures(0);
+	
+	TInt count = iNewPicHandles.Count();
+	if (!count)
+		{
+		return;
+		}
+
+	CMTPObjectMetaData* objMetadata = CMTPObjectMetaData::NewLC();
+	
+	for (TInt i(0); i<count; ++i)
+	{
+		Framework().ObjectMgr().ObjectL(iNewPicHandles[i], *objMetadata);
+		MTPImageDpUtilits::UpdateObjectStatusToOldL(Framework(), *objMetadata);
+	}
+	
+	iNewPicHandles.Reset();
+	CleanupStack::PopAndDestroy(objMetadata);
+	
+	__FLOG(_L8("<< ResetNewPictures "));
+	}
 
 void CMTPImageDataProvider::HandleMdeSessionCompleteL(TInt aError)
     {

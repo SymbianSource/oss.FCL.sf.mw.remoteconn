@@ -526,6 +526,7 @@ void RMTPUtility::RenameAllChildrenL(TUint32 aStorageId, TUint32 aParentHandle, 
         if (KErrNone != iFramework->Fs().Entry(entryName, entry))
             {
             // Skip objects that don't use the file path as SUID.
+            CleanupStack::PopAndDestroy(&rightPartName);            
             CleanupStack::PopAndDestroy(&entryName);
             continue;
             }        

@@ -114,17 +114,17 @@ void CMTPImageDpGetObjectInfo::BuildObjectInfoL()
     iObjectPropertyMgr.SetCurrentObjectL(*iObjectMeta, EFalse);
     
     //1. storage id
-    TUint32 storageId;
+    TUint32 storageId(0);
     iObjectPropertyMgr.GetPropertyL(EMTPObjectPropCodeStorageID, storageId);
     iObjectInfoToBuild->SetUint32L(CMTPTypeObjectInfo::EStorageID, storageId);	
     
     //2. object format
-    TUint16 format;
+    TUint16 format(0);
     iObjectPropertyMgr.GetPropertyL(EMTPObjectPropCodeObjectFormat, format);
     iObjectInfoToBuild->SetUint16L(CMTPTypeObjectInfo::EObjectFormat, format);
     
     //3. protection status,
-    TUint16 protection;
+    TUint16 protection(0);
     iObjectPropertyMgr.GetPropertyL(EMTPObjectPropCodeProtectionStatus, protection);
     iObjectInfoToBuild->SetUint16L(CMTPTypeObjectInfo::EProtectionStatus, protection);
     
@@ -138,7 +138,7 @@ void CMTPImageDpGetObjectInfo::BuildObjectInfoL()
     //9. image pix width
     //10. image pix height
     //11. image bit depth
-    TUint16 thumbFormat;
+    TUint16 thumbFormat(0);
     iObjectPropertyMgr.GetPropertyL(EMTPObjectPropCodeRepresentativeSampleFormat, thumbFormat);
     iObjectInfoToBuild->SetUint16L(CMTPTypeObjectInfo::EThumbFormat, thumbFormat);
     TUint32 value(0);
@@ -157,7 +157,7 @@ void CMTPImageDpGetObjectInfo::BuildObjectInfoL()
     iObjectInfoToBuild->SetUint32L(CMTPTypeObjectInfo::EImageBitDepth, value);
     
     //12. Parent object
-    TUint32 parent;
+    TUint32 parent(0);
     iObjectPropertyMgr.GetPropertyL(EMTPObjectPropCodeParentObject, parent);
     if(KMTPHandleNoParent == parent)
         {

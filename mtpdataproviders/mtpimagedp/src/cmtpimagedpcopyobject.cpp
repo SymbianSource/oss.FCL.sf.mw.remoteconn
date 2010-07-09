@@ -190,7 +190,7 @@ TUint32 CMTPImageDpCopyObject::CopyFileL(const TDesC& aOldFileName, const TDesC&
     
     GetPreviousPropertiesL(aOldFileName);
     User::LeaveIfError(iFileMan->Copy(aOldFileName, *iDest));
-    iRollbackActionL.Append(RollBackFromFsL);
+    iRollbackActionL.AppendL(RollBackFromFsL);
     SetPreviousPropertiesL(aNewFileName);
     
     iFramework.ObjectMgr().InsertObjectL(*iTargetObjectInfo);

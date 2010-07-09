@@ -44,6 +44,7 @@ CMTPImageDpNewPicturesNotifier::~CMTPImageDpNewPicturesNotifier()
 void CMTPImageDpNewPicturesNotifier::SetNewPictures(TInt aValue)
     {
     iNewPictures = aValue;
+    RProperty::Set(TUid::Uid(KMTPServerUID), KMTPNewPicKey, iNewPictures);
     }
 
 void CMTPImageDpNewPicturesNotifier::IncreaseCount(TInt aValue)

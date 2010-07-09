@@ -1413,8 +1413,24 @@ TBool CDunAtCmdHandler::IsExtendedBorder( TChar aCharacter,
         {
         iDecodeInfo.iExtendedIndex = aEndIndex;
         SaveFoundCharDecodeState( aCharacter );
-        FTRACE(FPrint( _L("CDunAtCmdHandler::IsExtendedBorder() (no border) complete") ));
+        FTRACE(FPrint( _L("CDunAtCmdHandler::IsExtendedBorder() (no border normal) complete") ));
         return EFalse;
+        }
+    // Now suspect border found so peek the next character after the suspected
+    // extended character. If it is not alphabetical character, return with EFalse.
+    // This case is to detect the cases such as "AT+VTS={*,3000}", where '*' would
+    // be the start of the next command in normal cases.
+    TInt peekIndex = aEndIndex + 1;
+    TInt lineLength = iLineBuffer.Length();
+    if ( peekIndex < lineLength )
+        {
+        TChar nextCharacter = iLineBuffer[peekIndex];
+        if ( !nextCharacter.IsAlpha() )
+            {
+            SaveFoundCharDecodeState( aCharacter );
+            FTRACE(FPrint( _L("CDunAtCmdHandler::IsExtendedBorder() (no border special) complete") ));
+            return EFalse;
+            }
         }
     aEndIndex--;
     FTRACE(FPrint( _L("CDunAtCmdHandler::IsExtendedBorder() (border) complete") ));

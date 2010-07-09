@@ -747,7 +747,7 @@ TMTPResponseCode CMTPKnowledgeHandler::GetAllObjectPropCodeByGroupL(TUint32 aGro
 		TInt count = sizeof(KMTPFullEnumSyncKnowledgeObjectProperties) / sizeof(KMTPFullEnumSyncKnowledgeObjectProperties[0]);
 		for (TInt i = 0; i < count; i++)
 			{
-			aPropCodes.Append(KMTPFullEnumSyncKnowledgeObjectProperties[i]);
+			aPropCodes.AppendL(KMTPFullEnumSyncKnowledgeObjectProperties[i]);
 			}
 		}
 	else if(2 == aGroupId)

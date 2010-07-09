@@ -122,7 +122,7 @@ EXPORT_C void CMTPFSEnumerator::StartL(TUint32 aStorageId, TBool aScanAll)
         const TUint KCount(storages.Count());
         for (TUint i(0); (i < KCount); i++)
             {
-            iStorages.Insert(storages[i]->Uint(CMTPStorageMetaData::EStorageId),0);
+            iStorages.InsertL(storages[i]->Uint(CMTPStorageMetaData::EStorageId),0);
             __FLOG_VA((_L8("FileEnumerator is doing storage id = %x\r\n"), storages[i]->Uint(CMTPStorageMetaData::EStorageId) ));
             }
         CleanupStack::PopAndDestroy(&storages);
@@ -396,18 +396,27 @@ Ignore the error, continue with the next one
 TInt CMTPFSEnumerator::RunError(TInt aError)
 	{
 	__FLOG_VA((_L8("RunError - entry with error %d"), aError));
-	 if(!iFramework.StorageMgr().ValidStorageId(iStorages[iScanPos]))
-		 {
-		 __FLOG_VA((_L8("Invalid StorageID = %d"),iStorages[iScanPos] ));
-		 if (iStorages.Count()>1)
-			 {
-			 //Not necessary to process any entry on the storage, since the storage removed.
-			 //Then need to start from root dir of next storage if there is.
-			 //So, the dir stack is popped to bottom.
-			 iDirStack.Reset();
-			 }
-		 iSkipCurrentStorage = ETrue;
-		 }
+	
+	// avoid to access overflow of iStorages
+    if (iScanPos < iStorages.Count())
+        {
+        if(!iFramework.StorageMgr().ValidStorageId(iStorages[iScanPos]))
+            {
+             __FLOG_VA((_L8("Invalid StorageID = %d"),iStorages[iScanPos] ));
+             if (iStorages.Count()>1)
+                 {
+                 //Not necessary to process any entry on the storage, since the storage removed.
+                 //Then need to start from root dir of next storage if there is.
+                 //So, the dir stack is popped to bottom.
+                 iDirStack.Reset();
+                 }
+             iSkipCurrentStorage = ETrue;
+            }
+        }
+    else
+        {
+        iSkipCurrentStorage = ETrue;
+        }
 	
 	// Reschedule ourselves
 	TRequestStatus* status = &iStatus;
@@ -501,7 +510,7 @@ void CMTPFSEnumerator::ProcessEntriesL()
                 ++len;
                 format = EMTPFormatCodeAssociation;
                 AddEntryL(iCurrentPath, handle, format, KMTPDeviceDPID, entry, iStorages[iScanPos], iParentHandle);
-                iDirStack.Append(TStackItem(iCurrentPath, handle));
+                iDirStack.AppendL(TStackItem(iCurrentPath, handle));
                 }
             }
         else
@@ -548,10 +557,16 @@ void CMTPFSEnumerator::ProcessEntriesL()
                                 __FLOG_VA((_L("mime %S"), mime));
                                 DpId = iDpSingletons.MTPUtility().GetDpIdL(parse.Ext().Mid(1),*mime);
                                 __FLOG_VA((_L("DpId find %d"), DpId));
+								
+								format = iDpSingletons.MTPUtility().GetFormatCodeByMimeTypeL(parse.Ext().Mid(1),*mime);
+								AddFileEntryForOtherDpL(iCurrentPath, handle, format, DpId, entry, iStorages[iScanPos], 
+										iParentHandle, iDpSingletons.MTPUtility().GetSubFormatCodeL(parse.Ext().Mid(1),*mime));
                                 }
-                            format = iDpSingletons.MTPUtility().GetFormatCodeByMimeTypeL(parse.Ext().Mid(1),*mime);
-                            AddFileEntryForOtherDpL(iCurrentPath, handle, format, DpId, entry, iStorages[iScanPos], 
-                                    iParentHandle, iDpSingletons.MTPUtility().GetSubFormatCodeL(parse.Ext().Mid(1),*mime));
+							else
+                                {
+                                AddEntryL(iCurrentPath, handle, EMTPFormatCodeUndefined, iDpID, entry, iStorages[iScanPos], iParentHandle);
+                                }
+
                             CleanupStack::PopAndDestroy(mime);
                             }
                         else

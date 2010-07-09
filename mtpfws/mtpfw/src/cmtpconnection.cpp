@@ -94,6 +94,12 @@ CMTPConnection::~CMTPConnection()
     	}
     
     iSessions.ResetAndDestroy();
+    
+    if (iTransportConnection != NULL)
+        {
+        iTransportConnection->Unbind(*this);
+        }
+    
     //close the property
     iProperty.Close();
     // delete the ‘name?property
@@ -357,7 +363,7 @@ TBool CMTPConnection::ConnectionSuspended()
             CompleteCloseConnection();
             ret = ETrue;
             }
-        
+          
         SetState(EStateShutdown);
         PublishConnState(EDisconnectedFromHost);   
         }
@@ -372,10 +378,6 @@ void CMTPConnection::CompleteCloseConnection()
     
     CloseAllSessions();
     iSessions.Reset();
-	if (iTransportConnection != NULL)
-		{
-		iTransportConnection->Unbind(*this);
-		}
     
     //notify ConnectionMgr and corresponding transports of completion of connection close
     iSingletons.ConnectionMgr().ConnectionCloseComplete(iConnectionId);    
@@ -405,8 +407,12 @@ void CMTPConnection::ConnectionResumedL(MMTPTransportConnection& aTransportConne
         */
         SessionOpenedL(KMTPSessionNone);            
         
+        if (iTransportConnection != NULL)
+            {
+            iTransportConnection->Unbind(*this);
+            }
         iTransportConnection = &aTransportConnection;
-        iTransportConnection->BindL(*this); 
+        iTransportConnection->BindL(*this);
         SetState(EStateOpen); 
          
         }
@@ -707,7 +713,7 @@ CMTPConnection::CMTPConnection(TUint aConnectionId, MMTPTransportConnection& aTr
     iEventQ(_FOFF(CMTPEventLink, iLink)),
     iTransportConnection(&aTransportConnection)
     {
-    
+    iTransportConnection->BindL(*this);
     }
     
 /**

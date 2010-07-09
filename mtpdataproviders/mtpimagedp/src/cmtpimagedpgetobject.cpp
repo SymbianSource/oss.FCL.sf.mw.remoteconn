@@ -93,7 +93,22 @@ void CMTPImageDpGetObject::ConstructL()
     __FLOG(_L8(">> CMTPImageDpGetObject::ConstructL"));   
     __FLOG(_L8("<< CMTPImageDpGetObject::ConstructL"));
     }
-
+TMTPResponseCode CMTPImageDpGetObject::CheckRequestL()
+    {    
+    __FLOG(_L8(">> CMTPImageDpGetObject::CheckRequestL"));
+    TMTPResponseCode responseCode = CMTPRequestProcessor::CheckRequestL();
+    
+    TUint32 handle(Request().Uint32(TMTPTypeRequest::ERequestParameter1));
+    if ( handle != KMTPHandleAll )
+        {
+        CMTPObjectMetaData* ObjectMeta = CMTPObjectMetaData::NewL();
+        responseCode = MTPImageDpUtilits::VerifyObjectHandleL(
+                iFramework, handle, *ObjectMeta);
+        delete ObjectMeta;
+        }
+    __FLOG(_L8("<< CMTPImageDpGetObject::CheckRequestL"));
+    return responseCode;
+    }
 /**
 GetObject request handler
 */		
@@ -140,7 +155,7 @@ TBool CMTPImageDpGetObject::DoHandleCompletingPhaseL()
             {       
             //update new picture status            
             MTPImageDpUtilits::UpdateObjectStatusToOldL(iFramework, *objectInfo);
-            iDataProvider.DecreaseNewPictures(1);
+            iDataProvider.ResetNewPictures();
             }
         }
     
