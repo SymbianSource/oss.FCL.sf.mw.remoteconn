@@ -442,6 +442,12 @@ void CMTPObjectStore::InsertObjectL(CMTPObjectMetaData& aObject)
 	TBool needUpdateOwner = EFalse;
 	TUint dpId(aObject.Uint(CMTPObjectMetaData::EDataProviderId));
 
+	if ((aObject.DesC(CMTPObjectMetaData::ESuid)).Length() > KMaxFileName)
+	{
+	// The length of object uid should not excceeds KMaxFileName
+	User::Leave( KErrBadName );
+	}
+
 	TFileName suid;
 	suid.CopyLC(aObject.DesC(CMTPObjectMetaData::ESuid));
 	TUint32 suidHash = DefaultHash::Des16(suid);
@@ -478,7 +484,8 @@ void CMTPObjectStore::InsertObjectL(CMTPObjectMetaData& aObject)
 				aObject.SetUint(CMTPObjectMetaData::EHandle, handle);
 				id = iEnumeratingCacheObjList[found]->iPOUID;
 				aObject.SetUint(CMTPObjectMetaData::EIdentifier, id);
-				if(iEnumeratingCacheObjList[found]->iFormatcode != aObject.Uint(CMTPObjectMetaData::EFormatCode))
+				if(iEnumeratingCacheObjList[found]->iFormatcode != aObject.Uint(CMTPObjectMetaData::EFormatCode) ||
+					 iEnumeratingCacheObjList[found]->iObjParentId != aObject.Uint(CMTPObjectMetaData::EParentHandle))
 					{//have different owner
 					needUpdateOwner = ETrue;
 					}
@@ -523,6 +530,7 @@ void CMTPObjectStore::InsertObjectL(CMTPObjectMetaData& aObject)
 		needToInsert = ETrue;
 		__FLOG_VA((_L8("InsertObjectL After enmueration, needUpdateOwner %d needToInsert %d"), needUpdateOwner, needToInsert));
 		}
+		
 	if (needToInsert)//needToInsert and needUpdateOwner can't be true at same time
 		{
 		TUint32 parentHandle(aObject.Uint(CMTPObjectMetaData::EParentHandle));
@@ -562,6 +570,7 @@ void CMTPObjectStore::InsertObjectL(CMTPObjectMetaData& aObject)
 			iBatched.SetColL(EObjectStoreModes, aObject.Uint(CMTPObjectMetaData::EModes));
 			iBatched.SetColL(EObjectStoreNonConsumable, aObject.Uint(CMTPObjectMetaData::ENonConsumable));
 			iBatched.SetColL(EObjectStoreName, aObject.DesC(CMTPObjectMetaData::EName));
+			iBatched.SetColL(EObjectStoreParentHandle, aObject.Uint(CMTPObjectMetaData::EParentHandle));
 			iBatched.PutL();
 			CleanupStack::Pop(&iBatched);
 			IncTranOpsNumL();	
@@ -937,6 +946,14 @@ void CMTPObjectStore::InitializeDbL()
 		if (err==KErrNone && iDatabase.IsDamaged())
 			{
 			err = iDatabase.Recover();
+			}
+		if(KErrNone == err)
+			{
+			err = iDatabase.Compact();
+			if(KErrNone != err)
+				{//the DB file is corrupt
+				BaflUtils::DeleteFile(iSingletons.Fs(), fullName);
+				}
 			}
 		}
 	

@@ -26,10 +26,7 @@
 #include "rmtpdevicedpsingletons.h"
 #include "cmtpdevicedpconfigmgr.h"
 #include "mtpframeworkconst.h"
-
-//This file is exported from s60 sdk, now just copy it
-//to make sure onb can run
-#include "UiklafInternalCRKeys.h"
+#include "mtpcommonconst.h"
 
 // Class constants.
 __FLOG_STMT(_LIT8(KComponent,"GetStorageInfo");)

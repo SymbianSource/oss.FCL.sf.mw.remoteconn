@@ -33,10 +33,8 @@ const TInt KMaxStringlistSize( 1000 );
 //
 CStringList* CStringList::NewL()
     {
-    TRACE_FUNC_ENTRY;
     CStringList* self = CStringList::NewLC();
     CleanupStack::Pop( self );
-    TRACE_FUNC_EXIT;
     return self;
     }
 
@@ -47,11 +45,9 @@ CStringList* CStringList::NewL()
 //
 CStringList* CStringList::NewLC()
     {
-    TRACE_FUNC_ENTRY;
     CStringList* self = new ( ELeave ) CStringList();
     CleanupStack::PushL( self );
     self->ConstructL();
-    TRACE_FUNC_EXIT;
     return self;
     }
 
@@ -62,7 +58,6 @@ CStringList* CStringList::NewLC()
 //
 CStringList::CStringList()
     {
-    TRACE_FUNC;
     }
 
 // -----------------------------------------------------------------------------
@@ -72,10 +67,8 @@ CStringList::CStringList()
 //
 CStringList::~CStringList()
     {
-    TRACE_FUNC_ENTRY;
     delete iLines;
     iLines = NULL;
-    TRACE_FUNC_EXIT;
     }
 
 // -----------------------------------------------------------------------------
@@ -85,11 +78,9 @@ CStringList::~CStringList()
 //
 void CStringList::ConstructL()
     {
-    TRACE_FUNC_ENTRY;
     const TInt KDefaultArrayGranularity = 10;
     iLines = new (ELeave) CDesCArrayFlat(KDefaultArrayGranularity);
     SetMark(0);
-    TRACE_FUNC_EXIT;
     }
 
 // -----------------------------------------------------------------------------

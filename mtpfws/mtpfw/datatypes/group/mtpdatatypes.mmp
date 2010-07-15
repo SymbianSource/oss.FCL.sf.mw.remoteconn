@@ -37,8 +37,8 @@ deffile mtpdatatypes_f32
 MW_LAYER_SYSTEMINCLUDE_SYMBIAN
 
 USERINCLUDE     ../inc
-//For UiklafInternalCRKeys.h,should be removed, after we switched to DFs
-USERINCLUDE		../../common/inc
+USERINCLUDE 	../../inc
+
 
 
 SOURCEPATH      ../src

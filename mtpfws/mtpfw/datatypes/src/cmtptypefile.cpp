@@ -21,9 +21,7 @@
 #include <mtp/cmtptypefile.h>
 #include <mtp/mtpdatatypeconstants.h>
 
-//This file is exported from s60 sdk, now just copy it
-//to make sure onb can run
-#include "UiklafInternalCRKeys.h"
+#include "mtpcommonconst.h"
 
 // File type constants.
 const TInt KMTPFileChunkSizeForLargeFile(0x00080000); // 512K

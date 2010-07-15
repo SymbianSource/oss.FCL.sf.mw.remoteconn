@@ -34,12 +34,10 @@
 //
 CCapList* CCapList::NewL()
     {
-    TRACE_FUNC_ENTRY;
     CCapList* self = new(ELeave) CCapList();
     CleanupStack::PushL( self );
     self->ConstructL();
     CleanupStack::Pop( self );
-    TRACE_FUNC_EXIT;
     return self;
     }
 
@@ -50,9 +48,7 @@ CCapList* CCapList::NewL()
 //
 CCapList::~CCapList()
     {
-    TRACE_FUNC_ENTRY;
     delete iList;
-    TRACE_FUNC_EXIT;
     }
 
 // -----------------------------------------------------------------------------
@@ -71,9 +67,7 @@ CCapList::CCapList()
 //
 void CCapList::ConstructL()
     {
-    TRACE_FUNC_ENTRY;
     iList = CStringList::NewL();
-    TRACE_FUNC_EXIT;
     }
 
 // -----------------------------------------------------------------------------
@@ -94,7 +88,6 @@ CStringList* CCapList::List()
 //
 TInt CCapList::FindFromMark(TInt aId, TInt aType)
     {
-    TRACE_FUNC_ENTRY;
     TInt mark = List()->Mark();
     TInt count= List()->Count();
     
@@ -106,7 +99,6 @@ TInt CCapList::FindFromMark(TInt aId, TInt aType)
     TInt index=Find(aId, aType, mark);
     if ( index == KErrNotFound )
         {
-        LOGGER_WRITE_1( "CCapList::FindFromMark(TInt aId, TInt aType) returned : %d", KErrNotFound );
         return KErrNotFound;
         }
         
@@ -114,7 +106,6 @@ TInt CCapList::FindFromMark(TInt aId, TInt aType)
     __ASSERT_DEBUG(index>=mark, CapUtil::Panic(KErrGeneral));
 
     List()->SetMark(index+1);
-    LOGGER_WRITE_1( "CCapList::FindFromMark(TInt aId, TInt aType) returned : %d", index );
     return index;
     }
 

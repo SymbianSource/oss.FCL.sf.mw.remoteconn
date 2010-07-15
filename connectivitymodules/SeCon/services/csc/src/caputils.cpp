@@ -198,12 +198,23 @@ void CapUtil::GetOperatorNameL(TDes& aLongName, TDes& aCountryCode, TDes& aNetwo
         mobilePhone.GetCurrentNetwork( 
             status, mobilePhoneNetworkInfoPckg, mobilePhoneLocationArea );
         User::WaitForRequest( status );
-        User::LeaveIfError( status.Int() );     
+        User::LeaveIfError( status.Int() );
         }
     
     CleanupStack::PopAndDestroy( &mobilePhone );
     CleanupStack::PopAndDestroy( &server );
-    StrCopy( aLongName, mobilePhoneNetworkInfo.iLongName );
+    if ( mobilePhoneNetworkInfo.iLongName.Length() > 0 )
+        {
+        StrCopy( aLongName, mobilePhoneNetworkInfo.iLongName );
+        }
+    else if ( mobilePhoneNetworkInfo.iShortName.Length() > 0 )
+        {
+        StrCopy( aLongName, mobilePhoneNetworkInfo.iShortName );
+        }
+    else
+        {
+        StrCopy( aLongName, mobilePhoneNetworkInfo.iDisplayTag );
+        }
     StrCopy( aCountryCode, mobilePhoneNetworkInfo.iCountryCode );
     StrCopy( aNetworkID, mobilePhoneNetworkInfo.iNetworkId );
     

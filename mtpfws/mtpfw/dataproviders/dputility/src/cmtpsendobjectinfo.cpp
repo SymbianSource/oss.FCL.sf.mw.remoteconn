@@ -540,7 +540,7 @@ TBool CMTPSendObjectInfo::DoHandleSendObjectInfoCompleteL()
             }
         }
 
-    if (result)
+    if (result && !iIsFolder)
         {    
         result &= !Exists(iFullPath);
         if (!result)
@@ -613,7 +613,7 @@ TBool CMTPSendObjectInfo::DoHandleSendObjectPropListCompleteL()
             }
         }
         
-    if (result) 
+    if (result && !iIsFolder)
         {
         result = !Exists(iFullPath);
         if (!result)
@@ -1100,18 +1100,28 @@ void CMTPSendObjectInfo::ReserveObjectL()
     iReceivedObject->SetUint(CMTPObjectMetaData::EStorageId, iStorageId);
     iReceivedObject->SetDesCL(CMTPObjectMetaData::ESuid, iFullPath);
     
-    iFramework.ObjectMgr().ReserveObjectHandleL(*iReceivedObject, iObjectSize);    
-    
     if(iIsFolder)
         {
-        SetPropertiesL(); 
-        iFramework.ObjectMgr().CommitReservedObjectHandleL(*iReceivedObject);       
+        SetPropertiesL();
+        TUint32 handle = iFramework.ObjectMgr().HandleL(iFullPath);
+        if (handle != KMTPHandleNone)
+            {
+            // The folder is already in DB
+            iReceivedObject->SetUint(CMTPObjectMetaData::EHandle, handle);
+            iFramework.ObjectMgr().ModifyObjectL(*iReceivedObject);
+            }
+        else
+            {
+            iFramework.ObjectMgr().ReserveObjectHandleL(*iReceivedObject, iObjectSize);
+            iFramework.ObjectMgr().CommitReservedObjectHandleL(*iReceivedObject);
+            }
         }
     else
-    	{
-    	iExpectedSendObjectRequest.SetUint32(TMTPTypeRequest::ERequestSessionID, iSessionId);
-    	iFramework.RouteRequestRegisterL(iExpectedSendObjectRequest, iConnection);
-    	}
+        {
+        iFramework.ObjectMgr().ReserveObjectHandleL(*iReceivedObject, iObjectSize);    
+        iExpectedSendObjectRequest.SetUint32(TMTPTypeRequest::ERequestSessionID, iSessionId);
+        iFramework.RouteRequestRegisterL(iExpectedSendObjectRequest, iConnection);
+        }
     TUint32 parameters[3];
     parameters[0] = iStorageId;
     parameters[1] = iParentHandle;
@@ -1124,7 +1134,10 @@ void CMTPSendObjectInfo::CreateFsObjectL()
     {
     if (iIsFolder)
         {
-        User::LeaveIfError(iFramework.Fs().MkDirAll(iFullPath));
+        if (!Exists(iFullPath))
+            {
+            User::LeaveIfError(iFramework.Fs().MkDirAll(iFullPath));
+            }
         }
     else
         {

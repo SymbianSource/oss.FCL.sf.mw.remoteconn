@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2005-2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2005-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -378,21 +378,7 @@ TInt CSConFTP::PutFileObjectInitL( CObexBufObject*& aObject,
 
             if( ret == KErrNone )
                 {
-                delete aObject;
-                aObject = CObexBufObject::NewL( NULL );
-                        
-                if( aBuffer )
-                    {
-                    aBuffer->Reset();
-                    delete aBuffer;
-                    }
-                
-                aBuffer = CBufFlat::NewL( KSConBufferSize );
-                aBuffer->ResizeL( KSConBufferSize );
-                
-                TObexFilenameBackedBuffer bufferdetails( *aBuffer, iTempFileName, 
-                CObexBufObject::EDoubleBuffering );
-                aObject->SetDataBufL( bufferdetails );
+                CreateObexBufObjectL( aObject, aBuffer );
                 }
             }
         else
@@ -432,21 +418,7 @@ TInt CSConFTP::PutFileObjectInitL( CObexBufObject*& aObject,
     
     if( ret == KErrNone )
         {
-        delete aObject;
-        aObject = CObexBufObject::NewL( NULL );
-                
-        if( aBuffer )
-            {
-            aBuffer->Reset();
-            delete aBuffer;
-            }
-        
-        aBuffer = CBufFlat::NewL( KSConBufferSize );
-        aBuffer->ResizeL( KSConBufferSize );
-        
-        TObexFilenameBackedBuffer bufferdetails( *aBuffer, iTempFileName, 
-        CObexBufObject::EDoubleBuffering );
-        aObject->SetDataBufL( bufferdetails );
+        CreateObexBufObjectL( aObject, aBuffer );
         
         if( lowMemory )
             {
@@ -458,6 +430,31 @@ TInt CSConFTP::PutFileObjectInitL( CObexBufObject*& aObject,
     
     LOGGER_WRITE_1( "CSConFTP::PutFileObjectInitL( CObexBufObject*& aObject, CBufFlat*& aBuffer ) : returned %d", ret );
     return ret;
+    }
+
+void CSConFTP::CreateObexBufObjectL( CObexBufObject*& aObject, CBufFlat*& aBuffer )
+    {
+    delete aObject;
+    aObject = NULL;
+    aObject = CObexBufObject::NewL( NULL );
+    
+    delete aBuffer;
+    aBuffer = NULL;
+    
+    aBuffer = CBufFlat::NewL( KSConBufferSize );
+    aBuffer->ResizeL( KSConBufferSize );
+    
+    TObexFilenameBackedBuffer bufferdetails( *aBuffer, iTempFileName, 
+                    CObexBufObject::EDoubleBuffering );
+    TRAPD( err, aObject->SetDataBufL( bufferdetails ));
+    if ( err == KErrNoMemory )
+        {
+        LOGGER_WRITE( "KErrNoMemory, Using singe buffer strategy");
+        // If fails, use singe buffer strategy to save RAM
+        TObexFilenameBackedBuffer lowMemBufferdetails( *aBuffer, iTempFileName, 
+                    CObexBufObject::ESingleBuffering );
+        aObject->SetDataBufL( lowMemBufferdetails );
+        }
     }
 
 // -----------------------------------------------------------------------------
