@@ -27,6 +27,8 @@
 // Class constants.
 __FLOG_STMT(_LIT8(KComponent,"GetDevicePropValue");)
 
+_LIT(KSpace, " ");
+
 /**
 Two-phase constructor.
 @param aPlugin  The data provider plugin
@@ -96,7 +98,33 @@ Services the device friendly name property.
 void CMTPGetDevicePropValue::ServiceDeviceFriendlyNameL()
     {
     __FLOG(_L8("ServiceDeviceFriendlyNameL - Entry")); 
-    iString->SetL(iDpSingletons.DeviceDataStore().DeviceFriendlyName());
+    //if device friendly name is blank, which means it is the first time the device get connected,
+    //, so will use "manufacture + model id" firstly; if neither manufacture nor model
+    //id not able to be fetched by API, then use the default device friendly name     if ( iDpSingletons.DeviceDataStore().DeviceFriendlyName().Length()<=0 )
+    if ( iDpSingletons.DeviceDataStore().DeviceFriendlyName().Length()<=0 ) 
+        {
+        if ( iDpSingletons.DeviceDataStore().Manufacturer().Compare(KMTPDefaultManufacturer) && 
+                iDpSingletons.DeviceDataStore().Model().Compare(KMTPDefaultModel) )
+            {
+            HBufC* friendlyName = HBufC::NewLC( iDpSingletons.DeviceDataStore().Manufacturer().Length()+1+  iDpSingletons.DeviceDataStore().Model().Length());
+            TPtr ptrName = friendlyName->Des();
+            ptrName.Copy( iDpSingletons.DeviceDataStore().Manufacturer());
+            ptrName.Append(KSpace);
+            ptrName.Append( iDpSingletons.DeviceDataStore().Model());
+            iDpSingletons.DeviceDataStore().SetDeviceFriendlyNameL(ptrName);
+            iString->SetL(ptrName);
+            CleanupStack::PopAndDestroy(friendlyName);
+            }
+        else
+            {
+            iString->SetL(iDpSingletons.DeviceDataStore().DeviceFriendlyNameDefault());
+            }
+        }
+    else
+        {
+        iString->SetL(iDpSingletons.DeviceDataStore().DeviceFriendlyName());
+        }
+      
     SendDataL(*iString);  
     __FLOG(_L8("ServiceDeviceFriendlyNameL - Exit"));   
     }

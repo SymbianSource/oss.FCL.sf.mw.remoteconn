@@ -200,9 +200,12 @@ namespace bur_ts
 		{
 		RestoreJavaMidletDataL();
 		
-		// passive
-		SupplyPassiveSnapshotDataL();
-		RestorePassiveBaseDataL();
+		if (iIsPartial)
+		    {
+            // passive
+            SupplyPassiveSnapshotDataL();
+            RestorePassiveBaseDataL();
+		    }
 		
 		//active
 		SupplyActiveSnapshotDataL();
@@ -216,17 +219,19 @@ namespace bur_ts
 		*/
 		{
 		RestoreJavaMidletDataL();
-		
-		// passive
-		SupplyPassiveSnapshotDataL();
-		RestorePassiveBaseDataL();
-		RestorePassiveIncDataL();
-		
-		
-		//active
-		SupplyActiveSnapshotDataL();
-		RestoreActiveBaseDataL();
-		RestoreActiveIncDataL();
+			
+        // passive
+        SupplyPassiveSnapshotDataL();
+        RestorePassiveBaseDataL();
+        RestorePassiveIncDataL();
+				
+        if (iIsPartial)
+            {   	
+            //active
+            SupplyActiveSnapshotDataL();
+            RestoreActiveBaseDataL();
+            RestoreActiveIncDataL();
+            }		
 		}
 		
 	

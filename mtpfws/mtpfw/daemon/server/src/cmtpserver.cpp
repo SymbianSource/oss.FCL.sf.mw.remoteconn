@@ -73,6 +73,7 @@ CMTPServer::~CMTPServer()
     {
     __FLOG(_L8("~CMTPServer - Entry"));
     delete iShutdown;
+    iShutdown = NULL;
     iFrameworkSingletons.ConnectionMgr().StopTransports();
     iFrameworkSingletons.DpController().UnloadDataProviders();
     iFrameworkSingletons.Close();
@@ -139,12 +140,6 @@ void CMTPServer::DropSession()
     if (--iSessionCount==0 && iFrameworkSingletons.ConnectionMgr().TransportCount() == 0)
         {
         // No active MTP client API sessions remain, start the shutdown timer.
-        if (!iShutdown)
-            {
-            TRAPD(error, iShutdown = CMTPShutdown::NewL());
-            __FLOG(_L8("CMTPShutdown Loaded- Entry"));
-            UNUSED_VAR(error);    
-            }
         if (iShutdown)
             {
             __FLOG(_L8("Shutdown Started - Entry"));
@@ -193,6 +188,12 @@ void CMTPServer::ConstructL()
     __FLOG(_L8("ConstructL - Entry"));
     StartL(KMTPServerName);
     iFrameworkSingletons.OpenL();
+    if (!iShutdown)
+        {
+        TRAPD(error, iShutdown = CMTPShutdown::NewL());
+        __FLOG(_L8("CMTPShutdown Loaded- Entry"));
+        UNUSED_VAR(error);    
+        }    
     __FLOG(_L8("ConstructL - Exit"));
     }
         

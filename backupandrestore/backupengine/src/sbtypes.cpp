@@ -19,7 +19,7 @@
  @file
 */
 #include <e32std.h>
-#include <connect/panic.h>
+#include "sbepanic.h"
 #include "sbtypes.h"
 #include <s32mem.h>
 #include <apgcli.h>

@@ -1,0 +1,47 @@
+/*
+* Copyright (c) 2006 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: 
+*	 This file provides the information required for building the whole of
+*    plugins.
+*
+*/
+
+#include <platform_paths.hrh>
+
+PRJ_PLATFORMS
+
+PRJ_EXPORTS
+#ifdef __BT
+../../rom/dunbt.iby     CORE_MW_LAYER_IBY_EXPORT_PATH(dunbt.iby)
+#endif
+#ifdef __IRDA
+../../rom/dunir.iby     CORE_MW_LAYER_IBY_EXPORT_PATH(dunir.iby)
+#endif
+#ifdef __USB
+../../rom/dunusb.iby    CORE_MW_LAYER_IBY_EXPORT_PATH(dunusb.iby)
+#endif
+
+PRJ_MMPFILES
+
+#ifdef __BT
+dunbt.mmp
+#endif
+#ifdef __IRDA
+dunir.mmp
+#endif
+#ifdef __USB
+dunusb.mmp
+#endif
+
+PRJ_TESTMMPFILES

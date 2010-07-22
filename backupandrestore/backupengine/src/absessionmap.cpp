@@ -22,7 +22,7 @@
 #include "absession.h"
 #include "absessionmap.h"
 #include "sbedataowner.h"
-#include <connect/panic.h>
+#include "sbepanic.h"
 
 namespace conn
 	{

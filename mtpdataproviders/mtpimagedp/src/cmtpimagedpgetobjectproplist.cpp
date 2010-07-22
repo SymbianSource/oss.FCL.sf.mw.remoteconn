@@ -363,7 +363,7 @@ void CMTPImageDpGetObjectPropList::ServiceOneObjectPropertyL(TUint32 aHandle, TU
         case EMTPObjectPropCodeRepresentativeSampleHeight:
         case EMTPObjectPropCodeRepresentativeSampleWidth:
             {
-            TUint32 value;
+            TUint32 value(0);
             iPropertyMgr.GetPropertyL(TMTPObjectPropertyCode(aPropCode), value, EFalse);
             CMTPTypeObjectPropListElement& propElem = iPropertyList->ReservePropElemL(aHandle, propCode); 
             propElem.SetUint32L(CMTPTypeObjectPropListElement::EValue, value);

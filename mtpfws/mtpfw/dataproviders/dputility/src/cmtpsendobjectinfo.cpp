@@ -717,7 +717,7 @@ TBool CMTPSendObjectInfo::DoHandleSendObjectCompleteL()
             iFullPath.LowerCase();
             __FLOG_VA((_L8("File Name %S"), &iFullPath));
             TParsePtrC file( iFullPath );
-            if ( file.ExtPresent() && iExceptionList.Find(file.Ext()) != KErrNotFound)
+            if ( file.ExtPresent() && file.Ext().Length()<=KExtensionLength && iExceptionList.Find(file.Ext()) != KErrNotFound)
                 {
                 TUint32 DpId = iFramework.DataProviderId();
                 HBufC* mime = iDpSingletons.MTPUtility().ContainerMimeType(iFullPath);

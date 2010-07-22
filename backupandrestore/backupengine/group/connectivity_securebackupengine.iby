@@ -21,7 +21,7 @@ file=ABI_DIR\BUILD_DIR\sbeclient.dll			System\libs\sbeclient.dll
 file=ABI_DIR\BUILD_DIR\abclient.dll			System\libs\abclient.dll
 
 #ifndef SBEHEAPMAX
-#define SBEHEAPMAX  0x400000
+#define SBEHEAPMAX  0x2000000
 #endif
 
 file=ABI_DIR\BUILD_DIR\sbengine.exe			System\programs\sbengine.exe heapmax=SBEHEAPMAX

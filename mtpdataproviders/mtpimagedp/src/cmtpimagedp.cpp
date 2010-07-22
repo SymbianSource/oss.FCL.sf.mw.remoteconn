@@ -121,7 +121,7 @@ void CMTPImageDataProvider::ConstructL()
     
     //Define RProperty of new pictures for status data provider
     _LIT_SECURITY_POLICY_PASS(KAllowReadAll);
-    TInt error = RProperty::Define(TUid::Uid(KMTPServerUID), KMTPNewPicKey, RProperty::EInt, KAllowReadAll, KAllowReadAll);
+    TInt error = RProperty::Define(KMTPNewPicKey, RProperty::EInt, KAllowReadAll, KAllowReadAll);
     if (error != KErrNone && error != KErrAlreadyExists)
         {
         __FLOG_1(_L8("CMTPImageDataProvider::ConstructL - RProperty define error:%d"), error);
@@ -586,7 +586,7 @@ void CMTPImageDataProvider::SessionClosedL(const TMTPNotificationParamsSessionCh
     /**
      * We clear property manager cache when receiving session close notification from framework every times
      */
-    iPropertyMgr->ClearCacheL();
+    iPropertyMgr->ClearAllCache();
     
     __FLOG(_L8("<< SessionClosedL"));
     }

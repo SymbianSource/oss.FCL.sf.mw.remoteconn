@@ -42,7 +42,7 @@ Verification data for the SendObjectInfo request
 const TMTPRequestElementInfo KMTPSendObjectInfoPolicy[] = 
     {
     {TMTPTypeRequest::ERequestParameter1, EMTPElementTypeStorageId, EMTPElementAttrWrite, 1, 0, 0},                
-    {TMTPTypeRequest::ERequestParameter2, EMTPElementTypeObjectHandle, EMTPElementAttrWrite, 2, KMTPHandleAll, KMTPHandleNone}
+    {TMTPTypeRequest::ERequestParameter2, EMTPElementTypeObjectHandle, EMTPElementAttrDir, 2, KMTPHandleAll, KMTPHandleNone}
     };
 
 

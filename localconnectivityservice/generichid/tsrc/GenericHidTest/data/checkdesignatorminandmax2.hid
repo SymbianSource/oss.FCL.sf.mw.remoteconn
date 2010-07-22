@@ -1,0 +1,2 @@
+0x59, 0x00, //define designator maximum
+0x91, 0x01 // main output tag - create field

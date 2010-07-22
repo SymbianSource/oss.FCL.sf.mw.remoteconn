@@ -1,0 +1,44 @@
+/*
+* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: 
+*
+*/
+
+
+// Local Connectivity Service Component
+#include "../remoteconn_plat/group/bld.inf"
+#include "../localconnectivityservice/group/bld.inf"
+
+// MTP Component
+#include "../mtpdataproviders/mtppictbridgedp/pictbridgeengine/group/bld.inf"
+#include "../mtpfws/mtpfw/group/bld.inf"
+#include "../mtpdataproviders/mtpfileandfolderdp/group/bld.inf"
+#include "../mtpdataproviders/mtpwmpextndp/group/bld.inf"
+#include "../mtptransports/mtpusbtransport/group/bld.inf"
+//#include "../mtpfws/mtpfw/dataproviders/devdp/devdpextn/group/bld.inf"
+#include "../mtptransports/mtpptpiptransport/group/bld.inf"
+#include "../mtptransports/mtpbttransport/group/bld.inf"
+#include "../mtpdataproviders/mtpmetadatadp/group/bld.inf"
+#include "../mtpdataproviders/mtpstatusdp/group/bld.inf"
+#include "../mtpdataproviders/mtppictbridgedp/group/bld.inf"
+#include "../mtpdataproviders/mtpimagedp/group/bld.inf"
+
+#include "../mtpdataproviders/mtpplaybackcontroldp/group/bld.inf"
+
+#ifdef FF_MTP_CONTROLLER
+#include        "../mtptransports/mtpcontroller/group/bld.inf"
+#endif//FF_MTP_CONTROLLER
+
+// SBE Component
+#include "../backupandrestore/backupengine/group/bld.inf"

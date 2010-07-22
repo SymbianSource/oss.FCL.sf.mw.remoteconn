@@ -25,7 +25,6 @@
 #include <mtp/tmtptypeuint32.h>
 #include "cmtphandleallocator.h"
 #include "cmtpobjectstore.h"
-#include "cmtpreferencemgr.h"
 #include "dbutility.h"
 #include "cmtpdataprovidercontroller.h"
 #include "cmtpdataprovider.h"
@@ -54,6 +53,8 @@ const TInt KMaxLimitCommitAfterEnumeration = 256;
 const TInt KMaxLimitCompactInEnumeration = 2048;
 const TInt KMaxLimitCompactAfterEnumeration = 1024;
 const TInt KSnapshotGranularity = 128; 
+const TInt KMaxLimitSnapshotSize = 50000;
+
 
 
 
@@ -496,9 +497,15 @@ void CMTPObjectStore::InsertObjectL(CMTPObjectMetaData& aObject)
 			else
 				{
 				aObject.SetUint(CMTPObjectMetaData::EHandle, handle);
-				needUpdateOwner = ETrue;
-				//while enumerating, we ignore the repeatedly INSERT operations.
-				//User::Leave(KErrAlreadyExists);
+				CMTPObjectMetaData* object(CMTPObjectMetaData::NewLC());
+				if(ObjectL(aObject.DesC(CMTPObjectMetaData::ESuid), *object))
+					{
+					if(object->Uint(CMTPObjectMetaData::EDataProviderId) != aObject.Uint(CMTPObjectMetaData::EDataProviderId))
+						{
+						needUpdateOwner = ETrue;
+						}
+					}
+				CleanupStack::PopAndDestroy(object);
 				}
 			__FLOG_VA(_L8("Not Found in Snapshot"));
 			}
@@ -768,7 +775,7 @@ void CMTPObjectStore::RemoveObjectL(const TMTPTypeUint32& aHandle)
             }
         iCachedSuidHash = 0;
         iCachedHandle = 0;
-        
+        iReferenceMgr->RemoveReferencesL(aHandle.Value());
         iBatched.DeleteL();
         __FLOG(_L8("RemoveObjectL From iBacthed"));
         IncTranOpsNumL();
@@ -787,6 +794,8 @@ void CMTPObjectStore::RemoveObjectL(const TDesC& aSuid)
 			}
 		iCachedSuidHash = 0;
 		iCachedHandle = 0;
+		//no need to call GetL already all it in LocateBySuidL
+		iReferenceMgr->RemoveReferencesL(iBatched_SuidHashID.ColUint32(EObjectStoreHandleId));
 		iBatched_SuidHashID.DeleteL();
 		IncTranOpsNumL();
 		}
@@ -837,6 +846,8 @@ void CMTPObjectStore::UnreserveObjectHandleL(const CMTPObjectMetaData& /*aObject
 void CMTPObjectStore::CleanL()
 	{
 	__FLOG(_L8("CleanL - Entry"));
+	
+	RemoveUndefinedObjectsL();
 	Swi::RSisRegistrySession sisSession;
 	User::LeaveIfError(sisSession.Connect());
 	CleanupClosePushL(sisSession);
@@ -1374,6 +1385,39 @@ void CMTPObjectStore::CleanDBSnapshotL(TBool aOnlyRoot/* = EFalse*/)
     
     __FLOG(_L8("CleanDBSnapshotL Exit"));
     }
+
+void CMTPObjectStore::RemoveUndefinedObjectsL()
+    {
+    __FLOG(_L8("CompactDBSnapshotL Entry"));
+    
+    if (iCleanUndefined)
+        {
+        return;
+        }
+    
+    TInt32 count = 0;
+    RDbTable temp;
+    CleanupClosePushL(temp);
+    User::LeaveIfError(temp.Open(iDatabase, KSQLHandleTableName, RDbRowSet::EUpdatable));
+    count = temp.CountL(RDbRowSet::EQuick);
+
+    __FLOG_VA((_L8("Count before deletion %d "), count));
+    CleanupStack::PopAndDestroy(&temp);
+    
+    if (count > KMaxLimitSnapshotSize)
+        {
+        // Delete all object with undefined format
+        _LIT(KSQLDeleteObjectText, "DELETE FROM HandleStore WHERE FormatCode = %u");
+        iSqlStatement.Format(KSQLDeleteObjectText, EMTPFormatCodeUndefined);
+        User::LeaveIfError(iDatabase.Execute(iSqlStatement));    
+        }
+    
+    iCleanUndefined = ETrue;
+
+    
+    __FLOG(_L8("CompactDBSnapshotL Exit"));    
+    }
+
 
 CMTPObjectStore::CEnumertingCacheItem::CEnumertingCacheItem(TUint32 aSuidHash, TUint32 aHandle, TUint32 aParent, TUint32 aFormat, TUint64 aId, TUint8 aDpID)
 	{

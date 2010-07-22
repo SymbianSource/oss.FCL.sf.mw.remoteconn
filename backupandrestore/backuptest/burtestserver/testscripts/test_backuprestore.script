@@ -1,0 +1,163 @@
+// Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+// All rights reserved.
+// This component and the accompanying materials are made available
+// under the terms of "Eclipse Public License v1.0"
+// which accompanies this distribution, and is available
+// at the URL "http://www.eclipse.org/legal/epl-v10.html".
+//
+// Initial Contributors:
+// Nokia Corporation - initial contribution.
+//
+// Contributors:
+//
+// Description:
+//
+
+//////////////////////////////////////////////////////////////////////////////////////
+//
+// test.script
+//
+////////////////////////////////////////////////////////////////////////////////////
+LOAD_SUITE BURTestServer
+
+PRINT ----------------------------------------------
+PRINT  Test Backup Restore
+PRINT ----------------------------------------------
+RUN_UTILS DeleteDirectory C:\BackupArchive\
+START_TESTCASE MTP-SBE-BACKUPPARTIALBASE-0000
+//! @SYMTestCaseID MTP-SBE-BACKUPPARTIALBASE-0000
+//! @SYMTestCaseDesc Backup with partial and base
+//! @SYMPREQ 2492
+//! @SYMTestStatus Released
+//! @SYMTestPriority High
+//! @SYMTestActions   Specify ini file for base and partial backup
+//! @SYMTestExpectedResults no error
+//! @SYMTestType CIT
+RUN_TEST_STEP 100 BURTestServer TestBackup z:\testdata\scripts\sbetestdata\test.ini BACKUP_RESTORE_0010
+END_TESTCASE MTP-SBE-BACKUPPARTIALBASE-0000
+
+START_TESTCASE MTP-SBE-RESTOREPARTIALBASE-0001
+//! @SYMTestCaseID MTP-SBE-RESTOREPARTIALBASE-0001
+//! @SYMTestCaseDesc restore with partial and base
+//! @SYMPREQ 2492
+//! @SYMTestStatus Released
+//! @SYMTestPriority High
+//! @SYMTestActions   Specify ini file for base and partial restore
+//! @SYMTestExpectedResults no error
+//! @SYMTestType CIT
+RUN_TEST_STEP 100 BURTestServer TestRestore z:\testdata\scripts\sbetestdata\test.ini BACKUP_RESTORE_0010
+END_TESTCASE MTP-SBE-RESTOREPARTIALBASE-0001
+
+START_TESTCASE MTP-SBE-BACKUPPARTIAL-0002
+//! @SYMTestCaseID MTP-SBE-BACKUPPARTIAL-0002
+//! @SYMTestCaseDesc Backup with partial and increament
+//! @SYMPREQ 2492
+//! @SYMTestStatus Released
+//! @SYMTestPriority High
+//! @SYMTestActions   Specify ini file for increament and partial backup
+//! @SYMTestExpectedResults no error
+//! @SYMTestType CIT
+RUN_TEST_STEP 100 BURTestServer TestBackup z:\testdata\scripts\sbetestdata\test.ini BACKUP_RESTORE_0020
+END_TESTCASE MTP-SBE-BACKUPPARTIAL-0002
+
+START_TESTCASE MTP-SBE-RESTOREPARTIAL-0003
+//! @SYMTestCaseID MTP-SBE-RESTOREPARTIAL-0003
+//! @SYMTestCaseDesc Restore with partial and increament
+//! @SYMPREQ 2492
+//! @SYMTestStatus Released
+//! @SYMTestPriority High
+//! @SYMTestActions   Specify ini file for increament and partial restore
+//! @SYMTestExpectedResults no error
+//! @SYMTestType CIT
+RUN_TEST_STEP 100 BURTestServer TestRestore z:\testdata\scripts\sbetestdata\test.ini BACKUP_RESTORE_0020
+END_TESTCASE MTP-SBE-RESTOREPARTIAL-0003
+
+START_TESTCASE MTP-SBE-BACKUPFULLBASE-0004
+//! @SYMTestCaseID MTP-SBE-BACKUPFULLBASE-0004
+//! @SYMTestCaseDesc Backup with full and base
+//! @SYMPREQ 2492
+//! @SYMTestStatus Released
+//! @SYMTestPriority High
+//! @SYMTestActions   Specify ini file for full and base backup
+//! @SYMTestExpectedResults no error
+//! @SYMTestType CIT
+RUN_TEST_STEP 500 BURTestServer TestBackup z:\testdata\scripts\sbetestdata\test.ini BACKUP_RESTORE_0030
+END_TESTCASE MTP-SBE-BACKUPFULLBASE-0004
+
+START_TESTCASE MTP-SBE-RESTOREFULLBASE-0005
+//! @SYMTestCaseID MTP-SBE-RESTOREFULLBASE-0005
+//! @SYMTestCaseDesc Restore with full and base
+//! @SYMPREQ 2492
+//! @SYMTestStatus Released
+//! @SYMTestPriority High
+//! @SYMTestActions   Specify ini file for full and base restore
+//! @SYMTestExpectedResults no error
+//! @SYMTestType CIT
+RUN_TEST_STEP 500 BURTestServer TestRestore z:\testdata\scripts\sbetestdata\test.ini BACKUP_RESTORE_0030
+END_TESTCASE MTP-SBE-RESTOREFULLBASE-0005
+
+START_TESTCASE MTP-SBE-BACKUPFULL-0006
+//! @SYMTestCaseID MTP-SBE-BACKUPFULL-0006
+//! @SYMTestCaseDesc Backup with full and increament
+//! @SYMPREQ 2492
+//! @SYMTestStatus Released
+//! @SYMTestPriority High
+//! @SYMTestActions   Specify ini file for full and increament backup
+//! @SYMTestExpectedResults no error
+//! @SYMTestType CIT
+RUN_TEST_STEP 500 BURTestServer TestBackup z:\testdata\scripts\sbetestdata\test.ini BACKUP_RESTORE_0040
+END_TESTCASE MTP-SBE-BACKUPFULL-0006
+
+START_TESTCASE MTP-SBE-RESTOREFULL-0007
+//! @SYMTestCaseID MTP-SBE-RESTOREFULL-0007
+//! @SYMTestCaseDesc Restore with full and increament
+//! @SYMPREQ 2492
+//! @SYMTestStatus Released
+//! @SYMTestPriority High
+//! @SYMTestActions   Specify ini file for full and increament restore
+//! @SYMTestExpectedResults no error
+//! @SYMTestType CIT
+RUN_TEST_STEP 500 BURTestServer TestRestore z:\testdata\scripts\sbetestdata\test.ini BACKUP_RESTORE_0040
+END_TESTCASE MTP-SBE-RESTOREFULL-0007
+
+RUN_UTILS DeleteFile c:\sbetest1.txt
+RUN_UTILS DeleteFile c:\sbetest2.txt
+RUN_UTILS CopyFile  z:\testdata\scripts\sbetestdata\increamenttest.xml c:\sbetest1.txt
+RUN_UTILS CopyFile  z:\testdata\scripts\sbetestdata\increamenttest.xml c:\sbetest2.txt
+RUN_UTILS MakeReadWrite c:\sbetest1.txt
+RUN_UTILS MakeReadWrite c:\sbetest2.txt
+START_TESTCASE MTP-SBE-BACKUPPARTIALBASE-0008
+//! @SYMTestCaseID MTP-SBE-BACKUPPARTIALBASE-0008
+//! @SYMTestCaseDesc Do passive backup for a data owner which has a very complex backup registration file 
+//! @SYMPREQ 2492
+//! @SYMTestStatus Released
+//! @SYMTestPriority high
+//! @SYMTestActions Do passive backup for a data owner which has a very complex backup registration file  
+//! @SYMTestExpectedResults Backup succeeds
+//! @SYMTestType CIT
+RUN_TEST_STEP 500 BURTestServer TestBackup z:\testdata\scripts\sbetestdata\test.ini BACKUP_RESTORE_0100
+END_TESTCASE MTP-SBE-BACKUPPARTIALBASE-0008
+
+START_TESTCASE MTP-SBE-BACKUPPARTIALBASE-0010
+//! @SYMTestCaseID MTP-SBE-BACKUPPARTIALBASE-0010
+//! @SYMTestCaseDesc Do passive backup for a data owner with a invalid drive list
+//! @SYMPREQ 2492
+//! @SYMTestStatus Released
+//! @SYMTestPriority high
+//! @SYMTestActions Do passive backup for a data owner with a invalid drive list  
+//! @SYMTestExpectedResults Backup fails with error code -1
+//! @SYMTestType CIT
+RUN_TEST_STEP 500 BURTestServer TestBackup z:\testdata\scripts\sbetestdata\test.ini BACKUP_RESTORE_0110
+END_TESTCASE MTP-SBE-BACKUPPARTIALBASE-0010
+
+START_TESTCASE MTP-SBE-BACKUPPARTIALBASE-0012
+//! @SYMTestCaseID MTP-SBE-BACKUPPARTIALBASE-0012
+//! @SYMTestCaseDesc Do passive backup with abnormal operation sequence
+//! @SYMPREQ 2492
+//! @SYMTestStatus Released
+//! @SYMTestPriority high
+//! @SYMTestActions Do passive backup with abnormal operation sequence   
+//! @SYMTestExpectedResults Backup fails with error code -21
+//! @SYMTestType CIT
+RUN_TEST_STEP 500 BURTestServer TestBackup2 z:\testdata\scripts\sbetestdata\test.ini BACKUP_RESTORE_0120
+END_TESTCASE MTP-SBE-BACKUPPARTIALBASE-0012

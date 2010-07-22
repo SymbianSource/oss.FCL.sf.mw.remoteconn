@@ -25,6 +25,7 @@
 #include <e32base.h>
 #include <f32file.h>
 #include <e32std.h>
+#include <e32hashtab.h> 
 
 #include <mdesession.h>
 #include <mtp/mtpprotocolconstants.h>
@@ -74,7 +75,8 @@ public:
     void GetPropertyL(TMTPObjectPropertyCode aProperty, CMTPTypeArray& aValue, TBool alwaysCreate = ETrue);
     
     //clear the cache
-    void ClearCacheL();
+    void ClearAllCache();
+    void ClearCache(TUint aHandle);
     void ConvertMTPTimeStr2TTimeL(const TDesC& aTimeString, TTime& aModifiedTime) const;
     
     void StoreThunmnail(TUint aHandle, HBufC8* aData);
@@ -108,6 +110,9 @@ private:
     void OpenMdeObjectL();
     void ClearThumnailCache();
     
+    TBool FindPropertiesCache(TUint aObjectHandle);
+    void  DestroyPropertiesCahce(TUint aObjectHandle);
+    
 private:
     
     //define property cache object
@@ -123,7 +128,6 @@ private:
             EImagePixHeight       = 1,
             EImageBitDepth        = 2,
             EDateCreated          = 3,
-            
             /**
             The number of elements.        
             */
@@ -138,11 +142,9 @@ private:
         
         const TDesC& DesC(TUint aId) const;
         TUint Uint(TUint aId) const;
-        TUint ObjectHandle() const;
         
         void SetDesCL(TUint aId, const TDesC& aValue);
-        void SetUint(TUint aId, TUint aValue);  
-        void SetObjectHandle(TUint aObjectHandle);
+        void SetUint(TUint aId, TUint aValue);
         
     private:
         
@@ -178,11 +180,6 @@ private:
         */
         RArray<TUint>                   iElementsUint;
         
-        /**
-        The object handle of owner
-        */
-        TUint                           iObjectHandle;
-        
         static const TElementMetaData   KElements[];        
     };
     
@@ -211,7 +208,6 @@ private:
     MMTPObjectMgr&              iObjectMgr;
     CMTPObjectMetaData*         iObjectInfo;  //not owned
     TBool                       iCacheHit;//flag to indicate cache is available
-    TBool                       iNeedParse;//flag to indicate whether we need to parse image file by our self
 	
     /*
      * Cache thumbnail, thumbnail size is inconsistent in winlogo test
@@ -222,7 +218,8 @@ private:
      * Cache the latest image properties which PC send to device,
      * it can optimize synce/reverse-sync performance due to reduction of object properties generation
      */
-    CMTPImagePropertiesCache*     iPropertiesCache; 
+    CMTPImagePropertiesCache*                     iCurrentPropertiesCache;
+    RHashMap<TUint, CMTPImagePropertiesCache*>    iPropretiesCacheMap;
     };
    
 #endif // CMTPIMAGEDPOBJECTPROPERTYMGR_H

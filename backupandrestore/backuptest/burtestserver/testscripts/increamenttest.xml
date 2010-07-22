@@ -1,0 +1,11 @@
+<?xml version="1.0" standalone="yes"?>
+
+<backup_registration>
+   <passive_backup base_backup_only="no">
+      <include_file name="needbackup.xml"/>
+   </passive_backup>
+   <public_backup>
+      <include_file name="c:\publicbackup.xml"/>
+   </public_backup>
+</backup_registration>
+

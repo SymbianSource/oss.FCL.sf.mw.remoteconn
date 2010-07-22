@@ -25,6 +25,5 @@ ARMV5
 PRJ_EXPORTS
 
 PRJ_MMPFILES
-#ifndef WINSCW 
 mtpusbsiccc.mmp
-#endif
+

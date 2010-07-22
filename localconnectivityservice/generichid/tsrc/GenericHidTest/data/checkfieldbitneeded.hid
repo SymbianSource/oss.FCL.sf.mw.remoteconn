@@ -1,0 +1,28 @@
+//0x91, 0x00, // main output tag - create field
+0x91, 0x41, // main output tag - create field KNullStateFlag
+
+
+//tests for BitsToRepresentRange
+0x15, 0x10, //define logical minimum
+0x25, 0x10, //define logical maximum
+0x91, 0x01, // main output tag - create field
+
+0x15, 0x05, //define logical minimum
+0x25, 0x10, //define logical maximum
+0x91, 0x01, // main output tag - create field
+
+
+0x17, 0xFF, 0xFF, 0xFF, 0xFF, //define logical minimum - negative minimum
+0x25, 0x10, //define logical maximum
+0x91, 0x01, // main output tag - create field
+
+0x15, 0x05, //define logical minimum
+0x25, 0x10, //define logical maximum
+
+//0x75, 0x00, // set iGlobal.iSize to 0
+0x77, 0xFF, 0xFF, 0xFF, 0xFF, // set iGlobal.iSize to -1
+
+0x91, 0x01, // main output tag - create field
+
+0x75, 0x00, // set iGlobal.iSize to 0
+0x91, 0x01 // main output tag - create field

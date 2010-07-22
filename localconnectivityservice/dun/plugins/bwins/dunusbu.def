@@ -1,0 +1,3 @@
+EXPORTS
+	?NewLocalPluginL@@YAPAVMDunLocalMediaPlugin@@XZ @ 1 NONAME ; class MDunLocalMediaPlugin * NewLocalPluginL(void)
+

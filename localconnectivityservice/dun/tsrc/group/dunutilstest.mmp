@@ -1,0 +1,53 @@
+/*
+* Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:
+*
+*/
+
+TARGET		  dunutilstest.dll
+TARGETTYPE	  dll
+UID			 0x1000008d 0xE9AF118D
+
+CAPABILITY      ALL -TCB
+
+//TARGETPATH      ?target_path
+DEFFILE         dunutilstest.def
+
+USERINCLUDE	 ../inc ../../utils/inc
+
+SYSTEMINCLUDE  /epoc32/include/mw/hb/hbwidgets
+
+#if defined(__S60_)
+  //  OSEXT_LAYER_SYSTEMINCLUDE
+    MW_LAYER_SYSTEMINCLUDE
+#else
+    //SYSTEMINCLUDE   /epoc32/include 
+    //SYSTEMINCLUDE   /epoc32/include/internal
+#endif
+
+SOURCEPATH	  ../src
+
+SOURCE		  dunutilstest.cpp
+
+SOURCEPATH	  ../../utils/src
+
+SOURCE		  DunNoteHandler.cpp
+
+
+LIBRARY         euser.lib
+LIBRARY         stiftestinterface.lib
+LIBRARY         sysutil.lib
+LIBRARY			HbWidgets.lib
+
+LANG            SC

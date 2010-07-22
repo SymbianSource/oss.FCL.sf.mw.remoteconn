@@ -1,0 +1,18 @@
+<?xml version="1.0" standalone="yes"?>
+
+<backup_registration>
+    <public_backup>
+      <include_directory name = "C:\public\81113002\"/>
+	  <include_directory name = "!:\public\test\"/>
+	  <exclude name = "c:\nkern.txt"/>
+    </public_backup>    
+   
+    <!-- Increase condition coverage -->
+    <exclude name = "c:\resource\81113002\nkern.txt"/>
+
+    <!--test proxy parse function. --> 
+    <proxy_data_manager sid= "0x10202BE9" />
+
+    <system_backup/>
+    <restore requires_reboot = "no"/>
+</backup_registration>

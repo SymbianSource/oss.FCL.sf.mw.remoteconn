@@ -40,9 +40,8 @@ burtestserver.iby              /epoc32/rom/include/burtestserver.iby
 ../testscripts/test_restorepackage.script       z:/testdata/scripts/sbetestdata/test_restorepackage.script
 ../testscripts/test_increament.script           z:/testdata/scripts/sbetestdata/test_increament.script
 
-../testscripts/sbeconfig.xml                /epoc32/release/winscw/udeb/z/private/10202d56/sbeconfig.xml
-../testscripts/sbeconfig.xml                /epoc32/release/winscw/urel/z/private/10202d56/sbeconfig.xml
-
+../../testdata/armv5/bigexeforbackup.sis     /epoc32/data/z/testdata/scripts/sbetestdata/bigexeforbackup.sis
+../../testdata/armv5/test_dll_nopublic.sis   /epoc32/data/z/testdata/scripts/sbetestdata/test_dll_nopublic.sis
 PRJ_TESTMMPFILES
     burtestserver.mmp
 

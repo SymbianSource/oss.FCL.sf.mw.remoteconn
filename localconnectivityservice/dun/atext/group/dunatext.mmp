@@ -1,0 +1,54 @@
+/*
+* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Project definition file for project DUN ATEXT
+*
+*/
+
+
+#include <data_caging_paths.hrh>
+#include <platform_paths.hrh>
+
+TARGET                  dunatext.dll
+TARGETTYPE              DLL
+UID                     0x1000008d 0x2001CBE6
+
+CAPABILITY              CAP_GENERAL_DLL
+VENDORID                VID_DEFAULT
+
+SOURCEPATH              ../src
+SOURCE                  DunAtCmdEchoer.cpp
+SOURCE                  DunAtCmdHandler.cpp
+SOURCE                  DunAtCmdPusher.cpp
+SOURCE                  DunAtUrcHandler.cpp
+SOURCE                  DunAtModeListen.cpp
+SOURCE                  DunAtEcomListen.cpp
+SOURCE                  DunAtNvramListen.cpp
+SOURCE                  DunAtSpecialCmdHandler.cpp
+
+USERINCLUDE             ../inc ../../utils/inc
+
+MW_LAYER_SYSTEMINCLUDE
+
+// Note:
+// The only other SYSTEMINCLUDE should you shall add are Symbian specific ones.
+// If there is a S60 header in the subdirectory then that should be
+// added into the include statements (like #include <phonebook/header.h>)
+//SYSTEMINCLUDE           /epoc32/include/ecom
+SYSTEMINCLUDE           ../../../inc
+
+LIBRARY                 atextclient.lib
+LIBRARY                 atextcommon.lib
+LIBRARY                 euser.lib
+LIBRARY                 bafl.lib
+DEBUGLIBRARY            flogger.lib

@@ -111,6 +111,10 @@ private:
     TMTPBTRemoteDevice iRemoteDevice;
     
     /**
+     * Set ETrue when Resumetransport need to be called.
+     */
+    TBool                           iResumeCalled;
+    /**
     FLOGGER debug trace member variable.
     */
     __FLOG_DECLARATION_MEMBER_MUTABLE;

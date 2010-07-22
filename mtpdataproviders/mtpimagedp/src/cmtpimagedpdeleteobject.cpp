@@ -238,7 +238,10 @@ void CMTPImageDpDeleteObject::DeleteObjectL( TUint32 aHandle )
                 //add Suid to deleteobjectlist
                 iDataProvider.AppendDeleteObjectsArrayL(iObjectMeta->DesC(CMTPObjectMetaData::ESuid));
                 //coverity[unterminated_case]
-            case KErrNone:
+            case KErrPathNotFound:
+                //if the file does not exist on device, remove it from objectstore
+                //coverity[fallthrough]
+            case KErrNone:            
                 //add for test
                 __FLOG(_L8("KErrNone"));                
                 //if the image object is new, we should update new picture count
