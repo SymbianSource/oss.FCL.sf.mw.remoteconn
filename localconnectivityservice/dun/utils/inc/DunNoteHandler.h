@@ -20,7 +20,7 @@
 #define C_CDUNNOTEHANDLER_H
 
 #include <e32base.h>
-#include <hbdevicemessageboxsymbian.h>
+#include <hb/hbwidgets/hbdevicemessageboxsymbian.h>
 #include "DunTransporter.h"
 
 /**

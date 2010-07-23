@@ -28,16 +28,10 @@ VENDORID                VID_DEFAULT
 SOURCEPATH              ../src/ir
 SOURCE                  DunIrPlugin.cpp
 
-USERINCLUDE             ../inc/ir ../../utils/inc
-
 MW_LAYER_SYSTEMINCLUDE
 
-// Note:
-// The only other SYSTEMINCLUDE should you shall add are Symbian specific ones.
-// If there is a S60 header in the subdirectory then that should be
-// added into the include statements (like #include <phonebook/header.h>)
-//SYSTEMINCLUDE           /epoc32/include/ecom
-SYSTEMINCLUDE          ../../../inc
+USERINCLUDE             ../inc/ir ../../utils/inc
+USERINCLUDE             ../../../inc
 
 LIBRARY                 euser.lib
 LIBRARY                 c32.lib

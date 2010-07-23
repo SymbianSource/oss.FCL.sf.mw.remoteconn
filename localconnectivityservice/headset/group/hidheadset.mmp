@@ -36,14 +36,14 @@ START RESOURCE          ../data/hidheadset.rss
     TARGET                  hidheadset.rsc  
 END // ECOM resource definition
 
-USERINCLUDE   ../inc ../hidremconbearer/inc
-
 #ifdef NO101APPDEPFIXES
 APP_LAYER_SYSTEMINCLUDE
 #else   //NO101APPDEPFIXES
 MW_LAYER_SYSTEMINCLUDE
 #endif  //NO101APPDEPFIXES
-SYSTEMINCLUDE  ../../../inc
+
+USERINCLUDE   ../inc ../hidremconbearer/inc
+USERINCLUDE   ../../../inc
 
 LIBRARY       euser.lib
 LIBRARY       ecom.lib

@@ -54,17 +54,10 @@ SOURCE                  DunDataPusher.cpp
 SOURCE                  DunNoteHandler.cpp
 SOURCE                  DunUtils.cpp
 
-USERINCLUDE             ../inc ../../atext/inc
-
 MW_LAYER_SYSTEMINCLUDE
 
-// Note:
-// The only other SYSTEMINCLUDE should you shall add are Symbian specific ones.
-// If there is a S60 header in the subdirectory then that should be
-// added into the include statements (like #include <phonebook/header.h>)
-//SYSTEMINCLUDE           /epoc32/include/ecom
-SYSTEMINCLUDE           ../../../inc
-SYSTEMINCLUDE  /epoc32/include/mw/hb/hbwidgets
+USERINCLUDE             ../inc ../../atext/inc
+USERINCLUDE             ../../../inc
 
 LIBRARY                 bafl.lib
 #ifdef PRJ_USE_NETWORK_STUBS

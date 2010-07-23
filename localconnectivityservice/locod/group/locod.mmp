@@ -33,9 +33,9 @@ SOURCE        locodaemon.cpp
 SOURCE        locodserviceman.cpp
 SOURCE        locodservice.cpp
 
-USERINCLUDE         ../inc
-SYSTEMINCLUDE       ../../inc ../../../inc 
-SYSTEMINCLUDE       /epoc32/include/ecom
+USERINCLUDE   ../inc
+USERINCLUDE   ../../inc ../../../inc 
+
 MW_LAYER_SYSTEMINCLUDE
 
 LIBRARY         euser.lib

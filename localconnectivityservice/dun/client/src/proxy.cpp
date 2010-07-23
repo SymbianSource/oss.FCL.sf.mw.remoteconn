@@ -16,7 +16,7 @@
 */
 
 
-#include <implementationproxy.h> //ECom header file
+#include <ecom/implementationproxy.h> //ECom header file
 #include "dunplugin.h"
 
 // ---------------------------------------------------------------------------

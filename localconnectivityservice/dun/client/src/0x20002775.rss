@@ -16,8 +16,8 @@
 */
 
 
-#include "registryinfov2.rh"
-#include "locodplugin.hrh"
+#include <ecom/registryinfov2.rh>
+#include <locodplugin.hrh>
 
 RESOURCE REGISTRY_INFO theInfo
 	{

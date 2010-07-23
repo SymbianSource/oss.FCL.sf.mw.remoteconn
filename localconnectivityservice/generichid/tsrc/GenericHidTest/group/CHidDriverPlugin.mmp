@@ -33,7 +33,6 @@ SOURCE      CHidDriverPlugin.cpp
 USERINCLUDE     ../inc 
 USERINCLUDE     ../../../inc 
 
-SYSTEMINCLUDE /epoc32/include/ecom 
 MW_LAYER_SYSTEMINCLUDE
 
 

@@ -21,20 +21,11 @@ UID			 0x1000008d 0xE9AF118D
 
 CAPABILITY      ALL -TCB
 
-//TARGETPATH      ?target_path
 DEFFILE         dunutilstest.def
 
 USERINCLUDE	 ../inc ../../utils/inc
 
-SYSTEMINCLUDE  /epoc32/include/mw/hb/hbwidgets
-
-#if defined(__S60_)
-  //  OSEXT_LAYER_SYSTEMINCLUDE
-    MW_LAYER_SYSTEMINCLUDE
-#else
-    //SYSTEMINCLUDE   /epoc32/include 
-    //SYSTEMINCLUDE   /epoc32/include/internal
-#endif
+MW_LAYER_SYSTEMINCLUDE
 
 SOURCEPATH	  ../src
 

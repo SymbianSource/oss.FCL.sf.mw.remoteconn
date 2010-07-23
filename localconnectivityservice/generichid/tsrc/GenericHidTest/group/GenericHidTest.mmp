@@ -36,8 +36,6 @@ MW_LAYER_SYSTEMINCLUDE
 USERINCLUDE	../inc 
 USERINCLUDE     ../../../inc 
 
-SYSTEMINCLUDE 	/epoc32/include/internal
-
 SOURCEPATH      ../src
 SOURCE          GenericHidTest.cpp
 SOURCE          GenericHidTestBlocks.cpp

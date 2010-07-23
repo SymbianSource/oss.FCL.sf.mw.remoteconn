@@ -13,8 +13,6 @@
 // Description:
 //
 
-#include <usbman.h>
-#include <usbstates.h>
 #include "cmtpconnectionmgr.h"
 
 #include "cmtpconnection.h"
@@ -115,33 +113,6 @@ void CMTPConnectionMgr::ConnectionCloseComplete(const TUint& /*aConnUid*/)
 EXPORT_C void CMTPConnectionMgr::StartTransportL(TUid aTransport)
     {
     __FLOG(_L8("StartTransportL - Entry"));
-  
-    RUsb usb;
-    User::LeaveIfError(usb.Connect());
-    __FLOG(_L8("after connect, and before call get currentpersonalityid"));
-    TInt usbMode;
-    TUsbServiceState usbStat;
-    TInt err = usb.GetCurrentPersonalityId(usbMode);
-    __FLOG_1(_L8("The return value of GetCurrentPersonalityId is %d"), err);
-    
-    err = usb.GetServiceState(usbStat);
-    __FLOG_1(_L8("The return value of GetServiceState is %d"), err);        
-    
-    usb.Close();
-    
-    __FLOG_1(_L8("The current usb mode is %d"), usbMode);
-    __FLOG_1(_L8("The current usb service state is %d"), usbStat);
-
-    TInt massStorageMode = 0x02;
-    
-    if(usbMode == massStorageMode && usbStat != EUsbServiceIdle)
-        {
-        __FLOG(_L8("StartTransportL without parameter!"));
-        StartTransportL( aTransport, NULL );
-        return;
-        }
-    
-    
     
     //When USB plug out, BT will start Master mode to reconnect remote device. Else BT will start slave mode to listen connection.
     if(aTransport.iUid == KMTPBTTransportUid && iRemoteDevice.iDeviceAddr != 0 && aTransport != iTransportUid)

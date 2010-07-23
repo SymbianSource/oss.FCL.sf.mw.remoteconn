@@ -36,16 +36,10 @@ START RESOURCE          0x20002775.rss
 TARGET                  dunclient.rsc
 END // RESOURCE
 
-USERINCLUDE             ../inc ../../utils/inc
-
 MW_LAYER_SYSTEMINCLUDE
 
-// Note:
-// The only other SYSTEMINCLUDE should you shall add are Symbian specific ones.
-// If there is a S60 header in the subdirectory then that should be
-// added into the include statements (like #include <phonebook/header.h>)
-//SYSTEMINCLUDE           /epoc32/include/ecom
-SYSTEMINCLUDE           ../../../inc ../../../../inc /epoc32/include/ecom
+USERINCLUDE             ../inc ../../utils/inc
+USERINCLUDE             ../../../inc ../../../../inc 
 
 LIBRARY                 euser.lib
 LIBRARY                 ecom.lib

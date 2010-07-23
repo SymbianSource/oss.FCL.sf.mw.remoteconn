@@ -29,16 +29,10 @@ SOURCEPATH              ../src/bt
 SOURCE                  DunBtPlugin.cpp
 SOURCE                  DunBtListen.cpp
 
-USERINCLUDE             ../inc/bt ../../utils/inc
-
 MW_LAYER_SYSTEMINCLUDE
 
-// Note:
-// The only other SYSTEMINCLUDE should you shall add are Symbian specific ones.
-// If there is a S60 header in the subdirectory then that should be
-// added into the include statements (like #include <phonebook/header.h>)
-//SYSTEMINCLUDE           /epoc32/include/ecom
-SYSTEMINCLUDE           ../../../inc
+USERINCLUDE             ../inc/bt ../../utils/inc
+USERINCLUDE             ../../../inc
 
 LIBRARY                 euser.lib
 LIBRARY                 esock.lib

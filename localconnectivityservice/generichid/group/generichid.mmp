@@ -41,11 +41,10 @@ SOURCE                  hidreportgenerator.cpp
 SOURCE                  hidinterfaces.cpp
 SOURCE                  hidconnectioninfo.cpp
 
-USERINCLUDE              ../inc
-
 MW_LAYER_SYSTEMINCLUDE
-SYSTEMINCLUDE           ../../../inc
-SYSTEMINCLUDE 			/epoc32/include/ecom
+
+USERINCLUDE             ../inc
+USERINCLUDE             ../../../inc
 
 LIBRARY       euser.lib
 LIBRARY       ecom.lib

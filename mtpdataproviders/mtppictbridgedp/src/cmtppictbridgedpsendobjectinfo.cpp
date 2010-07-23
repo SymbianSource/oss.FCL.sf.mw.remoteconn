@@ -659,7 +659,16 @@ TBool CMTPPictBridgeDpSendObjectInfo::DoHandleSendObjectCompleteL()
         //with folder creation.
 
 
-        iFramework.ObjectMgr().CommitReservedObjectHandleL(*iReceivedObjectP);
+        TRAPD(err, iFramework.ObjectMgr().CommitReservedObjectHandleL(*iReceivedObjectP));
+        __FLOG_VA((_L8(" Entry error %d"),err));        
+        if( KErrAlreadyExists == err )
+            {
+            iReceivedObjectP->SetUint(CMTPObjectMetaData::EHandle, iFramework.ObjectMgr().HandleL(iFullPath));
+            }
+        else 
+            {
+            User::LeaveIfError(err);
+            }
         SendResponseL(EMTPRespCodeOK);
         }
     __FLOG(_L8("<< CMTPPictGetObjectPropDesc::DoHandleSendObjectCompleteL"));
