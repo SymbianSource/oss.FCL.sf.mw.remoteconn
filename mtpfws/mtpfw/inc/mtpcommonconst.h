@@ -22,7 +22,7 @@
 #define MTPCOMMONCONST_H
 
 #ifdef __SERIES60_
-#include <UiklafInternalCRKeys.h>
+#include <uiklafinternalcrkeys.h>
 #else
 //Following is copied from 'UiklafInternalCRKeys.h', which is
 //exported from S60 sdk, in Symbian CBR, this file does not exist.

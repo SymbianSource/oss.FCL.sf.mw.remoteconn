@@ -147,6 +147,7 @@ private:
     
     void EnqueueEvent(CMTPEventLink* aLink);
     void DequeueEvent(CMTPEventLink* aLink);
+	void DequeueAllEvents();
 
 /**
   * This method define and attach the property for publishing connection state 

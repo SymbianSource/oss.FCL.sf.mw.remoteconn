@@ -855,20 +855,6 @@ TBool CDunAtCmdHandler::ExtractLineFromInputBuffer()
         FTRACE(FPrint( _L("CDunAtCmdHandler::ExtractLineFromInputBuffer() (more needed) complete") ));
         return ETrue;
         }
-    // As a last step adjust the possible multiple IsDelimiterCharacter()
-    // characters and set length of iLineBuffer. Leave iEndIndex untouched.
-    lineLength = iLineBuffer.Length();
-    for ( TInt i=lineLength-1; i>=0; i-- )
-        {
-        TChar character = iLineBuffer[i];
-        if ( !IsDelimiterCharacter(character) )
-            {
-            iLineBuffer.SetLength( i + 1 );
-            FTRACE(FPrint( _L("CDunAtCmdHandler::ExtractLineFromInputBuffer() after (%d bytes):"), iLineBuffer.Length() ));
-            FTRACE(FPrintRaw(iLineBuffer) );
-            break;
-            }
-        }
     FTRACE(FPrint( _L("CDunAtCmdHandler::ExtractLineFromInputBuffer() (line found) complete") ));
     return EFalse;
     }
