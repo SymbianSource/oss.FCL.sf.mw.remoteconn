@@ -23,6 +23,7 @@
 #include "sconinstqueue.h"
 #include "sconbrqueue.h"
 #include "sconmetadata.h"
+#include "sconsynchandler.h"
 #include "debug.h"
 
 // ============================= MEMBER FUNCTIONS ===============================
@@ -88,6 +89,7 @@ void CSConPCD::ConstructL()
         }
     CActiveScheduler::Add( iInstallerQueue );
     CActiveScheduler::Add( iBackupRestoreQueue );
+    iSyncHandler = CSconSyncHandler::NewL( iFs );
     TRACE_FUNC_EXIT;
     }
     
@@ -119,6 +121,12 @@ CSConPCD::~CSConPCD()
         iLatestReply = NULL;
         }
     
+    if ( iSyncHandler )
+        {
+        iSyncHandler->Cancel();
+        delete iSyncHandler;
+        iSyncHandler = NULL;
+        }
     iFs.Close();
     TRACE_FUNC_EXIT;
     }
@@ -255,6 +263,32 @@ void CSConPCD::ResetPCD()
         LOGGER_WRITE( "CSConPCD::ResetPCD() : Reseting backup queue" );
         iBackupRestoreQueue->Reset();
         }
+    
+    TRACE_FUNC_EXIT;
+    }
+
+// -----------------------------------------------------------------------------
+// CSConPCD::HandleGetSyncRequestL()
+// 
+// -----------------------------------------------------------------------------
+//
+void CSConPCD::HandleGetSyncRequestL( const TDesC8& aRequest, RWriteStream& aResult, TInt aMaxObjectSize )
+    {
+    TRACE_FUNC_ENTRY;
+    iSyncHandler->HandleGetSyncRequestL( aRequest, aResult, aMaxObjectSize );
+    
+    TRACE_FUNC_EXIT;
+    }
+
+// -----------------------------------------------------------------------------
+// CSConPCD::HandlePutSyncRequestL()
+// 
+// -----------------------------------------------------------------------------
+//
+void CSConPCD::HandlePutSyncRequestL( const TDesC8& aRequest, RReadStream& aResult )
+    {
+    TRACE_FUNC_ENTRY;
+    iSyncHandler->HandlePutSyncRequestL( aRequest, aResult );
     
     TRACE_FUNC_EXIT;
     }
@@ -421,16 +455,22 @@ TInt CSConPCD::GetStatusL( TInt aTask, TBool aAll )
         
     for ( TInt i = 0; i < installerReply->iTasks.Count(); i++ )
         {
-        mergeReply->iTasks.Append( installerReply->iTasks[i]->CopyAndFreeL() );
+        CSConTaskReply* temp = installerReply->iTasks[i]->CopyAndFreeL();
+        CleanupStack::PushL( temp );
+        mergeReply->iTasks.AppendL( temp );
+        CleanupStack::Pop( temp );
         }
     
     // installer replys are copied to mergereply, delete installerReply
     CleanupStack::PopAndDestroy( installerReply );
     
     // do same for br reply
-    for ( TInt j = 0; j < brReply->iTasks.Count(); j++ )
+    for ( TInt i = 0; i < brReply->iTasks.Count(); i++ )
         {
-        mergeReply->iTasks.Append( brReply->iTasks[j]->CopyAndFreeL() );
+        CSConTaskReply* temp = brReply->iTasks[i]->CopyAndFreeL();
+        CleanupStack::PushL( temp );
+        mergeReply->iTasks.AppendL( temp );
+        CleanupStack::Pop( temp );
         }
     
     CleanupStack::PopAndDestroy( brReply );

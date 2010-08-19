@@ -127,6 +127,10 @@ private:
 
     };
 
+
+class CSconFolderLister;
+class CSconBtEngine;
+
 //**********************************
 //CSConPCConnSession - Server session class, handles the requested operations
 //**********************************
@@ -216,7 +220,9 @@ private:
     TDesC8& HashToDesLC( const TDesC& aBuf );
     TPtr DesToHashLC( const TDesC8& aDes );
     TBool IsJavaHash( const TDesC8& aDes );
-        
+    
+    TInt ReadOviAccountInfoL( RWriteStream& aAccountInfoStream );
+    
 // data
 private:
     CSConPCConnServer& iServer;
@@ -232,6 +238,10 @@ private:
     RChunk iChunk;
     CBufFlat* iBuffer;  
     TInt iResult;
+    
+    CSconFolderLister* iFolderLister;
+    RFs iFs;
+    CSconBtEngine*  iBtEngine;
     };
 
 #endif // __SCONPCCONNSERVER_H__

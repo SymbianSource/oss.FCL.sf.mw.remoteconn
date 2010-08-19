@@ -46,6 +46,8 @@ const TUint8 KSconAudioRating       ( 0x10 );
 const TUint8 KSconAudioUniqueFileIdentifier( 0x11 );
 const TUint8 KSconAudioDuration     ( 0x12 );
 const TUint8 KSconAudioDate         ( 0x13 );
+const TUint8 KSconAudioUnsyncLyrics ( 0x14 );
+const TUint8 KSconAudioProtected    ( 0x15 );
 
 // fields for exif
 const TUint8 KSconExifThumbnail         ( 0x01 );

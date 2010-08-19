@@ -80,7 +80,9 @@ void CMTPBearerMonitor::ConstructL()
     __FLOG( _L8("+ConstructL") );
     
     CMTPBluetoothController* btController = CMTPBluetoothController::NewL( *this );
+    CleanupStack::PushL(btController);
     iMTPControllers.AppendL( btController );
+    CleanupStack::Pop(btController);
     
     __FLOG( _L8("-ConstructL") );
     }

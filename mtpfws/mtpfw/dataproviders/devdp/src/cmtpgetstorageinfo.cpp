@@ -196,7 +196,7 @@ void CMTPGetStorageInfo::SetStorageTypeL()
 		        {
 		        //E: is set as logically removable after eMMC image updated
 		        //So here we need to deal with this case to set it as FixedRam
-		        if(iDriveInfo.iDriveAtt & KDriveAttInternal)
+		        if(iDriveInfo.iDriveAtt & KDriveAttLogicallyRemovable)
 		            {
 		            __FLOG(_L8("removable but internal drive, set as Fixed RAM"));
 		            storageType = EMTPStorageFixedRAM;

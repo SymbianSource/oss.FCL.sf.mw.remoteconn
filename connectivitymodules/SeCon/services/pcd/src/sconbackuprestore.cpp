@@ -38,12 +38,10 @@
 CSConBackupRestore* CSConBackupRestore::NewL( CSConBackupRestoreQueue* aQueue,
                                             const TInt aMaxObjectSize, RFs& aFs )
     {
-    TRACE_FUNC_ENTRY;
     CSConBackupRestore* self = new (ELeave) CSConBackupRestore( aQueue, aFs );
     CleanupStack::PushL( self );
     self->ConstructL( aMaxObjectSize );
     CleanupStack::Pop( self );
-    TRACE_FUNC_EXIT;
     return self;
     }
 
@@ -76,18 +74,12 @@ void CSConBackupRestore::ConstructL( const TInt aMaxObjectSize )
 //
 CSConBackupRestore::~CSConBackupRestore()
     {
-    TRACE_FUNC_ENTRY;
     if( iSBEClient )
         {
-        if( iSBEClient->IsActive() )
-            {
-            iSBEClient->Cancel();
-            }
-        
+        iSBEClient->Cancel();
         delete iSBEClient;
         iSBEClient = NULL;
         }
-    TRACE_FUNC_EXIT;
     }
     
 // -----------------------------------------------------------------------------
@@ -166,11 +158,7 @@ void CSConBackupRestore::Reset()
     TRACE_FUNC_ENTRY;
     if( iSBEClient )
         {
-        if( iSBEClient->IsActive() )
-            {
-            iSBEClient->Cancel();
-            }
-        
+        iSBEClient->Cancel();
         delete iSBEClient;
         iSBEClient = NULL;
         }
@@ -212,11 +200,9 @@ void CSConBackupRestore::DoCancel()
 //          
 void CSConBackupRestore::RunL()
     {
-    TRACE_FUNC_ENTRY;
-    
+    TRACE_FUNC;
     iQueue->CompleteTask( iCurrentTask, iStatus.Int() );
     iBackupRestoreActive = EFalse;
-    TRACE_FUNC_EXIT;
     }
     
 // End of file

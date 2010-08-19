@@ -596,19 +596,11 @@ void CMTPUsbEpBase::ProcessFirstReceivedChunkL()
 	    // USB Header validation
 	    if (!ValidateUSBHeaderL())
 		    {
-            //trash data, continue to flush.
-            TRequestStatus status;
-            RBuf8 readBuf;
-            readBuf.CreateL(KMaxPacketTypeBulkHS);
-            Connection().Ldd().ReadPacket(status, EndpointNumber(), readBuf, KMaxPacketTypeBulkHS);
-            User::WaitForRequest(status);    
-            RDebug::Print(_L("CMTPUsbEpBase::ProcessFirstReceivedChunkL(), trash data length = %d"), readBuf.Length());
-            readBuf.Close();
+            //trash data, continue to flush by one packet.
+            FlushOnePacketL();
             
             InitiateFirstChunkReceiveL();  
             return;
-            
-
 			}
 			
 		if ((iDataLength - KUSBHeaderSize) == 0)
@@ -617,7 +609,14 @@ void CMTPUsbEpBase::ProcessFirstReceivedChunkL()
 			SetStreamState(EReceiveComplete);
 			}	        
 	    }
-     else if (iReceiveChunkData.MaxLength() == iReceiveChunkData.Length())
+    else if (iReceiveChunkData.MaxLength() == KUSBHeaderSize
+            && iReceiveChunkData.Length() < KUSBHeaderSize)
+        {
+        //trash data received, just diacard it and initiate next receiving
+        InitiateFirstChunkReceiveL();  
+        return;
+        }
+    else if (iReceiveChunkData.MaxLength() == iReceiveChunkData.Length())
 		{
 		// USB Control request setup or data packet is received from Control EP.		    		    		    
 	    // All the desired data should be received. 
@@ -692,7 +691,7 @@ void CMTPUsbEpBase::ResumeReceiveDataStreamL()
 	           	// 1. MTP file receiving: MTP type file never returns KMTPChunkSequenceCompletion,It can be received        
           		//    one part after another. Also it can be commited mutiple times.
             	// 2. Other MTP datatype receiving during the middle of data stream
-	           __FLOG(_L8("Commiting write data chunk"));
+	           __FLOG(_L8("Commiting write data chunk - 1"));
 	           needCommit = iReceiveDataSink->CommitChunkL(iReceiveChunkData);
 	           lastChunkCommited = ETrue;   
 	           }
@@ -702,7 +701,7 @@ void CMTPUsbEpBase::ResumeReceiveDataStreamL()
 		      {
 		      // It should be the end of MTP type file receiving since it never returns KMTPChunkSequenceCompletion.
 	 	      // it can be commited mutiple times.
-		      __FLOG(_L8("Commiting write data chunk"));
+		      __FLOG(_L8("Commiting write data chunk - 2"));
 		      needCommit = iReceiveDataSink->CommitChunkL(iReceiveChunkData);
 		      }
 		else if ((iChunkStatus == KMTPChunkSequenceCompletion)
@@ -711,9 +710,22 @@ void CMTPUsbEpBase::ResumeReceiveDataStreamL()
 		      {
 		      // The last chunk data which type is any other MTP data type than MTP file type. 
 		      // It will not be commited until all the chunk data is received.
-		      __FLOG(_L8("Commiting write data chunk"));
+		      __FLOG(_L8("Commiting write data chunk - 3"));
 		      needCommit = iReceiveDataSink->CommitChunkL(iReceiveChunkData); 
-		      }          
+		      }
+        else if ((iChunkStatus == KMTPChunkSequenceCompletion)
+                && !endStream
+                && (iReceiveChunkData.Length() == iReceiveChunkData.MaxLength()))
+              {
+              // The last chunk data is received and chunk has been filled up:
+              // just flush one packet and set endStream true and commit received data.
+              // This condition tries to make MTP more robust if DP forgets to handle data-out phase. 
+              __FLOG(_L8("Commiting write data chunk - 4"));
+              
+              FlushOnePacketL();  
+              endStream = ETrue;
+              needCommit = iReceiveDataSink->CommitChunkL(iReceiveChunkData); 
+              }
          }  
 
     // Fetch the next read data chunk.  
@@ -1109,4 +1121,16 @@ void CMTPUsbEpBase::FlushBufferedRxDataL()
         User::WaitForRequest(status);
         readBuf.Close(); 
         }
+    }
+
+void CMTPUsbEpBase::FlushOnePacketL()
+    {
+    //trash data, continue to flush.
+    TRequestStatus status;
+    RBuf8 readBuf;
+    readBuf.CreateL(KMaxPacketTypeBulkHS);
+    Connection().Ldd().ReadPacket(status, EndpointNumber(), readBuf, KMaxPacketTypeBulkHS);
+    User::WaitForRequest(status);    
+    RDebug::Print(_L("CMTPUsbEpBase::ProcessFirstReceivedChunkL(), trash data length = %d"), readBuf.Length());
+    readBuf.Close();
     }

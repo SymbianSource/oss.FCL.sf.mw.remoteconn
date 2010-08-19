@@ -67,6 +67,7 @@ public:
     void HandleDeleteObjectsArray();
     void IncreaseNewPictures(TInt aCount);
     void DecreaseNewPictures(TInt aCount);
+    void ResetNewPictures();
     void HandleMdeSessionCompleteL(TInt aError);
     
 public: // From CMTPDataProviderPlugin
@@ -129,6 +130,7 @@ private:
     TBool                   iEnumerationNotified;
 	
 	RPointerArray<HBufC>    iDeleteObjectsArray;
+	RArray<TUint>			iNewPicHandles;
     };
     
 #endif // CMTPIMAGEDP_H

@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2005-2008 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2005-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -161,6 +161,10 @@ CSConUpdateDeviceInfo* CSConUpdateDeviceInfo::CopyL()
     return copy;
     }
 
+CSConInstApp::~CSConInstApp()
+    {
+    delete iWidgetBundleId;
+    }
 // -----------------------------------------------------------------------------
 // CSConInstApp::Copy()
 // 
@@ -177,6 +181,14 @@ CSConInstApp* CSConInstApp::CopyL()
     copy->iSize = iSize;
     copy->iType = iType;
     copy->iUid = iUid;
+    if ( iWidgetBundleId )
+        {
+        copy->iWidgetBundleId = iWidgetBundleId->AllocL();
+        }
+    else
+        {
+        copy->iWidgetBundleId = NULL;
+        }
 
     return copy;
     }

@@ -89,7 +89,7 @@ void CMTPControllerTimer::RunL()
         {
         __FLOG( _L8("Start transport to launch mtp server") );
         
-        iMTPClient.Connect();
+        User::LeaveIfError(iMTPClient.Connect());
         iMTPClient.StartTransport(KMTPBtTransportUid);
         iStopTransport = EFalse;
         iMTPOperator->SubscribeConnState();

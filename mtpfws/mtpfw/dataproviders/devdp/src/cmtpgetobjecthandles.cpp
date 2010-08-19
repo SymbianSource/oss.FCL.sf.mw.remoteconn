@@ -107,10 +107,6 @@ void CMTPGetObjectHandles::ServiceL()
     
     iTimeoutCount = 0;
     
-	RMTPObjectMgrQueryContext   context;
-	RArray<TUint>               handles;
-	CleanupClosePushL(context);
-	CleanupClosePushL(handles);
 	delete iHandles;
 	iHandles = CMTPTypeArray::NewL(EMTPTypeAUINT32);
 
@@ -119,47 +115,14 @@ void CMTPGetObjectHandles::ServiceL()
        &&(KMTPFormatsAll == Request().Uint32(TMTPTypeRequest::ERequestParameter2)))
         {
         __FLOG(_L8("ConnectMac and Fetch all."));
-        //get folder object handles
-    	TMTPObjectMgrQueryParams    paramsFolder(Request().Uint32(TMTPTypeRequest::ERequestParameter1), EMTPFormatCodeAssociation, Request().Uint32(TMTPTypeRequest::ERequestParameter3));	
-    	do
-    	    {
-        	iFramework.ObjectMgr().GetObjectHandlesL(paramsFolder, context, handles);
-        	iHandles->AppendL(handles);
-    	    }
-    	while (!context.QueryComplete());
-
-        //get script object handles
-    	RMTPObjectMgrQueryContext   contextScript;
-    	RArray<TUint>               handlesScript;
-    	CleanupClosePushL(contextScript);
-    	CleanupClosePushL(handlesScript);            
-    	TMTPObjectMgrQueryParams    paramsScript(Request().Uint32(TMTPTypeRequest::ERequestParameter1), EMTPFormatCodeScript, Request().Uint32(TMTPTypeRequest::ERequestParameter3));	
-    	do
-    	    {
-        	iFramework.ObjectMgr().GetObjectHandlesL(paramsScript, contextScript, handlesScript);
-        	iHandles->AppendL(handlesScript);
-    	    }
-    	while (!contextScript.QueryComplete());
-    	CleanupStack::PopAndDestroy(&contextScript);
-    	CleanupStack::PopAndDestroy(&handlesScript);        
-
-        //get image object handles
-    	RMTPObjectMgrQueryContext   contextImage;
-    	RArray<TUint>               handlesImage;
-    	CleanupClosePushL(contextImage);
-    	CleanupClosePushL(handlesImage);            
-    	TMTPObjectMgrQueryParams    paramsImage(Request().Uint32(TMTPTypeRequest::ERequestParameter1), EMTPFormatCodeEXIFJPEG, Request().Uint32(TMTPTypeRequest::ERequestParameter3));	
-    	do
-    	    {
-        	iFramework.ObjectMgr().GetObjectHandlesL(paramsImage, contextImage, handlesImage);
-        	iHandles->AppendL(handlesImage);
-    	    }
-    	while (!contextImage.QueryComplete());
-    	CleanupStack::PopAndDestroy(&contextImage);
-    	CleanupStack::PopAndDestroy(&handlesImage);                            
+        HandleObjectHandlesUnderMacL(*iHandles);
         }
     else
         {
+    	RMTPObjectMgrQueryContext   context;
+    	RArray<TUint>               handles;
+    	CleanupClosePushL(context);
+    	CleanupClosePushL(handles);        
     	TMTPObjectMgrQueryParams    params(Request().Uint32(TMTPTypeRequest::ERequestParameter1), Request().Uint32(TMTPTypeRequest::ERequestParameter2), Request().Uint32(TMTPTypeRequest::ERequestParameter3));	
     	do
     	    {
@@ -194,13 +157,11 @@ void CMTPGetObjectHandles::ServiceL()
             	}
         	iHandles->AppendL(handles);
     	    }
-    	while (!context.QueryComplete());        
+    	while (!context.QueryComplete()); 
+    	CleanupStack::PopAndDestroy(&handles);
+    	CleanupStack::PopAndDestroy(&context);        
         }        
-    	
-        
-
-	CleanupStack::PopAndDestroy(&handles);
-	CleanupStack::PopAndDestroy(&context);					
+    						
 	SendDataL(*iHandles);
     __FLOG(_L8("ServiceL - Exit"));	    
 	}

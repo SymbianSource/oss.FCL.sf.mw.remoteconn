@@ -78,13 +78,19 @@ CMTPPictBridgeUsbConnection::~CMTPPictBridgeUsbConnection()
 //
 void CMTPPictBridgeUsbConnection::Listen()
     {
-    iProperty.Subscribe(iStatus);
-    SetActive();
-    if(ConnectionClosed()) // we listen to the disconnection only if connected to the printer
+    __FLOG(_L8(">> CMTPPictBridgeUsbConnection::Listen"));    
+    if(!IsActive())
         {
-        iPrinter.ConnectionClosed();
-        Cancel();    
+        __FLOG(_L8(" CMTPPictBridgeUsbConnection AO is NOT active and run AO"));
+        iProperty.Subscribe(iStatus);
+        SetActive();
+        if(ConnectionClosed()) // we listen to the disconnection only if connected to the printer
+            {
+            iPrinter.ConnectionClosed();
+            Cancel();    
+            }
         }
+    __FLOG(_L8("<< CMTPPictBridgeUsbConnection::Listen"));    
     }
 
 // --------------------------------------------------------------------------
@@ -97,12 +103,14 @@ TBool CMTPPictBridgeUsbConnection::ConnectionClosed()
     TInt ret = RProperty::Get(KPSUidUsbWatcher, KUsbWatcherSelectedPersonality, personality);
 
     __FLOG_VA((_L8("CMTPPictBridgeUsbConnection::ConnectionClosed() current personality = %d, previous personality = %d"), personality, iPreviousPersonality));  
-    if ((ret == KErrNone && 
-        (personality == KUsbPersonalityIdMS || personality == KUsbPersonalityIdPTP))
+    if ((ret == KErrNone && personality == KUsbPersonalityIdMS)
        || (iPreviousPersonality != KNotAssigned && personality != iPreviousPersonality))
-        { 
-        __FLOG_VA((_L8("****WARNING!!! PTP server detects the USB connection closed!")));  
-        return ETrue;
+        {
+        if((personality != KUsbPersonalityIdPCSuiteMTP)&&(personality != KUsbPersonalityIdMTP))
+            {
+            __FLOG_VA((_L8("****WARNING!!! PTP server detects the USB connection closed!")));  
+            return ETrue;
+            }
         }
 
     iPreviousPersonality = personality;

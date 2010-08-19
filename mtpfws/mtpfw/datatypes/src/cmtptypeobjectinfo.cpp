@@ -128,7 +128,9 @@ void CMTPTypeObjectInfo::ConstructL()
                 }
                 
             __ASSERT_DEBUG(chunk, User::Invariant());
+            CleanupStack::PushL(chunk);
             ChunkAppendL(*chunk);
+            CleanupStack::Pop(chunk);
             }
         }
     }

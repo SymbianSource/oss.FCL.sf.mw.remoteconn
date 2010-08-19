@@ -13,6 +13,7 @@
 // Description:
 //
 
+
 #include <mtp/tmtptyperequest.h>
 #include <mtp/mmtpdataproviderframework.h>
 #include <mtp/mmtpobjectmgr.h>
@@ -153,18 +154,11 @@ void CMTPGetNumObjects::ServiceL()
 	if(iDevDpSingletons.DeviceDataStore().IsConnectMac()
         &&(KMTPFormatsAll == Request().Uint32(TMTPTypeRequest::ERequestParameter2)))
         {
-        //get folder count
-    	TMTPObjectMgrQueryParams paramsFolder(Request().Uint32(TMTPTypeRequest::ERequestParameter1), EMTPFormatCodeAssociation, Request().Uint32(TMTPTypeRequest::ERequestParameter3));        
-    	TUint32 count = iFramework.ObjectMgr().CountL(paramsFolder);
-        __FLOG_VA((_L8("ConnectMac and Fetch all, folder count = %d"), count));
-
-        //get script count
-        TMTPObjectMgrQueryParams paramsScript(Request().Uint32(TMTPTypeRequest::ERequestParameter1), EMTPFormatCodeScript, Request().Uint32(TMTPTypeRequest::ERequestParameter3));
-        count += iFramework.ObjectMgr().CountL(paramsScript);
-        
-        //get Image file count
-        TMTPObjectMgrQueryParams paramsImage(Request().Uint32(TMTPTypeRequest::ERequestParameter1), EMTPFormatCodeEXIFJPEG, Request().Uint32(TMTPTypeRequest::ERequestParameter3));
-        count += iFramework.ObjectMgr().CountL(paramsImage);
+        TUint32 count(0);
+    	CMTPTypeArray *handles = CMTPTypeArray::NewLC(EMTPTypeAUINT32);
+        HandleObjectHandlesUnderMacL(*handles);
+        count = handles->NumElements();
+        CleanupStack::PopAndDestroy(handles);         
         __FLOG_VA((_L8("ConnectMac and Fetch all, total count = %d"), count));        
     	SendResponseL(EMTPRespCodeOK, 1, &count); 
         }
@@ -201,26 +195,106 @@ TBool CMTPGetNumObjects::IsSupportedFormatL(TUint32 aFormatCode)
 	}
 
 
-
-
-
-
-
-
-
-
-
-	
-
-	
-
-
-   	
-
-	
-
-
-
-
-
+/**
+Handle special case under Mac.
+Only expose the Folder, Image File and Viedo, Script under Drive:\Images, Drive\Viedos
+*/
+void CMTPGetNumObjects::HandleObjectHandlesUnderMacL(CMTPTypeArray &aObjectHandles)
+    {
+    __FLOG(_L8("HandleObjectHandlesUnderMacL - Entry"));
+    
+    CMTPTypeArray* totalHandles = CMTPTypeArray::NewLC(EMTPTypeAUINT32);
+    
+    //get folder object handles    
+    GetObjectHandlesByFormatCodeL(EMTPFormatCodeAssociation,*totalHandles);
+    
+    //get image/jpeg object handles
+    GetObjectHandlesByFormatCodeL(EMTPFormatCodeEXIFJPEG,*totalHandles);
+    //get image/bmp object handles
+    GetObjectHandlesByFormatCodeL(EMTPFormatCodeBMP,*totalHandles);
+    //get image/jif object handles
+    GetObjectHandlesByFormatCodeL(EMTPFormatCodeGIF,*totalHandles);
+    //get image/jpeg object handles
+    GetObjectHandlesByFormatCodeL(EMTPFormatCodePNG,*totalHandles);
+    
+    //get video/mp4 object handles
+    GetObjectHandlesByFormatCodeL(EMTPFormatCodeMP4Container,*totalHandles);
+    //get video/3gp object handles
+    GetObjectHandlesByFormatCodeL(EMTPFormatCode3GPContainer,*totalHandles);
+    //get video/wmv object handles
+    GetObjectHandlesByFormatCodeL(EMTPFormatCodeWMV,*totalHandles); 
+    //get video/asf object handles
+    GetObjectHandlesByFormatCodeL(EMTPFormatCodeASF,*totalHandles); 
+    
+    //Filer the folder list, ?:\\Images\\* and ?:\\Videos\\*
+    _LIT(KImagesFolderPre, "?:\\Images\\*");
+    _LIT(KViedosFolderPre, "?:\\Videos\\*");    
+   
+    const TUint KCount(totalHandles->NumElements());
+    
+    for (TUint i(0); (i < KCount); i++)//handles loop
+        {
+         CMTPObjectMetaData* object(CMTPObjectMetaData::NewLC());
+         iFramework.ObjectMgr().ObjectL(totalHandles->ElementUint(i),*object);
+         const TDesC& suid(object->DesC(CMTPObjectMetaData::ESuid));
+         
+#ifdef __FLOG_ACTIVE    
+        TBuf8<KMaxFileName> tmp;
+        tmp.Copy(suid);
+        __FLOG_VA((_L8("HandleObjectHandlesUnderMacL - suid: %S"), &tmp));
+#endif // __FLOG_ACTIVE
+         if((KErrNotFound != suid.MatchF(KImagesFolderPre)) ||
+            (KErrNotFound != suid.MatchF(KViedosFolderPre)))
+            {
+        	_LIT(KComma,",");
+        	_LIT(KLineation,"-");
+        	_LIT(KUnderline,"_");
+        	_LIT(Ksemicolon ,";");
+            if((KErrNotFound != suid.Find(KComma))||
+                (KErrNotFound != suid.Find(KLineation))||
+                (KErrNotFound != suid.Find(KUnderline))||
+                (KErrNotFound != suid.Find(Ksemicolon)))
+                {
+                __FLOG(_L8("HandleObjectHandlesUnderMacL - Skip handle"));
+                }
+            else
+                {
+                __FLOG_VA((_L8("HandleObjectHandlesUnderMacL - Add handle: %x"), totalHandles->ElementUint(i)));
+                RArray<TUint>   tmphandles;
+                CleanupClosePushL(tmphandles);
+                tmphandles.AppendL(totalHandles->ElementUint(i));
+                aObjectHandles.AppendL(tmphandles);
+                CleanupStack::PopAndDestroy(&tmphandles);                
+                }
+            }
+         CleanupStack::PopAndDestroy(object);
+        }
+    
+    CleanupStack::PopAndDestroy(totalHandles);
+    //get script object handles    
+    GetObjectHandlesByFormatCodeL(EMTPFormatCodeScript,aObjectHandles);
+    
+    __FLOG(_L8("HandleObjectHandlesUnderMacL - Exit"));    
+    }
+/**
+Get Object Handles by format code
+*/
+void CMTPGetNumObjects::GetObjectHandlesByFormatCodeL(TUint32 aFormatCode, CMTPTypeArray &aObjectHandles)
+    {
+    __FLOG_VA((_L8("GetObjectHandlesByFormatCodeL - Entry FormatCode: %x"), aFormatCode));    
+    RMTPObjectMgrQueryContext   context;
+    RArray<TUint>               handles;   
+    CleanupClosePushL(context);
+    CleanupClosePushL(handles);    
+    TMTPObjectMgrQueryParams    paramsFolder(Request().Uint32(TMTPTypeRequest::ERequestParameter1), aFormatCode, Request().Uint32(TMTPTypeRequest::ERequestParameter3));  
+    do
+        {
+        iFramework.ObjectMgr().GetObjectHandlesL(paramsFolder, context, handles);
+        aObjectHandles.AppendL(handles);
+        }
+    while (!context.QueryComplete());
+    CleanupStack::PopAndDestroy(&context);
+    CleanupStack::PopAndDestroy(&handles);
+    __FLOG(_L8("GetObjectHandlesByFormatCode - Exit"));    
+    }
 

@@ -49,10 +49,12 @@ protected:
 	
 	CMTPGetNumObjects(MMTPDataProviderFramework& aFramework, MMTPConnection& aConnection);
 	void ConstructL();
+    void HandleObjectHandlesUnderMacL(CMTPTypeArray &aObjectHandles);      
 
 private:
 
 	TBool IsSupportedFormatL(TUint32 aFormatCode);
+    void GetObjectHandlesByFormatCodeL(TUint32 aFormatCode, CMTPTypeArray &aObjectHandles);
 			
 protected:
 	/**

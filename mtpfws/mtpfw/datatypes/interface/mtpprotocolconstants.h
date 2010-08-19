@@ -368,7 +368,7 @@ enum TMTPResponseCode
     EMTPRespCodeCaptureAlreadyTerminated                = 0x2018,
     EMTPRespCodeDeviceBusy                              = 0x2019,
     EMTPRespCodeInvalidParentObject                     = 0x201A,
-    EMTPRespCodeInvalidDeviEMTPRespCodecePropFormat     = 0x201B,
+    EMTPRespCodeInvalidDevicePropFormat                 = 0x201B,
     EMTPRespCodeInvalidDevicePropValue                  = 0x201C,
     EMTPRespCodeInvalidParameter                        = 0x201D,
     EMTPRespCodeSessionAlreadyOpen                      = 0x201E,

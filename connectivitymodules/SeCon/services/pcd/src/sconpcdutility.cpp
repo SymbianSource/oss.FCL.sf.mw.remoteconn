@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2006-2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2006-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -217,7 +217,7 @@ void SConPcdUtility::AppendInstalledJavaL( CSConListInstApps& aListInstApps )
     CJavaRegistry* javaRegistry = CJavaRegistry::NewLC( );
     RArray<TUid> packageUids;
     CleanupClosePushL( packageUids );
-    javaRegistry->GetRegistryEntryUidsL( /*EGeneralPackage,*/ packageUids );
+    javaRegistry->GetRegistryEntryUidsL( packageUids );
     LOGGER_WRITE_1("packageUids.Count(): %d", packageUids.Count());
     for (TInt i=0; i<packageUids.Count(); i++ )
         {
@@ -317,7 +317,7 @@ void SConPcdUtility::AppendInstalledWidgetsL( CSConListInstApps& aListInstApps )
     RWidgetInfoArray widgetInfoArr;
     CleanupClosePushL( widgetInfoArr );
     widgetSession.InstalledWidgetsL( widgetInfoArr );
-    
+    TFileName bundleId;
     for ( TInt i = 0; i < widgetInfoArr.Count(); i++ )
         {
         CWidgetInfo *item = widgetInfoArr[i];
@@ -359,6 +359,9 @@ void SConPcdUtility::AppendInstalledWidgetsL( CSConListInstApps& aListInstApps )
                 }
             delete propValue;
             propValue = NULL;
+            bundleId.Zero();
+            widgetSession.GetWidgetBundleId( item->iUid, bundleId );
+            app->iWidgetBundleId = bundleId.AllocL();
             
             User::LeaveIfError( aListInstApps.iApps.Append( app ) );
             CleanupStack::Pop( app ); // ownership transferred, do not delete

@@ -68,7 +68,9 @@ const CMTPImageDpObjectPropertyMgr::CMTPImagePropertiesCache::TElementMetaData C
 CMTPImageDpObjectPropertyMgr::CMTPImagePropertiesCache* CMTPImageDpObjectPropertyMgr::CMTPImagePropertiesCache::NewL()
     {
     CMTPImagePropertiesCache* self = new(ELeave) CMTPImagePropertiesCache(KElements, ENumProperties);
+    CleanupStack::PushL(self);
     self->ConstructL();
+    CleanupStack::Pop(self);
     return self;
     }
 

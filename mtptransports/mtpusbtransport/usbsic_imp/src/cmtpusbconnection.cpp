@@ -131,7 +131,7 @@ void CMTPUsbConnection::CloseConnection()
     __FLOG(_L8("CloseConnection - Exit"));
     }
     
-void CMTPUsbConnection::ReceiveDataL(MMTPType& aData, const TMTPTypeRequest& aRequest)
+void CMTPUsbConnection::ReceiveDataL(MMTPType& aData, const TMTPTypeRequest& /*aRequest*/)
     {
     __FLOG(_L8("ReceiveDataL - Entry"));
     
@@ -636,7 +636,11 @@ void CMTPUsbConnection::SendInterruptDataCompleteL(TInt aError, const MMTPType& 
     {
     __FLOG(_L8("SendInterruptDataCompleteL - Entry"));
     iEventPending = EFalse;	
+    
+    if ( NULL != iProtocolLayer)
+        {
     BoundProtocolLayer().SendEventCompleteL(aError, iMTPEvent);
+        }
     __FLOG(_L8("SendInterruptDataCompleteL - Exit"));
     }    
 
@@ -1254,7 +1258,7 @@ Processes received USB SIC class specific Get Device Status requests
 @param aRequest The USB SIC class specific request setup data.
 @leave One of the system wide error codes, if a processing failure occurs.
 */ 
-void CMTPUsbConnection::ProcessControlRequestDeviceStatusL(const TMTPUsbControlRequestSetup& aRequest)
+void CMTPUsbConnection::ProcessControlRequestDeviceStatusL(const TMTPUsbControlRequestSetup& /*aRequest*/)
     {
     __FLOG(_L8("ProcessControlRequestDeviceStatusL - Entry"));
     iUsbControlRequestDeviceStatus.Reset();
@@ -1358,7 +1362,17 @@ TBool CMTPUsbConnection::BulkRequestTransactionStateValid(TMTPTransactionPhase a
         {
         // Invalid bulk transaction state, close the connection.
         __FLOG_VA((_L8("Expected bulk transaction state = %d"), aExpectedTransactionState));
+
+        //if transaction is in request phase, while the container type of data we received is other transaction phase,
+        //just ignore the data and initiate another request receiving. 
+        if (ERequestPhase == iBulkTransactionState)
+            {
+            InitiateBulkRequestSequenceL();
+            }
+        else
+            {
         CloseConnection();
+            }
         }
     __FLOG(_L8("BulkRequestTransactionStateValid - Exit"));
     return valid;
@@ -1503,6 +1517,7 @@ void CMTPUsbConnection::BulkEndpointsStallL()
     __FLOG(_L8("BulkEndpointsStallL - Entry"));
     EndpointStallL(EMTPUsbEpBulkIn);
     EndpointStallL(EMTPUsbEpBulkOut);
+    SetDeviceStatus(EMTPUsbDeviceStatusTransactionCancelled);
     __FLOG(_L8("BulkEndpointsStallL - Exit"));
     }
 
@@ -1669,6 +1684,7 @@ TBool CMTPUsbConnection::StopConnection()
         SetBulkTransactionState(EUndefined);
         SetConnectionState(EIdle);
         SetSuspendState(ENotSuspended);
+		iMTPSessionId = KMTPSessionNone;
         }
     
     __FLOG(_L8("StopConnection - Exit"));

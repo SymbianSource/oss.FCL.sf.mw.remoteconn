@@ -484,7 +484,7 @@ void CMTPDataProviderController::EnumerationStateChangedL(const CMTPDataProvider
             Cancel();
 
             //clean the root level snapshot
-            iSingletons.ObjectMgr().ObjectStore().CleanDBSnapshotL(ETrue);
+            TRAP_IGNORE(iSingletons.ObjectMgr().ObjectStore().CleanDBSnapshotL(ETrue));
 
             //Schedule again to scan subdir
             iEnumerationState   = EEnumeratingSubDirFiles;
@@ -500,9 +500,7 @@ void CMTPDataProviderController::EnumerationStateChangedL(const CMTPDataProvider
                 {
                 Cancel();
                 iEnumerationState   = EEnumeratingCleanDBSnapshot;
-                iSingletons.ObjectMgr().ObjectStore().CleanDBSnapshotL(EFalse);
-            
-
+                TRAP_IGNORE(iSingletons.ObjectMgr().ObjectStore().CleanDBSnapshotL(EFalse));
                 }
             else
                 {

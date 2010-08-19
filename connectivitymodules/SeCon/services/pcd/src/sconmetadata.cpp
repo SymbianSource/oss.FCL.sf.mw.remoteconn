@@ -210,8 +210,8 @@ void SConMetadata::GetAudioMetadataL( CSConTask& aTask )
             // get field id
             fields.FieldIdAt( i , fieldId );
             LOGGER_WRITE_2( "AudioFieldId( %d ): 0x%02x", i, fieldId );
-            
-            if ( fieldId == EMetaDataJpeg )
+            TUint8 sconFieldId = AudioFieldId( fieldId );
+            if ( sconFieldId == KSconAudioJpeg )
                 {
                 TPtrC8 field8( fields.Field8( fieldId ) );
                 AppendByteDataFieldL(
@@ -219,13 +219,16 @@ void SConMetadata::GetAudioMetadataL( CSConTask& aTask )
                     field8,
                     AudioFieldId( fieldId ) );
                 }
-            else
+            else if ( sconFieldId > 0 )
                 {
                 // get field data and add UTF-8 formatted text to buffer
                 fieldData.Set( fields.At( i , fieldId ) );
-                AppendUtf8DataFieldL( buffer, fieldData, AudioFieldId( fieldId ) );
+                AppendUtf8DataFieldL( buffer, fieldData, sconFieldId );
                 }
-            
+            else
+                {
+                LOGGER_WRITE("Unknown field skipped");
+                }
             }
         
         if ( buffer->Size() > 0 )
@@ -425,6 +428,12 @@ TUint8 SConMetadata::AudioFieldId( const TMetaDataFieldId fieldId )
             break;
         case EMetaDataDate :
             ret = KSconAudioDate;
+            break;
+        case EMetaDataUnsyncLyrics:
+            ret = KSconAudioUnsyncLyrics;
+            break;
+        case EMetaDataProtected:
+            ret = KSconAudioProtected;
             break;
         default :
             LOGGER_WRITE( "SConMetadata::AudioFieldId : ERR field not defined!" );

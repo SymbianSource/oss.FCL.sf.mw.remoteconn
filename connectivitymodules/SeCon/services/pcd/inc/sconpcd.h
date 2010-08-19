@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2005-2008 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2005-2009 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -23,11 +23,13 @@
 
 #include <e32base.h>
 #include <e32cons.h>
+#include <s32strm.h>
 
 #include "sconconmltask.h"
 
 class CSConInstallerQueue;
 class CSConBackupRestoreQueue;
+class CSconSyncHandler;
 
 enum TSConLastConMLOperation
     {
@@ -68,6 +70,9 @@ class CSConPCD : public CBase
          * @return none
          */
         virtual void ResetPCD();
+        
+        virtual void HandleGetSyncRequestL( const TDesC8& aRequest, RWriteStream& aResult, TInt aMaxObjectSize );
+        virtual void HandlePutSyncRequestL( const TDesC8& aRequest, RReadStream& aResult );
     
     private:        
         /**
@@ -153,6 +158,7 @@ class CSConPCD : public CBase
         TInt                        iMaxObjectSize;
         TSConLastConMLOperation     iLastOperation;
         RFs                         iFs;
+        CSconSyncHandler*           iSyncHandler;
     }; 
     
     IMPORT_C CSConPCD* CreateCSConPCDL();

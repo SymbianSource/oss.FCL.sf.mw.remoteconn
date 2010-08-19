@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2005-2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2005-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -138,7 +138,12 @@ NONSHARABLE_CLASS ( CSConSBEClient ) : public CActive
          * @return KErrNone if no erros. Else system wide error codes.
          */
         TInt ProcessRequestDataL();
-        /**
+		/**
+		 * Request data to iDataBuffer
+		 * @return none
+		 */
+		void RequestDataL( CSBGenericTransferType& aGenericTransferType );
+		/**
          * Executes GetDataOwnerStatus task
          * @return none
          */
@@ -209,25 +214,20 @@ NONSHARABLE_CLASS ( CSConSBEClient ) : public CActive
          * @param TDriveList drives to include
          * @return dataowner data size in specified drives
          */
-        TUint JavaDataSizeL( const TDesC& aJavaHash, const TDriveList& aDriveList ) const;
-        
-    private:
-        CSBEClient*                     iSBEClient;
-        TRequestStatus*                 iCallerStatus;
-        TBool                           iProcessComplete;
-        TInt                            iProcessIndex;
-        TInt                            iMaxObjectSize;
-        
-        CSConTask*                      iCurrentTask;
-        TInt                            iDataPos;
-        TBool                           iDataLeft;
-        TPtrC8                          iDataPtr;
-        TBool                           iLastChunk;
-        TBool                           iBURModeNormal;
-        TBool                           iRestoreMode;
-        RFs&                            iFs;
-        TBool                           iAllSnapshotsSuppliedCalled;
-    };
+         TUint JavaDataSizeL( const TDesC& aJavaHash, const TDriveList& aDriveList ) const;
+         
+	private:
+		CSBEClient*						iSBEClient;
+		TRequestStatus* 				iCallerStatus;
+		CSConTask*						iCurrentTask;
+		TBool							iBURModeNormal;
+		TBool                           iRestoreMode;
+		RFs&                            iFs;
+		TBool                           iAllSnapshotsSuppliedCalled;
+		TBool                           iLastChunk;
+		CBufFlat*                       iDataBuffer;
+		TInt                            iDataBufferSize;
+	};
 
 #endif
 

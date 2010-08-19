@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2005-2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2005-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -24,7 +24,8 @@
 #include "sconsbeclient.h"
 #include "debug.h"
 
-
+const TInt KDataBufExpandSize( 1024 );
+const TInt KMaxObjectSize( 1048576 - 1024 ); // Max chunk size is 1MB, but give some space for ConML wbxml
 _LIT( KSConNoDrive, "\x0" );
 _LIT( KSConDriveExists, "\x1" );
 // ============================= MEMBER FUNCTIONS ==============================
@@ -46,13 +47,10 @@ CSConSBEClient* CSConSBEClient::NewL( const TInt aMaxObjectSize, RFs& aFs )
 // Constructor
 // -----------------------------------------------------------------------------
 //
-CSConSBEClient::CSConSBEClient( const TInt aMaxObjectSize, RFs& aFs ) : 
-        CActive( EPriorityStandard ), iSBEClient(NULL), 
-        iProcessComplete(EFalse), iProcessIndex( 0 ), iDataPos( 0 ),
-        iDataLeft( EFalse ), iBURModeNormal( ETrue ),
-        iRestoreMode( EFalse ), iFs( aFs )
+CSConSBEClient::CSConSBEClient( const TInt /*aMaxObjectSize*/, RFs& aFs ) : 
+        CActive( EPriorityStandard ), iBURModeNormal( ETrue ), iFs( aFs )
     {
-    iMaxObjectSize = aMaxObjectSize;
+    
     }
 
 // -----------------------------------------------------------------------------
@@ -89,6 +87,8 @@ CSConSBEClient::~CSConSBEClient()
         delete iSBEClient;
         iSBEClient = NULL;
         }
+    
+    delete iDataBuffer;
     TRACE_FUNC_EXIT;
     }
 
@@ -263,67 +263,52 @@ void CSConSBEClient::RunL()
             LOGGER_WRITE( "CSConSBEClient::RunL() : ESetBURMode" );
             TRAP( err, ProcessSetBURModeL() );
             LOGGER_WRITE_1( "CSConSBEClient::RunL() : ProcessSetBURModeL() : returned %d", err );
-            HandleSBEErrorL( err );
-            User::RequestComplete( iCallerStatus, err );
             break;
         case EListPublicFiles :
             LOGGER_WRITE( "CSConSBEClient::RunL() : EListPublicFiles" );
             TRAP( err, ProcessListPublicFilesL() );
             LOGGER_WRITE_1( "CSConSBEClient::RunL() : ProcessListPublicFilesL() : returned %d", err );
-            HandleSBEErrorL( err );
-            User::RequestComplete( iCallerStatus, err );
             break;
         case EListDataOwners :
             LOGGER_WRITE( "CSConSBEClient::RunL() : EListDataOwners" ); 
             TRAP( err, ProcessListDataOwnersL() );
             LOGGER_WRITE_1( "CSConSBEClient::RunL() : ProcessListDataOwnersL() : returned %d", err );
-            HandleSBEErrorL( err );
-            User::RequestComplete( iCallerStatus, err );
             break;
         case EGetDataSize :
             LOGGER_WRITE( "CSConSBEClient::RunL() : EGetDataSize" );    
             TRAP( err, ProcessGetDataSizeL() );
             LOGGER_WRITE_1( "CSConSBEClient::RunL() : ProcessGetDataSizeL() : returned %d", err );
-            HandleSBEErrorL( err );
-            User::RequestComplete( iCallerStatus, err );
             break;
         case ERequestData :
             LOGGER_WRITE( "CSConSBEClient::RunL() : ERequestData" );
             TRAP( err, ret = ProcessRequestDataL() );
             LOGGER_WRITE_1( "CSConSBEClient::RunL() : ProcessRequestDataL() : returned %d", err );
-            HandleSBEErrorL( err );
-            
-            if( err == KErrNone )
-                {
-                err = ret;
-                }
-            
-            User::RequestComplete( iCallerStatus, err );
             break;  
         case EGetDataOwnerStatus :
             LOGGER_WRITE( "CSConSBEClient::RunL() : EGetDataOwnerStatus" );
             TRAP( err, ProcessGetDataOwnerStatusL() );
             LOGGER_WRITE_1( "CSConSBEClient::RunL() : ProcessGetDataOwnerStatusL() : returned %d", err );
-            HandleSBEErrorL( err );
-            User::RequestComplete( iCallerStatus, err );
             break;
         case ESupplyData :
             LOGGER_WRITE( "CSConSBEClient::RunL() : ESupplyData" ); 
             TRAP( err, ret = ProcessSupplyDataL() );
             LOGGER_WRITE_1( "CSConSBEClient::RunL() : SupplyDataL() : returned %d", err );
-            HandleSBEErrorL( err );
-            
-            if( err == KErrNone )
-                {
-                err = ret;
-                }
-            
-            User::RequestComplete( iCallerStatus, err );
             break;
         default :
+            err = KErrNotSupported;
             LOGGER_WRITE( "CSConSBEClient::RunL() : ERROR! Unknown!" ); 
             break;
         }
+    
+    if ( err )
+        {
+        HandleSBEErrorL( err );
+        }
+    else
+        {
+        err = ret;
+        }
+    User::RequestComplete( iCallerStatus, err );
             
     TRACE_FUNC_EXIT;
     }
@@ -338,6 +323,7 @@ void CSConSBEClient::ProcessSetBURModeL()
     TRACE_FUNC_ENTRY;
     
     iAllSnapshotsSuppliedCalled = EFalse;
+    iLastChunk = EFalse;
     
     TDriveList driveList = iCurrentTask->iBURModeParams->iDriveList;
     
@@ -366,6 +352,21 @@ void CSConSBEClient::ProcessSetBURModeL()
         default :
             partialType = EBURUnset;
             break;
+        }
+    
+    if ( partialType == EBURBackupFull || partialType == ESConBurBackupPartial )
+        {
+        // initialize buffer
+        if ( !iDataBuffer )
+            iDataBuffer = CBufFlat::NewL( KDataBufExpandSize );
+        else
+            iDataBuffer->Reset();
+        iDataBufferSize=0;
+        }
+    else
+        {
+        delete iDataBuffer;
+        iDataBuffer = 0;
         }
     
     TBackupIncType incType = ENoBackup;
@@ -521,6 +522,7 @@ void CSConSBEClient::ProcessListDataOwnersL()
         {
         LOGGER_WRITE_2("handling do: %d, count: %d", i, dataOwners.Count());
         CSConDataOwner* dataOwner = new (ELeave) CSConDataOwner();
+        CleanupStack::PushL( dataOwner );
         // default values
         TSecureId sid( 0 );
         includeToList = ETrue;
@@ -704,24 +706,27 @@ void CSConSBEClient::ProcessListDataOwnersL()
         if( includeToList ) 
             {
             LOGGER_WRITE_1( "Appending to list, uid: 0x%08x", dataOwner->iUid.iUid );
-            iCurrentTask->iListDataOwnersParams->iDataOwners.Append( dataOwner );
+            iCurrentTask->iListDataOwnersParams->iDataOwners.AppendL( dataOwner );
+            CleanupStack::Pop( dataOwner );
             }
         
         if( sid )
             {
             LOGGER_WRITE_1( "Appending package sid to list, sid: 0x%08x", sid.iId );
             CSConDataOwner* packageDataOwner = dataOwner->CopyL();
+            CleanupStack::PushL( packageDataOwner );
             //Clear package name
             packageDataOwner->iPackageName = KNullDesC();
             //Add sid
             packageDataOwner->iUid.iUid = sid.iId;
-            iCurrentTask->iListDataOwnersParams->iDataOwners.Append( packageDataOwner );
+            iCurrentTask->iListDataOwnersParams->iDataOwners.AppendL( packageDataOwner );
+            CleanupStack::Pop( packageDataOwner );
             }
         
         if( !includeToList )
             {
             //Not included to list => delete memory allocation
-            delete dataOwner;
+            CleanupStack::PopAndDestroy( dataOwner );
             }
         }
         
@@ -838,11 +843,6 @@ TInt CSConSBEClient::ProcessRequestDataL()
     {
     TRACE_FUNC_ENTRY;
     TInt ret( KErrNone );
-    
-    if( iMaxObjectSize <= 1 )
-        {
-        User::Leave( KErrGeneral );
-        }
         
     TBool packageData = EFalse;
     TTransferDataType transferDataType( ERegistrationData );
@@ -917,95 +917,42 @@ TInt CSConSBEClient::ProcessRequestDataL()
         sid = iCurrentTask->iRequestDataParams->iDataOwner->iUid;
         LOGGER_WRITE_1("CSConSBEClient::ProcessRequestDataL() sid: 0x%08x", sid.iId);
         }
-            
-    CSBPackageTransferType* ptt( NULL );
-    CSBSIDTransferType* stt( NULL );
-    CSBJavaTransferType* jtt( NULL );
     
-    LOGGER_WRITE_1( "CSConSBEClient::ProcessRequestDataL() : \
-    Begin - Data left: %d", iDataLeft );
+
     LOGGER_WRITE_1( "CSConSBEClient::ProcessRequestDataL() : \
     Begin - Package data: %d", packageData );
-    LOGGER_WRITE_1( "CSConSBEClient::ProcessRequestDataL() : \
-    Begin - iDataPos: %d", iDataPos );
+
+    LOGGER_WRITE_1("iLastChunk: %d", (TInt) iLastChunk );
+    LOGGER_WRITE_1("iDataBufferSize: %d", iDataBufferSize );
         
-    //Are there old data left to be transfered?
-    if( !iDataLeft ) 
+    // if was't last chunk and there are free space left on our packet
+    if( !iLastChunk && iDataBufferSize < KMaxObjectSize ) 
         {
         //No data left, request more from the server
         if( packageData && !iCurrentTask->iRequestDataParams->iDataOwner->iJavaHash )
             {
-            ptt = CSBPackageTransferType::NewL( uid, driveNumber, 
-                packageDataType );
+            CSBPackageTransferType* ptt = CSBPackageTransferType::NewL(
+                    uid, driveNumber, packageDataType );
             CleanupStack::PushL( ptt );
-            LOGGER_WRITE( "iSBEClient->RequestDataL( ptt ) : start" );
-            TRequestStatus status;
-            iSBEClient->RequestDataL( *ptt, status );
-            User::WaitForRequest( status );
-            LOGGER_WRITE( "iSBEClint->RequestDataL( ptt ) : stop" );
             
-            LOGGER_WRITE_1( "CSConSBEClient::ProcessRequestDataL() : status.Int() %d", status.Int() );
-            User::LeaveIfError( status.Int() );
-                                    
-            //Get the data and store the handle
-            CSBGenericTransferType* gtt = NULL;
-            LOGGER_WRITE( "iDataPtr.Set( iSBEClient->TransferDataInfoL( gtt, iSBEDataLeft ) : start" );
-            iDataPtr.Set( iSBEClient->TransferDataInfoL( gtt, iLastChunk ) );
-            LOGGER_WRITE( "iDataPtr.Set( iSBEClient->TransferDataInfoL( gtt, iSBEDataLeft ) : stop" );
-            LOGGER_WRITE_1( "CSConSBEClient::ProcessRequestDataL() :\
-             Received data size %d", iDataPtr.Length() );
-            LOGGER_WRITE_1( "CSConSBEClient::ProcessRequestDataL() :\
-             Received from DO 0x%08x", uid );
-            LOGGER_WRITE_1( "CSConSBEClient::ProcessRequestDataL() :\
-             Is last chunk %d", iLastChunk );
-            LOGGER_WRITE_1( "CSConSBEClient::ProcessRequestDataL() :\
-             Transfertype %d", iCurrentTask->iRequestDataParams->iDataOwner->iTransDataType );
-             
-             if( gtt )
-                {
-                delete gtt;
-                }
-             
+            RequestDataL( *ptt );
+            
             CleanupStack::PopAndDestroy( ptt );
             }
         else if( !iCurrentTask->iRequestDataParams->iDataOwner->iJavaHash )
             {
-            stt = CSBSIDTransferType::NewL( sid, driveNumber, transferDataType );
+            CSBSIDTransferType* stt = CSBSIDTransferType::NewL(
+                    sid, driveNumber, transferDataType );
             CleanupStack::PushL( stt );
-            LOGGER_WRITE( "iSBEClient->RequestDataL( stt ) : start" );
-            TRequestStatus status;
-            iSBEClient->RequestDataL( *stt, status );
-            User::WaitForRequest( status );
-            LOGGER_WRITE( "iSBEClient->RequestDataL( stt ) : stop" );
             
-            LOGGER_WRITE_1( "CSConSBEClient::ProcessRequestDataL() :\
-             status.Int() %d", status.Int() );
-            User::LeaveIfError( status.Int() );
-                        
-            //Get the data and store the handle
-            CSBGenericTransferType* gtt = NULL;
-            LOGGER_WRITE( "iDataPtr.Set( iSBEClient->TransferDataInfoL( gtt, iSBEDataLeft ) : start" );
-            iDataPtr.Set( iSBEClient->TransferDataInfoL( gtt, iLastChunk ) );
-            LOGGER_WRITE( "iDataPtr.Set( iSBEClient->TransferDataInfoL( gtt, iSBEDataLeft ) : stop" );
-            LOGGER_WRITE_1( "CSConSBEClient::ProcessRequestDataL() :\
-             Received data size %d", iDataPtr.Length() );
-            LOGGER_WRITE_1( "CSConSBEClient::ProcessRequestDataL() :\
-             Is last chunk %d", iLastChunk );
-            LOGGER_WRITE_1( "CSConSBEClient::ProcessRequestDataL() :\
-             Transfertype %d", 
-             iCurrentTask->iRequestDataParams->iDataOwner->iTransDataType );
-             
-            if( gtt )
-                {
-                delete gtt;
-                }
-             
+            RequestDataL( *stt );
+            
             CleanupStack::PopAndDestroy( stt );
             }
         else
             {
             TPtr javaHashPtr = iCurrentTask->iRequestDataParams->iDataOwner->iJavaHash->Des();
-            
+            CSBJavaTransferType* jtt( NULL );
             //When ESystemData is requested, request EJavaMIDlet
             if( packageDataType == ESystemData )
                 {
@@ -1020,52 +967,25 @@ TInt CSConSBEClient::ProcessRequestDataL()
             if( packageDataType == ESystemData || transferDataType == EPassiveBaseData )
                 {
                 CleanupStack::PushL( jtt );
-                LOGGER_WRITE( "iSBEClient->RequestDataL( jtt ) : start" );
-                TRequestStatus status;
-                iSBEClient->RequestDataL( *jtt, status );
-                User::WaitForRequest( status );
-                LOGGER_WRITE( "iSBEClient->RequestDataL( jtt ) : stop" );
                 
-                LOGGER_WRITE_1( "CSConSBEClient::ProcessRequestDataL() :\
-                 status.Int() %d", status.Int() );
-                User::LeaveIfError( status.Int() );
-                            
-                //Get the data and store the handle
-                CSBGenericTransferType* gtt = NULL;
-                LOGGER_WRITE( "iDataPtr.Set( iSBEClient->TransferDataInfoL( gtt, iSBEDataLeft ) : start" );
-                iDataPtr.Set( iSBEClient->TransferDataInfoL( gtt, iLastChunk ) );
-                LOGGER_WRITE( "iDataPtr.Set( iSBEClient->TransferDataInfoL( gtt, iSBEDataLeft ): stop" );
-                LOGGER_WRITE_1( "CSConSBEClient::ProcessRequestDataL() :\
-                 Received data size %d", iDataPtr.Length() );
-                LOGGER_WRITE_1( "CSConSBEClient::ProcessRequestDataL() :\
-                 Is last chunk %d", iLastChunk );
-                LOGGER_WRITE_1( "CSConSBEClient::ProcessRequestDataL() :\
-                 Transfertype %d", 
-                 iCurrentTask->iRequestDataParams->iDataOwner->iTransDataType );
-                 
-                if( gtt )
-                    {
-                    delete gtt;
-                    }
-                 
+                RequestDataL( *jtt );
+                
                 CleanupStack::PopAndDestroy( jtt );   
                 }
             else
                 {
                 //No data
-                iDataPtr.Set( KNullDesC8 );
+                iDataBuffer->Reset();
+                iDataBufferSize = 0;
                 iLastChunk = ETrue;
                 }
             }
-        }   
-        
-    TInt dataBufLength = iDataPtr.Length();
-    LOGGER_WRITE_1( "CSConSBEClient::ProcessRequestDataL() : \
-    Data received: %d", dataBufLength );
+        }
     
-    TInt maxLength = iMaxObjectSize - 1024;
-    LOGGER_WRITE_1( "CSConSBEClient::ProcessRequestDataL() : \
-    Max length: %d", maxLength );
+    LOGGER_WRITE_1("readed iLastChunk: %d", (TInt) iLastChunk );
+    LOGGER_WRITE_1("readed iDataBufferSize: %d", iDataBufferSize );
+        
+    
     
     if( iCurrentTask->iRequestDataParams->iBackupData )
         {
@@ -1073,56 +993,70 @@ TInt CSConSBEClient::ProcessRequestDataL()
         iCurrentTask->iRequestDataParams->iBackupData = NULL;
         }
     
+    TInt dataToRead = KMaxObjectSize;
+    if ( dataToRead > iDataBufferSize )
+        dataToRead = iDataBufferSize;
+    
     //Initialize the task data buffer
-    iCurrentTask->iRequestDataParams->iBackupData = HBufC8::NewL( maxLength );
+    iCurrentTask->iRequestDataParams->iBackupData = HBufC8::NewL( dataToRead );
     //Get descriptor task's buffer
     TPtr8 backupDataPtr = iCurrentTask->iRequestDataParams->iBackupData->Des();
     
-    TInt copyPos = 0;
     
-    //Copy data to task buffer
-    for( ; iDataPos < dataBufLength && copyPos < maxLength;
-     iDataPos++ )
+    iDataBuffer->Read(0, backupDataPtr, dataToRead );
+    iDataBuffer->Delete(0, dataToRead);
+    iDataBufferSize -= dataToRead;
+    
+    if ( !iLastChunk || iDataBufferSize>0 )
         {
-        backupDataPtr.Append( iDataPtr[iDataPos] );
-        copyPos++;
-        }
-        
-    LOGGER_WRITE_1( "CSConSBEClient::ProcessRequestDataL() : \
-    End - copyPos: %d", copyPos );
-    LOGGER_WRITE_1( "CSConSBEClient::ProcessRequestDataL() : \
-    End - iDataPos: %d", iDataPos );
-            
-    //Are there more data left in the buffer
-    if( iDataPos < dataBufLength )
-        {
-        LOGGER_WRITE( "iSBEClient->RequestDataL( stt ) : There is more data in buffer" );
-        iDataLeft = ETrue;
+        LOGGER_WRITE( "CSConSBEClient::ProcessRequestDataL() : There are more data available" );
         iCurrentTask->iRequestDataParams->iMoreData = ETrue;
         //Another task is needed to transfer the data to the client
         ret = KErrCompletion;
         }
     else
         {
-        //Check if the backup server has more data from the dataowner
-        if( !iLastChunk )
-            {
-            iCurrentTask->iRequestDataParams->iMoreData = ETrue; 
-            //Another task is needed to transfer the data to the client
-            ret = KErrCompletion;
-            LOGGER_WRITE( "iSBEClient->RequestDataL( stt ) : There are more data available from SBE" );
-            }
-        else
-            {
-            iCurrentTask->iRequestDataParams->iMoreData = EFalse;
-            }
-            
-        iDataPos = 0;   
-        iDataLeft = EFalse; 
+        LOGGER_WRITE( "CSConSBEClient::ProcessRequestDataL() : All data readed" );
+        iDataBuffer->Reset();
+        iDataBufferSize = 0;
+        // task will be completed, initialize iLastChunk value for next operation
+        iLastChunk = EFalse;
         }
+    
         
     LOGGER_WRITE_1( "CSConSBEClient::ProcessRequestDataL() :  returned %d", ret );
     return ret;
+    }
+
+void CSConSBEClient::RequestDataL( CSBGenericTransferType& aGenericTransferType )
+    {
+    TRACE_FUNC_ENTRY;
+    if ( !iDataBuffer )
+        User::Leave( KErrArgument );
+    
+    do
+        {
+        LOGGER_WRITE( "iSBEClient->RequestDataL() : start" );
+        TRequestStatus status;
+        iSBEClient->RequestDataL( aGenericTransferType, status );
+        User::WaitForRequest( status );
+        LOGGER_WRITE_1( "iSBEClient->RequestDataL() : status.Int() %d", status.Int() );
+        User::LeaveIfError( status.Int() );
+                    
+        //Get the data and store the handle
+        CSBGenericTransferType* gtt = NULL;
+        const TPtrC8& dataPtr = iSBEClient->TransferDataInfoL( gtt, iLastChunk );
+        LOGGER_WRITE_1("data size: %d", dataPtr.Length());
+        delete gtt;
+        iDataBuffer->ExpandL( iDataBufferSize, dataPtr.Length() );
+        iDataBuffer->Write(iDataBufferSize, dataPtr);
+        iDataBufferSize += dataPtr.Length();
+        LOGGER_WRITE_1("total buffer size: %d", iDataBufferSize);
+        }
+    // Continue if there are more data, and our packet is not full
+    while ( !iLastChunk && iDataBufferSize < KMaxObjectSize );
+    
+    TRACE_FUNC_EXIT;
     }
     
 // -----------------------------------------------------------------------------
@@ -1555,6 +1489,15 @@ void CSConSBEClient::HandleSBEErrorL( TInt& aErr )
         delete iSBEClient;
         iSBEClient = NULL;
         iSBEClient = CSBEClient::NewL();
+        }
+    else if ( aErr ) // error
+        {
+        if ( iDataBuffer )
+            {
+            iDataBuffer->Reset();
+            iDataBufferSize = 0;
+            }
+        iLastChunk = EFalse;
         }
     TRACE_FUNC_EXIT;
     }
