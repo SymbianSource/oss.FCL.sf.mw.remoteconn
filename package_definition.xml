@@ -1,11 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <SystemDefinition schema="3.0.0">
  <package id="remoteconn" name="Remote Connectivity" levels="plugin framework server generic specific">
-  <collection id="remoteconn_info" name="Remote Connectivity Info" level="specific">
-   <component id="remoteconn_metadata" name="Remote Connectivity Metadata" class="config" introduced="^2" purpose="development" target="desktop">
-    <unit mrp="remoteconn_info/remoteconn_metadata/remoteconn_metadata.mrp"/>
-   </component>
-  </collection>
   <collection id="remoteconn_plat" name="Remote Connectivity Platform Interfaces" level="specific">
    <component id="dialup_connection_status_api" name="Dialup Connection Status API" class="api" filter="s60">
     <meta rel="Api" href="remoteconn_plat/dialup_connection_status_api/dialup_connection_status_api.metaxml"/>

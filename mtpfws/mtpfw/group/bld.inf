@@ -37,4 +37,4 @@ backup_registration.xml  /epoc32/data/z/private/102827a2/backup_registration.xml
 ../conf/mtpframework.confml                 MW_LAYER_EXPORTS_CONFML(mtpframework.confml)
 ../conf/mtpframework_10282fcc.crml	        MW_LAYER_EXPORTS_CRML(mtpframework_10282fcc.crml)
 
-mtp_framework.iby   /epoc32/rom/include/mtp_framework.iby
+mtp_framework.iby   CORE_MW_LAYER_IBY_EXPORT_PATH(mtp_framework.iby)

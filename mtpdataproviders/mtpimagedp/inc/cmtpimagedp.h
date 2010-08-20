@@ -58,7 +58,7 @@ public:
     
 public:
     CMTPImageDpObjectPropertyMgr& PropertyMgr()const;
-    CMTPImageDpThumbnailCreator&  ThumbnailManager() const;
+    CMTPImageDpThumbnailCreator*  ThumbnailManager();
     CRepository& Repository() const;
     
     TMTPFormatCode FindFormat(const TDesC& aExtension);

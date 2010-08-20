@@ -24,13 +24,9 @@
 #include "../mtpdataproviders/mtppictbridgedp/pictbridgeengine/group/bld.inf"
 #include "../mtpfws/mtpfw/group/bld.inf"
 #include "../mtpdataproviders/mtpfileandfolderdp/group/bld.inf"
-#include "../mtpdataproviders/mtpwmpextndp/group/bld.inf"
 #include "../mtptransports/mtpusbtransport/group/bld.inf"
 //#include "../mtpfws/mtpfw/dataproviders/devdp/devdpextn/group/bld.inf"
 #include "../mtptransports/mtpptpiptransport/group/bld.inf"
-#include "../mtptransports/mtpbttransport/group/bld.inf"
-#include "../mtpdataproviders/mtpmetadatadp/group/bld.inf"
-#include "../mtpdataproviders/mtpstatusdp/group/bld.inf"
 #include "../mtpdataproviders/mtppictbridgedp/group/bld.inf"
 #include "../mtpdataproviders/mtpimagedp/group/bld.inf"
 

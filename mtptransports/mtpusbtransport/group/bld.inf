@@ -28,5 +28,5 @@ PRJ_MMPFILES
 #include        "../usbsic_cc/group/bld.inf"
 
 PRJ_EXPORTS
-mtp_usbsic.iby		/epoc32/rom/include/mtp_usbsic.iby
+mtp_usbsic.iby		CORE_MW_LAYER_IBY_EXPORT_PATH(mtp_usbsic.iby)
 

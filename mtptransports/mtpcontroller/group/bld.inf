@@ -24,7 +24,7 @@ PRJ_PLATFORMS
 ARMV5
 
 PRJ_EXPORTS
-mtp_controller.iby          /epoc32/rom/include/mtp_controller.iby
+mtp_controller.iby          CORE_MW_LAYER_IBY_EXPORT_PATH(mtp_controller.iby)
 
 PRJ_MMPFILES
 mtpcontroller.mmp
