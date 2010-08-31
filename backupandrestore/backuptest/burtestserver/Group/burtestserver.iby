@@ -35,6 +35,10 @@ data=EPOCROOT##Epoc32\data\z\testdata\scripts\sbetestdata\test_backuppackage.scr
 data=EPOCROOT##Epoc32\data\z\testdata\scripts\sbetestdata\test_activebackuprestore.script  testdata\scripts\sbetestdata\test_activebackuprestore.script
 data=EPOCROOT##Epoc32\data\z\testdata\scripts\sbetestdata\test_increament.script           testdata\scripts\sbetestdata\test_increament.script
 
+data=EPOCROOT##Epoc32\data\z\testdata\scripts\sbetestdata\bigexeforbackup.sis              testdata\scripts\sbetestdata\bigexeforbackup.sis
+data=EPOCROOT##Epoc32\data\z\testdata\scripts\sbetestdata\test_dll_nopublic.sis            testdata\scripts\sbetestdata\test_dll_nopublic.sis
+
+
 #ifndef __SERIES60_ 
 data=EPOCROOT##Epoc32\data\z\testdata\scripts\sbetestdata\sbeconfig.xml                    private\10202d56\sbeconfig.xml
 #endif

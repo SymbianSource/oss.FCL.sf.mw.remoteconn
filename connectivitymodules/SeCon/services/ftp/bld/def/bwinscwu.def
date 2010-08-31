@@ -1,3 +1,0 @@
-EXPORTS
-	?CreateCSConFTPL@@YAPAVCSConFTP@@XZ @ 1 NONAME ; class CSConFTP * CreateCSConFTPL(void)
-

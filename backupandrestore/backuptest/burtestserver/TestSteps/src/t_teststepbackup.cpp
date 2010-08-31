@@ -17,7 +17,7 @@
  @file
  @released
 */
-
+#include "W32STD.H" 
 #include "t_teststepbackup.h"
 
 namespace bur_ts
@@ -145,6 +145,8 @@ namespace bur_ts
 			Log(LOG_LEVEL2, KLog3);
 			}
 		
+        _LIT(KLog31, "Checking valid registration...");
+        Log(LOG_LEVEL2, KLog31);		
 		CheckValidRegistrationL();
 		
 		_LIT(KLog4, "Saving Data Owners...");
@@ -201,9 +203,13 @@ namespace bur_ts
 		BackupSystemBaseDataL();
 		BackupSystemSnapshotDataL();
 		
-		//active
-		BackupActiveBaseDataL();
-		BackupActiveSnapshotDataL();
+		// do active backup when in partial backup mode
+		if (iIsPartial)
+		    {
+            //active
+            BackupActiveBaseDataL();
+            BackupActiveSnapshotDataL();
+		    }
 		
 		//passive
 		BackupPassiveBaseDataL();
@@ -238,9 +244,13 @@ namespace bur_ts
 		BackupSystemBaseDataL();
 		BackupSystemSnapshotDataL();
 		
-		// active
-		BackupActiveIncDataL();
-		BackupActiveSnapshotDataL();
+        // do active backup when in partial backup mode
+        if (iIsPartial)
+            {
+            //active
+            BackupActiveIncDataL();
+            BackupActiveSnapshotDataL();
+            }
 		
 		//passive
 		BackupPassiveIncDataL();
@@ -530,6 +540,10 @@ namespace bur_ts
 			TRAPD(error,
 			for (TInt i=0; i < KRetries;)
 				{
+			  //
+			  LogWithNum(LOG_LEVEL3,_L("doActiveBackup-retryies :"), i);
+			  
+			  
 				CheckSIDStatusL(transferTypes, iTransferTypes);													
 				if (iTransferTypes.Count()) // dataowners ready
 					{
@@ -551,7 +565,20 @@ namespace bur_ts
 				iFailures++;
 				_LIT(KLogNoTrans, "***Error: Some Data Owners were Not Ready or Failed to Connect");
 				Log(LOG_LEVEL3, KLogNoTrans);
-				} //if
+				
+				
+				//print the remenant sids
+                for( TInt kk = 0 ; kk <transferTypes.Count() ; kk++)
+                    {
+                    
+                    CSBSIDTransferType* sidType = CSBSIDTransferType::NewL(transferTypes[kk]);
+                    CleanupStack::PushL(sidType);
+                    TSecureId id = NULL;
+                    id = sidType->SecureIdL();
+                    CleanupStack::PopAndDestroy(sidType);
+                    LogWithSID(LOG_LEVEL3, _L("doActiveBackup-transferTypes, remanent SIDs : "),id.iId);
+                    }
+               	} //if
 			transferTypes.ResetAndDestroy();
 			
 			User::LeaveIfError(error);

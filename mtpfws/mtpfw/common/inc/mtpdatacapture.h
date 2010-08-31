@@ -23,13 +23,7 @@
 
 // MTP data caputre defines
 
-#if defined(__WINS__)
 _LIT(KRequestCaptureRootDir, "c:\\test\\data\\");
-#elif defined(__SERIES60_) 
-_LIT(KRequestCaptureRootDir, "f:\\test\\data\\");
-#else
-_LIT(KRequestCaptureRootDir, "e:\\test\\data\\");
-#endif
 
 _LIT(KRequestCaptureDirPrefix, "testcase");
 _LIT(KIToRDataPhaseOutputFile, "i_to_r_dataphase.dat");

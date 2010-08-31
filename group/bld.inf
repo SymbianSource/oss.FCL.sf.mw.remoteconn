@@ -11,11 +11,30 @@
 *
 * Contributors:
 *
-* Description:  Build information file
+* Description: 
 *
 */
 
 
-
+// Local Connectivity Service Component
 #include "../remoteconn_plat/group/bld.inf"
-#include "../connectivitymodules/group/bld.inf"
+#include "../localconnectivityservice/group/bld.inf"
+
+// MTP Component
+#include "../mtpdataproviders/mtppictbridgedp/pictbridgeengine/group/bld.inf"
+#include "../mtpfws/mtpfw/group/bld.inf"
+#include "../mtpdataproviders/mtpfileandfolderdp/group/bld.inf"
+#include "../mtptransports/mtpusbtransport/group/bld.inf"
+//#include "../mtpfws/mtpfw/dataproviders/devdp/devdpextn/group/bld.inf"
+#include "../mtptransports/mtpptpiptransport/group/bld.inf"
+#include "../mtpdataproviders/mtppictbridgedp/group/bld.inf"
+#include "../mtpdataproviders/mtpimagedp/group/bld.inf"
+
+#include "../mtpdataproviders/mtpplaybackcontroldp/group/bld.inf"
+
+#ifdef FF_MTP_CONTROLLER
+#include        "../mtptransports/mtpcontroller/group/bld.inf"
+#endif//FF_MTP_CONTROLLER
+
+// SBE Component
+#include "../backupandrestore/backupengine/group/bld.inf"

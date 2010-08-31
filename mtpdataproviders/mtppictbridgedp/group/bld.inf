@@ -24,9 +24,8 @@ PRJ_MMPFILES
 
 
 PRJ_EXPORTS
-../inc/rptp.h         SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(rptp.h)
-./mtppictbridgedp.iby /epoc32/rom/include/mtppictbridgedp.iby
-./rptp.iby            CORE_MW_LAYER_IBY_EXPORT_PATH(rptp.iby)
-
+../inc/rptp.h                    SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(rptp.h)
+./mtppictbridgedp.iby            CORE_MW_LAYER_IBY_EXPORT_PATH(mtppictbridgedp.iby)
+./rptp.iby                       CORE_MW_LAYER_IBY_EXPORT_PATH(rptp.iby)
 #endif
 

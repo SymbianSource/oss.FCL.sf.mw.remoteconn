@@ -31,10 +31,8 @@ PRJ_MMPFILES
 PRJ_EXPORTS
 // Note: these files are exported for testing and techview only. Not used in a device
 2001fca2.txt /epoc32/data/z/private/10202be9/2001fca2.txt
-2001fca2.txt /epoc32/release/winscw/udeb/z/private/10202be9/2001fca2.txt
-2001fca2.txt /epoc32/release/winscw/urel/z/private/10202be9/2001fca2.txt
 
-../group/mtp_imagedp.iby  /epoc32/rom/include/mtp_imagedp.iby
+../group/mtp_imagedp.iby  CORE_MW_LAYER_IBY_EXPORT_PATH(mtp_imagedp.iby)
 
 // ConfML files
 ../conf/mtp_imagedp.confml          MW_LAYER_EXPORTS_CONFML(mtp_imagedp.confml)

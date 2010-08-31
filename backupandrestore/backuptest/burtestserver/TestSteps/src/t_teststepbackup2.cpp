@@ -204,9 +204,13 @@ namespace bur_ts
 		BackupSystemBaseDataL();
 		BackupSystemSnapshotDataL();
 		
-		//active
-		BackupActiveBaseDataL();
-		BackupActiveSnapshotDataL();
+        // do active backup when in partial backup mode
+        if (iIsPartial)
+            {
+            //active
+            BackupActiveBaseDataL();
+            BackupActiveSnapshotDataL();
+            }
 		
 		//passive
 		BackupPassiveBaseDataL();
@@ -241,9 +245,13 @@ namespace bur_ts
 		BackupSystemBaseDataL();
 		BackupSystemSnapshotDataL();
 		
-		// active
-		BackupActiveIncDataL();
-		BackupActiveSnapshotDataL();
+        // do active backup when in partial backup mode
+        if (iIsPartial)
+            {
+            //active
+            BackupActiveIncDataL();
+            BackupActiveSnapshotDataL();
+            }
 		
 		//passive
 		BackupPassiveIncDataL();

@@ -1,0 +1,25 @@
+/*
+* Copyright (c) 2006 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  iby file for pictbrige engine
+*
+*/
+
+#ifndef __PICTBRIDGE_IBY
+#define __PICTBRIDGE_IBY
+#ifdef __USB_PICTBRIDGE
+file=ABI_DIR\BUILD_DIR\pictbridge.dll			SHARED_LIB_DIR\pictbridge.dll
+
+data=DATAZ_\RESOURCE_FILES_DIR\dps.RSC         RESOURCE_FILES_DIR\dps.RSC
+#endif __USB_PICTBRIDGE
+#endif __PICTBRIDGE_IBY

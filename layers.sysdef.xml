@@ -1,14 +1,86 @@
 <?xml version="1.0"?>
-<!DOCTYPE SystemDefinition SYSTEM "sysdef_1_4_0.dtd" [
+<!DOCTYPE SystemDefinition SYSTEM "sysdef_1_5_1.dtd" [
   <!ENTITY layer_real_source_path "sf/mw/remoteconn" >
 ]>
 
-<SystemDefinition name="remoteconn" schema="1.4.0">
+<SystemDefinition name="Remoteconn" schema="1.5.1">
   <systemModel>
     <layer name="mw_layer">
-      <module name="remoteconn">
-        <unit name="remoteconn" unitID="sydo.remoteconn" bldFile="&layer_real_source_path;/group" mrp="" />
-      </module>
+      	<module name="localconnectivityservice">
+         <unit unitID="lcdo.localconnectivityservice" mrp="" bldFile="&layer_real_source_path;/localconnectivityservice/group" name="localconnectivityservice" />
+      	</module>
+      	<module name="dialup_connection_service_api">
+         <unit unitID="lcdo.localconnectivityservice.dialup_connection_status_api" mrp="" bldFile="&layer_real_source_path;/remoteconn_plat/dialup_connection_status_api/group" name="dialup_connection_status_api"/>
+      	</module>
+	<module name="dun_secondary_display_notification_api">
+         <unit unitID="lcdo.localconnectivityservice.dun_secondary_display_notification_api" mrp="" bldFile="&layer_real_source_path;/remoteconn_plat/dun_secondary_display_notification_api/group" name="dun_secondary_display_notification_api"/>
+      	</module>
+	<module name="generic_hid_api">
+         <unit unitID="lcdo.localconnectivityservice.generic_hid_api" mrp="" bldFile="&layer_real_source_path;/remoteconn_plat/generic_hid_api/group" name="generic_hid_api"/>
+      	</module>
+	<module name="locod_bearer_plugin_api">
+         <unit unitID="lcdo.localconnectivityservice.locod_bearer_plugin_api" mrp="" bldFile="&layer_real_source_path;/remoteconn_plat/locod_bearer_plugin_api/group" name="locod_bearer_plugin_api"/>
+      	</module>
+	<module name="locod_service_plugin_api">
+         <unit unitID="lcdo.localconnectivityservice.locod_service_plugin_api" mrp="" bldFile="&layer_real_source_path;/remoteconn_plat/locod_service_plugin_api/group" name="locod_service_plugin_api"/>
+      	</module>
+	<module name="mtppictbridgedp">
+      	<unit unitID="lcdo.localconnectivityservice.mtppictbridgeengine" mrp="" bldFile="&layer_real_source_path;/mtpdataproviders/mtppictbridgedp/pictbridgeengine/group" name="mtppictbridgeengine"/>
+      	</module>
+		
+	        <module name="MTP Framework">
+				<unit name="MTP_Framework" unitID="smw.mtpfws.mtpfw" bldFile="sf\mw\remoteconn\mtpfws\mtpfw\group" mrp="sf\mw\remoteconn\mtpfws\mtpfw\group\mtp_framework.mrp"/>
+			</module>
+
+			<module name="MTP File and Folder Provider">
+				<unit name="MTP_File_Folder" unitID="smw.mtpdps.mtpfilefolder" bldFile="sf\mw\remoteconn\mtpdataproviders\mtpfileandfolderdp\group" mrp="sf\mw\remoteconn\mtpdataproviders\mtpfileandfolderdp\group\mtp_filedp.mrp"/>
+			</module>
+
+			<module name="WMP Extension Data Provider">
+				<unit name="MTP_ExtDP" unitID="smw.mtpdps.mtpextdp" bldFile="sf\mw\remoteconn\mtpdataproviders\mtpwmpextndp\group" mrp="sf\mw\remoteconn\mtpdataproviders\mtpwmpextndp\group\mtp_wmpextndp.mrp"/>
+			</module>
+		  
+			<module name="MTP USB Transport">
+				<unit name="MTP_Usb" unitID="smw.mtptsp.mtpusbtsp" bldFile="sf\mw\remoteconn\mtptransports\mtpusbtransport\group" mrp="sf\mw\remoteconn\mtptransports\mtpusbtransport\group\mtp_usbsic.mrp"/>
+			</module>
+
+			<module name="MTP Device Provider Extension">
+				<unit name="MTP_DPExt" unitID="smw.mtpfws.devdp" bldFile="sf\mw\remoteconn\mtpfws\mtpfw\dataproviders\devdp\devdpextn\group" mrp=""/>
+			</module>
+
+			<module name="MTP PTP-IP Transport">
+				<unit name="MTP_PTP_IP" unitID="smw.mtptsp.mtpptpip" bldFile="sf\mw\remoteconn\mtptransports\mtpptpiptransport\group" mrp="sf\mw\remoteconn\mtptransports\mtpptpiptransport\group\mtp_ptpip.mrp"/>
+			</module>
+
+			<module name="MTP Bluetooth Transport">
+				<unit name="MTP_Bt_Tsp" unitID="smw.mtptsp.mtpbt" bldFile="sf\mw\remoteconn\mtptransports\mtpbttransport\group" mrp="sf\mw\remoteconn\mtptransports\mtpbttransport\group\mtp_bt.mrp"/>
+			</module>
+
+			<module name="MTP Device Metadata Data Provider">
+				<unit name="MTP_MetaDP" unitID="smw.mtpdps.mtpmetadp" bldFile="sf\mw\remoteconn\mtpdataproviders\mtpmetadatadp\group" mrp="sf\mw\remoteconn\mtpdataproviders\mtpmetadatadp\group\mtp_metadatadp.mrp"/>
+			</module>
+
+			<module name="MTP Status Data Provider">
+				<unit name="MTP_StatDP" unitID="smw.mtpdps.mtpstatdp" bldFile="sf\mw\remoteconn\mtpdataproviders\mtpstatusdp\group" mrp="sf\mw\remoteconn\mtpdataproviders\mtpstatusdp\group\mtp_statusdp.mrp"/>
+			</module>
+
+			<module name="MTP PictBridge Data Provider">
+				<unit name="MTP_Pic_Bri" unitID="smw.mtpdps.mtppicbri" bldFile="sf\mw\remoteconn\mtpdataproviders\mtppictbridgedp\group" mrp="sf\mw\remoteconn\mtpdataproviders\mtppictbridgedp\group\mtp_pictbridgedp.mrp"/>
+			</module>
+			
+			<module name="MTP Playback Control Data Provider">
+				<unit name="MTP_PbcDP" unitID="smw.mtpdps.mtpplaybackcontrol" bldFile="sf\mw\remoteconn\mtpdataproviders\mtpplaybackcontroldp\group" mrp="sf\mw\remoteconn\mtpdataproviders\mtpplaybackcontroldp\group\mtp_playbackcontroldp.mrp"/>
+			</module>
+
+			<module name="MTP Image Data Provider">
+				<unit name="MTP_ImageDP" unitID="smw.mtptsp.mtpimagedp" bldFile="sf\mw\remoteconn\mtpdataproviders\mtpimagedp\group" mrp="sf\mw\remoteconn\mtpdataproviders\mtpimagedp\group\mtp_imagedp.mrp"/>
+			</module>
+			
+			<module name="Backup Engine">
+				<unit name="backupengine" unitID="smw.br.backupengine" bldFile="sf\mw\remoteconn\backupandrestore\backupengine\group" mrp="sf\mw\remoteconn\backupandrestore\backupengine\group\connectivity_backupengine.mrp"/>
+			</module>
+
+			
     </layer>
   </systemModel>
 </SystemDefinition>

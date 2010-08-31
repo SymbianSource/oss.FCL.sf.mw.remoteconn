@@ -1,3 +1,0 @@
-EXPORTS
-	?CreateCSConConMLHandlerL@@YAPAVCSConConMLHandler@@XZ @ 1 NONAME ; class CSConConMLHandler * CreateCSConConMLHandlerL(void)
-

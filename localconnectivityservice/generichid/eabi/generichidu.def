@@ -1,0 +1,122 @@
+EXPORTS
+	_ZN10CHidDriver4NewLE4TUidP13MDriverAccess @ 1 NONAME
+	_ZN10CHidDriverC2Ev @ 2 NONAME
+	_ZN10CHidDriverD0Ev @ 3 NONAME
+	_ZN10CHidDriverD1Ev @ 4 NONAME
+	_ZN10CHidDriverD2Ev @ 5 NONAME
+	_ZN11CGenericHid4NewLEP15MTransportLayer @ 6 NONAME
+	_ZN11CGenericHid5NewLCEP15MTransportLayer @ 7 NONAME
+	_ZN15THidFieldSearch7SearchLEPK11CReportRootP15MHidFieldFinder @ 8 NONAME
+	_ZN16CReportGenerator4NewLEPK11CReportRootiN6CField5TTypeE @ 9 NONAME
+	_ZN16CReportGenerator5NewLCEPK11CReportRootiN6CField5TTypeE @ 10 NONAME
+	_ZN16CReportGenerator6ReportEv @ 11 NONAME
+	_ZN16CReportGenerator8SetFieldEPK6CFieldiii @ 12 NONAME
+	_ZN17TReportTranslatorC1ERK6TDesC8PK6CField @ 13 NONAME
+	_ZN17TReportTranslatorC2ERK6TDesC8PK6CField @ 14 NONAME
+	_ZN24CHidInputDataHandlingReg15AddHandledEventEii @ 15 NONAME
+	_ZN24CHidInputDataHandlingReg20AllowedToHandleEventEii @ 16 NONAME
+	_ZN6CField11SetReportIdEi @ 17 NONAME
+	_ZN6CField11SetUsageMaxEi @ 18 NONAME
+	_ZN6CField11SetUsageMinEi @ 19 NONAME
+	_ZN6CField12SetStringMaxEi @ 20 NONAME
+	_ZN6CField12SetStringMinEi @ 21 NONAME
+	_ZN6CField12SetUsagePageEi @ 22 NONAME
+	_ZN6CField13SetAttributesEm @ 23 NONAME
+	_ZN6CField13SetLogicalMaxEi @ 24 NONAME
+	_ZN6CField13SetLogicalMinEi @ 25 NONAME
+	_ZN6CField13SetUsageRangeEii @ 26 NONAME
+	_ZN6CField14ClearUsageListEv @ 27 NONAME
+	_ZN6CField14SetPhysicalMaxEi @ 28 NONAME
+	_ZN6CField14SetPhysicalMinEi @ 29 NONAME
+	_ZN6CField14SetStringIndexEi @ 30 NONAME
+	_ZN6CField14SetStringRangeEii @ 31 NONAME
+	_ZN6CField15SetLogicalRangeEii @ 32 NONAME
+	_ZN6CField15SetUnitExponentEi @ 33 NONAME
+	_ZN6CField16SetDesignatorMaxEi @ 34 NONAME
+	_ZN6CField16SetDesignatorMinEi @ 35 NONAME
+	_ZN6CField16SetPhysicalRangeEii @ 36 NONAME
+	_ZN6CField18SetDesignatorIndexEi @ 37 NONAME
+	_ZN6CField18SetDesignatorRangeEii @ 38 NONAME
+	_ZN6CField7SetSizeEi @ 39 NONAME
+	_ZN6CField7SetTypeERKNS_5TTypeE @ 40 NONAME
+	_ZN6CField7SetUnitEi @ 41 NONAME
+	_ZN6CField8SetCountEi @ 42 NONAME
+	_ZN6CField9AddUsageLEi @ 43 NONAME
+	_ZN6CField9SetOffsetEi @ 44 NONAME
+	_ZN7CParser4NewLEv @ 45 NONAME
+	_ZN7CParser5NewLCEv @ 46 NONAME
+	_ZN7CParser6ParseLERK6TDesC8 @ 47 NONAME
+	_ZNK11CCollection10FieldCountEv @ 48 NONAME
+	_ZNK11CCollection10IsPhysicalEv @ 49 NONAME
+	_ZNK11CCollection12FieldByIndexEi @ 50 NONAME
+	_ZNK11CCollection12IsNamedArrayEv @ 51 NONAME
+	_ZNK11CCollection13IsApplicationEv @ 52 NONAME
+	_ZNK11CCollection13IsUsageSwitchEv @ 53 NONAME
+	_ZNK11CCollection15CollectionCountEv @ 54 NONAME
+	_ZNK11CCollection15IsUsageModifierEv @ 55 NONAME
+	_ZNK11CCollection17CollectionByIndexEi @ 56 NONAME
+	_ZNK11CCollection4TypeEv @ 57 NONAME
+	_ZNK11CCollection5UsageEv @ 58 NONAME
+	_ZNK11CCollection8IsReportEv @ 59 NONAME
+	_ZNK11CCollection9IsLogicalEv @ 60 NONAME
+	_ZNK11CCollection9UsagePageEv @ 61 NONAME
+	_ZNK11CReportRoot15ReportSizeBytesEiN6CField5TTypeE @ 62 NONAME
+	_ZNK17TReportTranslator10GetUsageIdERii @ 63 NONAME
+	_ZNK17TReportTranslator5CountEv @ 64 NONAME
+	_ZNK17TReportTranslator6ValueLEii @ 65 NONAME
+	_ZNK17TReportTranslator8GetValueERiii @ 66 NONAME
+	_ZNK17TReportTranslator8UsageIdLEi @ 67 NONAME
+	_ZNK17TReportTranslator9RawValueLEi @ 68 NONAME
+	_ZNK6CField10AttributesEv @ 69 NONAME
+	_ZNK6CField10IsConstantEv @ 70 NONAME
+	_ZNK6CField10IsInReportEi @ 71 NONAME
+	_ZNK6CField10IsVariableEv @ 72 NONAME
+	_ZNK6CField10LogicalMaxEv @ 73 NONAME
+	_ZNK6CField10LogicalMinEv @ 74 NONAME
+	_ZNK6CField10UsageArrayEv @ 75 NONAME
+	_ZNK6CField10UsageCountEv @ 76 NONAME
+	_ZNK6CField11PhysicalMaxEv @ 77 NONAME
+	_ZNK6CField11PhysicalMinEv @ 78 NONAME
+	_ZNK6CField11StringIndexEv @ 79 NONAME
+	_ZNK6CField12UnitExponentEv @ 80 NONAME
+	_ZNK6CField13DesignatorMaxEv @ 81 NONAME
+	_ZNK6CField13DesignatorMinEv @ 82 NONAME
+	_ZNK6CField15DesignatorIndexEv @ 83 NONAME
+	_ZNK6CField4SizeEv @ 84 NONAME
+	_ZNK6CField4TypeEv @ 85 NONAME
+	_ZNK6CField4UnitEv @ 86 NONAME
+	_ZNK6CField5CountEv @ 87 NONAME
+	_ZNK6CField5UsageEi @ 88 NONAME
+	_ZNK6CField6IsDataEv @ 89 NONAME
+	_ZNK6CField6OffsetEv @ 90 NONAME
+	_ZNK6CField7IsArrayEv @ 91 NONAME
+	_ZNK6CField7IsInputEv @ 92 NONAME
+	_ZNK6CField8HasUsageEi @ 93 NONAME
+	_ZNK6CField8IsOutputEv @ 94 NONAME
+	_ZNK6CField8ReportIdEv @ 95 NONAME
+	_ZNK6CField8UsageMaxEv @ 96 NONAME
+	_ZNK6CField8UsageMinEv @ 97 NONAME
+	_ZNK6CField9IsFeatureEv @ 98 NONAME
+	_ZNK6CField9LastUsageEv @ 99 NONAME
+	_ZNK6CField9StringMaxEv @ 100 NONAME
+	_ZNK6CField9StringMinEv @ 101 NONAME
+	_ZNK6CField9UsagePageEv @ 102 NONAME
+	_ZTI10CHidDriver @ 103 NONAME ; #<TI>#
+	_ZTI11CCollection @ 104 NONAME ; #<TI>#
+	_ZTI11CGenericHid @ 105 NONAME ; #<TI>#
+	_ZTI11CReportRoot @ 106 NONAME ; #<TI>#
+	_ZTI15CDriverListItem @ 107 NONAME ; #<TI>#
+	_ZTI16CReportGenerator @ 108 NONAME ; #<TI>#
+	_ZTI24CHidInputDataHandlingReg @ 109 NONAME ; #<TI>#
+	_ZTI6CField @ 110 NONAME ; #<TI>#
+	_ZTI7CParser @ 111 NONAME ; #<TI>#
+	_ZTV10CHidDriver @ 112 NONAME ; #<VT>#
+	_ZTV11CCollection @ 113 NONAME ; #<VT>#
+	_ZTV11CGenericHid @ 114 NONAME ; #<VT>#
+	_ZTV11CReportRoot @ 115 NONAME ; #<VT>#
+	_ZTV15CDriverListItem @ 116 NONAME ; #<VT>#
+	_ZTV16CReportGenerator @ 117 NONAME ; #<VT>#
+	_ZTV24CHidInputDataHandlingReg @ 118 NONAME ; #<VT>#
+	_ZTV6CField @ 119 NONAME ; #<VT>#
+	_ZTV7CParser @ 120 NONAME ; #<VT>#
+

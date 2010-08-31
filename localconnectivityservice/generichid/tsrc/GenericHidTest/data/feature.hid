@@ -1,0 +1,37 @@
+// File: Feature1.hid.txt
+// A Feature item defined with no Global or Local items defined
+
+    0xa1, 0x02,                    // COLLECTION (Logical)
+    0xa1, 0x02,                    //   COLLECTION (Logical)
+// No global or Local items defined
+    0xb1, 0x40,                    //     FEATURE (Data,Ary,Abs,Null)
+    0xc0,                          //   END_COLLECTION
+    0x09, 0x47,                    //   USAGE (Usage Indicator Color)
+    0xa1, 0x02,                    //   COLLECTION (Logical)
+    0x09, 0x48,                    //     USAGE (Red)
+    0x09, 0x49,                    //     USAGE (Green)
+    0x09, 0x4a,                    //     USAGE (Amber)
+    0xb1, 0x40,                    //     FEATURE (Data,Ary,Abs,Null)
+    0xc0,                          //   END_COLLECTION
+    0xc0,                          // END_COLLECTION
+    0x05, 0x0c,                    // USAGE_PAGE (Consumer Devices)
+    0x19, 0xb7,                    // USAGE_MINIMUM (Stop)
+    0xa1, 0x02,                    // COLLECTION (Logical)
+    0x05, 0x08,                    //   USAGE_PAGE (LEDs)
+    0x09, 0x3c,                    //   USAGE (Usage Multi Mode Indicator)
+    0xa1, 0x02,                    //   COLLECTION (Logical)
+    0x09, 0x3d,                    //     USAGE (Indicator On)
+    0x09, 0x3f,                    //     USAGE (Indicator Slow Blink)
+    0x09, 0x41,                    //     USAGE (Indicator Off)
+    0xb1, 0x40,                    //     FEATURE (Data,Ary,Abs,Null)
+    0xc0,                          //   END_COLLECTION
+    0x09, 0x47,                    //   USAGE (Usage Indicator Color)
+    0xa1, 0x02,                    //   COLLECTION (Logical)
+    0x09, 0x48,                    //     USAGE (Red)
+    0x09, 0x49,                    //     USAGE (Green)
+    0x09, 0x4a,                    //     USAGE (Amber)
+    0xb1, 0x40,                    //     FEATURE (Data,Ary,Abs,Null)
+    0xc0,                          //   END_COLLECTION
+    0xc0                           // END_COLLECTION
+//};
+

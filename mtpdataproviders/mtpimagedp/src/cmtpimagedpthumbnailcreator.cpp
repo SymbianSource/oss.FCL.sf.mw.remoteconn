@@ -68,7 +68,7 @@ CMTPImageDpThumbnailCreator::~CMTPImageDpThumbnailCreator()
     delete iBitmap;  
     delete iObjectSource;
     delete iThumbMgr;
-    if(iActiveSchedulerWait->IsStarted())
+    if(iActiveSchedulerWait != NULL && iActiveSchedulerWait->IsStarted())
         {
         *iCreationErr = KErrNotReady;
         iActiveSchedulerWait->AsyncStop();

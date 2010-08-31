@@ -174,9 +174,9 @@ void CMTPFrameworkConfig::ConstructL()
     const TInt KStartupInitValue = 1;
     iAbnormalDownValue = 0;
     TInt err(iRepository->Get(EAbnormalDown, iAbnormalDownValue));
-    if ( KErrNone != err )
+    if ((KErrNone != err ) && (KErrNotFound != err))
 		{
-		iAbnormalDownValue = 0;
+		User::Leave(err);
 		}
     
     //Save the AbnormalDown state to ETrue
