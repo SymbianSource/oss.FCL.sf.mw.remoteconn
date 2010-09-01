@@ -1,3 +1,0 @@
-0x15, 0x10, //define logical minimum
-0x25, 0x00, //define logical maximum
-0x91, 0x01 // main output tag - create field

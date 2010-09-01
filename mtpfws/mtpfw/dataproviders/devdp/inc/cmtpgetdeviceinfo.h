@@ -57,7 +57,7 @@ private:
 
     void SetSupportedOperationsL(CMTPDataProviderController& aDpController);
     void SetSupportedEventsL(CMTPDataProviderController& aDpController);
-    void SetSupportedDevicePropertiesL(CMTPDataProviderController& aDpController);
+    void SetSupportedDevicePropertiesL();
     void SetSupportedCaptureFormatsL(CMTPDataProviderController& aDpController);
     void SetSupportedPlaybackFormatsL(CMTPDataProviderController& aDpController);
    

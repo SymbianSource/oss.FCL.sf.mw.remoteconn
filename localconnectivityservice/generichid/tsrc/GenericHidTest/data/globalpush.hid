@@ -1,3 +1,0 @@
-0xA4,  //global push - no data
-0xB4, // global pop
-0xA5, 0x01 // global push with data

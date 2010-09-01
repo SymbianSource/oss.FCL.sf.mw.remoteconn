@@ -148,8 +148,6 @@ namespace bur_ts
 			Log(LOG_LEVEL2, KLog3);
 			}
 		
-		_LIT(KLog31, "Checking valid registration...");
-        Log(LOG_LEVEL2, KLog31);		
 		CheckValidRegistrationL();
 		
 		_LIT(KLog4, "Saving Data Owners...");
@@ -206,12 +204,9 @@ namespace bur_ts
 		BackupSystemBaseDataL();
 		BackupSystemSnapshotDataL();
 		
-		if (iIsPartial)
-		    {
-            //active
-            BackupActiveBaseDataL();
-            BackupActiveSnapshotDataL();
-		    }
+		//active
+		BackupActiveBaseDataL();
+		BackupActiveSnapshotDataL();
 		
 		//passive
 		BackupPassiveBaseDataL();
@@ -256,12 +251,9 @@ namespace bur_ts
 		BackupSystemBaseDataL();
 		BackupSystemSnapshotDataL();
 		
-        if (iIsPartial)
-            {		
-            // active
-            BackupActiveIncDataL();
-            BackupActiveSnapshotDataL();
-            }
+		// active
+		BackupActiveIncDataL();
+		BackupActiveSnapshotDataL();
 		
 		//passive
 		BackupPassiveIncDataL();

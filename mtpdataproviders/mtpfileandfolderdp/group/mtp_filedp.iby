@@ -16,7 +16,7 @@
 #ifndef MTP_FILEDP_IBY
 #define MTP_FILEDP_IBY
 
-#if defined(__MTP_PROTOCOL_SUPPORT)
+#if !defined(SYMBIAN_EXCLUDE_MTP)
 
 #include <mtp_framework.iby>
 
@@ -26,7 +26,7 @@ ECOM_PLUGIN(mtpfiledp.dll, mtpfiledp.rsc)
 // MTP plugin registration resource file
 data=EPOCROOT##epoc32\data\Z\resource\mtp\102827B0.rsc  resource\mtp\102827B0.rsc 
 
-#endif // __MTP_PROTOCOL_SUPPORT
+#endif // SYMBIAN_EXCLUDE_MTP
 
 #endif // MTP_FILEDP_IBY
 

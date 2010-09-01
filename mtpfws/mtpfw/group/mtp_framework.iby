@@ -18,7 +18,7 @@
 #include <mtp_devicedp.iby>
 
 
-#if defined(__MTP_PROTOCOL_SUPPORT)
+#if !defined(SYMBIAN_EXCLUDE_MTP)
 
  
 // MTP Data Types Library
@@ -64,6 +64,6 @@ data=EPOCROOT##epoc32\data\Z\private\102827a2\backup_registration.xml  private\1
 //MTP device icon property file 
 data=EPOCROOT##epoc32\data\Z\private\102827a2\mtpdevice.ico  private\102827a2\mtpdevice.ico
 
-#endif // __MTP_PROTOCOL_SUPPORT
+#endif // SYMBIAN_EXCLUDE_MTP
 
 #endif // MTP_FRAMEWORK_IBY

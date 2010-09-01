@@ -21,13 +21,13 @@ file=ABI_DIR\BUILD_DIR\abtestclient2.EXE	    	System\programs\abtestclient2.EXE
 file=ABI_DIR\BUILD_DIR\abtestclient3.EXE	    	System\programs\abtestclient3.EXE
 file=ABI_DIR\BUILD_DIR\abtestclient4.EXE	    	System\programs\abtestclient4.EXE
 
-data=DATAZ_\private\0ab7e57c\backup_registration.xml  private\0ab7e57c\backup_registration.xml
-data=DATAZ_\private\0ab7e57d\backup_registration.xml  private\0ab7e57d\backup_registration.xml
-data=DATAZ_\private\0ab7e57e\backup_registration.xml  private\0ab7e57e\backup_registration.xml
-data=DATAZ_\private\0ab7e58a\backup_registration.xml  private\0ab7e58a\backup_registration.xml
-data=DATAZ_\private\0ab7e58b\backup_registration.xml  private\0ab7e58b\backup_registration.xml
-data=DATAZ_\private\0ab7e58c\backup_registration.xml  private\0ab7e58c\backup_registration.xml
+data=DATAZ_\private\0AB7E57C\backup_registration.xml  private\0AB7E57C\backup_registration.xml
+data=DATAZ_\private\0AB7E57D\backup_registration.xml  private\0AB7E57D\backup_registration.xml
+data=DATAZ_\private\0AB7E57E\backup_registration.xml  private\0AB7E57E\backup_registration.xml
+data=DATAZ_\private\0AB7E58A\backup_registration.xml  private\0AB7E58A\backup_registration.xml
+data=DATAZ_\private\0AB7E58B\backup_registration.xml  private\0AB7E58B\backup_registration.xml
+data=DATAZ_\private\0AB7E58C\backup_registration.xml  private\0AB7E58C\backup_registration.xml
 
-data=DATAZ_\private\0fa00001\backup_registration.xml  private\0fa00001\backup_registration.xml
+data=DATAZ_\private\0FA00001\backup_registration.xml  private\0FA00001\backup_registration.xml
 
 #endif

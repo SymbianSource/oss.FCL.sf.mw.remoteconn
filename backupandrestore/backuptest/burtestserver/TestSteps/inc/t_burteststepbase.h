@@ -90,9 +90,6 @@ namespace bur_ts
 		
 	public:
 		RSIDArray iSidArray;
-		// add support for exclude sid list
-		RSIDArray iExcludeSidArray;
-		
 		
 	private:
 		HBufC* GetIndentation(TInt aLevel);

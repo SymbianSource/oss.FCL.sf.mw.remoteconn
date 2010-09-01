@@ -21,6 +21,7 @@
 
 PRJ_PLATFORMS
 ARMV5
+winscw
 
 PRJ_EXPORTS
 

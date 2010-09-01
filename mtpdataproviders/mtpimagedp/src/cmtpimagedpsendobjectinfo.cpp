@@ -752,9 +752,6 @@ TBool CMTPImageDpSendObjectInfo::DoHandleSendObjectCompleteL(TAny* /*aPtr*/)
     {
     __FLOG(_L8("CMTPImageDpSendObjectInfo::DoHandleSendObjectCompleteL - Entry"));    
     TBool result(ETrue);
-
-    delete iFileReceived;
-    iFileReceived = NULL;  
     
 #ifdef SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API
     TInt64 objectsize = 0;
@@ -762,10 +759,8 @@ TBool CMTPImageDpSendObjectInfo::DoHandleSendObjectCompleteL(TAny* /*aPtr*/)
     TInt objectsize = 0;
 #endif
     
-    TEntry entry;
-    User::LeaveIfError(iFramework.Fs().Entry(iFullPath, entry));
-    objectsize = entry.FileSize();
-   
+    iFileReceived->File().Size(objectsize);    
+    
     if (objectsize != iObjectSize)
         {
         __FLOG_VA((_L8("object sizes differ %lu != %lu"), objectsize, iObjectSize));
@@ -794,31 +789,34 @@ TBool CMTPImageDpSendObjectInfo::DoHandleSendObjectCompleteL(TAny* /*aPtr*/)
         if (iProtectionStatus ==  EMTPProtectionNoProtection ||
             iProtectionStatus == EMTPProtectionReadOnly)
             {
-            entry.iAtt &= ~(KEntryAttNormal | KEntryAttReadOnly);
+            TUint attValue = 0;
+            User::LeaveIfError(iFileReceived->File().Att(attValue));
+            attValue &= ~(KEntryAttNormal | KEntryAttReadOnly);
+            
             if (iProtectionStatus == EMTPProtectionNoProtection)
                 {                        
-                entry.iAtt |= KEntryAttNormal;
+                attValue |= KEntryAttNormal;
                 }
             else
                 {
-                entry.iAtt |= KEntryAttReadOnly;
+                attValue |= KEntryAttReadOnly;
                 }
-            User::LeaveIfError(iFramework.Fs().SetAtt(iFullPath, entry.iAtt, ~entry.iAtt));
+            User::LeaveIfError(iFileReceived->File().SetAtt(attValue, ~attValue));
             }
-
         TTime modifiedTime;
         //update datemodified property.
         if(iDateMod != NULL && iDateMod->Length())
            {           
            iObjectPropertyMgr.ConvertMTPTimeStr2TTimeL(*iDateMod, modifiedTime);
+           User::LeaveIfError(iFileReceived->File().SetModified(modifiedTime));
            }
         else if(iDateCreated != NULL && iDateCreated->Length())
            {
            iObjectPropertyMgr.ConvertMTPTimeStr2TTimeL(*iDateCreated, modifiedTime);
+           User::LeaveIfError(iFileReceived->File().SetModified(modifiedTime));
            }
-        User::LeaveIfError(iFramework.Fs().SetModified(iFullPath, modifiedTime));
-
-        iFramework.RouteRequestUnregisterL(iExpectedSendObjectRequest, iConnection);
+                                   
+	     iFramework.RouteRequestUnregisterL(iExpectedSendObjectRequest, iConnection);
         
         //The MTP spec states that it is not mandatory for SendObjectInfo/SendObjectPropList
         //to be followed by a SendObject.  An object is reserved in the ObjectStore on 
@@ -829,8 +827,10 @@ TBool CMTPImageDpSendObjectInfo::DoHandleSendObjectCompleteL(TAny* /*aPtr*/)
 		
         CleanUndoList();
         SendResponseL(EMTPRespCodeOK);
-	    }
+	    }        
     
+    delete iFileReceived;
+    iFileReceived = NULL;  
     
     iSuccessful = result;
     __FLOG(_L8("CMTPImageDpSendObjectInfo::DoHandleSendObjectCompleteL - Exit"));

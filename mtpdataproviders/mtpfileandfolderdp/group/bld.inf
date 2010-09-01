@@ -24,7 +24,7 @@
 PRJ_PLATFORMS
 
 PRJ_EXPORTS
-mtp_filedp.iby                      CORE_MW_LAYER_IBY_EXPORT_PATH(mtp_filedp.iby)
+mtp_filedp.iby                      /epoc32/rom/include/mtp_filedp.iby
 ../inc/mtpfiledp_config.rh          SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(mtp/mtpfiledp_config.rh)
 
 PRJ_MMPFILES 

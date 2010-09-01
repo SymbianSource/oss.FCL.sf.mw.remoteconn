@@ -148,12 +148,7 @@ namespace conn
 		iCallbackWatchdog = NULL;
 		
 		// Remove this session from the server's session map
-		// Use dynamic_cast in case that ABServer is deconstructing 
-		CABServer *pServer = dynamic_cast<CABServer*>(const_cast<CServer2*>(CSession2::Server()));
-		if(pServer)
-			{
-			pServer->RemoveElement(iClientSID);
-			}		
+		Server().RemoveElement(iClientSID);
 		
 		// Clear up any outstanding message
 		HandleIPCClosingDownCallback();
@@ -164,10 +159,7 @@ namespace conn
 		// If the client has detached properly, they should
 		// have done this - but just in case.
 		//DoCancelWaitForCallback();
-		if(pServer)
-			{
-			pServer->DropSession();
-			}
+		Server().DropSession();
 		}
 		
 	void CABSession::CreateL()

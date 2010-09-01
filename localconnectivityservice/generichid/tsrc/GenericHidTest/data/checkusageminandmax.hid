@@ -1,2 +1,0 @@
-0x19, 0x00, //define usage min to 0
-0x91, 0x01 // main output tag - create field

@@ -63,7 +63,7 @@ REM Feature OBEX is not in this ROM
 REM *** Now for things which should only be included if the device
 REM *** supports USB, to save ROM space...
 
-#ifndef __USB
+#ifdef SYMBIAN_EXCLUDE_USB
 REM OBEX USB transport is not included in this ROM as it depends on USB
 #else
 OBEX_PLUGIN(obexusbtransportcontroller.dll,1020de87.rsc)
@@ -72,7 +72,7 @@ OBEX_PLUGIN(obexusbtransportcontroller.dll,1020de87.rsc)
 REM *** Now for things which should only be included if the device
 REM *** supports bluetooth, to save ROM space...
 
-#ifndef __BT
+#ifdef SYMBIAN_EXCLUDE_BLUETOOTH
 REM OBEX Bluetooth transport is not included in this ROM as it depends on BLUETOOTH
 #else
 OBEX_PLUGIN(obexbtrfcommtransportcontroller.dll,1020e043.rsc)

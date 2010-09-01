@@ -30,9 +30,10 @@ PRJ_EXPORTS
 #endif
 
 mtpdevice.ico /epoc32/data/z/private/102827a2/mtpdevice.ico
+mtpdevice.ico /epoc32/winscw/c/private/102827a2/mtpdevice.ico
 ../inc/mtpdevicedp_config.rh SYMBIAN_MW_LAYER_PLATFORM_EXPORT_PATH(mtp/mtpdevicedp_config.rh)
 
-mtp_devicedp.iby   CORE_MW_LAYER_IBY_EXPORT_PATH(mtp_devicedp.iby)
+mtp_devicedp.iby   /epoc32/rom/include/mtp_devicedp.iby
 
 PRJ_MMPFILES 
 mtpdevicedp.mmp

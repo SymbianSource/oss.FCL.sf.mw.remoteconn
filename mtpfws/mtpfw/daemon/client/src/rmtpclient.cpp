@@ -117,6 +117,15 @@ LOCAL_D TInt StartServer()
 		// Wait for the server start up to complete.
     	User::WaitForRequest(status);
     	ret = (server.ExitType() == EExitPanic) ? KErrGeneral : status.Int();
+#ifdef __WINSCW__
+    	if ( server.ExitType() == EExitPanic )
+    	    {
+            TExitCategoryName exitCategory = server.ExitCategory();
+            TInt exitReason = server.ExitReason();
+            RDebug::Print( _L("The exit category is \"%S\""), &exitCategory );
+            RDebug::Print( _L("The exit Reason is %d"), exitReason );
+    	    }
+#endif //__WINSCW__
     	server.Close();
 	    }
 	    

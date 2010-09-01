@@ -96,6 +96,8 @@ void CMTPImageDataProvider::ConstructL()
     {
     __FLOG_OPEN(KMTPSubsystem, KComponent);
     __FLOG(_L8(">> CMTPImageDataProvider::ConstructL"));
+    
+    iThumbnailManager = CMTPImageDpThumbnailCreator::NewL(*this);
     iNewPicNotifier = CMTPImageDpNewPicturesNotifier::NewL();
     
     //Setup central repository connection
@@ -452,14 +454,11 @@ void CMTPImageDataProvider::NotifyStorageEnumerationCompleteL()
     __FLOG(_L8("<< NotifyStorageEnumerationCompleteL"));        
     }
 
-CMTPImageDpThumbnailCreator* CMTPImageDataProvider::ThumbnailManager()
-    {
-    if(NULL == iThumbnailManager)
-        {
-        TRAP_IGNORE(iThumbnailManager = CMTPImageDpThumbnailCreator::NewL(*this));
-        }
-    return iThumbnailManager;
-    }
+CMTPImageDpThumbnailCreator& CMTPImageDataProvider::ThumbnailManager() const
+	{
+    __ASSERT_DEBUG(iThumbnailManager, User::Invariant());
+	return *iThumbnailManager;
+	}
 
 CMTPImageDpObjectPropertyMgr& CMTPImageDataProvider::PropertyMgr()const
 	{

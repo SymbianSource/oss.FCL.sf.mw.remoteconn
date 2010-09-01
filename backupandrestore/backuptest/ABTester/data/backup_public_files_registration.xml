@@ -1,0 +1,14 @@
+<?xml version="1.0" standalone="yes"?>
+
+
+<backup_registration>
+    <passive_backup>
+        <include_directory name = "\"/>
+    </passive_backup>
+    
+    <public_backup>
+      <include_directory name = "c:\public\0FA00001\"/>
+    </public_backup>
+    
+    <restore requires_reboot = "no"/>
+</backup_registration>

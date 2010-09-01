@@ -241,13 +241,9 @@ namespace bur_ts
 		SupplyPassiveSnapshotDataL();
 		RestorePassiveBaseDataL();
 		
-        // do active restore when in partial restore mode
-        if (iIsPartial)
-            {
-            //active
-            SupplyActiveSnapshotDataL();
-            RestoreActiveBaseDataL();
-            }		
+		//active
+		SupplyActiveSnapshotDataL();
+		RestoreActiveBaseDataL();
 		}
 	
 	void CBURTestStepRestore::IncrementalRestoreL()
@@ -263,14 +259,11 @@ namespace bur_ts
 		RestorePassiveBaseDataL();
 		RestorePassiveIncDataL();
 		
-        // do active restore when in partial restore mode
-        if (iIsPartial)
-            {		
-            //active
-            SupplyActiveSnapshotDataL();
-            RestoreActiveBaseDataL();
-            RestoreActiveIncDataL();
-            }
+		
+		//active
+		SupplyActiveSnapshotDataL();
+		RestoreActiveBaseDataL();
+		RestoreActiveIncDataL();
 		}
 		
 	

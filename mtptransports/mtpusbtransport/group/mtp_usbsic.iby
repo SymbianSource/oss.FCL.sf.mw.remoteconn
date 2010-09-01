@@ -16,7 +16,7 @@
 #ifndef MTP_USBSIC_IBY
 #define MTP_USBSIC_IBY
 
-#if defined (__MTP_PROTOCOL_SUPPORT) && defined(__USB)
+#if !defined (SYMBIAN_EXCLUDE_MTP) && !defined(SYMBIAN_EXCLUDE_USB)
 
 #include <mtp_framework.iby>
 
@@ -29,7 +29,7 @@ ECOM_PLUGIN(mtpusbsiccc.dll, mtpusbsiccc.rsc)
 //MTP USB SIC transport plugin
 ECOM_PLUGIN(mtpusbsicimp.dll, mtpusbsicimp.rsc)
 
-#endif // __MTP_PROTOCOL_SUPPORT && __USB
+#endif // SYMBIAN_EXCLUDE_MTP
 
 #endif // MTP_USBSIC_IBY
 

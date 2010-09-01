@@ -1,2 +1,0 @@
-0x89, 0x00, // define string minimum
-0x91, 0x01 // main output tag - create field

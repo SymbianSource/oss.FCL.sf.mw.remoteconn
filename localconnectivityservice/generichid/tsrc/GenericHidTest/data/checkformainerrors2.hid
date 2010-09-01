@@ -1,3 +1,0 @@
-0x35, 0x00, //define physical minimum
-
-0x91, 0x01 // main output tag - create field

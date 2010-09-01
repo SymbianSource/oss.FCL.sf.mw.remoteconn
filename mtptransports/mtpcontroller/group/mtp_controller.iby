@@ -16,13 +16,13 @@
 #ifndef MTP_CONTROLLER_IBY
 #define MTP_CONTROLLER_IBY
 
-#if defined (__MTP_PROTOCOL_SUPPORT)
+#if !defined (SYMBIAN_EXCLUDE_MTP)
 
 #include <mtp_framework.iby>
 
 //MTP Controller LOCOD service plugin
 ECOM_PLUGIN(mtpcontroller.dll, mtpcontroller.rsc)
 
-#endif// __MTP_PROTOCOL_SUPPORT
+#endif// SYMBIAN_EXCLUDE_MTP
 
 #endif// MTP_CONTROLLER_IBY

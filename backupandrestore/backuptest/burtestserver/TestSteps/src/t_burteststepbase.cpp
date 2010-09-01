@@ -63,9 +63,6 @@ namespace bur_ts
 		iDataOwners.Close();
 			
 		iSidArray.Close();
-		
-		iExcludeSidArray.Close();
-		
 		iJidArray.Close();
 		iPublicFileNames.Close();
 		iPrivateFileNames.Close();
@@ -390,48 +387,6 @@ namespace bur_ts
 		/** Read private file sizes into array */
 		_LIT(KExpectPrivateFileSizes, "ExpectPrivateFileSizes");
 		ReadListIntoIntArray(KExpectPrivateFileSizes, delimiter, iPrivateFileSizes);
-	
-		// Read Exclude IDs LIST //
-		TSecureId sid;           
-	    TChar ch;
-	    TPtrC list;
-	
-	    // clear the array
-	    iExcludeSidArray.Reset();
-	    // read the string
-        _LIT(KExcludeSIDList, "ExcludeIDs");
-        GetStringFromConfig(ConfigSection(), KExcludeSIDList, list);
-        TLex sidLex(list);
-        // parse the string
-        while (!sidLex.Eos())
-            {
-            sidLex.Mark();
-            ch=sidLex.Peek();
-
-            while(!sidLex.Eos() && ( ch=sidLex.Peek() ) != TChar(','))
-                sidLex.Inc();
-
-            if(!sidLex.TokenLength())
-                continue;
-            
-            TPtrC pToken = sidLex.MarkedToken();
-            TLex token(pToken);
-            
-            if (pToken.Length() <= KMaxHexLength && token.Val(sid.iId, EHex) == KErrNone)
-                {
-                iExcludeSidArray.Append(sid);
-                _LIT(KFound, "Exclude ID Found in ini file: ");
-                LogWithSID(LOG_LEVEL4, KFound, sid);        
-                } //if
-                    
-            if(ch==TChar(','))
-                sidLex.Inc();
-            
-            sidLex.SkipSpace();
-    
-            } //while
-                    
-		
 		}
 		
 	void CBURTestStepBase::ReadListIntoStringArray(const TDesC& aSectionName, const TChar& aDelimiter, RArray<TPtrC>& aResultList)
@@ -503,6 +458,7 @@ namespace bur_ts
 			LogWithNum(LOG_LEVEL2,KTempText1, err);
 			iFailures++;
 			}
+
 		// Log
 		if (iDataOwners.Count() == 0)
 			{
@@ -514,30 +470,6 @@ namespace bur_ts
 			_LIT(KTempText4, "Number of data owners found on device: ");
 			LogWithNum(LOG_LEVEL3, KTempText4, iDataOwners.Count());
 			}
-			
-		//filter the dataowners per the exclude SID list
-		for (TInt index = 0; index < iDataOwners.Count(); index++)
-            {
-            TSecureId sid = NULL;
-            sid = ExtractIDL(*iDataOwners[index]);
-            
-            if (sid != NULL)
-                {
-                TInt position = iExcludeSidArray.Find(sid);
-                if (position != KErrNotFound)
-                    {
-                    _LIT(KTempText2, "ExcludeID found in list of data owners: ");
-                    LogWithSID(LOG_LEVEL3, KTempText2, sid);
-                    
-                    delete iDataOwners[index];
-                    iDataOwners[index] = NULL;
-                    iDataOwners.Remove(index);
-                    index--;
-                    }            
-                }
-            }
-		       
-		
 		}
 		
 	void CBURTestStepBase::PopulateListOfDataOwnersAsyncL()
@@ -578,28 +510,6 @@ namespace bur_ts
 			_LIT(KTempText4, "Number of data owners found on device: ");
 			LogWithNum(LOG_LEVEL3, KTempText4, iDataOwners.Count());
 			}
-		
-        //filter the dataowners per the exclude SID list
-        for (TInt index = 0; index < iDataOwners.Count(); index++)
-            {
-            TSecureId sid = NULL;
-            sid = ExtractIDL(*iDataOwners[index]);
-            
-            if (sid != NULL)
-                {
-                TInt position = iExcludeSidArray.Find(sid);
-                if (position != KErrNotFound)
-                    {
-                    _LIT(KTempText2, "ExcludeID found in list of data owners: ");
-                    LogWithSID(LOG_LEVEL3, KTempText2, sid);
-                    
-                    delete iDataOwners[index];
-                    iDataOwners[index] = NULL;
-                    iDataOwners.Remove(index);
-                    index--;
-                    }            
-                }
-            }
 		}
 	
 	void CBURTestStepBase::SetBURModeL(TBURPartType aBURPartType, TBackupIncType aBackupIncType)
@@ -647,8 +557,8 @@ namespace bur_ts
 		for (TInt index = 0; index < iDataOwners.Count(); index++)
 			{
 			TBool notFound = ETrue;
-			sid = ExtractIDL(*iDataOwners[index]);	
-			                    
+			sid = ExtractIDL(*iDataOwners[index]);
+			
 			if (sid != NULL)
 				{
 				TInt position = iSidArray.Find(sid);
@@ -666,22 +576,19 @@ namespace bur_ts
 			else // possibly jid
 				{
 				HBufC* pSuiteHash = ExtractJavaIDL(*iDataOwners[index]);
-				if (pSuiteHash != NULL)
-				    {
-                    TPtrC suiteHash = pSuiteHash->Des();
-                    if (iJidArray.Find(suiteHash) != KErrNotFound)
-                        {
-                        _LIT(KTempText3, "Java ID found in list of data owners: ");
-                        LogWithText(LOG_LEVEL3, KTempText3, suiteHash);
-                        notFound = EFalse;
-                        }
-                    else // not found 
-                        {
-                        notFound = ETrue;
-                        }
-                    delete pSuiteHash;
-                    pSuiteHash = NULL;
-				    }
+				TPtrC suiteHash = pSuiteHash->Des();
+				if (iJidArray.Find(suiteHash) != KErrNotFound)
+					{
+					_LIT(KTempText3, "Java ID found in list of data owners: ");
+					LogWithText(LOG_LEVEL3, KTempText3, suiteHash);
+					notFound = EFalse;
+					}
+				else // not found 
+					{
+					notFound = ETrue;
+					}
+				delete pSuiteHash;
+				pSuiteHash = NULL;
 				}
 			if (notFound)
 				{
@@ -1316,12 +1223,6 @@ namespace bur_ts
 					j--;
 					total--;
 					}
-				else
-				    {
-                    // print the status
-                    LogWithSID(LOG_LEVEL3, _L("---The unexpected dataowner status-SID: "),statusArray[j].iSID.iId);
-                    LogWithNum(LOG_LEVEL3,_L("---The unexpected dataowner status-status: "),statusArray[j].iStatus) ;
-				    }
 				} //for	
 			statusArray.Reset();
 			CleanupStack::PopAndDestroy(&statusArray);
@@ -1466,25 +1367,8 @@ namespace bur_ts
 					
 				for (TInt i=0; i < KRetries;)
 					{
-				
-                  
-                    LogWithNum(LOG_LEVEL3,_L("retryies :"), i);
-				
 					CheckSIDStatusL(iTransferTypes, readyArray);
-								
-					
-					LogWithNum(LOG_LEVEL3,_L("readyArray count :"), readyArray.Count());
-					
-					// print all the ready array
-					for(TInt jj = 0 ; jj < readyArray.Count(); jj++)
-					    {
-                         CSBSIDTransferType* type = CSBSIDTransferType::NewL(readyArray[jj]);
-					     CleanupStack::PushL(type);
-					     
-					     LogWithSID(LOG_LEVEL3, _L("readyArray SIDs : ") , type->SecureIdL());
-					     CleanupStack::PopAndDestroy(type);
-					    }
-					
+											
 					if (readyArray.Count()) // dataowners ready
 						{
 						// ========= Supply Data ================
@@ -1505,19 +1389,6 @@ namespace bur_ts
 					iFailures++;
 					_LIT(KLogNoTrans, "***Error: Some Data Owners were Not Ready or Failed to Connect");
 					Log(LOG_LEVEL3, KLogNoTrans);
-					
-					// print the remenan sids
-					for( TInt kk = 0 ; kk <iTransferTypes.Count() ; kk++)
-					    {
-                        
-                        CSBSIDTransferType* sidType = CSBSIDTransferType::NewL(iTransferTypes[kk]);
-					    CleanupStack::PushL(sidType);
-					    TSecureId id = NULL;
-					    id = sidType->SecureIdL();
-					    CleanupStack::PopAndDestroy(sidType);
-                        LogWithSID(LOG_LEVEL3, _L("--iTransferTypes, remanent SIDs : "),id.iId);
-					    }
-					//
 					}
 				readyArray.ResetAndDestroy();
 				CleanupStack::PopAndDestroy(&readyArray);
@@ -1611,6 +1482,7 @@ namespace bur_ts
 			{
 			User::Leave(KErrInUse);
 			}
+		iStatus = KRequestPending;
 		SetActive();
 		iActiveScheduler->Start();
 		}

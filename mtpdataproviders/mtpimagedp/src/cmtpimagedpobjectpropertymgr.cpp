@@ -454,23 +454,21 @@ void CMTPImageDpObjectPropertyMgr::GetPropertyL(TMTPObjectPropertyCode aProperty
          */
         TEntry fileEntry;
         TInt err = iFs.Entry(iObjectInfo->DesC(CMTPObjectMetaData::ESuid), fileEntry);
-        CMTPImageDpThumbnailCreator* tnc = iDataProvider.ThumbnailManager();
-        if (err == KErrNone && tnc != NULL)
+        if (err == KErrNone)
             {
-            
             if(fileEntry.FileSize() > KFileSizeMax || !alwaysCreate)
                 {
-                tnc->GetThumbMgr()->SetFlagsL(CThumbnailManager::EDoNotCreate);
+                iDataProvider.ThumbnailManager().GetThumbMgr()->SetFlagsL(CThumbnailManager::EDoNotCreate);
                 }
             else
                 {
-                tnc->GetThumbMgr()->SetFlagsL(CThumbnailManager::EDefaultFlags);
+                iDataProvider.ThumbnailManager().GetThumbMgr()->SetFlagsL(CThumbnailManager::EDefaultFlags);
                 }
             
             /**
              * trap the leave to avoid return general error when PC get object property list
              */
-            TRAP(err, tnc->GetThumbnailL(iObjectInfo->DesC(CMTPObjectMetaData::ESuid), iThumbnailCache.iThumbnailData, err));
+            TRAP(err, iDataProvider.ThumbnailManager().GetThumbnailL(iObjectInfo->DesC(CMTPObjectMetaData::ESuid), iThumbnailCache.iThumbnailData, err));
             if (err == KErrNone)
                 {
                 iThumbnailCache.iObjectHandle = iObjectInfo->Uint(CMTPObjectMetaData::EHandle);                        
@@ -485,10 +483,6 @@ void CMTPImageDpObjectPropertyMgr::GetPropertyL(TMTPObjectPropertyCode aProperty
                     aValue = KThumbCompressedSize;
                     }
                 }
-            }
-        else
-            {
-            aValue = KThumbCompressedSize;
             }
         }
         break;       
@@ -605,23 +599,22 @@ void CMTPImageDpObjectPropertyMgr::GetPropertyL(TMTPObjectPropertyCode aProperty
              */
             TEntry fileEntry;
             TInt err = iFs.Entry(iObjectInfo->DesC(CMTPObjectMetaData::ESuid), fileEntry);
-            CMTPImageDpThumbnailCreator* tnc = iDataProvider.ThumbnailManager();
-            if (err == KErrNone && tnc != NULL)
+            if (err == KErrNone)
                 {
                 
                 if(fileEntry.FileSize() > KFileSizeMax || !alwaysCreate)
                     {
-                    tnc->GetThumbMgr()->SetFlagsL(CThumbnailManager::EDoNotCreate);
+                    iDataProvider.ThumbnailManager().GetThumbMgr()->SetFlagsL(CThumbnailManager::EDoNotCreate);
                     }
                 else
                     {
-                    tnc->GetThumbMgr()->SetFlagsL(CThumbnailManager::EDefaultFlags);
+                    iDataProvider.ThumbnailManager().GetThumbMgr()->SetFlagsL(CThumbnailManager::EDefaultFlags);
                     }
                 
                 /**
                  * trap the leave to avoid return general error when PC get object property list
                  */
-                TRAP(err, tnc->GetThumbnailL(iObjectInfo->DesC(CMTPObjectMetaData::ESuid), iThumbnailCache.iThumbnailData, err));
+                TRAP(err, iDataProvider.ThumbnailManager().GetThumbnailL(iObjectInfo->DesC(CMTPObjectMetaData::ESuid), iThumbnailCache.iThumbnailData, err));
                 if (err == KErrNone)
                     {
                     iThumbnailCache.iObjectHandle = iObjectInfo->Uint(CMTPObjectMetaData::EHandle);                        
