@@ -26,7 +26,6 @@
 #include <e32base.h>
 #include <mtp/mtpprotocolconstants.h>
 #include <mtp/tmtptyperequest.h>
-#include "mtpdebug.h"
 #include "rmtpdpsingletons.h"
 
 class CMTPObjectMetaData;
@@ -147,10 +146,6 @@ private:
 	RArray<TUint32>					    iHandles;			//these two arrays contain the mapping from the handle to objectinfo 
 	RPointerArray<CMTPObjectMetaData>   iObjectArray;
 	RMTPDpSingletons										iDpSingletons;
-	/**
-    FLOGGER debug trace member variable.
-    */
-    __FLOG_DECLARATION_MEMBER_MUTABLE;
     };
 	
 #endif 

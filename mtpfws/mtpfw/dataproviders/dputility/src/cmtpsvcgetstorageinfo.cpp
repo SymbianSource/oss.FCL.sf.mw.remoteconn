@@ -21,8 +21,12 @@
 
 #include "cmtpsvcgetstorageinfo.h"
 #include "mmtpservicedataprovider.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpsvcgetstorageinfoTraces.h"
+#endif
 
-__FLOG_STMT(_LIT8(KComponent,"SvcGetStgInfo");)
+
 
 EXPORT_C MMTPRequestProcessor* CMTPSvcGetStorageInfo::NewL(
 											MMTPDataProviderFramework& aFramework, 
@@ -38,10 +42,9 @@ EXPORT_C MMTPRequestProcessor* CMTPSvcGetStorageInfo::NewL(
 
 EXPORT_C CMTPSvcGetStorageInfo::~CMTPSvcGetStorageInfo()
 	{
-	__FLOG(_L8("~CMTPSvcGetStorageInfo - Entry"));
+	OstTraceFunctionEntry0( CMTPSVCGETSTORAGEINFO_CMTPSVCGETSTORAGEINFO_ENTRY );
 	delete iStorageInfo;
-	__FLOG(_L8("~CMTPSvcGetStorageInfo - Exit"));
-	__FLOG_CLOSE;
+	OstTraceFunctionExit0( CMTPSVCGETSTORAGEINFO_CMTPSVCGETSTORAGEINFO_EXIT );
 	}
 
 CMTPSvcGetStorageInfo::CMTPSvcGetStorageInfo(
@@ -58,23 +61,22 @@ Build storage info data set and send the data to the initiator
 */		
 void CMTPSvcGetStorageInfo::ConstructL()
 	{
-	__FLOG_OPEN(KMTPSubsystem, KComponent);
-	__FLOG(_L8("ConstructL - Entry"));
+	OstTraceFunctionEntry0( CMTPSVCGETSTORAGEINFO_CONSTRUCTL_ENTRY );
 	iStorageInfo = CMTPTypeStorageInfo::NewL();
-	__FLOG(_L8("ConstructL - Exit"));
+	OstTraceFunctionExit0( CMTPSVCGETSTORAGEINFO_CONSTRUCTL_EXIT );
 	}
 
 void CMTPSvcGetStorageInfo::ServiceL()
 	{
-	__FLOG(_L8("ServiceL - Entry"));
+	OstTraceFunctionEntry0( CMTPSVCGETSTORAGEINFO_SERVICEL_ENTRY );
 	iDataProvider.GetStorageInfoL(*iStorageInfo);
 	SendDataL(*iStorageInfo);
-	__FLOG(_L8("ServiceL - Exit"));
+	OstTraceFunctionExit0( CMTPSVCGETSTORAGEINFO_SERVICEL_EXIT );
 	}
 
 TMTPResponseCode CMTPSvcGetStorageInfo::CheckRequestL()
 	{
-	__FLOG(_L8("CheckRequestL - Entry"));
+	OstTraceFunctionEntry0( CMTPSVCGETSTORAGEINFO_CHECKREQUESTL_ENTRY );
 	TMTPResponseCode responseCode = CMTPRequestProcessor::CheckRequestL();
 	if (EMTPRespCodeOK == responseCode)
 		{
@@ -84,6 +86,7 @@ TMTPResponseCode CMTPSvcGetStorageInfo::CheckRequestL()
 			responseCode = EMTPRespCodeInvalidStorageID;
 			}
 		}
-	__FLOG_VA((_L8("CheckRequestL Exit with response code = 0x%04X"), responseCode));
+    OstTrace1( TRACE_NORMAL, CMTPSVCGETSTORAGEINFO_CHECKREQUESTL, "Exit with response code = 0x%04X", responseCode);	
+	OstTraceFunctionExit0( CMTPSVCGETSTORAGEINFO_CHECKREQUESTL_EXIT );
 	return responseCode;
 	}

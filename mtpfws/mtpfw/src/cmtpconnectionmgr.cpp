@@ -18,9 +18,14 @@
 #include "cmtpconnection.h"
 #include "cmtptransportplugin.h"
 #include "mmtptransportconnection.h"
+#include "mtpdebug.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpconnectionmgrTraces.h"
+#endif
+
 
 // Class constants.
-__FLOG_STMT(_LIT8(KComponent,"ConnectionMgr");)
 
 const TUint KMTPUsbTransportUid  = 0x102827B2;
 const TUint KMTPBTTransportUid  = 0x10286FCB;
@@ -44,7 +49,6 @@ CMTPConnectionMgr::~CMTPConnectionMgr()
     iConnections.ResetAndDestroy();    
     iSuspendedTransports.Close();
     delete iTransportTrigger;
-    __FLOG_CLOSE;
     }
 
 /**
@@ -56,14 +60,15 @@ exist.
 */
 EXPORT_C CMTPConnection& CMTPConnectionMgr::ConnectionL(TUint aConnectionId) const
     {   
-    __FLOG(_L8("ConnectionL - Entry"));
+    OstTraceFunctionEntry0( CMTPCONNECTIONMGR_CONNECTIONL_ENTRY );
+    
     
     TInt idx(ConnectionFind(aConnectionId));
     
-    __FLOG_VA((_L8("idx is %d "), idx));
+    OstTrace1( TRACE_NORMAL, CMTPCONNECTIONMGR_CONNECTIONL, "idx is %d", idx );    
     __ASSERT_ALWAYS((idx != KErrNotFound), User::Invariant());
     
-    __FLOG(_L8("ConnectionL - Exit"));
+    OstTraceFunctionExit0( CMTPCONNECTIONMGR_CONNECTIONL_EXIT );
     return *iConnections[idx];
     }
 
@@ -97,7 +102,8 @@ EXPORT_C TUid CMTPConnectionMgr::TransportUid()
 
 void CMTPConnectionMgr::ConnectionCloseComplete(const TUint& /*aConnUid*/)
     {
-    __FLOG(_L8("ConnectionCloseComplete - Entry"));
+    OstTraceFunctionEntry0( CMTPCONNECTIONMGR_CONNECTIONCLOSECOMPLETE_ENTRY );
+    
     if (iTransportUid.iUid != KMTPUsbTransportUid )
         {
         ResumeSuspendedTransport();
@@ -107,17 +113,17 @@ void CMTPConnectionMgr::ConnectionCloseComplete(const TUint& /*aConnUid*/)
         iResumeCalled = ETrue;
         }
     
-    __FLOG(_L8("ConnectionCloseComplete - exit"));
+    OstTraceFunctionExit0( CMTPCONNECTIONMGR_CONNECTIONCLOSECOMPLETE_EXIT );
     }
 
 EXPORT_C void CMTPConnectionMgr::StartTransportL(TUid aTransport)
     {
-    __FLOG(_L8("StartTransportL - Entry"));
+    OstTraceFunctionEntry0( CMTPCONNECTIONMGR_STARTTRANSPORTL_TUINT_ENTRY );
     
     //When USB plug out, BT will start Master mode to reconnect remote device. Else BT will start slave mode to listen connection.
     if(aTransport.iUid == KMTPBTTransportUid && iRemoteDevice.iDeviceAddr != 0 && aTransport != iTransportUid)
         {
-        __FLOG(_L8("StartTransportL with parameter!"));
+        OstTrace0( TRACE_NORMAL, CMTPCONNECTIONMGR_STARTTRANSPORTL_TUINT, "StartTransportL with parameter!" );
         TMTPBTRemoteDeviceBuf tmpdata(iRemoteDevice);
         StartTransportL( aTransport, &tmpdata );
         iRemoteDevice.iDeviceAddr = 0;
@@ -125,10 +131,10 @@ EXPORT_C void CMTPConnectionMgr::StartTransportL(TUid aTransport)
         }
     else
         {
-        __FLOG(_L8("StartTransportL without parameter!"));
+        OstTrace0( TRACE_NORMAL, DUP1_CMTPCONNECTIONMGR_STARTTRANSPORTL_TUINT, "StartTransportL without parameter!" );
         StartTransportL( aTransport, NULL );
         }
-    __FLOG(_L8("StartTransportL - Exit"));
+    OstTraceFunctionExit0( CMTPCONNECTIONMGR_STARTTRANSPORTL_TUINT_EXIT );
     }
 
 /**
@@ -143,20 +149,22 @@ plug-in.
 */
 EXPORT_C void CMTPConnectionMgr::StartTransportL(TUid aTransport, const TAny* aParameter)
     {
-    __FLOG(_L8("StartTransportL - Entry"));
+    OstTraceFunctionEntry0( CMTPCONNECTIONMGR_STARTTRANSPORTL_TUINT_TANYPOINTER_ENTRY );
     
     if (iTransport)
         {
-        __FLOG(_L8("The transport is not none."));
+        OstTrace0( TRACE_NORMAL, CMTPCONNECTIONMGR_STARTTRANSPORTL_TUINT_TANYPOINTER, "The transport is not none." );
+        
+        
         if (aTransport != iTransportUid)
             {
             // Multiple transports not currently supported.
-            __FLOG(_L8("Multiple transports are not supported now!"));
+            OstTrace0( TRACE_NORMAL, DUP1_CMTPCONNECTIONMGR_STARTTRANSPORTL_TUINT_TANYPOINTER, "Multiple transports are not supported now!" );
             User::Leave(KErrNotSupported);
             }
         else
             {
-            __FLOG_1(_L8("Relaunch the transport 0x%X"), iTransportUid.iUid);
+            OstTrace1( TRACE_NORMAL, DUP2_CMTPCONNECTIONMGR_STARTTRANSPORTL_TUINT_TANYPOINTER, "Relaunch the transport 0x%X",  iTransportUid.iUid); 
             if(aTransport.iUid == KMTPBTTransportUid)
                 {
                 iTransport->Stop(*this);
@@ -167,7 +175,8 @@ EXPORT_C void CMTPConnectionMgr::StartTransportL(TUid aTransport, const TAny* aP
                 TRAPD(err, iTransport->StartL(*this));
                 if (err != KErrNone)
                     {
-                    __FLOG_VA( ( _L8("StartTransportL error, error code = %d"), err) );
+                    OstTraceDef1( OST_TRACE_CATEGORY_PRODUCTION, TRACE_IMPORTANT, DUP3_CMTPCONNECTIONMGR_STARTTRANSPORTL_TUINT_TANYPOINTER, 
+                            "StartTransportL error, error code = %d",  err); 
                     delete iTransport;
                     iTransport = NULL;
                     
@@ -182,13 +191,13 @@ EXPORT_C void CMTPConnectionMgr::StartTransportL(TUid aTransport, const TAny* aP
         }
     else
         {
-        __FLOG(_L8("begin start transport."));
+        OstTrace0( TRACE_NORMAL, DUP4_CMTPCONNECTIONMGR_STARTTRANSPORTL_TUINT_TANYPOINTER, "begin start transport." );        
         iTransport = CMTPTransportPlugin::NewL(aTransport, aParameter);
 
         TRAPD(err, iTransport->StartL(*this));
         if (err != KErrNone)
             {
-            __FLOG_VA( ( _L8("StartTransportL error, error code = %d"), err) );
+            OstTrace1( TRACE_NORMAL, DUP5_CMTPCONNECTIONMGR_STARTTRANSPORTL_TUINT_TANYPOINTER, "StartTransportL error, error code = %d",  err); 
             delete iTransport;
             iTransport = NULL;
             User::Leave(err);
@@ -207,8 +216,8 @@ EXPORT_C void CMTPConnectionMgr::StartTransportL(TUid aTransport, const TAny* aP
             SuspendTransportL( iTransportUid);
             }
         }
-		
-	__FLOG(_L8("StartTransportL - Exit"));
+		    
+    OstTraceFunctionExit0( CMTPCONNECTIONMGR_STARTTRANSPORTL_TUINT_TANYPOINTER_EXIT );
     }
 
 /**
@@ -219,10 +228,12 @@ Queue the transport to start when there is no running transport
 */
 EXPORT_C void CMTPConnectionMgr::QueueTransportL( TUid aTransport, const TAny* /*aParameter*/ )
     {
-    __FLOG_VA( ( _L8("+QueueTransportL( 0x%08X )"), aTransport.iUid ) );
+    OstTraceFunctionEntry0(CMTPCONNECTIONMGR_QUEUETRANSPORTL_ENTRY);
+    OstTrace1( TRACE_NORMAL, CMTPCONNECTIONMGR_QUEUETRANSPORTL, "QueueTransportL( 0x%08X )", aTransport.iUid);
+    
     __ASSERT_DEBUG( ( KErrNotFound == iSuspendedTransports.Find( aTransport ) ), User::Invariant() );
     iSuspendedTransports.InsertL( aTransport, 0 );
-    __FLOG( _L8("-QueueTransportL") );
+    OstTraceFunctionExit0(CMTPCONNECTIONMGR_QUEUETRANSPORTL_EXIT);
     }
 
 EXPORT_C void CMTPConnectionMgr::SetClientSId(TUid aSecureId)
@@ -248,12 +259,9 @@ CMTPTransportPlugin interface implementation UID.
 */
 EXPORT_C void CMTPConnectionMgr::StopTransport( TUid aTransport, TBool aByBearer )
     {
-	__FLOG(_L8("StopTransport - Entry"));
-	
+	OstTraceFunctionEntry0( CMTPCONNECTIONMGR_STOPTRANSPORT_ENTRY );
+    OstTrace1( TRACE_NORMAL, CMTPCONNECTIONMGR_STOPTRANSPORT, "aTransport is 0x%X", aTransport.iUid);
 
-    __FLOG_1(_L8("aTransport is 0x%X"), aTransport.iUid);
-    __FLOG_1(_L8("iTransportUid is 0x%X"), iTransportUid.iUid);
-    
     TInt transportId = iTransportUid.iUid;
 
     if ( aByBearer )
@@ -281,7 +289,7 @@ EXPORT_C void CMTPConnectionMgr::StopTransport( TUid aTransport, TBool aByBearer
 
         }
     
-	__FLOG(_L8("StopTransport - Exit"));
+    OstTraceFunctionExit0( CMTPCONNECTIONMGR_STOPTRANSPORT_EXIT );
     }
 
 /**
@@ -328,22 +336,22 @@ EXPORT_C void CMTPConnectionMgr::SetBTResumeParameter(const TBTDevAddr& aBTAddr,
 
 TBool CMTPConnectionMgr::ConnectionClosed(MMTPTransportConnection& aTransportConnection)
     {
-    __FLOG(_L8("ConnectionClosed - Entry"));
+    OstTraceFunctionEntry0( CMTPCONNECTIONMGR_CONNECTIONCLOSED_ENTRY );
     
     TInt idx(ConnectionFind(aTransportConnection.BoundProtocolLayer().ConnectionId()));
-    __FLOG_VA((_L8("idx is %d "), idx));
+    OstTrace1( TRACE_NORMAL, CMTPCONNECTIONMGR_CONNECTIONCLOSED, "idx is %d", idx );
     __ASSERT_DEBUG((idx != KErrNotFound), User::Invariant());
     
     CMTPConnection* connection(iConnections[idx]);
     
-    __FLOG(_L8("ConnectionClosed - Exit"));
+    OstTraceFunctionExit0( CMTPCONNECTIONMGR_CONNECTIONCLOSED_EXIT);
     return connection->ConnectionSuspended();
     }
     
 void CMTPConnectionMgr::ConnectionOpenedL(MMTPTransportConnection& aTransportConnection)
     {   
-    __FLOG(_L8("ConnectionOpenedL - Entry"));
-    
+    OstTraceFunctionEntry0( CMTPCONNECTIONMGR_CONNECTIONOPENEDL_ENTRY );
+  
     TUint impUid = aTransportConnection.GetImplementationUid();
     TInt idx = ConnectionFind(impUid);
     CMTPConnection* connection = NULL;
@@ -361,7 +369,7 @@ void CMTPConnectionMgr::ConnectionOpenedL(MMTPTransportConnection& aTransportCon
         }
     connection->ConnectionResumedL(aTransportConnection);
     
-    __FLOG(_L8("ConnectionOpenedL - Exit"));
+    OstTraceFunctionExit0( CMTPCONNECTIONMGR_CONNECTIONOPENEDL_EXIT );
     }
 
 EXPORT_C TUid CMTPConnectionMgr::ClientSId()
@@ -376,7 +384,6 @@ CMTPConnectionMgr::CMTPConnectionMgr() :
     iShutdownConnectionIdx(KErrNotFound),
 	iTransportUid(KNullUid)
     {
-    __FLOG_OPEN(KMTPSubsystem, KComponent);
     iRemoteDevice.iDeviceAddr = 0;
     iRemoteDevice.iDeviceServicePort = 0;
     iResumeCalled = EFalse;
@@ -391,7 +398,9 @@ if the connection identifier could not be found.
 */ 
 TInt CMTPConnectionMgr::ConnectionFind(TUint aConnectionId) const
     {
-    __FLOG_VA((_L8("ConnectionFind - Entry with connectionId %d "), aConnectionId));
+    OstTraceFunctionEntry0( CMTPCONNECTIONMGR_CONNECTIONFIND_ENTRY );
+    OstTrace1( TRACE_NORMAL, CMTPCONNECTIONMGR_CONNECTIONFIND, "connectionId %d", aConnectionId);
+    
     TInt ret(KErrNotFound);
     
     const TUint noConnections = iConnections.Count();
@@ -404,7 +413,7 @@ TInt CMTPConnectionMgr::ConnectionFind(TUint aConnectionId) const
             break;
             }
         }
-    __FLOG(_L8("ConnectionFind - Exit"));    
+    OstTraceFunctionExit0( CMTPCONNECTIONMGR_CONNECTIONFIND_EXIT );
     return ret;
     }
 
@@ -427,12 +436,15 @@ Append the transport to the suspended transport list
 */
 void CMTPConnectionMgr::SuspendTransportL( TUid aTransport )
     {
-    __FLOG_1( _L8("+SuspendTransportL( 0x%08X )"), aTransport );
+    OstTraceFunctionEntry0( CMTPCONNECTIONMGR_SUSPENDTRANSPORTL_ENTRY );
+    OstTrace1( TRACE_NORMAL, CMTPCONNECTIONMGR_SUSPENDTRANSPORTL, "SuspendTransportL( 0x%08X )", aTransport.iUid );
+    
+    
     if ( KErrNotFound == iSuspendedTransports.Find( aTransport ) )
         {
         iSuspendedTransports.AppendL( aTransport );
         }
-    __FLOG( _L8("-SuspendTransportL") );
+    OstTraceFunctionExit0( CMTPCONNECTIONMGR_SUSPENDTRANSPORTL_EXIT );
     }
 
 /**
@@ -441,14 +453,17 @@ Remove transport from the suspended transports list
 */
 void CMTPConnectionMgr::UnsuspendTransport( TUid aTransport )
     {
-    __FLOG_1( _L8("+UnsuspendTransport( 0x%08X )"), aTransport.iUid );
+    OstTraceFunctionEntry0( CMTPCONNECTIONMGR_UNSUSPENDTRANSPORT_ENTRY );
+    OstTrace1( TRACE_NORMAL, CMTPCONNECTIONMGR_UNSUSPENDTRANSPORT, "Transport uid is 0x%08X;", aTransport.iUid );
+    
+    
     TInt idx = iSuspendedTransports.Find( aTransport );
     if ( KErrNotFound != idx )
         {
-        __FLOG_1( _L8("Remove the number %d suspended transport"), idx );
+        OstTrace1( TRACE_NORMAL, DUP1_CMTPCONNECTIONMGR_UNSUSPENDTRANSPORT, "Remove the number %d suspended transport", idx );
         iSuspendedTransports.Remove( idx );
         }
-    __FLOG( _L8("-UnsuspendTransport") );
+    OstTraceFunctionExit0( CMTPCONNECTIONMGR_UNSUSPENDTRANSPORT_EXIT );
     }
 
 /**
@@ -456,16 +471,16 @@ Prepare to resume suspended transport
 */
 void CMTPConnectionMgr::ResumeSuspendedTransport()
     {
-    __FLOG( _L8("+ResumeSuspendedTransport") );
+    OstTraceFunctionEntry0( CMTPCONNECTIONMGR_RESUMESUSPENDEDTRANSPORT_ENTRY );
     const TInt count = iSuspendedTransports.Count();
-    __FLOG_1(_L8("The count number is %d"), count);
-    __FLOG_1(_L8("The transportport id is 0x%X"), iTransportUid.iUid);
+    OstTrace1(TRACE_NORMAL, CMTPCONNECTIONMGR_RESUMESUSPENDEDTRANSPORT, "The count number is %d", count);
+    OstTrace1(TRACE_NORMAL, DUP1_CMTPCONNECTIONMGR_RESUMESUSPENDEDTRANSPORT, "The transportport id is 0x%X", iTransportUid.iUid);
     
     if ( ( count > 0 )
         // If the transport was just switched and suspended, it shouldn't be resumed.
         && (( iTransportUid != iSuspendedTransports[count-1] ) || iTransportUid.iUid == KMTPBTTransportUid))
         {
-        __FLOG( _L8("Found suspended transport(s).") );
+        OstTrace0(TRACE_NORMAL, DUP2_CMTPCONNECTIONMGR_RESUMESUSPENDEDTRANSPORT, "Found suspended transport(s).");
         if ( !iTransportTrigger )
             {
             iTransportTrigger = new( ELeave ) CAsyncCallBack( CActive::EPriorityStandard );
@@ -473,18 +488,18 @@ void CMTPConnectionMgr::ResumeSuspendedTransport()
        
         if ( !iTransportTrigger->IsActive())
             {
-            __FLOG( _L8("Set call back function!") );
+            OstTrace0(TRACE_NORMAL, DUP3_CMTPCONNECTIONMGR_RESUMESUSPENDEDTRANSPORT, "Set call back function!");
             TCallBack callback( CMTPConnectionMgr::DoResumeSuspendedTransport, this );
             iTransportTrigger->Set( callback );
             iTransportTrigger->CallBack();            
             }
         else
             {
-            __FLOG( _L8("Call back has been set!") );
+            OstTrace0(TRACE_NORMAL, DUP4_CMTPCONNECTIONMGR_RESUMESUSPENDEDTRANSPORT, "Call back has been set!");
             }
 
         }
-    __FLOG( _L8("-ResumeSuspendedTransport") );
+    OstTraceFunctionExit0( DUP1_CMTPCONNECTIONMGR_RESUMESUSPENDEDTRANSPORT_EXIT );
     }
 
 /**

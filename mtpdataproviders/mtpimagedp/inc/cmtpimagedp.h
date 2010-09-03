@@ -97,10 +97,6 @@ private:
     TUint QueryImageObjectCountL();    
     
 private:
-	/**
-    FLOGGER debug trace member variable.
-    */
-    __FLOG_DECLARATION_MEMBER_MUTABLE;
     
     CMTPImageDpObjectPropertyMgr*       iPropertyMgr;    
     CMTPImageDpThumbnailCreator*        iThumbnailManager;

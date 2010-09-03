@@ -36,9 +36,14 @@
 #include "cmtpconnectionmgr.h"
 
 #include "cmtpextndevdp.h"
+#include "mtpdebug.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpdevicedpTraces.h"
+#endif
+
 
 // Class constants.
-__FLOG_STMT(_LIT8(KComponent,"DeviceDataProvider");)
 static const TInt KMTPDeviceDpSessionGranularity(3);
 static const TInt KMTPDeviceDpActiveEnumeration(0);
 
@@ -62,7 +67,7 @@ Destructor
 */
 CMTPDeviceDataProvider::~CMTPDeviceDataProvider()
     {
-    __FLOG(_L8("~CMTPDeviceDataProvider - Entry"));
+    OstTraceFunctionEntry0( CMTPDEVICEDATAPROVIDER_CMTPDEVICEDATAPROVIDER_DES_ENTRY );
     iPendingEnumerations.Close();
     TInt count = iActiveProcessors.Count();
     while(count--)
@@ -82,8 +87,7 @@ CMTPDeviceDataProvider::~CMTPDeviceDataProvider()
 
     delete iDeviceInfoTimer;
     iFrameWork.Close();
-    __FLOG(_L8("~CMTPDeviceDataProvider - Exit"));
-    __FLOG_CLOSE;
+    OstTraceFunctionExit0( CMTPDEVICEDATAPROVIDER_CMTPDEVICEDATAPROVIDER_DES_EXIT );
     }
 
 void CMTPDeviceDataProvider::Cancel()
@@ -93,18 +97,18 @@ void CMTPDeviceDataProvider::Cancel()
 
 void CMTPDeviceDataProvider::ProcessEventL(const TMTPTypeEvent& aEvent, MMTPConnection& aConnection)
     {
-    __FLOG(_L8("ProcessEventL - Entry"));
+    OstTraceFunctionEntry0( CMTPDEVICEDATAPROVIDER_PROCESSEVENTL_ENTRY );
     TInt index = LocateRequestProcessorL(aEvent, aConnection);
     if(index != KErrNotFound)
         {
         iActiveProcessors[index]->HandleEventL(aEvent);
         }
-    __FLOG(_L8("ProcessEventL - Exit"));
+    OstTraceFunctionExit0( CMTPDEVICEDATAPROVIDER_PROCESSEVENTL_EXIT );
     }
 
 void CMTPDeviceDataProvider::ProcessNotificationL(TMTPNotification aNotification, const TAny* aParams)
     {
-    __FLOG(_L8("ProcessNotificationL - Entry"));
+    OstTraceFunctionEntry0( CMTPDEVICEDATAPROVIDER_PROCESSNOTIFICATIONL_ENTRY );
     switch (aNotification)
         {
     case EMTPSessionClosed:
@@ -121,12 +125,12 @@ void CMTPDeviceDataProvider::ProcessNotificationL(TMTPNotification aNotification
         // Ignore all other notifications.
         break;
         }
-    __FLOG(_L8("ProcessNotificationL - Exit"));
+    OstTraceFunctionExit0( CMTPDEVICEDATAPROVIDER_PROCESSNOTIFICATIONL_EXIT );
     }
 
 void CMTPDeviceDataProvider::ProcessRequestPhaseL(TMTPTransactionPhase aPhase, const TMTPTypeRequest& aRequest, MMTPConnection& aConnection)
     {
-    __FLOG(_L8("ProcessRequestPhaseL - Entry"));
+    OstTraceFunctionEntry0( CMTPDEVICEDATAPROVIDER_PROCESSREQUESTPHASEL_ENTRY );
     TUint16 opCode( aRequest.Uint16( TMTPTypeRequest::ERequestOperationCode ) );    
     TInt index = LocateRequestProcessorL(aRequest, aConnection);
     __ASSERT_DEBUG(index != KErrNotFound, Panic(EMTPDevDpNoMatchingProcessor));
@@ -145,54 +149,62 @@ void CMTPDeviceDataProvider::ProcessRequestPhaseL(TMTPTransactionPhase aPhase, c
 	    }
     iActiveProcessor = -1;
     
-    __FLOG_VA((_L8("opCode = 0x%x"), opCode));
-    __FLOG_VA((_L8("TranPort UID = 0x%x"), iFrameWork.ConnectionMgr().TransportUid().iUid));
-    __FLOG_VA((_L8("CommandState = 0x%x"), iCommandState));    
+    OstTrace1(TRACE_NORMAL, CMTPDEVICEDATAPROVIDER_PROCESSREQUESTPHASEL, "opCode = 0x%x", opCode);
+    OstTrace1(TRACE_NORMAL, DUP1_CMTPDEVICEDATAPROVIDER_PROCESSREQUESTPHASEL, 
+            "TranPort UID = 0x%x", iFrameWork.ConnectionMgr().TransportUid().iUid);
+    OstTrace1(TRACE_NORMAL, DUP2_CMTPDEVICEDATAPROVIDER_PROCESSREQUESTPHASEL, "CommandState = 0x%x", iCommandState);
     const static TInt32 KMTPUsbTransportUid = 0x102827B2;
 
     if((EMTPOpCodeGetDeviceInfo == opCode)&&(KMTPUsbTransportUid == iFrameWork.ConnectionMgr().TransportUid().iUid))
         {
-        __FLOG(_L8("EMTPOpCodeGetDeviceInfo == opCode"));
+        OstTrace0(TRACE_NORMAL, DUP3_CMTPDEVICEDATAPROVIDER_PROCESSREQUESTPHASEL, "EMTPOpCodeGetDeviceInfo == opCode");
         //If GetDeviceInfo comes and there is no OpenSession before, the timer will start. And tread the host as Mac. 
         //Only the first GetDeviceInfo in one session will start the timer.
         if((EIdle == iCommandState)&&(NULL == iDeviceInfoTimer))
             {
-            __FLOG(_L8("EMTPOpCodeGetDeviceInfo == opCode, start timer"));
+            OstTrace0(TRACE_NORMAL, DUP4_CMTPDEVICEDATAPROVIDER_PROCESSREQUESTPHASEL, 
+                    "EMTPOpCodeGetDeviceInfo == opCode, start timer");
+            
             iCommandState = EStartDeviceInfoTimer;
             iDeviceInfoTimer = CMTPDeviceInfoTimer::NewL(*this);
             iDeviceInfoTimer->Start();
             }
         else
             {
-            __FLOG(_L8("EMTPOpCodeGetDeviceInfo == opCode, Not start timer"));            
+            OstTrace0(TRACE_NORMAL, DUP5_CMTPDEVICEDATAPROVIDER_PROCESSREQUESTPHASEL, 
+                    "EMTPOpCodeGetDeviceInfo == opCode, Not start timer");
             }
         }
     else
        {       
-       __FLOG(_L8("EMTPOpCodeGetDeviceInfo != opCode"));
+       OstTrace0(TRACE_NORMAL, DUP6_CMTPDEVICEDATAPROVIDER_PROCESSREQUESTPHASEL, 
+               "EMTPOpCodeGetDeviceInfo != opCode");
        if((EMTPOpCodeOpenSession == opCode)&&(EIdle == iCommandState))
             {
-            __FLOG(_L8("EMTPOpCodeGetDeviceInfo == opCode, set CommandState to be EOpenSession"));
+            OstTrace0(TRACE_NORMAL, DUP7_CMTPDEVICEDATAPROVIDER_PROCESSREQUESTPHASEL, 
+                    "EMTPOpCodeGetDeviceInfo == opCode, set CommandState to be EOpenSession");
             iCommandState = EOpenSession;
             }
        
        if(iDeviceInfoTimer)
            {
-           __FLOG(_L8("iDeviceInfoTimer != NULL, stop timer"));
+           OstTrace0(TRACE_NORMAL, DUP8_CMTPDEVICEDATAPROVIDER_PROCESSREQUESTPHASEL, 
+                   "iDeviceInfoTimer != NULL, stop timer");
            delete iDeviceInfoTimer;
            iDeviceInfoTimer = NULL;
            }
        else
-           {
-           __FLOG(_L8("iDeviceInfoTimer == NULL, NOT stop timer"));            
+           {  
+           OstTrace0(TRACE_NORMAL, DUP9_CMTPDEVICEDATAPROVIDER_PROCESSREQUESTPHASEL, 
+                   "iDeviceInfoTimer == NULL, NOT stop timer");
            }
        }    
-    __FLOG(_L8("ProcessRequestPhaseL - Exit"));
+    OstTraceFunctionExit0( CMTPDEVICEDATAPROVIDER_PROCESSREQUESTPHASEL_EXIT );
     }
 
 void CMTPDeviceDataProvider::StartObjectEnumerationL(TUint32 aStorageId, TBool /*aPersistentFullEnumeration*/)
     {
-    __FLOG(_L8("StartObjectEnumerationL - Entry"));
+    OstTraceFunctionEntry0( CMTPDEVICEDATAPROVIDER_STARTOBJECTENUMERATIONL_ENTRY );
     iPendingEnumerations.AppendL(aStorageId);
     if (iEnumeratingState == EUndefined)
         {
@@ -205,20 +217,20 @@ void CMTPDeviceDataProvider::StartObjectEnumerationL(TUint32 aStorageId, TBool /
     	iEnumeratingState = EEnumeratingFolders;
     	NotifyEnumerationCompleteL(aStorageId, KErrNone);
         }
-    __FLOG(_L8("StartObjectEnumerationL - Exit"));
+    OstTraceFunctionExit0( CMTPDEVICEDATAPROVIDER_STARTOBJECTENUMERATIONL_EXIT );
     }
 
 void CMTPDeviceDataProvider::StartStorageEnumerationL()
     {
-    __FLOG(_L8("StartStorageEnumerationL - Entry"));
+    OstTraceFunctionEntry0( CMTPDEVICEDATAPROVIDER_STARTSTORAGEENUMERATIONL_ENTRY );
     iStorageWatcher->EnumerateStoragesL();
     Framework().StorageEnumerationCompleteL();
-    __FLOG(_L8("StartStorageEnumerationL - Exit"));
+    OstTraceFunctionExit0( CMTPDEVICEDATAPROVIDER_STARTSTORAGEENUMERATIONL_EXIT );
     }
 
 void CMTPDeviceDataProvider::Supported(TMTPSupportCategory aCategory, RArray<TUint>& aArray) const
     {
-    __FLOG(_L8("Supported - Entry"));
+    OstTraceFunctionEntry0( CMTPDEVICEDATAPROVIDER_SUPPORTED_ENTRY );
     TInt mode = Framework().Mode();
     switch (aCategory)
         {
@@ -329,12 +341,12 @@ void CMTPDeviceDataProvider::Supported(TMTPSupportCategory aCategory, RArray<TUi
         // Unrecognised category, leave aArray unmodified.
         break;
         }
-    __FLOG(_L8("Supported - Exit"));
+    OstTraceFunctionExit0( CMTPDEVICEDATAPROVIDER_SUPPORTED_EXIT );
     }
 
 void CMTPDeviceDataProvider::NotifyEnumerationCompleteL(TUint32 aStorageId, TInt /*aError*/)
 	{
-    __FLOG(_L8("NotifyEnumerationCompleteL - Entry"));
+    OstTraceFunctionEntry0( CMTPDEVICEDATAPROVIDER_NOTIFYENUMERATIONCOMPLETEL_ENTRY );
     __ASSERT_DEBUG((aStorageId == iPendingEnumerations[KMTPDeviceDpActiveEnumeration]), User::Invariant());
     if (iPendingEnumerations.Count() > 0)
         {
@@ -353,7 +365,7 @@ void CMTPDeviceDataProvider::NotifyEnumerationCompleteL(TUint32 aStorageId, TInt
 		__DEBUG_ONLY(User::Invariant());
 		break;
 		}
-    __FLOG(_L8("NotifyEnumerationCompleteL - Exit"));
+	OstTraceFunctionExit0( CMTPDEVICEDATAPROVIDER_NOTIFYENUMERATIONCOMPLETEL_EXIT );
 	}
 
 /**
@@ -374,7 +386,6 @@ Load devdp extension plugins if present
 */
 void CMTPDeviceDataProvider::LoadExtnPluginsL()
 	{
-
 	RArray<TUint> extnUidArray;
 	CleanupClosePushL(extnUidArray);
 	iDevDpSingletons.ConfigMgr().GetRssConfigInfoArrayL( extnUidArray, EDevDpExtnUids);
@@ -399,14 +410,16 @@ void CMTPDeviceDataProvider::LoadExtnPluginsL()
 
 void CMTPDeviceDataProvider::AddFolderRecursiveL( const TMTPNotificationParamsFolderChange& aFolder )
     {
-    __FLOG(_L8("AddFolderRecursiveL - Entry"));
+    OstTraceFunctionEntry0( CMTPDEVICEDATAPROVIDER_ADDFOLDERRECURSIVEL_ENTRY );
     
     TPtrC folderRight( aFolder.iFolderChanged );
-    __FLOG_VA((_L16("Folder Addition - DriveAndFullPath:%S"), &folderRight ));
+    OstTraceExt1(TRACE_NORMAL, CMTPDEVICEDATAPROVIDER_ADDFOLDERRECURSIVEL, 
+            "Folder Addition - DriveAndFullPath:%S", folderRight);
     
     if ( !BaflUtils::FolderExists( Framework().Fs(), folderRight ))
     	{
-    	__FLOG(_L8("Folder not exist in file system"));
+        OstTrace0(TRACE_NORMAL, DUP1_CMTPDEVICEDATAPROVIDER_ADDFOLDERRECURSIVEL, 
+                "Folder not exist in file system");
     	User::Leave( KErrArgument );
     	}
     
@@ -416,7 +429,14 @@ void CMTPDeviceDataProvider::AddFolderRecursiveL( const TMTPNotificationParamsFo
     TInt lengthOfRight( folderRight.Length());
     TFileName folderLeft;
     
-    _LIT( KRootFolder, "?:\\");
+    // get root path of storage
+    TInt driveNumber;
+    User::LeaveIfError(Framework().Fs().CharToDrive(folderRight[0], driveNumber));
+    RBuf rootDirPath;
+    rootDirPath.CreateL(KMaxFileName);
+    rootDirPath.CleanupClosePushL();
+    iDevDpSingletons.ConfigMgr().GetRootDirPathL(driveNumber, rootDirPath);
+    rootDirPath.Insert(0, folderRight.Mid(0, 2));// get drive:
     
     /*
     Go through from beginning.
@@ -434,7 +454,7 @@ void CMTPDeviceDataProvider::AddFolderRecursiveL( const TMTPNotificationParamsFo
         lengthOfRight = folderRight.Length()-pos -1;
         folderRight.Set( folderRight.Right( lengthOfRight ));
         
-        if ( KErrNotFound != folderLeft.Match( KRootFolder ))
+        if ( rootDirPath.FindF(folderLeft) != KErrNotFound)
         	{
         	//first time, root folder
         	//continue
@@ -444,11 +464,12 @@ void CMTPDeviceDataProvider::AddFolderRecursiveL( const TMTPNotificationParamsFo
         handle = Framework().ObjectMgr().HandleL( folderLeft );
         }
     while( KMTPHandleNone != handle );
-    
+    CleanupStack::PopAndDestroy(&rootDirPath);
 
     if ( KMTPHandleNone == handle )
         {
-        __FLOG(_L8("need to add entry into mtp database"));
+        OstTrace0(TRACE_NORMAL, DUP2_CMTPDEVICEDATAPROVIDER_ADDFOLDERRECURSIVEL, 
+                "need to add entry into mtp database");
         
         CMTPObjectMetaData* folderObject = CMTPObjectMetaData::NewL();
         TUint32 storageId = GetStorageIdL( folderLeft );
@@ -471,12 +492,12 @@ void CMTPDeviceDataProvider::AddFolderRecursiveL( const TMTPNotificationParamsFo
         delete folderObject;
         }
     
-    __FLOG(_L8("AddFolderRecursiveL - Exit"));
+    OstTraceFunctionExit0( CMTPDEVICEDATAPROVIDER_ADDFOLDERRECURSIVEL_EXIT );
     }
     
 TUint32 CMTPDeviceDataProvider::AddEntryL( const TDesC& aPath, TUint32 aParentHandle, TUint32 aStorageId, CMTPObjectMetaData& aObjectInfo  )
     {
-    __FLOG(_L8("AddEntryL - Entry"));
+    OstTraceFunctionEntry0( CMTPDEVICEDATAPROVIDER_ADDENTRYL_ENTRY );
     
     TBool isFolder( EFalse );
     BaflUtils::IsFolder( Framework().Fs(), aPath, isFolder );
@@ -485,7 +506,7 @@ TUint32 CMTPDeviceDataProvider::AddEntryL( const TDesC& aPath, TUint32 aParentHa
     __ASSERT_ALWAYS( aParentHandle != KMTPHandleNone, User::Leave( KErrArgument ));
     __ASSERT_ALWAYS( Framework().StorageMgr().ValidStorageId( aStorageId ), User::Leave( KErrArgument ));
 
-    __FLOG_VA((_L16("Add Entry for Path:%S"), &aPath ));
+    OstTraceExt1(TRACE_NORMAL, CMTPDEVICEDATAPROVIDER_ADDENTRYL, "Add Entry for Path:%S", aPath);
     aObjectInfo.SetUint( CMTPObjectMetaData::EDataProviderId, Framework().DataProviderId() );
     aObjectInfo.SetUint( CMTPObjectMetaData::EFormatCode, EMTPFormatCodeAssociation );
     aObjectInfo.SetUint( CMTPObjectMetaData::EStorageId, aStorageId );
@@ -505,27 +526,27 @@ TUint32 CMTPDeviceDataProvider::AddEntryL( const TDesC& aPath, TUint32 aParentHa
     aObjectInfo.SetDesCL( CMTPObjectMetaData::EName, tailFolder );
     
     Framework().ObjectMgr().InsertObjectL( aObjectInfo );
-    __FLOG(_L8("AddEntryL - Exit"));
-    
+    OstTraceFunctionExit0( CMTPDEVICEDATAPROVIDER_ADDENTRYL_EXIT );
     return aObjectInfo.Uint( CMTPObjectMetaData::EHandle );
     }
 
 TUint32 CMTPDeviceDataProvider::GetStorageIdL( const TDesC& aPath )
     {
-    __FLOG(_L8("GetStorageId - Entry"));
+    OstTraceFunctionEntry0( CMTPDEVICEDATAPROVIDER_GETSTORAGEIDL_ENTRY );
 
     TChar driveLetter = aPath[0];
     TInt drive;
-    User::LeaveIfError( Framework().Fs().CharToDrive( driveLetter, drive ));
-    	
-    __FLOG(_L8("GetStorageId - Exit"));
+    LEAVEIFERROR( Framework().Fs().CharToDrive( driveLetter, drive ),
+            OstTraceExt1( TRACE_ERROR, CMTPDEVICEDATAPROVIDER_GETSTORAGEIDL, "can't convert driver letter %c to drive!", driveLetter));
+
+    OstTraceFunctionExit0( CMTPDEVICEDATAPROVIDER_GETSTORAGEIDL_EXIT );
     
     return Framework().StorageMgr().FrameworkStorageId( static_cast<TDriveNumber>( drive ));
     }
 
 void CMTPDeviceDataProvider::OnDeviceFolderChangedL( TMTPEventCode aEventCode, CMTPObjectMetaData& aObjectInfo )
     {
-    __FLOG(_L8("OnDeviceFolderChangedL - Entry"));
+    OstTraceFunctionEntry0( CMTPDEVICEDATAPROVIDER_ONDEVICEFOLDERCHANGEDL_ENTRY );
     
     iEvent.Reset();
     
@@ -533,7 +554,7 @@ void CMTPDeviceDataProvider::OnDeviceFolderChangedL( TMTPEventCode aEventCode, C
         {
     case EMTPEventCodeObjectAdded:
         {
-        __FLOG(_L8("Send event for object add"));
+        OstTrace0(TRACE_NORMAL, CMTPDEVICEDATAPROVIDER_ONDEVICEFOLDERCHANGEDL, "Send event for object add");
         iEvent.SetUint16( TMTPTypeEvent::EEventCode, EMTPEventCodeObjectAdded );
         iEvent.SetUint32( TMTPTypeEvent::EEventSessionID, KMTPSessionAll );
         iEvent.SetUint32( TMTPTypeEvent::EEventTransactionID, KMTPTransactionIdNone );
@@ -547,7 +568,7 @@ void CMTPDeviceDataProvider::OnDeviceFolderChangedL( TMTPEventCode aEventCode, C
     
     Framework().SendEventL(iEvent);
     
-    __FLOG(_L8("OnDeviceFolderChangedL - Exit"));
+    OstTraceFunctionExit0( CMTPDEVICEDATAPROVIDER_ONDEVICEFOLDERCHANGEDL_EXIT );
     }
 
 /**
@@ -555,8 +576,7 @@ Second phase constructor.
 */
 void CMTPDeviceDataProvider::ConstructL()
     {
-    __FLOG_OPEN(KMTPSubsystem, KComponent);
-    __FLOG(_L8("ConstructL - Entry"));
+    OstTraceFunctionEntry0( CMTPDEVICEDATAPROVIDER_CONSTRUCTL_ENTRY );
     iDevDpSingletons.OpenL(Framework());
     iPtrDataStore = &(iDevDpSingletons.DeviceDataStore());
     iDpSingletons.OpenL(Framework());
@@ -572,14 +592,14 @@ void CMTPDeviceDataProvider::ConstructL()
  //	__ASSERT_DEBUG((err == KErrNone), Panic(_L("Invalid resource file ")));
  	if(KErrNone != err)
 		{
-	    __FLOG(_L8("\nTere is an issue in loading the plugin !!!!!\n"));
+	    OstTrace0(TRACE_ERROR, CMTPDEVICEDATAPROVIDER_CONSTRUCTL, 
+	            "\nTere is an issue in loading the plugin !!!!!\n");
 		}
 
     iEnumerator = CMTPFSEnumerator::NewL(Framework(), iDpSingletons.ExclusionMgrL(), *this, KProcessLimit);
     iFrameWork.OpenL();
-    
-    __FLOG(_L8("ConstructL - Exit"));
 
+    OstTraceFunctionExit0( CMTPDEVICEDATAPROVIDER_CONSTRUCTL_EXIT );
     }
 
 void CMTPDeviceDataProvider::OnDevicePropertyChangedL (TMTPDevicePropertyCode& aPropCode)
@@ -620,7 +640,7 @@ Find or create a request processor that can process the request
 */
 TInt CMTPDeviceDataProvider::LocateRequestProcessorL(const TMTPTypeRequest& aRequest, MMTPConnection& aConnection)
     {
-    __FLOG(_L8("LocateRequestProcessorL - Entry"));
+    OstTraceFunctionEntry0( CMTPDEVICEDATAPROVIDER_LOCATEREQUESTPROCESSORL_TMTPTYPEREQUEST_ENTRY );
     TInt index = KErrNotFound;
     TInt count = iActiveProcessors.Count();
     for(TInt i = 0; i < count; i++)
@@ -651,7 +671,7 @@ TInt CMTPDeviceDataProvider::LocateRequestProcessorL(const TMTPTypeRequest& aReq
 	        CleanupStack::Pop();
 	        index = count;
         }
-    __FLOG(_L8("LocateRequestProcessorL - Exit"));
+    OstTraceFunctionExit0( CMTPDEVICEDATAPROVIDER_LOCATEREQUESTPROCESSORL_TMTPTYPEREQUEST_EXIT );
     return index;
     }
 
@@ -663,7 +683,7 @@ Finds a request processor that can process the event
 */
 TInt CMTPDeviceDataProvider::LocateRequestProcessorL(const TMTPTypeEvent& aEvent, MMTPConnection& aConnection)
     {
-    __FLOG(_L8("LocateRequestProcessorL - Entry"));
+    OstTraceFunctionEntry0( CMTPDEVICEDATAPROVIDER_LOCATEREQUESTPROCESSORL_TMTPTYPEEVENT_ENTRY );
     TInt index = KErrNotFound;
     TInt count = iActiveProcessors.Count();
     for(TInt i = 0; i < count; i++)
@@ -674,7 +694,7 @@ TInt CMTPDeviceDataProvider::LocateRequestProcessorL(const TMTPTypeEvent& aEvent
 		break;
 		}
 	}
-    __FLOG(_L8("LocateRequestProcessorL - Exit"));
+    OstTraceFunctionExit0( CMTPDEVICEDATAPROVIDER_LOCATEREQUESTPROCESSORL_TMTPTYPEEVENT_EXIT );
     return index;
     }
 
@@ -684,7 +704,7 @@ Cleans up outstanding request processors when a session is closed.
 */
 void CMTPDeviceDataProvider::SessionClosedL(const TMTPNotificationParamsSessionChange& aSession)
     {
-    __FLOG(_L8("SessionClosedL - Entry"));
+    OstTraceFunctionEntry0( CMTPDEVICEDATAPROVIDER_SESSIONCLOSEDL_ENTRY );
     TInt count = iActiveProcessors.Count();
     while(count--)
         {
@@ -702,8 +722,9 @@ void CMTPDeviceDataProvider::SessionClosedL(const TMTPNotificationParamsSessionC
     			processor->Release();
     		} 
 		}
-        }
-    __FLOG_VA((_L8("current state is =%d"), iCommandState));    
+        } 
+    OstTrace1(TRACE_NORMAL, CMTPDEVICEDATAPROVIDER_SESSIONCLOSEDL, 
+            "current state is =%d", iCommandState);
     if(iCommandState != EIdle)
         {
         if(iDeviceInfoTimer)
@@ -714,31 +735,32 @@ void CMTPDeviceDataProvider::SessionClosedL(const TMTPNotificationParamsSessionC
         iCommandState = EIdle;
         iDevDpSingletons.DeviceDataStore().SetConnectMac(EFalse);
         }
-    __FLOG(_L8("SessionClosedL - Exit"));
+    OstTraceFunctionExit0( CMTPDEVICEDATAPROVIDER_SESSIONCLOSEDL_EXIT );
     }
 
 /**
 Prepares for a newly-opened session.
 @param aSession notification parameter block
 */
-#ifdef __FLOG_ACTIVE
+#ifdef OST_TRACE_COMPILER_IN_USE
 void CMTPDeviceDataProvider::SessionOpenedL(const TMTPNotificationParamsSessionChange& aSession)
 #else
 void CMTPDeviceDataProvider::SessionOpenedL(const TMTPNotificationParamsSessionChange& /*aSession*/)
 #endif
     {
-    __FLOG(_L8("SessionOpenedL - Entry"));
-    __FLOG_VA((_L8("SessionID = %d"), aSession.iMTPId));
-    __FLOG(_L8("SessionOpenedL - Exit"));
+    OstTraceFunctionEntry0( CMTPDEVICEDATAPROVIDER_SESSIONOPENEDL_ENTRY );
+    OstTrace1(TRACE_NORMAL, CMTPDEVICEDATAPROVIDER_SESSIONOPENEDL, "SessionID = %d", aSession.iMTPId);
+    OstTraceFunctionExit0( CMTPDEVICEDATAPROVIDER_SESSIONOPENEDL_EXIT);
     }
 
 void CMTPDeviceDataProvider::SetConnectMac()
     {
-    __FLOG(_L8("SetConnectMac - Entry"));   
-    iDevDpSingletons.DeviceDataStore().SetConnectMac(ETrue);
-    __FLOG_VA((_L8("previous state = %d, current is ESetIsMac"), iCommandState));    
-    iCommandState = ESetIsMac;
-    __FLOG(_L8("SetConnectMac - Exit"));     
+    OstTraceFunctionEntry0( CMTPDEVICEDATAPROVIDER_SETCONNECTMAC_ENTRY );
+    iDevDpSingletons.DeviceDataStore().SetConnectMac(ETrue); 
+    OstTrace1(TRACE_NORMAL, CMTPDEVICEDATAPROVIDER_SETCONNECTMAC,
+            "previous state = %d, current is ESetIsMac", iCommandState);
+    iCommandState = ESetIsMac; 
+    OstTraceFunctionExit0( CMTPDEVICEDATAPROVIDER_SETCONNECTMAC_EXIT );
     }
 
 /**
@@ -762,7 +784,6 @@ CMTPDeviceInfoTimer::~CMTPDeviceInfoTimer()
     {
     Cancel();
     iLdd.Close();
-    __FLOG_CLOSE;    
     }
     
 /**
@@ -772,37 +793,39 @@ Starts the deviceinfo timer.
 const TUint KMTPDeviceInfoDelay = (1000000 * 5);
 void CMTPDeviceInfoTimer::Start()
     {
-    __FLOG(_L8("CMTPDeviceInfoTimer::Start - Entry"));    
+    OstTraceFunctionEntry0( CMTPDEVICEINFOTIMER_START_ENTRY );
 
     After(KMTPDeviceInfoDelay);
     iState = EStartTimer;
-    __FLOG(_L8("CMTPDeviceInfoTimer::Start - Exit"));     
+    OstTraceFunctionExit0( CMTPDEVICEINFOTIMER_START_EXIT );
     }
     
 void CMTPDeviceInfoTimer::RunL()
     {
-    __FLOG(_L8("CMTPDeviceInfoTimer::RunL - Entry"));
-    __FLOG_VA((_L8("iStatus == %d"), iStatus.Int()));    
+    OstTraceFunctionEntry0( CMTPDEVICEINFOTIMER_RUNL_ENTRY );
+    OstTrace1(TRACE_NORMAL, CMTPDEVICEINFOTIMER_RUNL,
+            "iStatus == %d", iStatus.Int());
 
     switch(iState)
         {
         case EStartTimer:
-            __FLOG(_L8("CMTPDeviceInfoTimer::RunL - EStartTimer"));
+            OstTrace0(TRACE_NORMAL, DUP1_CMTPDEVICEINFOTIMER_RUNL, "CMTPDeviceInfoTimer::RunL - EStartTimer");
             // Open the USB device interface.
-            User::LeaveIfError(iLdd.Open(0));
+            LEAVEIFERROR(iLdd.Open(0),
+                    OstTrace0( TRACE_ERROR, DUP4_CMTPDEVICEINFOTIMER_RUNL, "Open the USB device interface error!" ));
             iLdd.ReEnumerate(iStatus);
             iDeviceProvider.SetConnectMac();
             iState = EUSBReEnumerate;
             SetActive();
             break;
         case EUSBReEnumerate:          
-            __FLOG(_L8("CMTPDeviceInfoTimer::RunL - EUSBReEnumerate"));            
+            OstTrace0(TRACE_NORMAL, DUP2_CMTPDEVICEINFOTIMER_RUNL, "CMTPDeviceInfoTimer::RunL - EUSBReEnumerate");
             break;
         default:
-            __FLOG(_L8("CMTPDeviceInfoTimer::RunL - default")); 
+            OstTrace0(TRACE_NORMAL, DUP3_CMTPDEVICEINFOTIMER_RUNL, "CMTPDeviceInfoTimer::RunL - default");
             break;
         }
-    __FLOG(_L8("CMTPDeviceInfoTimer::RunL - Exit"));    
+    OstTraceFunctionExit0( CMTPDEVICEINFOTIMER_RUNL_EXIT );
     }
     
 /** 
@@ -819,7 +842,6 @@ Second phase constructor.
 */    
 void CMTPDeviceInfoTimer::ConstructL()
     {
-    __FLOG_OPEN(KMTPSubsystem, KComponent);
     CTimer::ConstructL();
     CActiveScheduler::Add(this);
     }

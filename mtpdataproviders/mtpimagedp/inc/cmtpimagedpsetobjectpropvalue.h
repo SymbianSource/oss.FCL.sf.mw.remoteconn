@@ -52,10 +52,6 @@ private:	//from CMTPRequestProcessor
 	TBool HasDataphase() const;
 
 private:
-	/**
-	FLOGGER debug trace member variable.
-	**/
-	__FLOG_DECLARATION_MEMBER_MUTABLE;
 	
 	CMTPImageDataProvider&          iDataProvider;
 	CMTPImageDpObjectPropertyMgr&	iObjectPropertyMgr;

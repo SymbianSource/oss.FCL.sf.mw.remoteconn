@@ -34,8 +34,11 @@
 #include "mtpimagedppanic.h"
 #include "mtpimagedputilits.h"
 #include "cmtpimagedp.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpimagedpcopyobjectTraces.h"
+#endif
 
-__FLOG_STMT(_LIT8(KComponent,"CopyObject");)
 
 const TInt RollbackFuncCnt = 1;
 
@@ -69,15 +72,13 @@ Destructor
 */	
 CMTPImageDpCopyObject::~CMTPImageDpCopyObject()
     {	
-    __FLOG(_L8(">> CMTPImageDpCopyObject::~CMTPImageDpCopyObject"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPCOPYOBJECT_CMTPIMAGEDPCOPYOBJECT_DES_ENTRY );
     delete iDest;
     delete iFileMan;
     delete iSrcObjectInfo;
     delete iTargetObjectInfo;
     iRollbackActionL.Close();
-    __FLOG(_L8("<< CMTPImageDpCopyObject::~CMTPImageDpCopyObject"));
-    __FLOG_CLOSE;
-    
+    OstTraceFunctionExit0( CMTPIMAGEDPCOPYOBJECT_CMTPIMAGEDPCOPYOBJECT_DES_EXIT );
     }
     
 /**
@@ -88,7 +89,6 @@ CMTPImageDpCopyObject::CMTPImageDpCopyObject(MMTPDataProviderFramework& aFramewo
     iFramework(aFramework),
     iDataProvider(aDataProvider)
     {
-    __FLOG_OPEN(KMTPSubsystem, KComponent);
     }
     
 /**
@@ -96,16 +96,16 @@ Second phase constructor
 */
 void CMTPImageDpCopyObject::ConstructL()
     {
-    __FLOG(_L8(">> CMTPImageDpCopyObject::ConstructL"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPCOPYOBJECT_CONSTRUCTL_ENTRY );
     iFileMan = CFileMan::NewL(iFramework.Fs());
     iSrcObjectInfo = CMTPObjectMetaData::NewL();
     iRollbackActionL.ReserveL(RollbackFuncCnt);
-    __FLOG(_L8("<< CMTPImageDpCopyObject::ConstructL"));
+    OstTraceFunctionExit0( CMTPIMAGEDPCOPYOBJECT_CONSTRUCTL_EXIT );
     }
 
 TMTPResponseCode CMTPImageDpCopyObject::CheckRequestL()
     {
-    __FLOG(_L8(">> CMTPImageDpCopyObject::CheckRequestL"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPCOPYOBJECT_CHECKREQUESTL_ENTRY );
     TMTPResponseCode responseCode = CMTPRequestProcessor::CheckRequestL();
     if (EMTPRespCodeOK == responseCode)
         {
@@ -118,8 +118,9 @@ TMTPResponseCode CMTPImageDpCopyObject::CheckRequestL()
         responseCode = EMTPRespCodeInvalidParentObject;
         }
     
-    __FLOG_VA((_L8("CheckRequestL - Exit with responseCode = 0x%04X"), responseCode));
-    __FLOG(_L8("<< CMTPImageDpCopyObject::CheckRequestL"));
+    OstTrace1( TRACE_FLOW, CMTPIMAGEDPCOPYOBJECT_CHECKREQUESTL, 
+            "CheckRequestL - Exit with responseCode = 0x%04X", responseCode );
+    OstTraceFunctionExit0( CMTPIMAGEDPCOPYOBJECT_CHECKREQUESTL_EXIT );
     return responseCode;
     }
 
@@ -128,7 +129,7 @@ CopyObject request handler
 */      
 void CMTPImageDpCopyObject::ServiceL()
     {   
-    __FLOG(_L8(">> CMTPImageDpCopyObject::ServiceL"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPCOPYOBJECT_SERVICEL_ENTRY );
     TUint32 handle = KMTPHandleNone;
     TMTPResponseCode responseCode = CopyObjectL(handle);
     if(responseCode == EMTPRespCodeOK)
@@ -139,7 +140,7 @@ void CMTPImageDpCopyObject::ServiceL()
         {
         SendResponseL(responseCode);
         }
-    __FLOG(_L8("<< CMTPImageDpCopyObject::ServiceL"));
+    OstTraceFunctionExit0( CMTPIMAGEDPCOPYOBJECT_SERVICEL_EXIT );
     }
     
 /**
@@ -148,7 +149,7 @@ Copy object operation
 */
 TMTPResponseCode CMTPImageDpCopyObject::CopyObjectL(TUint32& aNewHandle)
     {
-    __FLOG(_L8(">> CMTPImageDpCopyObject::CopyObjectL"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPCOPYOBJECT_COPYOBJECTL_ENTRY );
     TMTPResponseCode responseCode = EMTPRespCodeOK;
     aNewHandle = KMTPHandleNone;
     
@@ -173,7 +174,7 @@ TMTPResponseCode CMTPImageDpCopyObject::CopyObjectL(TUint32& aNewHandle)
         {
         aNewHandle = CopyFileL(oldFileName, iNewFileName);
         }
-    __FLOG(_L8("<< CMTPImageDpCopyObject::CopyObjectL"));
+    OstTraceFunctionExit0( CMTPIMAGEDPCOPYOBJECT_COPYOBJECTL_EXIT );
     return responseCode;
     }
 
@@ -184,12 +185,15 @@ A helper function of CopyObjectL.
 */
 TUint32 CMTPImageDpCopyObject::CopyFileL(const TDesC& aOldFileName, const TDesC& aNewFileName)
     {
-    __FLOG(_L8(">> CMTPImageDpCopyObject::CopyFileL"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPCOPYOBJECT_COPYFILEL_ENTRY );
     TCleanupItem anItem(FailRecover, reinterpret_cast<TAny*>(this));
     CleanupStack::PushL(anItem);
     
     GetPreviousPropertiesL(aOldFileName);
-    User::LeaveIfError(iFileMan->Copy(aOldFileName, *iDest));
+    LEAVEIFERROR(iFileMan->Copy(aOldFileName, *iDest),
+            OstTraceExt3( TRACE_ERROR, CMTPIMAGEDPCOPYOBJECT_COPYFILEL, 
+                    "Copy %S to %S failed! error code %d", aOldFileName, *iDest, munged_err));
+            
     iRollbackActionL.AppendL(RollBackFromFsL);
     SetPreviousPropertiesL(aNewFileName);
     
@@ -201,8 +205,8 @@ TUint32 CMTPImageDpCopyObject::CopyFileL(const TDesC& aOldFileName, const TDesC&
         iDataProvider.IncreaseNewPictures(1);
         }    
     
-    __FLOG(_L8("<< CMTPImageDpCopyObject::CopyFileL"));
     CleanupStack::Pop(this);
+    OstTraceFunctionExit0( CMTPIMAGEDPCOPYOBJECT_COPYFILEL_EXIT );
     return iTargetObjectInfo->Uint(CMTPObjectMetaData::EHandle);
     }
 
@@ -211,7 +215,7 @@ Retrieve the parameters of the request
 */	
 void CMTPImageDpCopyObject::GetParametersL()
     {
-    __FLOG(_L8(">> CMTPImageDpCopyObject::GetParametersL"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPCOPYOBJECT_GETPARAMETERSL_ENTRY );
     __ASSERT_DEBUG(iRequestChecker, Panic(EMTPImageDpRequestCheckNull));
     
     TUint32 objectHandle  = Request().Uint32(TMTPTypeRequest::ERequestParameter1);
@@ -231,7 +235,7 @@ void CMTPImageDpCopyObject::GetParametersL()
         iDest = parentObjectInfo->DesC(CMTPObjectMetaData::ESuid).AllocL();        
         iNewParentHandle = parentObjectHandle;
         }
-    __FLOG(_L8("<< CMTPImageDpCopyObject::GetParametersL"));	
+    OstTraceFunctionExit0( CMTPIMAGEDPCOPYOBJECT_GETPARAMETERSL_EXIT );
     }
     
 /**
@@ -239,9 +243,10 @@ Get a default parent object, ff the request does not specify a parent object,
 */
 void CMTPImageDpCopyObject::SetDefaultParentObjectL()
     {
-    __FLOG(_L8(">> CMTPImageDpCopyObject::SetDefaultParentObjectL"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPCOPYOBJECT_SETDEFAULTPARENTOBJECTL_ENTRY );
     TDriveNumber drive(static_cast<TDriveNumber>(iFramework.StorageMgr().DriveNumber(iStorageId)));
-    User::LeaveIfError(drive);
+    LEAVEIFERROR(drive,
+            OstTraceExt2( TRACE_ERROR, CMTPIMAGEDPCOPYOBJECT_SETDEFAULTPARENTOBJECTL, "No driver number for %d! error code %d",iStorageId, munged_err));
     TChar driveLetter;
     iFramework.Fs().DriveToChar(drive, driveLetter);
     TFileName driveBuf;
@@ -251,7 +256,7 @@ void CMTPImageDpCopyObject::SetDefaultParentObjectL()
     iDest = NULL;
     iDest = driveBuf.AllocL();
     iNewParentHandle = KMTPHandleNoParent;
-    __FLOG(_L8("<< CMTPImageDpCopyObject::SetDefaultParentObjectL"));
+    OstTraceFunctionExit0( CMTPIMAGEDPCOPYOBJECT_SETDEFAULTPARENTOBJECTL_EXIT );
     }
     
 /**
@@ -259,15 +264,21 @@ Check if we can copy the file to the new location
 */
 TMTPResponseCode CMTPImageDpCopyObject::CanCopyObjectL(const TDesC& aOldName, const TDesC& aNewName) const
     {
-    __FLOG(_L8(">> CMTPImageDpCopyObject::CanCopyObjectL"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPCOPYOBJECT_CANCOPYOBJECTL_ENTRY );
     TMTPResponseCode result = EMTPRespCodeOK;
     
     TEntry fileEntry;
-    User::LeaveIfError(iFramework.Fs().Entry(aOldName, fileEntry));
+    LEAVEIFERROR(iFramework.Fs().Entry(aOldName, fileEntry),
+            OstTraceExt2( TRACE_ERROR, DUP1_CMTPIMAGEDPCOPYOBJECT_CANCOPYOBJECTL, 
+                    "Gets the entry details for %S failed! error code %d", aOldName, munged_err ));
     TDriveNumber drive(static_cast<TDriveNumber>(iFramework.StorageMgr().DriveNumber(iStorageId)));
-    User::LeaveIfError(drive);
+    LEAVEIFERROR(drive,
+            OstTraceExt2( TRACE_ERROR, DUP2_CMTPIMAGEDPCOPYOBJECT_CANCOPYOBJECTL, 
+                    "Gets drive for storage %d failed! error code %d", iStorageId, munged_err ));
     TVolumeInfo volumeInfo;
-    User::LeaveIfError(iFramework.Fs().Volume(volumeInfo, drive));
+    LEAVEIFERROR(iFramework.Fs().Volume(volumeInfo, drive),
+            OstTraceExt2( TRACE_ERROR, DUP3_CMTPIMAGEDPCOPYOBJECT_CANCOPYOBJECTL, 
+                    "Gets volume information for driver %d failed! error code %d", drive, munged_err ));            
     
     if(volumeInfo.iFree < fileEntry.FileSize())
         {
@@ -277,8 +288,9 @@ TMTPResponseCode CMTPImageDpCopyObject::CanCopyObjectL(const TDesC& aOldName, co
         {
         result = EMTPRespCodeInvalidParentObject;
         }
-    __FLOG_VA((_L8("CanCopyObjectL - Exit with response code 0x%04X"), result));
-    __FLOG(_L8("<< CMTPImageDpCopyObject::CanCopyObjectL"));  	
+	OstTrace1( TRACE_NORMAL, CMTPIMAGEDPCOPYOBJECT_CANCOPYOBJECTL, 
+	        "CanCopyObjectL - Exit with response code 0x%04X", result );
+    OstTraceFunctionExit0( CMTPIMAGEDPCOPYOBJECT_CANCOPYOBJECTL_EXIT );
     return result;	
     }
     
@@ -287,9 +299,11 @@ Save the object properties before doing the copy
 */
 void CMTPImageDpCopyObject::GetPreviousPropertiesL(const TDesC& aOldFileName)
     {
-    __FLOG(_L8("GetPreviousPropertiesL - Entry"));
-    User::LeaveIfError(iFramework.Fs().Modified(aOldFileName, iDateModified));
-    __FLOG(_L8("GetPreviousPropertiesL - Exit"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPCOPYOBJECT_GETPREVIOUSPROPERTIESL_ENTRY );
+    LEAVEIFERROR(iFramework.Fs().Modified(aOldFileName, iDateModified),
+            OstTraceExt2( TRACE_ERROR, CMTPIMAGEDPCOPYOBJECT_GETPREVIOUSPROPERTIESL, 
+                    "Gets the last modification date and time failed for %S! error code %d", aOldFileName, munged_err ));                        
+    OstTraceFunctionExit0( CMTPIMAGEDPCOPYOBJECT_GETPREVIOUSPROPERTIESL_EXIT );
     }
     
 /**
@@ -297,9 +311,10 @@ Set the object properties after doing the copy
 */
 void CMTPImageDpCopyObject::SetPreviousPropertiesL(const TDesC& aNewFileName)
     {
-    __FLOG(_L8("SetPreviousPropertiesL - Entry"));        
-    User::LeaveIfError(iFramework.Fs().SetModified(aNewFileName, iDateModified));
-    
+    OstTraceFunctionEntry0( CMTPIMAGEDPCOPYOBJECT_SETPREVIOUSPROPERTIESL_ENTRY );      
+    LEAVEIFERROR(iFramework.Fs().SetModified(aNewFileName, iDateModified),
+            OstTraceExt2( TRACE_ERROR, CMTPIMAGEDPCOPYOBJECT_SETPREVIOUSPROPERTIESL, 
+                    "Sets the date and time for %S failed. Error code %d", aNewFileName, munged_err));
     iTargetObjectInfo = CMTPObjectMetaData::NewL();
     iTargetObjectInfo->SetUint(CMTPObjectMetaData::EDataProviderId, iSrcObjectInfo->Uint(CMTPObjectMetaData::EDataProviderId));
     iTargetObjectInfo->SetUint(CMTPObjectMetaData::EFormatCode, iSrcObjectInfo->Uint(CMTPObjectMetaData::EFormatCode));
@@ -309,7 +324,7 @@ void CMTPImageDpCopyObject::SetPreviousPropertiesL(const TDesC& aNewFileName)
     iTargetObjectInfo->SetUint(CMTPObjectMetaData::EParentHandle, iNewParentHandle);
     iTargetObjectInfo->SetUint(CMTPObjectMetaData::EStorageId, iStorageId);
     iTargetObjectInfo->SetDesCL(CMTPObjectMetaData::ESuid, aNewFileName);
-    __FLOG(_L8("SetPreviousPropertiesL - Exit"));
+    OstTraceFunctionExit0( CMTPIMAGEDPCOPYOBJECT_SETPREVIOUSPROPERTIESL_EXIT );
     }
 
 void CMTPImageDpCopyObject::FailRecover(TAny* aCopyOperation)
@@ -329,7 +344,9 @@ void CMTPImageDpCopyObject::RollBack()
 
 void CMTPImageDpCopyObject::RollBackFromFsL()
     {
-    User::LeaveIfError(iFramework.Fs().Delete(iNewFileName));
+    LEAVEIFERROR(iFramework.Fs().Delete(iNewFileName),
+            OstTraceExt2( TRACE_ERROR, CMTPIMAGEDPCOPYOBJECT_ROLLBACKFROMFSL, 
+                    "delete %S failed! error code %d", iNewFileName, munged_err));
     }
 
 void CMTPImageDpCopyObject::RollBackFromFsL(CMTPImageDpCopyObject* aObject)

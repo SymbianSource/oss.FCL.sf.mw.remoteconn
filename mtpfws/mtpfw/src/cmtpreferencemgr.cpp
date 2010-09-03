@@ -21,6 +21,12 @@
 #include "cmtpobjectstore.h"
 #include "cmtpreferencemgr.h"
 #include "dbutility.h"
+#include "mtpdebug.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpreferencemgrTraces.h"
+#endif
+
 
 
 _LIT(KSQLReferenceTableName, "ReferenceStore");
@@ -180,7 +186,8 @@ Create the reference table in the database
 */	
 void CMTPReferenceMgr::CreateTableL()
 	{
-	User::LeaveIfError(iDatabase->Execute(KSQLCreateReferenceTableText));	
+	LEAVEIFERROR(iDatabase->Execute(KSQLCreateReferenceTableText),
+	        OstTrace0( TRACE_ERROR, CMTPREFERENCEMGR_CREATETABLEL, "TABLE ReferenceStore create failed!" ));    
 	}
 
 /**
@@ -189,7 +196,8 @@ Create the index in the reference table
 */	
 void CMTPReferenceMgr::CreateIndexL()
 	{
-	User::LeaveIfError(iDatabase->Execute(KSQLCreateReferenceIndexText));	
+	LEAVEIFERROR(iDatabase->Execute(KSQLCreateReferenceIndexText),
+	        OstTrace0( TRACE_ERROR, CMTPREFERENCEMGR_CREATEINDEXL, "INDEX ReferenceIndex on ReferenceStore create failed!" ));
 	}
 
 /**

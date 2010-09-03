@@ -22,7 +22,6 @@
 #define CMTPRESETDEVICEPROPVALUE_H
 
 #include "cmtpgetdevicepropdesc.h"
-#include "mtpdebug.h"
 
 class CMTPTypeString;
 /** 
@@ -67,11 +66,6 @@ private:
     void SaveGUID( const TUint aKey, TMTPTypeGuid& aValue );
 
 private: // Owned
-
-    /**
-    FLOGGER debug trace member variable.
-    */
-    __FLOG_DECLARATION_MEMBER_MUTABLE;
 
 //    CMTPTypeString* iString;
     TUint32                 iPropCode;

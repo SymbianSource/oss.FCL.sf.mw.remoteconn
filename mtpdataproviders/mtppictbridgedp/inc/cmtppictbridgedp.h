@@ -27,7 +27,6 @@
 
 #include "mmtppictbridgeenumeratorcallback.h"
 #include "cmtprequestprocessor.h"
-#include "mtpdebug.h"
 
 class CMTPPictBridgeEnumerator;
 class CPtpServer;
@@ -81,10 +80,6 @@ private:
     The active request processors table.
     */ 
     RPointerArray<MMTPRequestProcessor> iActiveProcessors;
-    /**
-    FLOGGER debug trace member variable.
-    */
-    __FLOG_DECLARATION_MEMBER_MUTABLE;
     };
     
 #endif // CMTPPICTBRIDGEDP_H

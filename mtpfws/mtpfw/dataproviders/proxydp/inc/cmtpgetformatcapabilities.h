@@ -62,12 +62,6 @@ private: // From CActive
     
 private: // Owned
 
-    /*
-     *FLOGGER debug trace member variable.
-     */
-    __FLOG_DECLARATION_MEMBER_MUTABLE;  
-
-    
     /* 
      * CMTPTypeCapabilityList dataset.
      */

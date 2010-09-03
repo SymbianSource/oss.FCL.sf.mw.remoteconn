@@ -24,6 +24,11 @@
 #include "cmtpgetobjectpropdesc.h"
 #include "mtpdpconst.h"
 #include "mtpdppanic.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpgetobjectpropdescTraces.h"
+#endif
+
 
  
 _LIT(KMtpObjDescObjFileName, "[a-zA-Z!#\\$%&'\\(\\)\\-0-9@\\^_\\`\\{\\}\\~][a-zA-Z!#\\$%&'\\(\\)\\-0-9@\\^_\\`\\{\\}\\~ ]{0, 7}\\.[[a-zA-Z!#\\$%&'\\(\\)\\-0-9@\\^_\\`\\{\\}\\~][a-zA-Z!#\\$%&'\\(\\)\\-0-9@\\^_\\`\\{\\}\\~ ]{0, 2}]?");
@@ -157,7 +162,11 @@ void CMTPGetObjectPropDesc::ServiceL()
 		case EMTPObjectPropCodeNonConsumable:
 			ServiceNonConsumableL();
 			break;
+		case EMTPObjectPropCodeHidden:
+		    ServiceHiddenL();
+		    break;
 		default:
+		    OstTrace1( TRACE_ERROR, CMTPGETOBJECTPROPDESC_SERVICEL, "invalid propCode %d!", propCode );
 		    User::Leave( KErrNotSupported );
 			break;
 		}
@@ -294,7 +303,20 @@ void CMTPGetObjectPropDesc::ServiceNonConsumableL()
 	CleanupStack::PopAndDestroy(expectedForm);
 	}
 
-
+void CMTPGetObjectPropDesc::ServiceHiddenL()
+    {
+    CMTPTypeObjectPropDescEnumerationForm* expectedForm = CMTPTypeObjectPropDescEnumerationForm::NewL(EMTPTypeUINT16);
+    CleanupStack::PushL(expectedForm);
+    TUint16 values[] = {EMTPVisible,EMTPHidden};
+    TUint   numValues((sizeof(values) / sizeof(values[0])));
+    for (TUint i = 0; i < numValues; i++)
+        {
+        TMTPTypeUint16 data(values[i]);
+        expectedForm->AppendSupportedValueL(data);
+        }   
+    iObjectProperty = CMTPTypeObjectPropDesc::NewL(EMTPObjectPropCodeHidden, *expectedForm);
+    CleanupStack::PopAndDestroy(expectedForm);
+    }
 	
 TUint16  CMTPGetObjectPropDesc::GetPropertyGroupNumber(const TUint16 aPropCode) const
     {

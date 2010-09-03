@@ -24,8 +24,12 @@
 #include "cmtpgetobjectinfo.h"
 #include "mtpdppanic.h"
 #include "cmtpfsentrycache.h"
+#include "mtpdebug.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpgetobjectinfoTraces.h"
+#endif
 
-__FLOG_STMT(_LIT8(KComponent,"MTPGetObjectInfo");)
 
 /**
 Verification data for GetObjectInfo request
@@ -56,9 +60,10 @@ Destructor
 */	
 EXPORT_C CMTPGetObjectInfo::~CMTPGetObjectInfo()
 	{	
+	OstTraceFunctionEntry0( CMTPGETOBJECTINFO_CMTPGETOBJECTINFO_DES_ENTRY );
 	delete iObjectInfoToBuild;
 	iDpSingletons.Close();
-	__FLOG_CLOSE;
+	OstTraceFunctionExit0( CMTPGETOBJECTINFO_CMTPGETOBJECTINFO_DES_EXIT );
 	}
 
 /**
@@ -69,7 +74,6 @@ CMTPGetObjectInfo::CMTPGetObjectInfo(MMTPDataProviderFramework& aFramework,
 	:CMTPRequestProcessor(aFramework, aConnection, sizeof(KMTPGetObjectInfoPolicy)/sizeof(TMTPRequestElementInfo), KMTPGetObjectInfoPolicy),
 	iRfs(aFramework.Fs())
 	{
-	__FLOG_OPEN(KMTPSubsystem, KComponent);
 	}
 
 /**
@@ -86,8 +90,10 @@ Second-phase construction
 */		
 void CMTPGetObjectInfo::ConstructL()
 	{
+	OstTraceFunctionEntry0( CMTPGETOBJECTINFO_CONSTRUCTL_ENTRY );
 	iObjectInfoToBuild = CMTPTypeObjectInfo::NewL();
 	iDpSingletons.OpenL(iFramework);
+	OstTraceFunctionExit0( CMTPGETOBJECTINFO_CONSTRUCTL_EXIT );
 	}
 
 /**
@@ -95,6 +101,7 @@ Populate the object info dataset
 */		
 void CMTPGetObjectInfo::BuildObjectInfoL()	
 	{
+	OstTraceFunctionEntry0( CMTPGETOBJECTINFO_BUILDOBJECTINFOL_ENTRY );
 	__ASSERT_DEBUG(iRequestChecker, Panic(EMTPDpRequestCheckNull));
 	TUint32 objectHandle = Request().Uint32(TMTPTypeRequest::ERequestParameter1);
 	//does not take owernship
@@ -110,7 +117,8 @@ void CMTPGetObjectInfo::BuildObjectInfoL()
 				(iDpSingletons.CopyingBigFileCache().IsOnGoing()))
 			{
 			// The object is being copied, it is not created in fs yet. Use its cache entry to get objectinfo
-			__FLOG(_L8("BuildObjectInfoL - The object is being copied, use its cache entry to get objectinfo"));
+			OstTrace0( TRACE_NORMAL, CMTPGETOBJECTINFO_BUILDOBJECTINFOL, 
+			        "BuildObjectInfoL - The object is being copied, use its cache entry to get objectinfo" );
 			fileEntry = iDpSingletons.CopyingBigFileCache().FileEntry();
 			err = KErrNone;
 			}
@@ -118,14 +126,17 @@ void CMTPGetObjectInfo::BuildObjectInfoL()
 							(iDpSingletons.MovingBigFileCache().IsOnGoing()))
 			{
 			// The object is being moved, it is not created in fs yet. Use its cache entry to get objectinfo
-			__FLOG(_L8("BuildObjectInfoL - The object is being moved, use its cache entry to get objectinfo"));
+			OstTrace0( TRACE_NORMAL, DUP1_CMTPGETOBJECTINFO_BUILDOBJECTINFOL, 
+			        "BuildObjectInfoL - The object is being moved, use its cache entry to get objectinfo" );
 			fileEntry = iDpSingletons.MovingBigFileCache().FileEntry();
 			err = KErrNone;
 			}	
 		}
 	
-	User::LeaveIfError(err);	
-			
+	LEAVEIFERROR(err,
+	        OstTraceExt2( TRACE_ERROR, DUP2_CMTPGETOBJECTINFO_BUILDOBJECTINFOL, 
+	                "Can't get entry details for %S even after error handling! error code %d",  objectInfoFromStore->DesC(CMTPObjectMetaData::ESuid), err));
+	
 	//1. storage id
 	iObjectInfoToBuild->SetUint32L(CMTPTypeObjectInfo::EStorageID, objectInfoFromStore->Uint(CMTPObjectMetaData::EStorageId));	
 	
@@ -190,5 +201,6 @@ void CMTPGetObjectInfo::BuildObjectInfoL()
 		
 	//19. keyword
 	iObjectInfoToBuild->SetStringL(CMTPTypeObjectInfo::EKeywords, KNullDesC);
+	OstTraceFunctionExit0( CMTPGETOBJECTINFO_BUILDOBJECTINFOL_EXIT );
 	}
 

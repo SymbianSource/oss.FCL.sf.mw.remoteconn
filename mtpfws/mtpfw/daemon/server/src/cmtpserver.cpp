@@ -28,10 +28,13 @@
 #include "mtpclientserver.h"
 #include "mtpdebug.h"
 #include "rmtpframework.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpserverTraces.h"
+#endif
+
 
 #define UNUSED_VAR(a) (a) = (a)
-
-__FLOG_STMT(_LIT8(KComponent,"Server");)
 
 /**
 PlatSec policy.
@@ -71,15 +74,14 @@ Destructor.
 */
 CMTPServer::~CMTPServer()
     {
-    __FLOG(_L8("~CMTPServer - Entry"));
+    OstTraceFunctionEntry0( CMTPSERVER_CMTPSERVER_DES_ENTRY ); 
     delete iShutdown;
     iShutdown = NULL;
     iFrameworkSingletons.ConnectionMgr().StopTransports();
     iFrameworkSingletons.DpController().UnloadDataProviders();
     iFrameworkSingletons.Close();
     REComSession::FinalClose();
-    __FLOG(_L8("~CMTPServer - Exit"));
-    __FLOG_CLOSE;
+    OstTraceFunctionExit0( CMTPSERVER_CMTPSERVER_DES_EXIT );
     }
 
 /**
@@ -88,10 +90,11 @@ Creates and executes a new CMTPServer instance.
 */
 void CMTPServer::RunServerL()
     {
-    __FLOG_STATIC(KMTPSubsystem, KComponent, _L8("RunServerL - Entry"));
+    OstTraceFunctionEntry0( CMTPSERVER_RUNSERVERL_ENTRY );
     
     // Naming the server thread after the server helps to debug panics
-    User::LeaveIfError(User::RenameProcess(KMTPServerName));
+    TInt ret = User::RenameProcess(KMTPServerName);
+    LEAVEIFERROR(ret, OstTrace0(TRACE_ERROR, CMTPSERVER_RUNSERVERL, "Rename process error"));
     
     // Create and install the active scheduler.
     CActiveScheduler* scheduler(new(ELeave) CActiveScheduler);
@@ -105,13 +108,15 @@ void CMTPServer::RunServerL()
     RProcess::Rendezvous(KErrNone);
     
     // Execute the server.
+    OstTraceDef0( OST_TRACE_CATEGORY_PRODUCTION, TRACE_IMPORTANT, DUP1_CMTPSERVER_RUNSERVERL, "MTP server starts up" );
     CActiveScheduler::Start();
+    OstTraceDef0( OST_TRACE_CATEGORY_PRODUCTION, TRACE_IMPORTANT, DUP2_CMTPSERVER_RUNSERVERL, "MTP server closed" );
 
 	// Server shutting down. 
 	CleanupStack::PopAndDestroy(server);
         
     CleanupStack::PopAndDestroy(1); // scheduler
-    __FLOG_STATIC(KMTPSubsystem, KComponent, _L8("RunServerL - Exit"));
+    OstTraceFunctionExit0( CMTPSERVER_RUNSERVERL_EXIT );
     } 
 
 /**
@@ -119,13 +124,13 @@ Adds a new CMTPServer session.
 */
 void CMTPServer::AddSession()
     {  
-    __FLOG(_L8("AddSession - Entry"));
+    OstTraceFunctionEntry0( CMTPSERVER_ADDSESSION_ENTRY );
     if(iShutdown && iShutdown->IsActive())
         {  
         iShutdown->Cancel();
         }
     ++iSessionCount;
-    __FLOG(_L8("AddSession - Exit"));
+    OstTraceFunctionExit0( CMTPSERVER_ADDSESSION_EXIT );
     }
 
 /**
@@ -135,24 +140,24 @@ terminate the server thread.
 */
 void CMTPServer::DropSession()
     {
-    __FLOG(_L8("DropSession - Entry"));
+    OstTraceFunctionEntry0( CMTPSERVER_DROPSESSION_ENTRY );
          
     if (--iSessionCount==0 && iFrameworkSingletons.ConnectionMgr().TransportCount() == 0)
         {
         // No active MTP client API sessions remain, start the shutdown timer.
         if (iShutdown)
             {
-            __FLOG(_L8("Shutdown Started - Entry"));
+            OstTrace0( TRACE_NORMAL, CMTPSERVER_DROPSESSION, "Shutdown Started" );           
             iShutdown->Start();
             }
         }
-    __FLOG(_L8("DropSession - Exit"));
+    OstTraceFunctionExit0( CMTPSERVER_DROPSESSION_EXIT );
     }
     
 CSession2* CMTPServer::NewSessionL(const TVersion&,const RMessage2&) const
     {
-    __FLOG(_L8("NewSessionL - Entry"));
-    __FLOG(_L8("NewSessionL - Exit"));
+    OstTraceFunctionEntry0( CMTPSERVER_NEWSESSIONL_ENTRY );
+    OstTraceFunctionExit0( CMTPSERVER_NEWSESSIONL_Exit );
     return new(ELeave) CMTPServerSession();
     }
        
@@ -184,17 +189,16 @@ second-phase constructor.
 */
 void CMTPServer::ConstructL()
     {
-    __FLOG_OPEN(KMTPSubsystem, KComponent);
-    __FLOG(_L8("ConstructL - Entry"));
+    OstTraceFunctionEntry0( CMTPSERVER_CONSTRUCTL_ENTRY );
     StartL(KMTPServerName);
     iFrameworkSingletons.OpenL();
     if (!iShutdown)
         {
         TRAPD(error, iShutdown = CMTPShutdown::NewL());
-        __FLOG(_L8("CMTPShutdown Loaded- Entry"));
+        OstTrace0( TRACE_NORMAL, CMTPSERVER_CONSTRUCTL, "CMTPShutdown Loaded" );            
         UNUSED_VAR(error);    
         }    
-    __FLOG(_L8("ConstructL - Exit"));
+    OstTraceFunctionExit0( CMTPSERVER_CONSTRUCTL_EXIT );
     }
         
 /*
@@ -206,11 +210,12 @@ RMessage::Panic() also completes the message. This is:
 */
 void PanicClient(const RMessagePtr2& aMessage,TMTPPanic aPanic)
     {
-    __FLOG_STATIC(KMTPSubsystem, KComponent, _L8("PanicClient - Entry"));
-    __FLOG_STATIC_VA((KMTPSubsystem, KComponent, _L8("Panic = %d"), aPanic));
+    OstTraceFunctionEntry0( _PANICCLIENT_ENTRY );
+    OstTraceDef1(OST_TRACE_CATEGORY_PRODUCTION, TRACE_IMPORTANT, _PANICCLIENT, "Panic = %d", aPanic );
+    
     _LIT(KPanic,"MTPServer");
     aMessage.Panic(KPanic, aPanic);
-    __FLOG_STATIC(KMTPSubsystem, KComponent, _L8("PanicClient - Exit"));
+    OstTraceFunctionExit0( _PANICCLIENT_EXIT );
     }
 
 /**
@@ -219,8 +224,10 @@ Process entry point
 TInt E32Main()
     {
     __UHEAP_MARK;
-    __FLOG_STATIC(KMTPSubsystem, KComponent, _L8("E32Main - Entry"));
-    __MTP_HEAP_FLOG
+    OstTraceFunctionEntry0( CMTPSERVER_E32MAIN_ENTRY );
+#ifdef OST_TRACE_COMPILER_IN_USE
+    __MTP_HEAP_OSTTRACE(OstTraceExt4(TRACE_NORMAL,CMTPSERVER_E32MAIN_HEAP,"Heap: Size = %d, Allocated = %d, Available = %d, Largest block = %d", size, allocated, available, largest));
+#endif
     
     CTrapCleanup* cleanup=CTrapCleanup::New();
     TInt ret = KErrNoMemory;
@@ -244,7 +251,9 @@ TInt E32Main()
 #endif        
         delete cleanup;
         }
-    __FLOG_STATIC(KMTPSubsystem, KComponent, _L8("E32Main - Exit"));
+    
+    OstTraceFunctionExit0( CMTPSERVER_E32MAIN_EXIT );
     __UHEAP_MARKEND;
+
     return ret;
     }

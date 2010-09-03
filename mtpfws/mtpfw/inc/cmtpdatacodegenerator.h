@@ -23,12 +23,7 @@
 
 #include <e32base.h>
 #include <mtp/mmtpdatacodegenerator.h>
-
-
-
-#include "mtpdebug.h"
-
-class RMTPFramework;
+#include "rmtpframework.h"
 
 
 class CMTPDataCodeGenerator :
@@ -54,11 +49,6 @@ private:
     TBool IsValidServiceType( const TUint aServiceType ) const;
     
 private:
-
-    /**
-    FLOGGER debug trace member variable.
-    */
-    __FLOG_DECLARATION_MEMBER_MUTABLE;
 
     /**
     The framework singletons.

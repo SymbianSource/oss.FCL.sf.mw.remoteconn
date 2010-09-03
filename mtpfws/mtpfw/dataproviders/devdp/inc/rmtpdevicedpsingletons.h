@@ -23,8 +23,6 @@
 
 #include <e32def.h>
 
-#include "mtpdebug.h"
-
 class CMTPDeviceDataStore;
 class CMTPDeviceDpConfigMgr;
 
@@ -66,11 +64,6 @@ private:
         void ConstructL(MMTPDataProviderFramework& aFramework);
 
     public: // Owned
-
-        /**
-        FLOGGER debug trace member variable.
-        */
-        __FLOG_DECLARATION_MEMBER_MUTABLE;
             
         /**
         The device information data manager.
@@ -89,11 +82,6 @@ private:
     };
     
 private: // Owned
-
-    /**
-    FLOGGER debug trace member variable.
-    */
-    __FLOG_DECLARATION_MEMBER_MUTABLE;
 
     /**
     The singletons reference block.

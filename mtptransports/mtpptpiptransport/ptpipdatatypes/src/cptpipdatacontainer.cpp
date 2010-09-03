@@ -19,6 +19,11 @@
 
 #include "ptpipdatatypes.h"
 #include "cptpipdatacontainer.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cptpipdatacontainerTraces.h"
+#endif
+
 
 // Dataset constants
 const TUint CPTPIPDataContainer::KFlatChunkSize(12);
@@ -40,10 +45,12 @@ const CMTPTypeCompoundBase::TElementInfo CPTPIPDataContainer::iElementMetaData[C
  */
 EXPORT_C CPTPIPDataContainer* CPTPIPDataContainer::NewL()
 	{
+	OstTraceFunctionEntry0( CPTPIPDATACONTAINER_NEWL_ENTRY );
 	CPTPIPDataContainer* self = new (ELeave) CPTPIPDataContainer();
 	CleanupStack::PushL(self);
 	self->ConstructL();
 	CleanupStack::Pop(self);
+	OstTraceFunctionExit0( CPTPIPDATACONTAINER_NEWL_EXIT );
 	return self;
 	}
 
@@ -52,7 +59,9 @@ EXPORT_C CPTPIPDataContainer* CPTPIPDataContainer::NewL()
  */
 EXPORT_C CPTPIPDataContainer::~CPTPIPDataContainer()
 	{
+	OstTraceFunctionEntry0( CPTPIPDATACONTAINER_CPTPIPDATACONTAINER_ENTRY );
 	iChunkHeader.Close();
+	OstTraceFunctionExit0( CPTPIPDATACONTAINER_CPTPIPDATACONTAINER_EXIT );
 	}
 
 /**
@@ -63,7 +72,9 @@ CPTPIPDataContainer::CPTPIPDataContainer( ) :
 			KFlatChunkSize, *this),
 			iElementInfo(iElementMetaData, ENumElements),iIsNextHeader(EFalse)
 	{
+	OstTraceFunctionEntry0( DUP1_CPTPIPDATACONTAINER_CPTPIPDATACONTAINER_ENTRY );
 	
+	OstTraceFunctionExit0( DUP1_CPTPIPDATACONTAINER_CPTPIPDATACONTAINER_EXIT );
 	}
 
 /**
@@ -71,8 +82,10 @@ CPTPIPDataContainer::CPTPIPDataContainer( ) :
  */
 void CPTPIPDataContainer::ConstructL( )
 	{
+	OstTraceFunctionEntry0( CPTPIPDATACONTAINER_CONSTRUCTL_ENTRY );
 	iChunkHeader.OpenL ( );
 	ChunkAppendL (iChunkHeader );
+	OstTraceFunctionExit0( CPTPIPDATACONTAINER_CONSTRUCTL_EXIT );
 	}
 
 /**
@@ -81,6 +94,8 @@ void CPTPIPDataContainer::ConstructL( )
  */
 EXPORT_C MMTPType* CPTPIPDataContainer::Payload() const
 	{
+	OstTraceFunctionEntry0( CPTPIPDATACONTAINER_PAYLOAD_ENTRY );
+	OstTraceFunctionExit0( CPTPIPDATACONTAINER_PAYLOAD_EXIT );
 	return iPayload;
 	}
 
@@ -90,6 +105,7 @@ EXPORT_C MMTPType* CPTPIPDataContainer::Payload() const
  */
 EXPORT_C void CPTPIPDataContainer::SetPayloadL(MMTPType* aPayload)
 	{
+	OstTraceFunctionEntry0( CPTPIPDATACONTAINER_SETPAYLOADL_ENTRY );
 	if (iPayload)
 		{
 		// Remove the existing payload from the super class.
@@ -103,17 +119,22 @@ EXPORT_C void CPTPIPDataContainer::SetPayloadL(MMTPType* aPayload)
 		}
 	iPayload = aPayload;
 	iIsNextHeader = EFalse; 
+	OstTraceFunctionExit0( CPTPIPDATACONTAINER_SETPAYLOADL_EXIT );
 	}
 
 EXPORT_C TUint CPTPIPDataContainer::Type() const
 	{
+	OstTraceFunctionEntry0( CPTPIPDATACONTAINER_TYPE_ENTRY );
+	OstTraceFunctionExit0( CPTPIPDATACONTAINER_TYPE_EXIT );
 	return EPTPIPTypeDataContainer;
 	}
 
 const CMTPTypeCompoundBase::TElementInfo& CPTPIPDataContainer::ElementInfo(
 		TInt aElementId ) const
 	{
+	OstTraceFunctionEntry0( CPTPIPDATACONTAINER_ELEMENTINFO_ENTRY );
 	__ASSERT_DEBUG((aElementId < ENumElements), User::Invariant());
+	OstTraceFunctionExit0( CPTPIPDATACONTAINER_ELEMENTINFO_EXIT );
 	return iElementInfo[aElementId];
 	}
 	
@@ -125,6 +146,7 @@ const CMTPTypeCompoundBase::TElementInfo& CPTPIPDataContainer::ElementInfo(
  **/
 EXPORT_C TInt CPTPIPDataContainer::FirstWriteChunk(TPtr8& aChunk)
 	        {
+	        OstTraceFunctionEntry0( CPTPIPDATACONTAINER_FIRSTWRITECHUNK_ENTRY );
 	        TInt err(KErrNone);	        
 	        
 	        aChunk.Set(NULL, 0, 0);
@@ -168,6 +190,7 @@ EXPORT_C TInt CPTPIPDataContainer::FirstWriteChunk(TPtr8& aChunk)
 	        
 	        iIsNextHeader = ETrue;
 	        
+	        OstTraceFunctionExit0( CPTPIPDATACONTAINER_FIRSTWRITECHUNK_EXIT );
 	        return err;
 	        }
 
@@ -178,6 +201,7 @@ EXPORT_C TInt CPTPIPDataContainer::FirstWriteChunk(TPtr8& aChunk)
  **/
 EXPORT_C MMTPType* CPTPIPDataContainer::CommitChunkL(TPtr8& aChunk)
 	    {       
+	    OstTraceFunctionEntry0( CPTPIPDATACONTAINER_COMMITCHUNKL_ENTRY );
 	    MMTPType *chunk(iChunks[iWriteChunk]);
 	    MMTPType* res = NULL;
 	    if (chunk->CommitRequired())
@@ -191,6 +215,7 @@ EXPORT_C MMTPType* CPTPIPDataContainer::CommitChunkL(TPtr8& aChunk)
 	        iWriteChunk++;            
 	        }
 
+	    OstTraceFunctionExit0( CPTPIPDATACONTAINER_COMMITCHUNKL_EXIT );
 	    return res;
 	    }
  

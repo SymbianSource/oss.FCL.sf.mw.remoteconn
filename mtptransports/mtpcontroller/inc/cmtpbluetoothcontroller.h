@@ -25,7 +25,6 @@
 
 #include "cmtpcontrollerbase.h"
 #include "cmtpoperator.h"
-#include "mtpdebug.h"
 
 NONSHARABLE_CLASS( CMTPBluetoothController ) : public CMTPControllerBase, public MMTPOperatorNotifier
     {
@@ -44,10 +43,6 @@ private:
     CMTPBluetoothController( CMTPBearerMonitor& aMon );
     
 private:
-    /**
-     * FLOGGER debug trace member variable.
-     */
-    __FLOG_DECLARATION_MEMBER_MUTABLE;
     
     TBool iStat;
     CMTPOperator* iMTPOperator;

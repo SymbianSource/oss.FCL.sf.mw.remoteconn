@@ -60,10 +60,6 @@ private:
 	TEntry					iFileEntry;
 	RFs&					iRfs;
 	RMTPDpSingletons		iDpSingletons;
-	/**
-	FLOGGER debug trace member variable.
-  */
-	__FLOG_DECLARATION_MEMBER_MUTABLE; 
 	};
 	
 #endif CMTPGETOBJECTINFO_H

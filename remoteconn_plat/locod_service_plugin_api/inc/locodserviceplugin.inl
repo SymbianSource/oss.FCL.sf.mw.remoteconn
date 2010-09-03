@@ -17,7 +17,7 @@
 */
 
 
-#include <ecom.h>
+#include <ecom/ecom.h>
 
 // -----------------------------------------------------------------------------
 // Constructor method, just saves the arguments into member variables

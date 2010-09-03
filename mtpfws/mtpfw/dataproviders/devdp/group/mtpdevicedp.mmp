@@ -13,8 +13,6 @@
 // Description:
 //
 
-#include <comms-infras/commsdebugutility.mmh>
-
 TARGET              mtpdevicedp.dll
 TARGETTYPE          PLUGIN
 UID                 0x10009D8D 0x102827A4
@@ -28,7 +26,8 @@ USERINCLUDE         ../../dputility/inc
 USERINCLUDE         ../../../common/inc 
 USERINCLUDE         ../../../inc
 USERINCLUDE         ../../../transports/transportapi/inc
-USERINCLUDE         ../devdpextnapi/interface
+USERINCLUDE         ../devdpextnapi/interface	
+USERINCLUDE					../traces
 
 SOURCEPATH          ../src 
 SOURCE              cmtpclosesession.cpp

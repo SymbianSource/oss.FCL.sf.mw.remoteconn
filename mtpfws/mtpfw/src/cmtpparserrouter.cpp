@@ -26,9 +26,13 @@
 #include "cmtpstoragemgr.h"
 #include "tmtptypeobjecthandle.h"
 #include "cmtpservicemgr.h"
+#include "mtpdebug.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpparserrouterTraces.h"
+#endif
 
-// Class constants.
-__FLOG_STMT(_LIT8(KComponent,"ParserRouter");)
+
 
 /**
 Provides the byte size of the specified array.
@@ -144,11 +148,10 @@ Destructor
 */
 CMTPParserRouter::~CMTPParserRouter()
     {
-    __FLOG(_L8("~CMTPParserRouter, Entry"));
+    OstTraceFunctionEntry0( CMTPPARSERROUTER_CMTPPARSERROUTER_DES_ENTRY );
     iMaps.ResetAndDestroy();
     iSingletons.Close();
-    __FLOG(_L8("~CMTPParserRouter, Exit"));
-    __FLOG_CLOSE;
+    OstTraceFunctionExit0( CMTPPARSERROUTER_CMTPPARSERROUTER_DES_EXIT );
     }
 
 /**
@@ -159,7 +162,7 @@ up the operation parameter lookup routing sub-type tables.
 */
 EXPORT_C void CMTPParserRouter::ConfigureL()
     {
-    __FLOG(_L8("ConfigureL, Entry"));    
+    OstTraceFunctionEntry0( CMTPPARSERROUTER_CONFIGUREL_ENTRY );
     const TUint KMapIds[] = 
         {
         ESubTypeDevicePropCode,
@@ -215,8 +218,11 @@ EXPORT_C void CMTPParserRouter::ConfigureL()
         CleanupStack::PopAndDestroy(&p1Codes);
         }
         
-    __FLOG_STMT(FLOGMapsL());
-    __FLOG(_L8("ConfigureL, Exit"));
+#ifdef OST_TRACE_COMPILER_IN_USE
+    OSTMapsL();
+#endif
+    
+    OstTraceFunctionExit0( CMTPPARSERROUTER_CONFIGUREL_EXIT );
     }
     
 /**
@@ -227,7 +233,7 @@ of loaded data providers.
 */    
 EXPORT_C TBool CMTPParserRouter::OperationSupportedL(TUint16 aOperation) const
     {
-    __FLOG(_L8("OperationSupported, Entry"));
+    OstTraceFunctionEntry0( CMTPPARSERROUTER_OPERATIONSUPPORTEDL_ENTRY );
     RArray<TUint> from;
     RArray<TUint> to;
     CleanupClosePushL(from);
@@ -239,7 +245,7 @@ EXPORT_C TBool CMTPParserRouter::OperationSupportedL(TUint16 aOperation) const
 
     CleanupStack::PopAndDestroy(&to);
     CleanupStack::PopAndDestroy(&from);
-    __FLOG(_L8("OperationSupported, Exit"));
+    OstTraceFunctionExit0( CMTPPARSERROUTER_OPERATIONSUPPORTEDL_EXIT );
     return (ret);
     }
 
@@ -266,9 +272,9 @@ operation.
 */
 EXPORT_C void CMTPParserRouter::ParseOperationRequestL(TRoutingParameters& aParams) const
     {
-    __FLOG(_L8("ParseOperationRequestL, Entry"));
+    OstTraceFunctionEntry0( CMTPPARSERROUTER_PARSEOPERATIONREQUESTL_ENTRY );
     const TUint16 KOpCode(aParams.Request().Uint16(TMTPTypeRequest::ERequestOperationCode));
-    __FLOG_VA((_L8("Operation Code = 0x%04X"), KOpCode));
+    OstTrace1(TRACE_NORMAL, CMTPPARSERROUTER_PARSEOPERATIONREQUESTL, "Operation Code = 0x%04X", KOpCode);
     switch (KOpCode)
         {
     case EMTPOpCodeGetStorageInfo:
@@ -379,7 +385,7 @@ EXPORT_C void CMTPParserRouter::ParseOperationRequestL(TRoutingParameters& aPara
         default:
         break;
         }
-    __FLOG(_L8("ParseOperationRequestL, Exit"));
+    OstTraceFunctionExit0( CMTPPARSERROUTER_PARSEOPERATIONREQUESTL_EXIT );
     }
 
 /**
@@ -392,7 +398,7 @@ operation should be dispatched.
 */
 EXPORT_C void CMTPParserRouter::RouteOperationRequestL(const TRoutingParameters& aParams, RArray<TUint>& aTargets) const
     {
-    __FLOG(_L8("RouteOperationRequestL, Entry"));
+    OstTraceFunctionEntry0( CMTPPARSERROUTER_ROUTEOPERATIONREQUESTL_ENTRY );
     aTargets.Reset();
     
     // By default ETypeOperationParameter routing is always enabled.
@@ -458,7 +464,7 @@ EXPORT_C void CMTPParserRouter::RouteOperationRequestL(const TRoutingParameters&
     CleanupStack::PopAndDestroy(&params);
     CleanupStack::PopAndDestroy(&validation);
     CleanupStack::PopAndDestroy(&routing);
-    __FLOG(_L8("RouteOperationRequestL, Exit"));
+    OstTraceFunctionExit0( CMTPPARSERROUTER_ROUTEOPERATIONREQUESTL_EXIT );
     }
 
 /**
@@ -474,7 +480,7 @@ registered on the session, otherwise EFalse.
 */
 EXPORT_C TBool CMTPParserRouter::RouteRequestRegisteredL(const TMTPTypeRequest& aRequest, MMTPConnection& aConnection) const
     {
-    __FLOG(_L8("RouteRequestRegistered, Entry"));
+    OstTraceFunctionEntry0( CMTPPARSERROUTER_ROUTEREQUESTREGISTEREDL_ENTRY );
     TBool ret(EFalse);
     const TUint32 KSessionId(aRequest.Uint32(TMTPTypeRequest::ERequestSessionID));
     if ((KSessionId != KMTPSessionAll) && (aConnection.SessionWithMTPIdExists(KSessionId)))
@@ -482,7 +488,7 @@ EXPORT_C TBool CMTPParserRouter::RouteRequestRegisteredL(const TMTPTypeRequest& 
         CMTPSession& session(static_cast<CMTPSession&>(aConnection.SessionWithMTPIdL(KSessionId)));
         ret = session.RouteRequestRegistered(aRequest.Uint16(TMTPTypeRequest::ERequestOperationCode));
         }
-    __FLOG(_L8("RouteRequestRegistered, Exit"));
+    OstTraceFunctionExit0( CMTPPARSERROUTER_ROUTEREQUESTREGISTEREDL_EXIT );
     return ret;
     }
    
@@ -498,7 +504,7 @@ will be discarded.
 */
 void CMTPParserRouter::ProcessEventL(const TMTPTypeEvent& aEvent, CMTPConnection& aConnection) const
     {
-    __FLOG(_L8("ProcessEventL, Entry"));
+    OstTraceFunctionEntry0( CMTPPARSERROUTER_PROCESSEVENTL_ENTRY );
     if ((aEvent.Uint16(TMTPTypeEvent::EEventCode) == EMTPEventCodeCancelTransaction) &&
         (aConnection.SessionWithMTPIdExists(aEvent.Uint32(TMTPTypeEvent::EEventSessionID))))
         {
@@ -508,7 +514,7 @@ void CMTPParserRouter::ProcessEventL(const TMTPTypeEvent& aEvent, CMTPConnection
             iSingletons.DpController().DataProviderL(RoutingTargetL(session.ActiveRequestL(), aConnection)).ExecuteEventL(aEvent, aConnection);
             }
         }
-    __FLOG(_L8("ProcessEventL, Exit"));
+    OstTraceFunctionExit0( CMTPPARSERROUTER_PROCESSEVENTL_EXIT );
     }
    
 /**
@@ -519,9 +525,9 @@ Routes and dispatches the specified MTP operation (request) dataset.
 */
 void CMTPParserRouter::ProcessRequestL(const TMTPTypeRequest& aRequest, CMTPConnection& aConnection) const
     {
-    __FLOG(_L8("ProcessRequestL, Entry")); 
+    OstTraceFunctionEntry0( CMTPPARSERROUTER_PROCESSREQUESTL_ENTRY );
     iSingletons.DpController().DataProviderL(RoutingTargetL(aRequest, aConnection)).ExecuteRequestL(aRequest, aConnection);
-    __FLOG(_L8("ProcessRequestL, Exit"));
+    OstTraceFunctionExit0( CMTPPARSERROUTER_PROCESSREQUESTL_EXIT );
     }
 
 /**
@@ -536,7 +542,7 @@ request is expected to be received.
 */
 void CMTPParserRouter::RouteRequestRegisterL(const TMTPTypeRequest& aRequest, MMTPConnection& aConnection, TInt aId)
     {
-    __FLOG(_L8("RouteRequestRegisterL, Entry"));
+    OstTraceFunctionEntry0( CMTPPARSERROUTER_ROUTEREQUESTREGISTERL_ENTRY );
     const TUint32 KSessionId(aRequest.Uint32(TMTPTypeRequest::ERequestSessionID));
     if (KSessionId == KMTPSessionAll)
         {
@@ -564,7 +570,7 @@ void CMTPParserRouter::RouteRequestRegisterL(const TMTPTypeRequest& aRequest, MM
         CMTPSession& session(static_cast<CMTPSession&>(aConnection.SessionWithMTPIdL(KSessionId)));
         session.RouteRequestRegisterL(aRequest, aId);
         }
-    __FLOG(_L8("RouteRequestRegisterL, Exit"));
+    OstTraceFunctionExit0( CMTPPARSERROUTER_ROUTEREQUESTREGISTERL_EXIT );
     }
 
 /**
@@ -578,10 +584,10 @@ occurs.
 */
 void CMTPParserRouter::RouteRequestUnregisterL(const TMTPTypeRequest& aRequest, MMTPConnection& aConnection)
     {
-    __FLOG(_L8("RouteRequestUnregisterL, Entry"));
+    OstTraceFunctionEntry0( CMTPPARSERROUTER_ROUTEREQUESTUNREGISTERL_ENTRY );
     CMTPSession& session(static_cast<CMTPSession&>(aConnection.SessionWithMTPIdL(aRequest.Uint32(TMTPTypeRequest::ERequestSessionID))));
     session.RouteRequestUnregister(aRequest);
-    __FLOG(_L8("RouteRequestUnregisterL, Exit"));
+    OstTraceFunctionExit0( CMTPPARSERROUTER_ROUTEREQUESTUNREGISTERL_EXIT );
     }
 
 /**
@@ -634,7 +640,6 @@ CMTPParserRouter::CMap::~CMap()
         {
         iToBranches.ResetAndDestroy();
         }
-    __FLOG_CLOSE;
     }
     
 /**
@@ -677,7 +682,9 @@ void CMTPParserRouter::CMap::InsertL(const RArray<TUint>& aFrom, TUint aTo)
     if (Params(iSubType) == ESubTypeParams1)
         {
         // Node.
-        __FLOG_STMT(FLOGMapEntryL(aFrom, aTo));
+#ifdef OST_TRACE_COMPILER_IN_USE
+        OSTMapEntryL(aFrom, aTo);
+#endif
         const TUint KSubType(CMTPParserRouter::SubType(Index(iSubType), Flags(iSubType), (ParamsCount(iSubType) - 1)));
         const TMap KNode(KFrom, aTo, KSubType);
         NodeInsertL(KNode);
@@ -704,7 +711,7 @@ occurs.
 */
 void CMTPParserRouter::CMap::GetToL(const RArray<TUint>& aFrom, RArray<TUint>& aTo) const
     {
-    __FLOG(_L8("CMap::GetToL - entry"));
+    OstTraceFunctionEntry0( CMAP_GETTOL_ENTRY );
     const TUint KFrom(Param(aFrom));
     if (KFrom == KMTPNotSpecified32)
         {
@@ -720,8 +727,8 @@ void CMTPParserRouter::CMap::GetToL(const RArray<TUint>& aFrom, RArray<TUint>& a
         {
         // Select 0 .. 1 matching targets.
         SelectTargetSingleL(aFrom, aTo);
-        }
-	__FLOG(_L8("CMap::GetToL - Exit"));        
+        }   
+    OstTraceFunctionExit0( CMAP_GETTOL_EXIT );
     }
     
 /**
@@ -733,7 +740,7 @@ TUint CMTPParserRouter::CMap::SubType() const
     return iSubType;
     }
 
-#ifdef __FLOG_ACTIVE
+#ifdef OST_TRACE_COMPILER_IN_USE
 /**
 Logs the map table entries (source and target) which match the specified source 
 parameters.
@@ -741,7 +748,7 @@ parameters.
 @leave One of the system wide error codes, if a general processing error 
 occurs.
 */  
-void CMTPParserRouter::CMap::FLOGMapL(RArray<TUint>& aFrom) const
+void CMTPParserRouter::CMap::OSTMapL(RArray<TUint>& aFrom) const
     {
     if (Params(iSubType) == ESubTypeParams1)
         {
@@ -750,7 +757,7 @@ void CMTPParserRouter::CMap::FLOGMapL(RArray<TUint>& aFrom) const
         for (TUint i(0); (i < KCount); i++)
             {
             aFrom[ParamIdx(aFrom)] = iToNodes[i].iFrom;
-            FLOGMapEntryL(aFrom, iToNodes[i].iTo);
+            OSTMapEntryL(aFrom, iToNodes[i].iTo);
             }
         }
     else 
@@ -761,7 +768,7 @@ void CMTPParserRouter::CMap::FLOGMapL(RArray<TUint>& aFrom) const
             {
             const CMap& KBranch(*iToBranches[i]);
             aFrom[ParamIdx(aFrom)] = KBranch.iFrom;
-            KBranch.FLOGMapL(aFrom);
+            KBranch.OSTMapL(aFrom);
             }
         }
     }
@@ -773,7 +780,7 @@ Logs the specified source and target map table entry parameters.
 @leave One of the system wide error codes, if a general processing error 
 occurs.
 */
-void CMTPParserRouter::CMap::FLOGMapEntryL(const RArray<TUint>& aFrom, TUint aTo) const
+void CMTPParserRouter::CMap::OSTMapEntryL(const RArray<TUint>& aFrom, TUint aTo) const
     {
     __ASSERT_DEBUG((aFrom.Count() >= ParamsCount(iSubType)), User::Invariant());
     RBuf log;
@@ -791,7 +798,7 @@ void CMTPParserRouter::CMap::FLOGMapEntryL(const RArray<TUint>& aFrom, TUint aTo
         }
     log.Append(_L("-> 0x"));
     log.AppendNumFixedWidthUC(aTo, EHex, KWidthTo);
-    __FLOG(log);
+    OstTraceExt1(TRACE_NORMAL, CMTPPARSERROUTER_CMAP_OSTMAPENTRYL, "%S", log);
     CleanupStack::PopAndDestroy(&log);
     }
 #endif
@@ -828,7 +835,6 @@ Second-phase constructor.
 */
 void CMTPParserRouter::CMap::ConstructL()
     {
-    __FLOG_OPEN(KMTPSubsystem, KComponent);
     }
     
 /**
@@ -910,7 +916,8 @@ TUint CMTPParserRouter::CMap::NodeInsertL(const TMap& aMap)
             }
         else
             {
-            User::LeaveIfError(err);
+            LEAVEIFERROR(err,
+                    OstTrace1( TRACE_ERROR, CMAP_NODEINSERTL, "Inserts the specified map node into the map node table failed, error code %d", err ));
             }
         }
     const TInt KIdx(NodeFind(aMap));
@@ -978,7 +985,7 @@ occurs.
 */
 void CMTPParserRouter::CMap::SelectTargetMatchingL(const RArray<TUint>& aFrom, RArray<TUint>& aTo) const
     {
-    __FLOG(_L8("CMap::SelectTargetMatchingL - entry"));
+    OstTraceFunctionEntry0( CMAP_SELECTTARGETMATCHINGL_ENTRY );
     const TUint KFrom(Param(aFrom));
     TInt idx(KErrNotFound);
     if (Params(iSubType) == ESubTypeParams1)
@@ -1003,8 +1010,8 @@ void CMTPParserRouter::CMap::SelectTargetMatchingL(const RArray<TUint>& aFrom, R
             {
             iToBranches[idx++]->GetToL(aFrom, aTo);
             }
-        }
-	__FLOG(_L8("CMap::SelectTargetMatchingL - exit"));        
+        }    
+    OstTraceFunctionExit0( CMAP_SELECTTARGETMATCHINGL_EXIT );
     }
 
 /**
@@ -1207,10 +1214,9 @@ Second-phase constructor.
 */
 void CMTPParserRouter::ConstructL()
     {
-    __FLOG_OPEN(KMTPSubsystem, KComponent);
-    __FLOG(_L8("ConstructL, Entry"));
+    OstTraceFunctionEntry0( CMTPPARSERROUTER_CONSTRUCTL_ENTRY );
     iSingletons.OpenL();
-    __FLOG(_L8("ConstructL, Exit"));
+    OstTraceFunctionExit0( CMTPPARSERROUTER_CONSTRUCTL_EXIT );
     }
     
 /**
@@ -1301,14 +1307,14 @@ occurs.
 */    
 void CMTPParserRouter::SelectTargetL(TUint aTarget, RArray<TUint>& aTargets)
     {
-    __FLOG_STATIC(KMTPSubsystem, KComponent, _L8("SelectTargetL, Entry"));
+    OstTraceFunctionEntry0( CMTPPARSERROUTER_SELECTTARGETL_ENTRY );
     TInt idx(aTargets.Find(aTarget));
     if (idx != KErrNotFound)
         {
         aTargets.Remove(idx);
         }
     aTargets.AppendL(aTarget);
-    __FLOG_STATIC(KMTPSubsystem, KComponent, _L8("SelectTargetL, Exit"));
+    OstTraceFunctionExit0( CMTPPARSERROUTER_SELECTTARGETL_EXIT );
     }
 
 /**
@@ -1333,9 +1339,10 @@ void CMTPParserRouter::Configure1ParameterMapL(TUint aSubType, const RArray<TUin
     for (TUint d(0); (d < KCount); d++)
         {
         CMTPDataProvider& dp(iSingletons.DpController().DataProviderByIndexL(d));
-        __FLOG(_L8(""));
-        __FLOG_VA((_L8("Creating DP %02d Table 0x%08X Entries"), dp.DataProviderId(), aSubType));
-        __FLOG(_L8("---------------------------------------")); 
+        OstTrace0(TRACE_NORMAL, CMTPPARSERROUTER_CONFIGURE1PARAMETERMAPL,"");
+        OstTraceExt2(TRACE_NORMAL, DUP1_CMTPPARSERROUTER_CONFIGURE1PARAMETERMAPL, 
+                "Creating DP %d Table 0x%X Entries", dp.DataProviderId(), aSubType);
+        OstTrace0(TRACE_NORMAL, DUP2_CMTPPARSERROUTER_CONFIGURE1PARAMETERMAPL,"----------------");
         
         RArray<TUint> p1s;
         CleanupClosePushL(p1s);
@@ -1348,7 +1355,7 @@ void CMTPParserRouter::Configure1ParameterMapL(TUint aSubType, const RArray<TUin
             map.InsertL(from, dp.DataProviderId());
             }
         CleanupStack::PopAndDestroy(&p1s);
-        __FLOG(_L8(""));
+        OstTrace0(TRACE_NORMAL, DUP3_CMTPPARSERROUTER_CONFIGURE1PARAMETERMAPL,"");
         }
     CleanupStack::PopAndDestroy(&from);
     }
@@ -1377,9 +1384,10 @@ void CMTPParserRouter::Configure2ParameterMapL(TUint aSubType, const RArray<TUin
     for (TUint d(0); (d < KCountDps); d++)
         {
         CMTPDataProvider& dp(iSingletons.DpController().DataProviderByIndexL(d));
-        __FLOG(_L8(""));
-        __FLOG_VA((_L8("Creating DP %02d Table 0x%08X Entries"), dp.DataProviderId(), aSubType));
-        __FLOG(_L8("---------------------------------------"));
+        OstTrace0(TRACE_NORMAL, CMTPPARSERROUTER_CONFIGURE2PARAMETERMAPL,"");
+        OstTraceExt2(TRACE_NORMAL, DUP1_CMTPPARSERROUTER_CONFIGURE2PARAMETERMAPL, 
+                "Creating DP %d Table 0x%X Entries", dp.DataProviderId(), aSubType);
+        OstTrace0(TRACE_NORMAL, DUP2_CMTPPARSERROUTER_CONFIGURE2PARAMETERMAPL,"----------------");        
         
         RArray<TUint> p1s;
         CleanupClosePushL(p1s);
@@ -1411,7 +1419,7 @@ void CMTPParserRouter::Configure2ParameterMapL(TUint aSubType, const RArray<TUin
                 }
             }
         CleanupStack::PopAndDestroy(&p1s);
-        __FLOG(_L8(""));
+        OstTrace0(TRACE_NORMAL, DUP3_CMTPPARSERROUTER_CONFIGURE2PARAMETERMAPL,"");
         } 
     CleanupStack::PopAndDestroy(&from);
     }
@@ -1442,9 +1450,10 @@ void CMTPParserRouter::Configure3ParameterMapL(TUint aSubType, const RArray<TUin
     for (TUint d(0); (d < KCount); d++)
         {
         CMTPDataProvider& dp(iSingletons.DpController().DataProviderByIndexL(d));
-        __FLOG(_L8(""));
-        __FLOG_VA((_L8("Creating DP %02d Table 0x%08X Entries"), dp.DataProviderId(), aSubType));
-        __FLOG(_L8("---------------------------------------"));
+        OstTrace0(TRACE_NORMAL, CMTPPARSERROUTER_CONFIGURE3PARAMETERMAPL,"");
+        OstTraceExt2(TRACE_NORMAL, DUP1_CMTPPARSERROUTER_CONFIGURE3PARAMETERMAPL, 
+                "Creating DP %d Table 0x%X Entries", dp.DataProviderId(), aSubType);
+        OstTrace0(TRACE_NORMAL, DUP2_CMTPPARSERROUTER_CONFIGURE3PARAMETERMAPL,"----------------");         
         
         RArray<TUint> p1s;
         CleanupClosePushL(p1s);
@@ -1493,7 +1502,7 @@ void CMTPParserRouter::Configure3ParameterMapL(TUint aSubType, const RArray<TUin
             CleanupStack::PopAndDestroy(&p3s);
             }
         CleanupStack::PopAndDestroy(&p1s);
-        __FLOG(_L8(""));
+        OstTrace0(TRACE_NORMAL, DUP3_CMTPPARSERROUTER_CONFIGURE3PARAMETERMAPL,"");
         }
     CleanupStack::PopAndDestroy(&from);
     }
@@ -1520,12 +1529,14 @@ void CMTPParserRouter::GetConfigParametersL(const CMTPDataProvider& aDp, const R
             {
             if(( EServiceIDs == aCodes[c] )&&( iSingletons.ServiceMgr().IsSupportedService( KParams[p] )) )
                 {
-                __FLOG_1(_L8("GetConfigParametersL, abstract service id = %d"), KParams[p]);
+                OstTrace1( TRACE_NORMAL, CMTPPARSERROUTER_GETCONFIGPARAMETERSL, 
+                        "GetConfigParametersL, abstract service id = %d",KParams[p] );             
                 continue;
                 }
             TInt err(aParams.InsertInOrder(KParams[p]));
             if ((err != KErrNone) && (err != KErrAlreadyExists))
                 {
+                OstTrace1( TRACE_ERROR, DUP1_CMTPPARSERROUTER_GETCONFIGPARAMETERSL, "insert into aParams error! error code %d", err );
                 User::Leave(err);
                 }
             }
@@ -1543,7 +1554,7 @@ occurs.
 */
 void CMTPParserRouter::GetRoutingSubTypesL(RArray<TRoutingParameters>& aParams, RArray<TUint>& aRoutingSubTypes, RArray<TUint>& aValidationSubTypes) const
     {
-    __FLOG(_L8("GetRoutingSubTypesL, Entry"));
+    OstTraceFunctionEntry0( CMTPPARSERROUTER_GETROUTINGSUBTYPESL_ENTRY );  
     __ASSERT_DEBUG((aParams.Count() > 0), User::Invariant());
     aRoutingSubTypes.Reset();
     aValidationSubTypes.Reset();
@@ -1743,7 +1754,7 @@ void CMTPParserRouter::GetRoutingSubTypesL(RArray<TRoutingParameters>& aParams, 
             break;
             }
         }
-    __FLOG(_L8("GetRoutingSubTypesL, Exit"));
+    OstTraceFunctionExit0( CMTPPARSERROUTER_GETROUTINGSUBTYPESL_EXIT );
     }
 
 /**
@@ -1758,7 +1769,7 @@ occurs.
 */
 void CMTPParserRouter::GetRoutingSubTypesDeleteRequestL(RArray<TRoutingParameters>& aParams, RArray<TUint>& aRoutingSubTypes, RArray<TUint>& aValidationSubTypes) const
     {
-    __FLOG(_L8("GetRoutingSubTypesDeleteRequestL, Entry"));
+    OstTraceFunctionEntry0( CMTPPARSERROUTER_GETROUTINGSUBTYPESDELETEREQUESTL_ENTRY );
     TRoutingParameters& params1(aParams[0]);
     __ASSERT_DEBUG((params1.Request().Uint16(TMTPTypeRequest::ERequestOperationCode) == EMTPOpCodeDeleteObject), User::Invariant());
     
@@ -1793,7 +1804,7 @@ void CMTPParserRouter::GetRoutingSubTypesDeleteRequestL(RArray<TRoutingParameter
             }
         SelectSubTypeRoutingL(ESubTypeOwnerObject, aRoutingSubTypes, aValidationSubTypes, aParams);
         }
-    __FLOG(_L8("GetRoutingSubTypesDeleteRequestL, Exit"));
+    OstTraceFunctionExit0( CMTPPARSERROUTER_GETROUTINGSUBTYPESDELETEREQUESTL_EXIT );
     }
 
 /**
@@ -1808,7 +1819,7 @@ occurs.
 */
 void CMTPParserRouter::GetRoutingSubTypesCopyMoveRequestL(RArray<TRoutingParameters>& aParams, RArray<TUint>& aRoutingSubTypes, RArray<TUint>& aValidationSubTypes) const
 	{
-	__FLOG(_L8("GetRoutingSubTypesCopyMoveRequestL, Entry"));
+	OstTraceFunctionEntry0( CMTPPARSERROUTER_GETROUTINGSUBTYPESCOPYMOVEREQUESTL_ENTRY );
 	const TUint KObjectFormatCode(aParams[0].Param(TRoutingParameters::EParamFormatCode));
 	if (KObjectFormatCode == EMTPFormatCodeAssociation)
         {
@@ -1818,7 +1829,7 @@ void CMTPParserRouter::GetRoutingSubTypesCopyMoveRequestL(RArray<TRoutingParamet
     	{
     	SelectSubTypeRoutingL(ESubTypeOwnerObject, aRoutingSubTypes, aValidationSubTypes, aParams);    
     	}
-	__FLOG(_L8("GetRoutingSubTypesCopyMoveRequestL, Exit"));    
+	OstTraceFunctionExit0( CMTPPARSERROUTER_GETROUTINGSUBTYPESCOPYMOVEREQUESTL_EXIT );
 	}
 /**
 Provides the set of operation parameter routing and validation sub-types to be 
@@ -1832,7 +1843,7 @@ occurs.
 */
 void CMTPParserRouter::GetRoutingSubTypesGetObjectPropListRequestL(RArray<TRoutingParameters>& aParams, RArray<TUint>& aRoutingSubTypes, RArray<TUint>& aValidationSubTypes) const
     {
-    __FLOG(_L8("GetRoutingSubTypesGetObjectPropListRequestL, Entry"));
+    OstTraceFunctionEntry0( CMTPPARSERROUTER_GETROUTINGSUBTYPESGETOBJECTPROPLISTREQUESTL_ENTRY );
     TRoutingParameters& params1(aParams[0]);
     __ASSERT_DEBUG((params1.Request().Uint16(TMTPTypeRequest::ERequestOperationCode) == EMTPOpCodeGetObjectPropList), User::Invariant());
     if (params1.Param(TRoutingParameters::EFlagRoutingTypes) & ETypeOperationParameter)
@@ -1875,7 +1886,7 @@ void CMTPParserRouter::GetRoutingSubTypesGetObjectPropListRequestL(RArray<TRouti
             }
         
         }
-    __FLOG(_L8("GetRoutingSubTypesGetObjectPropListRequestL, Exit"));
+    OstTraceFunctionExit0( CMTPPARSERROUTER_GETROUTINGSUBTYPESGETOBJECTPROPLISTREQUESTL_EXIT );
     }
 
 /**
@@ -1890,7 +1901,7 @@ occurs.
 */
 void CMTPParserRouter::GetRoutingSubTypesSendObjectPropListRequestL(RArray<TRoutingParameters>& aParams, RArray<TUint>& aRoutingSubTypes, RArray<TUint>& aValidationSubTypes) const
     {
-    __FLOG(_L8("GetRoutingSubTypesSendObjectPropListRequestL, Entry"));
+    OstTraceFunctionEntry0( CMTPPARSERROUTER_GETROUTINGSUBTYPESSENDOBJECTPROPLISTREQUESTL_ENTRY );
     TRoutingParameters& params1(aParams[0]);
     __ASSERT_DEBUG((params1.Request().Uint16(TMTPTypeRequest::ERequestOperationCode) == EMTPOpCodeSendObjectPropList), User::Invariant());
     const TUint KRoutingTypes(params1.Param(TRoutingParameters::EFlagRoutingTypes));
@@ -1903,12 +1914,12 @@ void CMTPParserRouter::GetRoutingSubTypesSendObjectPropListRequestL(RArray<TRout
         {
         SelectSubTypeRoutingL(ESubTypeFormatCodeFormatSubcodeStorageType, aRoutingSubTypes, aValidationSubTypes, aParams);
         }
-    __FLOG(_L8("GetRoutingSubTypesSendObjectPropListRequestL, Exit"));
+    OstTraceFunctionExit0( CMTPPARSERROUTER_GETROUTINGSUBTYPESSENDOBJECTPROPLISTREQUESTL_EXIT );
     }
 
 void CMTPParserRouter::GetRoutingSubTypesDeleteObjectPropListL(RArray<TRoutingParameters>& aParams, RArray<TUint>& aRoutingSubTypes, RArray<TUint>& aValidationSubTypes) const
     {
-    __FLOG(_L8("GetRoutingSubTypesDeleteObjectPropListL, Entry"));
+    OstTraceFunctionEntry0( CMTPPARSERROUTER_GETROUTINGSUBTYPESDELETEOBJECTPROPLISTL_ENTRY );
     TRoutingParameters& params1(aParams[0]);
     
     __ASSERT_DEBUG((params1.Request().Uint16(TMTPTypeRequest::ERequestOperationCode) == EMTPOpCodeDeleteObjectPropList), User::Invariant());
@@ -1923,12 +1934,12 @@ void CMTPParserRouter::GetRoutingSubTypesDeleteObjectPropListL(RArray<TRoutingPa
         SelectSubTypeRoutingL(ESubTypeOwnerObject, aRoutingSubTypes, aValidationSubTypes, aParams);
         }
 
-    __FLOG(_L8("GetRoutingSubTypesDeleteObjectPropListL, Exit"));
+    OstTraceFunctionExit0( CMTPPARSERROUTER_GETROUTINGSUBTYPESDELETEOBJECTPROPLISTL_EXIT );
     }
 
 void CMTPParserRouter::GetRoutingSubTypesGetFormatCapabilitiesL(RArray<TRoutingParameters>& aParams, RArray<TUint>& aRoutingSubTypes, RArray<TUint>& aValidationSubTypes) const
     {
-    __FLOG(_L8("GetRoutingSubTypesGetFormatCapabilities, Entry"));
+    OstTraceFunctionEntry0( CMTPPARSERROUTER_GETROUTINGSUBTYPESGETFORMATCAPABILITIESL_ENTRY );
     TRoutingParameters& params1(aParams[0]);
     
     __ASSERT_DEBUG((params1.Request().Uint16(TMTPTypeRequest::ERequestOperationCode) == EMTPOpCodeGetFormatCapabilities), User::Invariant());
@@ -1942,7 +1953,7 @@ void CMTPParserRouter::GetRoutingSubTypesGetFormatCapabilitiesL(RArray<TRoutingP
         SelectSubTypeRoutingL(ESubTypeFormatCodeOperationCode, aRoutingSubTypes, aValidationSubTypes, aParams);
         }
     
-    __FLOG(_L8("GetRoutingSubTypesGetFormatCapabilities, Exit"));
+    OstTraceFunctionExit0( CMTPPARSERROUTER_GETROUTINGSUBTYPESGETFORMATCAPABILITIESL_EXIT );
     }
 
 /**
@@ -1958,9 +1969,10 @@ occurs.
 */    
 void CMTPParserRouter::ParseOperationRequestParameterL(TMTPTypeRequest::TElements aParam, TRoutingParameters::TParameterType aType, TRoutingParameters& aParams) const
     {
-    __FLOG(_L8("ParseOperationRequestParameterL, Entry"));
-    const TUint32 KParam(aParams.Request().Uint32(aParam));    
-    __FLOG_VA((_L8("Parameter %d = 0x%08X"), (aParam - TMTPTypeRequest::ERequestParameter1 + 1), KParam));
+    OstTraceFunctionEntry0( CMTPPARSERROUTER_PARSEOPERATIONREQUESTPARAMETERL_ENTRY );
+    const TUint32 KParam(aParams.Request().Uint32(aParam));
+    OstTraceExt2(TRACE_NORMAL, CMTPPARSERROUTER_PARSEOPERATIONREQUESTPARAMETERL,
+            "Parameter %d = 0x%X", (aParam - TMTPTypeRequest::ERequestParameter1 + 1), (int)KParam);
     
     // Parse out the parameter value if a non-null value is present.
     if (KParam != KMTPNotSpecified32)
@@ -2015,7 +2027,7 @@ void CMTPParserRouter::ParseOperationRequestParameterL(TMTPTypeRequest::TElement
     default:
         break;
         }    
-    __FLOG(_L8("ParseOperationRequestParameterL, Exit"));
+    OstTraceFunctionExit0( CMTPPARSERROUTER_PARSEOPERATIONREQUESTPARAMETERL_EXIT );
     }
 
 /**
@@ -2029,8 +2041,9 @@ occurs.
 */
 void CMTPParserRouter::RouteOperationRequestNParametersL(TUint aRoutingSubType, const TRoutingParameters& aParams, RArray<TUint>& aTargets) const
     {
-    __FLOG(_L8("RouteOperationRequestNParametersL, Entry"));
-    __FLOG_VA((_L8("Routing Sub-type = 0x%08X"), aRoutingSubType));
+    OstTraceFunctionEntry0( CMTPPARSERROUTER_ROUTEOPERATIONREQUESTNPARAMETERSL_ENTRY );
+    OstTrace1(TRACE_NORMAL, CMTPPARSERROUTER_ROUTEOPERATIONREQUESTNPARAMETERSL, 
+            "Routing Sub-type = 0x%X", aRoutingSubType);
     
     // Build the set of map source parameter values.
     RArray<TUint> from;
@@ -2087,7 +2100,7 @@ void CMTPParserRouter::RouteOperationRequestNParametersL(TUint aRoutingSubType, 
     // Resolve the map target parameter set.
     iMaps[Index(aRoutingSubType)]->GetToL(from, aTargets);
     CleanupStack::PopAndDestroy(&from);
-    __FLOG(_L8("RouteOperationRequestNParametersL, Exit"));
+    OstTraceFunctionExit0( CMTPPARSERROUTER_ROUTEOPERATIONREQUESTNPARAMETERSL_EXIT );
     }
 
 /**
@@ -2101,8 +2114,9 @@ occurs.
 */
 void CMTPParserRouter::RouteOperationRequest0ParametersL(TUint aRoutingSubType, const TRoutingParameters& aParams, RArray<TUint>& aTargets) const
     {
-    __FLOG(_L8("RouteOperationRequest0ParametersL, Entry"));
-    __FLOG_VA((_L8("Routing Sub-type = 0x%08X"), aRoutingSubType));
+    OstTraceFunctionEntry0( CMTPPARSERROUTER_ROUTEOPERATIONREQUEST0PARAMETERSL_ENTRY );
+    OstTrace1(TRACE_NORMAL, CMTPPARSERROUTER_ROUTEOPERATIONREQUEST0PARAMETERSL, 
+            "Routing Sub-type = 0x%X", aRoutingSubType);    
     TInt id(KErrNotFound);
     switch (aRoutingSubType)
         {
@@ -2156,7 +2170,7 @@ void CMTPParserRouter::RouteOperationRequest0ParametersL(TUint aRoutingSubType, 
         {
         SelectTargetL(id, aTargets);
         }
-    __FLOG(_L8("RouteOperationRequest0ParametersL, Exit"));
+    OstTraceFunctionExit0( CMTPPARSERROUTER_ROUTEOPERATIONREQUEST0PARAMETERSL_EXIT );
     }
 
 /**
@@ -2177,7 +2191,7 @@ occurs.
 */
 TUint CMTPParserRouter::RoutingTargetL(const TMTPTypeRequest& aRequest, CMTPConnection& aConnection) const
     {
-    __FLOG(_L8("RoutingTargetL, Entry"));    
+    OstTraceFunctionEntry0( CMTPPARSERROUTER_ROUTINGTARGETL_ENTRY );
     // Parse the operation request dataset.
     TRoutingParameters params(aRequest, static_cast<MMTPConnection&>(aConnection));
     ParseOperationRequestL(params);
@@ -2200,7 +2214,7 @@ TUint CMTPParserRouter::RoutingTargetL(const TMTPTypeRequest& aRequest, CMTPConn
         target = targets[0];
         }
     CleanupStack::PopAndDestroy(&targets);
-    __FLOG(_L8("RoutingTargetL, Exit"));
+    OstTraceFunctionExit0( CMTPPARSERROUTER_ROUTINGTARGETL_EXIT );
     return target;
     }
     
@@ -2217,7 +2231,7 @@ occurs.
 */
 void CMTPParserRouter::SelectSubTypeRoutingL(TRoutingSubType aSubType, RArray<TUint>& aRoutingSubTypes, RArray<TUint>& aValidationSubTypes, RArray<TRoutingParameters>& aParams) const
     {
-    __FLOG(_L8("SelectSubTypeRoutingL, Entry"));
+    OstTraceFunctionEntry0( CMTPPARSERROUTER_SELECTSUBTYPEROUTINGL_ENTRY );
     __ASSERT_DEBUG((aRoutingSubTypes.Find(aSubType) == KErrNotFound), User::Invariant());
     aRoutingSubTypes.AppendL(aSubType);    
     switch (aSubType)
@@ -2245,7 +2259,7 @@ void CMTPParserRouter::SelectSubTypeRoutingL(TRoutingSubType aSubType, RArray<TU
     default:
         break;
         }
-    __FLOG(_L8("SelectSubTypeRoutingL, Exit"));
+    OstTraceFunctionExit0( CMTPPARSERROUTER_SELECTSUBTYPEROUTINGL_EXIT );
     }
     
 /**
@@ -2258,14 +2272,15 @@ occurs.
 */
 void CMTPParserRouter::SelectSubTypeValidationL(TRoutingSubType aSubType, RArray<TUint>& aValidationSubTypes) const
     {
-    __FLOG(_L8("SelectSubTypeValidationL, Entry"));
+    OstTraceFunctionEntry0( CMTPPARSERROUTER_SELECTSUBTYPEVALIDATIONL_ENTRY );
     TInt err(aValidationSubTypes.InsertInOrder(aSubType));
     if ((err != KErrNone) &&
         (err != KErrAlreadyExists))
         {
+        OstTrace1( TRACE_ERROR, CMTPPARSERROUTER_SELECTSUBTYPEVALIDATIONL, "insert into validation sub-type array failed! error code %d", err);
         User::Leave(err);
         }
-    __FLOG(_L8("SelectSubTypeValidationL, Exit"));
+    OstTraceFunctionExit0( CMTPPARSERROUTER_SELECTSUBTYPEVALIDATIONL_EXIT );
     }
 
 /**
@@ -2277,7 +2292,7 @@ targets are removed from this set.
 */    
 void CMTPParserRouter::ValidateTargetsL(const TRoutingParameters& aParams, const RArray<TUint>& aValidationSubTypes, RArray<TUint>& aTargets) const
     {
-    __FLOG(_L8("ValidateTargetsL, Entry"));
+    OstTraceFunctionEntry0( CMTPPARSERROUTER_VALIDATETARGETSL_ENTRY );
     const TUint KValidationsCount(aValidationSubTypes.Count());
     for (TUint v(0); (v < KValidationsCount); v++)
         {
@@ -2295,20 +2310,21 @@ void CMTPParserRouter::ValidateTargetsL(const TRoutingParameters& aParams, const
             }
         CleanupStack::PopAndDestroy(&valid);
         }
-    __FLOG(_L8("ValidateTargetsL, Exit"));
+    OstTraceFunctionExit0( CMTPPARSERROUTER_VALIDATETARGETSL_EXIT );
     }
     
 void CMTPParserRouter::ValidateOperationRequestParametersL(TRoutingParameters& aParams) const
 	{
-    __FLOG(_L8("ValidateOperationRequestParametersL, Entry"));
+    OstTraceFunctionEntry0( CMTPPARSERROUTER_VALIDATEOPERATIONREQUESTPARAMETERSL_ENTRY );
     if(aParams.Param(TRoutingParameters::EFlagInvalid))
     	{
-		__FLOG(_L8("ValidateOperationRequestParametersL, Invalid is true,Exit"));
+		OstTraceFunctionExit0( CMTPPARSERROUTER_VALIDATEOPERATIONREQUESTPARAMETERSL_EXIT );
 		return;
     	}
     		
     const TUint16 KOpCode(aParams.Request().Uint16(TMTPTypeRequest::ERequestOperationCode));
-	__FLOG_VA((_L8("Operation Code = 0x%04X"), KOpCode));
+	OstTrace1(TRACE_NORMAL, CMTPPARSERROUTER_VALIDATEOPERATIONREQUESTPARAMETERSL,
+	        "Operation Code = 0x%X", KOpCode);
 	switch (KOpCode)
 	   {
 		case EMTPOpCodeSetObjectPropValue:
@@ -2382,7 +2398,7 @@ void CMTPParserRouter::ValidateOperationRequestParametersL(TRoutingParameters& a
 		default:
 			break;
 	   }
-    __FLOG(_L8("ValidateOperationRequestParametersL, Exit"));
+	OstTraceFunctionExit0( DUP1_CMTPPARSERROUTER_VALIDATEOPERATIONREQUESTPARAMETERSL_EXIT );
 	}
 
 /**
@@ -2438,29 +2454,29 @@ TUint CMTPParserRouter::SubType(TUint aIndex, TUint aFlags, TUint aParamsCount)
     return ((aParamsCount << 24) | aFlags | aIndex);
     }
   
-#ifdef __FLOG_ACTIVE
+#ifdef OST_TRACE_COMPILER_IN_USE
 /**
 Logs the map table entries of all map tables.
 @leave One of the system wide error codes, if a general processing error 
 occurs.
 */  
-void CMTPParserRouter::FLOGMapsL() const
+void CMTPParserRouter::OSTMapsL() const
     {
-    __FLOG(_L8("FLOGMapsL, Entry"));
+    OstTraceFunctionEntry0( CMTPPARSERROUTER_OSTMAPSL_ENTRY );
     const TUint KCount(iMaps.Count());
     for (TUint i(0); (i < KCount); i++)
         {
         const CMap& KMap (*iMaps[i]);
-        __FLOG(_L8(""));
-        __FLOG_VA((_L8("Table 0x%08X"), KMap.SubType()));
-        __FLOG(_L8("----------------"));
+        OstTrace0(TRACE_NORMAL, CMTPPARSERROUTER_OSTMAPSL,"");
+        OstTrace1(TRACE_NORMAL, DUP1_CMTPPARSERROUTER_OSTMAPSL,"Table 0x%08X", KMap.SubType());
+        OstTrace0(TRACE_NORMAL, DUP2_CMTPPARSERROUTER_OSTMAPSL,"----------------");
         RArray<TUint> from;
         CleanupClosePushL(from);
         KMap.InitParamsL(from);
-        KMap.FLOGMapL(from);
+        KMap.OSTMapL(from);
         CleanupStack::PopAndDestroy(&from);
-        __FLOG(_L8(""));
+        OstTrace0(TRACE_NORMAL, DUP3_CMTPPARSERROUTER_OSTMAPSL,"");
         }
-    __FLOG(_L8("FLOGMapsL, Exit"));
+    OstTraceFunctionExit0( CMTPPARSERROUTER_OSTMAPSL_EXIT );
     }
 #endif

@@ -46,13 +46,9 @@ private: // From CMTPRequestProcessor
     TBool DoHandleResponsePhaseL();
        
 private:
-    /**
-    FLOGGER debug trace member variable.
-    **/
     TMTPTypeUint16          iMTPTypeUint16;
     RFs&                    iRfs;
     CMTPObjectMetaData*     iObjMeta;
-    __FLOG_DECLARATION_MEMBER_MUTABLE;
     };
     
 #endif // CMTPIMAGEDPSETOBJECTPROTECTION_H

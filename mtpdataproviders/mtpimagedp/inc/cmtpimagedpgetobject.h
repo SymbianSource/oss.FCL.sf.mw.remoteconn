@@ -52,11 +52,6 @@ private:
 	void BuildFileObjectL(const TDesC& aFileName);
 
 private: // Owned
-
-	/**
-	FLOGGER debug trace member variable.
-	 */
-	__FLOG_DECLARATION_MEMBER_MUTABLE;
 	
 	MMTPDataProviderFramework&    iFramework;
 	CMTPTypeFile*          iFileObject;

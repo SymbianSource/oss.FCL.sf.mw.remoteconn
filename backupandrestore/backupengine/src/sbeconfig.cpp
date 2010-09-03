@@ -21,8 +21,12 @@
 #include <e32std.h>
 #include "sbepanic.h"
 #include "sbeconfig.h"
-#include "sblog.h"
 #include <xml/parser.h>
+#include "OstTraceDefinitions.h"
+#include "sbtrace.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "sbeconfigTraces.h"
+#endif
 
 namespace conn
 	{
@@ -66,7 +70,9 @@ namespace conn
 	*/
 	CSBEConfig* CSBEConfig::NewL(RFs& aRFs)
 		{
+		OstTraceFunctionEntry0( CSBECONFIG_NEWL_ENTRY );
 		CSBEConfig* self = new (ELeave) CSBEConfig(aRFs);
+		OstTraceFunctionExit0( CSBECONFIG_NEWL_EXIT );
 		return self;
 		}
 	
@@ -75,14 +81,18 @@ namespace conn
 	*/
 	CSBEConfig::CSBEConfig(RFs& aRFs) : iRFs(aRFs), iFileName(KConfigFile), iConfigTagVisited(EFalse)
 		{
+		OstTraceFunctionEntry0( CSBECONFIG_CSBECONFIG_CONS_ENTRY );
 		SetDefault();
+		OstTraceFunctionExit0( CSBECONFIG_CSBECONFIG_CONS_EXIT );
 		}
 	/** 
 	Destructor
 	*/
 	CSBEConfig::~CSBEConfig()
 		{
+		OstTraceFunctionEntry0( CSBECONFIG_CSBECONFIG_DES_ENTRY );
 		delete iConverter;
+		OstTraceFunctionExit0( CSBECONFIG_CSBECONFIG_DES_EXIT );
 		}
 	
 	/**
@@ -93,9 +103,11 @@ namespace conn
 	*/
 	void CSBEConfig::HeapValues(TInt& aMaxSize, TInt& aReductionFactor, TInt& aMaxRetries) const
 		{
+		OstTraceFunctionEntry0( CSBECONFIG_HEAPVALUES_ENTRY );
 		aMaxSize = iSBEGSHMaxSize;
 		aReductionFactor = iReductionFactor;
 		aMaxRetries = iMaxRetries;
+		OstTraceFunctionExit0( CSBECONFIG_HEAPVALUES_EXIT );
 		}
 		
 	/**
@@ -130,6 +142,7 @@ namespace conn
 	*/	
 	void CSBEConfig::SetDefault()
 		{
+		OstTraceFunctionEntry0( CSBECONFIG_SETDEFAULT_ENTRY );
 		iSBEGSHMaxSize = KSBEGSHDefaultSize;
 		iCentRepId = KCentRepSID;
 		iDrives.SetLength(KMaxDrives);
@@ -138,6 +151,7 @@ namespace conn
 		iReductionFactor = KSBEGSHReductionFactor;
 		iMaxRetries = KSBEGSHMaxRetries;
 		iAppCloseDelay = KDefaultDelay;
+		OstTraceFunctionExit0( CSBECONFIG_SETDEFAULT_EXIT );
 		}
 		
 	/**
@@ -146,6 +160,7 @@ namespace conn
 	*/	
 	TInt CSBEConfig::StringToDrives(const TDesC8& aDes)
 		{
+		OstTraceFunctionEntry0( CSBECONFIG_STRINGTODRIVES_ENTRY );
 		iDrives.SetLength(KMaxDrives);
 		iDrives.FillZ();
 		
@@ -161,6 +176,7 @@ namespace conn
 				}
 			iDrives[pos] = ETrue;
 			}
+		OstTraceFunctionExit0( CSBECONFIG_STRINGTODRIVES_EXIT );
 		return err;
 		}
 	
@@ -170,9 +186,11 @@ namespace conn
 	*/	
 	void CSBEConfig::ParseL()
 		{
+		OstTraceFunctionEntry0( CSBECONFIG_PARSEL_ENTRY );
 		iRFs.PrivatePath(iFileName);
 		TFindFile findFile(iRFs);
-		User::LeaveIfError(findFile.FindByPath(KConfigFile, &iFileName));
+		TInt err = findFile.FindByPath(KConfigFile, &iFileName);
+		LEAVEIFERROR(err, OstTrace1(TRACE_ERROR, CSBECONFIG_PARSEL, "Leave: %d", err));
 		
 		iFileName = findFile.File();
 		// Connect to the parser
@@ -182,6 +200,7 @@ namespace conn
 		Xml::ParseL(*parser, iRFs, iFileName);
 		
 		CleanupStack::PopAndDestroy(parser);
+		OstTraceFunctionExit0( CSBECONFIG_PARSEL_EXIT );
 		}
 		
 	/**
@@ -191,6 +210,7 @@ namespace conn
 	*/	
 	TInt CSBEConfig::HandleAttributesElement(const RAttributeArray& aAttributes)
 		{
+		OstTraceFunctionEntry0( CSBECONFIG_HANDLEATTRIBUTESELEMENT_ENTRY );
 		TInt err = KErrNone;
 		// Loop through reading out attribute values
 		const TUint count = aAttributes.Count();
@@ -205,7 +225,7 @@ namespace conn
 				err = lex.Val(appCloseDelay);
 				if (appCloseDelay < 0)
 					{
-					__LOG("CSBEConfig::HandleAttributesElement() - Configuration Error: the time delay is negative");
+				    OstTrace0(TRACE_NORMAL, CSBECONFIG_HANDLEATTRIBUTESELEMENT, "Configuration Error: the time delay is negative");
 					err = KErrCorrupt;
 					}
 				else
@@ -219,7 +239,7 @@ namespace conn
 				err = lex.Val(iReductionFactor);
 				if (iReductionFactor < 0)
 					{
-					__LOG("CSBEConfig::HandleAttributesElement() - Configuration Error: the reductionFactor is negative");
+				    OstTrace0(TRACE_NORMAL, DUP1_CSBECONFIG_HANDLEATTRIBUTESELEMENT, "Configuration Error: the reductionFactor is negative");
 					err = KErrCorrupt;
 					}
 				}
@@ -229,7 +249,7 @@ namespace conn
 				err = lex.Val(iMaxRetries);
 				if (iMaxRetries < 0)
 					{
-					__LOG("CSBEConfig::HandleAttributesElement() - Configuration Error: the maxRetries is negative");
+				    OstTrace0(TRACE_NORMAL, DUP2_CSBECONFIG_HANDLEATTRIBUTESELEMENT, "Configuration Error: the maxRetries is negative");
 					err = KErrCorrupt;
 					}
 				}
@@ -239,7 +259,7 @@ namespace conn
 				err = lex.Val(iSBEGSHMaxSize);
 				if (iSBEGSHMaxSize < KMinHeapSize)
 					{
-					__LOG1("CSBEConfig::HandleAttributesElement() - Configuration Error: heap size is less then minimum %d", KMinHeapSize);
+				    OstTrace1(TRACE_NORMAL, DUP3_CSBECONFIG_HANDLEATTRIBUTESELEMENT, "Configuration Error: heap size is less then minimum %d", KMinHeapSize);
 					err = KErrCorrupt;
 					}
 				} // if
@@ -257,7 +277,7 @@ namespace conn
 					}
 				if (err != KErrNone)
 					{
-					__LOG("CSBEConfig::HandleAttributesElement() - Configuration Error: central_repostiory is NOT a HEX number");
+				    OstTrace0(TRACE_NORMAL, DUP4_CSBECONFIG_HANDLEATTRIBUTESELEMENT, "Configuration Error: central_repostiory is NOT a HEX number");
 					err = KErrCorrupt;
 					}
 				} // else if
@@ -266,11 +286,12 @@ namespace conn
 				err = StringToDrives(value);
 				if (err != KErrNone)
 					{
-					__LOG("CSBEConfig::HandleAttributesElement() - Configuration Error: list doesn't have valid characters from a-z");
+				    OstTrace0(TRACE_NORMAL, DUP5_CSBECONFIG_HANDLEATTRIBUTESELEMENT, "Configuration Error: list doesn't have valid characters from a-z");
 					}
 				} // else if
 				
 			} // for x
+		OstTraceFunctionExit0( CSBECONFIG_HANDLEATTRIBUTESELEMENT_EXIT );
 		return err;
 		}
 		
@@ -283,14 +304,17 @@ namespace conn
 	@leave if fails to set encoding
 	*/
 		{
+		OstTraceFunctionEntry0( CSBECONFIG_ONSTARTDOCUMENTL_ENTRY );
 		// Create a converter for converting strings to Unicode
 		iConverter = CCnvCharacterSetConverter::NewL();
 
 		// We only convert from UTF-8 to UTF-16
 		if (iConverter->PrepareToConvertToOrFromL(KCharacterSetIdentifierUtf8, iRFs) == CCnvCharacterSetConverter::ENotAvailable)
 			{
+		    OstTrace0(TRACE_ERROR, CSBECONFIG_ONSTARTDOCUMENTL, "Leave: KErrNotFound");
 			User::Leave(KErrNotFound);
 			}
+		OstTraceFunctionExit0( CSBECONFIG_ONSTARTDOCUMENTL_EXIT );
 		}
 		
 	void CSBEConfig::OnEndDocumentL(TInt /*aErrorCode*/)
@@ -300,9 +324,11 @@ namespace conn
 	@see MContentHandler::OnEndDocumentL()
 	*/
 		{
+		OstTraceFunctionEntry0( CSBECONFIG_ONENDDOCUMENTL_ENTRY );
 		// We've finished parsing the document, hence destroy the converter object
 		delete iConverter;
 		iConverter = NULL;
+		OstTraceFunctionExit0( CSBECONFIG_ONENDDOCUMENTL_EXIT );
 		}
 		
 	void CSBEConfig::OnStartElementL(const RTagInfo& aElement, const RAttributeArray& aAttributes, TInt /*aErrCode*/)
@@ -315,6 +341,7 @@ namespace conn
 	@param aAttributes RAttributeArray&
 	*/
 		{
+		OstTraceFunctionEntry0( CSBECONFIG_ONSTARTELEMENTL_ENTRY );
 		TInt err = KErrNone;
 		TPtrC8 localName(aElement.LocalName().DesC());
 		if (!localName.CompareF(KConfig))
@@ -336,7 +363,8 @@ namespace conn
 			{
 			err = KErrCorrupt;
 			}
-		User::LeaveIfError(err);
+		LEAVEIFERROR(err, OstTrace1(TRACE_ERROR, CSBECONFIG_ONSTARTELEMENTL, "Leave: %d", err));
+		OstTraceFunctionExit0( CSBECONFIG_ONSTARTELEMENTL_EXIT );
 		}
 		
 	void CSBEConfig::OnEndElementL(const RTagInfo& /*aElement*/, TInt /*aErrorCode*/)

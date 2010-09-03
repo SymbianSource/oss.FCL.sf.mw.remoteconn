@@ -58,11 +58,6 @@ private:
         void ConstructL(MMTPDataProviderFramework& aFramework);
 
     public: // Owned
-
-        /**
-        FLOGGER debug trace member variable.
-        */
-        __FLOG_DECLARATION_MEMBER_MUTABLE;
             
         /**
         The file config manager.
@@ -71,11 +66,6 @@ private:
     	};
     
 private: // Owned
-
-    /**
-    FLOGGER debug trace member variable.
-    */
-    __FLOG_DECLARATION_MEMBER_MUTABLE;
 
     /**
     The singletons reference block.

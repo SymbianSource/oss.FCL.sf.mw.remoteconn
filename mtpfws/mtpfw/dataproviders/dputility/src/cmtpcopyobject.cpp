@@ -27,8 +27,12 @@
 #include "cmtpstoragemgr.h"
 #include "cmtpcopyobject.h"
 #include "mtpdppanic.h"
+#include "mtpdebug.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpcopyobjectTraces.h"
+#endif
 
-__FLOG_STMT(_LIT8(KComponent,"CopyObject");)
 
 /**
 Verification data for the CopyObject request
@@ -62,7 +66,7 @@ Destructor
 */	
 EXPORT_C CMTPCopyObject::~CMTPCopyObject()
 	{	
-	__FLOG(_L8("~CMTPCopyObject - Entry"));
+	OstTraceFunctionEntry0( CMTPCOPYOBJECT_CMTPCOPYOBJECT_DES_ENTRY );
 	Cancel();
 	iDpSingletons.Close();
 	iSingletons.Close();
@@ -71,9 +75,8 @@ EXPORT_C CMTPCopyObject::~CMTPCopyObject()
 	delete iDest;
 	delete iNewFileName;
 	delete iFileMan;
-	
-	__FLOG(_L8("~CMTPCopyObject - Exit"));
-	__FLOG_CLOSE;
+
+	OstTraceFunctionExit0( CMTPCOPYOBJECT_CMTPCOPYOBJECT_DES_EXIT );
 	}
 
 /**
@@ -83,14 +86,13 @@ CMTPCopyObject::CMTPCopyObject(MMTPDataProviderFramework& aFramework, MMTPConnec
 	CMTPRequestProcessor(aFramework, aConnection, sizeof(KMTPCopyObjectPolicy)/sizeof(TMTPRequestElementInfo), KMTPCopyObjectPolicy),
 	iTimer(NULL)
 	{
-	__FLOG_OPEN(KMTPSubsystem, KComponent);
 	}
 
 
 
 TMTPResponseCode CMTPCopyObject::CheckRequestL()
 	{
-	__FLOG(_L8("CheckRequestL - Entry"));
+	OstTraceFunctionEntry0( CMTPCOPYOBJECT_CHECKREQUESTL_ENTRY );
 	TMTPResponseCode result = CMTPRequestProcessor::CheckRequestL();
 	if ( (EMTPRespCodeOK == result) && (!iSingletons.StorageMgr().IsReadWriteStorage(Request().Uint32(TMTPTypeRequest::ERequestParameter2))) )
 		{
@@ -104,19 +106,21 @@ TMTPResponseCode CMTPCopyObject::CheckRequestL()
 			{
 			const TDesC& suid(object->DesC(CMTPObjectMetaData::ESuid));
 			iIsFolder = EFalse;
-			User::LeaveIfError(BaflUtils::IsFolder(iFramework.Fs(), suid, iIsFolder));
+			LEAVEIFERROR(BaflUtils::IsFolder(iFramework.Fs(), suid, iIsFolder),
+			        OstTraceExt1( TRACE_ERROR, DUP1_CMTPCOPYOBJECT_CHECKREQUESTL, "can't judge whether %S is a folder", suid ));
 			if(!iIsFolder)
 				{
 				if(iDpSingletons.CopyingBigFileCache().IsOnGoing())
 					{
-					__FLOG(_L8("CheckRequestL - A big file copying is ongoing, respond with access denied"));
+					OstTrace0( TRACE_NORMAL, CMTPCOPYOBJECT_CHECKREQUESTL, 
+					        "CheckRequestL - A big file copying is ongoing, respond with access denied" );				
 					result = EMTPRespCodeAccessDenied;
 					}
 				}
 			}
 		CleanupStack::PopAndDestroy(object); 
 		}
-	__FLOG(_L8("CheckRequestL - Exit"));
+	OstTraceFunctionExit0( CMTPCOPYOBJECT_CHECKREQUESTL_EXIT );
 	return result;	
 	} 
 
@@ -125,7 +129,7 @@ CopyObject request handler
 */		
 void CMTPCopyObject::ServiceL()
 	{	
-	__FLOG(_L8("ServiceL - Entry"));
+	OstTraceFunctionEntry0( CMTPCOPYOBJECT_SERVICEL_ENTRY );
 	TUint32 handle = KMTPHandleNone;
 	TMTPResponseCode responseCode = EMTPRespCodeOK;
 	TRAPD(err, responseCode = CopyObjectL(handle));
@@ -135,15 +139,15 @@ void CMTPCopyObject::ServiceL()
 		}
 	else if(responseCode != EMTPRespCodeOK)
 		{
-		__FLOG_VA((_L8("ServiceL, sending response with respond code %d"), responseCode));
+		OstTrace1( TRACE_NORMAL, CMTPCOPYOBJECT_SERVICEL, "ServiceL, sending response with respond code %d", responseCode );
 		SendResponseL(responseCode);
 		}
 	else if (iIsFolder)
 		{
-		__FLOG_VA((_L8("ServiceL, sending response with handle=%d, respond code OK"), handle));
+		OstTrace1( TRACE_NORMAL, DUP1_CMTPCOPYOBJECT_SERVICEL, "ServiceL, sending response with handle=%d, respond code OK", handle );
 		SendResponseL(EMTPRespCodeOK, 1, &handle);
 		}
-	__FLOG(_L8("ServiceL - Exit"));
+	OstTraceFunctionExit0( CMTPCOPYOBJECT_SERVICEL_EXIT );
 	}
 
 
@@ -152,8 +156,10 @@ void CMTPCopyObject::ServiceL()
 */
 void CMTPCopyObject::ConstructL()
 	{
+	OstTraceFunctionEntry0( CMTPCOPYOBJECT_CONSTRUCTL_ENTRY );
 	iSingletons.OpenL();
 	iDpSingletons.OpenL(iFramework);
+	OstTraceFunctionExit0( CMTPCOPYOBJECT_CONSTRUCTL_EXIT );
 	}
 
 	
@@ -164,14 +170,15 @@ A helper function of CopyObjectL.
 */
 void CMTPCopyObject::CopyFileL(const TDesC& aNewFileName)
 	{
-	__FLOG(_L8("CopyFileL - Entry"));
+	OstTraceFunctionEntry0( CMTPCOPYOBJECT_COPYFILEL_ENTRY );
 	delete iNewFileName;
 	iNewFileName = NULL;
 	iNewFileName = aNewFileName.AllocL(); // Store the new file name	
 	const TDesC& suid(iObjectInfo->DesC(CMTPObjectMetaData::ESuid));
 	GetPreviousPropertiesL(suid);
 	
-	User::LeaveIfError(iFileMan->Copy(suid, *iDest, CFileMan::EOverWrite, iStatus));
+	LEAVEIFERROR(iFileMan->Copy(suid, *iDest, CFileMan::EOverWrite, iStatus),
+	        OstTraceExt2( TRACE_ERROR, CMTPCOPYOBJECT_COPYFILEL, "copy %S to %S failed!", suid, *iDest));
 	if ( !IsActive() )
 	{  
 	SetActive();
@@ -182,8 +189,8 @@ void CMTPCopyObject::CopyFileL(const TDesC& aNewFileName)
 	iTimer = CPeriodic::NewL(EPriorityStandard);
 	TTimeIntervalMicroSeconds32 KCopyObjectIntervalNone = 0;	
 	iTimer->Start(TTimeIntervalMicroSeconds32(KCopyObjectTimeOut), KCopyObjectIntervalNone, TCallBack(CMTPCopyObject::OnTimeoutL, this));
-	
-	__FLOG(_L8("CopyFileL - Exit"));
+
+	OstTraceFunctionExit0( CMTPCOPYOBJECT_COPYFILEL_EXIT );
 	}
 
 /**
@@ -193,13 +200,14 @@ A helper function of CopyObjectL.
 */
 TUint32 CMTPCopyObject::CopyFolderL(const TDesC& aNewFolderName)
 	{
-	__FLOG(_L8("CopyFolderL - Entry"));
+	OstTraceFunctionEntry0( CMTPCOPYOBJECT_COPYFOLDERL_ENTRY );
 	const TDesC& suid(iObjectInfo->DesC(CMTPObjectMetaData::ESuid));
 	TUint32 handle;
 	if (iObjectInfo->Uint(CMTPObjectMetaData::EDataProviderId) == iFramework.DataProviderId())
 		{
 		GetPreviousPropertiesL(suid);
-		User::LeaveIfError(iFramework.Fs().MkDir(aNewFolderName));
+		LEAVEIFERROR(iFramework.Fs().MkDir(aNewFolderName),
+		        OstTraceExt1( TRACE_ERROR, CMTPCOPYOBJECT_COPYFOLDERL, "create directory %S failed!", aNewFolderName));
 		SetPreviousPropertiesL(aNewFolderName);	
 		handle = UpdateObjectInfoL(aNewFolderName);
 		}
@@ -207,7 +215,7 @@ TUint32 CMTPCopyObject::CopyFolderL(const TDesC& aNewFolderName)
 		{
 		handle = iFramework.ObjectMgr().HandleL(aNewFolderName);
 		}
-	__FLOG(_L8("CopyFolderL - Exit"));
+	OstTraceFunctionExit0( CMTPCOPYOBJECT_COPYFOLDERL_EXIT );
 	return handle;
 	}
 		
@@ -217,7 +225,7 @@ Copy object operation
 */
 TMTPResponseCode CMTPCopyObject::CopyObjectL(TUint32& aNewHandle)
 	{
-	__FLOG(_L8("CopyObjectL - Entry"));
+	OstTraceFunctionEntry0( CMTPCOPYOBJECT_COPYOBJECTL_ENTRY );
 	TMTPResponseCode responseCode = EMTPRespCodeOK;
 	aNewHandle = KMTPHandleNone;
 	
@@ -241,7 +249,8 @@ TMTPResponseCode CMTPCopyObject::CopyObjectL(TUint32& aNewHandle)
 	else // It is a folder.
 		{
 		TFileName rightMostFolderName;
-		User::LeaveIfError(BaflUtils::MostSignificantPartOfFullName(suid, rightMostFolderName));
+		LEAVEIFERROR(BaflUtils::MostSignificantPartOfFullName(suid, rightMostFolderName),
+		        OstTraceExt1( TRACE_ERROR, CMTPCOPYOBJECT_COPYOBJECTL, "can't extract most significant part from %S", suid));    
 		if((newObjectName.Length() + rightMostFolderName.Length() + 1) <= newObjectName.MaxLength())
 			{
 			newObjectName.Append(rightMostFolderName);
@@ -268,7 +277,7 @@ TMTPResponseCode CMTPCopyObject::CopyObjectL(TUint32& aNewHandle)
 		}
 	
 	CleanupStack::PopAndDestroy(); // newObjectName.
-	__FLOG(_L8("CopyObjectL - Exit"));
+	OstTraceFunctionExit0( CMTPCOPYOBJECT_COPYOBJECTL_EXIT );
 	return responseCode;
 	}
 
@@ -277,7 +286,7 @@ Retrieve the parameters of the request
 */	
 void CMTPCopyObject::GetParametersL()
 	{
-	__FLOG(_L8("GetParametersL - Entry"));
+	OstTraceFunctionEntry0( CMTPCOPYOBJECT_GETPARAMETERSL_ENTRY );
 	__ASSERT_DEBUG(iRequestChecker, Panic(EMTPDpRequestCheckNull));
 	
 	TUint32 objectHandle  = Request().Uint32(TMTPTypeRequest::ERequestParameter1);
@@ -301,7 +310,7 @@ void CMTPCopyObject::GetParametersL()
 		iDest = parentObjectInfo->DesC(CMTPObjectMetaData::ESuid).AllocL();
 		iNewParentHandle = parentObjectHandle;
 		}
-	__FLOG(_L8("GetParametersL - Exit"));	
+	OstTraceFunctionExit0( CMTPCOPYOBJECT_GETPARAMETERSL_EXIT );
 	}
 	
 /**
@@ -309,7 +318,7 @@ Get a default parent object, ff the request does not specify a parent object,
 */
 void CMTPCopyObject::SetDefaultParentObjectL()
 	{
-	__FLOG(_L8("SetDefaultParentObjectL - Entry"));
+	OstTraceFunctionEntry0( CMTPCOPYOBJECT_SETDEFAULTPARENTOBJECTL_ENTRY );
 
 	const CMTPStorageMetaData& storageMetaData( iFramework.StorageMgr().StorageL(iStorageId) );
 	const TDesC& driveBuf( storageMetaData.DesC(CMTPStorageMetaData::EStorageSuid) );
@@ -318,7 +327,7 @@ void CMTPCopyObject::SetDefaultParentObjectL()
 	iDest = driveBuf.AllocL();
 	iNewParentHandle = KMTPHandleNoParent;
 	    
-	__FLOG(_L8("SetDefaultParentObjectL - Exit"));
+	OstTraceFunctionExit0( CMTPCOPYOBJECT_SETDEFAULTPARENTOBJECTL_EXIT );
 	}
 
 /**
@@ -326,16 +335,21 @@ Check if we can copy the file to the new location
 */
 TMTPResponseCode CMTPCopyObject::CanCopyObjectL(const TDesC& aOldName, const TDesC& aNewName) const
 	{
-	__FLOG(_L8("CanCopyObjectL - Entry"));
+	OstTraceFunctionEntry0( CMTPCOPYOBJECT_CANCOPYOBJECTL_ENTRY );
 	TMTPResponseCode result = EMTPRespCodeOK;
 
 	TEntry fileEntry;
-	User::LeaveIfError(iFramework.Fs().Entry(aOldName, fileEntry));
+	LEAVEIFERROR(iFramework.Fs().Entry(aOldName, fileEntry),
+	        OstTraceExt1( TRACE_ERROR, DUP1_CMTPCOPYOBJECT_CANCOPYOBJECTL, "Can't get entry details for %S", aOldName ));     
 	TInt drive(iFramework.StorageMgr().DriveNumber(iStorageId));
-	User::LeaveIfError(drive);
+	LEAVEIFERROR(drive,
+	        OstTraceExt2( TRACE_ERROR, DUP2_CMTPCOPYOBJECT_CANCOPYOBJECTL, 
+	                "Get driver number for storage %d failed! error code %d", iStorageId, drive));
+	        
 	TVolumeInfo volumeInfo;
-	User::LeaveIfError(iFramework.Fs().Volume(volumeInfo, drive));
-	
+	LEAVEIFERROR(iFramework.Fs().Volume(volumeInfo, drive),
+	        OstTrace1( TRACE_ERROR, DUP3_CMTPCOPYOBJECT_CANCOPYOBJECTL, "can't get volume information for driver %d", drive));
+
 #ifdef SYMBIAN_ENABLE_64_BIT_FILE_SERVER_API
     if(volumeInfo.iFree < fileEntry.FileSize())
 #else
@@ -348,7 +362,8 @@ TMTPResponseCode CMTPCopyObject::CanCopyObjectL(const TDesC& aOldName, const TDe
 		{
 		result = EMTPRespCodeInvalidParentObject;
 		}
-	__FLOG_VA((_L8("CanCopyObjectL - Exit with response code 0x%04X"), result));
+	OstTrace1( TRACE_NORMAL, CMTPCOPYOBJECT_CANCOPYOBJECTL, "response code 0x%04X", result );	
+	OstTraceFunctionExit0( CMTPCOPYOBJECT_CANCOPYOBJECTL_EXIT );
 	return result;	
 	}
 
@@ -357,9 +372,17 @@ Save the object properties before doing the copy
 */
 void CMTPCopyObject::GetPreviousPropertiesL(const TDesC& aFileName)
 	{
-	__FLOG(_L8("GetPreviousPropertiesL - Entry"));
-	User::LeaveIfError(iFramework.Fs().Modified(aFileName, iPreviousModifiedTime));
-	__FLOG(_L8("GetPreviousPropertiesL - Exit"));
+	OstTraceFunctionEntry0( CMTPCOPYOBJECT_GETPREVIOUSPROPERTIESL_ENTRY );
+	LEAVEIFERROR(iFramework.Fs().Modified(aFileName, iPreviousModifiedTime),
+	        OstTraceExt1( TRACE_ERROR, CMTPCOPYOBJECT_GETPREVIOUSPROPERTIESL, "Can't get the last modification date and time for %S", aFileName));
+	if ( iIsFolder )
+	    {
+        TEntry fileEntry;
+        User::LeaveIfError(iFramework.Fs().Entry( aFileName, fileEntry ));
+        iIsHidden = fileEntry.IsHidden();
+	    }
+	        
+	OstTraceFunctionExit0( CMTPCOPYOBJECT_GETPREVIOUSPROPERTIESL_EXIT );
 	}
 
 /**
@@ -367,9 +390,18 @@ Set the object properties after doing the copy
 */
 void CMTPCopyObject::SetPreviousPropertiesL(const TDesC& aFileName)
 	{
-	__FLOG(_L8("SetPreviousPropertiesL - Entry"));
-	User::LeaveIfError(iFramework.Fs().SetModified(aFileName, iPreviousModifiedTime));
-	__FLOG(_L8("SetPreviousPropertiesL - Exit"));
+	OstTraceFunctionEntry0( CMTPCOPYOBJECT_SETPREVIOUSPROPERTIESL_ENTRY );
+	LEAVEIFERROR(iFramework.Fs().SetModified(aFileName, iPreviousModifiedTime),
+	        OstTraceExt1( TRACE_ERROR, CMTPCOPYOBJECT_SETPREVIOUSPROPERTIESL, "Sets the date and time for %S failed", aFileName));
+	if ( iIsFolder && iIsHidden )
+	    {
+        TEntry fileEntry;
+        User::LeaveIfError(iFramework.Fs().Entry( aFileName, fileEntry ));
+        fileEntry.iAtt &= ~KEntryAttHidden;
+        fileEntry.iAtt |= KEntryAttHidden;
+        User::LeaveIfError(iFramework.Fs().SetAtt( aFileName, fileEntry.iAtt, ~fileEntry.iAtt));
+	    }
+	OstTraceFunctionExit0( CMTPCOPYOBJECT_SETPREVIOUSPROPERTIESL_EXIT );
 	}
 
 /**
@@ -377,7 +409,7 @@ void CMTPCopyObject::SetPreviousPropertiesL(const TDesC& aFileName)
 */
 TUint32 CMTPCopyObject::UpdateObjectInfoL(const TDesC& aNewObjectName)
 	{
-	__FLOG(_L8("UpdateObjectInfoL - Entry"));	
+	OstTraceFunctionEntry0( CMTPCOPYOBJECT_UPDATEOBJECTINFOL_ENTRY );
 	
 	// We should not modify this object's handle, so just get a "copy".
 	CMTPObjectMetaData* objectInfo(CMTPObjectMetaData::NewLC());
@@ -392,13 +424,13 @@ TUint32 CMTPCopyObject::UpdateObjectInfoL(const TDesC& aNewObjectName)
 		}
 	else
 		{
+        OstTrace0( TRACE_ERROR, CMTPCOPYOBJECT_UPDATEOBJECTINFOL, "the specified object handle doesn't exist");
 		User::Leave(KErrCorrupt);
 		}
 	TUint32 handle = objectInfo->Uint(CMTPObjectMetaData::EHandle);	
 	CleanupStack::PopAndDestroy(objectInfo);
 	
-	__FLOG(_L8("UpdateObjectInfoL - Exit"));
-	
+	OstTraceFunctionExit0( CMTPCOPYOBJECT_UPDATEOBJECTINFOL_EXIT );
 	return handle;	
 	}
 
@@ -416,7 +448,7 @@ TInt CMTPCopyObject::OnTimeoutL(TAny* aPtr)
 
 void CMTPCopyObject::DoOnTimeoutL()
 	{
-	__FLOG(_L8("DoOnTimeoutL - Entry"));
+	OstTraceFunctionEntry0( CMTPCOPYOBJECT_DOONTIMEOUTL_ENTRY );
 	
 	if (iTimer)
 		{
@@ -430,7 +462,9 @@ void CMTPCopyObject::DoOnTimeoutL()
 	
 	const TDesC& suid(iObjectInfo->DesC(CMTPObjectMetaData::ESuid));
 	TEntry fileEntry;
-	User::LeaveIfError(iFramework.Fs().Entry(suid, fileEntry));
+	LEAVEIFERROR(iFramework.Fs().Entry(suid, fileEntry),
+	        OstTraceExt1( TRACE_ERROR, DUP1_CMTPCOPYOBJECT_DOONTIMEOUTL, "Gets the entry details for %S failed!", suid));
+
 	TUint32 handle = KMTPHandleNone;
 	handle = UpdateObjectInfoL(*iNewFileName);
 	CMTPFSEntryCache& aCache = iDpSingletons.CopyingBigFileCache();
@@ -439,11 +473,12 @@ void CMTPCopyObject::DoOnTimeoutL()
 	aCache.SetOnGoing(ETrue);
 	aCache.SetTargetHandle(handle);
 	aCache.SetFileEntry(fileEntry);
-	
-	__FLOG_VA((_L8("UpdateFSEntryCache, sending response with handle=%d, respond code OK for a big file copy"), handle));
+
+	OstTrace1( TRACE_NORMAL, CMTPCOPYOBJECT_DOONTIMEOUTL, 
+	        "UpdateFSEntryCache, sending response with handle=%d, respond code OK for a big file copy", handle );	
 	SendResponseL(EMTPRespCodeOK, 1, &handle);
 	
-	__FLOG(_L8("DoOnTimeoutL - Exit"));
+	OstTraceFunctionExit0( CMTPCOPYOBJECT_DOONTIMEOUTL_EXIT );
 	}
 
 /**
@@ -451,15 +486,16 @@ void CMTPCopyObject::DoOnTimeoutL()
 */
 void CMTPCopyObject::RunL()
 	{
-	__FLOG(_L8("RunL - Entry"));
+	OstTraceFunctionEntry0( CMTPCOPYOBJECT_RUNL_ENTRY );
 	
-	User::LeaveIfError(iStatus.Int());
+	LEAVEIFERROR(iStatus.Int(),
+	        OstTrace1( TRACE_ERROR, DUP2_CMTPCOPYOBJECT_RUNL, "wrong istatus %d", iStatus.Int()));
 	SetPreviousPropertiesL(*iNewFileName);
 	CMTPFSEntryCache& aCache = iDpSingletons.CopyingBigFileCache();
 	// Check to see if we are copying a big file
 	if(aCache.IsOnGoing())
 		{
-		__FLOG(_L8("RunL - Big file copy complete"));
+		OstTrace0( TRACE_NORMAL, CMTPCOPYOBJECT_RUNL, "RunL - Big file copy complete" );
 		aCache.SetOnGoing(EFalse);
 		aCache.SetTargetHandle(KMTPHandleNone);
 		}	
@@ -477,10 +513,11 @@ void CMTPCopyObject::RunL()
 			}
 		
 		TUint32 handle = UpdateObjectInfoL(*iNewFileName);
-		__FLOG_VA((_L8("RunL, sending response with handle=%d, respond code OK for a normal file copy"), handle));
+		OstTrace1( TRACE_NORMAL, DUP1_CMTPCOPYOBJECT_RUNL, 
+		        "RunL, sending response with handle=%d, respond code OK for a normal file copy", handle );		
 		SendResponseL(EMTPRespCodeOK, 1, &handle);
 		}
-	__FLOG(_L8("RunL - Exit"));
+	OstTraceFunctionExit0( CMTPCOPYOBJECT_RUNL_EXIT );
 	}
 
 /**
@@ -489,15 +526,18 @@ Override to handle the complete phase of copy object
 */
 TBool CMTPCopyObject::DoHandleCompletingPhaseL()
 	{
+	OstTraceFunctionEntry0( CMTPCOPYOBJECT_DOHANDLECOMPLETINGPHASEL_ENTRY );
 	CMTPRequestProcessor::DoHandleCompletingPhaseL();
 	
 	CMTPFSEntryCache& aCache = iDpSingletons.CopyingBigFileCache();
 	if(aCache.IsOnGoing())
 		{
+		OstTraceFunctionExit0( CMTPCOPYOBJECT_DOHANDLECOMPLETINGPHASEL_EXIT );
 		return EFalse;
 		}
 	else
 		{
+		OstTraceFunctionExit0( DUP1_CMTPCOPYOBJECT_DOHANDLECOMPLETINGPHASEL_EXIT );
 		return ETrue;
 		}
 	}
@@ -510,13 +550,13 @@ Override to match CopyObject request
 */        
 TBool CMTPCopyObject::Match(const TMTPTypeRequest& aRequest, MMTPConnection& aConnection) const
 	{
-	__FLOG(_L8("Match - Entry"));
+	OstTraceFunctionEntry0( CMTPCOPYOBJECT_MATCH_ENTRY );
 	TBool result = EFalse;
 	TUint16 operationCode = aRequest.Uint16(TMTPTypeRequest::ERequestOperationCode);
 	if ((operationCode == EMTPOpCodeCopyObject) && &iConnection == &aConnection)
 	{
 	result = ETrue;
 	}    
-	__FLOG_VA((_L8("Match -- Exit with result = %d"), result));
+	OstTraceFunctionExit0( CMTPCOPYOBJECT_MATCH_EXIT );
 	return result;    
 	}

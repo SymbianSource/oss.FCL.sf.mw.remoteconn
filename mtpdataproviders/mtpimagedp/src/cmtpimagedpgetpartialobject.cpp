@@ -33,8 +33,12 @@
 #include "cmtpimagedp.h"
 #include "mtpimagedputilits.h"
 #include "cmtpimagedpobjectpropertymgr.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpimagedpgetpartialobjectTraces.h"
+#endif
 
-__FLOG_STMT(_LIT8(KComponent,"ImageDpGetPartialObject");)
+
 /**
 Verification data for the GetPartialObject request
 */
@@ -59,11 +63,10 @@ Destructor
 */	
 CMTPImageDpGetPartialObject::~CMTPImageDpGetPartialObject()
     {
-    __FLOG(_L8(">> CMTPImageDpGetPartialObject::~CMTPImageDpGetPartialObject"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPGETPARTIALOBJECT_CMTPIMAGEDPGETPARTIALOBJECT_ENTRY );
     delete iFileObject;
     delete iObjectMeta;
-    __FLOG(_L8("<< CMTPImageDpGetPartialObject::~CMTPImageDpGetPartialObject"));
-    __FLOG_CLOSE;
+    OstTraceFunctionExit0( CMTPIMAGEDPGETPARTIALOBJECT_CMTPIMAGEDPGETPARTIALOBJECT_EXIT );
     }
     
 /**
@@ -82,10 +85,9 @@ Second-phase construction
 */  
 void CMTPImageDpGetPartialObject::ConstructL()
     {
-    __FLOG_OPEN(KMTPSubsystem, KComponent);
-    __FLOG(_L8(">> CMTPImageDpGetPartialObject::ConstructL"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPGETPARTIALOBJECT_CONSTRUCTL_ENTRY );
     iObjectMeta = CMTPObjectMetaData::NewL();
-    __FLOG(_L8("<< CMTPImageDpGetPartialObject::ConstructL"));
+    OstTraceFunctionExit0( CMTPIMAGEDPGETPARTIALOBJECT_CONSTRUCTL_EXIT );
     }
     
 /**
@@ -94,7 +96,7 @@ Check the GetPartialObject reqeust
 */	
 TMTPResponseCode CMTPImageDpGetPartialObject::CheckRequestL()
     {
-    __FLOG(_L8(">> CMTPImageDpGetPartialObject::CheckRequestL"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPGETPARTIALOBJECT_CHECKREQUESTL_ENTRY );
     TMTPResponseCode result = CMTPRequestProcessor::CheckRequestL();
     if(result == EMTPRespCodeOK)
         {
@@ -104,8 +106,8 @@ TMTPResponseCode CMTPImageDpGetPartialObject::CheckRequestL()
         {
         result = EMTPRespCodeInvalidParameter;
         }
-    __FLOG_VA((_L8("<< CMTPImageDpGetPartialObject::CheckRequestL 0x%x"), result));
-    __FLOG(_L8("<< CMTPImageDpGetPartialObject::CheckRequestL"));
+    OstTrace1( TRACE_NORMAL, CMTPIMAGEDPGETPARTIALOBJECT_CHECKREQUESTL, "CheckRequestL result 0x%x", result );
+    OstTraceFunctionExit0( CMTPIMAGEDPGETPARTIALOBJECT_CHECKREQUESTL_EXIT );
     return result;	
     }
     
@@ -115,18 +117,23 @@ Verify if the parameter of the request (i.e. offset) is good.
 */		
 TBool CMTPImageDpGetPartialObject::VerifyParametersL()
     {
-    __FLOG(_L8(">> CMTPImageDpGetPartialObject::VerifyParametersL"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPGETPARTIALOBJECT_VERIFYPARAMETERSL_ENTRY );
     TBool result = EFalse;
     iOffset = Request().Uint32(TMTPTypeRequest::ERequestParameter2);
     iMaxLength = Request().Uint32(TMTPTypeRequest::ERequestParameter3);
 
     TEntry fileEntry;
-    User::LeaveIfError(iFs.Entry(iObjectMeta->DesC(CMTPObjectMetaData::ESuid), fileEntry));
+    LEAVEIFERROR(iFs.Entry(iObjectMeta->DesC(CMTPObjectMetaData::ESuid), fileEntry),
+            OstTraceExt2( TRACE_ERROR, DUP1_CMTPIMAGEDPGETPARTIALOBJECT_VERIFYPARAMETERSL, 
+                    "Gets the entry details for %S failed! error code %d", iObjectMeta->DesC(CMTPObjectMetaData::ESuid), munged_err));
+         
     if((iOffset < fileEntry.FileSize())) 
         {
         result = ETrue;
         }
-    __FLOG_VA((_L8("<< CMTPImageDpGetPartialObject::VerifyParametersL %d"), result));
+    OstTrace1( TRACE_NORMAL, CMTPIMAGEDPGETPARTIALOBJECT_VERIFYPARAMETERSL, 
+            "VerifyParametersL result %d", result );    
+    OstTraceFunctionExit0( CMTPIMAGEDPGETPARTIALOBJECT_VERIFYPARAMETERSL_EXIT );
     return result;	
     }
 /**
@@ -135,12 +142,12 @@ Send the partial object data to the initiator
 */	
 void CMTPImageDpGetPartialObject::ServiceL()
     {
+    OstTraceFunctionEntry0( CMTPIMAGEDPGETPARTIALOBJECT_SERVICEL_ENTRY );
     // Get file information
-    __FLOG(_L8(">> CMTPImageDpGetPartialObject::ServiceL"));
         // Pass the complete file back to the host
     iFileObject = CMTPTypeFile::NewL(iFramework.Fs(), iObjectMeta->DesC(CMTPObjectMetaData::ESuid), (TFileMode)(EFileRead | EFileShareReadersOnly), iMaxLength, iOffset);
     SendDataL(*iFileObject);	
-    __FLOG(_L8("<< CMTPImageDpGetPartialObject::ServiceL"));
+    OstTraceFunctionExit0( CMTPIMAGEDPGETPARTIALOBJECT_SERVICEL_EXIT );
     }
     
     
@@ -150,9 +157,9 @@ Signal to the initiator how much data has been sent
 */
 TBool CMTPImageDpGetPartialObject::DoHandleResponsePhaseL()
     {
-    __FLOG(_L8(">> CMTPImageDpGetPartialObject::DoHandleResponsePhaseL"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPGETPARTIALOBJECT_DOHANDLERESPONSEPHASEL_ENTRY );
     TUint32 dataLength = iFileObject->GetByteSent();
     SendResponseL(EMTPRespCodeOK, 1, &dataLength);
-    __FLOG(_L8("<< CMTPImageDpGetPartialObject::DoHandleResponsePhaseL"));
+    OstTraceFunctionExit0( CMTPIMAGEDPGETPARTIALOBJECT_DOHANDLERESPONSEPHASEL_EXIT );
     return EFalse;
     }

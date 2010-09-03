@@ -25,7 +25,6 @@
 #include "e32base.h"
 #include "cptpipconnection.h"
 
-#include "mtpdebug.h"
 #include "ptpipprotocolconstants.h"
 
 
@@ -113,11 +112,7 @@ public:
 protected:
 
 	CPTPIPSocketHandlerBase(CPTPIPConnection& aConnection, TPriority priority );
-#ifdef __FLOG_ACTIVE    
-    virtual void ConstructL(const TDesC8& aComponentName);
-#else
     virtual void ConstructL();
-#endif  
 	virtual TInt ParsePTPIPHeaderL() = 0;
 	virtual TBool HandleInitAck() = 0;
 	
@@ -179,11 +174,6 @@ protected :
     Keeps track of whether socket is sending, receiving, idle etc.
     */
     TSocketState		iState;
-    
-    /**
-    FLOGGER debug trace member variable.
-    */
-	__FLOG_DECLARATION_MEMBER_MUTABLE;
 
 private :
     /**

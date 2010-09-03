@@ -22,8 +22,6 @@
 #ifndef CMTPIMAGEDPRENAMEOBJECT_H
 #define CMTPIMAGEDPRENAMEOBJECT_H
 
-#include "mtpdebug.h"
-
 // Forward declarations
 class MMTPDataProviderFramework;
 class CMTPImageDataProvider;
@@ -54,9 +52,7 @@ protected:
 private:    
     void GenerateObjectHandleListL(TUint32 aParentHandle);    
 
-private:    
-    __FLOG_DECLARATION_MEMBER_MUTABLE;
-    
+private:       
     MMTPDataProviderFramework& iFramework;
     CMTPImageDataProvider&  iDataProvider;
     RArray<TUint> iObjectHandles;

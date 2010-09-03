@@ -26,8 +26,11 @@
 #include "mtpproxydppanic.h"
 #include "cmtpproxydpconfigmgr.h"
 #include "cmtpstoragemgr.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpsendobjectinfoTraces.h"
+#endif
 
-__FLOG_STMT( _LIT8( KComponent,"PrxySendObjectInfo" ); )
 
 /**
 Verification data for the SendObjectInfo request
@@ -58,14 +61,13 @@ Destructor
 */
 CMTPSendObjectInfo::~CMTPSendObjectInfo()
     {
-    __FLOG(_L8("~CMTPSendObjectInfo - Entry"));
-    
+    OstTraceFunctionEntry0( CMTPSENDOBJECTINFO_CMTPSENDOBJECTINFO_DES_ENTRY );
+
     delete iObjectInfo;
     iSingletons.Close();
     iProxyDpSingletons.Close();
     
-    __FLOG(_L8("~CMTPSendObjectInfo - Exit"));
-    __FLOG_CLOSE;
+    OstTraceFunctionExit0( CMTPSENDOBJECTINFO_CMTPSENDOBJECTINFO_DES_EXIT );
     }
 
 /**
@@ -82,12 +84,11 @@ Second phase constructor.
 */
 void CMTPSendObjectInfo::ConstructL()
     {
-    __FLOG_OPEN(KMTPSubsystem, KComponent);
-    __FLOG(_L8("ConstructL - Entry"));
+    OstTraceFunctionEntry0( CMTPSENDOBJECTINFO_CONSTRUCTL_ENTRY );
     
     iSingletons.OpenL();
-    
-    __FLOG(_L8("ConstructL - Exit"));
+
+    OstTraceFunctionExit0( CMTPSENDOBJECTINFO_CONSTRUCTL_EXIT );
     }
 
 /**
@@ -124,8 +125,8 @@ Handling the completing phase of SendObjectInfo request
 */
 void CMTPSendObjectInfo::DoHandleSendObjectInfoCompleteL()
     {
-    __FLOG(_L8("DoHandleSendObjectInfoCompleteL - Entry"));
-    
+    OstTraceFunctionEntry0( CMTPSENDOBJECTINFO_DOHANDLESENDOBJECTINFOCOMPLETEL_ENTRY );
+
     CMTPParserRouter::TRoutingParameters params(*iRequest, iConnection);
     iSingletons.Router().ParseOperationRequestL(params);
     TBool fileFlag=EFalse;
@@ -136,7 +137,7 @@ void CMTPSendObjectInfo::DoHandleSendObjectInfoCompleteL()
     iProxyDpSingletons.OpenL(iFramework);
     TInt index(KErrNotFound);
 	const TUint16 formatCode=iObjectInfo->Uint16L(CMTPTypeObjectInfo::EObjectFormat);
-	__FLOG_1( _L8("formatCode = %d"), formatCode );
+	OstTrace1(TRACE_NORMAL, CMTPSENDOBJECTINFO_DOHANDLESENDOBJECTINFOCOMPLETEL, "formatCode = %d", formatCode);
 	switch(formatCode)
 		{
 	case EMTPFormatCodeAssociation:
@@ -145,13 +146,13 @@ void CMTPSendObjectInfo::DoHandleSendObjectInfoCompleteL()
 
     case EMTPFormatCodeScript:
     	{
-    	__FLOG_1( _L8("formatCode = %d"), EMTPFormatCodeScript );
     	const TDesC& filename = iObjectInfo->StringCharsL(CMTPTypeObjectInfo::EFilename);
     	HBufC* lowFileName = HBufC::NewLC(filename.Length());
     	TPtr16 prt(lowFileName->Des());
     	prt.Append(filename);
     	prt.LowerCase();   	
-    	__FLOG_1( _L8("lowFileName = %s"), &prt );
+    	OstTraceExt1(TRACE_NORMAL, DUP1_CMTPSENDOBJECTINFO_DOHANDLESENDOBJECTINFOCOMPLETEL, 
+    	        "lowFileName = %S", prt);
     	if (iProxyDpSingletons.FrameworkConfig().GetFileName(prt,index) )
     		{
     		fileFlag=ETrue;
@@ -166,7 +167,8 @@ void CMTPSendObjectInfo::DoHandleSendObjectInfoCompleteL()
         break;
 		}
 	
-    __FLOG_1( _L8("fileFlag = %d"), fileFlag );
+    OstTrace1( TRACE_NORMAL, DUP2_CMTPSENDOBJECTINFO_DOHANDLESENDOBJECTINFOCOMPLETEL, "fileFlag = %d", fileFlag);
+    
     if(fileFlag)
     	{
     	TInt  syncdpid =  iSingletons.DpController().DpId(iProxyDpSingletons.FrameworkConfig().GetDPId(index));
@@ -177,8 +179,10 @@ void CMTPSendObjectInfo::DoHandleSendObjectInfoCompleteL()
     	iSingletons.Router().RouteOperationRequestL(params, targets);
         CMTPStorageMgr& storages(iSingletons.StorageMgr());
     	const TUint KStorageId = Request().Uint32(TMTPTypeResponse::EResponseParameter1);
-        __FLOG_1( _L8("KStorageId = %d"), KStorageId );
-        __FLOG_1( _L8("targets.Count() = %d"), targets.Count() );
+        OstTrace1(TRACE_NORMAL, DUP3_CMTPSENDOBJECTINFO_DOHANDLESENDOBJECTINFOCOMPLETEL, 
+                "KStorageId = %d", KStorageId);
+        OstTrace1(TRACE_NORMAL, DUP4_CMTPSENDOBJECTINFO_DOHANDLESENDOBJECTINFOCOMPLETEL, 
+                "targets.Count() = %d", targets.Count());
         if( KMTPNotSpecified32 == KStorageId)
             {
             iSingletons.DpController().DataProviderL(targets[0]).ExecuteProxyRequestL(Request(), Connection(), *this);
@@ -187,7 +191,8 @@ void CMTPSendObjectInfo::DoHandleSendObjectInfoCompleteL()
             {
         	if(targets.Count() == 1)
         		{
-        		__FLOG_1( _L8("targets[0] = %d"), targets[0] );
+                OstTrace1(TRACE_NORMAL, DUP5_CMTPSENDOBJECTINFO_DOHANDLESENDOBJECTINFOCOMPLETEL, 
+                        "targets[0] = %d", targets[0]);
         		iSingletons.DpController().DataProviderL(targets[0]).ExecuteProxyRequestL(Request(), Connection(), *this);
         		}
         	else
@@ -201,10 +206,12 @@ void CMTPSendObjectInfo::DoHandleSendObjectInfoCompleteL()
 	                {
 	                dpID = storages.PhysicalStorageOwner(KStorageId);
 	                }
-	            __FLOG_1( _L8("dpID = %d"), dpID );
+                OstTrace1(TRACE_NORMAL, DUP6_CMTPSENDOBJECTINFO_DOHANDLESENDOBJECTINFOCOMPLETEL, 
+                        "dpID = %d", dpID);
 	            if( targets.Find( dpID ) == KErrNotFound )
 	                {
-	                __FLOG(_L8("No target dp is found, so send one GeneralError response."));
+	                OstTrace0( TRACE_NORMAL, DUP7_CMTPSENDOBJECTINFO_DOHANDLESENDOBJECTINFOCOMPLETEL, 
+	                        "No target dp is found, so send one GeneralError response." );	                
 	                SendResponseL( EMTPRespCodeGeneralError );
 	                }
 	            else
@@ -215,13 +222,13 @@ void CMTPSendObjectInfo::DoHandleSendObjectInfoCompleteL()
             }
         else
             {
-            __FLOG(_L8("StorageID is invalid."));
+            OstTrace0( TRACE_NORMAL, DUP8_CMTPSENDOBJECTINFO_DOHANDLESENDOBJECTINFOCOMPLETEL,"StorageID is invalid." );
             SendResponseL( EMTPRespCodeInvalidStorageID );
             }
     	}	
     CleanupStack::PopAndDestroy(&targets);
-    
-    __FLOG(_L8("DoHandleSendObjectInfoCompleteL - Exit"));
+
+    OstTraceFunctionExit0( CMTPSENDOBJECTINFO_DOHANDLESENDOBJECTINFOCOMPLETEL_EXIT );
     }
 
 #ifdef _DEBUG

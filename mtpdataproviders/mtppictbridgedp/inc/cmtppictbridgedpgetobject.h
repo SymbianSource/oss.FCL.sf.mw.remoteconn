@@ -46,11 +46,6 @@ private: // Owned
     CMTPPictBridgeDataProvider& iPictBridgeDP;
     CMTPTypeFile*    iFileObject;  // owned
     TMTPResponseCode iError;
-    
-    /**
-    FLOGGER debug trace member variable.
-    */
-    __FLOG_DECLARATION_MEMBER_MUTABLE;
     };
     
 #endif // CMTPPICTBRIDGEDPGETOBJECT_H

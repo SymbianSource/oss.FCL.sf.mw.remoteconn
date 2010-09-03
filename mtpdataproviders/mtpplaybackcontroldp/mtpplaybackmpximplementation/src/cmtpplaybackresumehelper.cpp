@@ -21,9 +21,11 @@
 #include "cmtpplaybackresumehelper.h"
 #include "cmtpplaybackcommand.h"
 #include "cmtpplaybackcontrolimpl.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpplaybackresumehelperTraces.h"
+#endif
 
-// Constants
-__FLOG_STMT(_LIT8(KComponent,"PlaybackResumeHelper");)
 
 // ======== MEMBER FUNCTIONS ========
 
@@ -34,8 +36,12 @@ __FLOG_STMT(_LIT8(KComponent,"PlaybackResumeHelper");)
 CMTPPlaybackResumeHelper* CMTPPlaybackResumeHelper::NewL(
             CMTPPlaybackControlImpl& aControlImpl )
     {
+    OstTraceFunctionEntry0( CMTPPLAYBACKRESUMEHELPER_NEWL_ENTRY );
+    
     CMTPPlaybackResumeHelper* self = new ( ELeave ) 
                         CMTPPlaybackResumeHelper( aControlImpl );
+    
+    OstTraceFunctionExit0( CMTPPLAYBACKRESUMEHELPER_NEWL_EXIT );
     return self;
     }
 
@@ -45,9 +51,8 @@ CMTPPlaybackResumeHelper* CMTPPlaybackResumeHelper::NewL(
 //
 CMTPPlaybackResumeHelper::~CMTPPlaybackResumeHelper()
     {
-    __FLOG(_L8("+CMTPPlaybackResumeHelper::~CMTPPlaybackResumeHelper"));
-    __FLOG(_L8("-CMTPPlaybackResumeHelper::~CMTPPlaybackResumeHelper"));
-    __FLOG_CLOSE;
+    OstTraceFunctionEntry0( CMTPPLAYBACKRESUMEHELPER_CMTPPLAYBACKRESUMEHELPER_ENTRY );
+    OstTraceFunctionExit0( CMTPPLAYBACKRESUMEHELPER_CMTPPLAYBACKRESUMEHELPER_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -57,7 +62,7 @@ CMTPPlaybackResumeHelper::~CMTPPlaybackResumeHelper()
 void CMTPPlaybackResumeHelper::UpdatePrepareCmdArray( TMTPPlaybackCommand aMTPPPBCmd, 
         RResumeCmdArray& aMTPPBMPXCmd )
     {
-    __FLOG(_L8("+CMTPPlaybackResumeHelper::UpdatePrepareCmdArrayL"));
+    OstTraceFunctionEntry0( CMTPPLAYBACKRESUMEHELPER_UPDATEPREPARECMDARRAY_ENTRY );
     
     aMTPPBMPXCmd.Reset();
     iIfParepareArray = ETrue;
@@ -73,7 +78,7 @@ void CMTPPlaybackResumeHelper::UpdatePrepareCmdArray( TMTPPlaybackCommand aMTPPP
             break;
         }
     
-    __FLOG(_L8("-CMTPPlaybackResumeHelper::UpdatePrepareCmdArrayL"));
+    OstTraceFunctionExit0( CMTPPLAYBACKRESUMEHELPER_UPDATEPREPARECMDARRAY_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -83,7 +88,7 @@ void CMTPPlaybackResumeHelper::UpdatePrepareCmdArray( TMTPPlaybackCommand aMTPPP
 void CMTPPlaybackResumeHelper::UpdateResumeCmdArray( TMTPPlaybackCommand aMTPPPBCmd, 
         RResumeCmdArray& aMTPPBMPXCmd)
     {
-    __FLOG(_L8("+CMTPPlaybackResumeHelper::MapMTPPBCommandToMPXCommandL"));
+    OstTraceFunctionEntry0( CMTPPLAYBACKRESUMEHELPER_UPDATERESUMECMDARRAY_ENTRY );
     
     aMTPPBMPXCmd.Reset();
     iIfParepareArray = EFalse;
@@ -134,7 +139,7 @@ void CMTPPlaybackResumeHelper::UpdateResumeCmdArray( TMTPPlaybackCommand aMTPPPB
             break;
         }
     
-    __FLOG(_L8("-CMTPPlaybackResumeHelper::MapPlaybackControlCommandL"));
+    OstTraceFunctionExit0( CMTPPLAYBACKRESUMEHELPER_UPDATERESUMECMDARRAY_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -145,7 +150,8 @@ CMTPPlaybackResumeHelper::CMTPPlaybackResumeHelper(
         CMTPPlaybackControlImpl& aControlImpl )
                 : iMTPPlaybackControl( aControlImpl )
     {
-    __FLOG_OPEN(KMTPSubsystem, KComponent);
+    OstTraceFunctionEntry0( DUP1_CMTPPLAYBACKRESUMEHELPER_CMTPPLAYBACKRESUMEHELPER_ENTRY );
+    OstTraceFunctionExit0( DUP1_CMTPPLAYBACKRESUMEHELPER_CMTPPLAYBACKRESUMEHELPER_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -154,6 +160,8 @@ CMTPPlaybackResumeHelper::CMTPPlaybackResumeHelper(
 //
 void CMTPPlaybackResumeHelper::HandlePlaybackCmdInitObject( RResumeCmdArray& aMTPPBMPXCmdArray )
     {
+    OstTraceFunctionEntry0( CMTPPLAYBACKRESUMEHELPER_HANDLEPLAYBACKCMDINITOBJECT_ENTRY );
+    
     switch ( MTPPlaybackControlImpl().CurrentState() )
         {
         case EPbStatePlaying:
@@ -165,6 +173,8 @@ void CMTPPlaybackResumeHelper::HandlePlaybackCmdInitObject( RResumeCmdArray& aMT
         default:
             break;
         }
+    
+    OstTraceFunctionExit0( CMTPPLAYBACKRESUMEHELPER_HANDLEPLAYBACKCMDINITOBJECT_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -173,6 +183,8 @@ void CMTPPlaybackResumeHelper::HandlePlaybackCmdInitObject( RResumeCmdArray& aMT
 //
 void CMTPPlaybackResumeHelper::HandlePlaybackCmdInitIndex( RResumeCmdArray& aMTPPBMPXCmdArray )
     {
+    OstTraceFunctionEntry0( CMTPPLAYBACKRESUMEHELPER_HANDLEPLAYBACKCMDINITINDEX_ENTRY );
+    
     switch ( MTPPlaybackControlImpl().CurrentState() )
         {
         case EPbStatePlaying:
@@ -184,6 +196,8 @@ void CMTPPlaybackResumeHelper::HandlePlaybackCmdInitIndex( RResumeCmdArray& aMTP
         default:
             break;
         }
+    
+    OstTraceFunctionExit0( CMTPPLAYBACKRESUMEHELPER_HANDLEPLAYBACKCMDINITINDEX_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -192,6 +206,8 @@ void CMTPPlaybackResumeHelper::HandlePlaybackCmdInitIndex( RResumeCmdArray& aMTP
 //
 void CMTPPlaybackResumeHelper::HandlePlaybackCmdPlay(RResumeCmdArray& aMTPPBMPXCmdArray )
     {
+    OstTraceFunctionEntry0( CMTPPLAYBACKRESUMEHELPER_HANDLEPLAYBACKCMDPLAY_ENTRY );
+    
     switch ( MTPPlaybackControlImpl().CurrentState() )
         {
         case EPbStatePaused:
@@ -222,6 +238,8 @@ void CMTPPlaybackResumeHelper::HandlePlaybackCmdPlay(RResumeCmdArray& aMTPPBMPXC
          default:
             break;
          }
+    
+    OstTraceFunctionExit0( CMTPPLAYBACKRESUMEHELPER_HANDLEPLAYBACKCMDPLAY_EXIT );
     }
 
 
@@ -231,6 +249,8 @@ void CMTPPlaybackResumeHelper::HandlePlaybackCmdPlay(RResumeCmdArray& aMTPPBMPXC
 //
 void CMTPPlaybackResumeHelper::HandlePlaybackCmdPause( RResumeCmdArray& aMTPPBMPXCmdArray )
     {
+    OstTraceFunctionEntry0( CMTPPLAYBACKRESUMEHELPER_HANDLEPLAYBACKCMDPAUSE_ENTRY );
+    
     switch ( MTPPlaybackControlImpl().CurrentState() )
         {
         case EPbStatePlaying:
@@ -259,6 +279,8 @@ void CMTPPlaybackResumeHelper::HandlePlaybackCmdPause( RResumeCmdArray& aMTPPBMP
         default:
            break;
         }
+    
+    OstTraceFunctionExit0( CMTPPLAYBACKRESUMEHELPER_HANDLEPLAYBACKCMDPAUSE_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -267,6 +289,8 @@ void CMTPPlaybackResumeHelper::HandlePlaybackCmdPause( RResumeCmdArray& aMTPPBMP
 //
 void CMTPPlaybackResumeHelper::HandlePlaybackCmdSeekForward( RResumeCmdArray& aMTPPBMPXCmd )
     {
+    OstTraceFunctionEntry0( CMTPPLAYBACKRESUMEHELPER_HANDLEPLAYBACKCMDSEEKFORWARD_ENTRY );
+    
     switch ( MTPPlaybackControlImpl().CurrentState() )
         {
         case EPbStatePlaying:
@@ -305,6 +329,8 @@ void CMTPPlaybackResumeHelper::HandlePlaybackCmdSeekForward( RResumeCmdArray& aM
         default:
             break;
         }
+    
+    OstTraceFunctionExit0( CMTPPLAYBACKRESUMEHELPER_HANDLEPLAYBACKCMDSEEKFORWARD_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -313,6 +339,8 @@ void CMTPPlaybackResumeHelper::HandlePlaybackCmdSeekForward( RResumeCmdArray& aM
 //
 void CMTPPlaybackResumeHelper::HandlePlaybackCmdSeekBackward( RResumeCmdArray& aMTPPBMPXCmd )
     {
+    OstTraceFunctionEntry0( CMTPPLAYBACKRESUMEHELPER_HANDLEPLAYBACKCMDSEEKBACKWARD_ENTRY );
+    
     switch ( MTPPlaybackControlImpl().CurrentState() )
         {
         case EPbStatePlaying:
@@ -343,6 +371,8 @@ void CMTPPlaybackResumeHelper::HandlePlaybackCmdSeekBackward( RResumeCmdArray& a
         default:
             break;
         }
+    
+    OstTraceFunctionExit0( CMTPPLAYBACKRESUMEHELPER_HANDLEPLAYBACKCMDSEEKBACKWARD_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -351,6 +381,8 @@ void CMTPPlaybackResumeHelper::HandlePlaybackCmdSeekBackward( RResumeCmdArray& a
 //
 void CMTPPlaybackResumeHelper::HandlePlaybackCmdSkip( RResumeCmdArray& aMTPPBMPXCmd )
     {
+    OstTraceFunctionEntry0( CMTPPLAYBACKRESUMEHELPER_HANDLEPLAYBACKCMDSKIP_ENTRY );
+    
     switch ( MTPPlaybackControlImpl().CurrentState() )
         {
         case EPbStatePlaying:
@@ -362,6 +394,8 @@ void CMTPPlaybackResumeHelper::HandlePlaybackCmdSkip( RResumeCmdArray& aMTPPBMPX
         default:
             break;
         }
+    
+    OstTraceFunctionExit0( CMTPPLAYBACKRESUMEHELPER_HANDLEPLAYBACKCMDSKIP_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -370,6 +404,8 @@ void CMTPPlaybackResumeHelper::HandlePlaybackCmdSkip( RResumeCmdArray& aMTPPBMPX
 //
 void CMTPPlaybackResumeHelper::HandlePlaybackCmdSetPosition( RResumeCmdArray& aMTPPBMPXCmd )
     {
+    OstTraceFunctionEntry0( CMTPPLAYBACKRESUMEHELPER_HANDLEPLAYBACKCMDSETPOSITION_ENTRY );
+    
     switch ( MTPPlaybackControlImpl().CurrentState() )
         {
         case EPbStatePlaying:
@@ -389,6 +425,8 @@ void CMTPPlaybackResumeHelper::HandlePlaybackCmdSetPosition( RResumeCmdArray& aM
         default:
             break;
         }
+    
+    OstTraceFunctionExit0( CMTPPLAYBACKRESUMEHELPER_HANDLEPLAYBACKCMDSETPOSITION_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -397,6 +435,8 @@ void CMTPPlaybackResumeHelper::HandlePlaybackCmdSetPosition( RResumeCmdArray& aM
 //
 CMTPPlaybackControlImpl& CMTPPlaybackResumeHelper::MTPPlaybackControlImpl()
     {
+    OstTraceFunctionEntry0( CMTPPLAYBACKRESUMEHELPER_MTPPLAYBACKCONTROLIMPL_ENTRY );
+    OstTraceFunctionExit0( CMTPPLAYBACKRESUMEHELPER_MTPPLAYBACKCONTROLIMPL_EXIT );
     return iMTPPlaybackControl;
     }
 

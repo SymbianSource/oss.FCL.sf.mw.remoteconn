@@ -22,8 +22,12 @@
 
 #include "cmtprequestprocessor.h"
 #include "cmtprequestchecker.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtprequestprocessorTraces.h"
+#endif
+
 const static TInt KNullBufferSize = 4096;
-__FLOG_STMT(_LIT8(KComponent,"MTPRequestProcessor");)
 
 /**
 Standard c++ constructor
@@ -45,7 +49,6 @@ EXPORT_C CMTPRequestProcessor::CMTPRequestProcessor(
 	iElements(aElements)
 	{
 	CActiveScheduler::Add(this);
-	__FLOG_OPEN(KMTPSubsystem, KComponent);
 	}
 
 /**
@@ -53,10 +56,11 @@ Destructor
 */	
 EXPORT_C CMTPRequestProcessor::~CMTPRequestProcessor()
 	{
+	OstTraceFunctionEntry0( CMTPREQUESTPROCESSOR_CMTPREQUESTPROCESSOR_DES_ENTRY );
 	Cancel();
 	iNullBuffer.Close();
 	delete iRequestChecker;
-	__FLOG_CLOSE;
+	OstTraceFunctionExit0( CMTPREQUESTPROCESSOR_CMTPREQUESTPROCESSOR_DES_EXIT );
 	}
 
 /**
@@ -244,15 +248,16 @@ Handle the request phase of the current request
 */
 EXPORT_C TBool CMTPRequestProcessor::DoHandleRequestPhaseL()
 	{
-	__FLOG(_L8("DoHandleRequestPhaseL - Entry."));
+	OstTraceFunctionEntry0( CMTPREQUESTPROCESSOR_DOHANDLEREQUESTPHASEL_ENTRY );
 	TRAPD(err, iResponseCode = CheckRequestL());
 	if ((err != KErrNone) || (iResponseCode != EMTPRespCodeOK))
 		{
 		if (HasDataphase()) 
 			{
 			// If we have a dataphase
-			// we need to read in the data and discard it
-			__FLOG(_L8("Response code is not OK, there is data phase."));			
+			// we need to read in the data and discard it	
+			OstTrace0( TRACE_NORMAL, CMTPREQUESTPROCESSOR_DOHANDLEREQUESTPHASEL, 
+			        "Response code is not OK, there is data phase." );
 			iNullBuffer.Close();
 			iNullBuffer.CreateMaxL(KNullBufferSize);
 			iNull.SetBuffer(iNullBuffer);
@@ -262,6 +267,8 @@ EXPORT_C TBool CMTPRequestProcessor::DoHandleRequestPhaseL()
 			{
 			if(err != KErrNone)
 				{
+                OstTraceExt2( TRACE_ERROR, DUP1_CMTPREQUESTPROCESSOR_DOHANDLEREQUESTPHASEL, 
+			        "Can't deal with CheckRequestL error! error code %d, responseCode %d", err, iResponseCode);
 				User::Leave(err);
 				}
 			SendResponseL(TMTPResponseCode(iResponseCode));
@@ -284,11 +291,13 @@ EXPORT_C TBool CMTPRequestProcessor::DoHandleRequestPhaseL()
 				}
 			else
 				{
+                OstTrace1( TRACE_ERROR, DUP2_CMTPREQUESTPROCESSOR_DOHANDLEREQUESTPHASEL, 
+                    "Can't deal with ServiceL error! error code %d", err);
 				User::Leave(err);
 				}			
 			}
 		}
-	__FLOG(_L8("DoHandleRequestPhaseL - Exit."));	
+	OstTraceFunctionExit0( CMTPREQUESTPROCESSOR_DOHANDLEREQUESTPHASEL_EXIT );
 	return EFalse;	
 	}
 	

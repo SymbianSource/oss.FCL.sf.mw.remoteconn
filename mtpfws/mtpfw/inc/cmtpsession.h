@@ -26,8 +26,6 @@
 #include <mtp/tmtptyperequest.h>
 #include <mtp/tmtptypeevent.h>
 
-#include "mtpdebug.h"
-
 /** 
 Implements the session level portion of the MTP communication model. It also 
 implements the data provider layer MTP session interface (@see MMTPSession).
@@ -77,11 +75,6 @@ private:
     static TInt RouteRequestOrder(const TMTPTypeRequest& aLeft, const TMTPTypeRequest& aRight);
     
 private: // Owned
-
-    /**
-    FLOGGER debug trace member variable.
-    */
-    __FLOG_DECLARATION_MEMBER_MUTABLE;
 
     TUint32                 iExpectedTransactionId;
     TUint32                 iIdMTP;

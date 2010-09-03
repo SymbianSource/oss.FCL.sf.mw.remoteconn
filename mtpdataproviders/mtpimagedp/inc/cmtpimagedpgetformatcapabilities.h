@@ -51,14 +51,11 @@ private:
     void ServiceOneFormatCapabilitiesL(TUint aFormatCode);
     CMTPTypeObjectPropDesc* ServiceProtectionStatusL();
     CMTPTypeObjectPropDesc* ServiceNonConsumableL();
+	CMTPTypeObjectPropDesc* ServiceHiddenL();
     
     TUint16 GetPropertyGroupNumber(const TUint16 aPropCode) const;
     
 private: // Owned
-    /**
-    FLOGGER debug trace member variable.
-    */
-    __FLOG_DECLARATION_MEMBER_MUTABLE;
     
     TUint                                        iFormatCode;
     /* 

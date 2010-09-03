@@ -18,6 +18,12 @@
 #include "cmtppictbridgeusbconnection.h"
 #include "cmtppictbridgeprinter.h"
 #include "ptpdef.h"
+#include "OstTraceDefinitions.h"
+#include "mtpdebug.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtppictbridgeusbconnectionTraces.h"
+#endif
+
 
 const TInt KNotAssigned=0;
 // --------------------------------------------------------------------------
@@ -54,9 +60,12 @@ CMTPPictBridgeUsbConnection::CMTPPictBridgeUsbConnection(CMTPPictBridgePrinter& 
 //
 void CMTPPictBridgeUsbConnection::ConstructL()    
     {
-    __FLOG_OPEN(KMTPSubsystem, KPtpServerLog);
-    __FLOG(_L8("CMTPPictBridgeUsbConnection::ConstructL"));        
-    User::LeaveIfError(iProperty.Attach(KPSUidUsbWatcher, KUsbWatcherSelectedPersonality));
+    OstTraceFunctionEntry0( CMTPPICTBRIDGEUSBCONNECTION_CONSTRUCTL_ENTRY );     
+    LEAVEIFERROR(iProperty.Attach(KPSUidUsbWatcher, KUsbWatcherSelectedPersonality),
+            OstTrace1( TRACE_ERROR, CMTPPICTBRIDGEUSBCONNECTION_CONSTRUCTL, 
+                    "Attaches to the specified property failed. Error code %d", munged_err));
+            
+    OstTraceFunctionExit0( CMTPPICTBRIDGEUSBCONNECTION_CONSTRUCTL_EXIT );
     }
 
 // --------------------------------------------------------------------------
@@ -65,11 +74,10 @@ void CMTPPictBridgeUsbConnection::ConstructL()
 //
 CMTPPictBridgeUsbConnection::~CMTPPictBridgeUsbConnection()
     {
-    __FLOG(_L8(">> CMTPPictBridgeUsbConnection::~"));
+    OstTraceFunctionEntry0( CMTPPICTBRIDGEUSBCONNECTION_CMTPPICTBRIDGEUSBCONNECTION_DES_ENTRY );
     Cancel();
     iProperty.Close();
-    __FLOG(_L8("<< CMTPPictBridgeUsbConnection::~"));
-    __FLOG_CLOSE;
+    OstTraceFunctionExit0( CMTPPICTBRIDGEUSBCONNECTION_CMTPPICTBRIDGEUSBCONNECTION_DES_EXIT );
     }
 
 // --------------------------------------------------------------------------
@@ -78,10 +86,10 @@ CMTPPictBridgeUsbConnection::~CMTPPictBridgeUsbConnection()
 //
 void CMTPPictBridgeUsbConnection::Listen()
     {
-    __FLOG(_L8(">> CMTPPictBridgeUsbConnection::Listen"));    
+	OstTraceFunctionEntry0( CMTPPICTBRIDGEUSBCONNECTION_LISTEN_ENTRY );
     if(!IsActive())
         {
-        __FLOG(_L8(" CMTPPictBridgeUsbConnection AO is NOT active and run AO"));
+		OstTrace0( TRACE_NORMAL, CMTPPICTBRIDGEUSBCONNECTION_LISTEN, " CMTPPictBridgeUsbConnection AO is NOT active and run AO");
         iProperty.Subscribe(iStatus);
         SetActive();
         if(ConnectionClosed()) // we listen to the disconnection only if connected to the printer
@@ -90,7 +98,7 @@ void CMTPPictBridgeUsbConnection::Listen()
             Cancel();    
             }
         }
-    __FLOG(_L8("<< CMTPPictBridgeUsbConnection::Listen"));    
+	OstTraceFunctionExit0( CMTPPICTBRIDGEUSBCONNECTION_LISTEN_EXIT );
     }
 
 // --------------------------------------------------------------------------
@@ -102,13 +110,15 @@ TBool CMTPPictBridgeUsbConnection::ConnectionClosed()
     TInt personality=KNotAssigned;
     TInt ret = RProperty::Get(KPSUidUsbWatcher, KUsbWatcherSelectedPersonality, personality);
 
-    __FLOG_VA((_L8("CMTPPictBridgeUsbConnection::ConnectionClosed() current personality = %d, previous personality = %d"), personality, iPreviousPersonality));  
+    OstTraceExt2( TRACE_NORMAL, CMTPPICTBRIDGEUSBCONNECTION_CONNECTIONCLOSED, 
+            " current personality = %d, previous personality = %d", personality, iPreviousPersonality );
     if ((ret == KErrNone && personality == KUsbPersonalityIdMS)
        || (iPreviousPersonality != KNotAssigned && personality != iPreviousPersonality))
         {
         if((personality != KUsbPersonalityIdPCSuiteMTP)&&(personality != KUsbPersonalityIdMTP))
             {
-            __FLOG_VA((_L8("****WARNING!!! PTP server detects the USB connection closed!")));  
+	        OstTrace0( TRACE_WARNING, DUP1_CMTPPICTBRIDGEUSBCONNECTION_CONNECTIONCLOSED, 
+	                "****WARNING!!! PTP server detects the USB connection closed!" );
             return ETrue;
             }
         }
@@ -125,8 +135,9 @@ TBool CMTPPictBridgeUsbConnection::ConnectionClosed()
 //
 void CMTPPictBridgeUsbConnection::DoCancel()
     {
-    __FLOG(_L8("CMTPPictBridgeUsbConnection::DoCancel()"));
+    OstTraceFunctionEntry0( CMTPPICTBRIDGEUSBCONNECTION_DOCANCEL_ENTRY );
     iProperty.Cancel();
+    OstTraceFunctionExit0( CMTPPICTBRIDGEUSBCONNECTION_DOCANCEL_EXIT );
     }
 
 // --------------------------------------------------------------------------
@@ -135,7 +146,8 @@ void CMTPPictBridgeUsbConnection::DoCancel()
 //    
 void CMTPPictBridgeUsbConnection::RunL()
     {
-    __FLOG_VA((_L8(">>>CMTPPictBridgeUsbConnection::RunL %d"),iStatus.Int()));
+    OstTraceFunctionEntry0( CMTPPICTBRIDGEUSBCONNECTION_RUNL_ENTRY );
+    OstTrace1( TRACE_NORMAL, CMTPPICTBRIDGEUSBCONNECTION_RUNL, "iStatus %d", iStatus.Int() );
 
     TBool closed = EFalse;    
     if( iStatus == KErrNone )
@@ -152,20 +164,23 @@ void CMTPPictBridgeUsbConnection::RunL()
         Listen();
         }
 
-    __FLOG(_L8("<<<CMTPPictBridgeUsbConnection::RunL"));	
+    OstTraceFunctionExit0( CMTPPICTBRIDGEUSBCONNECTION_RUNL_EXIT );
     }
 
 // --------------------------------------------------------------------------
 // 
 // --------------------------------------------------------------------------
 //    
-#ifdef __FLOG_ACTIVE
+#ifdef OST_TRACE_COMPILER_IN_USE
 TInt CMTPPictBridgeUsbConnection::RunError(TInt aErr)
 #else
 TInt CMTPPictBridgeUsbConnection::RunError(TInt /*aErr*/)
 #endif
     {
-    __FLOG_VA((_L8(">>>CMTPPictBridgeUsbConnection::RunError %d"), aErr));
+    OstTraceFunctionEntry0( CMTPPICTBRIDGEUSBCONNECTION_RUNERROR_ENTRY );
+    OstTraceDef1( OST_TRACE_CATEGORY_PRODUCTION, TRACE_IMPORTANT, CMTPPICTBRIDGEUSBCONNECTION_RUNERROR, 
+            "error code %d", aErr);
+    OstTraceFunctionExit0( CMTPPICTBRIDGEUSBCONNECTION_RUNERROR_EXIT );
     return KErrNone;
     }
 

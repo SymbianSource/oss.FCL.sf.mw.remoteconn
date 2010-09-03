@@ -13,8 +13,6 @@
 // Description:
 //
 
-#include <comms-infras/commsdebugutility.mmh> 
-
 TARGET              mtpproxydp.dll
 TARGETTYPE          PLUGIN
 UID                 0x10009D8D 0x102827A6
@@ -26,7 +24,8 @@ MW_LAYER_SYSTEMINCLUDE_SYMBIAN
 USERINCLUDE         ../inc
 USERINCLUDE         ../../dputility/inc
 USERINCLUDE         ../../../common/inc
-USERINCLUDE         ../../../inc
+USERINCLUDE         ../../../inc 
+USERINCLUDE					../traces
 
 SOURCEPATH          ../src 
 SOURCE              cmtpcopyobject.cpp

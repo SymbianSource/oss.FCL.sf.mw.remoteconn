@@ -32,6 +32,7 @@ MW_LAYER_SYSTEMINCLUDE_SYMBIAN
 
 USERINCLUDE	    ../inc/
 USERINCLUDE	    ../interface/
+USERINCLUDE	    ../traces/
 USERINCLUDE   ../../common/inc/ 
 USERINCLUDE   ../../ptpipdatatypes/inc/
 USERINCLUDE   ../../../../mtpfws/mtpfw/common/inc			

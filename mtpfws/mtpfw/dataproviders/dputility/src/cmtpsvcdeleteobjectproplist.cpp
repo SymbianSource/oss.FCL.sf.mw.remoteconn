@@ -22,9 +22,12 @@
 #include "cmtpsvcdeleteobjectproplist.h"
 #include "mmtpservicedataprovider.h"
 #include "mmtpsvcobjecthandler.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpsvcdeleteobjectproplistTraces.h"
+#endif
 
-// Class constants.
-__FLOG_STMT(_LIT8(KComponent,"SvcDelObjPropList");)
+
 
 EXPORT_C MMTPRequestProcessor* CMTPSvcDeleteObjectPropList::NewL(MMTPDataProviderFramework& aFramework, 
 													MMTPConnection& aConnection, 
@@ -39,11 +42,10 @@ EXPORT_C MMTPRequestProcessor* CMTPSvcDeleteObjectPropList::NewL(MMTPDataProvide
 
 EXPORT_C CMTPSvcDeleteObjectPropList::~CMTPSvcDeleteObjectPropList()
 	{
-	__FLOG(_L8("~CMTPSvcDeleteObjectPropList - Entry"));
+	OstTraceFunctionEntry0( CMTPSVCDELETEOBJECTPROPLIST_CMTPSVCDELETEOBJECTPROPLIST_DES_ENTRY );
 	delete iPropertyList;
 	delete iReceivedObjectMetaData;
-	__FLOG(_L8("~CMTPSvcDeleteObjectPropList - Exit"));
-	__FLOG_CLOSE;
+	OstTraceFunctionExit0( CMTPSVCDELETEOBJECTPROPLIST_CMTPSVCDELETEOBJECTPROPLIST_DES_EXIT );
 	}
 
 CMTPSvcDeleteObjectPropList::CMTPSvcDeleteObjectPropList(MMTPDataProviderFramework& aFramework, 
@@ -56,15 +58,14 @@ CMTPSvcDeleteObjectPropList::CMTPSvcDeleteObjectPropList(MMTPDataProviderFramewo
 
 void CMTPSvcDeleteObjectPropList::ConstructL()
 	{
-	__FLOG_OPEN(KMTPSubsystem, KComponent);
-	__FLOG(_L8("ConstructL - Entry"));
+	OstTraceFunctionEntry0( CMTPSVCDELETEOBJECTPROPLIST_CONSTRUCTL_ENTRY );
 	iPropertyList = CMTPTypeDeleteObjectPropList::NewL();
-	__FLOG(_L8("ConstructL - Exit"));
+	OstTraceFunctionExit0( CMTPSVCDELETEOBJECTPROPLIST_CONSTRUCTL_EXIT );
 	}
 
 TMTPResponseCode CMTPSvcDeleteObjectPropList::CheckRequestL()
 	{
-	__FLOG(_L8("CheckRequestL - Entry"));
+	OstTraceFunctionEntry0( CMTPSVCDELETEOBJECTPROPLIST_CHECKREQUESTL_ENTRY );
 	TMTPResponseCode responseCode = CMTPRequestProcessor::CheckRequestL();
 	if (EMTPRespCodeOK == responseCode)
 		{
@@ -81,7 +82,7 @@ TMTPResponseCode CMTPSvcDeleteObjectPropList::CheckRequestL()
 				if (iReceivedObjectMetaData->Uint(CMTPObjectMetaData::EDataProviderId) != iFramework.DataProviderId())
 					{
 					responseCode = EMTPRespCodeInvalidObjectHandle;
-					__FLOG(_L8("CheckRequestL - DataProviderId dismatch"));
+					OstTrace0( TRACE_WARNING, DUP1_CMTPSVCDELETEOBJECTPROPLIST_CHECKREQUESTL, "CheckRequestL - DataProviderId dismatch" );
 					}
 				else
 					{
@@ -103,27 +104,31 @@ TMTPResponseCode CMTPSvcDeleteObjectPropList::CheckRequestL()
 			iReceivedObjectMetaData->SetUint(CMTPObjectMetaData::EHandle, KMTPHandleAll);
 			}
 		}
-	__FLOG_VA((_L8("CheckRequestL - Exit with responseCode = 0x%04X"), responseCode));
+	OstTrace1( TRACE_NORMAL, CMTPSVCDELETEOBJECTPROPLIST_CHECKREQUESTL, "Exit with responseCode = 0x%04X", responseCode );
+	OstTraceFunctionExit0( CMTPSVCDELETEOBJECTPROPLIST_CHECKREQUESTL_EXIT );
 	return responseCode;
 	}
 
 void CMTPSvcDeleteObjectPropList::ServiceL()
 	{
-	__FLOG(_L8("ServiceL - Entry"));
+	OstTraceFunctionEntry0( CMTPSVCDELETEOBJECTPROPLIST_SERVICEL_ENTRY );
 	ReceiveDataL(*iPropertyList);
-	__FLOG(_L8("ServiceL - Exit"));
+	OstTraceFunctionExit0( CMTPSVCDELETEOBJECTPROPLIST_SERVICEL_EXIT );
 	}
 
 TBool CMTPSvcDeleteObjectPropList::DoHandleResponsePhaseL()
 	{
-	__FLOG(_L8("DoHandleResponsePhaseL - Entry"));
+	OstTraceFunctionEntry0( CMTPSVCDELETEOBJECTPROPLIST_DOHANDLERESPONSEPHASEL_ENTRY );
 	TUint32 parameter(0);
 	TMTPResponseCode responseCode = EMTPRespCodeOK;
 
 	responseCode = DeleteObjectPropListL(*iReceivedObjectMetaData, *iPropertyList, parameter);
 	
 	SendResponseL(responseCode, 1, &parameter);
-	__FLOG_VA((_L8("DeleteObjectPropListL responseCode = 0x%x, failed index = %u"), responseCode, parameter));
+    OstTraceExt2( TRACE_NORMAL, CMTPSVCDELETEOBJECTPROPLIST_DOHANDLERESPONSEPHASEL, 
+            "DeleteObjectPropListL responseCode = 0x%x, failed index = %u", responseCode, parameter );
+	OstTraceFunctionExit0( CMTPSVCDELETEOBJECTPROPLIST_DOHANDLERESPONSEPHASEL_EXIT );
+
 	return EFalse;
 	}
 
@@ -136,7 +141,7 @@ TMTPResponseCode CMTPSvcDeleteObjectPropList::DeleteObjectPropListL(CMTPObjectMe
 														const CMTPTypeDeleteObjectPropList& aPropList, 
 														TUint32& aParameter)
 	{
-	__FLOG(_L8("DeleteObjectPropList- Entry")); 
+	OstTraceFunctionEntry0( CMTPSVCDELETEOBJECTPROPLIST_DELETEOBJECTPROPLISTL_ENTRY );
 	TMTPResponseCode responseCode = EMTPRespCodeOK;
 	TUint handle = aObjectMetaData.Uint(CMTPObjectMetaData::EHandle);
 	MMTPSvcObjectHandler* lastHandler = NULL; 
@@ -265,6 +270,8 @@ TMTPResponseCode CMTPSvcDeleteObjectPropList::DeleteObjectPropListL(CMTPObjectMe
 			aParameter = errIndex;
 			}
 		}
-	__FLOG_VA((_L8("DeleteObjectPropList - Exit with responseCode = 0x%04X"), responseCode));
+    OstTrace1( TRACE_NORMAL, CMTPSVCDELETEOBJECTPROPLIST_DELETEOBJECTPROPLISTL, 
+            "Exit with responseCode = 0x%04X", responseCode );
+	OstTraceFunctionExit0( CMTPSVCDELETEOBJECTPROPLIST_DELETEOBJECTPROPLISTL_EXIT );
 	return responseCode;
 	}

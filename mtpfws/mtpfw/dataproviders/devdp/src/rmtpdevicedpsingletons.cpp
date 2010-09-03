@@ -23,9 +23,13 @@
 #include "cmtpdevicedpconfigmgr.h"
 #include "cmtpstoragewatcher.h"
 #include "rmtpdevicedpsingletons.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "rmtpdevicedpsingletonsTraces.h"
+#endif
+
 
 // Class constants.
-__FLOG_STMT(_LIT8(KComponent,"DeviceDpSingletons");)
 
 /**
 Constructor.
@@ -41,10 +45,7 @@ Opens the singletons reference.
 */
 void RMTPDeviceDpSingletons::OpenL(MMTPDataProviderFramework& aFramework)
     {
-    __FLOG_OPEN(KMTPSubsystem, KComponent);
-    __FLOG(_L8("OpenL - Entry"));
     iSingletons = &CSingletons::OpenL(aFramework);
-    __FLOG(_L8("OpenL - Exit"));
     }
     
 /**
@@ -52,14 +53,13 @@ Closes the singletons reference.
 */
 void RMTPDeviceDpSingletons::Close()
     {
-    __FLOG(_L8("Close - Entry"));
+    OstTraceFunctionEntry0( RMTPDEVICEDPSINGLETONS_CLOSE_ENTRY );
     if (iSingletons)
         {
         iSingletons->Close();
         iSingletons = NULL;
         }
-    __FLOG(_L8("Close - Exit"));
-    __FLOG_CLOSE;
+    OstTraceFunctionExit0( RMTPDEVICEDPSINGLETONS_CLOSE_EXIT );
     }
 
 /**
@@ -69,10 +69,10 @@ store singleton.
 */
 CMTPDeviceDataStore& RMTPDeviceDpSingletons::DeviceDataStore()
     {
-    __FLOG(_L8("DeviceDataStore - Entry"));
+    OstTraceFunctionEntry0( RMTPDEVICEDPSINGLETONS_DEVICEDATASTORE_ENTRY );
     __ASSERT_DEBUG(iSingletons, User::Invariant());
     __ASSERT_DEBUG(iSingletons->iDeviceDataStore, User::Invariant());
-    __FLOG(_L8("DeviceDataStore - Exit"));
+    OstTraceFunctionExit0( RMTPDEVICEDPSINGLETONS_DEVICEDATASTORE_EXIT );
     return *iSingletons->iDeviceDataStore;
     }
 
@@ -83,25 +83,27 @@ Provides a handle to the MTP device data provider's config manager singleton.
     
 CMTPDeviceDpConfigMgr& RMTPDeviceDpSingletons::ConfigMgr()
 	{
-    __FLOG(_L8("ConfigMgr - Entry"));
+    OstTraceFunctionEntry0( RMTPDEVICEDPSINGLETONS_CONFIGMGR_ENTRY );
     __ASSERT_DEBUG(iSingletons, User::Invariant());
     __ASSERT_DEBUG(iSingletons->iConfigMgr, User::Invariant());
-    __FLOG(_L8("ConfigMgr - Exit"));
+    OstTraceFunctionExit0( RMTPDEVICEDPSINGLETONS_CONFIGMGR_EXIT );
     return *iSingletons->iConfigMgr;
 	}
 
 RMTPDeviceDpSingletons::CSingletons* RMTPDeviceDpSingletons::CSingletons::NewL(MMTPDataProviderFramework& aFramework)
     {
+    OstTraceFunctionEntry0( CSINGLETONS_NEWL_ENTRY );
     CSingletons* self(new(ELeave) CSingletons());
     CleanupStack::PushL(self);
     self->ConstructL(aFramework);
     CleanupStack::Pop(self);
+    OstTraceFunctionExit0( CSINGLETONS_NEWL_EXIT );
     return self;
     }
 
 RMTPDeviceDpSingletons::CSingletons& RMTPDeviceDpSingletons::CSingletons::OpenL(MMTPDataProviderFramework& aFramework)
     {
-    __FLOG_STATIC(KMTPSubsystem, KComponent, _L8("CSingletons::OpenL - Entry"));
+    OstTraceFunctionEntry0( CSINGLETONS_OPENL_ENTRY );
     CSingletons* self(reinterpret_cast<CSingletons*>(Dll::Tls()));
     if (!self)
         {
@@ -112,7 +114,7 @@ RMTPDeviceDpSingletons::CSingletons& RMTPDeviceDpSingletons::CSingletons::OpenL(
         {        
         self->Inc();
         }
-    __FLOG_STATIC(KMTPSubsystem, KComponent, _L8("CSingletons::OpenL - Exit"));
+    OstTraceFunctionExit0( CSINGLETONS_OPENL_EXIT );
     return *self;
     }
     
@@ -121,45 +123,43 @@ void RMTPDeviceDpSingletons::CSingletons::Close()
     CSingletons* self(reinterpret_cast<CSingletons*>(Dll::Tls()));
     if (self)
         {
-        __FLOG(_L8("CSingletons::Close - Entry"));
+        OstTraceFunctionEntry0( RMTPDEVICEDPSINGLETONS_CSINGLETONS_CLOSE_ENTRY );
         self->Dec();
         if (self->AccessCount() == 0)
             {
-            __FLOG(_L8("CSingletons::Close - Exit"));
+            OstTraceFunctionExit0( RMTPDEVICEDPSINGLETONS_CSINGLETONS_CLOSE_EXIT );
             delete self;
             Dll::SetTls(NULL);
             }
         else
             {
-            __FLOG(_L8("CSingletons::Close - Exit"));
+            OstTraceFunctionExit0( DUP1_RMTPDEVICEDPSINGLETONS_CSINGLETONS_CLOSE_EXIT );
             }
         }
     }
     
 RMTPDeviceDpSingletons::CSingletons::~CSingletons()
     {
-    __FLOG(_L8("CSingletons::~CSingletons - Entry"));
+    OstTraceFunctionEntry0( CSINGLETONS_CSINGLETONS_ENTRY );
     delete iConfigMgr;
     delete iDeviceDataStore;
     iPendingStorages.Close();
-    __FLOG(_L8("CSingletons::~CSingletons - Exit"));
-    __FLOG_CLOSE;
+    OstTraceFunctionExit0( CSINGLETONS_CSINGLETONS_EXIT );
     }
     
 void RMTPDeviceDpSingletons::CSingletons::ConstructL(MMTPDataProviderFramework& aFramework)
     {
-    __FLOG_OPEN(KMTPSubsystem, KComponent);
-    __FLOG(_L8("CSingletons::ConstructL - Entry"));
+    OstTraceFunctionEntry0( CSINGLETONS_CONSTRUCTL_ENTRY );
     iDeviceDataStore = CMTPDeviceDataStore::NewL();
     iConfigMgr = CMTPDeviceDpConfigMgr::NewL(aFramework);
-    __FLOG(_L8("CSingletons::ConstructL - Exit"));
+    OstTraceFunctionExit0( CSINGLETONS_CONSTRUCTL_EXIT );
     }
 
 RArray<TUint>& RMTPDeviceDpSingletons::PendingStorages()
 	{
-    __FLOG(_L8("PendingStorages - Entry"));
+    OstTraceFunctionEntry0( RMTPDEVICEDPSINGLETONS_PENDINGSTORAGES_ENTRY );
     __ASSERT_DEBUG(iSingletons, User::Invariant());
-    __FLOG(_L8("PendingStorages - Exit"));
+    OstTraceFunctionExit0( RMTPDEVICEDPSINGLETONS_PENDINGSTORAGES_EXIT );
     return iSingletons->iPendingStorages;
 	}
 

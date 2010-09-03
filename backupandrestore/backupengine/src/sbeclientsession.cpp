@@ -23,44 +23,58 @@
 #include "sbeclientserver.h"
 #include <connect/sbtypes.h>
 #include "sbepanic.h"
+#include "OstTraceDefinitions.h"
+#include "sbtrace.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "sbeclientsessionTraces.h"
+#endif
 
 namespace conn
 	{
-
 	RSBEClientSession* RSBEClientSession::NewL()
 	/** Symbian OS constructor 
 	@return pointer to an instantiated RSBEClientSession object */
 		{
+		OstTraceFunctionEntry0( RSBECLIENTSESSION_NEWL_ENTRY );
 		RSBEClientSession* self = new (ELeave) RSBEClientSession();
 		CleanupStack::PushL(self);
 		self->ConstructL();
 		CleanupStack::Pop(self);
+		OstTraceFunctionExit0( RSBECLIENTSESSION_NEWL_EXIT );
 		return self;
 		}
 
 	void RSBEClientSession::ConstructL()
 	/** Symbian second phase constructor */
 		{
+        OstTraceFunctionEntry0( RSBECLIENTSESSION_CONSTRUCTL_ENTRY );
         iGSHInterface = CHeapWrapper::NewL();
+		OstTraceFunctionExit0( RSBECLIENTSESSION_CONSTRUCTL_EXIT );
 		}
 		
 	RSBEClientSession::RSBEClientSession() : iCallbackHandler(NULL)
 	/** Class constructor. */
 		{
+		OstTraceFunctionEntry0( RSBECLIENTSESSION_RSBECLIENTSESSION_CONS_ENTRY );
+		OstTraceFunctionExit0( RSBECLIENTSESSION_RSBECLIENTSESSION_CONS_EXIT );
 		}
 
 	RSBEClientSession::~RSBEClientSession()
 	/** Class destructor. */
 		{
+		OstTraceFunctionEntry0( RSBECLIENTSESSION_RSBECLIENTSESSION_DES_ENTRY );
 		delete iGSHInterface;
 		delete iCallbackHandler;
+		OstTraceFunctionExit0( RSBECLIENTSESSION_RSBECLIENTSESSION_DES_EXIT );
 		}
 
 	void RSBEClientSession::Close()
 	/** Closes the Secure Backup Engine handle. */
 		{
+		OstTraceFunctionEntry0( RSBECLIENTSESSION_CLOSE_ENTRY );
 		iGlobalSharedHeap.Close();
 		RSessionBase::Close();
+		OstTraceFunctionExit0( RSBECLIENTSESSION_CLOSE_EXIT );
 		}
 
 	TInt RSBEClientSession::Connect()
@@ -69,6 +83,7 @@ namespace conn
 	@return KErrNone if successful, KErrCouldNotConnect otherwise
 	*/
 		{
+        OstTraceFunctionEntry0( RSBECLIENTSESSION_CONNECT_ENTRY );
         TInt nRetry = KSBERetryCount;
 		TInt nRet = KErrNotFound;
 
@@ -89,6 +104,7 @@ namespace conn
 			nRet = GetGlobalSharedHeapHandle();
 			}
 
+		OstTraceFunctionExit0( RSBECLIENTSESSION_CONNECT_EXIT );
 		return nRet;
 		}
 
@@ -114,6 +130,7 @@ namespace conn
 	@return Standard Symbian OS code from RProcess/RThread create.
 	*/
 		{
+        OstTraceFunctionEntry0( RSBECLIENTSESSION_STARTSERVER_ENTRY );
         //
 		// Servers UID
 		const TUidType serverUid(KNullUid, KNullUid, KSBServerUID3);
@@ -123,6 +140,7 @@ namespace conn
     	TInt nRet=server.Create(KSBImageName,KNullDesC,serverUid);
     	if (nRet != KErrNone)
     	    {
+    		OstTraceFunctionExit0( RSBECLIENTSESSION_STARTSERVER_EXIT );
     		return nRet;
     		}
     		
@@ -137,7 +155,9 @@ namespace conn
     		server.Resume();
     		}
     	User::WaitForRequest(stat);
-    	return (server.ExitType() == EExitPanic) ? KErrGeneral : stat.Int();
+    	nRet = (server.ExitType() == EExitPanic) ? KErrGeneral : stat.Int();
+    	OstTraceFunctionExit0( DUP1_RSBECLIENTSESSION_STARTSERVER_EXIT );
+    	return nRet;
 		
 		}
 
@@ -151,14 +171,16 @@ namespace conn
 			Any items present in this array will be lost
 	*/
 		{
+		OstTraceFunctionEntry0( RSBECLIENTSESSION_LISTOFDATAOWNERSL_ENTRY );
 		// Get the server to construct the flattened array and return the size of it		
 		TInt result = SendReceive(ESBEMsgPrepDataOwnerInfo);
 		
-		User::LeaveIfError(result);
+		LEAVEIFERROR(result, OstTrace1(TRACE_ERROR, RSBECLIENTSESSION_LISTOFDATAOWNERSL, "Leave: %d", result));
 		
 		iDataOwnersArray = &aDataOwners;
 		
 		PopulateListOfDataOwnersL(result);
+		OstTraceFunctionExit0( RSBECLIENTSESSION_LISTOFDATAOWNERSL_EXIT );
 		}
 		
 	void RSBEClientSession::PublicFileListL(TDriveNumber aDrive, CSBGenericDataType& aGenericDataType, 
@@ -172,15 +194,17 @@ namespace conn
 	@leave If a synchronous IPC call to the SBEngine returns an error code (i.e. if SBEngine leaves)
 	*/
 		{
+		OstTraceFunctionEntry0( RSBECLIENTSESSION_PUBLICFILELISTL_ENTRY );
 		// request the public file list
 		TInt result = SendReceive(ESBEMsgPrepPublicFiles, TIpcArgs(aDrive, 
 						&(aGenericDataType.Externalise())));
 		
-		User::LeaveIfError(result);
+		LEAVEIFERROR(result, OstTrace1(TRACE_ERROR, RSBECLIENTSESSION_PUBLICFILELISTL, "Leave: %d", result));
 
 		iFileArray = &aFiles;
 		
 		PopulatePublicFileListL(result);
+		OstTraceFunctionExit0( RSBECLIENTSESSION_PUBLICFILELISTL_EXIT );
 		}
 		
 	void RSBEClientSession::RawPublicFileListL(	TDriveNumber aDrive, 
@@ -197,6 +221,7 @@ namespace conn
 	@leave If a synchronous IPC call to the SBEngine returns an error code (i.e. if SBEngine leaves)
 	*/
 		{
+        OstTraceFunctionEntry0( RSBECLIENTSESSION_RAWPUBLICFILELISTL_ENTRY );
         // ensure that the array is cleared out before populating with externalised data
 		aFileFilter.Reset();
 		
@@ -206,14 +231,15 @@ namespace conn
 		TInt result = SendReceive(ESBEMsgPrepPublicFilesRaw, TIpcArgs(&drive, 
 				&(aGenericDataType.Externalise())));
 		
-		User::LeaveIfError(result);
+		LEAVEIFERROR(result, OstTrace1(TRACE_ERROR, RSBECLIENTSESSION_RAWPUBLICFILELISTL, "Leave: %d", result));
 
 		// Create a descriptor big enough for the array to be externalised into
 		HBufC8* pFileArray = HBufC8::NewL(result);
 		CleanupStack::PushL(pFileArray);
 		
 		TPtr8 fileArray(pFileArray->Des());
-		User::LeaveIfError(SendReceive(ESBEMsgGetPublicFilesRaw, TIpcArgs(&fileArray)));
+		result = SendReceive(ESBEMsgGetPublicFilesRaw, TIpcArgs(&fileArray));
+		LEAVEIFERROR(result, OstTrace1(TRACE_ERROR, DUP1_RSBECLIENTSESSION_RAWPUBLICFILELISTL, "Leave: %d", result));
 		
 		RRestoreFileFilterArray* pFileFilter = RRestoreFileFilterArray::InternaliseL(fileArray);
 		CleanupStack::PushL(pFileFilter);
@@ -228,6 +254,7 @@ namespace conn
 		CleanupStack::PopAndDestroy(pFileFilter); // CleanupClosePushL(*pFileFilter)
 		CleanupStack::PopAndDestroy(pFileFilter); // CleanupStack::PushL(pFileFilter)
 		CleanupStack::PopAndDestroy(pFileArray);
+		OstTraceFunctionExit0( RSBECLIENTSESSION_RAWPUBLICFILELISTL_EXIT );
 		}
 	
 	void RSBEClientSession::PublicFileListXMLL(TDriveNumber aDrive, TSecureId aSID, HBufC*& aFileList)
@@ -240,19 +267,22 @@ namespace conn
 	@leave If a synchronous IPC call to the SBEngine returns an error code (i.e. if SBEngine leaves)
 	*/
 		{
+        OstTraceFunctionEntry0( RSBECLIENTSESSION_PUBLICFILELISTXMLL_ENTRY );
         TPckgC<TDriveNumber> drive(aDrive);
 		TPckgC<TSecureId> sid(aSID);
 
 		// request the public file list
 		TInt result = SendReceive(ESBEMsgPrepPublicFilesXML, TIpcArgs(&drive, &sid));
 		
-		User::LeaveIfError(result);
+		LEAVEIFERROR(result, OstTrace1(TRACE_ERROR, RSBECLIENTSESSION_PUBLICFILELISTXMLL, "Leave: %d", result));
 
 		// Create a descriptor big enough for the array to be externalised into
 		aFileList = HBufC::NewL(result);
 	
 		TPtr fileList(aFileList->Des());
-		User::LeaveIfError(SendReceive(ESBEMsgPrepPublicFilesXML, TIpcArgs(&fileList)));
+		result = SendReceive(ESBEMsgPrepPublicFilesXML, TIpcArgs(&fileList));
+		LEAVEIFERROR(result, OstTrace1(TRACE_ERROR, DUP1_RSBECLIENTSESSION_PUBLICFILELISTXMLL, "Leave: %d", result));
+		OstTraceFunctionExit0( RSBECLIENTSESSION_PUBLICFILELISTXMLL_EXIT );
 		}
 	
 	void RSBEClientSession::SetBURModeL(const TDriveList& aDriveList, TBURPartType aBURType, 
@@ -266,7 +296,10 @@ namespace conn
 	@leave If a synchronous IPC call to the SBEngine returns an error code (i.e. if SBEngine leaves)
 	*/
 		{
-		User::LeaveIfError(SendReceive(ESBEMsgSetBURMode, TIpcArgs(&aDriveList, aBURType, aBackupIncType)));
+		OstTraceFunctionEntry0( RSBECLIENTSESSION_SETBURMODEL_ENTRY );
+		TInt result = SendReceive(ESBEMsgSetBURMode, TIpcArgs(&aDriveList, aBURType, aBackupIncType));
+		LEAVEIFERROR(result, OstTrace1(TRACE_ERROR, RSBECLIENTSESSION_SETBURMODEL, "Leave: %d", result));
+		OstTraceFunctionExit0( RSBECLIENTSESSION_SETBURMODEL_EXIT );
 		}
 		
 	void RSBEClientSession::SetSIDListForPartialBURL(RSIDArray& aSIDs)
@@ -279,14 +312,17 @@ namespace conn
 	@leave If a synchronous IPC call to the SBEngine returns an error code (i.e. if SBEngine leaves)
 	*/
 		{
+        OstTraceFunctionEntry0( RSBECLIENTSESSION_SETSIDLISTFORPARTIALBURL_ENTRY );
         HBufC8* pFlattenedArray = aSIDs.ExternaliseL();
 		CleanupStack::PushL(pFlattenedArray);
 		
 		TPtrC8 flatArray(pFlattenedArray->Des());
 		
-		User::LeaveIfError(SendReceive(ESBEMsgSetSIDListPartial, TIpcArgs(&flatArray)));
+		TInt result = SendReceive(ESBEMsgSetSIDListPartial, TIpcArgs(&flatArray));
+		LEAVEIFERROR(result, OstTrace1(TRACE_ERROR, RSBECLIENTSESSION_SETSIDLISTFORPARTIALBURL, "Leave: %d", result));
 
 		CleanupStack::PopAndDestroy(pFlattenedArray);
+		OstTraceFunctionExit0( RSBECLIENTSESSION_SETSIDLISTFORPARTIALBURL_EXIT );
 		}
 		
 	void RSBEClientSession::SIDStatusL(RSIDStatusArray& aSIDStatus)
@@ -299,16 +335,19 @@ namespace conn
 	@leave If a synchronous IPC call to the SBEngine returns an error code (i.e. if SBEngine leaves)
 	*/
 		{
+        OstTraceFunctionEntry0( RSBECLIENTSESSION_SIDSTATUSL_ENTRY );
         HBufC8* pExternalisedArray = aSIDStatus.ExternaliseL();
 		CleanupStack::PushL(pExternalisedArray);
 		
 		TPtr8 externArray(pExternalisedArray->Des());
-		User::LeaveIfError(SendReceive(ESBEMsgPrepSIDStatus, TIpcArgs(&externArray)));
+		TInt result = SendReceive(ESBEMsgPrepSIDStatus, TIpcArgs(&externArray));
+		LEAVEIFERROR(result, OstTrace1(TRACE_ERROR, RSBECLIENTSESSION_SIDSTATUSL, "Leave: %d", result));
 		
 		// Reset the descriptor, ready for getting the returned externalised array
 		externArray.Zero();
 		
-		User::LeaveIfError(SendReceive(ESBEMsgGetSIDStatus, TIpcArgs(&externArray)));
+		result = SendReceive(ESBEMsgGetSIDStatus, TIpcArgs(&externArray));
+		LEAVEIFERROR(result, OstTrace1(TRACE_ERROR, DUP1_RSBECLIENTSESSION_SIDSTATUSL, "Leave: %d", result));
 		RSIDStatusArray* pInternalisedArray = RSIDStatusArray::InternaliseL(externArray);
 
 		CleanupStack::PopAndDestroy(pExternalisedArray); // pExternalisedArray
@@ -326,6 +365,7 @@ namespace conn
 			}
 		CleanupStack::PopAndDestroy(pInternalisedArray);	// pInternalisedArray->Close()
 		CleanupStack::PopAndDestroy(pInternalisedArray); // pInternalisedArray
+		OstTraceFunctionExit0( RSBECLIENTSESSION_SIDSTATUSL_EXIT );
 		}
 	
 	TPtr8& RSBEClientSession::TransferDataAddressL()
@@ -363,11 +403,13 @@ namespace conn
 	@return Pointer to the start of the buffer for reading
 	*/
 		{
+        OstTraceFunctionEntry0( RSBECLIENTSESSION_TRANSFERDATAINFOL_ENTRY );
         TPtrC8& returnedBuf = iGSHInterface->ReadBufferL(iGlobalSharedHeap);
 		
 		TDesC8& genTypeBuffer = iGSHInterface->Header(iGlobalSharedHeap).GenericTransferTypeBuffer();
 		if (genTypeBuffer.Size() == 0)
 			{
+		    OstTrace0(TRACE_ERROR, RSBECLIENTSESSION_TRANSFERDATAINFOL, "Leave: KErrNotReady");
 			User::Leave(KErrNotReady);
 			}
 		
@@ -379,6 +421,7 @@ namespace conn
 
 		CleanupStack::Pop(aGenericTransferType);
 		
+		OstTraceFunctionExit0( RSBECLIENTSESSION_TRANSFERDATAINFOL_EXIT );
 		return returnedBuf;
 		}
 
@@ -390,6 +433,7 @@ namespace conn
 	@return An error code resulting from the server request for the handle, KErrNone if ok
 	*/
 		{
+        OstTraceFunctionEntry0( RSBECLIENTSESSION_GETGLOBALSHAREDHEAPHANDLE_ENTRY );
         TInt ret = SendReceive(ESBEMsgGetGSHHandle);
 		
 		// ret is negative if an error has ocurred
@@ -401,6 +445,7 @@ namespace conn
 			ret = KErrNone;
 			}
 		
+		OstTraceFunctionExit0( RSBECLIENTSESSION_GETGLOBALSHAREDHEAPHANDLE_EXIT );
 		return ret;
 		}
 		
@@ -416,8 +461,10 @@ namespace conn
 	is ready
 	*/
 		{
+        OstTraceFunctionEntry0( RSBECLIENTSESSION_REQUESTDATAL_ENTRY );
         const TDesC8& transBuf = aGenericTransferType.Externalise();
 		SendReceive(ESBEMsgRequestDataAsync, TIpcArgs(&transBuf), aStatus);
+		OstTraceFunctionExit0( RSBECLIENTSESSION_REQUESTDATAL_EXIT );
 		}
 
 	void RSBEClientSession::RequestDataL(CSBGenericTransferType& aGenericTransferType)
@@ -430,8 +477,10 @@ namespace conn
 	@leave If a synchronous IPC call to the SBEngine returns an error code (i.e. if SBEngine leaves)
 	*/
 		{
-        User::LeaveIfError(SendReceive(ESBEMsgRequestDataSync, 
-			TIpcArgs(&(aGenericTransferType.Externalise()))));
+        OstTraceFunctionEntry0( DUP1_RSBECLIENTSESSION_REQUESTDATAL_ENTRY );
+        TInt result = SendReceive(ESBEMsgRequestDataSync, TIpcArgs(&(aGenericTransferType.Externalise())));
+        LEAVEIFERROR(result, OstTrace1(TRACE_ERROR, DUP1_RSBECLIENTSESSION_REQUESTDATAL, "Leave: %d", result));
+		OstTraceFunctionExit0( DUP1_RSBECLIENTSESSION_REQUESTDATAL_EXIT );
 		}
 		
 	void RSBEClientSession::SupplyDataL(CSBGenericTransferType& aGenericTransferType, 
@@ -446,10 +495,12 @@ namespace conn
 	@leave If a synchronous IPC call to the SBEngine returns an error code (i.e. if SBEngine leaves)
 	*/
 		{
+        OstTraceFunctionEntry0( RSBECLIENTSESSION_SUPPLYDATAL_ENTRY );
         iGSHInterface->Header(iGlobalSharedHeap).GenericTransferTypeBuffer() 
 			= aGenericTransferType.Externalise();
 
 		SendReceive(ESBEMsgSupplyDataSync, TIpcArgs(aFinished), aStatus);
+		OstTraceFunctionExit0( RSBECLIENTSESSION_SUPPLYDATAL_EXIT );
 		}
 
 	void RSBEClientSession::SupplyDataL(CSBGenericTransferType& aGenericTransferType, 
@@ -464,10 +515,13 @@ namespace conn
 	@leave If a synchronous IPC call to the SBEngine returns an error code (i.e. if SBEngine leaves)
 	*/
 		{
+        OstTraceFunctionEntry0( DUP1_RSBECLIENTSESSION_SUPPLYDATAL_ENTRY );
         iGSHInterface->Header(iGlobalSharedHeap).GenericTransferTypeBuffer() 
 			= aGenericTransferType.Externalise();
-			
-		User::LeaveIfError(SendReceive(ESBEMsgSupplyDataSync, TIpcArgs(aFinished)));
+
+        TInt result = SendReceive(ESBEMsgSupplyDataSync, TIpcArgs(aFinished));
+		LEAVEIFERROR(result, OstTrace1(TRACE_ERROR, DUP1_RSBECLIENTSESSION_SUPPLYDATAL, "Leave: %d", result));
+		OstTraceFunctionExit0( DUP1_RSBECLIENTSESSION_SUPPLYDATAL_EXIT );
 		}
 		
 	void RSBEClientSession::AllSnapshotsSuppliedL()
@@ -477,8 +531,11 @@ namespace conn
 	@leave If a synchronous IPC call to the SBEngine returns an error code (i.e. if SBEngine leaves)
 	*/
 		{
-        User::LeaveIfError(SendReceive(ESBEMsgAllSnapshotsSupplied));
+        OstTraceFunctionEntry0( RSBECLIENTSESSION_ALLSNAPSHOTSSUPPLIEDL_ENTRY );
+        TInt result = SendReceive(ESBEMsgAllSnapshotsSupplied);
+        LEAVEIFERROR(result, OstTrace1(TRACE_ERROR, RSBECLIENTSESSION_ALLSNAPSHOTSSUPPLIEDL, "Leave: %d", result));
 	
+		OstTraceFunctionExit0( RSBECLIENTSESSION_ALLSNAPSHOTSSUPPLIEDL_EXIT );
 		}
 		
 	TUint RSBEClientSession::ExpectedDataSizeL(CSBGenericTransferType& aGenericTransferType)
@@ -490,13 +547,17 @@ namespace conn
 	@leave If a synchronous IPC call to the SBEngine returns an error code (i.e. if SBEngine leaves)
 	*/
 		{
+        OstTraceFunctionEntry0( RSBECLIENTSESSION_EXPECTEDDATASIZEL_ENTRY );
         TPckgBuf<TUint> sizePkg;
 
 		TPtrC8 genType(aGenericTransferType.Externalise());
 		
-		User::LeaveIfError(SendReceive(ESBEMsgGetExpectedDataSize, TIpcArgs(&genType, &sizePkg)));
+		TInt result = SendReceive(ESBEMsgGetExpectedDataSize, TIpcArgs(&genType, &sizePkg));
+		LEAVEIFERROR(result, OstTrace1(TRACE_ERROR, RSBECLIENTSESSION_EXPECTEDDATASIZEL, "Leave: %d", result));
 			
-		return sizePkg();
+		TUint size = sizePkg();
+		OstTraceFunctionExit0( RSBECLIENTSESSION_EXPECTEDDATASIZEL_EXIT );
+		return size;
 		}
 		
 	void RSBEClientSession::AllSystemFilesRestored()
@@ -505,7 +566,9 @@ namespace conn
 	are to be started
 	*/
 		{
+        OstTraceFunctionEntry0( RSBECLIENTSESSION_ALLSYSTEMFILESRESTORED_ENTRY );
         SendReceive(ESBEMsgAllSystemFilesRestored);
+		OstTraceFunctionExit0( RSBECLIENTSESSION_ALLSYSTEMFILESRESTORED_EXIT );
 		}
 	
 	/**
@@ -518,6 +581,7 @@ namespace conn
 	*/
 	void RSBEClientSession::ListOfDataOwnersL(RPointerArray<CDataOwnerInfo>& aDataOwners, TRequestStatus& aStatus)
 		{
+		OstTraceFunctionEntry0( DUP1_RSBECLIENTSESSION_LISTOFDATAOWNERSL_ENTRY );
 		if (iCallbackHandler == NULL)
 			{
 			iCallbackHandler = CSBECallbackHandler::NewL(*this);				
@@ -525,6 +589,7 @@ namespace conn
 
 		if (iCallbackHandler->IsActive())
 			{
+		    OstTrace0(TRACE_ERROR, DUP1_RSBECLIENTSESSION_LISTOFDATAOWNERSL, "Leave: KErrInUse");
 			User::Leave(KErrInUse);
 			}
 		else
@@ -533,6 +598,7 @@ namespace conn
 			SendReceive(ESBEMsgPrepDataOwnerInfo, iCallbackHandler->iStatus);
 			iCallbackHandler->StartL(aStatus, EListOfDataOwners);
 			}
+		OstTraceFunctionExit0( DUP1_RSBECLIENTSESSION_LISTOFDATAOWNERSL_EXIT );
 		}
 	
 	/**
@@ -546,6 +612,7 @@ namespace conn
 	*/	
 	void RSBEClientSession::PublicFileListL(TDriveNumber aDrive, CSBGenericDataType& aGenericDataType, RFileArray& aFiles, TRequestStatus& aStatus)
 		{
+		OstTraceFunctionEntry0( DUP1_RSBECLIENTSESSION_PUBLICFILELISTL_ENTRY );
 		if (iCallbackHandler == NULL)
 			{
 			iCallbackHandler = CSBECallbackHandler::NewL(*this);				
@@ -553,6 +620,7 @@ namespace conn
 	
 		if (iCallbackHandler->IsActive())
 			{
+		    OstTrace0(TRACE_ERROR, DUP1_RSBECLIENTSESSION_PUBLICFILELISTL, "Leave: KErrInUse");
 			User::Leave(KErrInUse);
 			}
 		else
@@ -562,6 +630,7 @@ namespace conn
 			SendReceive(ESBEMsgPrepPublicFiles, TIpcArgs(aDrive, &(aGenericDataType.Externalise())), iCallbackHandler->iStatus);
 			iCallbackHandler->StartL(aStatus,EPublicFileList);
 			}
+		OstTraceFunctionExit0( DUP1_RSBECLIENTSESSION_PUBLICFILELISTL_EXIT );
 		}
 		
 	void RSBEClientSession::SetBURModeL(const TDriveList& aDriveList, TBURPartType aBURType, 
@@ -576,7 +645,9 @@ namespace conn
 	*/
 
 		{
+		OstTraceFunctionEntry0( DUP1_RSBECLIENTSESSION_SETBURMODEL_ENTRY );
 		SendReceive(ESBEMsgSetBURMode, TIpcArgs(&aDriveList, aBURType, aBackupIncType), aStatus);
+		OstTraceFunctionExit0( DUP1_RSBECLIENTSESSION_SETBURMODEL_EXIT );
 		}
 	
 	/**
@@ -586,7 +657,9 @@ namespace conn
 	*/	
 	void RSBEClientSession::AllSnapshotsSuppliedL(TRequestStatus& aStatus)
 		{
+		OstTraceFunctionEntry0( DUP1_RSBECLIENTSESSION_ALLSNAPSHOTSSUPPLIEDL_ENTRY );
 		SendReceive(ESBEMsgAllSnapshotsSupplied, aStatus);
+		OstTraceFunctionExit0( DUP1_RSBECLIENTSESSION_ALLSNAPSHOTSSUPPLIEDL_EXIT );
 		}
 	
 	/**
@@ -597,7 +670,9 @@ namespace conn
 	*/	
 	void RSBEClientSession::AllSystemFilesRestoredL(TRequestStatus& aStatus)
 		{
+		OstTraceFunctionEntry0( RSBECLIENTSESSION_ALLSYSTEMFILESRESTOREDL_ENTRY );
 		SendReceive(ESBEMsgAllSystemFilesRestored, aStatus);
+		OstTraceFunctionExit0( RSBECLIENTSESSION_ALLSYSTEMFILESRESTOREDL_EXIT );
 		}
 				
 	
@@ -609,6 +684,7 @@ namespace conn
 	*/
 	void RSBEClientSession::PopulateListOfDataOwnersL(TUint aBufferSize)
 		{
+		OstTraceFunctionEntry0( RSBECLIENTSESSION_POPULATELISTOFDATAOWNERSL_ENTRY );
 		__ASSERT_DEBUG(iDataOwnersArray, Panic(KErrBadHandle));
 		iDataOwnersArray->ResetAndDestroy();
 					
@@ -620,7 +696,7 @@ namespace conn
 		TPtr8 returnedBuf(pReturnedBuf->Des());
 		// Request that the server returns the previously packed array
 		TInt result = SendReceive(ESBEMsgGetDataOwnerInfo, TIpcArgs(&returnedBuf));
-		User::LeaveIfError(result);
+		LEAVEIFERROR(result, OstTrace1(TRACE_ERROR, RSBECLIENTSESSION_POPULATELISTOFDATAOWNERSL, "Leave: %d", result));
 		
 		TInt offset = 0;
 		
@@ -637,6 +713,7 @@ namespace conn
 			}
 			
 		CleanupStack::PopAndDestroy(pReturnedBuf);
+		OstTraceFunctionExit0( RSBECLIENTSESSION_POPULATELISTOFDATAOWNERSL_EXIT );
 		}
 	
 	/**
@@ -647,6 +724,7 @@ namespace conn
 	*/	
 	void RSBEClientSession::PopulatePublicFileListL(TUint aBufferSize)
 		{
+		OstTraceFunctionEntry0( RSBECLIENTSESSION_POPULATEPUBLICFILELISTL_ENTRY );
 		__ASSERT_DEBUG(iFileArray, Panic(KErrBadHandle));
 		iFileArray->Reset();
 		
@@ -655,7 +733,8 @@ namespace conn
 		CleanupStack::PushL(pFileArray);
 		
 		TPtr8 fileArray(pFileArray->Des());
-		User::LeaveIfError(SendReceive(ESBEMsgGetPublicFiles, TIpcArgs(&fileArray)));
+		TInt result = SendReceive(ESBEMsgGetPublicFiles, TIpcArgs(&fileArray));
+		LEAVEIFERROR(result, OstTrace1(TRACE_ERROR, RSBECLIENTSESSION_POPULATEPUBLICFILELISTL, "Leave: %d", result));
 		
 		RFileArray* pFiles = RFileArray::InternaliseL(fileArray);
 		CleanupStack::PopAndDestroy(pFileArray);
@@ -671,6 +750,7 @@ namespace conn
 		
 		CleanupStack::PopAndDestroy(pFiles); // CleanupClosePushL(*pFiles)
 		CleanupStack::PopAndDestroy(pFiles); // CleanupStack::PushL(pFiles)
+		OstTraceFunctionExit0( RSBECLIENTSESSION_POPULATEPUBLICFILELISTL_EXIT );
 		}
 
 	void RSBEClientSession::PublicFileListL(TDriveNumber aDrive, CSBGenericDataType& aGenericDataType, 
@@ -691,6 +771,7 @@ namespace conn
 	@param aStatus The TRequestStatus that will be completed once the engine has fully processed this request
 	*/
 		{
+		OstTraceFunctionEntry0( DUP2_RSBECLIENTSESSION_PUBLICFILELISTL_ENTRY );
 		if (iCallbackHandler == NULL)
 			{
 			iCallbackHandler = CSBECallbackHandler::NewL(*this);				
@@ -698,6 +779,7 @@ namespace conn
 	
 		if (iCallbackHandler->IsActive())
 			{
+		    OstTrace0(TRACE_ERROR, DUP2_RSBECLIENTSESSION_PUBLICFILELISTL, "Leave: KErrInUse");
 			User::Leave(KErrInUse);
 			}
 		else
@@ -713,6 +795,7 @@ namespace conn
 				iCallbackHandler->iStatus);
 			iCallbackHandler->StartL(aStatus,ELargePublicFileList);
 			}
+		OstTraceFunctionExit0( DUP2_RSBECLIENTSESSION_PUBLICFILELISTL_EXIT );
 		}
 	
 	void RSBEClientSession::PopulateLargePublicFileListL(TInt aResult)
@@ -721,6 +804,7 @@ namespace conn
 	@param aResult The error code returned by the engine as a result of the initial request
 	*/
 		{
+		OstTraceFunctionEntry0( RSBECLIENTSESSION_POPULATELARGEPUBLICFILELISTL_ENTRY );
 		// Retrieve the return parameters (finished flag and entry count) from SBE
 		if (KErrNone == aResult)
 			{
@@ -728,7 +812,8 @@ namespace conn
 			TInt numEntries;
 			TPckg<TBool> finishPkg(finishedFlag);
 			TPckg<TInt> numEntriesPkg(numEntries);
-			User::LeaveIfError(SendReceive(ESBEMsgGetLargePublicFiles, TIpcArgs(&finishPkg, &numEntriesPkg)));
+			TInt result = SendReceive(ESBEMsgGetLargePublicFiles, TIpcArgs(&finishPkg, &numEntriesPkg));
+			LEAVEIFERROR(result, OstTrace1(TRACE_ERROR, RSBECLIENTSESSION_POPULATELARGEPUBLICFILELISTL, "Leave: %d", result));
 			
 			*iFinished = finishPkg();
 			TInt numberOfReturnedEntries = numEntriesPkg();
@@ -752,6 +837,7 @@ namespace conn
 			{
 			*iFinished = EFalse;
 			}
+		OstTraceFunctionExit0( RSBECLIENTSESSION_POPULATELARGEPUBLICFILELISTL_EXIT );
 		}
 
 
@@ -765,28 +851,36 @@ namespace conn
 	*/
 	CSBECallbackHandler* CSBECallbackHandler::NewL(RSBEClientSession& aClientSession)
 		{
+		OstTraceFunctionEntry0( CSBECALLBACKHANDLER_NEWL_ENTRY );
 		CSBECallbackHandler* self = new (ELeave) CSBECallbackHandler(aClientSession);
 		CleanupStack::PushL(self);
 		self->ConstructL();
 		CleanupStack::Pop(self);
+		OstTraceFunctionExit0( CSBECALLBACKHANDLER_NEWL_EXIT );
 		return self;
 		}
 		
 	/** Symbian second phase constructor */
 	void CSBECallbackHandler::ConstructL()
 		{
+		OstTraceFunctionEntry0( CSBECALLBACKHANDLER_CONSTRUCTL_ENTRY );
+		OstTraceFunctionExit0( CSBECALLBACKHANDLER_CONSTRUCTL_EXIT );
 		}
 		
 	/** Class constructor. */
 	CSBECallbackHandler::CSBECallbackHandler(RSBEClientSession& aClientSession)
 		: CActive(EPriorityNormal), iClientSession(aClientSession)
 		{
+		OstTraceFunctionEntry0( CSBECALLBACKHANDLER_CSBECALLBACKHANDLER_CONS_ENTRY );
 		CActiveScheduler::Add(this);
+		OstTraceFunctionExit0( CSBECALLBACKHANDLER_CSBECALLBACKHANDLER_CONS_EXIT );
 		}
 	/** Class destructor. */
 	CSBECallbackHandler::~CSBECallbackHandler()
 		{
+		OstTraceFunctionEntry0( CSBECALLBACKHANDLER_CSBECALLBACKHANDLER_DES_ENTRY );
 		Cancel();
+		OstTraceFunctionExit0( CSBECALLBACKHANDLER_CSBECALLBACKHANDLER_DES_EXIT );
 		}
 	
 	/** Starts Callback Handler
@@ -797,10 +891,12 @@ namespace conn
 	*/	
 	void CSBECallbackHandler::StartL(TRequestStatus& aStatus, TState aState)
 		{	
+		OstTraceFunctionEntry0( CSBECALLBACKHANDLER_STARTL_ENTRY );
 		aStatus = KRequestPending;
 		iObserver = &aStatus;
 		iState = aState;
 		SetActive();
+		OstTraceFunctionExit0( CSBECALLBACKHANDLER_STARTL_EXIT );
 		}
 		
 	/**
@@ -808,13 +904,16 @@ namespace conn
 	*/
   	void CSBECallbackHandler::CancelRequest()
   		{
+  		OstTraceFunctionEntry0( CSBECALLBACKHANDLER_CANCELREQUEST_ENTRY );
   		Cancel();
+  		OstTraceFunctionExit0( CSBECALLBACKHANDLER_CANCELREQUEST_EXIT );
   		}
 	/**
 	CActive::RunL() implementation
 	*/	
 	void CSBECallbackHandler::RunL()
 		{
+		OstTraceFunctionEntry0( CSBECALLBACKHANDLER_RUNL_ENTRY );
 		TInt result = iStatus.Int();
 		if (result >= KErrNone)
 			{			
@@ -835,9 +934,10 @@ namespace conn
 				} //switch
 			} // if
 			
-		User::LeaveIfError(result);
+		LEAVEIFERROR(result, OstTrace1(TRACE_ERROR, CSBECALLBACKHANDLER_RUNL, "Leave: %d", result));
 		
 		CompleteObserver(KErrNone);
+		OstTraceFunctionExit0( CSBECALLBACKHANDLER_RUNL_EXIT );
 		}
 	
 	/**
@@ -846,9 +946,11 @@ namespace conn
 	*/	
 	void CSBECallbackHandler::DoCancel()
 		{
+		OstTraceFunctionEntry0( CSBECALLBACKHANDLER_DOCANCEL_ENTRY );
 		iState = ENone;
 		// just to avoid repeating the code
 		CompleteObserver(KErrCancel);
+		OstTraceFunctionExit0( CSBECALLBACKHANDLER_DOCANCEL_EXIT );
 		}
 	
 	/**
@@ -857,11 +959,13 @@ namespace conn
 	*/
 	void CSBECallbackHandler::CompleteObserver(TInt aError)
 		{
+		OstTraceFunctionEntry0( CSBECALLBACKHANDLER_COMPLETEOBSERVER_ENTRY );
 		if(iObserver)
 			{
 			User::RequestComplete(iObserver, aError);
 			iObserver = NULL;
 			}
+		OstTraceFunctionExit0( CSBECALLBACKHANDLER_COMPLETEOBSERVER_EXIT );
 		}
 		
 	/**
@@ -871,7 +975,9 @@ namespace conn
 	*/
 	TInt CSBECallbackHandler::RunError(TInt aError)
 		{
+		OstTraceFunctionEntry0( CSBECALLBACKHANDLER_RUNERROR_ENTRY );
 		CompleteObserver(aError);
+		OstTraceFunctionExit0( CSBECALLBACKHANDLER_RUNERROR_EXIT );
 		return KErrNone;
 		}
 		

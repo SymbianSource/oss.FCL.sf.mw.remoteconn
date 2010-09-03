@@ -21,9 +21,11 @@
 */
 
 #include "cmtpoperator.h"
-
-__FLOG_STMT( _LIT8( KComponent, "mtpoperator" ); )
-
+#include "mtpdebug.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpoperatorTraces.h"
+#endif
 
 CMTPOperator* CMTPOperator::NewL( MMTPOperatorNotifier& aNotifier )
     {
@@ -34,53 +36,58 @@ CMTPOperator* CMTPOperator::NewL( MMTPOperatorNotifier& aNotifier )
 
 CMTPOperator::~CMTPOperator()
     {
+    OstTraceFunctionEntry0( CMTPOPERATOR_DES_ENTRY );
     Cancel();
     iPendingOperations.Reset();
     iPendingOperations.Close();
     iMTPClient.Close();
     iProperty.Close();
     delete iTimer;
-    __FLOG( _L8("+/-Dtor") );
-    __FLOG_CLOSE;
+    OstTraceFunctionExit0( CMTPOPERATOR_DES_EXIT );
     }
 
 void CMTPOperator::StartTransport( TUid aTransport )
     {
-    __FLOG_1( _L8("+/-StartTransport( 0x%08X )"), aTransport.iUid );
-
+    OstTraceFunctionEntry0( CMTPOPERATOR_STARTTRANSPORT_ENTRY );
+    OstTrace1( TRACE_NORMAL, CMTPOPERATOR_STARTTRANSPORT, "The transport uid is 0x%08X", aTransport.iUid );
     TInt err = AppendOperation( EStartTransport, aTransport );
     if ( KErrNone != err )
         {
         iNotifier.HandleStartTrasnportCompleteL( err );
         }
+    OstTraceFunctionExit0( CMTPOPERATOR_STARTTRANSPORT_EXIT );
     }
 
 void CMTPOperator::StopTransport( TUid aTransport )
     {
-    __FLOG_1( _L8("+/-StopTransport( 0x%08X )"), aTransport.iUid );
+    OstTraceFunctionEntry0( CMTPOPERATOR_STOPTRANSPORT_ENTRY );
+    OstTrace1( TRACE_NORMAL, CMTPOPERATOR_STOPTRANSPORT, "The transport uid is 0x%08X", aTransport.iUid );
     TInt err = AppendOperation( EStopTransport, aTransport );
     if ( KErrNone != err )
         {
         iNotifier.HandleStartTrasnportCompleteL( err );
         }
+    OstTraceFunctionExit0( CMTPOPERATOR_STOPTRANSPORT_EXIT );
     }
 
 void CMTPOperator::StartTimer(TInt aSecond)
     {
-    __FLOG(_L8("StartTimer in cmtpoperator!"));
+    OstTraceFunctionEntry0( CMTPOPERATOR_STARTTIMER_ENTRY );
     iTimer->Start(aSecond);    
+    OstTraceFunctionExit0( CMTPOPERATOR_STARTTIMER_EXIT );
     }
 
 void CMTPOperator::DoCancel()
     {
-    __FLOG( _L8("+/-DoCancel") );
+    OstTraceFunctionEntry0( CMTPOPERATOR_DOCANCEL_ENTRY );
     iProperty.Cancel();
     iConSubscribed = EFalse;
+    OstTraceFunctionExit0( CMTPOPERATOR_DOCANCEL_EXIT );
     }
 
 void CMTPOperator::RunL()
     {
-    __FLOG( _L8("+RunL") );
+    OstTraceFunctionEntry0( CMTPOPERATOR_RUNL_ENTRY );
     
     iConSubscribed = EFalse;
     TInt count = iPendingOperations.Count();
@@ -100,17 +107,17 @@ void CMTPOperator::RunL()
 
 
         TInt error = iProperty.Get(KMTPPublishConnStateCat, EMTPConnStateKey, connState);
-        __FLOG_2(_L8("Before, the iConnState is %d and connState is %d"), iConnState, connState);
+        OstTraceExt2( TRACE_NORMAL, CMTPOPERATOR_RUNL, "Before, the iConnState is %d and connState is %d", iConnState, connState );
         if ( KErrNotFound == error )
             {
             iConnState = KInitialValue;
-            __FLOG( _L8("The key is deleted and mtp server shut down!") );
+            OstTrace0( TRACE_NORMAL, DUP1_CMTPOPERATOR_RUNL, "The key is deleted and mtp server shut down!" );
             }
         else
             {
             if (iTimer->IsActive() && !iTimer->GetStopTransportStatus())
                 {
-                __FLOG( _L8("Timer is cancelled!") );
+                OstTrace0( TRACE_NORMAL, DUP2_CMTPOPERATOR_RUNL, "Timer is cancelled!" );
                 iTimer->Cancel();
                 }
             //if the disconnect is not set, set the disconnect
@@ -118,7 +125,7 @@ void CMTPOperator::RunL()
             if ( KInitialValue == iConnState )
                 {
                 iConnState = connState;
-                __FLOG( _L8("the first time to launch mtp") );
+                OstTrace0( TRACE_NORMAL, DUP3_CMTPOPERATOR_RUNL, "the first time to launch mtp" );
                 }
             else
                 {
@@ -129,7 +136,7 @@ void CMTPOperator::RunL()
                         {
                         iTimer->Start(KStopMTPSeconds);
                         }
-                    __FLOG( _L8("Timer is launched.") );
+                    OstTrace0( TRACE_NORMAL, DUP4_CMTPOPERATOR_RUNL, "Timer is launched." );
                     }
                 else
                     {
@@ -138,23 +145,22 @@ void CMTPOperator::RunL()
                     }
                 }
             }
-        __FLOG_2(_L8("After, the iConnState is %d and connState is %d"), iConnState, connState);
+        OstTraceExt2( TRACE_NORMAL, DUP5_CMTPOPERATOR_RUNL, "After, the iConnState is %d and connState is %d", iConnState, connState );
         }
-       
-    __FLOG( _L8("-RunL") );
+    OstTraceFunctionExit0( CMTPOPERATOR_RUNL_EXIT );
     }
 
 CMTPOperator::CMTPOperator( MMTPOperatorNotifier& aNotifier ):
     CActive( EPriorityStandard ),
     iNotifier( aNotifier )
     {
-    __FLOG_OPEN( KMTPSubsystem, KComponent );
-    __FLOG( _L8("+/-Ctor") );
+    OstTraceFunctionEntry0( CMTPOPERATOR_CONS_ENTRY );
+    OstTraceFunctionExit0( CMTPOPERATOR_CONS_EXIT );
     }
 
 void CMTPOperator::ConstructL()
     {
-    __FLOG( _L8("+ConstructL") );
+    OstTraceFunctionEntry0( CMTPOPERATOR_CONSTRUCTL_ENTRY );
     CActiveScheduler::Add( this );
     //if the server is running, the first disconnction shows the conection is down!
     if(KErrNone == iMTPClient.IsProcessRunning())
@@ -165,20 +171,25 @@ void CMTPOperator::ConstructL()
         {
         iConnState = KInitialValue;
         }
-    __FLOG_1( _L8("The connstate is set to %d"), iConnState );
-    User::LeaveIfError( iMTPClient.Connect() );
-    User::LeaveIfError(iProperty.Attach(KMTPPublishConnStateCat, EMTPConnStateKey));
+    OstTrace1( TRACE_NORMAL, CMTPOPERATOR_CONSTRUCTL, "The connstate is set to %d", iConnState );
+    
+    LEAVEIFERROR( iMTPClient.Connect(),
+            OstTrace0( TRACE_ERROR, DUP1_CMTPOPERATOR_CONSTRUCTL, "Leave when the client connects to mtp server" ));
+    
+    LEAVEIFERROR(iProperty.Attach(KMTPPublishConnStateCat, EMTPConnStateKey),
+            OstTrace0( TRACE_ERROR, DUP2_CMTPOPERATOR_CONSTRUCTL, "iProperty attached failed." ));
     iTimer = CMTPControllerTimer::NewL(iMTPClient, *this);
     
     iConSubscribed = EFalse;
-    __FLOG( _L8("-ConstructL") );
+    OstTraceFunctionExit0( CMTPOPERATOR_CONSTRUCTL_EXIT );
     }
 
 TInt CMTPOperator::AppendOperation( TOperationType aType, TUid aTransport )
     {
+    OstTraceFunctionEntry0( CMTPOPERATOR_APPENDOPERATION_ENTRY );
     TOperation operation = { aType, aTransport };
     TInt err = iPendingOperations.Append( operation );
-    __FLOG_1( _L8("+AppendOperation returns %d"), err );
+    OstTrace1( TRACE_NORMAL, CMTPOPERATOR_APPENDOPERATION, "The return value is %d", err );
     if ( ( KErrNone == err ) && !IsActive() )
         {
         Schedule( KErrNone );
@@ -194,13 +205,15 @@ TInt CMTPOperator::AppendOperation( TOperationType aType, TUid aTransport )
                 }
             }
         }
-    __FLOG( _L8("-AppendOperation") );
+
+    OstTraceFunctionExit0( CMTPOPERATOR_APPENDOPERATION_EXIT );
     return err;
     }
 
 void CMTPOperator::Schedule( TInt aError )
     {
-    __FLOG_1( _L8("+/-Schedule( %d )"), aError );
+    OstTraceFunctionEntry0( CMTPOPERATOR_SCHEDULE_ENTRY );
+    OstTrace1( TRACE_NORMAL, CMTPOPERATOR_SCHEDULE, "The error value is %d", aError );
     if(iTimer->IsActive())
         {
         iTimer->Cancel();
@@ -208,11 +221,13 @@ void CMTPOperator::Schedule( TInt aError )
     TRequestStatus* status = &iStatus;
     User::RequestComplete( status, aError );
     SetActive();
+    OstTraceFunctionExit0( CMTPOPERATOR_SCHEDULE_EXIT );
     }
 
 void CMTPOperator::HandleOperationL( const TOperation& aOperation )
     {
-    __FLOG_2( _L8("+HandleOperationL( 0x%08X, 0x%08X )"), aOperation.iTransport.iUid, aOperation.iType );
+    OstTraceFunctionEntry0( CMTPOPERATOR_HANDLEOPERATIONL_ENTRY );
+    OstTraceExt2( TRACE_NORMAL, CMTPOPERATOR_HANDLEOPERATIONL, "The transport id is 0x%08X and the operation is 0x%08X", (TInt)aOperation.iTransport.iUid, aOperation.iType );
     TInt err = KErrNone;
     switch ( aOperation.iType )
         {
@@ -231,19 +246,20 @@ void CMTPOperator::HandleOperationL( const TOperation& aOperation )
             iNotifier.HandleStopTrasnportCompleteL( err );
             break;
         }
-    __FLOG( _L8("-HandleOperationL") );
+    OstTraceFunctionExit0( CMTPOPERATOR_HANDLEOPERATIONL_EXIT );
     }
 
 void CMTPOperator::SubscribeConnState()
     {
+    OstTraceFunctionEntry0( CMTPOPERATOR_SUBSCRIBECONNSTATE_ENTRY );
     if(!IsActive())
         {
-        __FLOG( _L8("Subscribe connection state changed)") );
         iProperty.Subscribe(iStatus);
         iConSubscribed = ETrue;
         SetActive();
         }
   
+    OstTraceFunctionExit0( CMTPOPERATOR_SUBSCRIBECONNSTATE_EXIT );
     }
 
             

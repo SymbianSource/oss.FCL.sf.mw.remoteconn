@@ -25,7 +25,6 @@
 #include "mmtptransactionproxy.h"
 #include "rmtpframework.h"
 #include "rmtpproxydpsingletons.h"
-#include "mtpdebug.h"
 
 class CMTPTypeObjectInfo;
 class MMTPRequestProcessor;
@@ -70,11 +69,7 @@ private:
 	TMTPTypeResponse		iResponse;
 	RMTPFramework           iSingletons;
 	RMTPProxyDpSingletons   iProxyDpSingletons;
-	
-    /**
-    FLOGGER debug trace member variable.
-    */
-    __FLOG_DECLARATION_MEMBER_MUTABLE;
+
 	};
 	 
 #endif // CMTPSENDOBJECTINFO_H

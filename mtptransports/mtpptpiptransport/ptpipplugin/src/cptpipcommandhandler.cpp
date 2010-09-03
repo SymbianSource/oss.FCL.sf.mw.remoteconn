@@ -18,26 +18,27 @@
 */
 
 #include "cptpipcommandhandler.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cptpipcommandhandlerTraces.h"
+#endif
+
 
 const TUint32 KPTPIPHeaderSize = 8;
 const TUint32 KPTPIPDataHeaderSize = 12;
-
-__FLOG_STMT(_LIT8(KComponent,"CCommandHandler");) 
 
 /**
 Creates the channel for commands. The base class constructl is called. 
 */
 CPTPIPCommandHandler* CPTPIPCommandHandler::NewL(CPTPIPConnection& aConnection)
 	{
+	OstTraceFunctionEntry0( CPTPIPCOMMANDHANDLER_NEWL_ENTRY );
 	
 	CPTPIPCommandHandler* self = new(ELeave) CPTPIPCommandHandler(aConnection);
 	CleanupStack::PushL(self);
-#ifdef __FLOG_ACTIVE    
-    self->ConstructL(KComponent);
-#else
     self->ConstructL();
-#endif	
 	CleanupStack::Pop();
+	OstTraceFunctionExit0( CPTPIPCOMMANDHANDLER_NEWL_EXIT );
 	return self;
 	}
 
@@ -46,8 +47,8 @@ Desctructor
 */
 CPTPIPCommandHandler::~CPTPIPCommandHandler()
 	{
-	__FLOG(_L8("Destructor - Entry"));
-	__FLOG(_L8("Destructor - Exit"));
+	OstTraceFunctionEntry0( CPTPIPCOMMANDHANDLER_CPTPIPCOMMANDHANDLER_ENTRY );
+	OstTraceFunctionExit0( CPTPIPCOMMANDHANDLER_CPTPIPCOMMANDHANDLER_EXIT );
 	}
 
 /**
@@ -57,6 +58,8 @@ CPTPIPCommandHandler::CPTPIPCommandHandler(CPTPIPConnection& aConnection):
 								CPTPIPSocketHandlerBase(aConnection, CActive::EPriorityStandard)
 								
 	{
+	OstTraceFunctionEntry0( DUP1_CPTPIPCOMMANDHANDLER_CPTPIPCOMMANDHANDLER_ENTRY );
+	OstTraceFunctionExit0( DUP1_CPTPIPCOMMANDHANDLER_CPTPIPCOMMANDHANDLER_EXIT );
 	}
 
 /**
@@ -68,9 +71,9 @@ of the socket to send the actual data.
 */
 void CPTPIPCommandHandler::SendCommandDataL(const MMTPType& aRtoIData, TUint32 aTransactionId)
     {
-	__FLOG(_L8("SendCommandDataL - Entry"));
+	OstTraceFunctionEntry0( CPTPIPCOMMANDHANDLER_SENDCOMMANDDATAL_ENTRY );
     SendDataL(aRtoIData, aTransactionId);
-	__FLOG(_L8("SendCommandDataL - Exit"));
+    OstTraceFunctionExit0( CPTPIPCOMMANDHANDLER_SENDCOMMANDDATAL_EXIT );
     }
     
 /**
@@ -82,9 +85,9 @@ of the socket to send the actual data.
 */
 void CPTPIPCommandHandler::SendCommandL(const MMTPType& aResponse)
     {
-	__FLOG(_L8("SendCommandDataL - Entry"));
+	OstTraceFunctionEntry0( CPTPIPCOMMANDHANDLER_SENDCOMMANDL_ENTRY );
     SendDataL(aResponse, 0);
-	__FLOG(_L8("SendCommandDataL - Exit"));
+    OstTraceFunctionExit0( CPTPIPCOMMANDHANDLER_SENDCOMMANDL_EXIT );
     }
 
 /**
@@ -96,9 +99,9 @@ connection.
 */
 void CPTPIPCommandHandler::SendDataCompleteL(TInt aError, const MMTPType& aSource)
     {
-	__FLOG(_L8("SendDataCompleteL - Entry"));
+	OstTraceFunctionEntry0( CPTPIPCOMMANDHANDLER_SENDDATACOMPLETEL_ENTRY );
     Connection().SendCommandChannelCompleteL(aError, aSource);
-	__FLOG(_L8("SendDataCompleteL - Exit"));
+    OstTraceFunctionExit0( CPTPIPCOMMANDHANDLER_SENDDATACOMPLETEL_EXIT );
     }
 
 
@@ -110,9 +113,9 @@ Initiates the receiving of the info on the command channel, used for both comman
 */
 void CPTPIPCommandHandler::ReceiveCommandRequestL(MMTPType& aRequest)
     {
-	__FLOG(_L8("ReceiveCommandDataL - Entry"));
+	OstTraceFunctionEntry0( CPTPIPCOMMANDHANDLER_RECEIVECOMMANDREQUESTL_ENTRY );
     ReceiveDataL(aRequest);
-	__FLOG(_L8("ReceiveCommandDataL - Exit"));
+    OstTraceFunctionExit0( CPTPIPCOMMANDHANDLER_RECEIVECOMMANDREQUESTL_EXIT );
     }
 
 /**
@@ -123,9 +126,9 @@ Initiates the receiving of the info on the command channel, used for both comman
 */
 void CPTPIPCommandHandler::ReceiveCommandDataL(MMTPType& aItoRData)
     {
-	__FLOG(_L8("ReceiveCommandDataL - Entry"));
+	OstTraceFunctionEntry0( CPTPIPCOMMANDHANDLER_RECEIVECOMMANDDATAL_ENTRY );
 	ReceiveDataL(aItoRData);
-	__FLOG(_L8("ReceiveCommandDataL - Exit"));
+    OstTraceFunctionExit0( CPTPIPCOMMANDHANDLER_RECEIVECOMMANDDATAL_EXIT );
     }
 
 
@@ -137,10 +140,9 @@ by ReceiveCommandDataL.
 */
 void CPTPIPCommandHandler::ReceiveDataCompleteL(TInt aError, MMTPType& aSink)
     {
-	__FLOG(_L8("ReceiveDataCompleteL - Entry"));
-	
+	OstTraceFunctionEntry0( CPTPIPCOMMANDHANDLER_RECEIVEDATACOMPLETEL_ENTRY );
 	Connection().ReceiveCommandChannelCompleteL(aError, aSink);
-	__FLOG(_L8("ReceiveDataCompleteL - Exit"));
+    OstTraceFunctionExit0( CPTPIPCOMMANDHANDLER_RECEIVEDATACOMPLETEL_EXIT );
     }
     
 /**
@@ -154,7 +156,7 @@ For the data container, the payload is already set from the MTP framework.
 */   
 TInt CPTPIPCommandHandler::ParsePTPIPHeaderL()
 	{
-	__FLOG(_L8("ValidateAndSetPayload - Entry"));
+	OstTraceFunctionEntry0( CPTPIPCOMMANDHANDLER_PARSEPTPIPHEADERL_ENTRY );
 	TUint32 type = 0;
 	
 	// If this is a request or event, then the first chunk will have 8 bytes
@@ -168,8 +170,8 @@ TInt CPTPIPCommandHandler::ParsePTPIPHeaderL()
     	{
        	iPTPPacketLength = Connection().DataContainer()->Uint32L(CPTPIPDataContainer::EPacketLength);
     	type = Connection().ValidateDataPacketL();
-    	}
-	__FLOG(_L8("ValidateAndSetPayload - Exit"));	
+    	}	
+	OstTraceFunctionExit0( CPTPIPCOMMANDHANDLER_PARSEPTPIPHEADERL_EXIT );
 	return type;
 
 	}
@@ -180,5 +182,7 @@ TInt CPTPIPCommandHandler::ParsePTPIPHeaderL()
  */
 TBool CPTPIPCommandHandler::HandleInitAck()
 	{
+	OstTraceFunctionEntry0( CPTPIPCOMMANDHANDLER_HANDLEINITACK_ENTRY );
+	OstTraceFunctionExit0( CPTPIPCOMMANDHANDLER_HANDLEINITACK_EXIT );
 	return EFalse;
 	}

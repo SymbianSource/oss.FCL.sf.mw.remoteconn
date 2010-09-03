@@ -30,10 +30,12 @@
 #include "mmtpplaybackinterface.h"
 #include "cmtpplaybackevent.h"
 #include "mtpplaybackcontrolpanic.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpplaybackcontroldpTraces.h"
+#endif
 
 
-// Class constants.
-__FLOG_STMT(_LIT8(KComponent,"PlaybackControlDataProvider");)
 static const TInt KMTPPlaybackControlDpSessionGranularity(3);
 
 /**
@@ -44,10 +46,12 @@ transfered.
 */
 TAny* CMTPPlaybackControlDataProvider::NewL(TAny* aParams)
     {
+    OstTraceFunctionEntry0( CMTPPLAYBACKCONTROLDATAPROVIDER_NEWL_ENTRY );
     CMTPPlaybackControlDataProvider* self = new (ELeave) CMTPPlaybackControlDataProvider(aParams);
     CleanupStack::PushL(self);
     self->ConstructL();
     CleanupStack::Pop(self);
+    OstTraceFunctionExit0( CMTPPLAYBACKCONTROLDATAPROVIDER_NEWL_EXIT );
     return self;
     }
 
@@ -56,7 +60,7 @@ Destructor
 */
 CMTPPlaybackControlDataProvider::~CMTPPlaybackControlDataProvider()
     {
-    __FLOG(_L8("~CMTPPlaybackControlDataProvider - Entry"));
+    OstTraceFunctionEntry0( CMTPPLAYBACKCONTROLDATAPROVIDER_CMTPPLAYBACKCONTROLDATAPROVIDER_ENTRY );
     TInt count = iActiveProcessors.Count();
     while(count--)
         {
@@ -69,24 +73,25 @@ CMTPPlaybackControlDataProvider::~CMTPPlaybackControlDataProvider()
         {
         iPlaybackControl->Close();
         }
-    __FLOG(_L8("~CMTPPlaybackControlDataProvider - Exit"));
-    __FLOG_CLOSE;
+    OstTraceFunctionExit0( CMTPPLAYBACKCONTROLDATAPROVIDER_CMTPPLAYBACKCONTROLDATAPROVIDER_EXIT );
     }
 
 void CMTPPlaybackControlDataProvider::Cancel()
     {
+OstTraceFunctionEntry0( CMTPPLAYBACKCONTROLDATAPROVIDER_CANCEL_ENTRY );
 
+    OstTraceFunctionExit0( CMTPPLAYBACKCONTROLDATAPROVIDER_CANCEL_EXIT );
     }
 
 void CMTPPlaybackControlDataProvider::ProcessEventL(const TMTPTypeEvent& /*aEvent*/, MMTPConnection& /*aConnection*/)
     {
-    __FLOG(_L8("ProcessEventL - Entry"));
-    __FLOG(_L8("ProcessEventL - Exit"));
+    OstTraceFunctionEntry0( CMTPPLAYBACKCONTROLDATAPROVIDER_PROCESSEVENTL_ENTRY );
+    OstTraceFunctionExit0( CMTPPLAYBACKCONTROLDATAPROVIDER_PROCESSEVENTL_EXIT );
     }
 
 void CMTPPlaybackControlDataProvider::ProcessNotificationL(TMTPNotification aNotification, const TAny* aParams)
     {
-    __FLOG(_L8("ProcessNotificationL - Entry"));
+    OstTraceFunctionEntry0( CMTPPLAYBACKCONTROLDATAPROVIDER_PROCESSNOTIFICATIONL_ENTRY );
     switch (aNotification)
         {
     case EMTPSessionClosed:
@@ -100,12 +105,12 @@ void CMTPPlaybackControlDataProvider::ProcessNotificationL(TMTPNotification aNot
         // Ignore all other notifications.
         break;
         }
-    __FLOG(_L8("ProcessNotificationL - Exit"));
+    OstTraceFunctionExit0( CMTPPLAYBACKCONTROLDATAPROVIDER_PROCESSNOTIFICATIONL_EXIT );
     }
 
 void CMTPPlaybackControlDataProvider::ProcessRequestPhaseL(TMTPTransactionPhase aPhase, const TMTPTypeRequest& aRequest, MMTPConnection& aConnection)
     {
-    __FLOG(_L8("ProcessRequestPhaseL - Entry"));
+    OstTraceFunctionEntry0( CMTPPLAYBACKCONTROLDATAPROVIDER_PROCESSREQUESTPHASEL_ENTRY );
     TInt index = LocateRequestProcessorL(aRequest, aConnection);
     __ASSERT_DEBUG(index != KErrNotFound, Panic(EMTPPBArgumentErr));
     MMTPRequestProcessor* processor = iActiveProcessors[index];
@@ -122,12 +127,12 @@ void CMTPPlaybackControlDataProvider::ProcessRequestPhaseL(TMTPTransactionPhase 
 	    iActiveProcessors.Remove(index);
 	    }
     iActiveProcessor = -1;
-    __FLOG(_L8("ProcessRequestPhaseL - Exit"));
+    OstTraceFunctionExit0( CMTPPLAYBACKCONTROLDATAPROVIDER_PROCESSREQUESTPHASEL_EXIT );
     }
 
 void CMTPPlaybackControlDataProvider::Supported(TMTPSupportCategory aCategory, RArray<TUint>& aArray) const
     {
-    __FLOG(_L8("Supported - Entry"));
+    OstTraceFunctionEntry0( CMTPPLAYBACKCONTROLDATAPROVIDER_SUPPORTED_ENTRY );
     
     switch (aCategory)
         {
@@ -165,7 +170,7 @@ void CMTPPlaybackControlDataProvider::Supported(TMTPSupportCategory aCategory, R
         // Unrecognised category, leave aArray unmodified.
         break;
         }
-    __FLOG(_L8("Supported - Exit"));
+    OstTraceFunctionExit0( CMTPPLAYBACKCONTROLDATAPROVIDER_SUPPORTED_EXIT );
     }
 
 /**
@@ -177,7 +182,9 @@ CMTPPlaybackControlDataProvider::CMTPPlaybackControlDataProvider(TAny* aParams) 
     iActiveProcessor(-1),
     iRequestToResetPbCtrl(EFalse)
     {
+OstTraceFunctionEntry0( DUP1_CMTPPLAYBACKCONTROLDATAPROVIDER_CMTPPLAYBACKCONTROLDATAPROVIDER_ENTRY );
 
+    OstTraceFunctionExit0( DUP1_CMTPPLAYBACKCONTROLDATAPROVIDER_CMTPPLAYBACKCONTROLDATAPROVIDER_EXIT );
     }
 
 /**
@@ -185,23 +192,22 @@ Second phase constructor.
 */
 void CMTPPlaybackControlDataProvider::ConstructL()
     {
-    __FLOG_OPEN(KMTPSubsystem, KComponent);
-    __FLOG(_L8("ConstructL - Entry"));
+    OstTraceFunctionEntry0( CMTPPLAYBACKCONTROLDATAPROVIDER_CONSTRUCTL_ENTRY );
     iPlaybackProperty = CMTPPlaybackProperty::NewL();
     iPlaybackMap = CMTPPlaybackMap::NewL(Framework(),*iPlaybackProperty);
-    __FLOG(_L8("ConstructL - Exit"));
+    OstTraceFunctionExit0( CMTPPLAYBACKCONTROLDATAPROVIDER_CONSTRUCTL_EXIT );
     }
 
 void CMTPPlaybackControlDataProvider::SendEventL(TMTPDevicePropertyCode aPropCode)
 	{
-    __FLOG(_L8("SendEventL - Entry"));
+    OstTraceFunctionEntry0( CMTPPLAYBACKCONTROLDATAPROVIDER_SENDEVENTL_ENTRY );
 	iEvent.Reset();
 	iEvent.SetUint16(TMTPTypeEvent::EEventCode, EMTPEventCodeDevicePropChanged );
 	iEvent.SetUint32(TMTPTypeEvent::EEventSessionID, KMTPSessionAll);
 	iEvent.SetUint32(TMTPTypeEvent::EEventTransactionID, KMTPTransactionIdNone);
 	iEvent.SetUint32(TMTPTypeEvent::EEventParameter1, aPropCode);
 	Framework().SendEventL(iEvent);
-    __FLOG(_L8("SendEventL - Exit"));
+	OstTraceFunctionExit0( CMTPPLAYBACKCONTROLDATAPROVIDER_SENDEVENTL_EXIT );
 	}
 
 /**
@@ -212,7 +218,7 @@ Find or create a request processor that can process the request
 */
 TInt CMTPPlaybackControlDataProvider::LocateRequestProcessorL(const TMTPTypeRequest& aRequest, MMTPConnection& aConnection)
     {
-    __FLOG(_L8("LocateRequestProcessorL - Entry"));
+    OstTraceFunctionEntry0( CMTPPLAYBACKCONTROLDATAPROVIDER_LOCATEREQUESTPROCESSORL_ENTRY );
     TInt index = KErrNotFound;
     TInt count = iActiveProcessors.Count();
     for(TInt i = 0; i < count; i++)
@@ -233,7 +239,7 @@ TInt CMTPPlaybackControlDataProvider::LocateRequestProcessorL(const TMTPTypeRequ
         index = count;
         }
     
-    __FLOG(_L8("LocateRequestProcessorL - Exit"));
+    OstTraceFunctionExit0( CMTPPLAYBACKCONTROLDATAPROVIDER_LOCATEREQUESTPROCESSORL_EXIT );
     return index;
     }
 
@@ -243,7 +249,7 @@ Cleans up outstanding request processors when a session is closed.
 */
 void CMTPPlaybackControlDataProvider::SessionClosedL(const TMTPNotificationParamsSessionChange& aSession)
     {
-    __FLOG(_L8("SessionClosedL - Entry"));
+    OstTraceFunctionEntry0( CMTPPLAYBACKCONTROLDATAPROVIDER_SESSIONCLOSEDL_ENTRY );
     TInt count = iActiveProcessors.Count();
     while (count--)
         {
@@ -269,43 +275,39 @@ void CMTPPlaybackControlDataProvider::SessionClosedL(const TMTPNotificationParam
         iPlaybackControl = NULL;
         }
 
-    __FLOG(_L8("SessionClosedL - Exit"));
+    OstTraceFunctionExit0( CMTPPLAYBACKCONTROLDATAPROVIDER_SESSIONCLOSEDL_EXIT );
     }
 
 /**
 Prepares for a newly-opened session.
 @param aSession notification parameter block
 */
-#ifdef __FLOG_ACTIVE
 void CMTPPlaybackControlDataProvider::SessionOpenedL(const TMTPNotificationParamsSessionChange& aSession)
-#else
-void CMTPPlaybackControlDataProvider::SessionOpenedL(const TMTPNotificationParamsSessionChange& /*aSession*/)
-#endif
     {
-    __FLOG(_L8("SessionOpenedL - Entry"));
-    __FLOG_VA((_L8("SessionID = %d"), aSession.iMTPId));
-    __FLOG(_L8("SessionOpenedL - Exit"));
+    OstTraceFunctionEntry0( DUP1_CMTPPLAYBACKCONTROLDATAPROVIDER_SESSIONOPENEDL_ENTRY );
+    OstTrace1( TRACE_NORMAL, CMTPPLAYBACKCONTROLDATAPROVIDER_SESSIONOPENEDL, "SessionID = %d", aSession.iMTPId );
+    OstTraceFunctionExit0( CMTPPLAYBACKCONTROLDATAPROVIDER_SESSIONOPENEDL_EXIT );
     }
 
 void CMTPPlaybackControlDataProvider::StartObjectEnumerationL(TUint32 aStorageId, TBool /*aPersistentFullEnumeration*/)
     {
-    __FLOG(_L8("StartObjectEnumerationL - Entry"));
+    OstTraceFunctionEntry0( CMTPPLAYBACKCONTROLDATAPROVIDER_STARTOBJECTENUMERATIONL_ENTRY );
     //This DP doesn't manage data.
     Framework().ObjectEnumerationCompleteL(aStorageId);
-    __FLOG(_L8("StartObjectEnumerationL - Exit"));
+    OstTraceFunctionExit0( CMTPPLAYBACKCONTROLDATAPROVIDER_STARTOBJECTENUMERATIONL_EXIT );
     }
 
 void CMTPPlaybackControlDataProvider::StartStorageEnumerationL()
     {
-    __FLOG(_L8("StartStorageEnumerationL - Entry"));
+    OstTraceFunctionEntry0( CMTPPLAYBACKCONTROLDATAPROVIDER_STARTSTORAGEENUMERATIONL_ENTRY );
     //This DP doesn't manage data.
     Framework().StorageEnumerationCompleteL();
-    __FLOG(_L8("StartStorageEnumerationL - Exit"));
+    OstTraceFunctionExit0( CMTPPLAYBACKCONTROLDATAPROVIDER_STARTSTORAGEENUMERATIONL_EXIT );
     }
 
 void CMTPPlaybackControlDataProvider::HandlePlaybackEventL(CMTPPlaybackEvent* aEvent, TInt aErr)
     {
-    __FLOG(_L8("HandlePlaybackEventL - Entry"));
+    OstTraceFunctionEntry0( CMTPPLAYBACKCONTROLDATAPROVIDER_HANDLEPLAYBACKEVENTL_ENTRY );
 
     if(aErr != KPlaybackErrNone)
         {
@@ -318,13 +320,14 @@ void CMTPPlaybackControlDataProvider::HandlePlaybackEventL(CMTPPlaybackEvent* aE
             SendEventL(EMTPDevicePropCodePlaybackContainerIndex);
             SendEventL(EMTPDevicePropCodePlaybackPosition);
             }
+        OstTraceFunctionExit0( CMTPPLAYBACKCONTROLDATAPROVIDER_HANDLEPLAYBACKEVENTL_EXIT );
         return;
         }
 
     __ASSERT_DEBUG((aEvent != NULL), Panic(EMTPPBDataNullErr));
-    __ASSERT_ALWAYS((aEvent != NULL), User::Leave(KErrArgument));
-    __FLOG_1(_L8("aEvent %d"), aEvent->PlaybackEvent());
-
+    __ASSERT_ALWAYS_OST((aEvent != NULL), OstTrace0( TRACE_ERROR, DUP1_CMTPPLAYBACKCONTROLDATAPROVIDER_HANDLEPLAYBACKEVENTL, "Error argument" ), User::Leave(KErrArgument));
+    OstTrace1( TRACE_NORMAL, CMTPPLAYBACKCONTROLDATAPROVIDER_HANDLEPLAYBACKEVENTL, "aEvent %d", aEvent->PlaybackEvent());
+    
     switch(aEvent->PlaybackEvent())
         {
         case EPlaybackEventVolumeUpdate:
@@ -349,28 +352,33 @@ void CMTPPlaybackControlDataProvider::HandlePlaybackEventL(CMTPPlaybackEvent* aE
             break;
 
         default:
-            User::Leave(KErrArgument);
+            LEAVEIFERROR(KErrArgument, 
+                    OstTrace0( TRACE_ERROR, DUP2_CMTPPLAYBACKCONTROLDATAPROVIDER_HANDLEPLAYBACKEVENTL, "Error argument" ));
             break;
         }
     
-    __FLOG(_L8("HandlePlaybackEventL - Exit"));
+    OstTraceFunctionExit0( DUP1_CMTPPLAYBACKCONTROLDATAPROVIDER_HANDLEPLAYBACKEVENTL_EXIT );
     }
 
 CMTPPlaybackMap& CMTPPlaybackControlDataProvider::GetPlaybackMap() const 
     {
+    OstTraceFunctionEntry0( CMTPPLAYBACKCONTROLDATAPROVIDER_GETPLAYBACKMAP_ENTRY );
     __ASSERT_DEBUG((iPlaybackMap != NULL), Panic(EMTPPBDataNullErr));
+    OstTraceFunctionExit0( CMTPPLAYBACKCONTROLDATAPROVIDER_GETPLAYBACKMAP_EXIT );
     return *iPlaybackMap;
     }
 
 CMTPPlaybackProperty& CMTPPlaybackControlDataProvider::GetPlaybackProperty() const 
     {
+    OstTraceFunctionEntry0( CMTPPLAYBACKCONTROLDATAPROVIDER_GETPLAYBACKPROPERTY_ENTRY );
     __ASSERT_DEBUG((iPlaybackProperty != NULL), Panic(EMTPPBDataNullErr));
+    OstTraceFunctionExit0( CMTPPLAYBACKCONTROLDATAPROVIDER_GETPLAYBACKPROPERTY_EXIT );
     return *iPlaybackProperty;
     }
 
 MMTPPlaybackControl& CMTPPlaybackControlDataProvider::GetPlaybackControlL() 
     {
-    __FLOG(_L8("GetPlaybackControlL - Entry"));
+    OstTraceFunctionEntry0( CMTPPLAYBACKCONTROLDATAPROVIDER_GETPLAYBACKCONTROLL_ENTRY );
     if(iPlaybackControl == NULL)
         {
         iPlaybackControl = MMTPPlaybackControl::NewL(*this);
@@ -382,11 +390,13 @@ MMTPPlaybackControl& CMTPPlaybackControlDataProvider::GetPlaybackControlL()
         iPlaybackControl = NULL;
         iPlaybackControl = MMTPPlaybackControl::NewL(*this);
         }
-    __FLOG(_L8("GetPlaybackControlL - Exit"));
+    OstTraceFunctionExit0( CMTPPLAYBACKCONTROLDATAPROVIDER_GETPLAYBACKCONTROLL_EXIT );
     return *iPlaybackControl;
     }
 
 void CMTPPlaybackControlDataProvider::RequestToResetPbCtrl()
     {
+    OstTraceFunctionEntry0( CMTPPLAYBACKCONTROLDATAPROVIDER_REQUESTTORESETPBCTRL_ENTRY );
     iRequestToResetPbCtrl = ETrue;
+    OstTraceFunctionExit0( CMTPPLAYBACKCONTROLDATAPROVIDER_REQUESTTORESETPBCTRL_EXIT );
     }

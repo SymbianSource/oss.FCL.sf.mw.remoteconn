@@ -25,7 +25,6 @@
 #include <e32base.h>
 #include <bttypes.h>
 #include "mmtpconnectionmgr.h"
-#include "mtpdebug.h"
 #include "mtp/rmtpclient.h"
 
 class CMTPConnection;
@@ -114,9 +113,6 @@ private:
      * Set ETrue when Resumetransport need to be called.
      */
     TBool                           iResumeCalled;
-    /**
-    FLOGGER debug trace member variable.
-    */
-    __FLOG_DECLARATION_MEMBER_MUTABLE;
+
     };
 #endif // CMTPCONNECTIONMGR_H

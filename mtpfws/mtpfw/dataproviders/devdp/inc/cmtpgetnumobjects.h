@@ -57,11 +57,7 @@ private:
     void GetObjectHandlesByFormatCodeL(TUint32 aFormatCode, CMTPTypeArray &aObjectHandles);
 			
 protected:
-	/**
-    FLOGGER debug trace member variable.
-    */
-    __FLOG_DECLARATION_MEMBER_MUTABLE;
-
+    
     TUint iTimeoutCount;
 	RMTPFramework iSingletons;
     RMTPDeviceDpSingletons              iDevDpSingletons;

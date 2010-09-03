@@ -23,8 +23,6 @@
 #include <e32base.h>
 #include <f32file.h>
 
-#include "mtpdebug.h"
-
 class CMTPConnectionMgr;
 class CMTPDataProviderController;
 class CMTPFrameworkConfig;
@@ -81,11 +79,6 @@ private: // Owned
     public: // Owned
 
         /**
-        FLOGGER debug trace member variable.
-        */
-        __FLOG_DECLARATION_MEMBER_MUTABLE;
-        
-        /**
         The construction in-progress flag, which is used to manage nested 
         (recursive) opens.
         */
@@ -139,12 +132,6 @@ private: // Owned
         };
 
 private: // Owned
-
-    /**
-    FLOGGER debug trace member variable.
-    */
-    __FLOG_DECLARATION_MEMBER_MUTABLE;
-    
     /**
     The nested flag which indicates if the singletons manager reference was 
     recursively opened.

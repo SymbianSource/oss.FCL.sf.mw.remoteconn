@@ -17,7 +17,7 @@
 */
 
 
-#include <ecom.h>
+#include <ecom/ecom.h>
 
 // -----------------------------------------------------------------------------
 // Creates the bearer plug ins and return it to caller

@@ -16,7 +16,6 @@
 */
 
 
-#include <e32debug.h>
 #include "dpsstatemachine.h"
 #include "dpsscriptreceiver.h"
 #include "dpsscriptsender.h"
@@ -25,11 +24,9 @@
 #include "pictbridge.h"
 #include "dpsparam.h"
 #include "dpsoperation.h"
-
-#ifdef _DEBUG
-#	define IF_DEBUG(t) {RDebug::t;}
-#else
-#	define IF_DEBUG(t)
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "dpsstatemachineTraces.h"
 #endif
 
 // ---------------------------------------------------------------------------
@@ -38,7 +35,6 @@
 //
 CDpsStateMachine* CDpsStateMachine::NewL(CDpsEngine* aEngine)
     {
-    IF_DEBUG(Print(_L("CDpsStateMachine::NewL")));
     CDpsStateMachine* self = new(ELeave) CDpsStateMachine(aEngine);
     CleanupStack::PushL(self);
     self->ConstructL();
@@ -52,7 +48,7 @@ CDpsStateMachine* CDpsStateMachine::NewL(CDpsEngine* aEngine)
 //
 CDpsStateMachine::~CDpsStateMachine()
     {
-    IF_DEBUG(Print(_L(">>>~CDpsStateMachine")));
+    OstTraceFunctionEntry0( CDPSSTATEMACHINE_CDPSSTATEMACHINE_DES_ENTRY );
     delete iTrader;
     iTrader = NULL;
     delete iScriptReceiver;
@@ -64,7 +60,7 @@ CDpsStateMachine::~CDpsStateMachine()
     delete iSendingReqState; iSendingReqState = NULL;
     delete iWaitingRepState; iWaitingRepState = NULL;
     delete iSendingRepState; iSendingRepState = NULL;	
-    IF_DEBUG(Print(_L("<<<~CDpsStateMachine")));	
+    OstTraceFunctionExit0( CDPSSTATEMACHINE_CDPSSTATEMACHINE_DES_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -75,9 +71,9 @@ CDpsStateMachine::CDpsStateMachine(CDpsEngine* aEngine) :
     iEngine(aEngine),iOperation(EDpsOpEmpty), iEvent(EDpsEvtEmpty), 
     iCurError(KErrNone)
     {
-    IF_DEBUG(Print(_L(">>>CDpsStateMachine::Ctor")));
-    
-    IF_DEBUG(Print(_L("<<<CDpsStateMachine::Ctor")));
+    OstTraceFunctionEntry0( DUP1_CDPSSTATEMACHINE_CDPSSTATEMACHINE_CONS_ENTRY );
+
+    OstTraceFunctionExit0( DUP1_CDPSSTATEMACHINE_CDPSSTATEMACHINE_CONS_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -86,7 +82,7 @@ CDpsStateMachine::CDpsStateMachine(CDpsEngine* aEngine) :
 //
 void CDpsStateMachine::ConstructL()
     {
-    IF_DEBUG(Print(_L(">>>CDpsStateMachine::ConstructL")));	
+    OstTraceFunctionEntry0( CDPSSTATEMACHINE_CONSTRUCTL_ENTRY );
     iIdleState = new(ELeave) TDpsIdleState(this);
     iSendingReqState = new(ELeave) TDpsSendingReqState(this);
     iWaitingRepState = new(ELeave) TDpsWaitingRepState(this);
@@ -95,7 +91,7 @@ void CDpsStateMachine::ConstructL()
     iTrader = CDpsTransaction::NewL(this);
     iScriptReceiver = CDpsScriptReceiver::NewL(this);
     iScriptSender = CDpsScriptSender::NewL(this);	
-    IF_DEBUG(Print(_L("<<<CDpsOperator::ConstructL")));	
+    OstTraceFunctionExit0( CDPSSTATEMACHINE_CONSTRUCTL_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -104,12 +100,12 @@ void CDpsStateMachine::ConstructL()
 //
 void CDpsStateMachine::StartTransactionL(TMDpsOperation* aRequest)
     {
-    IF_DEBUG(Print(_L(">>>CDpsStateMachine::StartTransaction")));
+    OstTraceFunctionEntry0( CDPSSTATEMACHINE_STARTTRANSACTIONL_ENTRY );
     iMOperation = aRequest;
     iOperation = (TDpsOperation)iMOperation->iOperation;    
     iTrader->CreateRequestL(aRequest);
     iCurState = iSendingReqState;
-    IF_DEBUG(Print(_L("<<<CDpsStateMachine::StartTransaction")));
+    OstTraceFunctionExit0( CDPSSTATEMACHINE_STARTTRANSACTIONL_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -118,13 +114,13 @@ void CDpsStateMachine::StartTransactionL(TMDpsOperation* aRequest)
 //
 void CDpsStateMachine::Initialize()
     {
-    IF_DEBUG(Print(_L(">>>CDpsStateMachine::Initialize")));
+    OstTraceFunctionEntry0( CDPSSTATEMACHINE_INITIALIZE_ENTRY );
     iOperation = EDpsOpEmpty;
     iEvent = EDpsEvtEmpty;
     iCurError = KErrNone;
     if (CurState() != IdleState())
         {
         SetState(IdleState());
-        }
-    IF_DEBUG(Print(_L("<<<CDpsStateMachine::Initialize")));    
+        } 
+    OstTraceFunctionExit0( CDPSSTATEMACHINE_INITIALIZE_EXIT );
     }

@@ -20,16 +20,19 @@
 */
 
 #include "sbmain.h"
-#include "sblog.h"
 #include "sbeserver.h"
 #include "abserver.h"
 #include <connect/tserverstart.h>
 #include "sbedataownermanager.h"
 #include "ecom/ecom.h"
+#include "OstTraceDefinitions.h"
+#include "sbtrace.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "sbmainTraces.h"
+#endif
 
 namespace conn
-	{
-	
+	{	
 	void CSBActiveScheduler::Error(TInt aError) const
 	/**
 	Executed by the active scheduler when an error occurs. Ideally errors 
@@ -42,8 +45,10 @@ namespace conn
 	@param aError The error code
 	*/
 		{
+		OstTraceFunctionEntry0( CSBACTIVESCHEDULER_ERROR_ENTRY );
 		RDebug::Print(_L("Secure Backup unhandled error %d"), aError);
 		Stop();
+		OstTraceFunctionExit0( CSBACTIVESCHEDULER_ERROR_EXIT );
 		}
 	}
 
@@ -63,6 +68,7 @@ static void RunServerL()
 	@leave RThread::Rename() If an error is returned
 	*/
 	{
+	OstTraceFunctionEntry0( _CONN_RUNSERVERL_ENTRY );
 	//
 	// Create and install an active scheduler.
     CSBActiveScheduler* pScheduler = new (ELeave) CSBActiveScheduler();
@@ -100,6 +106,7 @@ static void RunServerL()
 	CleanupStack::PopAndDestroy(pSBEServer);
 	CleanupStack::PopAndDestroy(pDOM);
 	CleanupStack::PopAndDestroy(pScheduler);
+	OstTraceFunctionExit0( _CONN_RUNSERVERL_EXIT );
 	}
 
 
@@ -111,6 +118,7 @@ Creates cleanup framework and call leaving variant of RunServer
 @return Any error trapped by RunServerL
 */
 	{
+	OstTraceFunctionEntry0( _CONN_RUNSERVER_ENTRY );
 	__UHEAP_MARK;
 	CTrapCleanup* pCleanup = CTrapCleanup::New();
 	TInt nRet = KErrNoMemory;
@@ -145,6 +153,7 @@ Creates cleanup framework and call leaving variant of RunServer
     REComSession::FinalClose();
 
     __UHEAP_MARKEND;
+    OstTraceFunctionExit0( _CONN_RUNSERVER_EXIT );
     return nRet;
     }
 
@@ -159,10 +168,12 @@ Standard Symbian OS entry point
 @return Symbian OS internal value.
 */
 	{
+	OstTraceFunctionEntry0( _E32MAIN_ENTRY );
 	TInt nRet = KErrNone;
 	
     nRet = RunServer();
     
+	OstTraceFunctionExit0( _E32MAIN_EXIT );
 	return nRet;
 	}
 

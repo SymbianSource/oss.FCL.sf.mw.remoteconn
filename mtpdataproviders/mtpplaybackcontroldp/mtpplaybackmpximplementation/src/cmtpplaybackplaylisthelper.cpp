@@ -36,9 +36,11 @@
 #include "cmtpplaybackcontrolimpl.h"
 #include "cmtpplaybackplaylisthelper.h"
 #include "mtpplaybackcontrolpanic.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpplaybackplaylisthelperTraces.h"
+#endif
 
-// Constants
-__FLOG_STMT(_LIT8(KComponent,"PlaybackPlaylistHelper");)
 
 // ======== MEMBER FUNCTIONS ========
 
@@ -48,11 +50,15 @@ __FLOG_STMT(_LIT8(KComponent,"PlaybackPlaylistHelper");)
 //
 CMTPPlaybackPlaylistHelper* CMTPPlaybackPlaylistHelper::NewL( CMTPPlaybackControlImpl& aControlImpl )
     {
+    OstTraceFunctionEntry0( CMTPPLAYBACKPLAYLISTHELPER_NEWL_ENTRY );
+    
     CMTPPlaybackPlaylistHelper* self = new ( ELeave ) 
                 CMTPPlaybackPlaylistHelper( aControlImpl );
     CleanupStack::PushL( self );
     self->ConstructL();
     CleanupStack::Pop( self );
+    
+    OstTraceFunctionExit0( CMTPPLAYBACKPLAYLISTHELPER_NEWL_EXIT );
     return self;
     }
 
@@ -62,7 +68,7 @@ CMTPPlaybackPlaylistHelper* CMTPPlaybackPlaylistHelper::NewL( CMTPPlaybackContro
 //
 CMTPPlaybackPlaylistHelper::~CMTPPlaybackPlaylistHelper()
     {
-    __FLOG(_L8("+CMTPPlaybackPlaylistHelper::~CMTPPlaybackPlaylistHelper"));
+    OstTraceFunctionEntry0( CMTPPLAYBACKPLAYLISTHELPER_CMTPPLAYBACKPLAYLISTHELPER_ENTRY );
     
     if( iCollectionUiHelper )
         {
@@ -81,8 +87,7 @@ CMTPPlaybackPlaylistHelper::~CMTPPlaybackPlaylistHelper()
     
     delete iPlayObject;
     
-    __FLOG(_L8("-CMTPPlaybackPlaylistHelper::~CMTPPlaybackPlaylistHelper"));
-    __FLOG_CLOSE;
+    OstTraceFunctionExit0( CMTPPLAYBACKPLAYLISTHELPER_CMTPPLAYBACKPLAYLISTHELPER_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -92,7 +97,7 @@ CMTPPlaybackPlaylistHelper::~CMTPPlaybackPlaylistHelper()
 //
 void CMTPPlaybackPlaylistHelper::GetPlayListFromCollectionL( const TMTPPbDataSuid& aPlayObject )
     {
-    __FLOG(_L8("+CMTPPlaybackPlaylistHelper::GetPlayListFromCollectionL"));
+    OstTraceFunctionEntry0( CMTPPLAYBACKPLAYLISTHELPER_GETPLAYLISTFROMCOLLECTIONL_ENTRY );
     
     //Reset
     ResetPlaySource();
@@ -119,7 +124,7 @@ void CMTPPlaybackPlaylistHelper::GetPlayListFromCollectionL( const TMTPPbDataSui
             break;
         }
     
-    __FLOG(_L8("-CMTPPlaybackPlaylistHelper::GetPlayListFromCollectionL"));
+    OstTraceFunctionExit0( CMTPPLAYBACKPLAYLISTHELPER_GETPLAYLISTFROMCOLLECTIONL_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -129,13 +134,13 @@ void CMTPPlaybackPlaylistHelper::GetPlayListFromCollectionL( const TMTPPbDataSui
 //
 void CMTPPlaybackPlaylistHelper::GetPlayListFromCollectionL( TInt aIndex )
     {
-    __FLOG(_L8("+CMTPPlaybackPlaylistHelper::GetPlayListFromCollectionL"));
+    OstTraceFunctionEntry0( DUP1_CMTPPLAYBACKPLAYLISTHELPER_GETPLAYLISTFROMCOLLECTIONL_ENTRY );
     
     iSongIndex = aIndex;
     
     UpdatePathAndOpenL();
     
-    __FLOG(_L8("-CMTPPlaybackPlaylistHelper::GetPlayListFromCollectionL"));
+    OstTraceFunctionExit0( DUP1_CMTPPLAYBACKPLAYLISTHELPER_GETPLAYLISTFROMCOLLECTIONL_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -145,7 +150,7 @@ void CMTPPlaybackPlaylistHelper::GetPlayListFromCollectionL( TInt aIndex )
 TMTPPbDataSuid CMTPPlaybackPlaylistHelper::GetMTPPBSuidFromCollectionL( 
         const CMPXCollectionPlaylist& aPlaylist )
     {
-    __FLOG(_L8("+CMTPPlaybackPlaylistHelper::GetPlayListFromCollectionL"));
+    OstTraceFunctionEntry0( CMTPPLAYBACKPLAYLISTHELPER_GETMTPPBSUIDFROMCOLLECTIONL_ENTRY );
     
     CMPXCollectionPath* path = iCollectionUiHelper->MusicPlaylistPathL();
     if ( path->Id() == aPlaylist.Path().Id( KMTPPlaybackPlaylistAblumLevel -1 ))
@@ -159,7 +164,7 @@ TMTPPbDataSuid CMTPPlaybackPlaylistHelper::GetMTPPBSuidFromCollectionL(
     TFileName uri = ItemIdToUriL( aPlaylist.Path().Id( KMTPPlaybackPlaylistAblumLevel ));
     TMTPPbDataSuid dataSuid( iPlayCategory, uri );
     
-    __FLOG(_L8("-CMTPPlaybackPlaylistHelper::GetPlayListFromCollectionL"));
+    OstTraceFunctionExit0( CMTPPLAYBACKPLAYLISTHELPER_GETMTPPBSUIDFROMCOLLECTIONL_EXIT );
     return dataSuid;
     }
 
@@ -169,6 +174,8 @@ TMTPPbDataSuid CMTPPlaybackPlaylistHelper::GetMTPPBSuidFromCollectionL(
 //
 TMTPPbCategory CMTPPlaybackPlaylistHelper::MTPPbCategory() const
     {
+    OstTraceFunctionEntry0( CMTPPLAYBACKPLAYLISTHELPER_MTPPBCATEGORY_ENTRY );
+    OstTraceFunctionExit0( CMTPPLAYBACKPLAYLISTHELPER_MTPPBCATEGORY_EXIT );
     return iPlayCategory;
     }
 // ---------------------------------------------------------------------------
@@ -177,6 +184,8 @@ TMTPPbCategory CMTPPlaybackPlaylistHelper::MTPPbCategory() const
 //
 TFileName CMTPPlaybackPlaylistHelper::MTPPbSuid() const
     {
+    OstTraceFunctionEntry0( CMTPPLAYBACKPLAYLISTHELPER_MTPPBSUID_ENTRY );
+    OstTraceFunctionExit0( CMTPPLAYBACKPLAYLISTHELPER_MTPPBSUID_EXIT );
     return TFileName( *iPlayObject );
     }
 
@@ -187,8 +196,9 @@ TFileName CMTPPlaybackPlaylistHelper::MTPPbSuid() const
 //
 void CMTPPlaybackPlaylistHelper::HandleCollectionMessage( CMPXMessage* aMsg, TInt aErr )
     {
-    __FLOG_1(_L8("+CMTPPlaybackPlaylistHelper::HandleCollectionMessage( %d ) "), aErr );
-
+    OstTraceFunctionEntry0( CMTPPLAYBACKPLAYLISTHELPER_HANDLECOLLECTIONMESSAGE_ENTRY );
+    OstTrace1( TRACE_NORMAL, CMTPPLAYBACKPLAYLISTHELPER_HANDLECOLLECTIONMESSAGE, "CMTPPlaybackPlaylistHelper::HandleCollectionMessage( %d )", aErr );
+    
     if (( KErrNone == aErr ) && aMsg )
         {
         TRAP( aErr, DoHandleCollectionMessageL( *aMsg ));
@@ -200,7 +210,7 @@ void CMTPPlaybackPlaylistHelper::HandleCollectionMessage( CMPXMessage* aMsg, TIn
         MTPPlaybackControlImpl().DoHandleError( error );
         }
     
-    __FLOG(_L8("-CMTPPlaybackPlaylistHelper::HandleCollectionMessage"));
+    OstTraceFunctionExit0( CMTPPLAYBACKPLAYLISTHELPER_HANDLECOLLECTIONMESSAGE_EXIT );
     }
 // ---------------------------------------------------------------------------
 // From MMPXCollectionObserver
@@ -209,7 +219,8 @@ void CMTPPlaybackPlaylistHelper::HandleCollectionMessage( CMPXMessage* aMsg, TIn
 void CMTPPlaybackPlaylistHelper::HandleOpenL( const CMPXMedia& aEntries, 
         TInt /*aIndex*/, TBool /*aComplete*/, TInt aError )
     {
-    __FLOG_1(_L8("+CMTPPlaybackPlaylistHelper::HandleOpenL( %d )"), aError );
+    OstTraceFunctionEntry0( CMTPPLAYBACKPLAYLISTHELPER_HANDLEOPENL_ENTRY );
+    OstTrace1( TRACE_FLOW, CMTPPLAYBACKPLAYLISTHELPER_HANDLEOPENL, "CMTPPlaybackPlaylistHelper::HandleOpenL( %d )", aError );
     
     if ( KErrNone == aError )
         {
@@ -222,7 +233,7 @@ void CMTPPlaybackPlaylistHelper::HandleOpenL( const CMPXMedia& aEntries,
         MTPPlaybackControlImpl().DoHandleError( error );
         }
     
-    __FLOG(_L8("-CMTPPlaybackPlaylistHelper::HandleOpenL"));
+    OstTraceFunctionExit0( CMTPPLAYBACKPLAYLISTHELPER_HANDLEOPENL_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -232,7 +243,8 @@ void CMTPPlaybackPlaylistHelper::HandleOpenL( const CMPXMedia& aEntries,
 void CMTPPlaybackPlaylistHelper::HandleOpenL( const CMPXCollectionPlaylist& aPlaylist,
         TInt aError )
     {
-    __FLOG_1(_L8("+CMTPPlaybackPlaylistHelper::HandleOpenL( aPlaylist, aError = %d )"), aError );
+    OstTraceFunctionEntry0( DUP1_CMTPPLAYBACKPLAYLISTHELPER_HANDLEOPENL_ENTRY );
+    OstTrace1( TRACE_FLOW, DUP1_CMTPPLAYBACKPLAYLISTHELPER_HANDLEOPENL, "CMTPPlaybackPlaylistHelper::HandleOpenL( aPlaylist, aError = %d )", aError );
     
     if ( KErrNone == aError )
         {
@@ -245,7 +257,7 @@ void CMTPPlaybackPlaylistHelper::HandleOpenL( const CMPXCollectionPlaylist& aPla
         MTPPlaybackControlImpl().DoHandleError( error );
         }
     
-    __FLOG(_L8("-CMTPPlaybackPlaylistHelper::HandleOpenL( aPlaylist, aError )"));
+    OstTraceFunctionExit0( DUP1_CMTPPLAYBACKPLAYLISTHELPER_HANDLEOPENL_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -253,8 +265,8 @@ void CMTPPlaybackPlaylistHelper::HandleOpenL( const CMPXCollectionPlaylist& aPla
 // ---------------------------------------------------------------------------
 void CMTPPlaybackPlaylistHelper::HandleCollectionMediaL( const CMPXMedia& /*aMedia*/, TInt /*aError*/ )
     {
-    __FLOG(_L8("+CMTPPlaybackPlaylistHelper::HandleCollectionMediaL"));
-    __FLOG(_L8("-CMTPPlaybackPlaylistHelper::HandleCollectionMediaL"));
+    OstTraceFunctionEntry0( CMTPPLAYBACKPLAYLISTHELPER_HANDLECOLLECTIONMEDIAL_ENTRY );
+    OstTraceFunctionExit0( CMTPPLAYBACKPLAYLISTHELPER_HANDLECOLLECTIONMEDIAL_EXIT );
     }
 
 //
@@ -268,6 +280,8 @@ CMTPPlaybackPlaylistHelper::CMTPPlaybackPlaylistHelper( CMTPPlaybackControlImpl&
           iPlayObject( NULL ),
           iMTPPlaybackControl( aControlImpl )
     {
+    OstTraceFunctionEntry0( DUP1_CMTPPLAYBACKPLAYLISTHELPER_CMTPPLAYBACKPLAYLISTHELPER_ENTRY );
+    OstTraceFunctionExit0( DUP1_CMTPPLAYBACKPLAYLISTHELPER_CMTPPLAYBACKPLAYLISTHELPER_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -276,13 +290,12 @@ CMTPPlaybackPlaylistHelper::CMTPPlaybackPlaylistHelper( CMTPPlaybackControlImpl&
 //
 void CMTPPlaybackPlaylistHelper::ConstructL()
     {
-    __FLOG_OPEN(KMTPSubsystem, KComponent);
-    __FLOG(_L8("+CMTPPlaybackPlaylistHelper::ConstructL"));
+    OstTraceFunctionEntry0( CMTPPLAYBACKPLAYLISTHELPER_CONSTRUCTL_ENTRY );
     
     iCollectionUiHelper = CMPXCollectionHelperFactory::NewCollectionUiHelperL();
     iCollectionUtil = MMPXCollectionUtility::NewL( this, KMcModeDefault );
     
-    __FLOG(_L8("-CMTPPlaybackPlaylistHelper::ConstructL"));
+    OstTraceFunctionExit0( CMTPPLAYBACKPLAYLISTHELPER_CONSTRUCTL_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -291,7 +304,7 @@ void CMTPPlaybackPlaylistHelper::ConstructL()
 //
 void CMTPPlaybackPlaylistHelper::DoHandleCollectionMessageL( const CMPXMessage& aMsg )
     {
-    __FLOG(_L8("+CMTPPlaybackPlaylistHelper::DoHandleCollectionMessage"));
+    OstTraceFunctionEntry0( CMTPPLAYBACKPLAYLISTHELPER_DOHANDLECOLLECTIONMESSAGEL_ENTRY );
     
     TMPXMessageId id( aMsg.ValueTObjectL<TMPXMessageId>( KMPXMessageGeneralId ) );
 
@@ -301,8 +314,8 @@ void CMTPPlaybackPlaylistHelper::DoHandleCollectionMessageL( const CMPXMessage& 
         TInt type( aMsg.ValueTObjectL<TInt>( KMPXMessageGeneralType ) );
         TInt data( aMsg.ValueTObjectL<TInt>( KMPXMessageGeneralData ) );
         
-        __FLOG_VA((_L8("Event code is 0x%X, type code is 0x%X"), event, type ));
-        __FLOG_1(_L8("Data code is 0x%X"), data );
+        OstTraceExt2( TRACE_FLOW, CMTPPLAYBACKPLAYLISTHELPER_DOHANDLECOLLECTIONMESSAGEL, "Event code is 0x%X, type code is 0x%X", static_cast<TUint32>( event ), type );
+        OstTrace1( TRACE_FLOW, DUP1_CMTPPLAYBACKPLAYLISTHELPER_DOHANDLECOLLECTIONMESSAGEL, "Data code is 0x%X", data );
         
         if ( event == TMPXCollectionMessage::EPathChanged &&
              type == EMcPathChangedByOpen && 
@@ -318,11 +331,11 @@ void CMTPPlaybackPlaylistHelper::DoHandleCollectionMessageL( const CMPXMessage& 
             }
         else if ( event == TMPXCollectionMessage::ECollectionChanged )
             {
-            __FLOG(_L8("Ignore this event"));
+            OstTrace0( TRACE_NORMAL, DUP2_CMTPPLAYBACKPLAYLISTHELPER_DOHANDLECOLLECTIONMESSAGEL, "Ignore this event" );
             }
         }
     
-    __FLOG(_L8("-CMTPPlaybackPlaylistHelper::DoHandleCollectionMessage"));
+    OstTraceFunctionExit0( CMTPPLAYBACKPLAYLISTHELPER_DOHANDLECOLLECTIONMESSAGEL_EXIT );
     }
 
 // ----------------------------------------------------
@@ -331,7 +344,7 @@ void CMTPPlaybackPlaylistHelper::DoHandleCollectionMessageL( const CMPXMessage& 
 //
 void CMTPPlaybackPlaylistHelper::DoHandleOpenL( const CMPXMedia& aEntries )
     {
-    __FLOG(_L8("+CMTPPlaybackPlaylistHelper::DoHandleOpenL( const CMPXMedia )"));
+    OstTraceFunctionEntry0( CMTPPLAYBACKPLAYLISTHELPER_DOHANDLEOPENL_ENTRY );
     
     if ( EMTPPbCatAlbum == iPlayCategory )
         {
@@ -361,7 +374,7 @@ void CMTPPlaybackPlaylistHelper::DoHandleOpenL( const CMPXMedia& aEntries )
             }
         }
     
-    __FLOG(_L8("-CMTPPlaybackPlaylistHelper::DoHandleOpenL( const CMPXMedia )"));
+    OstTraceFunctionExit0( CMTPPLAYBACKPLAYLISTHELPER_DOHANDLEOPENL_EXIT );
     }
 
 // ----------------------------------------------------
@@ -370,14 +383,14 @@ void CMTPPlaybackPlaylistHelper::DoHandleOpenL( const CMPXMedia& aEntries )
 //
 void CMTPPlaybackPlaylistHelper::OpenMusicPlayListPathL()
     {
-    __FLOG(_L8("+CMTPPlaybackPlaylistHelper::OpenMusicPlayListPathL"));
+    OstTraceFunctionEntry0( CMTPPLAYBACKPLAYLISTHELPER_OPENMUSICPLAYLISTPATHL_ENTRY );
     
     CMPXCollectionPath* path = iCollectionUiHelper->MusicPlaylistPathL();
     CleanupStack::PushL( path );
     iCollectionUtil->Collection().OpenL( *path );
     CleanupStack::PopAndDestroy( path );
     
-    __FLOG(_L8("-CMTPPlaybackPlaylistHelper::OpenMusicPlayListPathL"));
+    OstTraceFunctionExit0( CMTPPLAYBACKPLAYLISTHELPER_OPENMUSICPLAYLISTPATHL_EXIT );
     }
 
 // ----------------------------------------------------
@@ -386,7 +399,7 @@ void CMTPPlaybackPlaylistHelper::OpenMusicPlayListPathL()
 //
 void CMTPPlaybackPlaylistHelper::OpenMusicAblumPathL()
     {
-    __FLOG(_L8("+CMTPPlaybackPlaylistHelper::OpenMusicAblumPathL"));
+    OstTraceFunctionEntry0( CMTPPLAYBACKPLAYLISTHELPER_OPENMUSICABLUMPATHL_ENTRY );
     
     CMPXCollectionPath* path = iCollectionUiHelper->MusicMenuPathL();
     CleanupStack::PushL( path );
@@ -394,7 +407,7 @@ void CMTPPlaybackPlaylistHelper::OpenMusicAblumPathL()
     iCollectionUtil->Collection().OpenL( *path );
     CleanupStack::PopAndDestroy( path );
     
-    __FLOG(_L8("-CMTPPlaybackPlaylistHelper::OpenMusicAblumPathL"));
+    OstTraceFunctionExit0( CMTPPLAYBACKPLAYLISTHELPER_OPENMUSICABLUMPATHL_EXIT );
     }
 
 // ----------------------------------------------------
@@ -403,14 +416,14 @@ void CMTPPlaybackPlaylistHelper::OpenMusicAblumPathL()
 //
 void CMTPPlaybackPlaylistHelper::ResetPlaySource()
     {
-    __FLOG(_L8("+CMTPPlaybackPlaylistHelper::ResetPlaySourceL"));
+    OstTraceFunctionEntry0( CMTPPLAYBACKPLAYLISTHELPER_RESETPLAYSOURCE_ENTRY );
     
     iPathIndex = -1;
     iSongIndex = 0;
     delete iPlayObject;
     iPlayObject = NULL;
     
-    __FLOG(_L8("-CMTPPlaybackPlaylistHelper::ResetPlaySourceL"));
+    OstTraceFunctionExit0( CMTPPLAYBACKPLAYLISTHELPER_RESETPLAYSOURCE_EXIT );
     }
 
 // ----------------------------------------------------
@@ -419,7 +432,7 @@ void CMTPPlaybackPlaylistHelper::ResetPlaySource()
 //
 void CMTPPlaybackPlaylistHelper::UpdatePlaylistPathIndexL( const CMPXMedia& aEntries )
     {
-    __FLOG(_L8("+CMTPPlaybackPlaylistHelper::UpdatePlaylistPathIndexL"));
+    OstTraceFunctionEntry0( CMTPPLAYBACKPLAYLISTHELPER_UPDATEPLAYLISTPATHINDEXL_ENTRY );
     __ASSERT_DEBUG( iPlayCategory == EMTPPbCatPlayList, Panic( EMTPPBCollectionErrCall ));
     
     const CMPXMediaArray* refArray = aEntries.Value<CMPXMediaArray> ( KMPXMediaArrayContents );
@@ -444,7 +457,7 @@ void CMTPPlaybackPlaylistHelper::UpdatePlaylistPathIndexL( const CMPXMedia& aEnt
             }
        }
     
-    __FLOG(_L8("-CMTPPlaybackPlaylistHelper::UpdatePlaylistPathIndexL"));
+    OstTraceFunctionExit0( CMTPPLAYBACKPLAYLISTHELPER_UPDATEPLAYLISTPATHINDEXL_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -453,7 +466,7 @@ void CMTPPlaybackPlaylistHelper::UpdatePlaylistPathIndexL( const CMPXMedia& aEnt
 //
 MMPXCollectionHelper* CMTPPlaybackPlaylistHelper::CollectionHelperL()
     {
-    __FLOG(_L8("+CMTPPlaybackPlaylistHelper::CollectionHelperL"));
+    OstTraceFunctionEntry0( CMTPPLAYBACKPLAYLISTHELPER_COLLECTIONHELPERL_ENTRY );
     
     if ( iCollectionHelper == NULL )
         {
@@ -478,11 +491,15 @@ MMPXCollectionHelper* CMTPPlaybackPlaylistHelper::CollectionHelperL()
         */
         TChar driveChar = 'c';
         TInt driveNumber;
-        User::LeaveIfError( RFs::CharToDrive( driveChar, driveNumber ) );
+        TInt ret = RFs::CharToDrive( driveChar, driveNumber );
+        LEAVEIFERROR( ret, 
+                OstTrace0( TRACE_ERROR, CMTPPLAYBACKPLAYLISTHELPER_COLLECTIONHELPERL, "Can't get driveNumber" ));
             
         // get root path
         TBuf<KStorageRootMaxLength> storeRoot;
-        User::LeaveIfError( PathInfo::GetRootPath( storeRoot, driveNumber ) );
+        ret = PathInfo::GetRootPath( storeRoot, driveNumber );
+        LEAVEIFERROR( ret, 
+                        OstTrace0( TRACE_ERROR, DUP1_CMTPPLAYBACKPLAYLISTHELPER_COLLECTIONHELPERL, "Can't get storeRoot" ));
             
         searchMedia->SetTextValueL( KMPXMediaGeneralDrive, storeRoot );
             
@@ -504,12 +521,13 @@ MMPXCollectionHelper* CMTPPlaybackPlaylistHelper::CollectionHelperL()
             {
             iCollectionHelper->Close();
             iCollectionHelper = NULL;
-            User::Leave( KErrGeneral );
+            LEAVEIFERROR( KErrGeneral, 
+                    OstTrace0( TRACE_ERROR, DUP2_CMTPPLAYBACKPLAYLISTHELPER_COLLECTIONHELPERL, "MPX database error" ));
             }
         CleanupStack::PopAndDestroy( foundMedia ); // - foundMedia
         }
     
-    __FLOG(_L8("-CMTPPlaybackPlaylistHelper::CollectionHelperL"));
+    OstTraceFunctionExit0( CMTPPLAYBACKPLAYLISTHELPER_COLLECTIONHELPERL_EXIT );
     return iCollectionHelper;
     }
 
@@ -519,8 +537,7 @@ MMPXCollectionHelper* CMTPPlaybackPlaylistHelper::CollectionHelperL()
 //
 const TMPXItemId CMTPPlaybackPlaylistHelper::UriToItemIdL()
     {
-    __FLOG(_L8("+CMTPPlaybackPlaylistHelper::UriToItemIdL"));
-    
+    OstTraceFunctionEntry0( CMTPPLAYBACKPLAYLISTHELPER_URITOITEMIDL_ENTRY );
 
     TMPXItemId itemId( KMPXInvalidItemId );
     TInt error = KErrNone;
@@ -551,7 +568,7 @@ const TMPXItemId CMTPPlaybackPlaylistHelper::UriToItemIdL()
         CleanupStack::PopAndDestroy( &atts );
         }
     
-    __FLOG(_L8("-CMTPPlaybackPlaylistHelper::UriToItemIdL"));
+    OstTraceFunctionExit0( CMTPPLAYBACKPLAYLISTHELPER_URITOITEMIDL_EXIT );
     return itemId;
     }
 
@@ -561,7 +578,7 @@ const TMPXItemId CMTPPlaybackPlaylistHelper::UriToItemIdL()
 //
 const TFileName CMTPPlaybackPlaylistHelper::ItemIdToUriL( const TMPXItemId& aId )
     {
-    __FLOG(_L8("+CMTPPlaybackPlaylistHelper::ItemIdToUriL"));
+    OstTraceFunctionEntry0( CMTPPLAYBACKPLAYLISTHELPER_ITEMIDTOURIL_ENTRY );
     
     TFileName itemUri( KNullDesC );
     
@@ -598,11 +615,13 @@ const TFileName CMTPPlaybackPlaylistHelper::ItemIdToUriL( const TMPXItemId& aId 
     CleanupStack::PushL( foundMedia ); // + foundMedia
     if ( !foundMedia->IsSupported( KMPXMediaArrayCount ))
         {
-        User::Leave( KErrNotSupported );
+        LEAVEIFERROR( KErrNotSupported, 
+                OstTrace0( TRACE_ERROR, CMTPPLAYBACKPLAYLISTHELPER_ITEMIDTOURIL, "ItemId convert to Uri error" ));
         }
     else if ( *foundMedia->Value<TInt>( KMPXMediaArrayCount ) != 1 )
         {
-        User::Leave( KErrNotSupported );
+        LEAVEIFERROR( KErrNotSupported, 
+                OstTrace0( TRACE_ERROR, DUP1_CMTPPLAYBACKPLAYLISTHELPER_ITEMIDTOURIL, "ItemId convert to Uri error" ));
         }
     
     const CMPXMediaArray* tracksArray = foundMedia->Value<CMPXMediaArray> ( KMPXMediaArrayContents );
@@ -615,7 +634,7 @@ const TFileName CMTPPlaybackPlaylistHelper::ItemIdToUriL( const TMPXItemId& aId 
     
     CleanupStack::PopAndDestroy( foundMedia ); // - foundMedia
     
-    __FLOG(_L8("-CMTPPlaybackPlaylistHelper::ItemIdToUriL"));
+    OstTraceFunctionExit0( CMTPPLAYBACKPLAYLISTHELPER_ITEMIDTOURIL_EXIT );
     return itemUri;
     }
 
@@ -625,7 +644,7 @@ const TFileName CMTPPlaybackPlaylistHelper::ItemIdToUriL( const TMPXItemId& aId 
 //
 CMPXMedia* CMTPPlaybackPlaylistHelper::FindAlbumSongsL( const TMPXItemId& aAlbumId )
     {
-    __FLOG(_L8("+CMTPPlaybackPlaylistHelper::FindAlbumSongsL"));
+    OstTraceFunctionEntry0( CMTPPLAYBACKPLAYLISTHELPER_FINDALBUMSONGSL_ENTRY );
     
     // Fetch the songs for the selected album
     CMPXMedia* findCriteria = CMPXMedia::NewL();
@@ -647,19 +666,22 @@ CMPXMedia* CMTPPlaybackPlaylistHelper::FindAlbumSongsL( const TMPXItemId& aAlbum
     
     if ( !foundMedia->IsSupported( KMPXMediaArrayCount ) )
         {
-        User::Leave( KErrNotSupported );
+        LEAVEIFERROR( KErrNotSupported, 
+                OstTrace0( TRACE_ERROR, CMTPPLAYBACKPLAYLISTHELPER_FINDALBUMSONGSL, "Find album song error" ));
         }
     TInt foundItemCount = *foundMedia->Value<TInt>( KMPXMediaArrayCount );
     if ( foundItemCount == 0 )
         {
-        User::Leave( KErrNotFound );
+        LEAVEIFERROR( KErrNotFound, 
+                OstTrace0( TRACE_ERROR, DUP1_CMTPPLAYBACKPLAYLISTHELPER_FINDALBUMSONGSL, "Can't find album song" ));
         }
     if ( !foundMedia->IsSupported( KMPXMediaArrayContents ) )
         {
-        User::Leave( KErrNotSupported );
+        LEAVEIFERROR( KErrNotSupported, 
+                OstTrace0( TRACE_ERROR, DUP2_CMTPPLAYBACKPLAYLISTHELPER_FINDALBUMSONGSL, "Find album song error" ));
         }
     
-    __FLOG(_L8("-CMTPPlaybackPlaylistHelper::FindAlbumSongsL"));
+    OstTraceFunctionExit0( CMTPPLAYBACKPLAYLISTHELPER_FINDALBUMSONGSL_EXIT );
     return foundMedia;
     }
 
@@ -670,7 +692,7 @@ CMPXMedia* CMTPPlaybackPlaylistHelper::FindAlbumSongsL( const TMPXItemId& aAlbum
 //
 void CMTPPlaybackPlaylistHelper::UpdateAlbumPathAndOpenL()
     {
-    __FLOG(_L8("+CMTPPlaybackPlaylistHelper::UpdateAlbumPathAndOpenL"));
+    OstTraceFunctionEntry0( CMTPPLAYBACKPLAYLISTHELPER_UPDATEALBUMPATHANDOPENL_ENTRY );
     
     RArray<TMPXItemId> ids;
     CleanupClosePushL(ids);
@@ -690,6 +712,7 @@ void CMTPPlaybackPlaylistHelper::UpdateAlbumPathAndOpenL()
         MTPPlaybackControlImpl().DoHandleError( KPlaybackErrParamInvalid );
         CleanupStack::PopAndDestroy( cpath );
         CleanupStack::PopAndDestroy(&ids);
+        OstTraceFunctionExit0( CMTPPLAYBACKPLAYLISTHELPER_UPDATEALBUMPATHANDOPENL_EXIT );
         return;
         }
     
@@ -701,7 +724,11 @@ void CMTPPlaybackPlaylistHelper::UpdateAlbumPathAndOpenL()
     CMPXMedia* songs = FindAlbumSongsL( id );
     CleanupStack::PushL( songs );
     const CMPXMediaArray* tracksArray = songs->Value<CMPXMediaArray> ( KMPXMediaArrayContents );
-    User::LeaveIfNull(const_cast<CMPXMediaArray*>(tracksArray));
+    if ( const_cast<CMPXMediaArray*>(tracksArray) == NULL )
+        {
+        LEAVEIFERROR( KErrNoMemory, 
+                            OstTrace0( TRACE_ERROR, CMTPPLAYBACKPLAYLISTHELPER_UPDATEALBUMPATHANDOPENL, "Find album song error" ));
+        }
     TUint count = tracksArray->Count();
     for (TInt i=0; i<count; ++i)
         {
@@ -718,7 +745,7 @@ void CMTPPlaybackPlaylistHelper::UpdateAlbumPathAndOpenL()
     CleanupStack::PopAndDestroy( cpath );
     CleanupStack::PopAndDestroy(&ids);
     
-    __FLOG(_L8("-CMTPPlaybackPlaylistHelper::UpdateAlbumPathAndOpenL"));
+    OstTraceFunctionExit0( DUP1_CMTPPLAYBACKPLAYLISTHELPER_UPDATEALBUMPATHANDOPENL_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -727,7 +754,7 @@ void CMTPPlaybackPlaylistHelper::UpdateAlbumPathAndOpenL()
 //
 void CMTPPlaybackPlaylistHelper::UpdatePathAndOpenL()
     {
-    __FLOG(_L8("+CMTPPlaybackPlaylistHelper::UpdatePathAndOpenL()"));
+    OstTraceFunctionEntry0( CMTPPLAYBACKPLAYLISTHELPER_UPDATEPATHANDOPENL_ENTRY );
     
     RArray<TMPXItemId> ids;
     CleanupClosePushL(ids);
@@ -741,7 +768,7 @@ void CMTPPlaybackPlaylistHelper::UpdatePathAndOpenL()
     CleanupStack::PopAndDestroy( cpath );
     CleanupStack::PopAndDestroy(&ids);
     
-    __FLOG(_L8("-CMTPPlaybackPlaylistHelper::UpdatePathAndOpenL( aSong Index )"));
+    OstTraceFunctionExit0( CMTPPLAYBACKPLAYLISTHELPER_UPDATEPATHANDOPENL_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -750,6 +777,8 @@ void CMTPPlaybackPlaylistHelper::UpdatePathAndOpenL()
 //
 CMTPPlaybackControlImpl& CMTPPlaybackPlaylistHelper::MTPPlaybackControlImpl()
     {
+    OstTraceFunctionEntry0( CMTPPLAYBACKPLAYLISTHELPER_MTPPLAYBACKCONTROLIMPL_ENTRY );
+    OstTraceFunctionExit0( CMTPPLAYBACKPLAYLISTHELPER_MTPPLAYBACKCONTROLIMPL_EXIT );
     return iMTPPlaybackControl;
     }
 

@@ -21,7 +21,12 @@
 
 
 #include "tptpipinitevtreq.h"
-#include "ptpipdatatypes.h"     
+#include "ptpipdatatypes.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "tptpipinitevtreqTraces.h"
+#endif
+     
 // Dataset element metadata.
 const TPTPIPInitEvtRequest::TElementInfo TPTPIPInitEvtRequest::iElementMetaData[ENumElements] = 
     {
@@ -37,17 +42,23 @@ EXPORT_C TPTPIPInitEvtRequest::TPTPIPInitEvtRequest() :
     iElementInfo(iElementMetaData, ENumElements),
     iBuffer(KSize)
     {
+    OstTraceFunctionEntry0( TPTPIPINITEVTREQUEST_TPTPIPINITEVTREQUEST_ENTRY );
     SetBuffer(iBuffer);
+    OstTraceFunctionExit0( TPTPIPINITEVTREQUEST_TPTPIPINITEVTREQUEST_EXIT );
     }     
 
 EXPORT_C TUint TPTPIPInitEvtRequest::Type() const
 	{
+	OstTraceFunctionEntry0( TPTPIPINITEVTREQUEST_TYPE_ENTRY );
+	OstTraceFunctionExit0( TPTPIPINITEVTREQUEST_TYPE_EXIT );
 	return EPTPIPTypeInitEvtRequest;
 	}
     
 EXPORT_C const TMTPTypeFlatBase::TElementInfo& TPTPIPInitEvtRequest::ElementInfo(TInt aElementId) const
     {
+    OstTraceFunctionEntry0( TPTPIPINITEVTREQUEST_ELEMENTINFO_ENTRY );
     __ASSERT_DEBUG((aElementId < ENumElements), User::Invariant());
+    OstTraceFunctionExit0( TPTPIPINITEVTREQUEST_ELEMENTINFO_EXIT );
     return iElementInfo[aElementId];
     }
 

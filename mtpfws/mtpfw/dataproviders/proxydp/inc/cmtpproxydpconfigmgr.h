@@ -20,7 +20,6 @@
 
 #ifndef CMTPPROXYDPPCONFIGMGR_H
 #define CMTPPROXYDPPCONFIGMGR_H
-#include "mtpdebug.h"
 #include <e32base.h>
 #include <badesca.h>
 struct FileMappingStruct
@@ -44,10 +43,6 @@ private:
 private:
 	MMTPDataProviderFramework& iFramework;
 	RArray<FileMappingStruct> iMappingStruct;
-	/**
-    FLOGGER debug trace member variable.
-    */
-    __FLOG_DECLARATION_MEMBER_MUTABLE;
 	};
 
 #endif // CMTPPROXYDPPCONFIGMGR_H

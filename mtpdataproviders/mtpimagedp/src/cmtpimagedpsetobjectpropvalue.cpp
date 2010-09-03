@@ -32,8 +32,12 @@
 #include "cmtpimagedp.h"
 #include "cmtpimagedpobjectpropertymgr.h"
 #include "cmtpimagedpsetobjectpropvalue.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpimagedpsetobjectpropvalueTraces.h"
+#endif
 
-__FLOG_STMT(_LIT8(KComponent,"CMTPImageDpSetObjectPropValue");)
+
 /**
 Two-phase construction method
 @param aPlugin	The data provider plugin
@@ -57,11 +61,10 @@ Destructor
 */	
 CMTPImageDpSetObjectPropValue::~CMTPImageDpSetObjectPropValue()
 	{	
-	__FLOG(_L8(">> ~CMTPImageDpSetObjectPropValue"));
+	OstTraceFunctionEntry0( CMTPIMAGEDPSETOBJECTPROPVALUE_CMTPIMAGEDPSETOBJECTPROPVALUE_DES_ENTRY );
 	delete iMTPTypeString;
 	delete iObjectMeta;
-	__FLOG(_L8("<< ~CMTPImageDpSetObjectPropValue"));
-	__FLOG_CLOSE;
+	OstTraceFunctionExit0( CMTPIMAGEDPSETOBJECTPROPVALUE_CMTPIMAGEDPSETOBJECTPROPVALUE_DES_EXIT );
 	}
 
 /**
@@ -84,7 +87,7 @@ A helper function of CheckRequestL. To check whether the object property code is
 */	
 TBool CMTPImageDpSetObjectPropValue::IsPropCodeReadonly(TUint32 aObjectPropCode)
 	{
-	__FLOG(_L8(">> CMTPImageDpSetObjectPropValue::IsPropCodeReadonly"));
+	OstTraceFunctionEntry0( CMTPIMAGEDPSETOBJECTPROPVALUE_ISPROPCODEREADONLY_ENTRY );
 	TBool returnCode = EFalse;
 	if(aObjectPropCode == EMTPObjectPropCodeStorageID
 		|| aObjectPropCode == EMTPObjectPropCodeObjectFormat
@@ -104,7 +107,7 @@ TBool CMTPImageDpSetObjectPropValue::IsPropCodeReadonly(TUint32 aObjectPropCode)
 		{
 		returnCode = ETrue;
 		}
-	__FLOG(_L8("<< CMTPImageDpSetObjectPropValue::IsPropCodeReadonly"));
+	OstTraceFunctionExit0( CMTPIMAGEDPSETOBJECTPROPVALUE_ISPROPCODEREADONLY_EXIT );
 	return returnCode;
 	}
 
@@ -113,7 +116,7 @@ Verify object handle, prop code
 */
 TMTPResponseCode CMTPImageDpSetObjectPropValue::CheckRequestL()
 	{
-	__FLOG(_L8(">> CMTPImageDpSetObjectPropValue::CheckRequestL"));
+	OstTraceFunctionEntry0( CMTPIMAGEDPSETOBJECTPROPVALUE_CHECKREQUESTL_ENTRY );
 	TMTPResponseCode responseCode = CMTPRequestProcessor::CheckRequestL();
 	if(responseCode == EMTPRespCodeOK)
 		{
@@ -145,7 +148,7 @@ TMTPResponseCode CMTPImageDpSetObjectPropValue::CheckRequestL()
 				responseCode = EMTPRespCodeInvalidObjectPropCode;
 				}
 		}
-	__FLOG(_L8("<< CMTPImageDpSetObjectPropValue::CheckRequestL"));
+	OstTraceFunctionExit0( CMTPIMAGEDPSETOBJECTPROPVALUE_CHECKREQUESTL_EXIT );
 	return responseCode;
 	}
 		
@@ -154,7 +157,7 @@ SetObjectPropValue request handler
 */	
 void CMTPImageDpSetObjectPropValue::ServiceL()
 	{
-	__FLOG(_L8(">> CMTPImageDpSetObjectPropValue::ServiceL"));
+	OstTraceFunctionEntry0( CMTPIMAGEDPSETOBJECTPROPVALUE_SERVICEL_ENTRY );
 	TUint32 propCode = Request().Uint32(TMTPTypeRequest::ERequestParameter2);
 	delete iMTPTypeString;
 	iMTPTypeString = NULL;
@@ -168,11 +171,15 @@ void CMTPImageDpSetObjectPropValue::ServiceL()
 			break;
         case EMTPObjectPropCodeNonConsumable:
             ReceiveDataL(iMTPTypeUint8);
-            break;			
+            break;
+        case EMTPObjectPropCodeHidden:
+            ReceiveDataL(iMTPTypeUint16);
+            break;
 		default:
+		    OstTrace1( TRACE_ERROR, CMTPIMAGEDPSETOBJECTPROPVALUE_SERVICEL, "Invalid propCode %d", propCode );
 			User::Leave(KErrGeneral);
 		}	
-	__FLOG(_L8("<< CMTPImageDpSetObjectPropValue::ServiceL"));
+	OstTraceFunctionExit0( CMTPIMAGEDPSETOBJECTPROPVALUE_SERVICEL_EXIT );
 	}
 
 /**
@@ -181,7 +188,7 @@ Apply the references to the specified object
 */	
 TBool CMTPImageDpSetObjectPropValue::DoHandleResponsePhaseL()
 	{
-	__FLOG(_L8(">> CMTPImageDpSetObjectPropValue::DoHandleResponsePhaseL"));
+	OstTraceFunctionEntry0( CMTPIMAGEDPSETOBJECTPROPVALUE_DOHANDLERESPONSEPHASEL_ENTRY );
 	
     iObjectPropertyMgr.SetCurrentObjectL(*iObjectMeta, ETrue);
     /*
@@ -192,6 +199,7 @@ TBool CMTPImageDpSetObjectPropValue::DoHandleResponsePhaseL()
     if(EMTPProtectionReadOnly == protection)
         {
         SendResponseL(EMTPRespCodeAccessDenied);
+        OstTraceFunctionExit0( CMTPIMAGEDPSETOBJECTPROPVALUE_DOHANDLERESPONSEPHASEL_EXIT );
         return EFalse;  
         }
 	TInt32 handle(Request().Uint32(TMTPTypeRequest::ERequestParameter1));
@@ -233,15 +241,21 @@ TBool CMTPImageDpSetObjectPropValue::DoHandleResponsePhaseL()
             iFramework.ObjectMgr().ModifyObjectL(*iObjectMeta);
             responseCode = EMTPRespCodeOK;
             }
-            break;            
+            break;
+        case EMTPObjectPropCodeHidden:
+            {
+            iObjectPropertyMgr.SetPropertyL(TMTPObjectPropertyCode(propCode), iMTPTypeUint16.Value());
+            responseCode = EMTPRespCodeOK;
+            }
+            break;    
  		default:
 			responseCode = EMTPRespCodeInvalidObjectPropFormat;
 			//Panic(EMTPImageDpUnsupportedProperty);
 		}
 	
 	SendResponseL(responseCode);
-	
-	__FLOG(_L8("<< CMTPImageDpSetObjectPropValue::DoHandleResponsePhaseL"));
+
+	OstTraceFunctionExit0( DUP1_CMTPIMAGEDPSETOBJECTPROPVALUE_DOHANDLERESPONSEPHASEL_EXIT );
 	return EFalse;	
 	}
 	
@@ -255,12 +269,11 @@ Second-phase construction
 */			
 void CMTPImageDpSetObjectPropValue::ConstructL()
 	{
-	__FLOG_OPEN(KMTPSubsystem, KComponent);
-	__FLOG(_L8(">> CMTPImageDpSetObjectPropList::ConstructL"));
+	OstTraceFunctionEntry0( CMTPIMAGEDPSETOBJECTPROPVALUE_CONSTRUCTL_ENTRY );
 	
 	iObjectMeta = CMTPObjectMetaData::NewL();
-	
-	__FLOG(_L8("<< CMTPImageDpSetObjectPropList::ConstructL"));
+
+	OstTraceFunctionExit0( CMTPIMAGEDPSETOBJECTPROPVALUE_CONSTRUCTL_EXIT );
 	}
 
 	

@@ -17,14 +17,11 @@
 */
 
 
-#include <e32debug.h>
 #include "dpsconnectnotifier.h"
 #include "dpsusbnotifier.h"
-
-#ifdef _DEBUG
-#	define IF_DEBUG(t) {RDebug::t;}
-#else
-#	define IF_DEBUG(t)
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "dpsconnectnotifierTraces.h"
 #endif
 
 const TUint KUsbAllStates = 0xFFFFFFFF;
@@ -35,7 +32,6 @@ const TUint KUsbAllStates = 0xFFFFFFFF;
 // 
 CDpsConnectNotifier* CDpsConnectNotifier::NewL(CDpsUsbNotifier* aParent)
     {
-    IF_DEBUG(Print(_L("CDpsConnectNotifier::NewL")));
     CDpsConnectNotifier* self = new(ELeave) CDpsConnectNotifier(aParent);
     return self;	    
     }
@@ -47,9 +43,9 @@ CDpsConnectNotifier* CDpsConnectNotifier::NewL(CDpsUsbNotifier* aParent)
 CDpsConnectNotifier::CDpsConnectNotifier(CDpsUsbNotifier* aParent) :
     CActive(EPriorityNormal), iNotifier(aParent) 
     {
-    IF_DEBUG(Print(_L(">>>CDpsConnectNotifier::Ctor")));    
+    OstTraceFunctionEntry0( DUP1_CDPSCONNECTNOTIFIER_CDPSCONNECTNOTIFIER_CONS_ENTRY ); 
     CActiveScheduler::Add(this);
-    IF_DEBUG(Print(_L("<<<CDpsConnectNotifier::Ctor")));    
+    OstTraceFunctionExit0( DUP1_CDPSCONNECTNOTIFIER_CDPSCONNECTNOTIFIER_CONS_EXIT );
     }
    
 // ---------------------------------------------------------------------------
@@ -58,9 +54,9 @@ CDpsConnectNotifier::CDpsConnectNotifier(CDpsUsbNotifier* aParent) :
 //     
 CDpsConnectNotifier::~CDpsConnectNotifier()
     {
-    IF_DEBUG(Print(_L(">>>CDpsConnectNotifier::~")));   
+    OstTraceFunctionEntry0( CDPSCONNECTNOTIFIER_CDPSCONNECTNOTIFIER_DES_ENTRY );  
     Cancel();
-    IF_DEBUG(Print(_L("<<<CDpsConnectNotifier::~")));   
+    OstTraceFunctionExit0( CDPSCONNECTNOTIFIER_CDPSCONNECTNOTIFIER_DES_EXIT );
     }
    
 // ---------------------------------------------------------------------------
@@ -69,15 +65,15 @@ CDpsConnectNotifier::~CDpsConnectNotifier()
 //     
 void CDpsConnectNotifier::ConnectNotify()
     {
-    IF_DEBUG(Print(_L(">>>CDpsConnectNotifier::ConnectNotify")));    
+    OstTraceFunctionEntry0( CDPSCONNECTNOTIFIER_CONNECTNOTIFY_ENTRY );  
     if (!IsActive())
         {
 	    iNotifier->iUsbM.DeviceStateNotification(KUsbAllStates, 
 	                                             iNotifier->iConnectState, 
 	                                             iStatus);
         SetActive();			
-        }
-    IF_DEBUG(Print(_L("<<<CDpsConnectNotifier::ConnectNotify")));    	
+        } 	
+    OstTraceFunctionExit0( CDPSCONNECTNOTIFIER_CONNECTNOTIFY_EXIT );
     }
     
 // ---------------------------------------------------------------------------
@@ -86,8 +82,9 @@ void CDpsConnectNotifier::ConnectNotify()
 // 
 void CDpsConnectNotifier::RunL()
     {
-    IF_DEBUG(Print(_L
-        (">>>CDpsConnectNotifier::RunL %x"), iNotifier->iConnectState));
+    OstTraceFunctionEntry0( CDPSCONNECTNOTIFIER_RUNL_ENTRY );
+    OstTrace1( TRACE_NORMAL, CDPSCONNECTNOTIFIER_RUNL, "status %d", iNotifier->iConnectState );
+
     if (KErrNone == iStatus.Int())
         {
         
@@ -117,9 +114,9 @@ void CDpsConnectNotifier::RunL()
         }
     else
         {
-        IF_DEBUG(Print(_L("\tthe iStatus is wrong!!!")));
-        }    
-    IF_DEBUG(Print(_L("<<<CDpsConnectNotifier::RunL")));    
+        OstTrace0( TRACE_WARNING, DUP1_CDPSCONNECTNOTIFIER_RUNL, "the iStatus is wrong!!!" );
+        }      
+    OstTraceFunctionExit0( CDPSCONNECTNOTIFIER_RUNL_EXIT );
     }
     
 // ---------------------------------------------------------------------------
@@ -128,9 +125,9 @@ void CDpsConnectNotifier::RunL()
 // 
 void CDpsConnectNotifier::DoCancel()
     {
-    IF_DEBUG(Print(_L(">>>CDpsConnectNotifier::DoCancel")));    
+    OstTraceFunctionEntry0( CDPSCONNECTNOTIFIER_DOCANCEL_ENTRY );  
     iNotifier->iUsbM.DeviceStateNotificationCancel();
-    IF_DEBUG(Print(_L("<<<CDpsConnectNotifier::DoCancel")));
+    OstTraceFunctionExit0( CDPSCONNECTNOTIFIER_DOCANCEL_EXIT );
     }
     
 // ---------------------------------------------------------------------------
@@ -139,6 +136,7 @@ void CDpsConnectNotifier::DoCancel()
 // 
 TInt CDpsConnectNotifier::RunError(TInt aErr)
     {
-    IF_DEBUG(Print(_L("CDpsConnectNotifier::RunError is %d"), aErr));    
+    OstTraceDef1(OST_TRACE_CATEGORY_PRODUCTION, TRACE_IMPORTANT, CDPSCONNECTNOTIFIER_RUNERROR, 
+            "CDpsConnectNotifier::RunError is %d", aErr );
     return aErr;
     }

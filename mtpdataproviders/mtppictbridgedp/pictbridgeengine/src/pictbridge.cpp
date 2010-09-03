@@ -17,7 +17,6 @@
 
 
 #include <e32base.h>
-#include <e32debug.h>
 #include <dps.rsg>
 #include <f32file.h>
 #include <barsc.h>
@@ -36,12 +35,12 @@
 #include "dpsscriptsender.h"
 #include "dpstransaction.h"
 #include "dpsfile.h"
-
-#ifdef _DEBUG
-#	define IF_DEBUG(t) {RDebug::t;}
-#else
-#	define IF_DEBUG(t)
+#include "mtpdebug.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "pictbridgeTraces.h"
 #endif
+
 
 const TInt KResource = 32;
 const TInt KDriver = 3;
@@ -51,7 +50,7 @@ const TInt KDriver = 3;
 //
 EXPORT_C CDpsEngine* CDpsEngine::GetEngineL()
     {
-    IF_DEBUG(Print(_L("CDpsEngine::GetEngineL")));
+    OstTraceFunctionEntry0( CDPSENGINE_GETENGINEL_ENTRY );
     CDpsEngine* me;
     me = static_cast<CDpsEngine*>(Dll::Tls());
     if (!me)
@@ -61,11 +60,16 @@ EXPORT_C CDpsEngine* CDpsEngine::GetEngineL()
         CleanupStack::PushL(self);
         self->ConstructL();
         CleanupStack::Pop();
-        User::LeaveIfError(Dll::SetTls(self));
+        LEAVEIFERROR(Dll::SetTls(self),
+                OstTrace1( TRACE_ERROR, CDPSENGINE_GETENGINEL, 
+                        "Build singleton failed! error code %d", munged_err));
+                
+        OstTraceFunctionExit0( CDPSENGINE_GETENGINEL_EXIT );
         return self;	
         }
     else
         {
+        OstTraceFunctionExit0( DUP1_CDPSENGINE_GETENGINEL_EXIT );
         return me;	
         }			    
     }
@@ -76,14 +80,14 @@ EXPORT_C CDpsEngine* CDpsEngine::GetEngineL()
 //	
 EXPORT_C void CDpsEngine::Delete()
     {
-    IF_DEBUG(Print(_L(">>>DpsEngine::Delete")));
+    OstTraceFunctionEntry0( CDPSENGINE_DELETE_ENTRY );
     CDpsEngine *me; me = static_cast<CDpsEngine*>(Dll::Tls());
     if (me)
         {
         delete me;
         Dll::SetTls(NULL);
         }
-    IF_DEBUG(Print(_L("<<<DpsEngine::Delete")));	
+    OstTraceFunctionExit0( CDPSENGINE_DELETE_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -92,12 +96,15 @@ EXPORT_C void CDpsEngine::Delete()
 //	
 void CDpsEngine::ConstructL()	
     {
-    IF_DEBUG(Print(_L(">>>CDpsEngine::ConstructL")));
+    OstTraceFunctionEntry0( CDPSENGINE_CONSTRUCTL_ENTRY );
     iDpsParameters = TDpsXmlString::NewL();
-    User::LeaveIfError(iPtp.Connect());    
+    LEAVEIFERROR(iPtp.Connect(),
+            OstTrace1( TRACE_ERROR, CDPSENGINE_CONSTRUCTL, 
+                    "Connect iPtp failed! error code %d", munged_err));
+            
     iDpsOperator = CDpsStateMachine::NewL(this);
-    iUsbNotifier = CDpsUsbNotifier::NewL(this);
-    IF_DEBUG(Print(_L("<<<DpsEngine::ConstructL")));		
+    iUsbNotifier = CDpsUsbNotifier::NewL(this);	
+    OstTraceFunctionExit0( CDPSENGINE_CONSTRUCTL_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -106,7 +113,7 @@ void CDpsEngine::ConstructL()
 //	
 CDpsEngine::~CDpsEngine()
 	{
-    IF_DEBUG(Print(_L(">>>~CDpsEngine")));
+    OstTraceFunctionEntry0( CDPSENGINE_CDPSENGINE_DES_ENTRY );
 	
     delete iDpsOperator;
     iDpsOperator = NULL;
@@ -129,7 +136,7 @@ CDpsEngine::~CDpsEngine()
     delete iDpsParameters;
     iDpsParameters = NULL;
     iPtp.Close();
-    IF_DEBUG(Print(_L("<<<~CDpsEngine")));
+	OstTraceFunctionExit0( CDPSENGINE_CDPSENGINE_DES_EXIT );
 	}
 	
 // ---------------------------------------------------------------------------
@@ -138,12 +145,12 @@ CDpsEngine::~CDpsEngine()
 //
 EXPORT_C void CDpsEngine::SetPrintMode(TRequestStatus& aStatus)
     {
-    IF_DEBUG(Print(_L(">>>DpsEngine::SearchPrinter")));
+    OstTraceFunctionEntry0( CDPSENGINE_SETPRINTMODE_ENTRY );
     
     iPrinterConnectRequest = &aStatus;
     *iPrinterConnectRequest = KRequestPending;		
     iUsbNotifier->WaitForPrinterNotify();
-    IF_DEBUG(Print(_L("<<<DpsEngine::SearchPrinter")));
+	OstTraceFunctionExit0( CDPSENGINE_SETPRINTMODE_EXIT );
 	}
 
 // ---------------------------------------------------------------------------
@@ -152,9 +159,9 @@ EXPORT_C void CDpsEngine::SetPrintMode(TRequestStatus& aStatus)
 //	
 EXPORT_C void CDpsEngine::CancelPrintMode()
     {
-    IF_DEBUG(Print(_L(">>>DpsEngine::CancelSearchPrinter")));
+    OstTraceFunctionEntry0( CDPSENGINE_CANCELPRINTMODE_ENTRY );
     iUsbNotifier->CancelPrinterNotify();				
-    IF_DEBUG(Print(_L("<<<DpsEngine::CancelSearchPrinter")));
+    OstTraceFunctionExit0( CDPSENGINE_CANCELPRINTMODE_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -163,19 +170,20 @@ EXPORT_C void CDpsEngine::CancelPrintMode()
 //
 EXPORT_C void CDpsEngine::ConnectStateNotify(TRequestStatus& aStatus)
     {
-    IF_DEBUG(Print(_L(">>>DpsEngine::ConnectStateNotifyL")));
+    OstTraceFunctionEntry0( CDPSENGINE_CONNECTSTATENOTIFY_ENTRY );
     // SetPrintMode must be finished
     if (!iUsbNotifier->IsSetPrintModeIssued())
         {
         TRequestStatus* status = &aStatus;
         User::RequestComplete(status, KErrNotReady);
+        OstTraceFunctionExit0( CDPSENGINE_CONNECTSTATENOTIFY_EXIT );
         return;
         }
     
     iPrinterConnectRequest = &aStatus;
     *iPrinterConnectRequest = KRequestPending;		
     iUsbNotifier->ConnectNotify();
-    IF_DEBUG(Print(_L("<<<DpsEngine::ConnecStatetNotifyL")));
+    OstTraceFunctionExit0( DUP1_CDPSENGINE_CONNECTSTATENOTIFY_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -185,31 +193,34 @@ EXPORT_C void CDpsEngine::ConnectStateNotify(TRequestStatus& aStatus)
 EXPORT_C void CDpsEngine::DoDpsRequestL(TMDpsOperation* aRequest, 
                                        TRequestStatus& aStatus)
     {
-    IF_DEBUG(Print(_L(">>>DpsEngine::DoDpsRequestL")));
+    OstTraceFunctionEntry0( CDPSENGINE_DODPSREQUESTL_ENTRY );
     // the ptp printer must be connected and registered for the dps event
     if (!iUsbNotifier->IsConfigured() || !iDpsEventRequest)
         {
         TRequestStatus* status = &aStatus;
         User::RequestComplete(status, KErrNotReady);
+        OstTraceFunctionExit0( CDPSENGINE_DODPSREQUESTL_EXIT );
         return;
         }
         
     // there is a request from the host received and the reply has been
     // sending out, but the host has not received it yet. we can not send
-    // the device request now
-    IF_DEBUG(Print(_L("curState is %x, idleState is %x"), 
-        iDpsOperator->CurState(), iDpsOperator->IdleState()));    
+    // the device request now  
+    OstTraceExt2( TRACE_NORMAL, CDPSENGINE_DODPSREQUESTL, 
+            "curState is %x, idleState is %x", (TUint32)iDpsOperator->CurState(), (TUint32)iDpsOperator->IdleState() );
+    
     if (iDpsOperator->CurState() != iDpsOperator->IdleState())
         {
         TRequestStatus* status = &aStatus;
         User::RequestComplete(status, KErrInUse);        
+        OstTraceFunctionExit0( DUP1_CDPSENGINE_DODPSREQUESTL_EXIT );
         return;
         }
     
     iDpsOperator->StartTransactionL(aRequest);
     iDpsOperationRequest = &aStatus;
-    *iDpsOperationRequest = KRequestPending;    
-    IF_DEBUG(Print(_L("<<<DpsEngine::DoDpsRequestL")));           
+    *iDpsOperationRequest = KRequestPending;            
+	OstTraceFunctionExit0( DUP2_CDPSENGINE_DODPSREQUESTL_EXIT );
 	}
 
 // ---------------------------------------------------------------------------
@@ -218,14 +229,14 @@ EXPORT_C void CDpsEngine::DoDpsRequestL(TMDpsOperation* aRequest,
 //	
 EXPORT_C void CDpsEngine::CancelDpsRequest()
     {
-    IF_DEBUG(Print(_L(">>>DpsEngine::CancelDpsOperation")));
+    OstTraceFunctionEntry0( CDPSENGINE_CANCELDPSREQUEST_ENTRY );
     if (iDpsOperationRequest)
         {
         iDpsOperator->ScriptSender()->Cancel();
         User::RequestComplete(iDpsOperationRequest, KErrCancel);
         }
     iDpsOperator->Initialize();
-    IF_DEBUG(Print(_L("<<<DpsEngine::CancelDpsOperation")));
+    OstTraceFunctionExit0( CDPSENGINE_CANCELDPSREQUEST_EXIT );
     }
  
 // ---------------------------------------------------------------------------
@@ -235,12 +246,13 @@ EXPORT_C void CDpsEngine::CancelDpsRequest()
 EXPORT_C void CDpsEngine::DpsEventNotify(TDpsEvents& aParam,
                                          TRequestStatus& aStatus)
     {
-    IF_DEBUG(Print(_L(">>>DpsEngine::DpsEventNotify")));
+    OstTraceFunctionEntry0( CDPSENGINE_DPSEVENTNOTIFY_ENTRY );
     // the PTP printer must be connected and registered for the disconnect
     if (!iUsbNotifier->IsConfigured() || !iPrinterConnectRequest)
         {
         TRequestStatus* status = &aStatus;
         User::RequestComplete(status, KErrNotReady);
+        OstTraceFunctionExit0( CDPSENGINE_DPSEVENTNOTIFY_EXIT );
         return;
         }
     
@@ -248,7 +260,7 @@ EXPORT_C void CDpsEngine::DpsEventNotify(TDpsEvents& aParam,
     iDpsEventRequest = &aStatus;
     *iDpsEventRequest = KRequestPending;
     iDpsOperator->ScriptReceiver()->WaitForReceive();
-    IF_DEBUG(Print(_L("<<<DpsEngine::DpsEventNotify")));
+    OstTraceFunctionExit0( DUP1_CDPSENGINE_DPSEVENTNOTIFY_EXIT );
     }
  
 // ---------------------------------------------------------------------------
@@ -257,12 +269,13 @@ EXPORT_C void CDpsEngine::DpsEventNotify(TDpsEvents& aParam,
 //       
 EXPORT_C void CDpsEngine::CancelDpsEventNotify()
     {
-    IF_DEBUG(Print(_L("DpsEngine::CancelDpsEventNotify")));
+    OstTraceFunctionEntry0( CDPSENGINE_CANCELDPSEVENTNOTIFY_ENTRY );
     if (iDpsEventRequest)
         {
         User::RequestComplete(iDpsEventRequest, KErrCancel);
         iDpsOperator->ScriptReceiver()->Cancel();
         }  
+    OstTraceFunctionExit0( CDPSENGINE_CANCELDPSEVENTNOTIFY_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -271,7 +284,7 @@ EXPORT_C void CDpsEngine::CancelDpsEventNotify()
 //     
 EXPORT_C void CDpsEngine::GetDpsConfigL(TDpsConfigPrintReq& aConfig)
     {
-    IF_DEBUG(Print(_L(">>>DpsEngine::GetDpsConfigL")));
+    OstTraceFunctionEntry0( CDPSENGINE_GETDPSCONFIGL_ENTRY );
 
     RFs fs = iDpsOperator->Trader()->FileHandle()->FileSession();
     RResourceFile resource;
@@ -280,7 +293,7 @@ EXPORT_C void CDpsEngine::GetDpsConfigL(TDpsConfigPrintReq& aConfig)
     TBuf<KResource> length(KDpsResource);    
     resourceFile.SetLength(KDriver + length.Length());
     resourceFile.Replace(KDriver, length.Length(), KDpsResource);
-    IF_DEBUG(Print(_L("file is %S"), &resourceFile));
+    OstTraceExt1( TRACE_NORMAL, CDPSENGINE_GETDPSCONFIGL, "file is %S", resourceFile );
     resource.OpenL(fs, resourceFile);
     CleanupClosePushL(resource);
     resource.ConfirmSignatureL(KDpsResourceVersion);
@@ -307,7 +320,7 @@ EXPORT_C void CDpsEngine::GetDpsConfigL(TDpsConfigPrintReq& aConfig)
     aConfig.iSerialNo.Copy(SerialNo);
     CleanupStack::PopAndDestroy(id); 
     CleanupStack::PopAndDestroy(&resource);
-    IF_DEBUG(Print(_L("<<<DpsEngine::GetDpsConfigL")));
+    OstTraceFunctionExit0( CDPSENGINE_GETDPSCONFIGL_EXIT );
     }
    
 // ---------------------------------------------------------------------------

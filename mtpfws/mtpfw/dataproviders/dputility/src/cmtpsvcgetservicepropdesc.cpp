@@ -20,8 +20,11 @@
 #include "cmtpsvcgetservicepropdesc.h"
 #include "mmtpservicedataprovider.h"
 #include "mmtpservicehandler.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpsvcgetservicepropdescTraces.h"
+#endif
 
-__FLOG_STMT(_LIT8(KComponent,"SvcGetSvcPDesc");)
 
 EXPORT_C MMTPRequestProcessor* CMTPSvcGetServicePropDesc::NewL(MMTPDataProviderFramework& aFramework, MMTPConnection& aConnection, MMTPServiceDataProvider& aDataProvider)
 	{
@@ -34,10 +37,9 @@ EXPORT_C MMTPRequestProcessor* CMTPSvcGetServicePropDesc::NewL(MMTPDataProviderF
 
 EXPORT_C CMTPSvcGetServicePropDesc::~CMTPSvcGetServicePropDesc()
 	{
-	__FLOG(_L8("~CMTPSvcGetServicePropDesc - Entry"));
+	OstTraceFunctionEntry0( CMTPSVCGETSERVICEPROPDESC_CMTPSVCGETSERVICEPROPDESC_ENTRY );
 	delete iPropDescList;
-	__FLOG(_L8("~CMTPSvcGetServicePropDesc - Exit"));
-	__FLOG_CLOSE;
+	OstTraceFunctionExit0( CMTPSVCGETSERVICEPROPDESC_CMTPSVCGETSERVICEPROPDESC_EXIT );
 	}
 
 CMTPSvcGetServicePropDesc::CMTPSvcGetServicePropDesc(MMTPDataProviderFramework& aFramework, MMTPConnection& aConnection, MMTPServiceDataProvider& aDataProvider) :
@@ -49,15 +51,14 @@ CMTPSvcGetServicePropDesc::CMTPSvcGetServicePropDesc(MMTPDataProviderFramework& 
 
 void CMTPSvcGetServicePropDesc::ConstructL()
 	{
-	__FLOG_OPEN(KMTPSubsystem, KComponent);
-	__FLOG(_L8("ConstructL - Entry"));
+	OstTraceFunctionEntry0( CMTPSVCGETSERVICEPROPDESC_CONSTRUCTL_ENTRY );
 	iPropDescList = CMTPTypeServicePropDescList::NewL();
-	__FLOG(_L8("ConstructL - Exit"));
+	OstTraceFunctionExit0( CMTPSVCGETSERVICEPROPDESC_CONSTRUCTL_EXIT );
 	}
 
 TMTPResponseCode CMTPSvcGetServicePropDesc::CheckRequestL()
 	{
-	__FLOG(_L8("CheckRequestL - Entry"));
+	OstTraceFunctionEntry0( CMTPSVCGETSERVICEPROPDESC_CHECKREQUESTL_ENTRY );
 	TMTPResponseCode responseCode = CMTPRequestProcessor::CheckRequestL();
 	if (EMTPRespCodeOK == responseCode)
 		{
@@ -67,7 +68,7 @@ TMTPResponseCode CMTPSvcGetServicePropDesc::CheckRequestL()
 		if ((iDataProvider.ServiceID() != serviceID))
 			{
 			responseCode = EMTPRespCodeInvalidServiceID;
-			__FLOG(_L8("Service Id Parameter don't be supported"));
+			OstTrace0( TRACE_WARNING, DUP1_CMTPSVCGETSERVICEPROPDESC_CHECKREQUESTL, "Service Id Parameter don't be supported" );
 			}
 		
 		if (EMTPRespCodeOK == responseCode)
@@ -76,17 +77,18 @@ TMTPResponseCode CMTPSvcGetServicePropDesc::CheckRequestL()
 				!(iDataProvider.IsValidServicePropCodeL(propCode)))
 				{
 				responseCode = EMTPRespCodeInvalidServicePropCode;
-				__FLOG(_L8("Service Object PropCode Parameter don't be supported"));
+				OstTrace0( TRACE_WARNING, DUP2_CMTPSVCGETSERVICEPROPDESC_CHECKREQUESTL, "Service Object PropCode Parameter don't be supported" );
 				}
 			}
 		}
-	__FLOG_VA((_L8("CheckRequestL - Exit with response code = 0x%04X"), responseCode));
+    OstTrace1( TRACE_NORMAL, CMTPSVCGETSERVICEPROPDESC_CHECKREQUESTL, "Exit with response code = 0x%04X", responseCode );	
+	OstTraceFunctionExit0( CMTPSVCGETSERVICEPROPDESC_CHECKREQUESTL_EXIT );
 	return responseCode;
 	}
 
 void CMTPSvcGetServicePropDesc::ServiceL()
 	{
-	__FLOG(_L8("ServiceL - Entry"));
+	OstTraceFunctionEntry0( CMTPSVCGETSERVICEPROPDESC_SERVICEL_ENTRY );
 	TUint32 propCode = Request().Uint32(TMTPTypeRequest::ERequestParameter2);
 	
 	if (KMTPNotSpecified32 != propCode)
@@ -106,15 +108,19 @@ void CMTPSvcGetServicePropDesc::ServiceL()
 		CleanupStack::PopAndDestroy(&propCodeArray);
 		}
 	SendDataL(*iPropDescList);
-	__FLOG_VA((_L8("ServiceL - Exit with Response Code: 0x%x, Service Property Count: %u"), iResponseCode, iPropDescList->NumberOfElements()));
+    OstTraceExt2( TRACE_NORMAL, CMTPSVCGETSERVICEPROPDESC_SERVICEL, 
+            "Exit with Response Code: 0x%x, Service Property Count: %u", iResponseCode, iPropDescList->NumberOfElements());
+	OstTraceFunctionExit0( CMTPSVCGETSERVICEPROPDESC_SERVICEL_EXIT );
 	}
 
 TBool CMTPSvcGetServicePropDesc::DoHandleResponsePhaseL()
 	{
-	__FLOG(_L8("DoHandleResponsePhaseL - Entry"));
+	OstTraceFunctionEntry0( CMTPSVCGETSERVICEPROPDESC_DOHANDLERESPONSEPHASEL_ENTRY );
 	TMTPResponseCode responseCode = (iCancelled ? EMTPRespCodeIncompleteTransfer : iResponseCode);
 	SendResponseL(responseCode);
-	__FLOG_VA((_L8("DoHandleResponsePhaseL - Exit with Response Code: 0x%x"), iResponseCode));
+    OstTrace1( TRACE_NORMAL, CMTPSVCGETSERVICEPROPDESC_DOHANDLERESPONSEPHASEL, "Exit with Response Code: 0x%x", iResponseCode );	
+	OstTraceFunctionExit0( CMTPSVCGETSERVICEPROPDESC_DOHANDLERESPONSEPHASEL_EXIT );
+	
 	return EFalse;
 	}
 

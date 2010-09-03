@@ -25,8 +25,6 @@
 #include <e32base.h>
 #include <e32def.h>
 
-#include <comms-infras/commsdebugutility.h>
-
 #include "cmtpimagedpobjectpropertymgr.h"
 
 class MMTPDataProviderFramework;
@@ -66,10 +64,6 @@ private:
     void CreateMetadataL(const TParsePtrC& aParse, TMTPFormatCode aFormat, TUint32 aParentHandle, CMTPObjectMetaData& aMetaData); 
     
 private:
-    /**
-    FLOGGER debug trace member variable.
-    */
-    __FLOG_DECLARATION_MEMBER_MUTABLE;
     
     MMTPDataProviderFramework&    iFramework;    
     CMTPImageDataProvider&        iDataProvider;

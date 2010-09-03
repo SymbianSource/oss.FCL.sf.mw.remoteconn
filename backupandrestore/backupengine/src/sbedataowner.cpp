@@ -23,9 +23,13 @@
 #include "sbedataowner.h"
 #include "abserver.h"
 #include "sbtypes.h"
-#include "sblog.h"
 #include "sbeparserdefs.h"
 #include "sbepanic.h"
+#include "OstTraceDefinitions.h"
+#include "sbtrace.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "sbedataownerTraces.h"
+#endif
 
 namespace conn
 	{	
@@ -47,9 +51,11 @@ namespace conn
 	
 	void CleanupRPointerArray(TAny* aPtr)
 		{
+		OstTraceFunctionEntry0( _CONN_CLEANUPRPOINTERARRAY_ENTRY );
 		RPointerArray<CBase>* array = static_cast<RPointerArray<CBase>*>(aPtr);
 		array->ResetAndDestroy();
 		delete array;
+		OstTraceFunctionExit0( _CONN_CLEANUPRPOINTERARRAY_EXIT );
 		}
 	
 	// CSelection //
@@ -64,9 +70,11 @@ namespace conn
 	*/
 	CSelection* CSelection::NewLC(TSelectionType aType, const TDesC& aSelection)
 		{
+		OstTraceFunctionEntry0( CSELECTION_NEWLC_ENTRY );
 		CSelection* self = new (ELeave) CSelection(aType);
 		CleanupStack::PushL(self);
 		self->ConstructL(aSelection);
+		OstTraceFunctionExit0( CSELECTION_NEWLC_EXIT );
 		return self;
 		}
 	
@@ -75,7 +83,9 @@ namespace conn
 	*/
 	CSelection::~CSelection()
 		{
+		OstTraceFunctionEntry0( CSELECTION_CSELECTION_DES_ENTRY );
 		delete iSelection;
+		OstTraceFunctionExit0( CSELECTION_CSELECTION_DES_EXIT );
 		}
 	
 	/**
@@ -83,6 +93,8 @@ namespace conn
 	*/
 	CSelection::CSelection(TSelectionType aType) : iType(aType)
 		{
+		OstTraceFunctionEntry0( CSELECTION_CSELECTION_CONS_ENTRY );
+		OstTraceFunctionExit0( CSELECTION_CSELECTION_CONS_EXIT );
 		}
 		
 	/**
@@ -90,7 +102,9 @@ namespace conn
 	*/
 	void CSelection::ConstructL(const TDesC& aSelection)
 		{
+		OstTraceFunctionEntry0( CSELECTION_CONSTRUCTL_ENTRY );
 		iSelection = aSelection.AllocL();
+		OstTraceFunctionExit0( CSELECTION_CONSTRUCTL_EXIT );
 		}
 	
 	/**
@@ -123,9 +137,11 @@ namespace conn
 	@return a CDataOwner object
 	*/
 		{
+		OstTraceFunctionEntry0( CDATAOWNER_NEWL_ENTRY );
 		CDataOwner* self = CDataOwner::NewLC(aSID, apDataOwnerManager);
 		CleanupStack::Pop(self);
 
+		OstTraceFunctionExit0( CDATAOWNER_NEWL_EXIT );
 		return self;
 		}
 
@@ -137,11 +153,13 @@ namespace conn
 	@return a CDataOwner object
 	*/
 		{
+		OstTraceFunctionEntry0( CDATAOWNER_NEWLC_ENTRY );
 		CDataOwner* self = new(ELeave) CDataOwner(aSID, apDataOwnerManager);
 		CleanupStack::PushL(self);
 
 		self->ConstructL();
 		
+		OstTraceFunctionExit0( CDATAOWNER_NEWLC_EXIT );
 		return self;
 		}
 
@@ -156,23 +174,28 @@ namespace conn
 	@param apDataOwnerManager data owner manager to access resources
 	*/
 		{
+		OstTraceFunctionEntry0( CDATAOWNER_CDATAOWNER_CONS_ENTRY );
+		OstTraceFunctionExit0( CDATAOWNER_CDATAOWNER_CONS_EXIT );
 		}
 		
 	void CDataOwner::ConstructL()
 	/** Symbian 2nd stage constructor */
 		{
+		OstTraceFunctionEntry0( CDATAOWNER_CONSTRUCTL_ENTRY );
 		iRegistrationFiles = new (ELeave) CDesCArrayFlat(KDesCArrayGranularity);
 		iPrivatePath = HBufC::NewL(0);
 		iProxyInformationArray.Reset();
 		iPublicDirStack.Reset();
 		iPublicDirNameStack.Reset();
 		iPublicExcludes.Reset();
+		OstTraceFunctionExit0( CDATAOWNER_CONSTRUCTL_EXIT );
 		}
 
 	CDataOwner::~CDataOwner()
 	/** Standard C++ destructor
 	*/
 		{
+		OstTraceFunctionEntry0( CDATAOWNER_CDATAOWNER_DES_ENTRY );
 		// Close the RArrays
 		iProxyInformationArray.Close();
 		iStateByDrive.Close();
@@ -199,6 +222,7 @@ namespace conn
 		delete iBufferSnapshotReader;
 		delete iTempSnapshotHolder;
 		delete iRegistrationFiles;
+		OstTraceFunctionExit0( CDATAOWNER_CDATAOWNER_DES_EXIT );
 		}
 
 	void CDataOwner::AddRegistrationFilesL(const TDesC& aFileName)
@@ -209,7 +233,9 @@ namespace conn
 	@param aFileName the filename of the 
 	*/
 		{
+		OstTraceFunctionEntry0( CDATAOWNER_ADDREGISTRATIONFILESL_ENTRY );
 		iRegistrationFiles->AppendL(aFileName);
+		OstTraceFunctionExit0( CDATAOWNER_ADDREGISTRATIONFILESL_EXIT );
 		}
 		
 	void CDataOwner::StartProcessIfNecessaryL()
@@ -217,6 +243,7 @@ namespace conn
 	Start the active process
 	*/
 		{
+		OstTraceFunctionEntry0( CDATAOWNER_STARTPROCESSIFNECESSARYL_ENTRY );
 		// Do we need to check that the process is started?
 		if (iActiveInformation.iSupported && iActiveInformation.iActiveDataOwner)
 			{
@@ -233,15 +260,15 @@ namespace conn
 					if (process.SecureId() == iSecureId)
 						{
 						// Process already exists - see if it's previuosly connected and has a current session
-						__LOG1("Process %S already exists - not starting", &processName);
+					    OstTraceExt1(TRACE_NORMAL, CDATAOWNER_STARTPROCESSIFNECESSARYL, "Process %S already exists - not starting", processName);
 						TRAPD(err, iStatus = ipDataOwnerManager->ABServer().SessionReadyStateL(iSecureId));
 						if (err == KErrNone)
 							{
-							__LOG2("Existing session for process %S has status %d", &processName, iStatus);
+						    OstTraceExt2(TRACE_NORMAL, DUP1_CDATAOWNER_STARTPROCESSIFNECESSARYL, "Existing session for process %S has status %d", processName, iStatus);
 							} // if
 						else
 							{
-							__LOG1("Existing process %S hasn't yet connected to a session", &processName);
+						    OstTraceExt1(TRACE_NORMAL, DUP2_CDATAOWNER_STARTPROCESSIFNECESSARYL, "Existing process %S hasn't yet connected to a session", processName);
 							iStatus = EDataOwnerNotConnected;//ReadyState only check session state when this status not equal to 'EDataOwnerReadyNoImpl' and 'EDataOwnerReady' 
 							} // else
 						
@@ -262,18 +289,19 @@ namespace conn
 				TInt createErr = process.Create(iActiveInformation.iProcessName, KNullDesC, uidType);
 				if (createErr != KErrNone)
 					{
-					__LOG2("Process %S failed to start(%d)", &iActiveInformation.iProcessName, createErr);
+				    OstTraceExt2(TRACE_NORMAL, DUP3_CDATAOWNER_STARTPROCESSIFNECESSARYL, "Process %S failed to start(%d)", iActiveInformation.iProcessName, createErr);
 					iStatus = EDataOwnerFailed;
 					} // if
 				else
 					{
-					__LOG1("Process %S started.", &iActiveInformation.iProcessName);
+				    OstTraceExt1(TRACE_NORMAL, DUP4_CDATAOWNER_STARTPROCESSIFNECESSARYL, "Process %S started.", iActiveInformation.iProcessName);
 					process.Resume();
 					} // else
 					
 				CleanupStack::PopAndDestroy(&process);
 				} // if
 			} // if
+		OstTraceFunctionExit0( CDATAOWNER_STARTPROCESSIFNECESSARYL_EXIT );
 		}
 		
 
@@ -283,6 +311,7 @@ namespace conn
 	@leave KErrGeneral data owner has no primary registration file
 	*/
 		{
+		OstTraceFunctionEntry0( CDATAOWNER_PARSEFILESL_ENTRY );
 		if (!iFilesParsed)
 			{
 			TUint count = iRegistrationFiles->Count();
@@ -300,15 +329,15 @@ namespace conn
 
 				// Parse file
 
-				__LOG2("CDataOwner::ParseFilesL() - [0x%08x] - parsing reg file: %S...", iSecureId.iId, &fileName);
+				OstTraceExt2(TRACE_NORMAL, CDATAOWNER_PARSEFILESL, "[0x%08x] - parsing reg file: %S...", iSecureId.iId, fileName);
 				TRAPD(err, ParseFileL(fileName));
 				if	(err == KErrNone)
 					{
-					__LOG1("CDataOwner::ParseFilesL() - [0x%08x] - ...file parsed okay", iSecureId.iId);
+				    OstTrace1(TRACE_NORMAL, DUP1_CDATAOWNER_PARSEFILESL, "[0x%08x] - ...file parsed okay", iSecureId.iId);
 					}
 				else
 					{
-					__LOG2("CDataOwner::ParseFilesL() - [0x%08x] - ...*** PARSING FAILED *** - error: %d", iSecureId.iId, err);
+				    OstTraceExt2(TRACE_ERROR, DUP2_CDATAOWNER_PARSEFILESL, "[0x%08x] - ...*** PARSING FAILED *** - error: %d", iSecureId.iId, static_cast<TInt32>(err));
 					User::Leave(err);
 					}
 				
@@ -321,6 +350,7 @@ namespace conn
 			// Check that a primary file was found, as there must be one	
 			if (!foundPrimaryFile)
 				{
+			    OstTrace0(TRACE_ERROR, DUP3_CDATAOWNER_PARSEFILESL, "Leave: KErrGeneral");
 				User::Leave(KErrGeneral);
 				} // if
 			
@@ -331,6 +361,7 @@ namespace conn
 			{
 			iStatus = EDataOwnerReady;
 			}
+ 		OstTraceFunctionExit0( CDATAOWNER_PARSEFILESL_EXIT );
  		}
 		
 	void CDataOwner::GetExpectedDataSizeL(TTransferDataType aTransferType,
@@ -343,12 +374,13 @@ namespace conn
 	@leave KErrNotReady the snapshot has not been set
 	*/
 		{
+		OstTraceFunctionEntry0( CDATAOWNER_GETEXPECTEDDATASIZEL_ENTRY );
 		aSize = 0;
 		switch (aTransferType)
 			{
 		case EPassiveSnapshotData:
 			{
-			__LOG1("CDataOwner::GetExpectedDataSizeL() - START - EPassiveSnapshotData - aDriveNumber: %c", aDriveNumber + 'A');
+			OstTraceExt1(TRACE_NORMAL, CDATAOWNER_GETEXPECTEDDATASIZEL, "EPassiveSnapshotData - aDriveNumber: %c", aDriveNumber + 'A');
 
             CDesCArray* files = new(ELeave) CDesC16ArrayFlat(KDesCArrayGranularity);
             CleanupStack::PushL(files);
@@ -360,7 +392,7 @@ namespace conn
 			
 			TUint count = files->Count();
 			aSize = count * sizeof(TSnapshot);
-            __LOG2("CDataOwner::GetExpectedDataSizeL() - passive snapshot count: %d, expected size: %d", count, aSize);
+			OstTraceExt2(TRACE_NORMAL, DUP1_CDATAOWNER_GETEXPECTEDDATASIZEL, "passive snapshot count: %d, expected size: %d", count, aSize);
 			
 			CleanupStack::PopAndDestroy(files);
 			break;
@@ -368,7 +400,7 @@ namespace conn
 		case EPassiveBaseData:
 		case EPassiveIncrementalData:
 			{
-			__LOG1("CDataOwner::GetExpectedDataSizeL() - START - EPassiveBaseData/EPassiveIncrementalData - aDriveNumber: %c", aDriveNumber + 'A');
+			OstTraceExt1(TRACE_NORMAL, DUP2_CDATAOWNER_GETEXPECTEDDATASIZEL, "EPassiveBaseData/EPassiveIncrementalData - aDriveNumber: %c", aDriveNumber + 'A');
 
             RFileArray files;
 			CleanupClosePushL(files);
@@ -376,7 +408,7 @@ namespace conn
 			// Find all the files
 			if (aTransferType == EPassiveBaseData)
 				{
-	            __LOG("CDataOwner::GetExpectedDataSizeL() - EPassiveBaseData");
+			    OstTrace0(TRACE_NORMAL, DUP3_CDATAOWNER_GETEXPECTEDDATASIZEL, "EPassiveBaseData");
 				BuildFileListL(iPassiveSelections, aDriveNumber, aTransferType, EFalse, NULL, &files, NULL);
 				
 				// Do we need to add the DBMS file?
@@ -384,7 +416,7 @@ namespace conn
 				} // if
 			else
 				{
-	            __LOG("CDataOwner::GetExpectedDataSizeL() - EPassiveIncrementalData");
+			    OstTrace0(TRACE_NORMAL, DUP4_CDATAOWNER_GETEXPECTEDDATASIZEL, "EPassiveIncrementalData");
 
 				// Do we have a snapshot?
 				const TUint count = iSnapshots.Count();
@@ -405,13 +437,13 @@ namespace conn
 			
 			// Calculate the expected data size
 			const TUint count = files.Count();
-	        __LOG1("CDataOwner::GetExpectedDataSizeL() - passive file count: %d", count);
+			OstTrace1(TRACE_NORMAL, DUP5_CDATAOWNER_GETEXPECTEDDATASIZEL, "passive file count: %d", count);
 			aSize = (count * sizeof(TFileFixedHeader));
 			for (TInt x = 0; x < count; x++)
 				{
                 const TEntry& fileEntry = files[x];
                 const TInt fileSize = fileEntry.iSize;
-                __LOG2("CDataOwner::GetExpectedDataSizeL() - passive file: %S, size: %d", &fileEntry.iName, fileSize);
+                OstTraceExt2(TRACE_NORMAL, DUP6_CDATAOWNER_GETEXPECTEDDATASIZEL, "passive file: %S, size: %d", fileEntry.iName, fileSize);
 
 				aSize += fileEntry.iName.Length();
 				aSize += fileSize;
@@ -422,7 +454,7 @@ namespace conn
 		case EActiveBaseData:
 		case EActiveIncrementalData:
 			{
-			__LOG1("CDataOwner::GetExpectedDataSizeL() - START - EActiveBaseData/EActiveIncrementalData - aDriveNumber: %c", aDriveNumber + 'A');
+			OstTraceExt1(TRACE_NORMAL, DUP7_CDATAOWNER_GETEXPECTEDDATASIZEL, "EActiveBaseData/EActiveIncrementalData - aDriveNumber: %c", aDriveNumber + 'A');
 			// Only request expected data size if it's for this data owner, not the proxies
 			if (iActiveInformation.iSupported && iActiveInformation.iActiveDataOwner && (iActiveInformation.iActiveType != EProxyImpOnly))
 				{
@@ -431,21 +463,22 @@ namespace conn
 			else
 				{
 				aSize = 0;
-                __LOG1("CDataOwner::GetExpectedDataSizeL() - ACTIVE BASE - DO 0x%08x is PROXY, so setting size to 0!", iSecureId.iId);
+				OstTrace1(TRACE_NORMAL, DUP8_CDATAOWNER_GETEXPECTEDDATASIZEL, "ACTIVE BASE - DO 0x%08x is PROXY, so setting size to 0!", iSecureId.iId);
 				}
 				
 			} break;
 		case EActiveSnapshotData:
 			{
-			__LOG1("CDataOwner::GetExpectedDataSizeL() - START - EActiveSnapshotData - aDriveNumber: %c", aDriveNumber + 'A');
+			OstTraceExt1(TRACE_NORMAL, DUP9_CDATAOWNER_GETEXPECTEDDATASIZEL, "EActiveSnapshotData - aDriveNumber: %c", aDriveNumber + 'A');
 			aSize = 0;		// ABClient M class doesn't provide retrieval of snapshot data size
 			} break;
 		default:
-			__LOG1("CDataOwner::GetExpectedDataSizeL() - START - ERROR - UNSUPPORTED TYPE! => KErrNotSupported - aDriveNumber: %c", aDriveNumber + 'A');
+		    OstTraceExt1(TRACE_ERROR, DUP10_CDATAOWNER_GETEXPECTEDDATASIZEL, "ERROR - UNSUPPORTED TYPE! => KErrNotSupported - aDriveNumber: %c", aDriveNumber + 'A');
 			User::Leave(KErrNotSupported);
 			} // switch
 
-		__LOG2("CDataOwner::GetExpectedDataSizeL() - END - size is: %d, data owner 0x%08x", aSize, iSecureId.iId);
+		OstTraceExt2(TRACE_NORMAL, DUP11_CDATAOWNER_GETEXPECTEDDATASIZEL, "size is: %d, data owner 0x%08x", static_cast<TUint32>(aSize), iSecureId.iId);
+		OstTraceFunctionExit0( CDATAOWNER_GETEXPECTEDDATASIZEL_EXIT );
 		}
 
 
@@ -457,7 +490,9 @@ namespace conn
 	@param aFiles on return a list of public files
 	*/
 		{
+		OstTraceFunctionEntry0( CDATAOWNER_GETPUBLICFILELISTL_ENTRY );
 		BuildFileListL(iPublicSelections, aDriveNumber, EPassiveBaseData, ETrue, NULL, &aFiles, NULL);
+		OstTraceFunctionExit0( CDATAOWNER_GETPUBLICFILELISTL_EXIT );
 		}
 		
 	
@@ -469,9 +504,11 @@ namespace conn
 	@param aRestoreFileFilter on return the file filter
 	*/
 		{
+		OstTraceFunctionEntry0( CDATAOWNER_GETRAWPUBLICFILELISTL_ENTRY );
 		// Convert drive number to letter
 		TChar drive;
-		User::LeaveIfError(ipDataOwnerManager->GetRFs().DriveToChar(aDriveNumber, drive));
+		TInt err = ipDataOwnerManager->GetRFs().DriveToChar(aDriveNumber, drive);
+		LEAVEIFERROR(err, OstTrace1(TRACE_ERROR, CDATAOWNER_GETRAWPUBLICFILELISTL, "Leave: %d", err));
 		
 		const TUint count = iPublicSelections.Count();
 		for (TInt x = 0; x < count; x++)
@@ -513,6 +550,7 @@ namespace conn
 					aRestoreFileFilter.AppendL(TRestoreFileFilter(include, filename));
 					} // if
 			} // for x
+		OstTraceFunctionExit0( CDATAOWNER_GETRAWPUBLICFILELISTL_EXIT );
 		}
 		
 	void CDataOwner::ProcessSupplyDataL(TDriveNumber aDriveNumber, TTransferDataType aTransferType, 
@@ -528,19 +566,20 @@ namespace conn
 	@leave KErrCorrupt If commands have been issued that violate the allowed sequence
 	*/
 		{
+		OstTraceFunctionEntry0( CDATAOWNER_PROCESSSUPPLYDATAL_ENTRY );
 		TBURPartType burType = ipDataOwnerManager->BURType();
-        __LOG2("CDataOwner::ProcessSupplyDataL() - START - drive: %c, aTransferType: %d", aDriveNumber + 'A', aTransferType);
+		OstTraceExt2(TRACE_NORMAL, CDATAOWNER_PROCESSSUPPLYDATAL, "drive: %c, aTransferType: %d", aDriveNumber + 'A', aTransferType);
 		
 
 		switch (aTransferType)
 			{
 			case EPassiveSnapshotData:
 				{
-				__LOG1("CDataOwner::ProcessSupplyDataL() - Supplying passive snapshot data to data owner with SID 0x%08x", iSecureId.iId);
+				OstTrace1(TRACE_NORMAL, DUP1_CDATAOWNER_PROCESSSUPPLYDATAL, "Supplying passive snapshot data to data owner with SID 0x%08x", iSecureId.iId);
 				// Check that no passive data has been received for a data owner that doesn't support it
 				if (!iPassiveInformation.iSupported)
 					{
-					__LOG("CDataOwner::ProcessSupplyDataL() - State Error - Passive restore has been requested but isn't supported");
+				    OstTrace0(TRACE_ERROR, DUP2_CDATAOWNER_PROCESSSUPPLYDATAL, "State Error - Passive restore has been requested but isn't supported");
 					User::Leave(KErrCorrupt);
 					}
 				
@@ -549,14 +588,14 @@ namespace conn
 					(StateByDriveL(aDriveNumber).iPassiveBaseDataRequested || 
 					 StateByDriveL(aDriveNumber).iPassiveIncDataRequested))
 					{
-					__LOG("CDataOwner::ProcessSupplyDataL() - State Error - Snapshot has been supplied after data has been requested");
+				    OstTrace0(TRACE_ERROR, DUP3_CDATAOWNER_PROCESSSUPPLYDATAL, "State Error - Snapshot has been supplied after data has been requested");
 					User::Leave(KErrCorrupt);
 					}
 					
 				// Check that no snapshot is supplied for a data owner expecting base backup
 				if (iPassiveInformation.iBaseBackupOnly)
 					{
-					__LOG("CDataOwner::ProcessSupplyDataL() - State Error - Snapshot data has been supplied for a base data owner");
+				    OstTrace0(TRACE_ERROR, DUP4_CDATAOWNER_PROCESSSUPPLYDATAL, "State Error - Snapshot data has been supplied for a base data owner");
 					User::Leave(KErrCorrupt);
 					}
 					
@@ -565,7 +604,7 @@ namespace conn
 					&& (StateByDriveL(aDriveNumber).iPassiveBaseDataReceived || 
 					    StateByDriveL(aDriveNumber).iPassiveIncDataReceived))
 					{
-					__LOG("CDataOwner::ProcessSupplyDataL() - State Error - Snapshot has been supplied after restore data has been supplied");
+				    OstTrace0(TRACE_ERROR, DUP5_CDATAOWNER_PROCESSSUPPLYDATAL, "State Error - Snapshot has been supplied after restore data has been supplied");
 					User::Leave(KErrCorrupt);
 					}
   				
@@ -582,45 +621,45 @@ namespace conn
 				{
 				if (aTransferType == EPassiveBaseData)
 					{
-					__LOG1("CDataOwner::ProcessSupplyDataL() - Supplying passive base data to data owner with SID 0x%08x", iSecureId.iId);
+				    OstTrace1(TRACE_NORMAL, DUP6_CDATAOWNER_PROCESSSUPPLYDATAL, "Supplying passive base data to data owner with SID 0x%08x", iSecureId.iId);
 					}
 				else if (aTransferType == EPassiveIncrementalData)
 					{
-					__LOG1("CDataOwner::ProcessSupplyDataL() - Supplying passive inc data to data owner with SID 0x%08x", iSecureId.iId);
+				    OstTrace1(TRACE_NORMAL, DUP7_CDATAOWNER_PROCESSSUPPLYDATAL, "Supplying passive inc data to data owner with SID 0x%08x", iSecureId.iId);
 					}
 				
 				// Check that no passive data has been received for a data owner that doesn't support it
 				if (!iPassiveInformation.iSupported)
 					{
-					__LOG("CDataOwner::ProcessSupplyDataL() - State Error - Passive restore data has been supplied but isn't supported");
+				    OstTrace0(TRACE_ERROR, DUP8_CDATAOWNER_PROCESSSUPPLYDATAL, "State Error - Passive restore data has been supplied but isn't supported");
 					User::Leave(KErrCorrupt);
 					}
 
 				// Check that no incremental data has been received for a SID that doesn't support it
 				if (iPassiveInformation.iBaseBackupOnly && (aTransferType == EPassiveIncrementalData))
 					{
-					__LOG("CDataOwner::ProcessSupplyDataL() - State Error - Incremental restore data has been received for a base only data owner");
+				    OstTrace0(TRACE_ERROR, DUP9_CDATAOWNER_PROCESSSUPPLYDATAL, "State Error - Incremental restore data has been received for a base only data owner");
 					User::Leave(KErrCorrupt);
 					}
 					
 				// Passive Base data should only have been provided once for a SID
 				if ((aTransferType == EPassiveBaseData) && StateByDriveL(aDriveNumber).iPassiveBaseDataReceived)
 					{
-					__LOG("CDataOwner::ProcessSupplyDataL() - State Error - Data is being restored more than once to a DO");
+				    OstTrace0(TRACE_ERROR, DUP10_CDATAOWNER_PROCESSSUPPLYDATAL, "State Error - Data is being restored more than once to a DO");
 					User::Leave(KErrCorrupt);
 					}
 				
 				// A snapshot should already have been supplied if we're incremental
 				if (!StateByDriveL(aDriveNumber).iPassiveSnapshotReceived && (aTransferType == EPassiveIncrementalData))
 					{
-					__LOG("CDataOwner::ProcessSupplyDataL() - State Error - Snapshot has not yet been supplied and should have whether we're base or inc");
+				    OstTrace0(TRACE_ERROR, DUP11_CDATAOWNER_PROCESSSUPPLYDATAL, "State Error - Snapshot has not yet been supplied and should have whether we're base or inc");
 					User::Leave(KErrCorrupt);
 					}
 				
 				// If incremental data is being supplied, then base data must already have been supplied
 				if ((aTransferType == EPassiveIncrementalData) && !StateByDriveL(aDriveNumber).iPassiveBaseDataReceived)
 					{
-					__LOG("CDataOwner::ProcessSupplyDataL() - State Error - Incremental data supplied before base data");
+				    OstTrace0(TRACE_ERROR, DUP12_CDATAOWNER_PROCESSSUPPLYDATAL, "State Error - Incremental data supplied before base data");
 					User::Leave(KErrCorrupt);
 					}
 				
@@ -639,33 +678,33 @@ namespace conn
 				}
 			case EActiveSnapshotData:
 				{
-				__LOG1("CDataOwner::ProcessSupplyDataL() - Supplying active snapshot data to data owner with SID 0x%08x", iSecureId.iId);
+				OstTrace1(TRACE_NORMAL, DUP13_CDATAOWNER_PROCESSSUPPLYDATAL, "Supplying active snapshot data to data owner with SID 0x%08x", iSecureId.iId);
 				
 				// Check that no active data has been received for a data owner that doesn't support it
 				if (!iActiveInformation.iSupported)
 					{
-					__LOG("CDataOwner::ProcessSupplyDataL() - State Error - Active snapshot data has been supplied for a DO that doesn't support it");
+				    OstTrace0(TRACE_ERROR, DUP14_CDATAOWNER_PROCESSSUPPLYDATAL, "State Error - Active snapshot data has been supplied for a DO that doesn't support it");
 					User::Leave(KErrCorrupt);
 					}
 
 				// Check that no active data has been received for a data owner that doesn't support it
 				if (!iActiveInformation.iSupportsIncremental)
 					{
-					__LOG("CDataOwner::ProcessSupplyDataL() - State Error - Active snapshot data has been supplied for a base only Data Owner");
+				    OstTrace0(TRACE_ERROR, DUP15_CDATAOWNER_PROCESSSUPPLYDATAL, "State Error - Active snapshot data has been supplied for a base only Data Owner");
 					User::Leave(KErrCorrupt);
 					}
 				
 				// Check that no snapshot is supplied after backup data has been requested during a backup
 				if (((burType == EBURBackupFull) || (burType == EBURBackupPartial)) && StateByDriveL(aDriveNumber).iActiveBaseDataRequested)
 					{
-					__LOG("CDataOwner::ProcessSupplyDataL() - State Error - Active snapshot has been supplied after backup data has been requested");
+				    OstTrace0(TRACE_ERROR, DUP16_CDATAOWNER_PROCESSSUPPLYDATAL, "State Error - Active snapshot has been supplied after backup data has been requested");
 					User::Leave(KErrCorrupt);
 					}
 					
 				// Check that no snapshot data is provided after backup data has been supplied during a restore
 				if (((burType == EBURRestorePartial) || (burType == EBURRestoreFull)) && StateByDriveL(aDriveNumber).iActiveBaseDataReceived)
 					{
-					__LOG("CDataOwner::ProcessSupplyDataL() - State Error - Active snapshot data has been supplied after restore data");
+				    OstTrace0(TRACE_ERROR, DUP17_CDATAOWNER_PROCESSSUPPLYDATAL, "State Error - Active snapshot data has been supplied after restore data");
 					User::Leave(KErrCorrupt);
 					}
 
@@ -682,11 +721,11 @@ namespace conn
 				{
 				if (aTransferType == EActiveBaseData)
 					{
-					__LOG1("CDataOwner::ProcessSupplyDataL() - Supplying active base data to data owner with SID 0x%08x", iSecureId.iId);					
+				    OstTrace1(TRACE_NORMAL, DUP18_CDATAOWNER_PROCESSSUPPLYDATAL, "Supplying active base data to data owner with SID 0x%08x", iSecureId.iId);					
 					}
 				else if (aTransferType == EActiveIncrementalData)
 					{
-					__LOG1("CDataOwner::ProcessSupplyDataL() - Supplying active incremental data to data owner with SID 0x%08x", iSecureId.iId);
+				    OstTrace1(TRACE_NORMAL, DUP19_CDATAOWNER_PROCESSSUPPLYDATAL, "Supplying active incremental data to data owner with SID 0x%08x", iSecureId.iId);
 					}
 				
 				const TUint supportedProxyCount = iProxyInformationArray.Count();
@@ -699,14 +738,14 @@ namespace conn
 					TInt proxyCountCheck = 0;
 					UnpackTypeAdvance(proxyCountCheck, aBuffer, offset);
 					StateByDriveL(aDriveNumber).iFirstActiveTransaction = EFalse;
-					__LOG1("CDataOwner::ProcessSupplyDataL() - Proxy Info : Unpacked TotalProxyCount = %d", proxyCountCheck);
+					OstTrace1(TRACE_NORMAL, DUP20_CDATAOWNER_PROCESSSUPPLYDATAL, "Proxy Info : Unpacked TotalProxyCount = %d", proxyCountCheck);
 
 					// If the backup stream specifies a different number of proxy's to the registration file,
 					// then we're looking at different reg file versions. This isn't supported as far as proxy's
 					// are concerned
 					if (supportedProxyCount != proxyCountCheck)
 						{
-						__LOG("CDataOwner::ProcessSupplyDataL() - State Error - Number of proxies supported (reg file) differs from backed up data");
+					    OstTrace0(TRACE_ERROR, DUP21_CDATAOWNER_PROCESSSUPPLYDATAL, "State Error - Number of proxies supported (reg file) differs from backed up data");
 						User::Leave(KErrCorrupt);
 						}
 
@@ -714,7 +753,7 @@ namespace conn
 					if ((!iActiveInformation.iSupported) && (supportedProxyCount == 0))
 						{
 						// No proxies or active data 
-						__LOG("CDataOwner::ProcessSupplyDataL() - State Error - Active data has been received but this DO doesn't support Active/Proxies");
+					    OstTrace0(TRACE_ERROR, DUP22_CDATAOWNER_PROCESSSUPPLYDATAL, "State Error - Active data has been received but this DO doesn't support Active/Proxies");
 						User::Leave(KErrCorrupt);
 						}
 						
@@ -732,30 +771,31 @@ namespace conn
 						}
 					}
 
-				__LOG1("CDataOwner::ProcessSupplyDataL() - Supplying active base data of size = %D", aBuffer.Length());
+				OstTrace1(TRACE_NORMAL, DUP23_CDATAOWNER_PROCESSSUPPLYDATAL, "Supplying active base data of size = %d", aBuffer.Length());
 				
 				// Restore the proxy data first
 				TBool currentBufferConsumed = EFalse;  
 				while ( (iCurrentProxy < supportedProxyCount) && (!currentBufferConsumed))
 					{
-					__LOG2("CDataOwner::ProcessSupplyDataL() - Proxy Info : Unpacking proxy info %d of %d", iCurrentProxy + 1, supportedProxyCount);
+				    OstTraceExt2(TRACE_NORMAL, DUP24_CDATAOWNER_PROCESSSUPPLYDATAL, "Proxy Info : Unpacking proxy info %d of %d", iCurrentProxy + 1, supportedProxyCount);
 					
 					// Unpack the proxy's finished flag, len and sid if we are handling the proxy for the first time
 					if ( iProxyInformationArray[iCurrentProxy].iDataSupplied == 0)
 						{						
 						UnpackTypeAdvance(iProxyInformationArray[iCurrentProxy].iOpInProgress, aBuffer, offset);						
-						__LOG1("CDataOwner::ProcessSupplyDataL() - Proxy Info : FinishedFlag = %d", iProxyInformationArray[iCurrentProxy].iOpInProgress);												
+						OstTrace1(TRACE_NORMAL, DUP25_CDATAOWNER_PROCESSSUPPLYDATAL, "Proxy Info : FinishedFlag = %d", iProxyInformationArray[iCurrentProxy].iOpInProgress);												
 						UnpackTypeAdvance(iProxyInformationArray[iCurrentProxy].iDataRequested, aBuffer, offset);						
-						__LOG1("CDataOwner::ProcessSupplyDataL() - Proxy Info : ProxyDataStreamLength = %d", iProxyInformationArray[iCurrentProxy].iDataRequested);
+						OstTrace1(TRACE_NORMAL, DUP26_CDATAOWNER_PROCESSSUPPLYDATAL, "Proxy Info : ProxyDataStreamLength = %d", iProxyInformationArray[iCurrentProxy].iDataRequested);
 						TSecureId 	proxySecureId;
 						UnpackTypeAdvance(proxySecureId, aBuffer, offset);
 						
 						if ( iProxyInformationArray[iCurrentProxy].iSecureId.iId != proxySecureId.iId )
 							{
+						    OstTrace0(TRACE_ERROR, DUP38_CDATAOWNER_PROCESSSUPPLYDATAL, "Leave: KErrCorrupt");
 							User::Leave(KErrCorrupt);
 							}
 							
-						__LOG1("CDataOwner::ProcessSupplyDataL() - Proxy Info : ProxySID = 0x%08x", proxySecureId.iId);
+						OstTrace1(TRACE_NORMAL, DUP27_CDATAOWNER_PROCESSSUPPLYDATAL, "Proxy Info : ProxySID = 0x%08x", proxySecureId.iId);
 						}
 		
 					// Is no more data coming , either from the buffer manager or from the server
@@ -772,6 +812,7 @@ namespace conn
 						// more data was expected but both server and data mgr have finished, then leave
 						if  (proxyFinished && dataLengthRemaining > aBuffer.Length()-offset)
 							{
+						    OstTrace0(TRACE_ERROR, DUP39_CDATAOWNER_PROCESSSUPPLYDATAL, "Leave: KErrCorrupt");
 							User::Leave(KErrCorrupt);
 							}
 							
@@ -788,7 +829,7 @@ namespace conn
 					// Create a pointer to the data of this proxy 
 					TPtrC8 buffer(aBuffer.Mid(offset, currentBufferLen));					
 					iProxyInformationArray[iCurrentProxy].iDataSupplied +=  currentBufferLen;
-					__LOG1("CDataOwner::ProcessSupplyDataL() - iProxyConsumedLength = %D",iProxyInformationArray[iCurrentProxy].iDataSupplied);
+					OstTrace1(TRACE_NORMAL, DUP28_CDATAOWNER_PROCESSSUPPLYDATAL, "iProxyConsumedLength = %d",iProxyInformationArray[iCurrentProxy].iDataSupplied);
 					
 					offset += currentBufferLen;	
 
@@ -797,7 +838,7 @@ namespace conn
 					// If the data to send is the last section, set proxyLastSection with true.
 					if ((iProxyInformationArray[iCurrentProxy].iOpInProgress == (TInt)ETrue) && (iProxyInformationArray[iCurrentProxy].iDataSupplied == iProxyInformationArray[iCurrentProxy].iDataRequested))
 						{
-						__LOG("CDataOwner::ProcessSupplyDataL() - Last Section to Proxy");
+					    OstTrace0(TRACE_NORMAL, DUP29_CDATAOWNER_PROCESSSUPPLYDATAL, "Last Section to Proxy");
 						proxyLastSection = ETrue;
 						}
 					else
@@ -821,21 +862,21 @@ namespace conn
 					// data server or datamanager can supply again.
 					if (!proxyFinished)
 						{
-						__LOG("CDataOwner::ProcessSupplyDataL() - Proxy Info : Multipart send not complete, expecting more proxy data");
+					    OstTrace0(TRACE_NORMAL, DUP30_CDATAOWNER_PROCESSSUPPLYDATAL, "Proxy Info : Multipart send not complete, expecting more proxy data");
 						ProxyStateByDriveL(aDriveNumber,iCurrentProxy).iOpInProgress = ETrue;							
 						}
 					else
 						{
-						__LOG("CDataOwner::ProcessSupplyDataL() - Proxy Info : Send complete");
+					    OstTrace0(TRACE_NORMAL, DUP31_CDATAOWNER_PROCESSSUPPLYDATAL, "Proxy Info : Send complete");
 						ProxyStateByDriveL(aDriveNumber,iCurrentProxy).iOpInProgress = EFalse;
 						ProxyStateByDriveL(aDriveNumber,iCurrentProxy).iDataSupplied = ETrue;
 	
 						}				
 					
-					__LOG2("CDataOwner::ProcessSupplyDataL() - Check proxyConsumedLength = %D & proxyTotalDataLength = %D",iProxyInformationArray[iCurrentProxy].iDataSupplied,iProxyInformationArray[iCurrentProxy].iDataRequested);
+					OstTraceExt2(TRACE_NORMAL, DUP32_CDATAOWNER_PROCESSSUPPLYDATAL, "Check proxyConsumedLength = %d & proxyTotalDataLength = %d",iProxyInformationArray[iCurrentProxy].iDataSupplied,iProxyInformationArray[iCurrentProxy].iDataRequested);
 					if (iProxyInformationArray[iCurrentProxy].iDataSupplied == iProxyInformationArray[iCurrentProxy].iDataRequested)
 						{
-						__LOG("CDataOwner::ProcessSupplyDataL() - Resetting internal variables");
+					    OstTrace0(TRACE_NORMAL, DUP33_CDATAOWNER_PROCESSSUPPLYDATAL, "Resetting internal variables");
 						// when whole packet from server is read.						
 						iProxyInformationArray[iCurrentProxy].iDataSupplied = 0;
 						iProxyInformationArray[iCurrentProxy].iDataRequested = 0;
@@ -844,7 +885,7 @@ namespace conn
 					// Check 
 					if ( (iProxyInformationArray[iCurrentProxy].iOpInProgress == (TInt)ETrue) && (iProxyInformationArray[iCurrentProxy].iDataSupplied == iProxyInformationArray[iCurrentProxy].iDataRequested) )
 						{
-						__LOG("CDataOwner::ProcessSupplyDataL() - Proxy Finished");
+					    OstTrace0(TRACE_NORMAL, DUP34_CDATAOWNER_PROCESSSUPPLYDATAL, "Proxy Finished");
 						iCurrentProxy++;
 						}
 						
@@ -853,11 +894,11 @@ namespace conn
 				// Active data can be sent under 2 circumstances, data for a proxy and data for an actual active client				
 				if (iActiveInformation.iSupported && iActiveInformation.iActiveDataOwner && (offset < aBuffer.Size()))
 					{
-					__LOG("CDataOwner::ProcessSupplyDataL() - State iActiveInformation.iSupported");					
+				    OstTrace0(TRACE_NORMAL, DUP35_CDATAOWNER_PROCESSSUPPLYDATAL, "State iActiveInformation.iSupported");					
 					// Active Base data should only have been provided once for a SID
 					if ((aTransferType == EActiveBaseData) && StateByDriveL(aDriveNumber).iActiveBaseDataReceived)
 						{
-						__LOG("CDataOwner::ProcessSupplyDataL() - State Error - Active restore data has been provided more than once for this DO");
+					    OstTrace0(TRACE_ERROR, DUP36_CDATAOWNER_PROCESSSUPPLYDATAL, "State Error - Active restore data has been provided more than once for this DO");
 						User::Leave(KErrCorrupt);
 						}
 					
@@ -893,10 +934,11 @@ namespace conn
 				} break;
 			default:
 				{
-				__LOG("CDataOwner::ProcessSupplyDataL() - State Error - An unsupported transfer type has been supplied");
+				OstTrace0(TRACE_ERROR, DUP37_CDATAOWNER_PROCESSSUPPLYDATAL, "State Error - An unsupported transfer type has been supplied");
 				User::Leave(KErrNotSupported);
 				}
 			} // switch
+		OstTraceFunctionExit0( CDATAOWNER_PROCESSSUPPLYDATAL_EXIT );
 		}
 		
 	void CDataOwner::SupplyDataL(TDriveNumber aDriveNumber, TTransferDataType aTransferType, 
@@ -912,12 +954,14 @@ namespace conn
 	@leave KErrCorrupt If commands have been issued that violate the allowed sequence
 	*/
 		{
-		__LOG5("CDataOwner::SupplyDataL() - START - SID: 0x%08x, aDrive: %c, aTransferType: %d, aLastSection: %d, iState: %d", iSecureId.iId, aDriveNumber + 'A', aTransferType, aLastSection, iState.iState);
+		OstTraceFunctionEntry0( CDATAOWNER_SUPPLYDATAL_ENTRY );
+		OstTraceExt5(TRACE_NORMAL, CDATAOWNER_SUPPLYDATAL, "SID: 0x%08x, aDrive: %c, aTransferType: %d, aLastSection: %d, iState: %d", iSecureId.iId, static_cast<TInt8>(aDriveNumber + 'A'), static_cast<TInt32>(aTransferType), static_cast<TInt32>(aLastSection), static_cast<TInt32>(iState.iState));
 		// Check our state
 		if (!((iState.iState == ENone) ||
 		     ((iState.iState == ESupply) && (iState.iDriveNumber == aDriveNumber) && 
 		      (iState.iTransferType == aTransferType))))
 			{
+		    OstTrace0(TRACE_ERROR, DUP2_CDATAOWNER_SUPPLYDATAL, "Leave: KErrNotReady");
 			User::Leave(KErrNotReady);			
 			}
 			
@@ -943,7 +987,7 @@ namespace conn
 			}
 		if (err != KErrNone)
 			{
-			__LOG2("CDataOwner::SupplyDataL() - Data owner 0x%08x, drive %d could not cleanup before restore", iSecureId.iId, aDriveNumber);
+		    OstTraceExt2(TRACE_NORMAL, DUP1_CDATAOWNER_SUPPLYDATAL, "Data owner 0x%08x, drive %d could not cleanup before restore", iSecureId.iId, static_cast<TUint32>(aDriveNumber));
 			}
 
 		TRAP(err, ProcessSupplyDataL(aDriveNumber, aTransferType, aBuffer, aLastSection));
@@ -957,14 +1001,15 @@ namespace conn
 			iBufferFileReader = NULL;
 			delete iBufferSnapshotReader;
 			iBufferSnapshotReader = NULL;
+			OstTrace1(TRACE_ERROR, DUP3_CDATAOWNER_SUPPLYDATAL, "Leave: %d", err);
 			User::Leave(err);
 			} // if
 			     
 		if (aLastSection) // If last section reset state
 			{
 			iState.iState = ENone;
-			} // if
-		__LOG("CDataOwner::SupplyDataL() - END");
+			} // if		
+		OstTraceFunctionExit0( CDATAOWNER_SUPPLYDATAL_EXIT );
 		} // SupplyDataL
 		
 		
@@ -974,27 +1019,26 @@ namespace conn
     So that the TRAPD isn't massive, this switch statement has been moved to this function
     */
 		{
-        __LOG4("CDataOwner::ProcessRequestDataL() - START - aDrive: %c, aTransferType: %d, aBuffer.Ptr(): 0x%08x, aBuffer.Length(): %d", aDriveNumber + 'A', aTransferType, aBuffer.Ptr(), aBuffer.Length());
-        //__LOGDATA("CDataOwner::ProcessRequestDataL() - %S", aBuffer.Ptr(), aBuffer.Length() );
+        OstTraceFunctionEntry0( CDATAOWNER_PROCESSREQUESTDATAL_ENTRY );
+        OstTraceExt4(TRACE_NORMAL, CDATAOWNER_PROCESSREQUESTDATAL, "aDrive: %c, aTransferType: %d, aBuffer.Ptr(): 0x%08x, aBuffer.Length(): %d", static_cast<TInt8>(aDriveNumber + 'A'), static_cast<TInt32>(aTransferType), reinterpret_cast<TInt32>(aBuffer.Ptr()), static_cast<TInt32>(aBuffer.Length()));
 
-        //
 		switch (aTransferType)
 			{
 			case EPassiveSnapshotData:
 				{
-				__LOG1("CDataOwner::ProcessRequestDataL() - Requesting passive snapshot data from data owner with SID 0x%08x", iSecureId.iId);
+				OstTrace1(TRACE_NORMAL, DUP1_CDATAOWNER_PROCESSREQUESTDATAL, "Requesting passive snapshot data from data owner with SID 0x%08x", iSecureId.iId);
 
 				// Check that no passive data has been requested for a data owner that doesn't support it
 				if (!iPassiveInformation.iSupported)
 					{
-					__LOG("CDataOwner::ProcessRequestDataL() - State Error - Passive snapshot data has been requested for a non-passive data owner");
+				    OstTrace0(TRACE_ERROR, DUP2_CDATAOWNER_PROCESSREQUESTDATAL, "State Error - Passive snapshot data has been requested for a non-passive data owner");
 					User::Leave(KErrCorrupt);
 					}
 					
 				// Check that snapshot data is only requested once
 				if (StateByDriveL(aDriveNumber).iPassiveSnapshotRequested)
 					{
-					__LOG("CDataOwner::ProcessRequestDataL() - State Error - Passive snapshot data has been requested more than once");
+				    OstTrace0(TRACE_ERROR, DUP3_CDATAOWNER_PROCESSREQUESTDATAL, "State Error - Passive snapshot data has been requested more than once");
 					User::Leave(KErrCorrupt);
 					}
 
@@ -1011,24 +1055,24 @@ namespace conn
 				{
 				if (aTransferType == EPassiveBaseData)
 					{
-					__LOG1("CDataOwner::ProcessRequestDataL() - Requesting passive base data from data owner with SID 0x%08x", iSecureId.iId);
+				    OstTrace1(TRACE_NORMAL, DUP4_CDATAOWNER_PROCESSREQUESTDATAL, "Requesting passive base data from data owner with SID 0x%08x", iSecureId.iId);
 					}
 				else if (aTransferType == EPassiveIncrementalData)
 					{
-					__LOG1("CDataOwner::ProcessRequestDataL() - Requesting passive inc data from data owner with SID 0x%08x", iSecureId.iId);
+				    OstTrace1(TRACE_NORMAL, DUP5_CDATAOWNER_PROCESSREQUESTDATAL, "Requesting passive inc data from data owner with SID 0x%08x", iSecureId.iId);
 					}
 
 				// Check that no passive data has been requested for a data owner that doesn't support it
 				if (!iPassiveInformation.iSupported)
 					{
-					__LOG("CDataOwner::ProcessRequestDataL() - State Error - Passive backup data has been requested for a non-passive data owner");
+				    OstTrace0(TRACE_ERROR, DUP6_CDATAOWNER_PROCESSREQUESTDATAL, "State Error - Passive backup data has been requested for a non-passive data owner");
 					User::Leave(KErrCorrupt);
 					}
 
 				// Check that if this is an incremental backup, complete snapshot data has been received
 				if ((aTransferType == EPassiveIncrementalData) && !StateByDriveL(aDriveNumber).iPassiveSnapshotReceived)
 					{
-					__LOG("CDataOwner::ProcessRequestDataL() - State Error - Incremental data has been requested without a snapshot being supplied");
+				    OstTrace0(TRACE_ERROR, DUP7_CDATAOWNER_PROCESSREQUESTDATAL, "State Error - Incremental data has been requested without a snapshot being supplied");
 					User::Leave(KErrCorrupt);
 					}
 				
@@ -1036,14 +1080,14 @@ namespace conn
 				if (((aTransferType == EPassiveBaseData) && StateByDriveL(aDriveNumber).iPassiveBaseDataRequested) ||
 					((aTransferType == EPassiveIncrementalData) && StateByDriveL(aDriveNumber).iPassiveIncDataRequested))
 					{
-					__LOG("CDataOwner::ProcessRequestDataL() - State Error - Passive data has been requested more than once for this data owner");
+				    OstTrace0(TRACE_ERROR, DUP8_CDATAOWNER_PROCESSREQUESTDATAL, "State Error - Passive data has been requested more than once for this data owner");
 					User::Leave(KErrCorrupt);
 					}
 				
 				// Check that for base backup, no snapshot data has been supplied
 				if ((aTransferType == EPassiveBaseData) && StateByDriveL(aDriveNumber).iPassiveSnapshotReceived)
 					{
-					__LOG("CDataOwner::ProcessRequestDataL() - State Error - Snapshot data has been received for a base only data owner");
+				    OstTrace0(TRACE_ERROR, DUP9_CDATAOWNER_PROCESSREQUESTDATAL, "State Error - Snapshot data has been received for a base only data owner");
 					User::Leave(KErrCorrupt);
 					}
 				
@@ -1051,7 +1095,7 @@ namespace conn
 				if (((aTransferType == EPassiveBaseData) && StateByDriveL(aDriveNumber).iPassiveIncDataRequested) || 
 					((aTransferType == EPassiveIncrementalData) && StateByDriveL(aDriveNumber).iPassiveBaseDataRequested))
 					{
-					__LOG("CDataOwner::ProcessRequestDataL() - State Error - Base and Incremental data have been requested in the same session");
+				    OstTrace0(TRACE_ERROR, DUP10_CDATAOWNER_PROCESSREQUESTDATAL, "State Error - Base and Incremental data have been requested in the same session");
 					User::Leave(KErrCorrupt);
 					}
 				
@@ -1070,33 +1114,33 @@ namespace conn
 				}
 			case EActiveSnapshotData:
 				{
-				__LOG1("CDataOwner::ProcessRequestDataL() - Requesting active snapshot data from data owner with SID 0x%08x", iSecureId.iId);
+				OstTrace1(TRACE_NORMAL, DUP11_CDATAOWNER_PROCESSREQUESTDATAL, "Requesting active snapshot data from data owner with SID 0x%08x", iSecureId.iId);
 
 				// Check that active data hasn't been requested for a data owner that doesn't support it
 				if (!iActiveInformation.iSupported)
 					{
-					__LOG("CDataOwner::ProcessRequestDataL() - State Error - Active snapshot data has been requested from a non-active data owner");
+				    OstTrace0(TRACE_ERROR, DUP12_CDATAOWNER_PROCESSREQUESTDATAL, "State Error - Active snapshot data has been requested from a non-active data owner");
 					User::Leave(KErrCorrupt);
 					}
 
 				// Check that no active snapshot data has been requested for a base only active data owner
 				if (!iActiveInformation.iSupportsIncremental)
 					{
-					__LOG("CDataOwner::ProcessRequestDataL() - State Error - Active snapshot data has been requested from a base only data owner");
+				    OstTrace0(TRACE_ERROR, DUP13_CDATAOWNER_PROCESSREQUESTDATAL, "State Error - Active snapshot data has been requested from a base only data owner");
 					User::Leave(KErrCorrupt);
 					}
 
 				// Check that the Active client has prepared it's data and is ready
 				if (iStatus != EDataOwnerReady)
 					{
-					__LOG("CDataOwner::ProcessRequestDataL() - State Error - Active Snapshot data has been requested from a data owner that isn't ready");
+				    OstTrace0(TRACE_ERROR, DUP14_CDATAOWNER_PROCESSREQUESTDATAL, "State Error - Active Snapshot data has been requested from a data owner that isn't ready");
 					User::Leave(KErrNotReady);
 					}
 					
 				// Check that snapshot data is only requested once
 				if (StateByDriveL(aDriveNumber).iActiveSnapshotRequested)
 					{
-					__LOG("CDataOwner::ProcessRequestDataL() - State Error - Active Snapshot data has been requested more than once");
+				    OstTrace0(TRACE_ERROR, DUP15_CDATAOWNER_PROCESSREQUESTDATAL, "State Error - Active Snapshot data has been requested more than once");
 					User::Leave(KErrCorrupt);
 					}
 					
@@ -1114,11 +1158,11 @@ namespace conn
 				{
 				if (aTransferType == EActiveBaseData)
 					{
-					__LOG1("CDataOwner::ProcessRequestDataL() - Requesting active base data from data owner with SID 0x%08x", iSecureId.iId);
+				    OstTrace1(TRACE_NORMAL, DUP16_CDATAOWNER_PROCESSREQUESTDATAL, "Requesting active base data from data owner with SID 0x%08x", iSecureId.iId);
 					}
 				else if (aTransferType == EActiveIncrementalData)
 					{
-					__LOG1("CDataOwner::ProcessRequestDataL() - Requesting active inc data from data owner with SID 0x%08x", iSecureId.iId);
+				    OstTrace1(TRACE_NORMAL, DUP17_CDATAOWNER_PROCESSREQUESTDATAL, "Requesting active inc data from data owner with SID 0x%08x", iSecureId.iId);
 					}
 
 				TInt supportedProxyCount = iProxyInformationArray.Count();
@@ -1131,17 +1175,16 @@ namespace conn
 					if ((!iActiveInformation.iSupported) && (supportedProxyCount == 0))
 						{
 						// No proxies or active data 
-						__LOG("CDataOwner::ProcessRequestDataL() - State Error - Active data has been requested from a non-active/no proxy data owner");
+					    OstTrace0(TRACE_ERROR, DUP18_CDATAOWNER_PROCESSREQUESTDATAL, "State Error - Active data has been requested from a non-active/no proxy data owner");
 						User::Leave(KErrCorrupt);
 						}
 					
 					StateByDriveL(aDriveNumber).iFirstActiveTransaction = EFalse;
 					
 					PackTypeAdvance(supportedProxyCount, aBuffer, offset);
-					__LOG1("CDataOwner::ProcessRequestDataL() - Proxy Info : Packing TotalProxyCount = %d", supportedProxyCount);
+					OstTrace1(TRACE_NORMAL, DUP19_CDATAOWNER_PROCESSREQUESTDATAL, "Proxy Info : Packing TotalProxyCount = %d", supportedProxyCount);
 
-					aBuffer.SetLength(offset);
-			        //__LOGDATA( "CDataOwner::ProcessRequestDataL() - after adding proxy info - %S", aBuffer.Ptr(), aBuffer.Length() );
+					aBuffer.SetLength(offset);			        
 					
 					// Reset proxy state information for this drive
 					for (TInt numProxy=0; numProxy < supportedProxyCount; numProxy++)
@@ -1153,7 +1196,7 @@ namespace conn
 				// Proxy data is always at the beginning of the data block
 				for (TInt index = 0; index < supportedProxyCount; index++)
 					{
-					__LOG2("CDataOwner::ProcessRequestDataL() - Proxy Info : Packing proxy info %d of %d", index + 1, supportedProxyCount);
+				    OstTraceExt2(TRACE_NORMAL, DUP20_CDATAOWNER_PROCESSREQUESTDATAL, "Proxy Info : Packing proxy info %d of %d", index + 1, supportedProxyCount);
 
 					// Request data from each of the data owners that haven't yet been added
 					// If the buffer's overflowed, then let the PC request again
@@ -1194,13 +1237,13 @@ namespace conn
 
 							// Write the proxy protocol block to the active backup data stream
 							PackType(aLastSection, finishedBuf, 0);
-							__LOG1("CDataOwner::ProcessRequestDataL() - Proxy Info : FinishedFlag = %d", aLastSection);
+							OstTrace1(TRACE_NORMAL, DUP21_CDATAOWNER_PROCESSREQUESTDATAL, "Proxy Info : FinishedFlag = %d", aLastSection);
 							
 							PackType(size, lengthBuf, 0);
-							__LOG1("CDataOwner::ProcessRequestDataL() - Proxy Info : ProxyStreamSize= %d", size);
+							OstTrace1(TRACE_NORMAL, DUP22_CDATAOWNER_PROCESSREQUESTDATAL, "Proxy Info : ProxyStreamSize= %d", size);
 
 							PackType(iProxyInformationArray[index].iSecureId, sidBuf, 0);
-							__LOG1("CDataOwner::ProcessRequestDataL() - Proxy Info : ProxySID = 0x%08x", iProxyInformationArray[index].iSecureId.iId);
+							OstTrace1(TRACE_NORMAL, DUP23_CDATAOWNER_PROCESSREQUESTDATAL, "Proxy Info : ProxySID = 0x%08x", iProxyInformationArray[index].iSecureId.iId);
 							
 							// Update the offset and main buffer size
 							offset += size;
@@ -1230,14 +1273,14 @@ namespace conn
 					// Check that if this is a base backup, no snapshot has been provided
 					if ((aTransferType == EActiveBaseData) && StateByDriveL(aDriveNumber).iActiveSnapshotReceived)
 						{
-						__LOG("CDataOwner::ProcessRequestDataL() - State Error - A snapshot has been provided before a request for base data");
+					    OstTrace0(TRACE_ERROR, DUP24_CDATAOWNER_PROCESSREQUESTDATAL, "State Error - A snapshot has been provided before a request for base data");
 						User::Leave(KErrCorrupt);
 						}
 					
 					// Check that if this is an incremental backup that at least one complete snapshot has been sent
 					if ((aTransferType == EActiveIncrementalData) && !StateByDriveL(aDriveNumber).iActiveSnapshotReceived)
 						{
-						__LOG("CDataOwner::ProcessRequestDataL() - State Error - No snapshot has been supplied, yet incremental data has been requested");
+					    OstTrace0(TRACE_ERROR, DUP25_CDATAOWNER_PROCESSREQUESTDATAL, "State Error - No snapshot has been supplied, yet incremental data has been requested");
 						User::Leave(KErrCorrupt);
 						}
 					
@@ -1245,7 +1288,7 @@ namespace conn
 					if (((aTransferType == EActiveBaseData) && StateByDriveL(aDriveNumber).iActiveBaseDataRequested) || 
 						((aTransferType == EActiveIncrementalData) && StateByDriveL(aDriveNumber).iActiveIncDataRequested))
 						{
-						__LOG("CDataOwner::ProcessRequestDataL() - State Error - Active data has been requested more than once (not counting multi-part)");
+					    OstTrace0(TRACE_ERROR, DUP26_CDATAOWNER_PROCESSREQUESTDATAL, "State Error - Active data has been requested more than once (not counting multi-part)");
 						User::Leave(KErrCorrupt);
 						}
 						
@@ -1253,7 +1296,7 @@ namespace conn
 					if (((aTransferType == EActiveBaseData) && StateByDriveL(aDriveNumber).iActiveIncDataRequested) || 
 						((aTransferType == EActiveIncrementalData) && StateByDriveL(aDriveNumber).iActiveBaseDataRequested))
 						{
-						__LOG("CDataOwner::ProcessRequestDataL() - State Error - Only active base or incremental data can be requested in the same session");
+					    OstTrace0(TRACE_ERROR, DUP27_CDATAOWNER_PROCESSREQUESTDATAL, "State Error - Only active base or incremental data can be requested in the same session");
 						User::Leave(KErrCorrupt);
 						}
 
@@ -1297,18 +1340,19 @@ namespace conn
 				} break;
 			default:
 				{
+				OstTrace0(TRACE_ERROR, DUP29_CDATAOWNER_PROCESSREQUESTDATAL, "Leave: KErrNotSupported");
 				User::Leave(KErrNotSupported);
 				}
 			} // switch
 
-        __LOG2("CDataOwner::ProcessRequestDataL() - NEAR END - aBuffer.Ptr(): 0x%08x, aBuffer.Length(): %d", aBuffer.Ptr(), aBuffer.Length());
-        //__LOGDATA( "CDataOwner::ProcessRequestDataL() - %S", aBuffer.Ptr(), aBuffer.Length() );
-        __LOG("CDataOwner::ProcessRequestDataL() - END");
+		OstTraceExt2(TRACE_NORMAL, DUP28_CDATAOWNER_PROCESSREQUESTDATAL, "aBuffer.Ptr(): 0x%08x, aBuffer.Length(): %d", reinterpret_cast<TInt32>(aBuffer.Ptr()), static_cast<TInt32>(aBuffer.Length()));
+		OstTraceFunctionExit0( CDATAOWNER_PROCESSREQUESTDATAL_EXIT );
 		}
 		
     void CDataOwner::RequestDataL(TDriveNumber aDriveNumber, TTransferDataType aTransferType, 
     				  			  TPtr8& aBuffer, TBool& aLastSection)
     	{
+    	OstTraceFunctionEntry0( CDATAOWNER_REQUESTDATAL_ENTRY );
     	aLastSection = ETrue;		// Set the last section to be true by default
     	
 		// Check our state
@@ -1316,6 +1360,7 @@ namespace conn
 		     ((iState.iState == ERequest) && (iState.iDriveNumber == aDriveNumber) && 
 		      (iState.iTransferType == aTransferType))))
 			{
+		    OstTrace0(TRACE_ERROR, DUP1_CDATAOWNER_REQUESTDATAL, "Leave: KErrNotReady");
 			User::Leave(KErrNotReady);			
 			}
 			
@@ -1333,12 +1378,13 @@ namespace conn
 		
 		if (err != KErrNone)
 			{
-			__LOG4("CDataOwner::RequestDataL() - drive: %c:, aTransferType: %d, secureId: 0x%08x - ERROR: %d", 'a' + aDriveNumber, aTransferType, iSecureId.iId, err);
+		    OstTraceExt4(TRACE_NORMAL, CDATAOWNER_REQUESTDATAL, "drive: %c:, aTransferType: %d, secureId: 0x%08x - ERROR: %d", static_cast<TInt8>('a' + aDriveNumber), static_cast<TInt32>(aTransferType), static_cast<TInt32>(iSecureId.iId), static_cast<TInt32>(err));
 			iState.iState = ENone;
 			delete iBufferFileWriter;
 			iBufferFileWriter = NULL;
 			delete iBufferSnapshotWriter;
 			iBufferSnapshotWriter = NULL;
+			OstTrace1(TRACE_ERROR, DUP2_CDATAOWNER_REQUESTDATAL, "Leave: %d", err);
 			User::Leave(err);
 			} // if
 		
@@ -1346,12 +1392,14 @@ namespace conn
 			{
 			iState.iState = ENone;
 			} // if
+    	OstTraceFunctionExit0( CDATAOWNER_REQUESTDATAL_EXIT );
     	} // RequestDataL
     	
     void CDataOwner::RestoreCompleteL()
     /** Indicate to the active client that the restore operation has been completed
     */
     	{
+    	OstTraceFunctionEntry0( CDATAOWNER_RESTORECOMPLETEL_ENTRY );
     	// Find all of the drives that this data owner could have stored data on
     	TDriveList driveList;
     	GetDriveListL(driveList);
@@ -1364,6 +1412,7 @@ namespace conn
     			ipDataOwnerManager->ABServer().RestoreCompleteL(iSecureId, static_cast<TDriveNumber>(driveCountIndex));
     			}
     		}
+    	OstTraceFunctionExit0( CDATAOWNER_RESTORECOMPLETEL_EXIT );
     	}
 
 
@@ -1382,6 +1431,7 @@ namespace conn
 	@return The ready state
 	*/
 		{
+		OstTraceFunctionEntry0( CDATAOWNER_READYSTATE_ENTRY );
 		TDataOwnerStatus status = EDataOwnerReady;
 		TInt proxyIndex = 0;
 		const TUint proxyCount = iProxyInformationArray.Count();
@@ -1445,8 +1495,9 @@ namespace conn
 			}
 		
 		
-		__LOG2("CDataOwner::ReadyState() - Ready status for data owner 0x%08x is %d", iSecureId.iId, static_cast<TInt>(status));
+		OstTraceExt2(TRACE_NORMAL, CDATAOWNER_READYSTATE, "Ready status for data owner 0x%08x is %d", iSecureId.iId, static_cast<TInt32>(status));
 			
+		OstTraceFunctionExit0( CDATAOWNER_READYSTATE_EXIT );
 		return status;
 		}
 		
@@ -1455,12 +1506,14 @@ namespace conn
 	Set upon a ConfirmReadyForBUR IPC call from an active backup client
 	*/
 		{
-		__LOG2("CDataOwner::SetReadyState() - Setting ready state of data owner 0x%08x to %d", iSecureId.iId, static_cast<TInt>(aDataOwnerStatus));
+		OstTraceFunctionEntry0( CDATAOWNER_SETREADYSTATE_ENTRY );
+		OstTraceExt2(TRACE_NORMAL, CDATAOWNER_SETREADYSTATE, "Setting ready state of data owner 0x%08x to %d", iSecureId.iId, static_cast<TInt32>(aDataOwnerStatus));
 		iStatus = aDataOwnerStatus;
 		if (aDataOwnerStatus == EDataOwnerReady && iActiveInformation.iActiveType == EProxyImpOnly)
 			{
 			iStatus = EDataOwnerReadyNoImpl;
 			}
+		OstTraceFunctionExit0( CDATAOWNER_SETREADYSTATE_EXIT );
 		}
 
 	TCommonBURSettings CDataOwner::CommonSettingsL()
@@ -1471,44 +1524,46 @@ namespace conn
 	@leave KErrNotReady if CDataOwner::ParseFilesL() not called
 	*/
 		{
-		__LOG2("CDataOwner::CommonSettingsL() - START - sid: 0x%08x, iFilesParsed: %d", iSecureId.iId, iFilesParsed);
+		OstTraceFunctionEntry0( CDATAOWNER_COMMONSETTINGSL_ENTRY );
+		OstTraceExt2(TRACE_NORMAL, CDATAOWNER_COMMONSETTINGSL, "sid: 0x%08x, iFilesParsed: %d", iSecureId.iId, static_cast<TInt32>(iFilesParsed));
 		if (!iFilesParsed)
 			{
+		    OstTrace0(TRACE_ERROR, DUP6_CDATAOWNER_COMMONSETTINGSL, "Leave: KErrNotReady");
 			User::Leave(KErrNotReady);
 			}
 			
-		__LOG2("CDataOwner::CommonSettingsL() - Active Supported: %d, proxyCount: %d", iActiveInformation.iSupported, iProxyInformationArray.Count());
+		OstTraceExt2(TRACE_NORMAL, DUP1_CDATAOWNER_COMMONSETTINGSL, "Active Supported: %d, proxyCount: %d", iActiveInformation.iSupported, iProxyInformationArray.Count());
 		TCommonBURSettings settings = ENoOptions;
 		if (iActiveInformation.iSupported || iProxyInformationArray.Count())
 			{
 			settings |= EActiveBUR;
 			} // if
 
-		__LOG1("CDataOwner::CommonSettingsL() - Passive Supported: %d", iPassiveInformation.iSupported);
+		OstTrace1(TRACE_NORMAL, DUP2_CDATAOWNER_COMMONSETTINGSL, "Passive Supported: %d", iPassiveInformation.iSupported);
 		if (iPassiveInformation.iSupported)
 			{
 			settings |= EPassiveBUR;
 			}
 
-		__LOG1("CDataOwner::CommonSettingsL() - System Supported: %d", iSystemInformation.iSupported);
+		OstTrace1(TRACE_NORMAL, DUP3_CDATAOWNER_COMMONSETTINGSL, "System Supported: %d", iSystemInformation.iSupported);
 		if (iSystemInformation.iSupported)
 			{
 			settings |= EHasSystemFiles;
 			}
 
-		__LOG2("CDataOwner::CommonSettingsL() - SelActive: %d, SelPassive: %d", iActiveInformation.iSupportsSelective, iPassiveInformation.iSupportsSelective);
+		OstTraceExt2(TRACE_NORMAL, DUP4_CDATAOWNER_COMMONSETTINGSL, "SelActive: %d, SelPassive: %d", iActiveInformation.iSupportsSelective, iPassiveInformation.iSupportsSelective);
 		if (iActiveInformation.iSupportsSelective && iPassiveInformation.iSupportsSelective)
 			{
 			settings |= ESupportsSelective;
 			}
 
-		__LOG1("CDataOwner::CommonSettingsL() - Reboot required: %d", iRestoreInformation.iRequiresReboot);
+		OstTrace1(TRACE_NORMAL, DUP5_CDATAOWNER_COMMONSETTINGSL, "Reboot required: %d", iRestoreInformation.iRequiresReboot);
 		if (iRestoreInformation.iRequiresReboot)
 			{
 			settings |= ERequiresReboot;
 			}
 
-		__LOG("CDataOwner::CommonSettingsL() - END");
+		OstTraceFunctionExit0( CDATAOWNER_COMMONSETTINGSL_EXIT );
 		return settings;
 		}
 
@@ -1520,8 +1575,10 @@ namespace conn
 	@leave KErrNotReady if CDataOwner::ParseFilesL() not called
 	*/
 		{
+		OstTraceFunctionEntry0( CDATAOWNER_PASSIVESETTINGSL_ENTRY );
 		if (!iFilesParsed)
 			{
+		    OstTrace0(TRACE_ERROR, CDATAOWNER_PASSIVESETTINGSL, "Leave: KErrNotReady");
 			User::Leave(KErrNotReady);
 			}
 		
@@ -1543,6 +1600,7 @@ namespace conn
 			} // if
 			
 			
+		OstTraceFunctionExit0( CDATAOWNER_PASSIVESETTINGSL_EXIT );
 		return settings;
 		}
 
@@ -1554,8 +1612,10 @@ namespace conn
 	@leave KErrNotReady if CDataOwner::ParseFilesL() not called
 	*/
 		{
+		OstTraceFunctionEntry0( CDATAOWNER_ACTIVESETTINGSL_ENTRY );
 		if (!iFilesParsed)
 			{
+		    OstTrace0(TRACE_ERROR, CDATAOWNER_ACTIVESETTINGSL, "Leave: KErrNotReady");
 			User::Leave(KErrNotReady);
 			}
 			
@@ -1572,6 +1632,7 @@ namespace conn
 				} // if
 			} // if
 
+		OstTraceFunctionExit0( CDATAOWNER_ACTIVESETTINGSL_EXIT );
 		return settings;
 		}
 		
@@ -1593,9 +1654,11 @@ namespace conn
 	@leave KErrNotReady if CDataOwner::ParseFilesL() not called
 	*/
 		{
-		__LOG2("CDataOwner::GetDriveListL() - SID: 0x%08x, iFilesParsed: %d", iSecureId.iId, iFilesParsed);
+		OstTraceFunctionEntry0( CDATAOWNER_GETDRIVELISTL_ENTRY );
+		OstTraceExt2(TRACE_NORMAL, CDATAOWNER_GETDRIVELISTL, "SID: 0x%08x, iFilesParsed: %d", iSecureId.iId, static_cast<TInt32>(iFilesParsed));
 		if (!iFilesParsed)
 			{
+		    OstTrace0(TRACE_ERROR, DUP13_CDATAOWNER_GETDRIVELISTL, "Leave: KErrNotReady");
 			User::Leave(KErrNotReady);
 			}
 
@@ -1604,9 +1667,9 @@ namespace conn
 		const TInt error = ipDataOwnerManager->GetRFs().DriveList(existingDrives);
         if  ( error != KErrNone )
             {
-            __LOG1("CDataOwner::GetDriveListL() - couldnt get drive list: %d", error);
+            OstTrace1(TRACE_NORMAL, DUP1_CDATAOWNER_GETDRIVELISTL, "couldnt get drive list: %d", error);
             }
-        User::LeaveIfError(error);
+        LEAVEIFERROR(error, OstTrace1(TRACE_ERROR, DUP12_CDATAOWNER_GETDRIVELISTL, "Leave: %d", error));
 		
 		// We now no longer return the Z drive, it has been decided that the Z drive will always be the
 		// ROM. Backing up and restoring the ROM drive should not be possible, as what is the point
@@ -1626,7 +1689,7 @@ namespace conn
 		// have to say all drives
 		if ((iActiveInformation.iSupported) || (iDBMSSelections.Count()))
 			{
-            __LOG("CDataOwner::GetDriveListL() - active DO, so using all existing drives");
+		    OstTrace0(TRACE_NORMAL, DUP2_CDATAOWNER_GETDRIVELISTL, "active DO, so using all existing drives");
 			aDriveList = existingDrives;		
 			} // if
 		else
@@ -1640,7 +1703,7 @@ namespace conn
 			
 			// Loop through passive files
 			TInt count = iPassiveSelections.Count();
-            __LOG1("CDataOwner::GetDriveListL() - checking %d passive file entries...", count);
+			OstTrace1(TRACE_NORMAL, DUP3_CDATAOWNER_GETDRIVELISTL, "checking %d passive file entries...", count);
 			for (TInt x = 0; !allDrives &&  x < count; x++)
 				{
                 const TDesC& selection = iPassiveSelections[x]->SelectionName();
@@ -1650,23 +1713,23 @@ namespace conn
 							
 					if (drive == -1)
 						{
-	                    __LOG3("CDataOwner::GetDriveListL() - passive[%2d/%2d] => all drives (no specific drive letter) - fullName: %S", x+1, count, &selection);
+					    OstTraceExt3(TRACE_NORMAL, DUP4_CDATAOWNER_GETDRIVELISTL, "passive[%2d/%2d] => all drives (no specific drive letter) - fullName: %S", x+1, count, selection);
 						allDrives = ETrue;
 						}
 					else if (existingDrives[drive] != 0)
 						{
-	                    __LOG4("CDataOwner::GetDriveListL() - passive[%2d/%2d] => drive: %c, fullName: %S", x+1, count, drive + 'A', &selection);
+					    OstTraceExt4(TRACE_NORMAL, DUP5_CDATAOWNER_GETDRIVELISTL, "passive[%2d/%2d] => drive: %c, fullName: %S", x+1, count, drive + 'A', selection);
 						aDriveList[drive] = ETrue;
 						}
                 	}
 
 				} // for
 
-            __LOG(" ");
+			OstTrace0(TRACE_NORMAL, DUP6_CDATAOWNER_GETDRIVELISTL, " ");
 					
 			// Loop through public files
 			count = iPublicSelections.Count();
-            __LOG1("CDataOwner::GetDriveListL() - checking %d public file entries...", count);
+			OstTrace1(TRACE_NORMAL, DUP7_CDATAOWNER_GETDRIVELISTL, "checking %d public file entries...", count);
 
             for (TInt x = 0; !allDrives &&  (x < count); x++)
 				{
@@ -1677,12 +1740,12 @@ namespace conn
 						
 					if (drive == -1)
 						{
-	                    __LOG3("CDataOwner::GetDriveListL() - public[%2d/%2d] => all drives (no specific drive letter) - fullName: %S", x+1, count, &selection);
+					    OstTraceExt3(TRACE_NORMAL, DUP8_CDATAOWNER_GETDRIVELISTL, "public[%2d/%2d] => all drives (no specific drive letter) - fullName: %S", x+1, count, selection);
 						allDrives = ETrue;
 						}
 					else if (existingDrives[drive] != 0)
 						{
-	                    __LOG4("CDataOwner::GetDriveListL() - public[%2d/%2d] => drive: %c, fullName: %S", x+1, count, drive + 'A', &selection);
+					    OstTraceExt4(TRACE_NORMAL, DUP9_CDATAOWNER_GETDRIVELISTL, "public[%2d/%2d] => drive: %c, fullName: %S", x+1, count, drive + 'A', selection);
 						aDriveList[drive] = ETrue;
 						}
                 	}
@@ -1690,12 +1753,11 @@ namespace conn
 					
 			if (allDrives)
 				{
-                __LOG("CDataOwner::GetDriveListL() - using all drives!");
+			    OstTrace0(TRACE_NORMAL, DUP10_CDATAOWNER_GETDRIVELISTL, "using all drives!");
 				aDriveList = existingDrives;
 				} // if
 			} // else
 
-	#ifdef SBE_LOGGING_ENABLED
 		TBuf<256> drivePrint;
 		//
 		for(TInt i=0; i<KMaxDrives; i++)
@@ -1712,8 +1774,8 @@ namespace conn
 				}
 			}
 
-        __LOG2("CDataOwner::GetDriveListL() - END - SID: 0x%08x, supports drives: %S", iSecureId.iId, &drivePrint);
-	#endif
+		OstTraceExt2(TRACE_NORMAL, DUP11_CDATAOWNER_GETDRIVELISTL, "SID: 0x%08x, supports drives: %S", iSecureId.iId, drivePrint);
+		OstTraceFunctionExit0( CDATAOWNER_GETDRIVELISTL_EXIT );
 		}
 
 	void CDataOwner::SetBackedUpAsPartial(TBool aPartial)
@@ -1741,11 +1803,13 @@ namespace conn
 	@param aFileName the registration file to parse
 	*/
 		{
-		__LOG2("CDataOwner::ParseFileL() - START - aFileName: %S, iPrimaryFile: %d", &aFileName, iPrimaryFile);
+		OstTraceFunctionEntry0( CDATAOWNER_PARSEFILEL_ENTRY );
+		OstTraceExt2(TRACE_NORMAL, CDATAOWNER_PARSEFILEL, "aFileName: %S, iPrimaryFile: %d", aFileName, iPrimaryFile);
 		
 		PrivatePathL(aFileName);
 		// Parse the file
 		ipDataOwnerManager->ParserProxy().ParseL(aFileName, *this);
+		OstTraceFunctionExit0( CDATAOWNER_PARSEFILEL_EXIT );
 		}
 		
 	void CDataOwner::PrivatePathL(const TDesC& aFileName)
@@ -1753,9 +1817,11 @@ namespace conn
 	@param aPath The path to extract the drive from
 	*/
 		{
+		OstTraceFunctionEntry0( CDATAOWNER_PRIVATEPATHL_ENTRY );
 		delete iPrivatePath;
   		TParsePtrC parse(aFileName);
   		iPrivatePath = parse.Path().AllocL();
+		OstTraceFunctionExit0( CDATAOWNER_PRIVATEPATHL_EXIT );
 		}
 
 	TInt CDataOwner::GetDrive(const TDesC& aPath) const
@@ -1765,6 +1831,7 @@ namespace conn
 	@return A TDriveNumber or -1 if a drive is not specified
 	*/
 		{
+		OstTraceFunctionEntry0( CDATAOWNER_GETDRIVE_ENTRY );
 		TInt ret = KErrNotFound;
 		
 		if (aPath.Length() > 0)
@@ -1775,6 +1842,7 @@ namespace conn
 				} // if			
 			}
 
+		OstTraceFunctionExit0( CDATAOWNER_GETDRIVE_EXIT );
 		return ret;
 		}
 		
@@ -1798,8 +1866,9 @@ namespace conn
 	@param apFileNames Array of file names to populate
 	*/
 		{
+		OstTraceFunctionEntry0( CDATAOWNER_BUILDFILELISTL_ENTRY );
 		TInt count = aFileSelection.Count();
-		__LOG4("CDataOwner::BuildFileListL() - START - aDriveNumber: %c, count: %d, aIsPublic: %d, aTransferType: %d", aDriveNumber + 'A', count, aIsPublic, aTransferType);		
+		OstTraceExt4(TRACE_NORMAL, CDATAOWNER_BUILDFILELISTL, "aDriveNumber: %c, count: %d, aIsPublic: %d, aTransferType: %d", static_cast<TInt8>(aDriveNumber + 'A'), static_cast<TInt32>(count), static_cast<TInt32>(aIsPublic), static_cast<TInt32>(aTransferType));
 		// Split selections into include and exclude
 		RArray<TPtrC> include;
 		CleanupClosePushL(include);
@@ -1811,11 +1880,11 @@ namespace conn
 			apSnapshots->Sort(CSnapshot::Compare);
 			}	
 
-        __LOG("CDataOwner::BuildFileListL() - file selection listing...:");
+		OstTrace0(TRACE_NORMAL, DUP1_CDATAOWNER_BUILDFILELISTL, "file selection listing...:");
 		for (TInt x = 0; x < count; x++)
 			{
             const TDesC& selectionName = aFileSelection[x]->SelectionName();
-            __LOG3("CDataOwner::BuildFileListL() - selection[%03d]: %S, type: %d", x, &selectionName, aFileSelection[x]->SelectionType());
+            OstTraceExt3(TRACE_NORMAL, DUP2_CDATAOWNER_BUILDFILELISTL, "selection[%03d]: %S, type: %d", x, selectionName, aFileSelection[x]->SelectionType());
 			if (aFileSelection[x]->SelectionType() == EInclude)
 				{
 				include.AppendL(selectionName);
@@ -1828,17 +1897,18 @@ namespace conn
 			
 		// Loop through all includes
 		count = include.Count();
-        __LOG("CDataOwner::BuildFileListL() - include listing...:");
+		OstTrace0(TRACE_NORMAL, DUP3_CDATAOWNER_BUILDFILELISTL, "include listing...:");
         TFileName* fileName = new(ELeave) TFileName();
         CleanupStack::PushL(fileName);
 		for (TInt x = 0; x < count; x++)
 			{
 			fileName->Zero();
 			TChar drive;
-			User::LeaveIfError(ipDataOwnerManager->GetRFs().DriveToChar(aDriveNumber, drive));
+			TInt err = ipDataOwnerManager->GetRFs().DriveToChar(aDriveNumber, drive);
+			LEAVEIFERROR(err, OstTrace1(TRACE_ERROR, DUP14_CDATAOWNER_BUILDFILELISTL, "Leave: %d", err));
 
             const TDesC& includeEntry( include[x] );
-            __LOG2("CDataOwner::BuildFileListL() - entry[%03d] is: %S", x, &includeEntry);
+            OstTraceExt2(TRACE_NORMAL, DUP4_CDATAOWNER_BUILDFILELISTL, "entry[%03d] is: %S", x, includeEntry);
             
             // See if the drive is specified
 			if (includeEntry[0] == KBackSlash()[0])
@@ -1854,7 +1924,7 @@ namespace conn
 				} // else
 
 			
-            __LOG2("CDataOwner::BuildFileListL() - entry[%03d] filename is therefore: %S", x, fileName);
+			OstTraceExt2(TRACE_NORMAL, DUP5_CDATAOWNER_BUILDFILELISTL, "entry[%03d] filename is therefore: %S", x, *fileName);
 			if (fileName->Length() > 0)
 				{
 				
@@ -1864,7 +1934,7 @@ namespace conn
 				    (fileName->MatchF(KDriveAndSlash) != KErrNotFound))
 					{
 					isDrive = ETrue;
-                    __LOG("CDataOwner::BuildFileListL() - filename is a drive");
+					OstTrace0(TRACE_NORMAL, DUP6_CDATAOWNER_BUILDFILELISTL, "filename is a drive");
 					} // if
 					
 				TEntry entry;
@@ -1872,7 +1942,7 @@ namespace conn
 				if (!isDrive)
 					{
 					TInt err = ipDataOwnerManager->GetRFs().Entry(*fileName, entry);
-                    __LOG1("CDataOwner::BuildFileListL() - get entry error: %d", err);
+					OstTrace1(TRACE_NORMAL, DUP7_CDATAOWNER_BUILDFILELISTL, "get entry error: %d", err);
 					entry.iName = *fileName;
 					switch (err)
 						{
@@ -1884,28 +1954,27 @@ namespace conn
 					case KErrBadName:
 						break;
 					default:
+					    OstTrace1(TRACE_ERROR, DUP13_CDATAOWNER_BUILDFILELISTL, "Leave: %d", err);
 						User::Leave(err);
 						} // switch
 					} // if
 					
 				if (isDrive || (isEntry && entry.IsDir()))
 					{
-                    __LOG("CDataOwner::BuildFileListL() - parsing directory...");
+				    OstTrace0(TRACE_NORMAL, DUP8_CDATAOWNER_BUILDFILELISTL, "parsing directory...");
 					ParseDirL(*fileName, exclude, aTransferType, aIsPublic, apSnapshots, apFileEntries, apFileNames);
 
-				#ifdef SBE_LOGGING_ENABLED
                     if  (apFileNames)
                         {
                         const TInt fNameCount = apFileNames->Count();
                         for(TInt k=0; k<fNameCount; k++)
                             {
                             const TDesC& fileName = (*apFileNames)[k];
-                            __LOG2("CDataOwner::BuildFileListL() - directory entry[%03d] %S", k, &fileName);
+                            OstTraceExt2(TRACE_NORMAL, DUP9_CDATAOWNER_BUILDFILELISTL, "directory entry[%03d] %S", k, fileName);
                             }
                         }
 
-                    __LOG("CDataOwner::BuildFileListL() - end of parsing directory");
-				#endif
+                    OstTrace0(TRACE_NORMAL, DUP10_CDATAOWNER_BUILDFILELISTL, "end of parsing directory");
 					} // if
 				else
 					{
@@ -1925,7 +1994,7 @@ namespace conn
 							    newer || 
 							    (err != KErrNone))
 								{
-                                __LOG1("CDataOwner::BuildFileListL() - adding fully verified file: %S", fileName);
+							    OstTraceExt1(TRACE_NORMAL, DUP11_CDATAOWNER_BUILDFILELISTL, "adding fully verified file: %S", *fileName);
 								if (apFileEntries)
 									{
 									// Add to list of files
@@ -1940,7 +2009,7 @@ namespace conn
 							} // if
                         else
                             {
-                            __LOG("CDataOwner::BuildFileListL() - file is excluded!");
+                            OstTrace0(TRACE_NORMAL, DUP12_CDATAOWNER_BUILDFILELISTL, "file is excluded!");
                             }
 						} // if
 					} // else
@@ -1948,8 +2017,8 @@ namespace conn
 			} // for x
 		CleanupStack::PopAndDestroy(fileName);
 		CleanupStack::PopAndDestroy(&exclude);
-		CleanupStack::PopAndDestroy(&include);
-        __LOG("CDataOwner::BuildFileListL() - END");
+		CleanupStack::PopAndDestroy(&include);        
+		OstTraceFunctionExit0( CDATAOWNER_BUILDFILELISTL_EXIT );
 		}
 
 	void CDataOwner::ParseDirL(const TDesC& aDirName, 
@@ -1969,6 +2038,7 @@ namespace conn
 	@param apFileNames Array of filenames to populate
 	*/							   
 		{
+		OstTraceFunctionEntry0( CDATAOWNER_PARSEDIRL_ENTRY );
 		CDir* pFiles = NULL;
 		
 		// This function requires a / on the end otherwise it does not work!
@@ -1983,6 +2053,7 @@ namespace conn
 		TInt err = ipDataOwnerManager->GetRFs().GetDir(*path, KEntryAttMatchMask, ESortNone, pFiles);
 		if ((err != KErrNone) && (err != KErrNotFound)) // Do we need to leave?
 			{
+		    OstTrace1(TRACE_ERROR, CDATAOWNER_PARSEDIRL, "Leave: %d", err);
 			User::Leave(err);
 			} // if
 		
@@ -2068,6 +2139,7 @@ namespace conn
 		CleanupStack::PopAndDestroy(fileName);
 		CleanupStack::PopAndDestroy(pFiles);
 		CleanupStack::PopAndDestroy(path);
+		OstTraceFunctionExit0( CDATAOWNER_PARSEDIRL_EXIT );
 		}
 
 
@@ -2079,12 +2151,14 @@ namespace conn
 	@param aEntry on return the next entry in the list, an empty entry indicates the end of the list has been reached
 	*/
 		{
+		OstTraceFunctionEntry0( CDATAOWNER_GETNEXTPUBLICFILEL_ENTRY );
 		TInt stackCount;
 		TFileName fileName;
 		TBool endOfList = EFalse;
 		TBool gotEntry = EFalse;
 		TChar drive;
-		User::LeaveIfError(ipDataOwnerManager->GetRFs().DriveToChar(aDriveNumber, drive));
+		TInt err = ipDataOwnerManager->GetRFs().DriveToChar(aDriveNumber, drive);
+		LEAVEIFERROR(err, OstTrace1(TRACE_ERROR, DUP8_CDATAOWNER_GETNEXTPUBLICFILEL, "Leave: %d", err));
 		
 		if (aReset) 
 			{
@@ -2106,7 +2180,7 @@ namespace conn
 			for (TInt x = 0; x < selectionCount; ++x)
 				{
 	            const TDesC& selectionName = iPublicSelections[x]->SelectionName();
-	            __LOG3("CDataOwner::GetNextPublicFileL() - selection[%03d]: %S, type: %d", x, &selectionName, iPublicSelections[x]->SelectionType());
+	            OstTraceExt3(TRACE_NORMAL, CDATAOWNER_GETNEXTPUBLICFILEL, "selection[%03d]: %S, type: %d", x, selectionName, iPublicSelections[x]->SelectionType());
 				if (iPublicSelections[x]->SelectionType() == EExclude)
 					{
 					iPublicExcludes.AppendL(selectionName);
@@ -2160,7 +2234,7 @@ namespace conn
 						
 						} // else
 
-		            __LOG1("CDataOwner::GetNextPublicFileL() - next include entry filename is therefore: %S", &fileName);
+					OstTraceExt1(TRACE_NORMAL, DUP1_CDATAOWNER_GETNEXTPUBLICFILEL, "next include entry filename is therefore: %S", fileName);
 					if (fileName.Length() > 0)
 						{
 						
@@ -2170,14 +2244,14 @@ namespace conn
 						    (fileName.MatchF(KDriveAndSlash) != KErrNotFound))
 							{
 							isDrive = ETrue;
-		                    __LOG("CDataOwner::GetNextPublicFileL() - filename is a drive");
+							OstTrace0(TRACE_NORMAL, DUP2_CDATAOWNER_GETNEXTPUBLICFILEL, "filename is a drive");
 							} // if
 							
 						TBool isEntry = EFalse;
 						if (!isDrive)
 							{
 							TInt err = ipDataOwnerManager->GetRFs().Entry(fileName, aEntry);
-		                    __LOG1("CDataOwner::GetNextPublicFileL() - get entry error: %d", err);
+							OstTrace1(TRACE_NORMAL, DUP3_CDATAOWNER_GETNEXTPUBLICFILEL, "get entry error: %d", err);
 							aEntry.iName = fileName;
 							switch (err)
 								{
@@ -2189,6 +2263,7 @@ namespace conn
 							case KErrBadName:
 								break;
 							default:
+							    OstTrace1(TRACE_ERROR, DUP6_CDATAOWNER_GETNEXTPUBLICFILEL, "Leave: %d", err);
 								User::Leave(err);
 								} // switch
 
@@ -2201,7 +2276,7 @@ namespace conn
 					
 						if (isDrive || (isEntry && aEntry.IsDir()))
 							{
-		                    __LOG("CDataOwner::GetNextPublicFileL() - parsing directory...");
+						    OstTrace0(TRACE_NORMAL, DUP4_CDATAOWNER_GETNEXTPUBLICFILEL, "parsing directory...");
 							RDir dir;
 							dir.Open(ipDataOwnerManager->GetRFs(), fileName, KEntryAttMaskSupported);
 							iPublicDirStack.AppendL(dir);
@@ -2216,7 +2291,7 @@ namespace conn
 								}
 	                        else
 	                            {
-	                            __LOG("CDataOwner::BuildFileListL() - file is excluded!");
+	                            OstTrace0(TRACE_NORMAL, DUP5_CDATAOWNER_GETNEXTPUBLICFILEL, "file is excluded!");
 	                            }
 							} // if
 						} // else if
@@ -2261,7 +2336,8 @@ namespace conn
 						
 						// Open the directory and push it onto the dir stack
 						RDir dir;
-						User::LeaveIfError(dir.Open(ipDataOwnerManager->GetRFs(), fileName, KEntryAttMaskSupported));
+						TInt err = dir.Open(ipDataOwnerManager->GetRFs(), fileName, KEntryAttMaskSupported);
+						LEAVEIFERROR(err, OstTrace1(TRACE_ERROR, DUP10_CDATAOWNER_GETNEXTPUBLICFILEL, "Leave: %d", err));
 						iPublicDirStack.AppendL(dir);
 						iPublicDirNameStack.AppendL(aEntry.iName.AllocL());
 						++stackCount;
@@ -2288,6 +2364,7 @@ namespace conn
 					}
 				else
 					{
+				    OstTrace1(TRACE_ERROR, DUP7_CDATAOWNER_GETNEXTPUBLICFILEL, "Leave: %d", err);
 					User::Leave(err);
 					}
 				} // if (stackCount > 0)
@@ -2298,6 +2375,7 @@ namespace conn
 			// If the end of the list has been reached, make sure that an empty TEntry is returned
 			aEntry = TEntry();
 			}
+		OstTraceFunctionExit0( CDATAOWNER_GETNEXTPUBLICFILEL_EXIT );
 		}
 
 
@@ -2311,6 +2389,7 @@ namespace conn
 	@return ETrue if excluded otherwise EFalse
 	*/
 		{
+		OstTraceFunctionEntry0( CDATAOWNER_ISEXCLUDED_ENTRY );
 		TBool ret = EFalse;
 		
 		// Check it is not in sys, resource, system or backwards path
@@ -2358,7 +2437,7 @@ namespace conn
 			const TInt count = aExclude.Count();
 			for (TInt x = 0; !ret && x < count; x++)
 				{				
-				__LOG1("file name: %S",&aFileName);
+			    OstTraceExt1(TRACE_NORMAL, CDATAOWNER_ISEXCLUDED, "file name: %S",aFileName);
 				if (aExclude[x][0] == KBackSlash()[0])
 					{
 					// Compare with out drive
@@ -2375,7 +2454,8 @@ namespace conn
 				} // for x
 			} // if
 		
-        __LOG2("CDataOwner::IsExcluded() - END - returns excluded: %d for file: %S", ret, &aFileName);
+		OstTraceExt2(TRACE_NORMAL, DUP1_CDATAOWNER_ISEXCLUDED, "returns excluded: %d for file: %S", ret, aFileName);
+		OstTraceFunctionExit0( CDATAOWNER_ISEXCLUDED_EXIT );
 		return ret;
 		}
 		
@@ -2386,25 +2466,26 @@ namespace conn
 	@param aLastSection Is this the last section?
 	*/
 		{
-        __LOG2("CDataOwner::SupplyPassiveSnapshotDataL() - START - aDriveNumber: %c, aLastSection: %d", aDriveNumber + 'A', aLastSection);
+        OstTraceFunctionEntry0( CDATAOWNER_SUPPLYPASSIVESNAPSHOTDATAL_ENTRY );
+        OstTraceExt2(TRACE_NORMAL, CDATAOWNER_SUPPLYPASSIVESNAPSHOTDATAL, "aDriveNumber: %c, aLastSection: %d", aDriveNumber + 'A', aLastSection);
 
 		TInt err = KErrNone;
 		if (iBufferSnapshotReader == NULL)
 			{
-            __LOG("CDataOwner::SupplyPassiveSnapshotDataL() - making temporary snapshot holder..");
+		    OstTrace0(TRACE_NORMAL, DUP1_CDATAOWNER_SUPPLYPASSIVESNAPSHOTDATAL, "making temporary snapshot holder..");
 			iTempSnapshotHolder = CSnapshotHolder::NewL();
 			iTempSnapshotHolder->iDriveNumber = aDriveNumber;
 			iBufferSnapshotReader = CBufferSnapshotReader::NewL(iTempSnapshotHolder->iSnapshots);
 			
-            __LOG("CDataOwner::SupplyPassiveSnapshotDataL() - trying to unpack snapshots from buffer...");
+			OstTrace0(TRACE_NORMAL, DUP2_CDATAOWNER_SUPPLYPASSIVESNAPSHOTDATAL, "trying to unpack snapshots from buffer...");
 			TRAP(err, iBufferSnapshotReader->StartL(aBuffer, aLastSection));
-            __LOG1("CDataOwner::SupplyPassiveSnapshotDataL() - unpack result was: %d", err);
+			OstTrace1(TRACE_NORMAL, DUP3_CDATAOWNER_SUPPLYPASSIVESNAPSHOTDATAL, "unpack result was: %d", err);
 			} // if
 		else
 			{
-            __LOG("CDataOwner::SupplyPassiveSnapshotDataL() - continuing unpack operation...");
+		    OstTrace0(TRACE_NORMAL, DUP4_CDATAOWNER_SUPPLYPASSIVESNAPSHOTDATAL, "continuing unpack operation...");
 			TRAP(err, iBufferSnapshotReader->ContinueL(aBuffer, aLastSection));
-            __LOG1("CDataOwner::SupplyPassiveSnapshotDataL() - continued unpack operation result was: %d", err);
+			OstTrace1(TRACE_NORMAL, DUP5_CDATAOWNER_SUPPLYPASSIVESNAPSHOTDATAL, "continued unpack operation result was: %d", err);
 			}
 			
 		if ((err != KErrNone) || aLastSection)
@@ -2414,26 +2495,27 @@ namespace conn
 			
 			if (err == KErrNone)
 				{
-                __LOG("CDataOwner::SupplyPassiveSnapshotDataL() - Snapshots identified ok!");
+			    OstTrace0(TRACE_NORMAL, DUP6_CDATAOWNER_SUPPLYPASSIVESNAPSHOTDATAL, "Snapshots identified ok!");
 				
 				iSnapshots.AppendL(iTempSnapshotHolder);
 				iTempSnapshotHolder = NULL;
 				} // if
 			else
 				{
-                __LOG1("CDataOwner::SupplyPassiveSnapshotDataL() - END - leaving with error: %d", err);
+			    OstTrace1(TRACE_ERROR, DUP7_CDATAOWNER_SUPPLYPASSIVESNAPSHOTDATAL, "leaving with error: %d", err);
 				User::Leave(err);
 				} // else
 			} // if
 
-        __LOG("CDataOwner::SupplyPassiveSnapshotDataL() - END");
+		OstTraceFunctionExit0( CDATAOWNER_SUPPLYPASSIVESNAPSHOTDATAL_EXIT );
 		}
 	
 	void CDataOwner::SupplyPassiveBaseDataL(const TDriveNumber aDriveNumber, TDesC8& aBuffer, TBool aLastSection)
 	/** Handles the supply of passive base data
 	*/
 		{
-		__LOG3("CDataOwner::SupplyPassiveBaseDataL() - START - drive: %c, aLastSection: %d, iBufferFileReader: 0x%08x", aDriveNumber + 'A', aLastSection, iBufferFileReader);
+		OstTraceFunctionEntry0( CDATAOWNER_SUPPLYPASSIVEBASEDATAL_ENTRY );
+		OstTraceExt3(TRACE_NORMAL, CDATAOWNER_SUPPLYPASSIVEBASEDATAL, "drive: %c, aLastSection: %d, iBufferFileReader: 0x%08x", static_cast<TInt8>(aDriveNumber + 'A'), static_cast<TUint32>(aLastSection), reinterpret_cast<TInt32>(iBufferFileReader));
 
         TInt err = KErrNone;
 		if (iBufferFileReader == NULL)
@@ -2451,16 +2533,16 @@ namespace conn
 			{
             if  ( err != KErrNone )
                 {
-                __LOG1("CDataOwner::SupplyPassiveBaseDataL() - ERROR - error: %d", err);
+                OstTrace1(TRACE_NORMAL, DUP1_CDATAOWNER_SUPPLYPASSIVEBASEDATAL, "error: %d", err);
                 }
 	
             delete iBufferFileReader;
 			iBufferFileReader = NULL;
 			
-			User::LeaveIfError(err);
+			LEAVEIFERROR(err, OstTrace1(TRACE_ERROR, DUP2_CDATAOWNER_SUPPLYPASSIVEBASEDATAL, "Leave: %d", err));
 			} // if
 
-        __LOG("CDataOwner::SupplyPassiveBaseDataL() - END");
+		OstTraceFunctionExit0( CDATAOWNER_SUPPLYPASSIVEBASEDATAL_EXIT );
 		}
 		
 	void CDataOwner::RequestPassiveSnapshotDataL(TDriveNumber aDriveNumber, TPtr8& aBuffer, 
@@ -2472,7 +2554,8 @@ namespace conn
 	@param aLastSection On return set to true if finished.
 	*/													 
 		{
-        __LOG3("CDataOwner::RequestPassiveSnapshotDataL() - START - aDriveNumber: %c, owner: 0x%08x, bufferLen: %d", aDriveNumber + 'A', iSecureId.iId, aBuffer.Length() );
+        OstTraceFunctionEntry0( CDATAOWNER_REQUESTPASSIVESNAPSHOTDATAL_ENTRY );
+        OstTraceExt3(TRACE_NORMAL, CDATAOWNER_REQUESTPASSIVESNAPSHOTDATAL, "aDriveNumber: %c, owner: 0x%08x, bufferLen: %d", static_cast<TInt8>(aDriveNumber + 'A'), iSecureId.iId, static_cast<TInt32>(aBuffer.Length()));
 
 		if (iBufferSnapshotWriter == NULL)
 			{
@@ -2490,7 +2573,7 @@ namespace conn
 			const TInt count = fileinfos.Count();
 			if (count > 0)
 				{
-                __LOG1("CDataOwner::SupplyPassiveBaseDataL() - got %d entries...", count);
+			    OstTrace1(TRACE_NORMAL, DUP1_CDATAOWNER_REQUESTPASSIVESNAPSHOTDATAL, "got %d entries...", count);
 
 				// Create a tempory snapshot holder
 				RSnapshots* tempSnapshots = new(ELeave) RSnapshots();
@@ -2501,7 +2584,7 @@ namespace conn
 					{
 					const TDesC& fileName = (*filenames)[x];
 					CSnapshot* snapshot = CSnapshot::NewLC(fileinfos[x].iModified.Int64(), fileName);
-					__LOG3("CDataOwner::RequestPassiveSnapshotDataL() - snapshot[%2d/%2d] = %S", x+1, count, &fileName);
+					OstTraceExt3(TRACE_NORMAL, DUP2_CDATAOWNER_REQUESTPASSIVESNAPSHOTDATAL, "snapshot[%2d/%2d] = %S", x+1, count, fileName);
 					tempSnapshots->AppendL(snapshot);
 					CleanupStack::Pop(snapshot);
 					} // for x
@@ -2510,7 +2593,7 @@ namespace conn
 				iBufferSnapshotWriter = CBufferSnapshotWriter::NewL(tempSnapshots);
 				CleanupStack::Pop(tempSnapshots);
 				
-                __LOG("CDataOwner::RequestPassiveSnapshotDataL() - writing snapshots to buffer...");
+				OstTrace0(TRACE_NORMAL, DUP3_CDATAOWNER_REQUESTPASSIVESNAPSHOTDATAL, "writing snapshots to buffer...");
 				iBufferSnapshotWriter->StartL(aBuffer, aLastSection);
 				if (aLastSection)
 					{
@@ -2538,7 +2621,8 @@ namespace conn
 				} // if
 			} // else
 
-        __LOG2("CDataOwner::RequestPassiveSnapshotDataL() - END - aLastSection: %d, bufferLen: %d", aLastSection, aBuffer.Length());
+		OstTraceExt2(TRACE_NORMAL, DUP4_CDATAOWNER_REQUESTPASSIVESNAPSHOTDATAL, "aLastSection: %d, bufferLen: %d", aLastSection, aBuffer.Length());
+		OstTraceFunctionExit0( CDATAOWNER_REQUESTPASSIVESNAPSHOTDATAL_EXIT );
 		} // RequestPassiveSnapShotDataL
 		
 	void CDataOwner::RequestPassiveDataL(TTransferDataType aTransferType, 
@@ -2551,7 +2635,8 @@ namespace conn
 	@param aLastSection On return set to true if finished.
 	*/
 		{
-        __LOG4("CDataOwner::RequestPassiveDataL() - START - aDrive: %c, aTransferType: %d, iSecureId: 0x%08x, iBufferFileWriter: 0x%08x", aDriveNumber + 'A', aTransferType, iSecureId.iId, iBufferFileWriter);
+        OstTraceFunctionEntry0( CDATAOWNER_REQUESTPASSIVEDATAL_ENTRY );
+        OstTraceExt4(TRACE_NORMAL, CDATAOWNER_REQUESTPASSIVEDATAL, "aDrive: %c, aTransferType: %d, iSecureId: 0x%08x, iBufferFileWriter: 0x%08x", static_cast<TInt8>(aDriveNumber + 'A'), static_cast<TInt32>(aTransferType), iSecureId.iId, reinterpret_cast<TInt32>(iBufferFileWriter));
 
         // Build the list of files
 		if (iBufferFileWriter == NULL)
@@ -2561,7 +2646,7 @@ namespace conn
 
 			if (aTransferType == EPassiveBaseData)
 				{
-                __LOG("CDataOwner::RequestPassiveDataL() - EPassiveBaseData...");
+			    OstTrace0(TRACE_NORMAL, DUP1_CDATAOWNER_REQUESTPASSIVEDATAL, "EPassiveBaseData...");
 				BuildFileListL(iPassiveSelections, aDriveNumber, aTransferType, EFalse, NULL, NULL, filenames);
 				
 				// Add the DBMS file
@@ -2587,7 +2672,7 @@ namespace conn
 				} // else
 
 
-            __LOG1("CDataOwner::RequestPassiveDataL() - Got %d files...", filenames->Count());
+			OstTrace1(TRACE_NORMAL, DUP2_CDATAOWNER_REQUESTPASSIVEDATAL, "Got %d files...", filenames->Count());
 			if (filenames->Count() > 0)
 				{
 				// Create a file writer
@@ -2618,7 +2703,7 @@ namespace conn
 				} // if
 			} // else
 		
-        __LOG("CDataOwner::RequestPassiveDataL() - END");
+		OstTraceFunctionExit0( CDATAOWNER_REQUESTPASSIVEDATAL_EXIT );
 		}
 		
 	void CDataOwner::IsNewerL(const TDesC& aFileName, const TEntry& aFile, const RSnapshots* aSnapshots, TBool& aNewer)
@@ -2632,10 +2717,11 @@ namespace conn
 	@leave KErrNotFound if aFile does not exist in aFiles.
 	*/
 		{
+		OstTraceFunctionEntry0( CDATAOWNER_ISNEWERL_ENTRY );
 		CSnapshot* snapshot = CSnapshot::NewLC(TTime().Int64(), aFileName);
 		TInt res = aSnapshots->Find(snapshot, CSnapshot::Match);
 		CleanupStack::PopAndDestroy(snapshot);
-		User::LeaveIfError(res);
+		LEAVEIFERROR(res, OstTrace1(TRACE_ERROR, CDATAOWNER_ISNEWERL, "Leave: %d", res));
 		if (aFile.iModified.Int64() > (*aSnapshots)[res]->Modified())
 			{
 			aNewer = ETrue;
@@ -2644,6 +2730,7 @@ namespace conn
 			{
 			aNewer = EFalse;
 			}
+		OstTraceFunctionExit0( CDATAOWNER_ISNEWERL_EXIT );
 		}
 	
 	RSnapshots* CDataOwner::FindSnapshot(TDriveNumber aDriveNumber)
@@ -2653,8 +2740,9 @@ namespace conn
 	@return The snapshot or NULL
 	*/
 		{
+		OstTraceFunctionEntry0( CDATAOWNER_FINDSNAPSHOT_ENTRY );
 		const TInt count = iSnapshots.Count();
-		__LOG3("CDataOwner::FindSnapshot() - START - aDriveNumber: %c, count: %d, iSecureId: 0x%08x", aDriveNumber + 'A', count, iSecureId.iId);
+		OstTraceExt3(TRACE_NORMAL, CDATAOWNER_FINDSNAPSHOT, "aDriveNumber: %c, count: %d, iSecureId: 0x%08x", static_cast<TInt8>(aDriveNumber + 'A'), static_cast<TInt32>(count), iSecureId.iId);
 
         RSnapshots* pRet = NULL;
 		
@@ -2662,16 +2750,14 @@ namespace conn
 			{
             CSnapshotHolder* snapshotHolder = iSnapshots[x];
 
-		#ifdef SBE_LOGGING_ENABLED            
             const TInt entryCount = snapshotHolder->iSnapshots.Count();
-            __LOG4("CDataOwner::FindSnapshot() - snapshot[%02d] - drive: %c, entry Count: %d, addr: 0x%08x", x, snapshotHolder->iDriveNumber + 'A', entryCount, &snapshotHolder->iSnapshots);
+            OstTraceExt4(TRACE_NORMAL, DUP1_CDATAOWNER_FINDSNAPSHOT, "snapshot[%02d] - drive: %c, entry Count: %d, addr: 0x%08x", static_cast<TInt32>(x), static_cast<TInt8>(snapshotHolder->iDriveNumber + 'A'), static_cast<TInt32>(entryCount), reinterpret_cast<TUint32>(&snapshotHolder->iSnapshots));
 
             for(TInt i=0; i<entryCount; i++)
                 {
                 const TDesC& snapshot = snapshotHolder->iSnapshots[i]->FileName();
-                __LOG2("CDataOwner::FindSnapshot() -     file[%04d]: %S", i+1, &snapshot);
+                OstTraceExt2(TRACE_NORMAL, DUP2_CDATAOWNER_FINDSNAPSHOT, "file[%04d]: %S", i+1, snapshot);
                 }
-		#endif
 
 			if (snapshotHolder->iDriveNumber == aDriveNumber)
 				{
@@ -2679,7 +2765,8 @@ namespace conn
 				} // if
 			} // for x
 			
-		__LOG1("CDataOwner::FindSnapshot() - END - ret: 0x%08x", pRet);
+		OstTrace1(TRACE_NORMAL, DUP3_CDATAOWNER_FINDSNAPSHOT, "ret: 0x%08x", pRet);
+		OstTraceFunctionExit0( CDATAOWNER_FINDSNAPSHOT_EXIT );
 		return pRet;
 		}
 		
@@ -2689,6 +2776,7 @@ namespace conn
 	*/
 	TDataOwnerStateByDrive& CDataOwner::StateByDriveL(TDriveNumber& aDrive)
 		{
+		OstTraceFunctionEntry0( CDATAOWNER_STATEBYDRIVEL_ENTRY );
 		TBool found = EFalse;
 		const TInt count = iStateByDrive.Count();
 		TInt index = 0;
@@ -2709,9 +2797,11 @@ namespace conn
 		// We must have found, otherwise error	
 		if (!found)
 			{
+		    OstTrace0(TRACE_ERROR, CDATAOWNER_STATEBYDRIVEL, "Leave: KErrNotFound");
 			User::Leave(KErrNotFound);
 			}
 			
+		OstTraceFunctionExit0( CDATAOWNER_STATEBYDRIVEL_EXIT );
 		return iStateByDrive[index];
 		}
 
@@ -2722,6 +2812,7 @@ namespace conn
 	*/
 	TProxyStateByDrive& CDataOwner::ProxyStateByDriveL(TDriveNumber& aDrive, TInt aProxy)
 		{
+		OstTraceFunctionEntry0( CDATAOWNER_PROXYSTATEBYDRIVEL_ENTRY );
 		TBool found = EFalse;
 		const TInt count = iProxyStateByDrive.Count();
 		TInt index = 0;
@@ -2747,6 +2838,7 @@ namespace conn
 			index = count;
 			}
 			
+		OstTraceFunctionExit0( CDATAOWNER_PROXYSTATEBYDRIVEL_EXIT );
 		return iProxyStateByDrive[index];
 		}
 
@@ -2757,11 +2849,12 @@ namespace conn
 	*/
 	void CDataOwner::BuildDriveStateArrayL()
 		{
+		OstTraceFunctionEntry0( CDATAOWNER_BUILDDRIVESTATEARRAYL_ENTRY );
 		TDriveList driveList;
 		driveList.SetMax();
 		
 		TRAPD(err, GetDriveListL(driveList));
-        __LOG2("CDataOwner::BuildDriveStateArrayL() - START - SID: 0x%08x, error: %d", iSecureId.iId, err);
+		OstTraceExt2(TRACE_NORMAL, CDATAOWNER_BUILDDRIVESTATEARRAYL, "SID: 0x%08x, error: %d", iSecureId.iId, static_cast<TInt32>(err));
 		
 		if (err == KErrNone)
 			{
@@ -2776,8 +2869,9 @@ namespace conn
 			}
 		else
 			{
-			__LOG1("CDataOwner::BuildDriveStateArrayL() - Warning! error ocurred whilst getting the drivelist from data owner %08x", iSecureId.iId);
+		    OstTrace1(TRACE_NORMAL, DUP1_CDATAOWNER_BUILDDRIVESTATEARRAYL, "Warning! error ocurred whilst getting the drivelist from data owner %08x", iSecureId.iId);
 			}
+		OstTraceFunctionExit0( CDATAOWNER_BUILDDRIVESTATEARRAYL_EXIT );
 		}
 		
 		
@@ -2786,14 +2880,16 @@ namespace conn
 	*/
 	void CDataOwner::AddDBMSFilesL(TDriveNumber aDriveNumber, CDesCArray* apFileNames, RFileArray* apEntries)
 		{
+		OstTraceFunctionEntry0( CDATAOWNER_ADDDBMSFILESL_ENTRY );
 		const TInt count = iDBMSSelections.Count();
-		__LOG3("CDataOwner::AddDBMSFilesL() - START - aDriveNumber: %c, owner: 0x%08x, count: %d", aDriveNumber + 'A', iSecureId.iId, count);
+		OstTraceExt3(TRACE_NORMAL, CDATAOWNER_ADDDBMSFILESL, "aDriveNumber: %c, owner: 0x%08x, count: %d", static_cast<TInt8>(aDriveNumber + 'A'), iSecureId.iId, static_cast<TInt32>(count));
 
         if (count > 0)
 			{
 			// Get DB connection
 			RDbs dbs;
-			User::LeaveIfError(dbs.Connect());
+			TInt err = dbs.Connect();
+			LEAVEIFERROR(err, OstTrace1(TRACE_ERROR, DUP10_CDATAOWNER_ADDDBMSFILESL, "Leave: %d", err));
 			CleanupClosePushL(dbs);
 			
 			for (TInt x = 0; x < count; x++)
@@ -2807,13 +2903,13 @@ namespace conn
 					{
 					CleanupStack::PushL(pFilenames);
 					
-		        	__LOG1("CDataOwner::AddDBMSFilesL() - getting backup paths for owner returned error: %d", err);
+					OstTrace1(TRACE_NORMAL, DUP1_CDATAOWNER_ADDDBMSFILESL, "getting backup paths for owner returned error: %d", err);
 		        	
 					const TInt count = pFilenames->Count();
 					for (TInt x = 0; x < count; x++)
 						{
                         const TDesC& pFileName = (*pFilenames)[x];
-	                	__LOG3("CDataOwner::AddDBMSFilesL() - file[%3d/%3d] = %S", x + 1, count, &pFileName);
+                        OstTraceExt3(TRACE_NORMAL, DUP2_CDATAOWNER_ADDDBMSFILESL, "file[%3d/%3d] = %S", x + 1, count, pFileName);
 
 						TInt drive = -1;
 						TInt driveerr = RFs::CharToDrive( pFileName[0], drive);
@@ -2821,28 +2917,28 @@ namespace conn
 							{ 
 							if (apFileNames)
 								{
-	                	        __LOG1("CDataOwner::AddDBMSFilesL() - adding validated filename: %S", &pFileName);
+							    OstTraceExt1(TRACE_NORMAL, DUP3_CDATAOWNER_ADDDBMSFILESL, "adding validated filename: %S", pFileName);
 								apFileNames->AppendL( pFileName );
 								}
 							if (apEntries)
 								{
 								TEntry entry;
 								TInt entryError = ipDataOwnerManager->GetRFs().Entry( pFileName, entry);
-	                	        __LOG2("CDataOwner::AddDBMSFilesL() - drive entry result for file \'%S\' is: %d", &pFileName, entryError);
+								OstTraceExt2(TRACE_NORMAL, DUP4_CDATAOWNER_ADDDBMSFILESL, "drive entry result for file \'%S\' is: %d", pFileName, entryError);
 								if (entryError == KErrNone)
 									{
-	                	            __LOG1("CDataOwner::AddDBMSFilesL() - adding validated entry: %S", &pFileName);
+								    OstTraceExt1(TRACE_NORMAL, DUP5_CDATAOWNER_ADDDBMSFILESL, "adding validated entry: %S", pFileName);
 									apEntries->AppendL(entry);
 									} // if
 								else if (entryError != KErrNotFound)
 									{
-									__LOG2("CDataOwner::AddDBMSFilesL() - Could not get entry for 0x%08x, error: %d", iSecureId.iId, entryError);
+								    OstTraceExt2(TRACE_NORMAL, DUP6_CDATAOWNER_ADDDBMSFILESL, "Could not get entry for 0x%08x, error: %d", iSecureId.iId, static_cast<TInt32>(entryError));
 									} // else if
 								} // if
 							} // if
 						else
     						{
-							__LOG("CDataOwner::AddDBMSFilesL() - File is not applicable for this drive => file ignored");
+						    OstTrace0(TRACE_NORMAL, DUP7_CDATAOWNER_ADDDBMSFILESL, "File is not applicable for this drive => file ignored");
     						}
 						} // for x
 					
@@ -2851,7 +2947,7 @@ namespace conn
 					}
 				else
 					{
-					__LOG2("CDataOwner::AddDBMSFilesL() - RDbs error %d SID: 0x%08x", err, iSecureId.iId);
+				    OstTraceExt2(TRACE_NORMAL, DUP8_CDATAOWNER_ADDDBMSFILESL, "RDbs error %d SID: 0x%08x", static_cast<TInt32>(err), iSecureId.iId);
 					} // else
 				} // for x
 			
@@ -2859,7 +2955,8 @@ namespace conn
 			CleanupStack::PopAndDestroy(&dbs);	
 			} // if
 		
-        __LOG2("CDataOwner::AddDBMSFilesL() - END - aDriveNumber: %c, owner: 0x%08x", aDriveNumber + 'A', iSecureId.iId);
+        OstTraceExt2(TRACE_NORMAL, DUP9_CDATAOWNER_ADDDBMSFILESL, "aDriveNumber: %c, owner: 0x%08x", static_cast<TInt8>(aDriveNumber + 'A'), iSecureId.iId);
+		OstTraceFunctionExit0( CDATAOWNER_ADDDBMSFILESL_EXIT );
 		} // AddDBMSFiles
 		
 	/** Disables system data
@@ -2875,6 +2972,7 @@ namespace conn
 	@return error if Append failes
 	*/
 		{
+		OstTraceFunctionEntry0( CDATAOWNER_ADDPROXYTOLIST_ENTRY );
 		TInt count = iProxyInformationArray.Count();
 		TBool found = EFalse;
 		
@@ -2891,8 +2989,9 @@ namespace conn
 		if (!found)
 			{
 			err = iProxyInformationArray.Append(aProxy);
-			__LOG2("Data owner(0x%08x): Adding Proxy(0x%08x) to the list", iSecureId.iId,aProxy.iSecureId.iId);
+			OstTraceExt2(TRACE_NORMAL, CDATAOWNER_ADDPROXYTOLIST, "Data owner(0x%08x): Adding Proxy(0x%08x) to the list", iSecureId.iId,aProxy.iSecureId.iId);
 			}
+		OstTraceFunctionExit0( CDATAOWNER_ADDPROXYTOLIST_EXIT );
 		return err;
 		}	
 		
@@ -2901,10 +3000,11 @@ namespace conn
 	@param aDriveNumber drive to clear
 	*/
 		{
+        OstTraceFunctionEntry0( CDATAOWNER_CLEANUPBEFORERESTOREL_ENTRY );
         const TBool passiveDeleteBeforeRestore = iPassiveInformation.iDeleteBeforeRestore;
         const TBool driveAlreadyCleaned = StateByDriveL(aDriveNumber).iDeleteBeforeRestorePerformed;
 
-        __LOG4("CDataOwner::CleanupBeforeRestoreL() - START - aDriveNumber: %c, owner: 0x%08x, passiveDeleteBeforeRestore: %d, driveAlreadyCleaned: %d", aDriveNumber + 'A', iSecureId.iId, passiveDeleteBeforeRestore, driveAlreadyCleaned);
+        OstTraceExt4(TRACE_NORMAL, CDATAOWNER_CLEANUPBEFORERESTOREL, "aDriveNumber: %c, owner: 0x%08x, passiveDeleteBeforeRestore: %d, driveAlreadyCleaned: %d", static_cast<TInt8>(aDriveNumber + 'A'), static_cast<TInt32>(iSecureId.iId), static_cast<TInt32>(passiveDeleteBeforeRestore), static_cast<TInt32>(driveAlreadyCleaned));
 
         if  ( passiveDeleteBeforeRestore && !driveAlreadyCleaned )
 			{
@@ -2938,7 +3038,7 @@ namespace conn
 				{
 				const TDesC& fileName = (*toDelete)[x];
 
-	            __LOG3("CDataOwner::CleanupBeforeRestoreL() - checking file[%2d/%2d] for match = %S", x + 1, count, &fileName);
+				OstTraceExt3(TRACE_NORMAL, DUP1_CDATAOWNER_CLEANUPBEFORERESTOREL, "checking file[%2d/%2d] for match = %S", x + 1, count, fileName);
 
                 // Check it is not a backup registration file
 				if  ( fileName.MatchF(KBackupRegistrationFile) == KErrNotFound )
@@ -2952,8 +3052,8 @@ namespace conn
 						{
 						  deleteError = ipDataOwnerManager->GetRFs().Delete( fileName );
 						}
-					__LOG2("CDataOwner::CleanupBeforeRestoreL() - trying to deleting file %S (error was: %d)", &fileName, deleteError);
-					User::LeaveIfError(deleteError);
+                    OstTraceExt2(TRACE_NORMAL, DUP2_CDATAOWNER_CLEANUPBEFORERESTOREL, "trying to deleting file %S (error was: %d)", fileName, deleteError);
+					LEAVEIFERROR(deleteError, OstTrace1(TRACE_ERROR, DUP4_CDATAOWNER_CLEANUPBEFORERESTOREL, "Leave: %d", deleteError));
 					} // if
 				} // for
 			
@@ -2965,7 +3065,8 @@ namespace conn
 			CleanupStack::PopAndDestroy(selections);
 			} // if
 
-        __LOG2("CDataOwner::CleanupBeforeRestoreL() - END - aDriveNumber: %c, owner: 0x%08x", aDriveNumber + 'A', iSecureId.iId);
+        OstTraceExt2(TRACE_NORMAL, DUP3_CDATAOWNER_CLEANUPBEFORERESTOREL, "aDriveNumber: %c, owner: 0x%08x", static_cast<TInt8>(aDriveNumber + 'A'), iSecureId.iId);
+		OstTraceFunctionExit0( CDATAOWNER_CLEANUPBEFORERESTOREL_EXIT );
 		} 
 	/**
 	Check if the file is in the include list
@@ -2975,7 +3076,8 @@ namespace conn
 	*/
 	TBool CDataOwner::ValidFileL(const TDesC& aFileName)
 		{
-        __LOG2("CDataOwner::ValidFileL() - START - owner: 0x%08x, aFileName: %S", iSecureId.iId, &aFileName);
+        OstTraceFunctionEntry0( CDATAOWNER_VALIDFILEL_ENTRY );
+        OstTraceExt2(TRACE_NORMAL, CDATAOWNER_VALIDFILEL, "owner: 0x%08x, aFileName: %S", iSecureId.iId, aFileName);
 
         TInt include = EFalse;
 		
@@ -2984,18 +3086,18 @@ namespace conn
 			{
 			const TDesC& selectionName = iPassiveSelections[i]->SelectionName();
 			TInt match = aFileName.FindF(selectionName);
-            __LOG5("CDataOwner::ValidFileL() - match result against file[%3d/%3d], selectionType: %d, matchResult: %d, name: %S", i+1, count, iPassiveSelections[i]->SelectionType(), match, &selectionName);
+			OstTraceExt5(TRACE_NORMAL, DUP1_CDATAOWNER_VALIDFILEL, "match result against file[%3d/%3d], selectionType: %d, matchResult: %d, name: %S", i+1, count, iPassiveSelections[i]->SelectionType(), match, selectionName);
             
             if (match >= 0)
 				{
 				if (iPassiveSelections[i]->SelectionType() == EInclude)
 					{
-                    __LOG("CDataOwner::ValidFileL() - file included");
+				    OstTrace0(TRACE_NORMAL, DUP2_CDATAOWNER_VALIDFILEL, "file included");
 					include = ETrue;
 					}
 				else
 					{
-                    __LOG("CDataOwner::ValidFileL() - file excluded");
+				    OstTrace0(TRACE_NORMAL, DUP3_CDATAOWNER_VALIDFILEL, "file excluded");
 					include = EFalse;
 					break;	
 					} // else if
@@ -3007,25 +3109,26 @@ namespace conn
         const TInt dbmsSelectionCount = iDBMSSelections.Count();
 		if (dbmsSelectionCount && !include)
 			{
-            __LOG1("CDataOwner::ValidFileL() - checking against %d DBMS files...", dbmsSelectionCount);
+		    OstTrace1(TRACE_NORMAL, DUP4_CDATAOWNER_VALIDFILEL, "checking against %d DBMS files...", dbmsSelectionCount);
 
             for (TInt j = 0; j < dbmsSelectionCount; j++)
 				{
                 const TDesC& pDbmsFileName =  iDBMSSelections[j].Name();
                 const TInt matchResult = aFileName.FindF( pDbmsFileName );
 
-                __LOG4("CDataOwner::ValidFileL() - checking against DBMS file[%2d/%2d] with result: %d (%S)...", j+1, dbmsSelectionCount, matchResult, &pDbmsFileName);
+                OstTraceExt4(TRACE_NORMAL, DUP5_CDATAOWNER_VALIDFILEL, "checking against DBMS file[%2d/%2d] with result: %d (%S)...", j+1, dbmsSelectionCount, matchResult, pDbmsFileName);
 
                 if  ( matchResult )
 					{
-                    __LOG("CDataOwner::ValidFileL() - DBMS file included");
+                    OstTrace0(TRACE_NORMAL, DUP6_CDATAOWNER_VALIDFILEL, "DBMS file included");
 					include = ETrue;
 					break;
 					} // if
 				}//for
 			} // if
 		
-        __LOG1("CDataOwner::ValidFileL() - END - valid file result is: %d", include);
+		OstTrace1(TRACE_NORMAL, DUP7_CDATAOWNER_VALIDFILEL, "valid file result is: %d", include);
+		OstTraceFunctionExit0( CDATAOWNER_VALIDFILEL_EXIT );
 		return include;
 		}
 		
@@ -3039,23 +3142,27 @@ namespace conn
 	/** MContentHandler::OnStartDocumentL()
 	*/
 		{
+		OstTraceFunctionEntry0( CDATAOWNER_ONSTARTDOCUMENTL_ENTRY );
 		if (aErrorCode != KErrNone)
 			{
-			__LOG1("CDataOwner::OnStartDocumentL() - error = %d", aErrorCode);
+		    OstTrace1(TRACE_ERROR, CDATAOWNER_ONSTARTDOCUMENTL, "error = %d", aErrorCode);
 			User::Leave(aErrorCode);
 			}
+		OstTraceFunctionExit0( CDATAOWNER_ONSTARTDOCUMENTL_EXIT );
 		}
 		
 	void CDataOwner::OnEndDocumentL(TInt aErrorCode)
 	/** MContentHandler::OnEndDocumentL()
 	*/
 		{
+		OstTraceFunctionEntry0( CDATAOWNER_ONENDDOCUMENTL_ENTRY );
 		if (aErrorCode != KErrNone)
 			{
 			// just to satifsy UREL compiler
 			(void) aErrorCode;
-			__LOG1("CDataOwner::OnEndDocumentL() - error = %d", aErrorCode);
+			OstTrace1(TRACE_NORMAL, CDATAOWNER_ONENDDOCUMENTL, "error = %d", aErrorCode);
 			}
+		OstTraceFunctionExit0( CDATAOWNER_ONENDDOCUMENTL_EXIT );
 		}
 		
 	void CDataOwner::OnStartElementL(const RTagInfo& aElement, 
@@ -3066,12 +3173,14 @@ namespace conn
 	@leave KErrUnknown an unknown element
 	*/
 		{
+		OstTraceFunctionEntry0( CDATAOWNER_ONSTARTELEMENTL_ENTRY );
 		if (aErrorCode != KErrNone)
 			{
-			__LOG1("CDataOwner::OnStartElementL() - error = %d", aErrorCode);
-			User::LeaveIfError(aErrorCode);
+		    OstTrace1(TRACE_NORMAL, CDATAOWNER_ONSTARTELEMENTL, "error = %d", aErrorCode);
+			LEAVEIFERROR(aErrorCode, OstTrace1(TRACE_ERROR, DUP2_CDATAOWNER_ONSTARTELEMENTL, "Leave: %d", aErrorCode));
 			}
 		
+		TInt err;
 		TBool unknownElement = EFalse;
 		const TDesC8& localName = aElement.LocalName().DesC();
 		if (localName == KIncludeFile) 
@@ -3092,24 +3201,29 @@ namespace conn
 			}
 		else if (!localName.CompareF(KDBMSBackup))
 			{
-			User::LeaveIfError(HandleDBMSBackupL(aAttributes));
+		    err = HandleDBMSBackupL(aAttributes);
+			LEAVEIFERROR(err, OstTrace1(TRACE_ERROR, DUP3_CDATAOWNER_ONSTARTELEMENTL, "Leave: %d", err));
 			}
 		else if (!localName.CompareF(KSystemBackup))
 			{
-			User::LeaveIfError(HandleSystemBackup(aAttributes));
+		    err = HandleSystemBackup(aAttributes);
+			LEAVEIFERROR(err, OstTrace1(TRACE_ERROR, DUP4_CDATAOWNER_ONSTARTELEMENTL, "Leave: %d", err));
 			}
 		else if (!localName.CompareF(KProxyDataManager))
 			{
-			User::LeaveIfError(HandleProxyDataManager(aAttributes));
+		    err = HandleProxyDataManager(aAttributes);
+			LEAVEIFERROR(err, OstTrace1(TRACE_ERROR, DUP5_CDATAOWNER_ONSTARTELEMENTL, "Leave: %d", err));
 			}
 		else if (!localName.CompareF(KCenrepBackup))
 			{
-			User::LeaveIfError(HandleCenrepBackup(aAttributes));
+		    err = HandleCenrepBackup(aAttributes);
+			LEAVEIFERROR(err, OstTrace1(TRACE_ERROR, DUP6_CDATAOWNER_ONSTARTELEMENTL, "Leave: %d", err));
 			}
 		else if (!localName.CompareF(KPublicBackup))
 			{
 			iCurrentElement = EPublic;
-			User::LeaveIfError(HandlePublicBackup(aAttributes));
+			err = HandlePublicBackup(aAttributes);
+			LEAVEIFERROR(err, OstTrace1(TRACE_ERROR, DUP7_CDATAOWNER_ONSTARTELEMENTL, "Leave: %d", err));
 			}
 		else if (!localName.CompareF(KPassiveBackup))
 			{
@@ -3117,7 +3231,8 @@ namespace conn
 			// Only allow passive to be switched on in primary files
 			if (iPrimaryFile)
 				{
-				User::LeaveIfError(HandlePassiveBackup(aAttributes));
+			    err = HandlePassiveBackup(aAttributes);
+				LEAVEIFERROR(err, OstTrace1(TRACE_ERROR, DUP8_CDATAOWNER_ONSTARTELEMENTL, "Leave: %d", err));
 				}
 			}
 		else if (iPrimaryFile) 
@@ -3125,11 +3240,13 @@ namespace conn
 			// These remaining elements are only allowed in primary files
 			if (!localName.CompareF(KActiveBackup))
 				{
-				User::LeaveIfError(HandleActiveBackupL(aAttributes));
+			    err = HandleActiveBackupL(aAttributes);
+				LEAVEIFERROR(err, OstTrace1(TRACE_ERROR, DUP9_CDATAOWNER_ONSTARTELEMENTL, "Leave: %d", err));
 				}
 			else if (!localName.CompareF(KRestore))
 				{
-				User::LeaveIfError(HandleRestore(aAttributes));
+			    err = HandleRestore(aAttributes);
+				LEAVEIFERROR(err, OstTrace1(TRACE_ERROR, DUP10_CDATAOWNER_ONSTARTELEMENTL, "Leave: %d", err));
 				}
 			else 
 				{
@@ -3143,8 +3260,9 @@ namespace conn
 			
 		if (unknownElement)
 			{
-			__LOG1("CDataOwner::OnStartElementL() - Unknown element while parsing 0x%08x", iSecureId.iId);
+		    OstTrace1(TRACE_NORMAL, DUP1_CDATAOWNER_ONSTARTELEMENTL, "Unknown element while parsing 0x%08x", iSecureId.iId);
 			}
+		OstTraceFunctionExit0( CDATAOWNER_ONSTARTELEMENTL_EXIT );
 		}
 
 	
@@ -3152,9 +3270,10 @@ namespace conn
 	/** MContentHandler::OnEndElementL()
 	*/
 		{
+		OstTraceFunctionEntry0( CDATAOWNER_ONENDELEMENTL_ENTRY );
 		if (aErrorCode != KErrNone)
 			{
-			__LOG1("CDataOwner::OnEndElementL() - error = %d", aErrorCode);
+		    OstTrace1(TRACE_ERROR, CDATAOWNER_ONENDELEMENTL, "error = %d", aErrorCode);
 			User::Leave(aErrorCode);
 			}
 		
@@ -3167,6 +3286,7 @@ namespace conn
 			{
 			iCurrentElement = ENoElement;
 			} // else if
+		OstTraceFunctionExit0( CDATAOWNER_ONENDELEMENTL_EXIT );
 		}
 
 	void CDataOwner::OnContentL(const TDesC8& /*aBytes*/, TInt /*aErrorCode*/)
@@ -3220,8 +3340,10 @@ namespace conn
 	@leave aErrorCode
 	*/
 		{
+		OstTraceFunctionEntry0( CDATAOWNER_ONERROR_ENTRY );
 		(void)aErrorCode;
-		__LOG1("CDataOwner::OnError() - error = %d", aErrorCode);
+		OstTrace1(TRACE_NORMAL, CDATAOWNER_ONERROR, "error = %d", aErrorCode);
+		OstTraceFunctionExit0( CDATAOWNER_ONERROR_EXIT );
 		}
 
 	TAny* CDataOwner::GetExtendedInterface(const TInt32 /*aUid*/)
@@ -3239,15 +3361,17 @@ namespace conn
 	@return KErrUnknown unknown version
 	*/
 		{
+		OstTraceFunctionEntry0( CDATAOWNER_HANDLEBACKUPREGISTRATIONL_ENTRY );
 		if (aAttributes.Count() == 1)
 			{
 			// Check the version is correct.
 			if (aAttributes[0].Value().DesC() != KVersion()) // Only version we know about
 				{
-				__LOG1("CDataOwner::HandleBackupRegistrationL() - Unknown version at SID(0x%08x)", iSecureId.iId);
+			    OstTrace1(TRACE_ERROR, CDATAOWNER_HANDLEBACKUPREGISTRATIONL, "Unknown version at SID(0x%08x)", iSecureId.iId);
 				User::Leave(KErrNotSupported);
 				} // else
 			} // if
+		OstTraceFunctionExit0( CDATAOWNER_HANDLEBACKUPREGISTRATIONL_EXIT );
 		}
 
 
@@ -3258,6 +3382,7 @@ namespace conn
 	@return KErrNone
 	*/
 		{
+		OstTraceFunctionEntry0( CDATAOWNER_HANDLEPASSIVEBACKUP_ENTRY );
 		iPassiveInformation.iSupported = ETrue;
 		
 		// Loop through reading out attribute values
@@ -3270,19 +3395,19 @@ namespace conn
 				{
                 const TBool supportsSelective = ( aAttributes[x].Value().DesC().CompareF(KYes) == 0 );
 				iPassiveInformation.iSupportsSelective = supportsSelective;
-				__LOG2("CDataOwner::HandlePassiveBackup(0x%08x) - iPassiveInformation.iSupportsSelective: %d", iSecureId.iId, supportsSelective);
+				OstTraceExt2(TRACE_NORMAL, DUP3_CDATAOWNER_HANDLEPASSIVEBACKUP, "(0x%08x) - iPassiveInformation.iSupportsSelective: %d", iSecureId.iId, static_cast<TInt32>(supportsSelective));
                 } // if
 			else if ( localName.CompareF(KDeleteBeforeRestore) == 0 )
 				{
 				// AW This logic looks somewhat strange.
 				if (!aAttributes[x].Value().DesC().CompareF(KYes))
 					{
-				    __LOG1("CDataOwner::HandlePassiveBackup(0x%08x) - iPassiveInformation.iDeleteBeforeRestore: ETrue", iSecureId.iId);
+				    OstTrace1(TRACE_NORMAL, DUP1_CDATAOWNER_HANDLEPASSIVEBACKUP, "(0x%08x) - iPassiveInformation.iDeleteBeforeRestore: ETrue", iSecureId.iId);
 					iPassiveInformation.iDeleteBeforeRestore |= ETrue;
 					} // if
 				else
 					{
-				    __LOG1("CDataOwner::HandlePassiveBackup(0x%08x) - iPassiveInformation.iDeleteBeforeRestore: EFalse", iSecureId.iId);
+				    OstTrace1(TRACE_NORMAL, DUP2_CDATAOWNER_HANDLEPASSIVEBACKUP, "(0x%08x) - iPassiveInformation.iDeleteBeforeRestore: EFalse", iSecureId.iId);
 					iPassiveInformation.iDeleteBeforeRestore |= EFalse;
 					} // else
 				} // else if
@@ -3290,14 +3415,15 @@ namespace conn
 				{
                 const TBool baseBackupOnly = ( aAttributes[x].Value().DesC().CompareF(KYes) == 0 );
 				iPassiveInformation.iBaseBackupOnly = baseBackupOnly;
-				__LOG2("CDataOwner::HandlePassiveBackup(0x%08x) - iPassiveInformation.iBaseBackupOnly: %d", iSecureId.iId, baseBackupOnly);
+				OstTraceExt2(TRACE_NORMAL, DUP4_CDATAOWNER_HANDLEPASSIVEBACKUP, "(0x%08x) - iPassiveInformation.iBaseBackupOnly: %d", iSecureId.iId, static_cast<TInt32>(baseBackupOnly));
 				} // else if
 			else
 				{
-				__LOG1("CDataOwner::HandlePassiveBackup() - Unknown element while parsing 0x%08x", iSecureId.iId);
+			    OstTrace1(TRACE_NORMAL, DUP5_CDATAOWNER_HANDLEPASSIVEBACKUP, "Unknown element while parsing 0x%08x", iSecureId.iId);
 				} // else
 			} // for x
 		
+		OstTraceFunctionExit0( CDATAOWNER_HANDLEPASSIVEBACKUP_EXIT );
 		return KErrNone;
 		}
 
@@ -3309,15 +3435,17 @@ namespace conn
 	@return KErrNone
 	*/
 		{
+		OstTraceFunctionEntry0( CDATAOWNER_HANDLEPUBLICBACKUP_ENTRY );
 		iPublicInformation.iSupported = ETrue;
 		
 		if (aAttributes.Count() > 0)
 			{
             const TBool deleteBeforeRestore = ( aAttributes[0].Value().DesC().CompareF(KYes) == 0 );
 			iPublicInformation.iDeleteBeforeRestore = deleteBeforeRestore;
-			__LOG2("CDataOwner::HandlePublicBackup(0x%08x) - iPublicInformation.iDeleteBeforeRestore: %d", iSecureId.iId, deleteBeforeRestore);
+			OstTraceExt2(TRACE_NORMAL, CDATAOWNER_HANDLEPUBLICBACKUP, "(0x%08x) - iPublicInformation.iDeleteBeforeRestore: %d", iSecureId.iId, static_cast<TInt32>(deleteBeforeRestore));
 			} // if
 		
+		OstTraceFunctionExit0( CDATAOWNER_HANDLEPUBLICBACKUP_EXIT );
 		return KErrNone;
 		}
 
@@ -3328,9 +3456,11 @@ namespace conn
 	@return KErrNone
 	*/
 		{
+		OstTraceFunctionEntry0( CDATAOWNER_HANDLESYSTEMBACKUP_ENTRY );
 		iSystemInformation.iSupported = ETrue;
-		__LOG2("CDataOwner::HandleSystemBackup(0x%08x) - iSystemInformation.iSupported: %d", iSecureId.iId, iSystemInformation.iSupported);
+		OstTraceExt2(TRACE_NORMAL, CDATAOWNER_HANDLESYSTEMBACKUP, "(0x%08x) - iSystemInformation.iSupported: %d", iSecureId.iId, static_cast<TInt32>(iSystemInformation.iSupported));
 
+		OstTraceFunctionExit0( CDATAOWNER_HANDLESYSTEMBACKUP_EXIT );
 		return KErrNone;	
 		}
 
@@ -3342,6 +3472,7 @@ namespace conn
 	@return KErrNone
 	*/
 		{
+		OstTraceFunctionEntry0( CDATAOWNER_HANDLECENREPBACKUP_ENTRY );
 		TInt err = KErrNone;
 		TProxyInformation proxyInformation;
 		
@@ -3361,7 +3492,8 @@ namespace conn
 				
 			}
 		
-		__LOG2("CDataOwner::HandleCenrepBackup(0x%08x) - proxy creation error: %d", iSecureId.iId, err);
+		OstTraceExt2(TRACE_NORMAL, CDATAOWNER_HANDLECENREPBACKUP, "(0x%08x) - proxy creation error: %d", iSecureId.iId, static_cast<TInt32>(err));
+		OstTraceFunctionExit0( CDATAOWNER_HANDLECENREPBACKUP_EXIT );
 		return err;
 		}
 
@@ -3372,6 +3504,7 @@ namespace conn
 	@return KErrNone
 	*/
 		{	
+		OstTraceFunctionEntry0( CDATAOWNER_HANDLEPROXYDATAMANAGER_ENTRY );
 		TInt err = KErrNone;
 		
 		TProxyInformation proxyInformation;
@@ -3390,7 +3523,7 @@ namespace conn
 				{
 				if (hexString.Length() < (result + KHexLeader().Size()))
 					{
-					__LOG1("CDataOwner::HandleProxyDataManager() - The Hex number has incorrect number of digits", iSecureId.iId);
+				    OstTrace1(TRACE_NORMAL, CDATAOWNER_HANDLEPROXYDATAMANAGER, "The Hex number has incorrect number of digits for 0x%08x", iSecureId.iId);
 					}
 				// Strip off the preceeding upper case hex leader characters
 				strippedSID.Set(hexString.Mid(result + KHexLeader().Size()));
@@ -3418,15 +3551,16 @@ namespace conn
 						}
 					}
         		
-                __LOG3("CDataOwner::HandleProxyDataManager(0x%08x) - proxy creation error: %d for proxySid: 0x%08x", iSecureId.iId, err, proxyInformation.iSecureId.iId);
+				OstTraceExt3(TRACE_NORMAL, DUP1_CDATAOWNER_HANDLEPROXYDATAMANAGER, "(0x%08x) - proxy creation error: %d for proxySid: 0x%08x", iSecureId.iId, static_cast<TInt32>(err), proxyInformation.iSecureId.iId);
 				}
 			else 
 				{
-				__LOG1("CDataOwner::HandleProxyDataManager() - Not a Hex Number specified in reg_file of 0x%08x)", iSecureId.iId);
+			    OstTrace1(TRACE_NORMAL, DUP2_CDATAOWNER_HANDLEPROXYDATAMANAGER, "Not a Hex Number specified in reg_file of 0x%08x)", iSecureId.iId);
 				err = KErrNone;		// We shouldn't return an error unless Append has errored (OOM etc.)
 				}
 			} // else it's corrupt - don't error, just ignore this attribute
 		
+		OstTraceFunctionExit0( CDATAOWNER_HANDLEPROXYDATAMANAGER_EXIT );
 		return err;
 		}
 
@@ -3437,6 +3571,7 @@ namespace conn
 	@return KErrNone
 	*/
 		{
+		OstTraceFunctionEntry0( CDATAOWNER_HANDLEDBMSBACKUPL_ENTRY );
 		iPassiveInformation.iSupported = ETrue;
 		
 		const TInt count = aAttributes.Count();
@@ -3447,7 +3582,7 @@ namespace conn
 				{
 				if (!localName.CompareF(KDatabase))
 					{
-					__LOG1("CDataOwner::HandleDBMSBackup(0x%08x) - Still using deprecated 'database' attribute", iSecureId.iId);
+				    OstTrace1(TRACE_NORMAL, CDATAOWNER_HANDLEDBMSBACKUPL, "(0x%08x) - Still using deprecated 'database' attribute", iSecureId.iId);
 					}
 				else if (!localName.CompareF(KPolicy))
 					{
@@ -3472,7 +3607,7 @@ namespace conn
 						// Add to list of Uid's
 						if (toAdd)
 							{
-        					__LOG2("CDataOwner::HandleDBMSBackup(0x%08x) - adding database with policy uid: 0x%08x", iSecureId.iId, temp);
+						    OstTraceExt2(TRACE_NORMAL, DUP1_CDATAOWNER_HANDLEDBMSBACKUPL, "(0x%08x) - adding database with policy uid: 0x%08x", iSecureId.iId, temp);
 							TUid tempUID;
 							tempUID.iUid = temp;
 							TRAP_IGNORE(iDBMSSelections.AppendL(tempUID));
@@ -3480,16 +3615,17 @@ namespace conn
 						} // if
 					else
 						{
-						__LOG1("CDataOwner::HandleDBMSBackup(0x%08x) - Error converting policy number", iSecureId.iId);
+					    OstTrace1(TRACE_NORMAL, DUP2_CDATAOWNER_HANDLEDBMSBACKUPL, "(0x%08x) - Error converting policy number", iSecureId.iId);
 						} // else
 					} // else if
 				} // if
 			else
 				{
-				__LOG1("CDataOwner::HandleDBMSBackup(0x%08x) - Incorrect use of attributes", iSecureId.iId);
+			    OstTrace1(TRACE_NORMAL, DUP3_CDATAOWNER_HANDLEDBMSBACKUPL, "(0x%08x) - Incorrect use of attributes", iSecureId.iId);
 				}
 			} // for x
 			
+		OstTraceFunctionExit0( CDATAOWNER_HANDLEDBMSBACKUPL_EXIT );
 		return KErrNone;
 	}
 
@@ -3500,6 +3636,7 @@ namespace conn
 	@return KErrNone
 	*/
 		{
+		OstTraceFunctionEntry0( CDATAOWNER_HANDLEACTIVEBACKUPL_ENTRY );
 		iActiveInformation.iSupported = ETrue;
 		iActiveInformation.iActiveDataOwner = ETrue;
 		iStatus = EDataOwnerNotConnected;
@@ -3513,43 +3650,43 @@ namespace conn
 				if (KErrNone != ipDataOwnerManager->ParserProxy().ConvertToUnicodeL(iActiveInformation.iProcessName, aAttributes[x].Value().DesC()))
 					{
 					iActiveInformation.iSupported = EFalse;
-					__LOG1("CDataOwner::HandleActiveBackup(0x%08x) - Error converting process name", iSecureId.iId);
+					OstTrace1(TRACE_NORMAL, CDATAOWNER_HANDLEACTIVEBACKUPL, "(0x%08x) - Error converting process name", iSecureId.iId);
 					}
 				}
 			else if (!localName.CompareF(KRequiresDelay))
 				{
                 const TBool required = ( aAttributes[x].Value().DesC().CompareF(KYes) == 0 );
 				iActiveInformation.iRequiresDelayToPrepareData = required;
-				__LOG2("CDataOwner::HandleActiveBackup(0x%08x) - iActiveInformation.iRequiresDelayToPrepareData: %d", iSecureId.iId, required);
+				OstTraceExt2(TRACE_NORMAL, DUP1_CDATAOWNER_HANDLEACTIVEBACKUPL, "(0x%08x) - iActiveInformation.iRequiresDelayToPrepareData: %d", iSecureId.iId, static_cast<TInt32>(required));
 				} // else if
 			else if (!localName.CompareF(KSupportsSelective))
 				{
                 const TBool required = ( aAttributes[x].Value().DesC().CompareF(KYes) == 0 );
 				iActiveInformation.iSupportsSelective = required;
-				__LOG2("CDataOwner::HandleActiveBackup(0x%08x) - iActiveInformation.iSupportsSelective: %d", iSecureId.iId, required);
+				OstTraceExt2(TRACE_NORMAL, DUP2_CDATAOWNER_HANDLEACTIVEBACKUPL, "(0x%08x) - iActiveInformation.iSupportsSelective: %d", iSecureId.iId, static_cast<TInt32>(required));
 				} // else if
 			else if (!localName.CompareF(KSupportsInc))
 				{
                 const TBool required = ( aAttributes[x].Value().DesC().CompareF(KYes) == 0 );
 				iActiveInformation.iSupportsIncremental = required;
-				__LOG2("CDataOwner::HandleActiveBackup(0x%08x) - iActiveInformation.iSupportsIncremental: %d", iSecureId.iId, required);
+				OstTraceExt2(TRACE_NORMAL, DUP3_CDATAOWNER_HANDLEACTIVEBACKUPL, "(0x%08x) - iActiveInformation.iSupportsIncremental: %d", iSecureId.iId, static_cast<TInt32>(required));
 				} // else if
 			else if (!localName.CompareF(KActiveType))
 				{
 				const TDesC8& value = aAttributes[x].Value().DesC();
 				if (!value.CompareF(KActiveOnly))
 					{
-    				__LOG1("CDataOwner::HandleActiveBackup(0x%08x) - iActiveInformation.iActiveType: EActiveOnly", iSecureId.iId);
+				    OstTrace1(TRACE_NORMAL, DUP4_CDATAOWNER_HANDLEACTIVEBACKUPL, "(0x%08x) - iActiveInformation.iActiveType: EActiveOnly", iSecureId.iId);
 					iActiveInformation.iActiveType = EActiveOnly;
 					}
 				else if (!value.CompareF(KActiveAndProxy))
 					{
-    				__LOG1("CDataOwner::HandleActiveBackup(0x%08x) - iActiveInformation.iActiveType: EActiveAndProxyImpl", iSecureId.iId);
+				    OstTrace1(TRACE_NORMAL, DUP5_CDATAOWNER_HANDLEACTIVEBACKUPL, "(0x%08x) - iActiveInformation.iActiveType: EActiveAndProxyImpl", iSecureId.iId);
 					iActiveInformation.iActiveType = EActiveAndProxyImpl;
 					}
 				else if (!value.CompareF(KProxyOnly))
 					{
-    				__LOG1("CDataOwner::HandleActiveBackup(0x%08x) - iActiveInformation.iActiveType: EProxyImpOnly", iSecureId.iId);
+				    OstTrace1(TRACE_NORMAL, DUP6_CDATAOWNER_HANDLEACTIVEBACKUPL, "(0x%08x) - iActiveInformation.iActiveType: EProxyImpOnly", iSecureId.iId);
 					iActiveInformation.iActiveType = EProxyImpOnly;
 					}
 				}
@@ -3566,6 +3703,7 @@ namespace conn
 				}
 			} // for x
 		
+		OstTraceFunctionExit0( CDATAOWNER_HANDLEACTIVEBACKUPL_EXIT );
 		return KErrNone;
 		}
 
@@ -3577,6 +3715,7 @@ namespace conn
 	@return KErrNone
 	*/
 		{
+		OstTraceFunctionEntry0( CDATAOWNER_HANDLERESTORE_ENTRY );
 		iRestoreInformation.iSupported = ETrue;
 		
 		if (aAttributes.Count() == 1)
@@ -3585,10 +3724,11 @@ namespace conn
 				{
                 const TBool required = ( aAttributes[0].Value().DesC().CompareF(KYes) == 0 );
 				iRestoreInformation.iRequiresReboot = required;
-				__LOG2("CDataOwner::HandleRestore(0x%08x) - iRestoreInformation.iRequiresReboot: %d", iSecureId.iId, required);
+				OstTraceExt2(TRACE_NORMAL, CDATAOWNER_HANDLERESTORE, "(0x%08x) - iRestoreInformation.iRequiresReboot: %d", iSecureId.iId, static_cast<TInt32>(required));
 				} // if
 			} // if
 		
+		OstTraceFunctionExit0( CDATAOWNER_HANDLERESTORE_EXIT );
 		return KErrNone;
 		}
 
@@ -3603,18 +3743,20 @@ namespace conn
 	@param aDir The element was found in an <include_dir/> element?
 	*/
 		{
+		OstTraceFunctionEntry0( CDATAOWNER_HANDLEPATHL_ENTRY );
 		// Check we dont have a NULL string
 		if (aAttributes[0].Value().DesC().Length() > 0)
 			{
 			TFileName filename;
 			if (KErrNone != ipDataOwnerManager->ParserProxy().ConvertToUnicodeL(filename, aAttributes[0].Value().DesC()))
 				{
-				__LOG1("CDataOwner::HandlePathL(0x%08x) - EPassive - Could not convert filename", iSecureId.iId);
+			    OstTrace1(TRACE_NORMAL, CDATAOWNER_HANDLEPATHL, "(0x%08x) - EPassive - Could not convert filename", iSecureId.iId);
+				OstTraceFunctionExit0( CDATAOWNER_HANDLEPATHL_EXIT );
 				return;
 				}
 			else
 				{
-				__LOG3("CDataOwner::HandlePathL(0x%08x) - path in the registration file is: %S [type: %d]", iSecureId.iId, &filename, aType);
+			    OstTraceExt3(TRACE_NORMAL, DUP1_CDATAOWNER_HANDLEPATHL, "(0x%08x) - path in the registration file is: %S [type: %d]", iSecureId.iId, filename, static_cast<TInt32>(aType));
 				}
 				
 			// If it is a directory is do we add a trailing backslash,
@@ -3638,7 +3780,8 @@ namespace conn
 						if (offset != KErrNotFound)
 							{
 							// someone other absoulute path
-							__LOG2("CDataOwner::HandlePathL(0x%08x) - Path is not recognised by the data owner : %S", iSecureId.iId, &filename);
+						    OstTraceExt2(TRACE_NORMAL, DUP2_CDATAOWNER_HANDLEPATHL, "(0x%08x) - Path is not recognised by the data owner : %S", iSecureId.iId, filename);
+							OstTraceFunctionExit0( DUP1_CDATAOWNER_HANDLEPATHL_EXIT );
 							return;
 							}
 						else
@@ -3661,7 +3804,7 @@ namespace conn
 					CSelection* selection = CSelection::NewLC(aType, selectionName);
 					iPassiveSelections.AppendL(selection);
 					CleanupStack::Pop(selection);
-					__LOG3("CDataOwner::HandlePathL(0x%08x) - Added selection: %S [type: %d]", iSecureId.iId, &selectionName, aType);
+					OstTraceExt3(TRACE_NORMAL, DUP3_CDATAOWNER_HANDLEPATHL, "(0x%08x) - Added selection: %S [type: %d]", iSecureId.iId, selectionName, static_cast<TInt32>(aType));
 					break;
 					}
 			case EPublic:
@@ -3672,11 +3815,12 @@ namespace conn
 						CSelection* selection = CSelection::NewLC(aType, filename);
 						iPublicSelections.AppendL(selection);
 						CleanupStack::Pop(selection);
-						__LOG3("CDataOwner::HandlePathL(0x%08x) - Added selection: %S [type: %d]", iSecureId.iId, &filename, aType);
+						OstTraceExt3(TRACE_NORMAL, DUP4_CDATAOWNER_HANDLEPATHL, "(0x%08x) - Added selection: %S [type: %d]", iSecureId.iId, filename, static_cast<TInt32>(aType));
 						}
 					else
 						{
-						__LOG3("CDataOwner::HandlePathL(0x%08x) - Not an Absolute Path: %S [type: %d]", iSecureId.iId, &filename, aType);
+					    OstTraceExt3(TRACE_NORMAL, DUP5_CDATAOWNER_HANDLEPATHL, "(0x%08x) - Not an Absolute Path: %S [type: %d]", iSecureId.iId, filename, static_cast<TInt32>(aType));
+						OstTraceFunctionExit0( DUP2_CDATAOWNER_HANDLEPATHL_EXIT );
 						return;
 						}
 					break;
@@ -3685,8 +3829,9 @@ namespace conn
 			} // if
 		else
 			{
-			__LOG1("CDataOwner::HandlePathL(0x%08x) - Path attribute error", iSecureId.iId);
+		    OstTrace1(TRACE_NORMAL, DUP6_CDATAOWNER_HANDLEPATHL, "(0x%08x) - Path attribute error", iSecureId.iId);
 			} // else
+		OstTraceFunctionExit0( DUP3_CDATAOWNER_HANDLEPATHL_EXIT );
 		}
 		
 		
@@ -3696,9 +3841,11 @@ namespace conn
 	@return a CSnapshotHolder object
 	*/
 		{
+		OstTraceFunctionEntry0( CSNAPSHOTHOLDER_NEWL_ENTRY );
 		CSnapshotHolder* self = NewLC();
 		CleanupStack::Pop(self);
 		
+		OstTraceFunctionExit0( CSNAPSHOTHOLDER_NEWL_EXIT );
 		return self;
 		}
 
@@ -3708,9 +3855,11 @@ namespace conn
 	@return a CSnapshotHolder object
 	*/
 		{
+		OstTraceFunctionEntry0( CSNAPSHOTHOLDER_NEWLC_ENTRY );
 		CSnapshotHolder* self = new(ELeave) CSnapshotHolder();
 		CleanupStack::PushL(self);
 		
+		OstTraceFunctionExit0( CSNAPSHOTHOLDER_NEWLC_EXIT );
 		return self;
 		}
 		
@@ -3718,13 +3867,17 @@ namespace conn
 	/** Default C++ Constructor
 	*/
 		{
+		OstTraceFunctionEntry0( CSNAPSHOTHOLDER_CSNAPSHOTHOLDER_CONS_ENTRY );
+		OstTraceFunctionExit0( CSNAPSHOTHOLDER_CSNAPSHOTHOLDER_CONS_EXIT );
 		}
 		
 	CSnapshotHolder::~CSnapshotHolder()
 	/** Default C++ Constructor
 	*/
 		{
+		OstTraceFunctionEntry0( CSNAPSHOTHOLDER_CSNAPSHOTHOLDER_DES_ENTRY );
 		iSnapshots.ResetAndDestroy();
+		OstTraceFunctionExit0( CSNAPSHOTHOLDER_CSNAPSHOTHOLDER_DES_EXIT );
 		}
 			
 		

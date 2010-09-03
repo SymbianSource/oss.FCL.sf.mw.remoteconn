@@ -30,8 +30,11 @@
 #include "cmtpimagedpobjectpropertymgr.h"
 #include "cmtpimagedp.h"
 #include "mtpimagedputilits.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpimagedpsetobjectproplistTraces.h"
+#endif
 
-__FLOG_STMT(_LIT8(KComponent,"CMTPImageDpSetObjectPropList");)
 
 MMTPRequestProcessor* CMTPImageDpSetObjectPropList::NewL(MMTPDataProviderFramework& aFramework, MMTPConnection& aConnection,CMTPImageDataProvider& aDataProvider)
     {
@@ -44,11 +47,10 @@ MMTPRequestProcessor* CMTPImageDpSetObjectPropList::NewL(MMTPDataProviderFramewo
     
 CMTPImageDpSetObjectPropList::~CMTPImageDpSetObjectPropList()
     {
-    __FLOG(_L8(">> CMTPImageDpSetObjectPropList::~CMTPImageDpSetObjectPropList"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPSETOBJECTPROPLIST_CMTPIMAGEDPSETOBJECTPROPLIST_DES_ENTRY );
     delete iPropertyList;
     delete iObjectMeta;
-    __FLOG(_L8("<< CMTPImageDpSetObjectPropList::~CMTPImageDpSetObjectPropList"));
-    __FLOG_CLOSE;
+    OstTraceFunctionExit0( CMTPIMAGEDPSETOBJECTPROPLIST_CMTPIMAGEDPSETOBJECTPROPLIST_DES_EXIT );
     }
     
 CMTPImageDpSetObjectPropList::CMTPImageDpSetObjectPropList(MMTPDataProviderFramework& aFramework, MMTPConnection& aConnection,CMTPImageDataProvider& aDataProvider) :
@@ -61,29 +63,29 @@ CMTPImageDpSetObjectPropList::CMTPImageDpSetObjectPropList(MMTPDataProviderFrame
     
 void CMTPImageDpSetObjectPropList::ConstructL()
     {
-    __FLOG_OPEN(KMTPSubsystem, KComponent);
-    __FLOG(_L8(">> CMTPImageDpSetObjectPropList::ConstructL"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPSETOBJECTPROPLIST_CONSTRUCTL_ENTRY );
     iPropertyList = CMTPTypeObjectPropList::NewL();
     iObjectMeta = CMTPObjectMetaData::NewL();
-    __FLOG(_L8("<< CMTPImageDpSetObjectPropList::ConstructL"));
+    OstTraceFunctionExit0( CMTPIMAGEDPSETOBJECTPROPLIST_CONSTRUCTL_EXIT );
     }
 
 void CMTPImageDpSetObjectPropList::ServiceL()
     {
-    __FLOG(_L8(">> CMTPImageDpSetObjectPropList::ConstructL"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPSETOBJECTPROPLIST_SERVICEL_ENTRY );
     ReceiveDataL(*iPropertyList);
-    __FLOG(_L8(">> CMTPImageDpSetObjectPropList::ConstructL"));
+    OstTraceFunctionExit0( CMTPIMAGEDPSETOBJECTPROPLIST_SERVICEL_EXIT );
     }
 
 TBool CMTPImageDpSetObjectPropList::DoHandleResponsePhaseL()
     {
-    __FLOG(_L8(">> CMTPImageDpSetObjectPropList::DoHandleResponsePhaseL"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPSETOBJECTPROPLIST_DOHANDLERESPONSEPHASEL_ENTRY );
     MMTPObjectMgr& objects(iFramework.ObjectMgr());
     TUint32 parameter(0);
     TMTPResponseCode responseCode(EMTPRespCodeOK);
     const TUint count(iPropertyList->NumberOfElements());
     iPropertyList->ResetCursor();
-    __FLOG_VA((_L8("setting %d properties"), count));
+    OstTrace1( TRACE_NORMAL, CMTPIMAGEDPSETOBJECTPROPLIST_DOHANDLERESPONSEPHASEL, 
+            "setting %d properties", count );
     TUint32 preHandle = KMTPHandleNone;
     for (TUint i(0); ((i < count) && (responseCode == EMTPRespCodeOK)); i++)
         {
@@ -91,7 +93,8 @@ TBool CMTPImageDpSetObjectPropList::DoHandleResponsePhaseL()
         TUint32 handle = element.Uint32L(CMTPTypeObjectPropListElement::EObjectHandle);
         TUint16 propertyCode = element.Uint16L(CMTPTypeObjectPropListElement::EPropertyCode);
         TUint16 dataType = element.Uint16L(CMTPTypeObjectPropListElement::EDatatype);
-        __FLOG_VA((_L8("set property, propertycode %d, datatype %d, handle %d"), propertyCode, dataType, handle));
+        OstTraceExt3( TRACE_NORMAL, DUP1_CMTPIMAGEDPSETOBJECTPROPLIST_DOHANDLERESPONSEPHASEL, 
+                "set property, propertycode %d, datatype %d, handle %d", propertyCode, dataType, handle );
         
         responseCode = MTPImageDpUtilits::VerifyObjectHandleL(iFramework, handle, *iObjectMeta);
         if ((EMTPRespCodeOK == responseCode) && (iObjectMeta->Uint(CMTPObjectMetaData::EDataProviderId) == iFramework.DataProviderId()))
@@ -116,7 +119,10 @@ TBool CMTPImageDpSetObjectPropList::DoHandleResponsePhaseL()
                     case EMTPObjectPropCodeNonConsumable:
                         iPropertyMgr.SetPropertyL(TMTPObjectPropertyCode(propertyCode), element.Uint8L(CMTPTypeObjectPropListElement::EValue));
                         objects.ModifyObjectL(*iObjectMeta);
-                        break;                        
+                        break;
+                    case EMTPObjectPropCodeHidden:
+                        iPropertyMgr.SetPropertyL(TMTPObjectPropertyCode(propertyCode), element.Uint16L(CMTPTypeObjectPropListElement::EValue));
+                        break;
                     default:
                         responseCode = EMTPRespCodeInvalidObjectPropCode;
                         break;
@@ -133,19 +139,20 @@ TBool CMTPImageDpSetObjectPropList::DoHandleResponsePhaseL()
         }
 
     SendResponseL(responseCode, 1, &parameter);
-    __FLOG(_L8("<< CMTPImageDpSetObjectPropList::DoHandleResponsePhaseL"));
+    OstTraceFunctionExit0( CMTPIMAGEDPSETOBJECTPROPLIST_DOHANDLERESPONSEPHASEL_EXIT );
     return EFalse;
     }
 
 TBool CMTPImageDpSetObjectPropList::HasDataphase() const
     {
-    __FLOG(_L8(">> CMTPImageDpSetObjectPropList::HasDataphase"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPSETOBJECTPROPLIST_HASDATAPHASE_ENTRY );
+    OstTraceFunctionExit0( CMTPIMAGEDPSETOBJECTPROPLIST_HASDATAPHASE_EXIT );
     return ETrue;
     }
 
 TMTPResponseCode CMTPImageDpSetObjectPropList::CheckPropCode(TUint16 aPropertyCode, TUint16 aDataType) const
     {
-    __FLOG(_L8(">> CMTPImageDpSetObjectPropList::CheckPropCode"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPSETOBJECTPROPLIST_CHECKPROPCODE_ENTRY );
     TMTPResponseCode responseCode = EMTPRespCodeOK;
     switch(aPropertyCode)
         {
@@ -180,11 +187,17 @@ TMTPResponseCode CMTPImageDpSetObjectPropList::CheckPropCode(TUint16 aPropertyCo
                 {
                 responseCode = EMTPRespCodeInvalidObjectPropFormat;
                 }
-            break;            
+            break;
+        case EMTPObjectPropCodeHidden:
+            if (aDataType != EMTPTypeUINT16)
+                {
+                responseCode = EMTPRespCodeInvalidObjectPropFormat;
+                }
+            break;
         default:
             responseCode = EMTPRespCodeInvalidObjectPropCode;
         }
-    __FLOG(_L8("<< CMTPImageDpSetObjectPropList::CheckPropCode"));
+    OstTraceFunctionExit0( CMTPIMAGEDPSETOBJECTPROPLIST_CHECKPROPCODE_EXIT );
     return responseCode;
     }
     

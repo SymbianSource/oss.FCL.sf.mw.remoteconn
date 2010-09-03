@@ -31,9 +31,11 @@
 #include "cmtpimagedpthumbnailcreator.h"
 #include "cmtpimagedpobjectpropertymgr.h"
 #include "cmtpimagedp.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpimagedpgetthumbTraces.h"
+#endif
 
-// Class constants.
-__FLOG_STMT(_LIT8(KComponent,"ImageDpGetThumb");)
 
 
 /**
@@ -57,11 +59,10 @@ Destructor
 */	
 CMTPImageDpGetThumb::~CMTPImageDpGetThumb()
     {
-    __FLOG(_L8(">> CMTPImageDpGetThumb::~CMTPImageDpGetThumb"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPGETTHUMB_CMTPIMAGEDPGETTHUMB_ENTRY );
     delete iThumb;    
     delete iObjectMeta;
-    __FLOG(_L8("<< CMTPImageDpGetThumb::~CMTPImageDpGetThumb"));
-    __FLOG_CLOSE;
+    OstTraceFunctionExit0( CMTPIMAGEDPGETTHUMB_CMTPIMAGEDPGETTHUMB_EXIT );
     }
     
 /**
@@ -78,19 +79,18 @@ Second-phase constructor.
 */        
 void CMTPImageDpGetThumb::ConstructL()
     {
-    __FLOG_OPEN(KMTPSubsystem, KComponent);
-    __FLOG(_L8("CMTPImageDpGetThumb::ConstructL"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPGETTHUMB_CONSTRUCTL_ENTRY );
     iThumb = CMTPTypeOpaqueData::NewL();    
     iObjectMeta = CMTPObjectMetaData::NewL();
-    __FLOG(_L8("CMTPImageDpGetThumb::ConstructL"));
+    OstTraceFunctionExit0( CMTPIMAGEDPGETTHUMB_CONSTRUCTL_EXIT );
     }
 
 
 TMTPResponseCode CMTPImageDpGetThumb::CheckRequestL()
     {
-    __FLOG(_L8(">> CMTPImageDpGetThumb::CheckRequestL"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPGETTHUMB_CHECKREQUESTL_ENTRY );
     TMTPResponseCode result = MTPImageDpUtilits::VerifyObjectHandleL(iFramework, Request().Uint32(TMTPTypeRequest::ERequestParameter1), *iObjectMeta);
-    __FLOG(_L8("<< CMTPImageDpGetThumb::CheckRequestL"));
+    OstTraceFunctionExit0( CMTPIMAGEDPGETTHUMB_CHECKREQUESTL_EXIT );
     return result;	
     }
     
@@ -100,17 +100,19 @@ GetObject request handler
 */
 void CMTPImageDpGetThumb::ServiceL()
     {
-    __FLOG(_L8(">> CMTPImageDpGetThumb::ServiceL"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPGETTHUMB_SERVICEL_ENTRY );
     TInt err = KErrNone;
     
     //at first, try to query thumbnail from property manager
     HBufC8* thumbnailData = imgDp.PropertyMgr().Thumbnail(iObjectMeta->Uint(CMTPObjectMetaData::EHandle));
     if (thumbnailData == NULL)
         {
-        __FLOG(_L8("CMTPImageDpGetThumb::ServiceL-  fail to query thumbnail from cache"));
+        OstTrace0( TRACE_NORMAL, CMTPIMAGEDPGETTHUMB_SERVICEL, "CMTPImageDpGetThumb::ServiceL-  fail to query thumbnail from cache" );
         TEntry fileEntry;
         
-        User::LeaveIfError(iFramework.Fs().Entry(iObjectMeta->DesC(CMTPObjectMetaData::ESuid), fileEntry));
+        LEAVEIFERROR(iFramework.Fs().Entry(iObjectMeta->DesC(CMTPObjectMetaData::ESuid), fileEntry),
+                OstTraceExt2( TRACE_ERROR, DUP1_CMTPIMAGEDPGETTHUMB_SERVICEL, 
+                        "Gets the entry details for %S failed! error code %d", iObjectMeta->DesC(CMTPObjectMetaData::ESuid), munged_err));
         
         CMTPImageDpThumbnailCreator* tnc = imgDp.ThumbnailManager();
         if(tnc != NULL)
@@ -118,7 +120,7 @@ void CMTPImageDpGetThumb::ServiceL()
             tnc->GetThumbMgr()->SetFlagsL(CThumbnailManager::EDefaultFlags);
             if(fileEntry.FileSize() > KFileSizeMax)
                 {
-                __FLOG(_L8(">> CMTPImageDpGetThumb::ServiceL, fileEntry.FileSize() > KFileSizeMax"));
+            	OstTrace0( TRACE_NORMAL, DUP2_CMTPIMAGEDPGETTHUMB_SERVICEL, "fileEntry.FileSize() > KFileSizeMax" );
                 tnc->GetThumbMgr()->SetFlagsL(CThumbnailManager::EDoNotCreate);
                 }
             
@@ -132,7 +134,7 @@ void CMTPImageDpGetThumb::ServiceL()
         iThumb->Write(*thumbnailData);
         }
     SendDataL(*iThumb);
-    __FLOG(_L8("<< CMTPImageDpGetThumb::ServiceL"));
+    OstTraceFunctionExit0( CMTPIMAGEDPGETTHUMB_SERVICEL_EXIT );
     }
 
 TBool CMTPImageDpGetThumb::DoHandleCompletingPhaseL()

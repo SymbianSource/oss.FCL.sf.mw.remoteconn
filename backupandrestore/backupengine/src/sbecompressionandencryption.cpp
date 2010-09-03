@@ -20,12 +20,16 @@
 */
 #include "sbencrypt.h"
 #include "sbecompressionandencryption.h"
-#include "sblog.h"
 #include "sbtypes.h"
 
 #include <arc4.h>
 #include <ezcompressor.h>
 #include <ezdecompressor.h>
+#include "OstTraceDefinitions.h"
+#include "sbtrace.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "sbecompressionandencryptionTraces.h"
+#endif
 
 // Uncomment the next line if you want to turn off compression & encryption, ignore the warnings.
 //#define TURN_OFF_COMPRESSION_AND_ENCRYPTION
@@ -55,12 +59,14 @@ namespace conn
 	@param aToCopy the amount of data to copy
 	*/
 		{
+		OstTraceFunctionEntry0( _CONN_READL_ENTRY );
 		TUint8* inData = const_cast<TUint8*>(aBuffer.Ptr());
 		TUint8* outData = (reinterpret_cast<TUint8*>(&aT)) + aStartAt;
 		for (TInt x = 0; x < aToCopy; x++)
 			{
 			*(outData++) = *(inData++);
 			} // for
+		OstTraceFunctionExit0( _CONN_READL_EXIT );
 		}
 	
 	
@@ -73,6 +79,7 @@ namespace conn
 	@param aToCopy the amount of data to copy
 	*/
 		{
+		OstTraceFunctionEntry0( _CONN_WRITEL_ENTRY );
 		TUint8* inData = reinterpret_cast<TUint8*>(&aT);
 		TUint8* outData = (const_cast<TUint8*>(aBuffer.Ptr())) + aStartAt;
 		for (TInt x = 0; x < aToCopy; x++)
@@ -81,6 +88,7 @@ namespace conn
 			} // for
 			
 		aBuffer.SetLength(aBuffer.Length() + sizeof(T));
+		OstTraceFunctionExit0( _CONN_WRITEL_EXIT );
 		}
 
 	CSBECompressAndEncrypt* CSBECompressAndEncrypt::NewLC(CSBGenericTransferType*& apTransferType, TPtr8& aInputData)
@@ -90,10 +98,12 @@ namespace conn
 	@param aInputData data block to be used. Start point will be changed to allow for compression.
 	*/
 		{
+		OstTraceFunctionEntry0( CSBECOMPRESSANDENCRYPT_NEWLC_ENTRY );
 		CSBECompressAndEncrypt* self = new(ELeave) CSBECompressAndEncrypt();
 		CleanupStack::PushL(self);
 		self->ConstructL(apTransferType, aInputData);
 		
+		OstTraceFunctionExit0( CSBECOMPRESSANDENCRYPT_NEWLC_EXIT );
 		return self;
 		}
 			
@@ -102,18 +112,22 @@ namespace conn
 	/** Standard C++ Constructor
 	*/
 		{
+		OstTraceFunctionEntry0( CSBECOMPRESSANDENCRYPT_CSBECOMPRESSANDENCRYPT_CONS_ENTRY );
+		OstTraceFunctionExit0( CSBECOMPRESSANDENCRYPT_CSBECOMPRESSANDENCRYPT_CONS_EXIT );
 		}
 		
 	CSBECompressAndEncrypt::~CSBECompressAndEncrypt()
 	/** Standard C++ Destructor
 	*/
 		{
+OstTraceFunctionEntry0( CSBECOMPRESSANDENCRYPT_CSBECOMPRESSANDENCRYPT_DES_ENTRY );
 #ifndef TURN_OFF_COMPRESSION_AND_ENCRYPTION	
 
 		if( ! iIsFreed )
 			iOffsetStart->Set(iActualStart);	// free reserved space when leave occurs.
 #endif
 		delete iCipher;
+		OstTraceFunctionExit0( CSBECOMPRESSANDENCRYPT_CSBECOMPRESSANDENCRYPT_DES_EXIT );
 		}
 	
 	void CSBECompressAndEncrypt::ConstructL(CSBGenericTransferType*& apTransferType, TPtr8& aOutputData)
@@ -124,7 +138,8 @@ namespace conn
 	@param aInputData data block to be used. Start point will be changed to allow for compression.
 	*/
 		{
-		__LOG2("CSBECompressAndEncrypt::ConstructL() - START - aOutputData: 0x%08x (%d)", aOutputData.Ptr(), aOutputData.Length());
+		OstTraceFunctionEntry0( CSBECOMPRESSANDENCRYPT_CONSTRUCTL_ENTRY );
+		OstTraceExt2(TRACE_NORMAL, CSBECOMPRESSANDENCRYPT_CONSTRUCTL, "aOutputData: 0x%08x (%d)", reinterpret_cast<TInt32>(aOutputData.Ptr()), static_cast<TInt32>(aOutputData.Length()));
 
 #ifndef TURN_OFF_COMPRESSION_AND_ENCRYPTION		
 		// Do we need a key source and cipher?
@@ -170,7 +185,7 @@ namespace conn
 		 	// Create the cipher, if needed.
 		 	if (iDoEncrypt)
 		 		{
-		 		__LOG1("Key length: %d", iKey.Length() * 4);
+		 	    OstTrace1(TRACE_NORMAL, DUP1_CSBECOMPRESSANDENCRYPT_CONSTRUCTL, "Key length: %d", iKey.Length() * 4);
 			 	iCipher = CARC4::NewL(iKey);
 			 	} // if
 			 	
@@ -180,7 +195,7 @@ namespace conn
 		// Reserve the space required
 		TInt numberBlocks = (aOutputData.MaxSize() / KCompressionBlockSize) + (((aOutputData.MaxSize() % KCompressionBlockSize) == 0) ? 0 : 1);
 		TInt reservedSpace = (numberBlocks * iCompressionGrowthSize) + extraToReserve;
-		__LOG2("CSBECompressAndEncrypt::ConstructL() - numberBlocks: %d, reservedSpace: %d", numberBlocks, reservedSpace);
+		OstTraceExt2(TRACE_NORMAL, DUP2_CSBECOMPRESSANDENCRYPT_CONSTRUCTL, "numberBlocks: %d, reservedSpace: %d", numberBlocks, reservedSpace);
 		
 		// Keep a copy of the acutual data block
 		iActualStart.Set(const_cast<TUint8*>(aOutputData.Ptr()), 0, aOutputData.MaxSize());
@@ -188,12 +203,14 @@ namespace conn
 		// Reserve the space in the input data
 		if (reservedSpace > aOutputData.MaxSize())
 			{
+		    OstTrace0(TRACE_ERROR, DUP4_CSBECOMPRESSANDENCRYPT_CONSTRUCTL, "Leave: KErrOverflow");
 			User::Leave(KErrOverflow);
 			}
 		aOutputData.Set((const_cast<TUint8*>(aOutputData.Ptr()) + reservedSpace), 0, aOutputData.MaxSize() - reservedSpace);
 		iOffsetStart = &aOutputData;
 #endif		 	
-		__LOG2("CSBECompressAndEncrypt::ConstructL() - END - aOutputData: 0x%08x (%d)", aOutputData.Ptr(), aOutputData.Length());
+		OstTraceExt2(TRACE_NORMAL, DUP3_CSBECOMPRESSANDENCRYPT_CONSTRUCTL, "aOutputData: 0x%08x (%d)", reinterpret_cast<TInt32>(aOutputData.Ptr()), static_cast<TInt32>(aOutputData.Length()));
+		OstTraceFunctionExit0( CSBECOMPRESSANDENCRYPT_CONSTRUCTL_EXIT );
 		}
 
 	void CSBECompressAndEncrypt::PackL(TPtr8& aOutputData)
@@ -202,7 +219,8 @@ namespace conn
 	@param aOutputData the compressed data
 	*/
 		{
-		__LOG4("CSBECompressAndEncrypt::PackL() - START - aOutputData: 0x%08x (%d), iActualStart: 0x%08x (%d)", aOutputData.Ptr(), aOutputData.Length(), iActualStart.Ptr(), iActualStart.Length());
+		OstTraceFunctionEntry0( CSBECOMPRESSANDENCRYPT_PACKL_ENTRY );
+		OstTraceExt4(TRACE_NORMAL, CSBECOMPRESSANDENCRYPT_PACKL, "aOutputData: 0x%08x (%d), iActualStart: 0x%08x (%d)", reinterpret_cast<TInt32>(aOutputData.Ptr()), static_cast<TInt32>(aOutputData.Length()), reinterpret_cast<TInt32>(iActualStart.Ptr()), static_cast<TInt32>(iActualStart.Length()));
 #ifndef TURN_OFF_COMPRESSION_AND_ENCRYPTION		
 		// Add the encryption header
 		TEncryptionHeader encryptionHeader;
@@ -210,9 +228,9 @@ namespace conn
 		encryptionHeader.iBufferSize = iBuffer.Size();
 		encryptionHeader.iTotalSize = sizeof(TEncryptionHeader) + encryptionHeader.iBufferSize;
 		
-		__LOG1("CSBECompressAndEncrypt::PackL() - Encryption Header: Encryption supported %d", encryptionHeader.iEncrypted);
-		__LOG1("CSBECompressAndEncrypt::PackL() - Encryption Header: BufferSize %d", encryptionHeader.iBufferSize);
-		__LOG1("CSBECompressAndEncrypt::PackL() - Encryption Header: Total Size %d",encryptionHeader.iTotalSize);
+		OstTrace1(TRACE_NORMAL, DUP1_CSBECOMPRESSANDENCRYPT_PACKL, "Encryption Header: Encryption supported %d", encryptionHeader.iEncrypted);
+		OstTrace1(TRACE_NORMAL, DUP2_CSBECOMPRESSANDENCRYPT_PACKL, "Encryption Header: BufferSize %d", encryptionHeader.iBufferSize);
+		OstTrace1(TRACE_NORMAL, DUP3_CSBECOMPRESSANDENCRYPT_PACKL, "Encryption Header: Total Size %d",encryptionHeader.iTotalSize);
 		
 		// Move along
 		TPtr8 encryptionOffset(const_cast<TUint8*>(iActualStart.Ptr()), 0, sizeof(TEncryptionHeader));
@@ -253,8 +271,8 @@ namespace conn
 			compressionHeader.iCompressedSize = compressionBuffer->Size();
 			compressionHeader.iUncompressedSize = toCompressSize;
 			
-			__LOG1("CSBECompressAndEncrypt::PackL() - Compression Header: Compressed %d", compressionHeader.iCompressedSize);
-			__LOG1("CSBECompressAndEncrypt::PackL() - Compression Header: UnCompressed %d", compressionHeader.iUncompressedSize);
+			OstTrace1(TRACE_NORMAL, DUP4_CSBECOMPRESSANDENCRYPT_PACKL, "Compression Header: Compressed %d", compressionHeader.iCompressedSize);
+			OstTrace1(TRACE_NORMAL, DUP5_CSBECOMPRESSANDENCRYPT_PACKL, "Compression Header: UnCompressed %d", compressionHeader.iUncompressedSize);
 			
 			if (iDoEncrypt)
 				{
@@ -291,7 +309,8 @@ namespace conn
 		aOutputData.Set(iActualStart);
 		iIsFreed = ETrue;
 #endif		
-		__LOG("CSBECompressAndEncrypt::PackL() - END");
+		
+		OstTraceFunctionExit0( CSBECOMPRESSANDENCRYPT_PACKL_EXIT );
 		}
 	void CSBECompressAndEncrypt::FreeReservedSpace(TPtr8& aOutputData)
 		/*
@@ -299,26 +318,28 @@ namespace conn
 		@param aOutputData the compressed data
 		*/
 		{
-		__LOG("CSBECompressAndEncrypt::FreeReservedSpace() - START");
+		OstTraceFunctionEntry0( CSBECOMPRESSANDENCRYPT_FREERESERVEDSPACE_ENTRY );		
 
 #ifndef TURN_OFF_COMPRESSION_AND_ENCRYPTION	
 	
-		__LOG1("CSBECompressAndEncrypt::FreeReservedSpace() aOutputData.Length(): %d", aOutputData.Length());
+		OstTrace1(TRACE_NORMAL, CSBECOMPRESSANDENCRYPT_FREERESERVEDSPACE, "aOutputData.Length(): %d", aOutputData.Length());
 
 		aOutputData.Set(iActualStart);
 		iIsFreed = ETrue;
 #endif
 
-		__LOG("CSBECompressAndEncrypt::FreeReservedSpace() - END");		
+		OstTraceFunctionExit0( CSBECOMPRESSANDENCRYPT_FREERESERVEDSPACE_EXIT );
 		}
 
 	CSBEDecompressAndEncrypt* CSBEDecompressAndEncrypt::NewL()
 	/** Standard Symbian constructor
 	*/
 		{
+		OstTraceFunctionEntry0( CSBEDECOMPRESSANDENCRYPT_NEWL_ENTRY );
 		CSBEDecompressAndEncrypt* self = CSBEDecompressAndEncrypt::NewLC();
 		CleanupStack::Pop(self);
 		
+		OstTraceFunctionExit0( CSBEDECOMPRESSANDENCRYPT_NEWL_EXIT );
 		return self;
 		}
 	
@@ -326,9 +347,11 @@ namespace conn
 	/** Standard Symbian constructor
 	*/
 		{
+		OstTraceFunctionEntry0( CSBEDECOMPRESSANDENCRYPT_NEWLC_ENTRY );
 		CSBEDecompressAndEncrypt* self = new(ELeave) CSBEDecompressAndEncrypt();
 		CleanupStack::PushL(self);
 		
+		OstTraceFunctionExit0( CSBEDECOMPRESSANDENCRYPT_NEWLC_EXIT );
 		return self;
 		}
 		
@@ -337,26 +360,33 @@ namespace conn
 		/** Stanard C++ Constructor
 		*/
 		{
+		OstTraceFunctionEntry0( CSBEDECOMPRESSANDENCRYPT_CSBEDECOMPRESSANDENCRYPT_ENTRY );
 		Reset();
+		OstTraceFunctionExit0( CSBEDECOMPRESSANDENCRYPT_CSBEDECOMPRESSANDENCRYPT_EXIT );
 		}
 		
 	CSBEDecompressAndEncrypt::~CSBEDecompressAndEncrypt()
 	/** Standard C++ Destructor 
 	*/
 		{
+		OstTraceFunctionEntry0( DUP1_CSBEDECOMPRESSANDENCRYPT_CSBEDECOMPRESSANDENCRYPT_ENTRY );
 		delete iCipher;
 		delete iJavaHash;
 		delete iBuffer;
+		OstTraceFunctionExit0( DUP1_CSBEDECOMPRESSANDENCRYPT_CSBEDECOMPRESSANDENCRYPT_EXIT );
 		}
 		
 	void CSBEDecompressAndEncrypt::SetBuffer(TDesC8& aOutputData)
 		{
+		OstTraceFunctionEntry0( CSBEDECOMPRESSANDENCRYPT_SETBUFFER_ENTRY );
 		iCurrentPtr.Set(const_cast<TUint8*>(aOutputData.Ptr()), aOutputData.Size(), aOutputData.Size());
+		OstTraceFunctionExit0( CSBEDECOMPRESSANDENCRYPT_SETBUFFER_EXIT );
 		}
 		
 	void CSBEDecompressAndEncrypt::SetGenericTransferTypeL(CSBGenericTransferType*& apTransferType)
 		{
-		__LOG("CSBEDecompressAndEncrypt::SetGenericTransferTypeL() - START");
+		OstTraceFunctionEntry0( CSBEDECOMPRESSANDENCRYPT_SETGENERICTRANSFERTYPEL_ENTRY );
+		
 #ifndef TURN_OFF_COMPRESSION_AND_ENCRYPTION
 		TSBDerivedType derivedType = apTransferType->DerivedTypeL();
 		if (derivedType == ESIDTransferDerivedType)
@@ -374,7 +404,7 @@ namespace conn
 				
 				iDriveNumber = pSIDTransferType->DriveNumberL();
 				iSecureId = pSIDTransferType->SecureIdL();
-				__LOG1("CSBEDecompressAndEncrypt::SetGenericTransferTypeL() - SecureId ID 0x%08x", iSecureId.iId);
+				OstTrace1(TRACE_NORMAL, CSBEDECOMPRESSANDENCRYPT_SETGENERICTRANSFERTYPEL, "SecureId ID 0x%08x", iSecureId.iId);
 				iType = ESid;
 				} // if
 				CleanupStack::PopAndDestroy(pSIDTransferType);
@@ -387,7 +417,7 @@ namespace conn
 			
 			// Do we need to perform a reset
 			const TDesC& javahash = pJavaTransferType->SuiteHashL();
-			__LOG1("CSBEDecompressAndEncrypt::SetGenericTransferTypeL() - JavaHash %S", &javahash);
+			OstTraceExt1(TRACE_NORMAL, DUP1_CSBEDECOMPRESSANDENCRYPT_SETGENERICTRANSFERTYPEL, "JavaHash %S", javahash);
 			if ((iType != EJava) ||
 			    (iDriveNumber != pJavaTransferType->DriveNumberL()) ||
 			    (iJavaHash->Des() != javahash))
@@ -419,7 +449,7 @@ namespace conn
 				{
 				Reset();
 				iPackageId = pPackageTransferType->PackageIdL();
-				__LOG1("CSBEDecompressAndEncrypt::SetGenericTransferTypeL() - Package ID 0x%08x", iPackageId.iUid);
+				OstTrace1(TRACE_NORMAL, DUP2_CSBEDECOMPRESSANDENCRYPT_SETGENERICTRANSFERTYPEL, "Package ID 0x%08x", iPackageId.iUid);
 				iType = EPackage;
 				}
 				
@@ -427,18 +457,19 @@ namespace conn
 			} // else if
 		else
 			{
-			__LOG("CSBEDecompressAndEncrypt::SetGenericTransferTypeL() - DerivedType not supported");
+		    OstTrace0(TRACE_ERROR, DUP3_CSBEDECOMPRESSANDENCRYPT_SETGENERICTRANSFERTYPEL, "DerivedType not supported");
 			User::Leave(KErrNotSupported);
 			} // else
 #endif
-		__LOG("CSBEDecompressAndEncrypt::SetGenericTransferTypeL() - END");
+		
+		OstTraceFunctionExit0( CSBEDECOMPRESSANDENCRYPT_SETGENERICTRANSFERTYPEL_EXIT );
 		}
 		
 	void CSBEDecompressAndEncrypt::Reset()
 	/** Resets the data 
 	*/
 		{
-		__LOG("CSBEDecompressAndEncrypt::Reset()");
+		OstTraceFunctionEntry0( CSBEDECOMPRESSANDENCRYPT_RESET_ENTRY );		
 		iCount = 0;
 		iType = ENotSet;
 		iDoDecrypt = EFalse;
@@ -450,6 +481,7 @@ namespace conn
 		iGotCipher = EFalse;
 		delete iBuffer;
   		iBuffer = NULL;
+		OstTraceFunctionExit0( CSBEDECOMPRESSANDENCRYPT_RESET_EXIT );
 		}
 		
 	void CSBEDecompressAndEncrypt::MoveAlongL(TPtr8& aPtr, TInt aAmount)
@@ -459,15 +491,17 @@ namespace conn
 	@param aAmount amount to move
 	*/
 		{
+		OstTraceFunctionEntry0( CSBEDECOMPRESSANDENCRYPT_MOVEALONGL_ENTRY );
 		TInt newSize = aPtr.Size() - aAmount;
 		// Check
 		if (newSize < 0)
 			{
-			__LOG("CSBEDecompressAndEncrypt::MoveAlong() - Overflow");
+		    OstTrace0(TRACE_ERROR, CSBEDECOMPRESSANDENCRYPT_MOVEALONGL, "Overflow");
 			User::Leave(KErrOverflow);
 			}
 		
 		aPtr.Set(const_cast<TUint8*>(aPtr.Ptr()) + aAmount, newSize, newSize);			
+		OstTraceFunctionExit0( CSBEDECOMPRESSANDENCRYPT_MOVEALONGL_EXIT );
 		}
 	
 	TBool CSBEDecompressAndEncrypt::NextLC(HBufC8*& apOutput, TBool& aMoreData)
@@ -477,20 +511,21 @@ namespace conn
 	@param aMoreData is there more data left in the compressed block.
 	*/
 		{
-		__LOG("CSBEDecompressAndEncrypt::NextLC() - START");
+		OstTraceFunctionEntry0( CSBEDECOMPRESSANDENCRYPT_NEXTLC_ENTRY );		
 #ifndef TURN_OFF_COMPRESSION_AND_ENCRYPTION
 		if (!iGotCipher)
 			{
 			iGotCipher = CreateCipherL();
 			if (!iGotCipher)
 				{
+				OstTraceFunctionExit0( CSBEDECOMPRESSANDENCRYPT_NEXTLC_EXIT );
 				return EFalse;
 				} // if
 			}
 
 		if (!iGotCompressionHeader)
 			{
-			__LOG("CSBEDecompressAndEncrypt::NextLC - No Header read yet");
+		    OstTrace0(TRACE_NORMAL, CSBEDECOMPRESSANDENCRYPT_NEXTLC, "No Header read yet");
 
 			// Determine how much data we need to read to complete the header
 			TInt dataAvail = iCurrentPtr.Size();
@@ -507,24 +542,25 @@ namespace conn
 			
 			if (iCompressionSizeRead < sizeof(TCompressionHeader))
 				{
-				__LOG1("CSBEDecompressAndEncrypt::NextLC - Got partial compression header (%d bytes)",iCompressionSizeRead );
+			    OstTrace1(TRACE_NORMAL, DUP1_CSBEDECOMPRESSANDENCRYPT_NEXTLC, "Got partial compression header (%d bytes)",iCompressionSizeRead );
+				OstTraceFunctionExit0( DUP1_CSBEDECOMPRESSANDENCRYPT_NEXTLC_EXIT );
 				return EFalse;
 				}
 
-			__LOG2("CSBEDecompressAndEncrypt::NextLC - Got compression header (compressed size=%d, uncompressed=%d)", 
+			OstTraceExt2(TRACE_NORMAL, DUP2_CSBEDECOMPRESSANDENCRYPT_NEXTLC, "Got compression header (compressed size=%d, uncompressed=%d)", 
 				iCompressionHeader.iCompressedSize, iCompressionHeader.iUncompressedSize);
 			
 			// Was the header encrypted?
 			if (iEncryptionHeader.iEncrypted)
 				{
-				__LOG("CSBEDecompressAndEncrypt::NextLC - Header Encrypted!");
+			    OstTrace0(TRACE_NORMAL, DUP3_CSBEDECOMPRESSANDENCRYPT_NEXTLC, "Header Encrypted!");
 				TCompressionHeader compressionHeader;
 				TPtr8 inData(reinterpret_cast<TUint8*>(&iCompressionHeader), sizeof(TCompressionHeader), sizeof(TCompressionHeader));
 				TPtr8 outData(reinterpret_cast<TUint8*>(&compressionHeader), 0, sizeof(TCompressionHeader));
 				
 				iCipher->Process(inData, outData);
 				iCompressionHeader = compressionHeader;
-				__LOG2("CSBEDecompressAndEncrypt::NextLC - unencrypted header, compressed size %d, uncompressed %d", iCompressionHeader.iCompressedSize, iCompressionHeader.iUncompressedSize);
+				OstTraceExt2(TRACE_NORMAL, DUP4_CSBEDECOMPRESSANDENCRYPT_NEXTLC, "unencrypted header, compressed size %d, uncompressed %d", iCompressionHeader.iCompressedSize, iCompressionHeader.iUncompressedSize);
 				}
 				
 			iCompressionSizeRead = 0;
@@ -537,7 +573,7 @@ namespace conn
 			(iCompressionHeader.iCompressedSize >= KMaxHeapSize) ||
 			(iCompressionHeader.iUncompressedSize >= KMaxHeapSize))
 			{
-			__LOG("CSBEDecompressAndEncrypt::NextLC() - Compression header is corrupt");
+		    OstTrace0(TRACE_ERROR, DUP5_CSBEDECOMPRESSANDENCRYPT_NEXTLC, "Compression header is corrupt");
 			User::Leave(KErrCorrupt);
 			}
 
@@ -545,24 +581,25 @@ namespace conn
 			{
 			// Do we have enough data to decompress?
 			TInt dataSize = iCurrentPtr.Size();
-			__LOG1("CSBEDecompressAndEncrypt::NextLC() - Doing Decompression - data size %d", dataSize);
+			OstTrace1(TRACE_NORMAL, DUP6_CSBEDECOMPRESSANDENCRYPT_NEXTLC, "Doing Decompression - data size %d", dataSize);
 			if (iBuffer != NULL)
 				{
 				dataSize += iBuffer->Size();
-				__LOG1("CSBEDecompressAndEncrypt::NextLC() - iBuffer not NULL new data size %d", dataSize)
+				OstTrace1(TRACE_NORMAL, DUP7_CSBEDECOMPRESSANDENCRYPT_NEXTLC, "iBuffer not NULL new data size %d", dataSize);
 				}
 			if (dataSize < iCompressionHeader.iCompressedSize)
 				{
-				__LOG("CSBEDecompressAndEncrypt::NextLC() - data size < compressed size");
+			    OstTrace0(TRACE_NORMAL, DUP8_CSBEDECOMPRESSANDENCRYPT_NEXTLC, "data size < compressed size");
 				// Need to buffer the buffer
 				if (iBuffer == NULL)
   					{
-  					__LOG1("CSBEDecompressAndEncrypt::NextLC() - Creating internal buffer of size %d",iCompressionHeader.iCompressedSize);
+				    OstTrace1(TRACE_NORMAL, DUP9_CSBEDECOMPRESSANDENCRYPT_NEXTLC, "Creating internal buffer of size %d",iCompressionHeader.iCompressedSize);
   					iBuffer = HBufC8::NewL(iCompressionHeader.iCompressedSize);	
   					}
 
 				iBuffer->Des().Append(const_cast<TUint8*>(iCurrentPtr.Ptr()), iCurrentPtr.Size());
-				__LOG("CSBEDecompressAndEncrypt::NextLC() - Appending data to internal buffer");
+				OstTrace0(TRACE_NORMAL, DUP10_CSBEDECOMPRESSANDENCRYPT_NEXTLC, "Appending data to internal buffer");
+				OstTraceFunctionExit0( DUP2_CSBEDECOMPRESSANDENCRYPT_NEXTLC_EXIT );
 				return EFalse;
 				} // if
 				
@@ -571,7 +608,7 @@ namespace conn
 			TInt toAppend = 0;
 			if (iBuffer != NULL)
 				{
-				__LOG("CSBEDecompressAndEncrypt::NextLC() - Preparing inData from internal buffer");
+			    OstTrace0(TRACE_NORMAL, DUP11_CSBEDECOMPRESSANDENCRYPT_NEXTLC, "Preparing inData from internal buffer");
 				toAppend = iCompressionHeader.iCompressedSize - iBuffer->Des().Size();
 				iBuffer->Des().Append(const_cast<TUint8*>(iCurrentPtr.Ptr()), toAppend);
 				
@@ -579,16 +616,16 @@ namespace conn
 				} // if
 			else
 				{
-				__LOG("CSBEDecompressAndEncrypt::NextLC() - Preparing inData");
+			    OstTrace0(TRACE_NORMAL, DUP12_CSBEDECOMPRESSANDENCRYPT_NEXTLC, "Preparing inData");
 				inData.Set(const_cast<TUint8*>(iCurrentPtr.Ptr()), iCompressionHeader.iCompressedSize, iCompressionHeader.iCompressedSize);			
 				} // else
 				
 			// Uncompress + Decrypt the buffer
 			apOutput = HBufC8::NewLC(iCompressionHeader.iUncompressedSize);
-			__LOG1("CSBEDecompressAndEncrypt::NextLC() - Allocated Output data for uncompressed data of size %d", iCompressionHeader.iUncompressedSize);
+			OstTrace1(TRACE_NORMAL, DUP13_CSBEDECOMPRESSANDENCRYPT_NEXTLC, "Allocated Output data for uncompressed data of size %d", iCompressionHeader.iUncompressedSize);
 			if (iEncryptionHeader.iEncrypted)
 				{
-				__LOG("CSBEDecompressAndEncrypt::NextLC() Encrypted data, trying to allocate temp");
+			    OstTrace0(TRACE_NORMAL, DUP14_CSBEDECOMPRESSANDENCRYPT_NEXTLC, "Encrypted data, trying to allocate temp");
 				// Need another temp buffer
 				HBufC8* temp = HBufC8::NewLC(iCompressionHeader.iCompressedSize);
 				
@@ -601,14 +638,14 @@ namespace conn
 				
 				// Cleanup
 				CleanupStack::PopAndDestroy(temp);
-				__LOG("CSBEDecompressAndEncrypt::NextLC() Decryption and decompresson done");
+				OstTrace0(TRACE_NORMAL, DUP15_CSBEDECOMPRESSANDENCRYPT_NEXTLC, "Decryption and decompresson done");
 				} // if
 			else
 				{
 				// Decompress
 				TPtr8 ptrOutput = apOutput->Des();
 				CEZDecompressor::DecompressL(ptrOutput, inData);
-				__LOG("CSBEDecompressAndEncrypt::NextLC() decompresson done");
+				OstTrace0(TRACE_NORMAL, DUP16_CSBEDECOMPRESSANDENCRYPT_NEXTLC, "decompresson done");
 				} // else
 				
 			iCount += iCompressionHeader.iCompressedSize;
@@ -627,7 +664,7 @@ namespace conn
 			iDoneDecompression = ETrue;
 			} // if
 		
-		__LOG2("CSBEDecompressAndEncrypt::NextLC() - encryption buffer done %d of %d", iCount, iEncryptionHeader.iTotalSize);
+		OstTraceExt2(TRACE_NORMAL, DUP17_CSBEDECOMPRESSANDENCRYPT_NEXTLC, "encryption buffer done %d of %d", iCount, iEncryptionHeader.iTotalSize);
 
 		// If the entire encrypted block has been read, prepare to read the next one
 		if (iCount >= iEncryptionHeader.iTotalSize)
@@ -674,7 +711,8 @@ namespace conn
 			aMoreData = ETrue;
 			}
 #endif			
-		__LOG("CSBEDecompressAndEncrypt::NextLC() - END");
+		
+		OstTraceFunctionExit0( DUP3_CSBEDECOMPRESSANDENCRYPT_NEXTLC_EXIT );
 		return ETrue;
 		}
 		
@@ -685,7 +723,7 @@ namespace conn
 	@return ETrue if cipher created, otherwise EFalse.
 	*/
 		{
-		__LOG("CSBEDecompressAndEncrypt::CreateCipherL() - START");
+		OstTraceFunctionEntry0( CSBEDECOMPRESSANDENCRYPT_CREATECIPHERL_ENTRY );		
 		
 		TInt dataAvail = iCurrentPtr.Size();
 		if (iEncryptionSizeRead + dataAvail > sizeof(TEncryptionHeader))
@@ -701,18 +739,19 @@ namespace conn
 		
 		if (iEncryptionSizeRead < sizeof(TEncryptionHeader))
 			{
-			__LOG1("CSBEDecompressAndEncrypt::CreateCipherL - Got partial encryption header (%d bytes)",iEncryptionSizeRead);
+		    OstTrace1(TRACE_NORMAL, CSBEDECOMPRESSANDENCRYPT_CREATECIPHERL, "Got partial encryption header (%d bytes)",iEncryptionSizeRead);
+			OstTraceFunctionExit0( CSBEDECOMPRESSANDENCRYPT_CREATECIPHERL_EXIT );
 			return EFalse;
 			}
 
-		__LOG3("CSBEDecompressAndEncrypt::CreateCipherL - Got encryption header (encrypted=%d, buffer size=%d, total size=%d)", 
+		OstTraceExt3(TRACE_NORMAL, DUP1_CSBEDECOMPRESSANDENCRYPT_CREATECIPHERL, "Got encryption header (encrypted=%d, buffer size=%d, total size=%d)", 
 			iEncryptionHeader.iEncrypted, iEncryptionHeader.iBufferSize, iEncryptionHeader.iTotalSize);
 		
 		// Check we have a sensible encryption header
 		if ((iEncryptionHeader.iBufferSize < 0) || (iEncryptionHeader.iBufferSize >= KMaxTInt/2) ||
 			(iEncryptionHeader.iTotalSize < 0))
 			{
-			__LOG("CSBEDecompressAndEncrypt::CreateCipherL() - Corrupt data");
+		    OstTrace0(TRACE_ERROR, DUP2_CSBEDECOMPRESSANDENCRYPT_CREATECIPHERL, "Corrupt data");
 			User::Leave(KErrCorrupt);
 			}
 		if (iEncryptionHeader.iEncrypted)
@@ -741,6 +780,7 @@ namespace conn
 			keySource->GetRestoreKeyL(iDriveNumber, iSecureId, gotBuffer, ptrAlignedBuffer, gotKey, key);
 			if (!gotKey)
 				{
+			    OstTrace0(TRACE_ERROR, DUP3_CSBEDECOMPRESSANDENCRYPT_CREATECIPHERL, "Leave: KErrCorrupt");
 				User::Leave(KErrCorrupt);
 				}
 				
@@ -760,8 +800,8 @@ namespace conn
 		// Set iCount
 		iCount += iEncryptionHeader.iBufferSize;
 		// Move current pointer along
-		MoveAlongL(iCurrentPtr, iEncryptionHeader.iBufferSize);
-		__LOG("CSBEDecompressAndEncrypt::CreateCipherL() - END");
+		MoveAlongL(iCurrentPtr, iEncryptionHeader.iBufferSize);		
+		OstTraceFunctionExit0( DUP1_CSBEDECOMPRESSANDENCRYPT_CREATECIPHERL_EXIT );
 		return ETrue;
 		}
 		

@@ -20,6 +20,11 @@
 #include <mtp/mmtpdataproviderframework.h>
 #include <102827af.rsg>
 #include "cmtpdevicedpconfigmgr.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpdevicedpconfigmgrTraces.h"
+#endif
+
 
 enum PanicReason
 {
@@ -31,7 +36,6 @@ _LIT(KPanicinvalidRssConfigParam, "Panic is due to invalid RSS Config Param");
 #endif 
 
 // Class constants.
-__FLOG_STMT(_LIT8(KComponent,"DeviceDpConfigMgr");)
 
 CMTPDeviceDpConfigMgr* CMTPDeviceDpConfigMgr::NewL(MMTPDataProviderFramework& aFramework)
 	{
@@ -49,8 +53,7 @@ CMTPDeviceDpConfigMgr::CMTPDeviceDpConfigMgr(MMTPDataProviderFramework& aFramewo
 	
 void CMTPDeviceDpConfigMgr::ConstructL()
 	{
-	__FLOG_OPEN(KMTPSubsystem, KComponent);
-    __FLOG(_L8("ConstructL - Entry"));
+	OstTraceFunctionEntry0( CMTPDEVICEDPCONFIGMGR_CONSTRUCTL_ENTRY );
     
 	iResourceId = iFramework.DataProviderConfig().UintValue(MMTPDataProviderConfig::EOpaqueResource);
 	
@@ -71,12 +74,11 @@ void CMTPDeviceDpConfigMgr::ConstructL()
 	CleanupStack::PopAndDestroy(res);
 	CleanupStack::PopAndDestroy(&resFile);
 	
-	__FLOG(_L8("ConstructL - Exit"));
+	OstTraceFunctionExit0( CMTPDEVICEDPCONFIGMGR_CONSTRUCTL_EXIT );
 	}
 	
 CMTPDeviceDpConfigMgr::~CMTPDeviceDpConfigMgr()
 	{
-	__FLOG_CLOSE;
 	}
 	
 #ifdef _DEBUG
@@ -124,7 +126,7 @@ CDesCArray* CMTPDeviceDpConfigMgr::ReadExclusionListL() const
 
 void CMTPDeviceDpConfigMgr::GetDriveInfoL(TInt aDriveNo, TDes& aVolumeName, TDes& aRootDirPath)
 	{
-	__FLOG(_L8("GetDriveInfoL - Entry"));
+	OstTraceFunctionEntry0( CMTPDEVICEDPCONFIGMGR_GETDRIVEINFOL_ENTRY );
 	RResourceFile resFile;
 	resFile.OpenL(iFramework.Fs(), iFramework.DataProviderConfig().DesCValue(MMTPDataProviderConfig::EResourceFileName));
 	CleanupClosePushL(resFile);
@@ -133,7 +135,7 @@ void CMTPDeviceDpConfigMgr::GetDriveInfoL(TInt aDriveNo, TDes& aVolumeName, TDes
 	TResourceReader reader;
 	reader.SetBuffer(dataBuffer);
 	TInt maxDrives = reader.ReadInt16();
-	__FLOG_VA((_L8("aDriveNo = %d"), aDriveNo));
+	OstTrace1(TRACE_NORMAL, CMTPDEVICEDPCONFIGMGR_GETDRIVEINFOL, "aDriveNo = %d", aDriveNo);
 	TBool found = EFalse;
 	for(TInt driveIndex = 0; driveIndex < maxDrives; driveIndex++)
 		{
@@ -144,7 +146,8 @@ void CMTPDeviceDpConfigMgr::GetDriveInfoL(TInt aDriveNo, TDes& aVolumeName, TDes
 		if(driveNumber ==  aDriveNo)
 			{
 			found = ETrue;
-			__FLOG_VA((_L8("Found the drive! Drive Number = %d"), driveNumber));
+			OstTrace1(TRACE_NORMAL, DUP1_CMTPDEVICEDPCONFIGMGR_GETDRIVEINFOL, 
+			        "Found the drive! Drive Number = %d", driveNumber);
 			if ((KMaxFileName > volumeName.Length()) && 
 			    (KMaxFileName > rootDirName.Length())
 			    )
@@ -154,7 +157,8 @@ void CMTPDeviceDpConfigMgr::GetDriveInfoL(TInt aDriveNo, TDes& aVolumeName, TDes
 				}
 			else
 				{
-				__FLOG(_L8("VolumeName or RootDirName length is more than KMaxFileName"));
+	            OstTrace0(TRACE_NORMAL, DUP2_CMTPDEVICEDPCONFIGMGR_GETDRIVEINFOL, 
+	                    "VolumeName or RootDirName length is more than KMaxFileName");
 				// volumeName and/or rootDirName specified in resource file is too lengthy.
 				User::Leave(KErrArgument);
 				}			
@@ -164,36 +168,37 @@ void CMTPDeviceDpConfigMgr::GetDriveInfoL(TInt aDriveNo, TDes& aVolumeName, TDes
 	
 	if (!found)
 		{
-		__FLOG_VA((_L8("No match in resource file for Drive Number = %d"), aDriveNo));
+        OstTrace1(TRACE_NORMAL, DUP3_CMTPDEVICEDPCONFIGMGR_GETDRIVEINFOL, 
+                  "No match in resource file for Drive Number = %d", aDriveNo);
 		// Matching drive number was not found in resource file.
 		User::Leave(KErrNotFound);
 		}
 		
 	CleanupStack::PopAndDestroy(dataBuffer);
 	CleanupStack::PopAndDestroy(&resFile);
-	__FLOG(_L8("GetDriveInfoL - Exit"));
+	OstTraceFunctionExit0( CMTPDEVICEDPCONFIGMGR_GETDRIVEINFOL_EXIT );
 	}
 
 void CMTPDeviceDpConfigMgr::GetFriendlyVolumeNameL(TInt aDriveNo, TDes& aVolumeName)
 	{
-	__FLOG(_L8("GetFriendlyVolumeNameL - Entry"));
+	OstTraceFunctionEntry0( CMTPDEVICEDPCONFIGMGR_GETFRIENDLYVOLUMENAMEL_ENTRY );
 	RBuf rootDirPath;
 	rootDirPath.CreateL(KMaxFileName);
 	rootDirPath.CleanupClosePushL();
 	GetDriveInfoL(aDriveNo, aVolumeName, rootDirPath);
 	CleanupStack::PopAndDestroy();
-	__FLOG(_L8("GetFriendlyVolumeNameL - Exit"));
+	OstTraceFunctionExit0( CMTPDEVICEDPCONFIGMGR_GETFRIENDLYVOLUMENAMEL_EXIT );
 	}
 
 void CMTPDeviceDpConfigMgr::GetRootDirPathL(TInt aDriveNo, TDes& aRootDirPath)
 	{
-	__FLOG(_L8("GetRootDirPathL - Entry"));
+	OstTraceFunctionEntry0( CMTPDEVICEDPCONFIGMGR_GETROOTDIRPATHL_ENTRY );
 	RBuf volumeName;
 	volumeName.CreateL(KMaxFileName);
 	volumeName.CleanupClosePushL();
 	GetDriveInfoL(aDriveNo, volumeName, aRootDirPath);
 	CleanupStack::PopAndDestroy();
-	__FLOG(_L8("GetRootDirPathL - Exit"));
+	OstTraceFunctionExit0( CMTPDEVICEDPCONFIGMGR_GETROOTDIRPATHL_EXIT );
 	}
 
 /**
@@ -204,7 +209,7 @@ void CMTPDeviceDpConfigMgr::GetRootDirPathL(TInt aDriveNo, TDes& aRootDirPath)
   */
  void CMTPDeviceDpConfigMgr::GetRssConfigInfoArrayL(RArray<TUint>& aOrderInfoArray, TDevDPConfigRSSParams aParam)
 	{
-	__FLOG(_L8("GetOrderedFormatInfo - Entry"));
+	OstTraceFunctionEntry0( CMTPDEVICEDPCONFIGMGR_GETRSSCONFIGINFOARRAYL_ENTRY );
 	RResourceFile resFile;
 	resFile.OpenL(iFramework.Fs(), iFramework.DataProviderConfig().DesCValue(MMTPDataProviderConfig::EResourceFileName));
 	CleanupClosePushL(resFile);
@@ -229,7 +234,7 @@ void CMTPDeviceDpConfigMgr::GetRootDirPathL(TInt aDriveNo, TDes& aRootDirPath)
 	TResourceReader reader;
 	reader.SetBuffer(dataBuffer);
 	TInt noOfElem = reader.ReadInt16();
-	//rewind to the begening else desc array can not read value.
+	//rewind to the beginning else desc array can not read value.
 	reader.Rewind(sizeof(TInt16));
 	if(0 != noOfElem)	
 	{
@@ -249,7 +254,8 @@ void CMTPDeviceDpConfigMgr::GetRootDirPathL(TInt aDriveNo, TDes& aRootDirPath)
 
 		if(errorCode )
 			{
-			 __FLOG(_L8("ERROR !!!Invalid entry in the config.rss file "));
+			 OstTrace0(TRACE_ERROR, CMTPDEVICEDPCONFIGMGR_GETRSSCONFIGINFOARRAYL, 
+			         "ERROR !!!Invalid entry in the config.rss file ");
 			}
 		else
 			{
@@ -269,9 +275,10 @@ void CMTPDeviceDpConfigMgr::GetRootDirPathL(TInt aDriveNo, TDes& aRootDirPath)
 	{
 	CleanupStack::PopAndDestroy(dataBuffer);
 	CleanupStack::PopAndDestroy(&resFile);	
+	OstTrace0( TRACE_ERROR, DUP1_CMTPDEVICEDPCONFIGMGR_GETRSSCONFIGINFOARRAYL, "resource file contains zero element" );
 	User::Leave(KErrArgument);	
 	}
 
-	__FLOG(_L8("GetOrderedFormatInfo -  Exit"));
+	OstTraceFunctionExit0( CMTPDEVICEDPCONFIGMGR_GETRSSCONFIGINFOARRAYL_EXIT );
 	}
 

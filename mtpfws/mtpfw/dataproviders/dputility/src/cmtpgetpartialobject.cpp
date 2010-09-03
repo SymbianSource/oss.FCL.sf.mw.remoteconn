@@ -25,9 +25,12 @@
 
 #include "cmtpgetpartialobject.h"
 #include "mtpdppanic.h"
+#include "mtpdebug.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpgetpartialobjectTraces.h"
+#endif
 
-// Class constants.
-__FLOG_STMT(_LIT8(KComponent,"GetObject");)
 
 /**
 Verification data for the GetNumObjects request
@@ -58,10 +61,9 @@ Destructor
 */	
 EXPORT_C CMTPGetPartialObject::~CMTPGetPartialObject()
 	{	
-    __FLOG(_L8("~CMTPGetPartialObject - Entry"));
+    OstTraceFunctionEntry0( CMTPGETPARTIALOBJECT_CMTPGETPARTIALOBJECT_DES_ENTRY );
 	delete iFileObject;
-    __FLOG(_L8("~CMTPGetPartialObject - Exit"));
-    __FLOG_CLOSE;
+	OstTraceFunctionExit0( CMTPGETPARTIALOBJECT_CMTPGETPARTIALOBJECT_DES_EXIT );
 	}
 	
 /**
@@ -78,9 +80,8 @@ Second-phase constructor.
 */        
 void CMTPGetPartialObject::ConstructL()
     {
-    __FLOG_OPEN(KMTPSubsystem, KComponent);
-    __FLOG(_L8("ConstructL - Entry"));
-    __FLOG(_L8("ConstructL - Exit"));
+    OstTraceFunctionEntry0( CMTPGETPARTIALOBJECT_CONSTRUCTL_ENTRY );
+    OstTraceFunctionExit0( CMTPGETPARTIALOBJECT_CONSTRUCTL_EXIT );
     }
 
 /**
@@ -89,7 +90,7 @@ Check the GetPartialObject reqeust
 */  
 TMTPResponseCode CMTPGetPartialObject::CheckRequestL()
     {
-    __FLOG(_L8("CheckRequestL - Entry"));
+    OstTraceFunctionEntry0( CMTPGETPARTIALOBJECT_CHECKREQUESTL_ENTRY );
     TMTPResponseCode result = CMTPRequestProcessor::CheckRequestL();
     if(result == EMTPRespCodeOK)
         {
@@ -109,7 +110,9 @@ TMTPResponseCode CMTPGetPartialObject::CheckRequestL()
         else
             {
             TEntry fileEntry;
-            User::LeaveIfError(iFramework.Fs().Entry(iObjectInfo->DesC(CMTPObjectMetaData::ESuid), fileEntry));
+            LEAVEIFERROR(iFramework.Fs().Entry(iObjectInfo->DesC(CMTPObjectMetaData::ESuid), fileEntry),
+                    OstTraceExt1(TRACE_ERROR, CMTPGETPARTIALOBJECT_CHECKREQUESTL, 
+                            "can't get entry details for %S!", iObjectInfo->DesC(CMTPObjectMetaData::ESuid)));
 
             if((iOffset >= fileEntry.FileSize())) 
                 {
@@ -118,7 +121,7 @@ TMTPResponseCode CMTPGetPartialObject::CheckRequestL()
             }
         }
 
-    __FLOG(_L8("CheckRequestL - Exit"));
+    OstTraceFunctionExit0( CMTPGETPARTIALOBJECT_CHECKREQUESTL_EXIT );
     return result;  
     }
 
@@ -127,7 +130,7 @@ GetObject request handler
 */		
 void CMTPGetPartialObject::ServiceL()
 	{
-    __FLOG(_L8("ServiceL - Entry"));
+    OstTraceFunctionEntry0( CMTPGETPARTIALOBJECT_SERVICEL_ENTRY );
     
 	if (!iObjectInfo)
 	    {
@@ -139,8 +142,8 @@ void CMTPGetPartialObject::ServiceL()
         iFileObject = CMTPTypeFile::NewL(iFramework.Fs(), iObjectInfo->DesC(CMTPObjectMetaData::ESuid), EFileRead, iLength, iOffset);
     	SendDataL(*iFileObject);
         }
-	
-    __FLOG(_L8("ServiceL - Exit"));
+
+	OstTraceFunctionExit0( CMTPGETPARTIALOBJECT_SERVICEL_EXIT );
 	}
 
 /**
@@ -149,13 +152,13 @@ Handle the response phase of the current request
 */		
 TBool CMTPGetPartialObject::DoHandleResponsePhaseL()
 	{
-    __FLOG(_L8("DoHandleResponsePhaseL - Entry"));
+    OstTraceFunctionEntry0( CMTPGETPARTIALOBJECT_DOHANDLERESPONSEPHASEL_ENTRY );
     __ASSERT_DEBUG(iFileObject, Panic(EMTPDpObjectNull));
 
     TUint32 dataLength = iFileObject->GetByteSent();
 	SendResponseL(EMTPRespCodeOK, 1, &dataLength);
-	
-    __FLOG(_L8("DoHandleResponsePhaseL - Exit"));
+
+	OstTraceFunctionExit0( CMTPGETPARTIALOBJECT_DOHANDLERESPONSEPHASEL_EXIT );
 	return EFalse;
 	}
 

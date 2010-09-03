@@ -23,13 +23,19 @@
 #include "sbeclient.h"
 #include "sbeclientsession.h"
 #include "sbepanic.h"
+#include "OstTraceDefinitions.h"
+#include "sbtrace.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "sbeclientTraces.h"
+#endif
 
 namespace conn
 	{
-
 	CSBEClient::CSBEClient()
 	/** Class constructor. */
 		{
+		OstTraceFunctionEntry0( CSBECLIENT_CSBECLIENT_CONS_ENTRY );
+		OstTraceFunctionExit0( CSBECLIENT_CSBECLIENT_CONS_EXIT );
 		}
 
 
@@ -40,10 +46,12 @@ namespace conn
 	@return a new CSBEClient.
 	*/
 		{
+		OstTraceFunctionEntry0( CSBECLIENT_NEWL_ENTRY );
 		CSBEClient* self = new (ELeave) CSBEClient();
 		CleanupStack::PushL(self);
 		self->ConstructL();
 		CleanupStack::Pop(self);
+		OstTraceFunctionExit0( CSBECLIENT_NEWL_EXIT );
 		return self;
 		}
 
@@ -52,9 +60,12 @@ namespace conn
 	Construct this instance of CSBEClient
 	*/
 		{
+		OstTraceFunctionEntry0( CSBECLIENT_CONSTRUCTL_ENTRY );
 		iClientSession = RSBEClientSession::NewL();
 		
-		User::LeaveIfError(iClientSession->Connect());
+		TInt err = iClientSession->Connect();
+		LEAVEIFERROR(err, OstTrace1(TRACE_ERROR, CSBECLIENT_CONSTRUCTL, "Leave: %d", err));
+		OstTraceFunctionExit0( CSBECLIENT_CONSTRUCTL_EXIT );
 		}
 
 
@@ -63,6 +74,7 @@ namespace conn
 	Standard destructor
 	*/
 		{
+		OstTraceFunctionEntry0( CSBECLIENT_CSBECLIENT_DES_ENTRY );
 		if (iClientSession)
 			{
 			iClientSession->Close();
@@ -70,6 +82,7 @@ namespace conn
 		
 		delete iClientSession;
 		iClientSession = NULL;
+		OstTraceFunctionExit0( CSBECLIENT_CSBECLIENT_DES_EXIT );
 		}
 
 
@@ -86,7 +99,9 @@ namespace conn
 	@param aDataOwners on return an array of information about backup data owners.
 	*/
 		{
+		OstTraceFunctionEntry0( CSBECLIENT_LISTOFDATAOWNERSL_ENTRY );
 		iClientSession->ListOfDataOwnersL(aDataOwners);
+		OstTraceFunctionExit0( CSBECLIENT_LISTOFDATAOWNERSL_EXIT );
 		}
 
 	EXPORT_C void CSBEClient::PublicFileListL(TDriveNumber aDrive, CSBGenericDataType& aGenericDataType, RFileArray& aFiles)
@@ -106,7 +121,9 @@ namespace conn
 	@param aFiles on return an array of information about files.
 	*/
 		{
+		OstTraceFunctionEntry0( CSBECLIENT_PUBLICFILELISTL_ENTRY );
 		iClientSession->PublicFileListL(aDrive, aGenericDataType, aFiles);
+		OstTraceFunctionExit0( CSBECLIENT_PUBLICFILELISTL_EXIT );
 		}
 
 	EXPORT_C void CSBEClient::RawPublicFileListL(TDriveNumber aDrive, CSBGenericDataType& aGenericDataType,
@@ -132,7 +149,9 @@ namespace conn
 	@param aFileFilter on return an array of names of files or directories for restore.
 	*/
 		{
+		OstTraceFunctionEntry0( CSBECLIENT_RAWPUBLICFILELISTL_ENTRY );
 		iClientSession->RawPublicFileListL(aDrive, aGenericDataType, aFileFilter);
+		OstTraceFunctionExit0( CSBECLIENT_RAWPUBLICFILELISTL_EXIT );
 		}
 
 	EXPORT_C void CSBEClient::PublicFileListXMLL(TDriveNumber aDrive, TSecureId aSID, HBufC*& aFileList)
@@ -152,8 +171,10 @@ namespace conn
 	@param aFileList on return a description of the list of files and directories. Must be NULL
 	*/
 		{
+		OstTraceFunctionEntry0( CSBECLIENT_PUBLICFILELISTXMLL_ENTRY );
 		__ASSERT_DEBUG(aFileList == NULL, Panic(KErrArgument));
 		iClientSession->PublicFileListXMLL(aDrive, aSID, aFileList);
+		OstTraceFunctionExit0( CSBECLIENT_PUBLICFILELISTXMLL_EXIT );
 		}
 
 	EXPORT_C void CSBEClient::SetBURModeL(const TDriveList& aDriveList, TBURPartType aBURType, 
@@ -166,7 +187,9 @@ namespace conn
 	@param aBackupIncType is a backup base or incremental (ignored for restore operations).
 	*/
 		{
+		OstTraceFunctionEntry0( CSBECLIENT_SETBURMODEL_ENTRY );
 		iClientSession->SetBURModeL(aDriveList, aBURType, aBackupIncType);
+		OstTraceFunctionExit0( CSBECLIENT_SETBURMODEL_EXIT );
 		}
 
 	EXPORT_C void CSBEClient::SetSIDListForPartialBURL(RSIDArray& aSIDs)
@@ -178,7 +201,9 @@ namespace conn
 	@param aSIDs array of affected data owners.
 	*/
 		{
+		OstTraceFunctionEntry0( CSBECLIENT_SETSIDLISTFORPARTIALBURL_ENTRY );
 		iClientSession->SetSIDListForPartialBURL(aSIDs);
+		OstTraceFunctionExit0( CSBECLIENT_SETSIDLISTFORPARTIALBURL_EXIT );
 		}
 
 
@@ -194,7 +219,9 @@ namespace conn
 	the status information is filled in.
 	*/
 		{
+		OstTraceFunctionEntry0( CSBECLIENT_SIDSTATUSL_ENTRY );
 		iClientSession->SIDStatusL(aSIDStatus);
+		OstTraceFunctionExit0( CSBECLIENT_SIDSTATUSL_EXIT );
 		}
 
 
@@ -219,7 +246,10 @@ namespace conn
 	@return Pointer to the start of the buffer for writing
 	*/
 		{
-		return iClientSession->TransferDataAddressL();
+		OstTraceFunctionEntry0( CSBECLIENT_TRANSFERDATAADDRESSL_ENTRY );
+		TPtr8& ptr = iClientSession->TransferDataAddressL(); 
+		OstTraceFunctionExit0( CSBECLIENT_TRANSFERDATAADDRESSL_EXIT );
+		return ptr;
 		}
 		
 	EXPORT_C TPtrC8& CSBEClient::TransferDataInfoL(CSBGenericTransferType*& aGenericTransferType,
@@ -235,8 +265,11 @@ namespace conn
 	@return read only pointer to the global heap.
 	*/
 		{
+		OstTraceFunctionEntry0( CSBECLIENT_TRANSFERDATAINFOL_ENTRY );
 		__ASSERT_DEBUG(aGenericTransferType == NULL, Panic(KErrArgument));
-		return iClientSession->TransferDataInfoL(aGenericTransferType, aFinished);
+		TPtrC8& ptr = iClientSession->TransferDataInfoL(aGenericTransferType, aFinished);
+		OstTraceFunctionExit0( CSBECLIENT_TRANSFERDATAINFOL_EXIT );
+		return ptr;
 		}
 
 	EXPORT_C void CSBEClient::RequestDataL(CSBGenericTransferType& aGenericTransferType,
@@ -253,7 +286,9 @@ namespace conn
 	@param aStatus the request status of an Active Object to be completed when the data has been received
 	*/
 		{
+		OstTraceFunctionEntry0( CSBECLIENT_REQUESTDATAL_ENTRY );
 		iClientSession->RequestDataL(aGenericTransferType, aStatus);
+		OstTraceFunctionExit0( CSBECLIENT_REQUESTDATAL_EXIT );
 		}
 		
 	EXPORT_C void CSBEClient::RequestDataL(CSBGenericTransferType& aGenericTransferType)
@@ -268,7 +303,9 @@ namespace conn
 	@param aGenericTransferType  Reference to a CSBGenericTransferType object
 	*/
 		{
+		OstTraceFunctionEntry0( DUP1_CSBECLIENT_REQUESTDATAL_ENTRY );
 		iClientSession->RequestDataL(aGenericTransferType);
+		OstTraceFunctionExit0( DUP1_CSBECLIENT_REQUESTDATAL_EXIT );
 		}
 	
 	EXPORT_C void CSBEClient::SupplyDataL(CSBGenericTransferType& aGenericTransferType,
@@ -288,7 +325,9 @@ namespace conn
 	@param aStatus the request status of an Active Object to be completed when the data has been transferred
 	*/
 		{
+		OstTraceFunctionEntry0( CSBECLIENT_SUPPLYDATAL_ENTRY );
 		iClientSession->SupplyDataL(aGenericTransferType, aFinished, aStatus);
+		OstTraceFunctionExit0( CSBECLIENT_SUPPLYDATAL_EXIT );
 		}
 		
 	EXPORT_C void CSBEClient::SupplyDataL(CSBGenericTransferType& aGenericTransferType,
@@ -306,7 +345,9 @@ namespace conn
 	@param aFinished ETrue if this buffer is the last one for this package uid, drive and data type
 	*/
 		{
+		OstTraceFunctionEntry0( DUP1_CSBECLIENT_SUPPLYDATAL_ENTRY );
 		iClientSession->SupplyDataL(aGenericTransferType, aFinished);
+		OstTraceFunctionExit0( DUP1_CSBECLIENT_SUPPLYDATAL_EXIT );
 		}
 
 	EXPORT_C void CSBEClient::AllSnapshotsSuppliedL()								  
@@ -320,7 +361,9 @@ namespace conn
 	It must only be called once for a SID for a backup operation.
 	*/
 		{
+		OstTraceFunctionEntry0( CSBECLIENT_ALLSNAPSHOTSSUPPLIEDL_ENTRY );
 		iClientSession->AllSnapshotsSuppliedL();
+		OstTraceFunctionExit0( CSBECLIENT_ALLSNAPSHOTSSUPPLIEDL_EXIT );
 		}
 		
 	EXPORT_C TUint CSBEClient::ExpectedDataSizeL(CSBGenericTransferType& aGenericTransferType)
@@ -337,7 +380,10 @@ namespace conn
 	@return KErrNone if successful.
 	*/
 		{
-		return (iClientSession->ExpectedDataSizeL(aGenericTransferType));
+		OstTraceFunctionEntry0( CSBECLIENT_EXPECTEDDATASIZEL_ENTRY );
+		TUint ret = (iClientSession->ExpectedDataSizeL(aGenericTransferType));
+		OstTraceFunctionExit0( CSBECLIENT_EXPECTEDDATASIZEL_EXIT );
+		return ret;
 		}
 										 
 	EXPORT_C void CSBEClient::AllSystemFilesRestored()
@@ -346,7 +392,9 @@ namespace conn
 	Backup Engine to start active data owners.
 	*/
 		{
+		OstTraceFunctionEntry0( CSBECLIENT_ALLSYSTEMFILESRESTORED_ENTRY );
 		iClientSession->AllSystemFilesRestored();
+		OstTraceFunctionExit0( CSBECLIENT_ALLSYSTEMFILESRESTORED_EXIT );
 		}
 	
 	/**
@@ -363,7 +411,9 @@ namespace conn
 	*/	
 	EXPORT_C void CSBEClient::ListOfDataOwnersL(RPointerArray<CDataOwnerInfo>& aDataOwners, TRequestStatus& aStatus)
 		{
+		OstTraceFunctionEntry0( DUP1_CSBECLIENT_LISTOFDATAOWNERSL_ENTRY );
 		iClientSession->ListOfDataOwnersL(aDataOwners, aStatus);
+		OstTraceFunctionExit0( DUP1_CSBECLIENT_LISTOFDATAOWNERSL_EXIT );
 		}
 	
 	/**
@@ -384,7 +434,9 @@ namespace conn
 	*/	
 	EXPORT_C void CSBEClient::PublicFileListL(TDriveNumber aDrive, CSBGenericDataType& aGenericDataType, RFileArray& aFiles, TRequestStatus& aStatus)
 		{
+		OstTraceFunctionEntry0( DUP1_CSBECLIENT_PUBLICFILELISTL_ENTRY );
 		iClientSession->PublicFileListL(aDrive, aGenericDataType, aFiles, aStatus);
+		OstTraceFunctionExit0( DUP1_CSBECLIENT_PUBLICFILELISTL_EXIT );
 		}
 	
 	/**
@@ -398,7 +450,9 @@ namespace conn
 	EXPORT_C void CSBEClient::SetBURModeL(const TDriveList& aDriveList, TBURPartType aBURType, 
 								  TBackupIncType aBackupIncType, TRequestStatus& aStatus)
 		{
+		OstTraceFunctionEntry0( DUP1_CSBECLIENT_SETBURMODEL_ENTRY );
 		iClientSession->SetBURModeL(aDriveList, aBURType, aBackupIncType, aStatus);
+		OstTraceFunctionExit0( DUP1_CSBECLIENT_SETBURMODEL_EXIT );
 		}
 	
 	/**
@@ -414,7 +468,9 @@ namespace conn
 	*/
 	EXPORT_C void CSBEClient::AllSnapshotsSuppliedL(TRequestStatus& aStatus)
 		{
+		OstTraceFunctionEntry0( DUP1_CSBECLIENT_ALLSNAPSHOTSSUPPLIEDL_ENTRY );
 		iClientSession->AllSnapshotsSuppliedL(aStatus);
+		OstTraceFunctionExit0( DUP1_CSBECLIENT_ALLSNAPSHOTSSUPPLIEDL_EXIT );
 		}
 		
 	/**
@@ -425,7 +481,9 @@ namespace conn
 	*/
 	EXPORT_C void CSBEClient::AllSystemFilesRestoredL(TRequestStatus& aStatus)
 		{
+		OstTraceFunctionEntry0( CSBECLIENT_ALLSYSTEMFILESRESTOREDL_ENTRY );
 		iClientSession->AllSystemFilesRestoredL(aStatus);
+		OstTraceFunctionExit0( CSBECLIENT_ALLSYSTEMFILESRESTOREDL_EXIT );
 		}
 
 	// Test Methods //
@@ -441,6 +499,8 @@ namespace conn
 	@return the 32-bit checksum
 	*/
 		{
+		OstTraceFunctionEntry0( CSBECLIENT_DATACHECKSUM_ENTRY );
+		OstTraceFunctionExit0( CSBECLIENT_DATACHECKSUM_EXIT );
 		return 0;
 		}
 		
@@ -461,7 +521,9 @@ namespace conn
 	@param aStatus The TRequestStatus that will be completed once the engine has fully processed this request
 	*/
 		{
+		OstTraceFunctionEntry0( DUP2_CSBECLIENT_PUBLICFILELISTL_ENTRY );
 		iClientSession->PublicFileListL(aDrive, aGenericDataType, aFileList, aFinished, aTotalListCursor, aMaxResponseSize, aStatus);
+		OstTraceFunctionExit0( DUP2_CSBECLIENT_PUBLICFILELISTL_EXIT );
 		}
 
 	} // end of conn namespace

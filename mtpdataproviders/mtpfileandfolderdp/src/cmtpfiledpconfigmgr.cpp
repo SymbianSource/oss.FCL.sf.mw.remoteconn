@@ -20,6 +20,11 @@
 
 #include <mtp/mmtpdataproviderconfig.h>
 #include <mtp/mmtpdataproviderframework.h>
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpfiledpconfigmgrTraces.h"
+#endif
+
 
 
 #define UNUSED_VAR(v) (v = v)
@@ -103,6 +108,7 @@ void CMTPFileDpConfigMgr::ReadFormatExclusionListL(RArray<TUint>& aArray) const
 		err = aArray.InsertInOrder(TUint(reader.ReadUint16()));
 		if( (err != KErrNone) && (err != KErrAlreadyExists) )
 			{
+            OstTrace1( TRACE_ERROR, CMTPFILEDPCONFIGMGR_READFORMATEXCLUSIONLISTL, "insert in aArray failed! error code %d", err );
 			User::Leave(err);
 			}
 		}

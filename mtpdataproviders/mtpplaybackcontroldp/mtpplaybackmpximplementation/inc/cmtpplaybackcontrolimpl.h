@@ -25,7 +25,6 @@
 
 #include "mmtpplaybackinterface.h"
 #include "mtpplaybackcontrolconst.h"
-#include "mtpdebug.h"
 
 class MMPXPlaybackUtility;
 class CMPXCollectionPath;
@@ -304,11 +303,6 @@ private:
     TMTPPlaybackCommand          iMTPPBCmd;
     TMPXPlaybackState            iPreState;
     TMPXPlaybackState            iState;
-    
-    /**
-    FLOGGER debug trace member variable.
-     */
-    __FLOG_DECLARATION_MEMBER;
     };
 
 #endif // CMTPPLAYBACKCONTROLIMPL_H

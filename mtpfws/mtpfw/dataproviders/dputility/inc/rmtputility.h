@@ -26,8 +26,8 @@
 #include <e32base.h>
 #include <badesca.h>
 #include <mtp/mtpprotocolconstants.h>
-#include "rmtpframework.h"
 #include "mtpdebug.h"
+#include "rmtpframework.h"
 
 class MMTPDataProviderFramework;
 class CMTPObjectMetaData;
@@ -84,10 +84,6 @@ private:
 	void ParseEnumerationFlag(const TDesC& aString, CMTPExtensionMapping& aMapping, TParseState& aState);
 	void Parse(const TDesC& aString, CMTPExtensionMapping& aMapping, TParseState& aState);
 private:
-    /**
-    FLOGGER debug trace member variable.
-    */
-    __FLOG_DECLARATION_MEMBER_MUTABLE;
 	MMTPDataProviderFramework*  iFramework;
 	RMTPFramework				iSingleton;
     RPointerArray<CMTPExtensionMapping> iFormatMappings;

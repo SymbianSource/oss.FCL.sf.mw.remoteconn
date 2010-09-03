@@ -22,8 +22,12 @@
 
 #include "cmtpcontrollertimer.h"
 #include "cmtpoperator.h"
+#include "mtpdebug.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpcontrollertimerTraces.h"
+#endif
 
-__FLOG_STMT( _LIT8( KComponent, "mtpConTimer" ); )
 
 const TUid KMTPBtTransportUid = { 0x10286FCB };
 const TInt KStartMTPSeconds = 7;
@@ -55,43 +59,46 @@ TBool CMTPControllerTimer::GetStopTransportStatus()
 
 CMTPControllerTimer::~CMTPControllerTimer()
     {
-    __FLOG( _L8("CMPTControllerTimer destruction") );
-    __FLOG_CLOSE;
+    OstTraceFunctionEntry0( CMTPCONTROLLERTIMER_DES_ENTRY );
+    OstTraceFunctionExit0( CMTPCONTROLLERTIMER_DES_EXIT );
     }
 
 CMTPControllerTimer::CMTPControllerTimer( RMTPClient& aMTPClient, CMTPOperator& aMTPOperator ):
     CTimer( CActive::EPriorityStandard ), iMTPClient(aMTPClient)
     {
-    __FLOG_OPEN( KMTPSubsystem, KComponent );
     iMTPOperator = &aMTPOperator;
     }
 
 void CMTPControllerTimer::ConstructL()
     {
+    OstTraceFunctionEntry0( CMTPCONTROLLERTIMER_CONSTRUCTL_ENTRY );
     CTimer::ConstructL();
     CActiveScheduler::Add( this );
     iStopTransport = EFalse;
-    __FLOG( _L8("CMPTControllerTimer construction") );
+    OstTraceFunctionExit0( CMTPCONTROLLERTIMER_CONSTRUCTL_EXIT );
     }
 
 void CMTPControllerTimer::RunL()
     {
+    OstTraceFunctionEntry0( CMTPCONTROLLERTIMER_RUNL_ENTRY );
     if (KErrNone == iMTPClient.IsProcessRunning() && !iStopTransport)
         {
-        __FLOG( _L8("Stop transport to shut down mtp server") );
+         OstTrace0( TRACE_NORMAL, CMTPCONTROLLERTIMER_RUNL, "Stop transport to shut down mtp server" );
         TInt error = iMTPClient.StopTransport(KMTPBtTransportUid);
         iMTPClient.Close();
         iStopTransport = ETrue;
-        __FLOG_1( _L8("The return value of stop transport is: %d"), error );
+        OstTrace1( TRACE_NORMAL, DUP1_CMTPCONTROLLERTIMER_RUNL, "The return value of stop transport is: %d", error );
         iMTPOperator->StartTimer(KStartMTPSeconds);
         }
     else
         {
-        __FLOG( _L8("Start transport to launch mtp server") );
+        OstTrace0( TRACE_NORMAL, DUP2_CMTPCONTROLLERTIMER_RUNL, "Start transport to launch mtp server" );
         
-        User::LeaveIfError(iMTPClient.Connect());
+        LEAVEIFERROR(iMTPClient.Connect(),
+				OstTrace1( TRACE_NORMAL, DUP3_CMTPCONTROLLERTIMER_RUNL, "connect to mtp server failed! error code %d", munged_err ));
         iMTPClient.StartTransport(KMTPBtTransportUid);
         iStopTransport = EFalse;
         iMTPOperator->SubscribeConnState();
         }
+    OstTraceFunctionExit0( CMTPCONTROLLERTIMER_RUNL_EXIT );
     }

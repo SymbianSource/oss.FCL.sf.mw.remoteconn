@@ -25,9 +25,14 @@
 #include "cmtpresetdevicepropvalue.h"
 #include "mtpdevicedpconst.h"
 #include "mtpdevdppanic.h"
+#include "mtpdebug.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpresetdevicepropvalueTraces.h"
+#endif
+
 
 // Class constants.
-__FLOG_STMT(_LIT8(KComponent,"ResetDevicePropValue");)
 
 /**
 Two-phase constructor.
@@ -50,12 +55,11 @@ Destructor
 */    
 CMTPResetDevicePropValue::~CMTPResetDevicePropValue()
     {    
-    __FLOG(_L8("~CMTPResetDevicePropValue - Entry"));
-        iDpSingletons.Close();
-        delete iData;
-        delete iRepository;
-    __FLOG(_L8("~CMTPResetDevicePropValue - Exit"));
-    __FLOG_CLOSE;
+    OstTraceFunctionEntry0( CMTPRESETDEVICEPROPVALUE_CMTPRESETDEVICEPROPVALUE_DES_ENTRY );
+    iDpSingletons.Close();
+    delete iData;
+    delete iRepository;
+    OstTraceFunctionExit0( CMTPRESETDEVICEPROPVALUE_CMTPRESETDEVICEPROPVALUE_DES_EXIT );
     }
 
 /**
@@ -64,7 +68,7 @@ Standard c++ constructor
 CMTPResetDevicePropValue::CMTPResetDevicePropValue(MMTPDataProviderFramework& aFramework, MMTPConnection& aConnection) :
  CMTPRequestProcessor(aFramework, aConnection, 0, NULL)
     {
-    
+
     }
     
 /**
@@ -72,13 +76,12 @@ Second-phase construction
 */    
 void CMTPResetDevicePropValue::ConstructL()
     {
-    __FLOG_OPEN(KMTPSubsystem, KComponent);
-    __FLOG(_L8("ConstructL - Entry")); 
+    OstTraceFunctionEntry0( CMTPRESETDEVICEPROPVALUE_CONSTRUCTL_ENTRY );
     iDpSingletons.OpenL(iFramework);
 	const TUint32 KUidMTPRepositoryValue(0x10282FCC);
     const TUid KUidMTPRepository = {KUidMTPRepositoryValue};
     iRepository = CRepository::NewL(KUidMTPRepository);
-    __FLOG(_L8("ConstructL - Exit")); 
+    OstTraceFunctionExit0( CMTPRESETDEVICEPROPVALUE_CONSTRUCTL_EXIT );
     }
 
 /**
@@ -87,7 +90,7 @@ SetDevicePropValue request validator.
 */
 TMTPResponseCode CMTPResetDevicePropValue::CheckRequestL()
     {
-    __FLOG(_L8("CheckRequestL - Entry"));
+    OstTraceFunctionEntry0( CMTPRESETDEVICEPROPVALUE_CHECKREQUESTL_ENTRY );
     TMTPResponseCode respCode(EMTPRespCodeDevicePropNotSupported);
     iPropCode = Request().Uint32(TMTPTypeRequest::ERequestParameter1);
     const TInt count = sizeof(KMTPDeviceDpSupportedProperties) / sizeof(KMTPDeviceDpSupportedProperties[0]);
@@ -103,7 +106,7 @@ TMTPResponseCode CMTPResetDevicePropValue::CheckRequestL()
         {
         respCode = EMTPRespCodeOK;
         }
-    __FLOG(_L8("CheckRequestL - Exit"));
+    OstTraceFunctionExit0( CMTPRESETDEVICEPROPVALUE_CHECKREQUESTL_EXIT );
     return respCode;
     }
 /**
@@ -111,7 +114,7 @@ ResetDevicePropValue request handler.
 */ 	
 void CMTPResetDevicePropValue::ServiceL()
     {
-    __FLOG(_L8("ServiceL - Entry"));
+    OstTraceFunctionEntry0( CMTPRESETDEVICEPROPVALUE_SERVICEL_ENTRY );
     iPropCode = Request().Uint32(TMTPTypeRequest::ERequestParameter1);
     MExtnDevicePropDp* extnDevplugin = iDpSingletons.DeviceDataStore().ExtnDevicePropDp();
     switch (iPropCode)
@@ -155,6 +158,7 @@ void CMTPResetDevicePropValue::ServiceL()
                 }
         break;   
         }
+    OstTraceFunctionExit0( CMTPRESETDEVICEPROPVALUE_SERVICEL_EXIT );
     } 
 
  void CMTPResetDevicePropValue::HandleExtnServiceL(TInt aPropCode, MExtnDevicePropDp* aExtnDevplugin)
@@ -167,7 +171,7 @@ void CMTPResetDevicePropValue::ServiceL()
 	  {
 	  SendResponseL(EMTPRespCodeDevicePropNotSupported);
 	  }
-    
+
     }
 
 /**
@@ -175,10 +179,10 @@ Service session initiator property.
 */ 
 void CMTPResetDevicePropValue::ServiceSessionInitiatorVersionInfoL()
     {  
-    __FLOG(_L8("SetSessionInitiatorVersionInfo - Entry")); 
+    OstTraceFunctionEntry0( CMTPRESETDEVICEPROPVALUE_SERVICESESSIONINITIATORVERSIONINFOL_ENTRY );
     iDpSingletons.DeviceDataStore().SetSessionInitiatorVersionInfoL( iDpSingletons.DeviceDataStore().SessionInitiatorVersionInfoDefault());
     SendResponseL(EMTPRespCodeOK);
-    __FLOG(_L8("SetSessionInitiatorVersionInfo - Exit"));
+    OstTraceFunctionExit0( CMTPRESETDEVICEPROPVALUE_SERVICESESSIONINITIATORVERSIONINFOL_EXIT );
     }
 
 /**
@@ -187,10 +191,10 @@ void CMTPResetDevicePropValue::ServiceSessionInitiatorVersionInfoL()
 **/
 void CMTPResetDevicePropValue::ServicePerceivedDeviceTypeL()
     {  
-    __FLOG(_L8("ServicePerceivedDeviceType - Entry")); 
+    OstTraceFunctionEntry0( CMTPRESETDEVICEPROPVALUE_SERVICEPERCEIVEDDEVICETYPEL_ENTRY );
     //PerceivedDeviceType is of type get only .
     SendResponseL(EMTPRespCodeAccessDenied);
-    __FLOG(_L8("ServicePerceivedDeviceType - Exit"));
+    OstTraceFunctionExit0( CMTPRESETDEVICEPROPVALUE_SERVICEPERCEIVEDDEVICETYPEL_EXIT );
     }
 
 /**
@@ -198,9 +202,9 @@ Service the Date Time property.
 */ 
 void CMTPResetDevicePropValue::ServiceDateTimeL()
     {  
-    __FLOG(_L8("ServiceDateTime - Entry")); 
+    OstTraceFunctionEntry0( CMTPRESETDEVICEPROPVALUE_SERVICEDATETIMEL_ENTRY );
     SendResponseL(EMTPRespCodeOperationNotSupported);
-    __FLOG(_L8("ServiceDateTime - Exit"));
+    OstTraceFunctionExit0( CMTPRESETDEVICEPROPVALUE_SERVICEDATETIMEL_EXIT );
     }
 
 
@@ -210,10 +214,10 @@ As of now implemented as device property of type get.
 */   
 void CMTPResetDevicePropValue::ServiceDeviceIconL()
     {  
-    __FLOG(_L8("ServiceDeviceIcon - Entry")); 
+    OstTraceFunctionEntry0( CMTPRESETDEVICEPROPVALUE_SERVICEDEVICEICONL_ENTRY );
     //DeviceIcon property is implemented as get only .
     SendResponseL(EMTPRespCodeAccessDenied);
-    __FLOG(_L8("ServiceDeviceIcon - Exit"));
+    OstTraceFunctionExit0( CMTPRESETDEVICEPROPVALUE_SERVICEDEVICEICONL_EXIT );
     }
 
 /*
@@ -221,11 +225,11 @@ void CMTPResetDevicePropValue::ServiceDeviceIconL()
 */
 void CMTPResetDevicePropValue::ServiceSupportedFormatsOrderedL()
     {  
-    __FLOG(_L8("ServiceSupportedFormatsOrdered - Entry"));  
+    OstTraceFunctionEntry0( CMTPRESETDEVICEPROPVALUE_SERVICESUPPORTEDFORMATSORDEREDL_ENTRY );
     //no need to recive this data beacuse it is Get property
     //iDpSingletons.DeviceDataStore().SetFormatOrdered( iDpSingletons.DeviceDataStore().FormatOrderedDefault());
     SendResponseL(EMTPRespCodeAccessDenied);
-    __FLOG(_L8("ServicePerceivedDeviceType - Exit"));
+    OstTraceFunctionExit0( CMTPRESETDEVICEPROPVALUE_SERVICESUPPORTEDFORMATSORDEREDL_EXIT );
     }
 
 /*
@@ -233,12 +237,12 @@ void CMTPResetDevicePropValue::ServiceSupportedFormatsOrderedL()
 */
 void CMTPResetDevicePropValue::ServiceFunctionalIDL()
     {	 
-    __FLOG(_L8("ServiceFunctionalIDL - Entry")); 
+    OstTraceFunctionEntry0( CMTPRESETDEVICEPROPVALUE_SERVICEFUNCTIONALIDL_ENTRY );
     delete iData;
     iData = GetGUIDL( MMTPFrameworkConfig::EDeviceDefaultFuncationalID ); 
     SaveGUID(MMTPFrameworkConfig::EDeviceCurrentFuncationalID, *iData);
     SendResponseL(EMTPRespCodeOK);
-    __FLOG(_L8("ServiceFunctionalIDL - Exit"));
+    OstTraceFunctionExit0( CMTPRESETDEVICEPROPVALUE_SERVICEFUNCTIONALIDL_EXIT );
     }
 
 /*
@@ -246,9 +250,9 @@ void CMTPResetDevicePropValue::ServiceFunctionalIDL()
 */
 void CMTPResetDevicePropValue::ServiceModelIDL()
     {	 
-    __FLOG(_L8("ServiceModelIDL - Entry")); 	
+    OstTraceFunctionEntry0( CMTPRESETDEVICEPROPVALUE_SERVICEMODELIDL_ENTRY );
     SendResponseL(EMTPRespCodeAccessDenied);
-    __FLOG(_L8("ServiceModelIDL - Exit"));
+    OstTraceFunctionExit0( CMTPRESETDEVICEPROPVALUE_SERVICEMODELIDL_EXIT );
     }
 
 /*
@@ -256,16 +260,17 @@ void CMTPResetDevicePropValue::ServiceModelIDL()
 */
 void CMTPResetDevicePropValue::ServiceUseDeviceStageL()
     {	 
-    __FLOG(_L8("ServiceUseDeviceStageL - Entry")); 	
+    OstTraceFunctionEntry0( CMTPRESETDEVICEPROPVALUE_SERVICEUSEDEVICESTAGEL_ENTRY );
     SendResponseL(EMTPRespCodeAccessDenied);
-    __FLOG(_L8("ServiceUseDeviceStageL - Exit"));
+    OstTraceFunctionExit0( CMTPRESETDEVICEPROPVALUE_SERVICEUSEDEVICESTAGEL_EXIT );
     }
 
 TMTPTypeGuid* CMTPResetDevicePropValue::GetGUIDL(const TUint aKey)
     {
     TBuf<KGUIDFormatStringLength> buf;
     
-    User::LeaveIfError(iRepository->Get(aKey,buf));
+    LEAVEIFERROR(iRepository->Get(aKey,buf),
+            OstTrace1( TRACE_ERROR, CMTPRESETDEVICEPROPVALUE_GETGUIDL, "get from iRepository with key %d", aKey ));
 
     TMTPTypeGuid* ret = new (ELeave) TMTPTypeGuid( buf );
     

@@ -23,7 +23,6 @@
 
 #include "rmtpframework.h"
 #include "cmtprequestprocessor.h"
-#include "mtpdebug.h"
 #include "rmtpdpsingletons.h"
 
 class RFs;
@@ -84,13 +83,10 @@ private:
 	TUint32								iNewParentHandle;
 	TUint32								iStorageId;
 	TTime									iPreviousModifiedTime;
+	TBool                               iIsHidden;
   RMTPFramework					iSingletons;
   RMTPDpSingletons			iDpSingletons;
   CPeriodic*						iTimer;
-	/**
-    FLOGGER debug trace member variable.
-    */
-    __FLOG_DECLARATION_MEMBER_MUTABLE;
 	};
 	
 #endif

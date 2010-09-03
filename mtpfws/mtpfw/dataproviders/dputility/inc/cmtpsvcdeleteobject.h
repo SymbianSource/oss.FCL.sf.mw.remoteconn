@@ -62,10 +62,6 @@ private:
 	TBool                        iSuccessDeletion;
 	TInt32                       iFormatCode;
 	CMTPObjectMetaData*          iReceivedObjectMetaData;
-	/**
-	FLOGGER debug trace member variable.
-	*/
-	__FLOG_DECLARATION_MEMBER_MUTABLE;
 	};
 
 #endif // __CMTPSVCDELETEOBJECT_H__

@@ -27,14 +27,17 @@
 #include "mtpframeworkconst.h"
 #include "cmtpframeworkconfig.h"
 #include "cmtpstoragemgr.h"
+#include "mtpdebug.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpdataprovidercontrollerTraces.h"
+#endif
+
 
 
 // Class constants.
 _LIT(KMTPDpResourceDirectory, "z:\\resource\\mtp\\");
 _LIT(KMTPDpDummyResourcefile, "z:\\resource\\mtp\\dummydp.rsc");
-
-// Class constants.
-__FLOG_STMT(_LIT8(KComponent,"DataProviderController");)
 
 static const TUint KOpaqueDataLength(64);
 
@@ -75,7 +78,8 @@ Destructor.
 */
 CMTPDataProviderController::~CMTPDataProviderController()
     {
-    __FLOG(_L8("~CMTPDataProviderController - Entry"));
+    OstTraceFunctionEntry0( CMTPDATAPROVIDERCONTROLLER_CMTPDATAPROVIDERCONTROLLER_DES_ENTRY );
+    
     Cancel();
     UnloadDataProviders();
     iDataProviderIds.Close();
@@ -85,8 +89,8 @@ CMTPDataProviderController::~CMTPDataProviderController()
     CloseRegistrySessionAndEntryL();
     delete iOpenSessionWaiter;
     delete iPendingRequestTimer;
-    __FLOG(_L8("~CMTPDataProviderController - Exit"));
-    __FLOG_CLOSE;
+    
+    OstTraceFunctionExit0( CMTPDATAPROVIDERCONTROLLER_CMTPDATAPROVIDERCONTROLLER_DES_EXIT );
     }
     
 /**
@@ -96,7 +100,8 @@ enumeration sequence.
 */
 EXPORT_C void CMTPDataProviderController::LoadDataProvidersL()
     {
-    __FLOG(_L8("LoadDataProvidersL - Entry"));
+    OstTraceFunctionEntry0( CMTPDATAPROVIDERCONTROLLER_LOADDATAPROVIDERSL_ENTRY );
+
     // Retrieve the ECOM data provider implementations list
     RImplInfoPtrArray   implementations;
     TCleanupItem        cleanup(ImplementationsCleanup, reinterpret_cast<TAny*>(&implementations));
@@ -106,7 +111,9 @@ EXPORT_C void CMTPDataProviderController::LoadDataProvidersL()
     
     // Retrieve the data provider registration resource file list.
     CDir* registrations;
-    User::LeaveIfError(iSingletons.Fs().GetDir(KMTPDpResourceDirectory, KEntryAttNormal, ESortByName, registrations));
+    LEAVEIFERROR(iSingletons.Fs().GetDir(KMTPDpResourceDirectory, KEntryAttNormal, ESortByName, registrations),
+            OstTrace0( TRACE_ERROR, DUP5_CMTPDATAPROVIDERCONTROLLER_LOADDATAPROVIDERSL, "get MTP Dp resource directory error!" ));
+            
     CleanupStack::PushL(registrations);
 
     CreateRegistrySessionAndEntryL();
@@ -119,7 +126,8 @@ EXPORT_C void CMTPDataProviderController::LoadDataProvidersL()
         TUint uid = 0;
         if(Uid((*registrations)[i].iName, uid) != KErrNone)
         	{
-        	__FLOG_1(_L8("LoadDataProvidersL - Fail to get UID = %s"),&((*registrations)[i].iName) );
+        	OstTraceExt1( TRACE_WARNING, CMTPDATAPROVIDERCONTROLLER_LOADDATAPROVIDERSL, 
+        	        "LoadDataProvidersL - Fail to get UID = %S", (*registrations)[i].iName);       	
         	continue;
         	}
         index = implementations.FindInOrder(TUid::Uid(uid), ImplementationsLinearOrderUid);
@@ -165,7 +173,8 @@ EXPORT_C void CMTPDataProviderController::LoadDataProvidersL()
         TRAPD(err, LoadInstalledDataProvidersL(implementations[index]));
         if (KErrNone != err)
             {
-            __FLOG_VA((_L8("Load installed data provider[0x%x] failed."),implementations[index]->ImplementationUid().iUid));
+            OstTrace1(TRACE_ERROR, DUP1_CMTPDATAPROVIDERCONTROLLER_LOADDATAPROVIDERSL, 
+                    "Load installed data provider[0x%x] failed.", implementations[index]->ImplementationUid().iUid);
             }
         }
 
@@ -173,10 +182,13 @@ EXPORT_C void CMTPDataProviderController::LoadDataProvidersL()
     CleanupStack::PopAndDestroy(&implementations);    
 
     // Verify that the framework data providers are loaded.
-    User::LeaveIfError(DpId(KMTPImplementationUidDeviceDp));
-    User::LeaveIfError(DpId(KMTPImplementationUidProxyDp));
-    User::LeaveIfError(DpId(KMTPImplementationUidFileDp));
-
+    LEAVEIFERROR(DpId(KMTPImplementationUidDeviceDp),
+            OstTrace0( TRACE_ERROR, DUP2_CMTPDATAPROVIDERCONTROLLER_LOADDATAPROVIDERSL, "Device Dp not loaded!" ));           
+    LEAVEIFERROR(DpId(KMTPImplementationUidProxyDp),
+            OstTrace0( TRACE_ERROR, DUP3_CMTPDATAPROVIDERCONTROLLER_LOADDATAPROVIDERSL, "Proxy Dp not loaded!" ));       
+    LEAVEIFERROR(DpId(KMTPImplementationUidFileDp),
+            OstTrace0( TRACE_ERROR, DUP4_CMTPDATAPROVIDERCONTROLLER_LOADDATAPROVIDERSL, "file Dp not loaded!" ));
+            
 	// Sort the data provider set on enumeration phase order.
 	iDataProviders.Sort(TLinearOrder<CMTPDataProvider>(CMTPDataProvider::LinearOrderEnumerationPhase));
 	// Add the DP IDs into DP ID array, except for device DP, File DP and proxy DP
@@ -196,7 +208,7 @@ EXPORT_C void CMTPDataProviderController::LoadDataProvidersL()
     iEnumeratingStorages.AppendL(KMTPStorageAll);
     iEnumerationState = EEnumerationStarting;
     Schedule();
-    __FLOG(_L8("LoadDataProvidersL - Exit"));
+    OstTraceFunctionExit0( CMTPDATAPROVIDERCONTROLLER_LOADDATAPROVIDERSL_EXIT );
     }
     
 /**
@@ -205,11 +217,11 @@ Unloads all active data providers.
 */
 EXPORT_C void CMTPDataProviderController::UnloadDataProviders()
     {
-    __FLOG(_L8("UnloadDataProviders - Entry"));
+    OstTraceFunctionEntry0( CMTPDATAPROVIDERCONTROLLER_UNLOADDATAPROVIDERS_ENTRY );
     TRAP_IGNORE(iSingletons.ObjectMgr().ObjectStore().CleanL());
     iDataProviders.ResetAndDestroy();
     iDataProviderIds.Reset();
-    __FLOG(_L8("UnloadDataProviders - Exit"));
+    OstTraceFunctionExit0( CMTPDATAPROVIDERCONTROLLER_UNLOADDATAPROVIDERS_EXIT );
     }
     
 /**
@@ -226,7 +238,7 @@ EXPORT_C void CMTPDataProviderController::NotifyDataProvidersL(TMTPNotification 
 
 EXPORT_C void CMTPDataProviderController::NotifyDataProvidersL(TUint aDPId, TMTPNotification aNotification, const TAny* aParams)
     {
-    __FLOG(_L8("NotifyDataProvidersL - Entry"));
+    OstTraceFunctionEntry0( CMTPDATAPROVIDERCONTROLLER_NOTIFYDATAPROVIDERSL_ENTRY);
     // Schedule any long running operations.
     switch (aNotification)
         {
@@ -260,7 +272,8 @@ EXPORT_C void CMTPDataProviderController::NotifyDataProvidersL(TUint aDPId, TMTP
             if(storageId==iEnumeratingStorages[i])
                 {
                 iEnumeratingStorages.Remove(i);
-                __FLOG_VA((_L8("Unhandle memory card add event removed, storageId: %d"), storageId));
+                OstTrace1(TRACE_ERROR, CMTPDATAPROVIDERCONTROLLER_NOTIFYDATAPROVIDERSL, 
+                        "Unhandle memory card add event removed, storageId: %d", storageId);
                 }
             }
         }
@@ -304,7 +317,7 @@ EXPORT_C void CMTPDataProviderController::NotifyDataProvidersL(TUint aDPId, TMTP
                 }
             }
         }    
-    __FLOG(_L8("NotifyDataProvidersL - Exit"));
+    OstTraceFunctionExit0( CMTPDATAPROVIDERCONTROLLER_NOTIFYDATAPROVIDERSL_EXIT);
     }
 
 /**
@@ -424,8 +437,9 @@ Data provider enumeration state change notification callback.
 */    
 void CMTPDataProviderController::EnumerationStateChangedL(const CMTPDataProvider& aDp)
     {
-    __FLOG(_L8("EnumerationStateChangedL - Entry"));
-    __FLOG_VA((_L8("Entry iEnumerationState: 0x%x DpId: %d"), iEnumerationState, aDp.DataProviderId()));
+    OstTraceFunctionEntry0( CMTPDATAPROVIDERCONTROLLER_ENUMERATIONSTATECHANGEDL_ENTRY);
+    OstTraceDefExt2(OST_TRACE_CATEGORY_PRODUCTION, TRACE_IMPORTANT, CMTPDATAPROVIDERCONTROLLER_ENUMERATIONSTATECHANGEDL, 
+            "iEnumerationState: 0x%x DpId: %d", iEnumerationState, aDp.DataProviderId());
     switch (iEnumerationState)
         {        
     case EEnumeratingFrameworkStorages:
@@ -480,7 +494,8 @@ void CMTPDataProviderController::EnumerationStateChangedL(const CMTPDataProvider
     case EEnumeratingSubDirFiles:
         if(KMTPImplementationUidFileDp == aDp.ImplementationUid().iUid && NeedEnumeratingPhase2())
             {
-            __FLOG(_L8("File DP first level enum complete"));
+            OstTrace0(TRACE_NORMAL, DUP1_CMTPDATAPROVIDERCONTROLLER_ENUMERATIONSTATECHANGEDL,
+                    "File DP first level enum complete");
             Cancel();
 
             //clean the root level snapshot
@@ -523,14 +538,15 @@ void CMTPDataProviderController::EnumerationStateChangedL(const CMTPDataProvider
         break;
         }
     
-    __FLOG_VA((_L8("Exit iEnumerationState: 0x%x, DpId: %d, UID=0x%x"), iEnumerationState,  aDp.DataProviderId(), aDp.ImplementationUid().iUid));
-    __FLOG(_L8("EnumerationStateChangedL - Exit"));
+    OstTraceExt3(TRACE_NORMAL, DUP2_CMTPDATAPROVIDERCONTROLLER_ENUMERATIONSTATECHANGEDL, 
+                "iEnumerationState: 0x%x, DpId: %d, UID=0x%x", iEnumerationState, aDp.DataProviderId(), (TUint)aDp.ImplementationUid().iUid);
+    OstTraceFunctionExit0( CMTPDATAPROVIDERCONTROLLER_ENUMERATIONSTATECHANGEDL_EXIT);
     }
 
 void CMTPDataProviderController::DoCancel()
     {
-    __FLOG(_L8("DoCancel - Entry"));
-    __FLOG(_L8("DoCancel - Exit"));
+    OstTraceFunctionEntry0( CMTPDATAPROVIDERCONTROLLER_DOCANCEL_ENTRY);
+    OstTraceFunctionExit0( CMTPDATAPROVIDERCONTROLLER_DOCANCEL_EXIT);
     }
     
 
@@ -553,7 +569,8 @@ void CMTPDataProviderController::EstablishDBSnapshotL(TUint32 aStorageId)
             const TUint KCountLogicalIds(logicalIds.Count());
             for (TUint i(0); (i < KCountLogicalIds); i++)
                 {
-                __FLOG_VA((_L8("Establish snapshot for storage: 0x%x"), logicalIds[i]));
+                OstTrace1(TRACE_NORMAL, CMTPDATAPROVIDERCONTROLLER_ESTABLISHDBSNAPSHOTL,
+                        "Establish snapshot for storage: 0x%x", logicalIds[i]);
                 iSingletons.ObjectMgr().ObjectStore().EstablishDBSnapshotL(logicalIds[i]);
                 }   
             }
@@ -563,8 +580,9 @@ void CMTPDataProviderController::EstablishDBSnapshotL(TUint32 aStorageId)
 
 void CMTPDataProviderController::RunL()
     {
-    __FLOG(_L8("RunL - Entry"));
-    __FLOG_VA((_L8("iEnumerationState: 0x%x iNextDpId: %d"), iEnumerationState, iNextDpId));
+    OstTraceFunctionEntry0( CMTPDATAPROVIDERCONTROLLER_RUNL_ENTRY );
+    OstTraceDef1(OST_TRACE_CATEGORY_PRODUCTION, TRACE_IMPORTANT, CMTPDATAPROVIDERCONTROLLER_RUNL, 
+            "iEnumerationState: 0x%x", iEnumerationState);
     switch (iEnumerationState)
         {
     case EEnumerationStarting:
@@ -651,12 +669,14 @@ void CMTPDataProviderController::RunL()
                && (iEnumerationPhase == DataProviderL(iDataProviderIds[iDpIdArrayIndex]).DataProviderConfig().UintValue(MMTPDataProviderConfig::EEnumerationPhase)))
             {
             currentDp = iDataProviderIds[iDpIdArrayIndex++];
-            __FLOG_VA((_L8("Enumerating dpid %d"), currentDp));
+            OstTrace1(TRACE_NORMAL, DUP1_CMTPDATAPROVIDERCONTROLLER_RUNL, 
+                    "Enumerating dpid %d", currentDp);
             iEnumeratingDps.InsertInOrderL(currentDp);
             EnumerateDataProviderObjectsL(currentDp);
             }
         
-        __FLOG_VA((_L8("iDpIdArrayIndex = %d, KLoadedDps = %d"), iDpIdArrayIndex, KLoadedDps));
+        OstTraceExt2(TRACE_NORMAL, DUP2_CMTPDATAPROVIDERCONTROLLER_RUNL, 
+                "iDpIdArrayIndex = %d, KLoadedDps = %d", iDpIdArrayIndex, KLoadedDps);
         }
         break;
         
@@ -690,17 +710,14 @@ void CMTPDataProviderController::RunL()
         __DEBUG_ONLY(User::Invariant());
         break;
         }
-    __FLOG(_L8("RunL - Exit"));
+    OstTraceFunctionExit0( CMTPDATAPROVIDERCONTROLLER_RUNL_EXIT );
     }
 
-#ifdef __FLOG_ACTIVE
+
 TInt CMTPDataProviderController::RunError(TInt aError)
-#else
-TInt CMTPDataProviderController::RunError(TInt /*aError*/)
-#endif
     {
-    __FLOG(_L8("RunError - Entry"));
-    __FLOG_VA((_L8("Error = %d"), aError));
+    OstTraceFunctionEntry0( CMTPDATAPROVIDERCONTROLLER_RUNERROR_ENTRY );
+    OstTrace1(TRACE_NORMAL, CMTPDATAPROVIDERCONTROLLER_RUNERROR, "Error = %d", aError);
     
     // If a RunL error happens, there's no point in trying to continue.
     switch (iEnumerationState)
@@ -730,7 +747,7 @@ TInt CMTPDataProviderController::RunError(TInt /*aError*/)
         }
 
     // This code is never reached
-    __FLOG(_L8("RunError - Exit"));
+    OstTraceFunctionExit0( CMTPDATAPROVIDERCONTROLLER_RUNERROR_EXIT );
     return KErrNone;
     }
 
@@ -749,8 +766,7 @@ Second-phase constructor.
 */
 void CMTPDataProviderController::ConstructL()
     {
-    __FLOG_OPEN(KMTPSubsystem, KComponent);
-    __FLOG(_L8("ConstructL - Entry"));
+    OstTraceFunctionEntry0( CMTPDATAPROVIDERCONTROLLER_CONSTRUCTL_ENTRY );
     iSingletons.OpenL();
 	TInt tMTPMode;
 	TInt err = RProperty::Get(KUidSystemCategory, KUidMTPModeKeyValue, tMTPMode);
@@ -772,7 +788,7 @@ void CMTPDataProviderController::ConstructL()
     
     iPendingRequestTimer = CMTPPendingReqestTimer::NewL(this);
     
-    __FLOG(_L8("ConstructL - Exit"));
+    OstTraceFunctionExit0( CMTPDATAPROVIDERCONTROLLER_CONSTRUCTL_EXIT );
     }
     
 /**
@@ -785,7 +801,8 @@ which is also placed on the cleanup stack. Ownership is transferred.
 */    
 CMTPDataProviderConfig* CMTPDataProviderController::CreateConfigLC(const TDesC& aResourceFilename)
     {
-    __FLOG(_L8("CreateConfigLC - Entry"));
+    OstTraceFunctionEntry0( CMTPDATAPROVIDERCONTROLLER_CREATECONFIGLC_ENTRY );
+
     // Open the configuration data resource file
     RResourceFile file;
     CleanupClosePushL(file);
@@ -802,7 +819,7 @@ CMTPDataProviderConfig* CMTPDataProviderController::CreateConfigLC(const TDesC& 
     CleanupStack::PopAndDestroy(buffer);
     CleanupStack::PopAndDestroy(&file);
     CleanupStack::PushL(config);
-    __FLOG(_L8("CreateConfigLC - Exit"));
+    OstTraceFunctionExit0( CMTPDATAPROVIDERCONTROLLER_CREATECONFIGLC_EXIT );
     return config;
     }
 
@@ -812,7 +829,7 @@ Check the  necessity of objects enumeration as given the data provider
 */
 TBool CMTPDataProviderController::IsObjectsEnumerationNeededL(CMTPDataProvider& dp)
 {
-    __FLOG(_L8("CheckEnumerateDPObjectsL - Entry"));
+    OstTraceFunctionEntry0( CMTPDATAPROVIDERCONTROLLER_ISOBJECTSENUMERATIONNEEDEDL_ENTRY );
 
 	CMTPStorageMgr& storages = iSingletons.StorageMgr();
 	TUint32 aStorageId = iEnumeratingStorages[0];
@@ -834,7 +851,7 @@ TBool CMTPDataProviderController::IsObjectsEnumerationNeededL(CMTPDataProvider& 
 			  doEnumeration = false;
 			}
 	    }
-	__FLOG(_L8("CheckEnumerateDPObjectsL - Exit"));
+	OstTraceFunctionExit0( CMTPDATAPROVIDERCONTROLLER_ISOBJECTSENUMERATIONNEEDEDL_EXIT );
 	return doEnumeration;
 }
 
@@ -844,7 +861,9 @@ Requests that the given data provider enumerate its objects.
 */
 void CMTPDataProviderController::EnumerateDataProviderObjectsL(TUint aId)
     {
-    __FLOG(_L8("EnumerateDataProviderObjectsL - Entry"));
+    OstTraceFunctionEntry0( CMTPDATAPROVIDERCONTROLLER_ENUMERATEDATAPROVIDEROBJECTSL_ENTRY );
+    OstTraceDef1(OST_TRACE_CATEGORY_PRODUCTION, TRACE_IMPORTANT, CMTPDATAPROVIDERCONTROLLER_ENUMERATEDATAPROVIDEROBJECTSL, 
+            "Data provider with DpId %d to enumerate its objects", aId );
     CMTPDataProvider& dp(DataProviderL(aId));
 
     if (IsObjectsEnumerationNeededL(dp))
@@ -878,7 +897,7 @@ void CMTPDataProviderController::EnumerateDataProviderObjectsL(TUint aId)
         EnumerationStateChangedL(dp);
         }
 
-    __FLOG(_L8("EnumerateDataProviderObjectsL - Exit"));
+    OstTraceFunctionExit0( CMTPDATAPROVIDERCONTROLLER_ENUMERATEDATAPROVIDEROBJECTSL_EXIT );
     }
     
 /**
@@ -892,10 +911,12 @@ implementation UID).
 */
 TBool CMTPDataProviderController::LoadROMDataProvidersL(const TDesC& aResourceFilename, const RImplInfoPtrArray& aImplementations)
     {
-    __FLOG(_L8("LoadROMDataProvidersL - Entry"));
+    OstTraceFunctionEntry0( CMTPDATAPROVIDERCONTROLLER_LOADROMDATAPROVIDERSL_ENTRY );
     // Retrieve the implementation UID
     TUint uid(0);
-    User::LeaveIfError(Uid(aResourceFilename, uid));
+    LEAVEIFERROR(Uid(aResourceFilename, uid),
+            OstTraceExt1( TRACE_ERROR, CMTPDATAPROVIDERCONTROLLER_LOADROMDATAPROVIDERSL, "can't get uid from resource file %S", aResourceFilename));
+            
     TBool success(EFalse);
 
     // Check for a corresponding plug-in implementation.
@@ -931,7 +952,7 @@ TBool CMTPDataProviderController::LoadROMDataProvidersL(const TDesC& aResourceFi
         success = LoadDataProviderL(filename);
         CleanupStack::PopAndDestroy(&filename);
         }    	
-    __FLOG(_L8("LoadROMDataProvidersL - Exit"));
+    OstTraceFunctionExit0( CMTPDATAPROVIDERCONTROLLER_LOADROMDATAPROVIDERSL_EXIT );
     return success;
     }
 
@@ -944,7 +965,7 @@ implementation UID).
 */
 void CMTPDataProviderController::LoadInstalledDataProvidersL(const CImplementationInformation* aImplementations)
     {
-    __FLOG(_L8("LoadInstalledDataProvidersL - Entry"));
+    OstTraceFunctionEntry0( CMTPDATAPROVIDERCONTROLLER_LOADINSTALLEDDATAPROVIDERSL_ENTRY );
     TUint uid = aImplementations->ImplementationUid().iUid;
     TBool tFlag(EFalse);
     iNextDpId = iSingletons.ObjectMgr().DPIDL(uid, tFlag);
@@ -968,11 +989,14 @@ void CMTPDataProviderController::LoadInstalledDataProvidersL(const CImplementati
         }
     if (0 == pkgIDstr.Length())
         {
+        OstTrace0( TRACE_ERROR, CMTPDATAPROVIDERCONTROLLER_LOADINSTALLEDDATAPROVIDERSL, "pkgIdstr is empty!" );
         User::Leave(KErrArgument);
         }
     
     TUint aUid(0);
-    User::LeaveIfError(Uid(pkgIDstr, aUid));
+    LEAVEIFERROR(Uid(pkgIDstr, aUid),
+            OstTraceExt1( TRACE_ERROR, DUP1_CMTPDATAPROVIDERCONTROLLER_LOADINSTALLEDDATAPROVIDERSL, "can't get uid from string %S",pkgIDstr ));
+            
     
     iSingletons.ObjectMgr().InsertPkgIDObjectL(iNextDpId, aUid);
     TDriveName drive = aImplementations->Drive().Name();
@@ -995,7 +1019,7 @@ void CMTPDataProviderController::LoadInstalledDataProvidersL(const CImplementati
     LoadDataProviderL(resourcefilename);
 
     CleanupStack::PopAndDestroy(&resourcefilename);
-    __FLOG(_L8("LoadInstalledDataProvidersL - Exit"));
+    OstTraceFunctionExit0( CMTPDATAPROVIDERCONTROLLER_LOADINSTALLEDDATAPROVIDERSL_EXIT );
     }
 
 /**
@@ -1007,7 +1031,7 @@ implementation UID).
 */
 TBool CMTPDataProviderController::LoadDataProviderL(const TDesC& aResourceFilename)
     {
-    __FLOG(_L8("LoadDataProviderL - Entry"));
+    OstTraceFunctionEntry0( CMTPDATAPROVIDERCONTROLLER_LOADDATAPROVIDERL_ENTRY );
     // Load the configurability parameter data.
     CMTPDataProviderConfig* config(CreateConfigLC(aResourceFilename));
     
@@ -1017,6 +1041,7 @@ TBool CMTPDataProviderController::LoadDataProviderL(const TDesC& aResourceFilena
     TUint aUid(0);
     if ( Uid(aResourceFilename,aUid) != KErrNone )
        	{
+        OstTraceFunctionExit0( CMTPDATAPROVIDERCONTROLLER_LOADDATAPROVIDERL_EXIT );
         return success;	
        	}
     TUint uid(aUid);
@@ -1104,7 +1129,7 @@ TBool CMTPDataProviderController::LoadDataProviderL(const TDesC& aResourceFilena
         // No data provider was created.
         CleanupStack::PopAndDestroy(config);
         }
-    __FLOG(_L8("LoadDataProviderL - Exit"));
+    OstTraceFunctionExit0( DUP1_CMTPDATAPROVIDERCONTROLLER_LOADDATAPROVIDERL_EXIT );
     return success;
     }
 
@@ -1117,12 +1142,12 @@ filename.
 */
 TInt CMTPDataProviderController::Uid(const TDesC& aResourceFilename, TUint& aUid)
     {
-    __FLOG(_L8("Uid - Entry"));
+    OstTraceFunctionEntry0( CMTPDATAPROVIDERCONTROLLER_UID_ENTRY );
     // Extract the implemetation UID from the filename.
     TParsePtrC parser(aResourceFilename);
     TLex lex(parser.Name());
     TInt err = lex.Val(aUid, EHex);
-    __FLOG(_L8("Uid - Exit"));
+    OstTraceFunctionExit0( CMTPDATAPROVIDERCONTROLLER_UID_EXIT );
     return err;
     }
 
@@ -1131,7 +1156,7 @@ Schedules an enumeration iteration.
 */
 void CMTPDataProviderController::Schedule()
     {
-    __FLOG(_L8("Schedule - Entry"));
+    OstTraceFunctionEntry0( CMTPDATAPROVIDERCONTROLLER_SCHEDULE_ENTRY );
     if (!IsActive())
         {
         TRequestStatus* status(&iStatus);
@@ -1139,7 +1164,7 @@ void CMTPDataProviderController::Schedule()
         SetActive();
         User::RequestComplete(status, KErrNone);
         }
-    __FLOG(_L8("Schedule - Exit"));
+    OstTraceFunctionExit0( CMTPDATAPROVIDERCONTROLLER_SCHEDULE_EXIT );
     }
 /**
 Get the mtpkey mode.
@@ -1198,7 +1223,8 @@ void CMTPDataProviderController::CreateRegistrySessionAndEntryL()
         return;
         }
             
-	User::LeaveIfError(iSisSession.Connect());
+	LEAVEIFERROR(iSisSession.Connect(),
+	        OstTrace0( TRACE_ERROR, CMTPDATAPROVIDERCONTROLLER_CREATEREGISTRYSESSIONANDENTRYL, "can't connect to iSisSession " ));
     CleanupClosePushL(iSisSession);
     TInt err = KErrNone;
     TUint stubuid;
@@ -1222,12 +1248,12 @@ void  CMTPDataProviderController::CloseRegistrySessionAndEntryL()
 
 EXPORT_C void CMTPDataProviderController::SetNeedEnumeratingPhase2(TBool aNeed)
 	{
-	__FLOG(_L8("SetNeedEnumeratingPhase2 - Entry"));
-	__FLOG_VA((_L8("Need = %d"), aNeed)); 
+    OstTraceFunctionEntry0( CMTPDATAPROVIDERCONTROLLER_SETNEEDENUMERATINGPHASE2_ENTRY );
+    OstTrace1(TRACE_NORMAL, CMTPDATAPROVIDERCONTROLLER_SETNEEDENUMERATINGPHASE2, "Need = %d", aNeed);
 	
 	iNeedEnumeratingPhase2 = aNeed;
 	
-	__FLOG(_L8("SetNeedEnumeratingPhase2 - Exit"));
+	OstTraceFunctionExit0( CMTPDATAPROVIDERCONTROLLER_SETNEEDENUMERATINGPHASE2_EXIT );
 	}
 
 EXPORT_C TBool CMTPDataProviderController::NeedEnumeratingPhase2() const
@@ -1238,7 +1264,7 @@ EXPORT_C TBool CMTPDataProviderController::NeedEnumeratingPhase2() const
 
 EXPORT_C void CMTPDataProviderController::RegisterPendingRequestDP(TUint aDpUid, TUint aTimeOut)
     {
-    __FLOG(_L8("CMTPDataProviderController::RegisterPendingRequestDP - Entry"));
+    OstTraceFunctionEntry0( CMTPDATAPROVIDERCONTROLLER_REGISTERPENDINGREQUESTDP_ENTRY );
     
     __ASSERT_DEBUG((iPendingRequestDpUid == 0), User::Invariant());
     iPendingRequestDpUid = aDpUid;
@@ -1246,18 +1272,19 @@ EXPORT_C void CMTPDataProviderController::RegisterPendingRequestDP(TUint aDpUid,
         {
         iPendingRequestTimer->Start(aTimeOut);
         }
-    
-    __FLOG(_L8("CMTPDataProviderController::RegisterPendingRequestDP - Exit"));    
+      
+    OstTraceFunctionExit0( CMTPDATAPROVIDERCONTROLLER_REGISTERPENDINGREQUESTDP_EXIT );
     }
 
 
 EXPORT_C void CMTPDataProviderController::ExecutePendingRequestL()
     {
-    __FLOG(_L8("CMTPDataProviderController::ExecutePendingRequestL - Entry"));
+    OstTraceFunctionEntry0( CMTPDATAPROVIDERCONTROLLER_EXECUTEPENDINGREQUESTL_ENTRY );
     
     if (iPendingRequestDpUid == 0)
         {
         iPendingRequestTimer->Cancel();
+        OstTraceFunctionExit0( CMTPDATAPROVIDERCONTROLLER_EXECUTEPENDINGREQUESTL_EXIT );
         return;
         }
     
@@ -1273,8 +1300,8 @@ EXPORT_C void CMTPDataProviderController::ExecutePendingRequestL()
             }
         }
     
-    iPendingRequestTimer->Cancel();
-    __FLOG(_L8("CMTPDataProviderController::ExecutePendingRequestL - Exit"));    
+    iPendingRequestTimer->Cancel();   
+    OstTraceFunctionExit0( DUP1_CMTPDATAPROVIDERCONTROLLER_EXECUTEPENDINGREQUESTL_EXIT );
     }
 
 EXPORT_C TUint CMTPDataProviderController::StorageEnumerateState(TUint aStorageId)
@@ -1320,35 +1347,33 @@ CMTPDataProviderController::CMTPPendingReqestTimer* CMTPDataProviderController::
 
 CMTPDataProviderController::CMTPPendingReqestTimer::~CMTPPendingReqestTimer()
     {
-    __FLOG(_L8("~CMTPPendingReqestTimer - Entry"));  
+    OstTraceFunctionEntry0( CMTPPENDINGREQESTTIMER_CMTPPENDINGREQESTTIMER_ENTRY );
     
     Cancel();
     
-    __FLOG(_L8("~CMTPPendingReqestTimer - Exit"));    
-    __FLOG_CLOSE;
-    
+    OstTraceFunctionExit0( CMTPPENDINGREQESTTIMER_CMTPPENDINGREQESTTIMER_EXIT );
     }
           
 void CMTPDataProviderController::CMTPPendingReqestTimer::Start(TUint aTimeOut)
     {
-    __FLOG(_L8("CMTPPendingReqestTimer::Start - Entry"));
+    OstTraceFunctionEntry0( CMTPPENDINGREQESTTIMER_START_ENTRY );
     
     if (aTimeOut > 0)
         {
         const TUint KMTPPendingRequestDelay = (1000000 * aTimeOut);
         After(KMTPPendingRequestDelay);
         }
-    
-    __FLOG(_L8("CMTPPendingReqestTimer::Start - Exit"));
+
+    OstTraceFunctionExit0( CMTPPENDINGREQESTTIMER_START_EXIT );
     }
         
 void CMTPDataProviderController::CMTPPendingReqestTimer::RunL()
     {
-    __FLOG(_L8("CMTPPendingReqestTimer::RunL - Entry"));
+    OstTraceFunctionEntry0( CMTPPENDINGREQESTTIMER_RUNL_ENTRY );
 
     iDPController->ExecutePendingRequestL();
     
-    __FLOG(_L8("CMTPPendingReqestTimer::RunL - Exit"));
+    OstTraceFunctionExit0( CMTPPENDINGREQESTTIMER_RUNL_EXIT );
     }
 
 CMTPDataProviderController::CMTPPendingReqestTimer::CMTPPendingReqestTimer(CMTPDataProviderController* aDPController) :
@@ -1359,12 +1384,11 @@ CMTPDataProviderController::CMTPPendingReqestTimer::CMTPPendingReqestTimer(CMTPD
 
 void CMTPDataProviderController::CMTPPendingReqestTimer::ConstructL()
     {
-    __FLOG_OPEN(KMTPSubsystem, KComponent);
-    __FLOG(_L8("CMTPPendingReqestTimer::ConstructL - Entry"));
+    OstTraceFunctionEntry0( CMTPPENDINGREQESTTIMER_CONSTRUCTL_ENTRY );
 
     CTimer::ConstructL();
     CActiveScheduler::Add(this);
-    
-    __FLOG(_L8("CMTPPendingReqestTimer::ConstructL - Exit"));    
+      
+    OstTraceFunctionExit0( CMTPPENDINGREQESTTIMER_CONSTRUCTL_EXIT );
     }
 

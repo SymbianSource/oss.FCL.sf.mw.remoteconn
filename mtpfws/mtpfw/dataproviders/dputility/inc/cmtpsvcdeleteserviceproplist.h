@@ -22,7 +22,6 @@
 #define __CMTPSVCDELETESERVICEPROPLIST_H__
 
 #include "cmtprequestprocessor.h"
-#include "mtpdebug.h"
 
 class MMTPServiceDataProvider;
 class CMTPTypeDeleteServicePropList;
@@ -50,10 +49,6 @@ private:
 private:
 	CMTPTypeDeleteServicePropList*     iDeleteServicePropList;
 	MMTPServiceDataProvider&           iDataProvider;
-	/**
-	FLOGGER debug trace member variable.
-	*/
-	__FLOG_DECLARATION_MEMBER_MUTABLE;
 	};
 
 #endif // __CMTPSVCDELETESERVICEPROPLIST_H__

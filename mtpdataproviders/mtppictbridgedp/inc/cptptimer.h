@@ -45,10 +45,6 @@ class CPtpTimer : public CTimer
         
     private:
         CPtpSession& iSession;
-		/**
-        FLOGGER debug trace member variable.
-        */
-        __FLOG_DECLARATION_MEMBER_MUTABLE;
     };
     
 #endif

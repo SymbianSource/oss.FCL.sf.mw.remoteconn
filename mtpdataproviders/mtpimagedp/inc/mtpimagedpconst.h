@@ -24,7 +24,6 @@
 #include <e32std.h>
 
 #include <mtp/mtpprotocolconstants.h>
-#include <comms-infras/commsdebugutility.h> // for __FLOG debugging
 
 /*
  * [Thumbnail SIZE]: performance improvement
@@ -98,7 +97,8 @@ static const TUint16 KMTPImageDpSupportedProperties[] =
   	EMTPObjectPropCodeRepresentativeSampleHeight,
   	EMTPObjectPropCodeRepresentativeSampleWidth,
   	EMTPObjectPropCodeRepresentativeSampleData,
-  	EMTPObjectPropCodeNonConsumable
+  	EMTPObjectPropCodeNonConsumable,
+  	EMTPObjectPropCodeHidden
   	};
 
 /**
@@ -134,7 +134,10 @@ static const TUint16 KMTPImageDpGroupOneProperties[] =
     EMTPObjectPropCodeRepresentativeSampleSize,
     EMTPObjectPropCodeRepresentativeSampleHeight,
     EMTPObjectPropCodeRepresentativeSampleWidth,
-    EMTPObjectPropCodeRepresentativeSampleData
+    EMTPObjectPropCodeRepresentativeSampleData,
+    
+    //From file system
+    EMTPObjectPropCodeHidden
     };
 
 /**

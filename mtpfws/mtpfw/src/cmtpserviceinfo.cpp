@@ -20,11 +20,14 @@
 
 #include "mtpservicecommon.h"
 #include "cmtpserviceinfo.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpserviceinfoTraces.h"
+#endif
+
 
 
 // Class constants.
-
-__FLOG_STMT(_LIT8(KComponent,"ServiceInfo");)
 
 
 TPKeyPair::TPKeyPair( const TMTPTypeGuid& aNamespace, const TUint aID ):
@@ -204,7 +207,7 @@ CMTPServiceInfo* CMTPServiceInfo::NewLC()
 
 CMTPServiceInfo::~CMTPServiceInfo()
     {
-    __FLOG(_L8("CServiceInfo::~CserviceInfo() - Entry"));
+    OstTraceFunctionEntry0( CMTPSERVICEINFO_CMTPSERVICEINFO_DES_ENTRY );
     
     delete iServiceName;
     
@@ -214,9 +217,8 @@ CMTPServiceInfo::~CMTPServiceInfo()
     iServiceMethods.ResetAndDestroy();
     iServiceEvents.ResetAndDestroy();
     iDataBlock.Close();
-    
-    __FLOG(_L8("CServiceInfo::~CserviceInfo() - Exit"));
-    __FLOG_CLOSE;
+
+    OstTraceFunctionExit0( CMTPSERVICEINFO_CMTPSERVICEINFO_DES_EXIT );
     }
     
 
@@ -225,12 +227,8 @@ CMTPServiceInfo::CMTPServiceInfo()
     }
 void CMTPServiceInfo::ConstructL()
     {
-    __FLOG_OPEN(KMTPSubsystem, KComponent);
-    __FLOG(_L8("CServiceInfo::ConstructL() - Entry"));
-   
-    
-    
-    __FLOG(_L8("CServiceInfo::ConstructL() - Exit"));
+    OstTraceFunctionEntry0( CMTPSERVICEINFO_CONSTRUCTL_ENTRY );
+    OstTraceFunctionExit0( CMTPSERVICEINFO_CONSTRUCTL_EXIT );
     }
 
 
@@ -339,56 +337,56 @@ void CMTPServiceInfo::SetBaseServiceID( TUint aID )
 
 void CMTPServiceInfo::AppendUserServiceL( const TMTPTypeGuid& aServiceGUID )
     {
-    __FLOG(_L8("CServiceInfo::AppendUserServiceL - Entry"));
+    OstTraceFunctionEntry0( CMTPSERVICEINFO_APPENDUSERSERVICEL_ENTRY );
     
     iUsedServiceGUIDs.AppendL( aServiceGUID );
     
-    __FLOG(_L8("CServiceInfo::AppendUserServiceL - Exit"));
+    OstTraceFunctionExit0( CMTPSERVICEINFO_APPENDUSERSERVICEL_EXIT );
     }
 
 void CMTPServiceInfo::InsertPropertyL( const CServiceProperty* aProperty )
     {
-    __FLOG(_L8("CServiceInfo::InsertPropertyL - Entry"));
+    OstTraceFunctionEntry0( CMTPSERVICEINFO_INSERTPROPERTYL_ENTRY );
     
     iServiceProperties.InsertInOrderL( aProperty, TLinearOrder<CServiceProperty>(ServicePropertyOrderFromAscending) );
-    
-    __FLOG(_L8("CServiceInfo::InsertPropertyL - Exit"));
+
+    OstTraceFunctionExit0( CMTPSERVICEINFO_INSERTPROPERTYL_EXIT );
     }
 
 void CMTPServiceInfo::InsertFormatL( const CServiceFormat* aFormat )
     {
-    __FLOG(_L8("CServiceInfo::InsertFormatL - Entry"));
+    OstTraceFunctionEntry0( CMTPSERVICEINFO_INSERTFORMATL_ENTRY );
     
     iServiceFormats.InsertInOrderL( aFormat, TLinearOrder<CServiceFormat>(ServiceFormatOrderFromAscending) );
-    
-    __FLOG(_L8("CServiceInfo::InsertFormatL - Exit"));
+
+    OstTraceFunctionExit0( CMTPSERVICEINFO_INSERTFORMATL_EXIT );
     }
 
 void CMTPServiceInfo::InsertMethodL( const CServiceMethod* aMethod )
     {
-    __FLOG(_L8("CServiceInfo::InsertMethodL - Entry"));
+    OstTraceFunctionEntry0( CMTPSERVICEINFO_INSERTMETHODL_ENTRY );
     
     iServiceMethods.InsertInOrderL( aMethod , TLinearOrder<CServiceMethod>(ServiceMethodOrderFromAscending) );
-    
-    __FLOG(_L8("CServiceInfo::InsertMethodL - Exit"));
+
+    OstTraceFunctionExit0( CMTPSERVICEINFO_INSERTMETHODL_EXIT );
     }
 
 void CMTPServiceInfo::InsertEventL( const CServiceEvent* aEvent )
     {
-    __FLOG(_L8("CServiceInfo::InsertMethodL - Entry"));
+    OstTraceFunctionEntry0( CMTPSERVICEINFO_INSERTEVENTL_ENTRY );
     
     iServiceEvents.InsertInOrderL( aEvent , TLinearOrder<CServiceEvent>(ServiceEventOrderFromAscending) );
-    
-    __FLOG(_L8("CServiceInfo::InsertMethodL - Exit"));
+
+    OstTraceFunctionExit0( CMTPSERVICEINFO_INSERTEVENTL_EXIT );
     }
   
 void CMTPServiceInfo::AppendDataGUIDL( const TMTPTypeGuid& aGUID )
     {
-    __FLOG(_L8("CServiceInfo::AppendDataGUIDL - Entry"));
-    
+    OstTraceFunctionEntry0( CMTPSERVICEINFO_APPENDDATAGUIDL_ENTRY );
+
     iDataBlock.AppendL( aGUID );
-    
-    __FLOG(_L8("CServiceInfo::AppendDataGUIDL - Exit"));
+
+    OstTraceFunctionExit0( CMTPSERVICEINFO_APPENDDATAGUIDL_EXIT );
     }
     
 EXPORT_C TUint CMTPServiceInfo::ServiceID() const

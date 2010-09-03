@@ -16,10 +16,13 @@
 //
 
 /**
+To log transferred MTP-USB packets, uncomment the following line
+*/
+//MACRO   MTP_DEBUG_OST_HEX_DUMP
+
+/**
  @file
 */
-
-#include <comms-infras/commsdebugutility.mmh>
 
 TARGET              mtpusbsicimp.dll
 TARGETTYPE          PLUGIN
@@ -35,6 +38,7 @@ USERINCLUDE         ../../common/inc/
 USERINCLUDE         ../../usbdatatypes/inc
 USERINCLUDE         ../../../../mtpfws/mtpfw/transports/transportapi/inc
 USERINCLUDE         ../../../../mtpfws/mtpfw/common/inc
+USERINCLUDE         ../traces
 
 SOURCEPATH          ../src/ 
 SOURCE              cmtpusbconnection.cpp

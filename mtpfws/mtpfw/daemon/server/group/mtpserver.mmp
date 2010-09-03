@@ -13,8 +13,6 @@
 // Description:
 //
 
-#include <comms-infras/commsdebugutility.mmh>
-
 TARGET              mtpserver.exe
 TARGETTYPE          EXE
 UID         	    0 0x102827A2
@@ -32,7 +30,8 @@ USERINCLUDE         ../inc/
 USERINCLUDE         ../../common/inc/
 USERINCLUDE         ../../../common/inc
 USERINCLUDE         ../../../inc 
-USERINCLUDE         ../../../transports/transportapi/inc
+USERINCLUDE         ../../../transports/transportapi/inc 
+USERINCLUDE					../traces
 
 SOURCEPATH          ../src/ 
 SOURCE              cmtpserver.cpp

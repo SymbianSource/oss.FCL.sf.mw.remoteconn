@@ -31,8 +31,6 @@
 #include <mtp/tmtptypeguid.h>
 #include "cmtpserviceinfo.h"
 
-#include "mtpdebug.h"
-
 class TResourceReader;
 
 
@@ -83,12 +81,6 @@ private:
     TMTPTypeGuid ReadGUID( TResourceReader& aReader );
     
 private:
-
-    /**
-    FLOGGER debug trace member variable.
-    */
-    __FLOG_DECLARATION_MEMBER_MUTABLE;
-    
     
     RFs&                             iRFs;
     

@@ -89,11 +89,6 @@ private: // Owned
     RArray<TUint>                  iHandles;
     CMTPTypeObjectPropList*        iPropertyList;  
     CMTPObjectMetaData*            iObjectMeta;
-    
-    /**
-     FLOGGER debug trace member variable.
-     */
-     __FLOG_DECLARATION_MEMBER_MUTABLE;
     };
     
 #endif // CMTPIMAGEDPGETOBJECTPROPLIST_H

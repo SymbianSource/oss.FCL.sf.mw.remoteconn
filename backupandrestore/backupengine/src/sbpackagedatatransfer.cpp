@@ -22,7 +22,6 @@
 #include "sbedataowner.h"
 #include "sbebufferhandler.h"
 #include "sbpackagedatatransfer.h"
-#include "sblog.h"
 
 #include <babackup.h>
 #include <swi/backuprestore.h>
@@ -30,6 +29,11 @@
 #include <swi/sisregistrypackage.h>
 
 #include "sbeparserdefs.h"
+#include "OstTraceDefinitions.h"
+#include "sbtrace.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "sbpackagedatatransferTraces.h"
+#endif
 
 namespace conn
 	{
@@ -46,8 +50,10 @@ namespace conn
 	@return a CPackageDataTransfer object
 	*/
 		{
+		OstTraceFunctionEntry0( CPACKAGEDATATRANSFER_NEWL_ENTRY );
 		CPackageDataTransfer* self = CPackageDataTransfer::NewLC(aPid, aDOM);
 		CleanupStack::Pop(self);
+		OstTraceFunctionExit0( CPACKAGEDATATRANSFER_NEWL_EXIT );
 		return self;
 		}
 	
@@ -58,9 +64,11 @@ namespace conn
 	@return a CPackageDataTransfer object
 	*/
 		{
+		OstTraceFunctionEntry0( CPACKAGEDATATRANSFER_NEWLC_ENTRY );
 		CPackageDataTransfer *self = new(ELeave) CPackageDataTransfer(aPid, aDOM);
 		CleanupStack::PushL(self);
 		self->ConstructL();
+		OstTraceFunctionExit0( CPACKAGEDATATRANSFER_NEWLC_EXIT );
 		return self;
 		}
 
@@ -73,30 +81,39 @@ namespace conn
 		iBufferFileWriter(NULL), iBufferSnapshotWriter(NULL), 
 		iPackageID(aPid), iSnapshot(NULL), iMetaData(NULL), ipDataOwnerManager(aDOM), iRestored(EFalse)
 	  	{
+	  	OstTraceFunctionEntry0( CPACKAGEDATATRANSFER_CPACKAGEDATATRANSFER_CONS_ENTRY );
 	  	// needed for intiliazion
 	  	iDriveList.SetLength(KMaxDrives);
 	  	iDriveList.FillZ();
 	  	// needed for hashes in registry on drive C (i.e. MMC card app's hash)
 	  	iDriveList[EDriveC] = ETrue;
+		OstTraceFunctionExit0( CPACKAGEDATATRANSFER_CPACKAGEDATATRANSFER_CONS_EXIT );
 		}
 		
 	void CPackageDataTransfer::ConstructL()
 	/** Standard Symbian second phase constructor
 	*/
 		{
-		User::LeaveIfError(iSWIRestore.Connect());
-		User::LeaveIfError(iSWIBackup.Connect());
-		User::LeaveIfError(iFs.Connect());
-		User::LeaveIfError(iFs.ShareProtected());
+		OstTraceFunctionEntry0( CPACKAGEDATATRANSFER_CONSTRUCTL_ENTRY );
+		TInt err = iSWIRestore.Connect();
+		LEAVEIFERROR(err, OstTrace1(TRACE_ERROR, CPACKAGEDATATRANSFER_CONSTRUCTL, "error = %d", err));
+		err = iSWIBackup.Connect();
+		LEAVEIFERROR(err, OstTrace1(TRACE_ERROR, DUP1_CPACKAGEDATATRANSFER_CONSTRUCTL, "error = %d", err));
+		err = iFs.Connect();
+		LEAVEIFERROR(err, OstTrace1(TRACE_ERROR, DUP2_CPACKAGEDATATRANSFER_CONSTRUCTL, "error = %d", err));
+		err = iFs.ShareProtected();
+		LEAVEIFERROR(err, OstTrace1(TRACE_ERROR, DUP3_CPACKAGEDATATRANSFER_CONSTRUCTL, "error = %d", err));
 		iRegistrationFile = HBufC::NewL(0);
 		iFileName = HBufC::NewL(KMaxFileName);
 		iTempFileName = HBufC::NewL(KMaxFileName);
+		OstTraceFunctionExit0( CPACKAGEDATATRANSFER_CONSTRUCTL_EXIT );
 		}
 
 	CPackageDataTransfer::~CPackageDataTransfer()
 	/** Standard C++ Destructor
 	*/
 	  	{
+		OstTraceFunctionEntry0( CPACKAGEDATATRANSFER_CPACKAGEDATATRANSFER_DES_ENTRY );
 		iSWIRestore.Close();
 		iSWIBackup.Close();
 		iFileHandle.Close();
@@ -112,6 +129,7 @@ namespace conn
 		delete iFileName;
 		delete iTempFileName;
 		iFs.Close();
+		OstTraceFunctionExit0( CPACKAGEDATATRANSFER_CPACKAGEDATATRANSFER_DES_EXIT );
 		}
 
 	
@@ -124,11 +142,13 @@ namespace conn
 	@param aSize Size of the aItem
 	*/										 
 		{
+		OstTraceFunctionEntry0( CPACKAGEDATATRANSFER_WRITEDATA_ENTRY );
 		TUint8 *pos = reinterpret_cast<TUint8*>(aItem);
 		for (TInt i = 0; i < aSize; ++i)
 			{
 			aBuffer.Append(pos[i]);
 			}
+		OstTraceFunctionExit0( CPACKAGEDATATRANSFER_WRITEDATA_EXIT );
 		}
 
 	TUid CPackageDataTransfer::PackageId() const
@@ -149,7 +169,7 @@ namespace conn
 	@param aFileNames on return the list of files
 	*/
 		{
-		__LOG("CPackageDataTransfer::BuildPackageFileListL() - START");
+		OstTraceFunctionEntry0( CPACKAGEDATATRANSFER_BUILDPACKAGEFILELIST_ENTRY );		
 		// Establish a connection to the registry and read the list of
 		// filenames into array.
 		// 
@@ -160,7 +180,7 @@ namespace conn
 		iDriveList[EDriveC] = ETrue;
 		
 		TUint count = iFiles.Count();
-		__LOG1("CPackageDataTransfer::BuildPackageFileListL() - No of files: %d", count);
+		OstTrace1(TRACE_NORMAL, CPACKAGEDATATRANSFER_BUILDPACKAGEFILELIST, "No of files: %d", count);
 		while (count > 0)
 			{
 			count--;
@@ -213,20 +233,17 @@ namespace conn
 			} // for
 			
 		
-		#ifdef SBE_LOGGING_ENABLED
-			const TUint fNameCount = iFiles.Count();
-	        if  (fNameCount)
-	            {
-	            for(TUint k=0; k<fNameCount; k++)
-	                {
-	                const TDesC& file = *iFiles[k];
-	                __LOG2("CPackageDataTransfer::BuildPackageFileListL() - Files Added - file entry[%03d] %S", k, &file);
-	                }
-	            }
-		#endif
+        const TUint fNameCount = iFiles.Count();
+        if  (fNameCount)
+            {
+            for(TUint k=0; k<fNameCount; k++)
+                {
+                const TDesC& file = *iFiles[k];
+                OstTraceExt2(TRACE_NORMAL, DUP1_CPACKAGEDATATRANSFER_BUILDPACKAGEFILELIST, "Files Added - file entry[%03d] %S", static_cast<TInt32>(k), file);
+                }
+            }
 		
-		
-		__LOG("CPackageDataTransfer::BuildPackageFileListL() - END");		
+		OstTraceFunctionExit0( CPACKAGEDATATRANSFER_BUILDPACKAGEFILELIST_EXIT );
 		}
 
 	
@@ -238,7 +255,8 @@ namespace conn
 	@param aSize on return the size of the data
 	*/
 		{
-		__LOG("CPackageDataTransfer::GetExpectedDataSizeL - Begin getmetadata");
+		OstTraceFunctionEntry0( CPACKAGEDATATRANSFER_GETEXPECTEDDATASIZEL_ENTRY );
+		OstTrace0(TRACE_NORMAL, CPACKAGEDATATRANSFER_GETEXPECTEDDATASIZEL, "Begin getmetadata");
 		if (iMetaData == NULL)
 			{
 			TRAPD(err, iMetaData = iSWIBackup.GetMetaDataL(iPackageID, iFiles));
@@ -246,24 +264,26 @@ namespace conn
 			if(KErrNotSupported == err)
 			    {//Non-Removable package, nothing to backup
 			    aSize = 0;
-			    __LOG("CPackageDataTransfer::GetExpectedDataSizeL - GetMetaDataL - KErrNotSupported");
+			    OstTrace0(TRACE_NORMAL, DUP1_CPACKAGEDATATRANSFER_GETEXPECTEDDATASIZEL, "GetMetaDataL - KErrNotSupported");
+			    OstTraceFunctionExit0( CPACKAGEDATATRANSFER_GETEXPECTEDDATASIZEL_EXIT );
 			    return;
 			    }
 			else if(KErrNone != err)
 			    {
-			    __LOG1("CPackageDataTransfer::GetExpectedDataSizeL - GetMetaDataL leave with %d", err);
+			    OstTrace1(TRACE_ERROR, DUP2_CPACKAGEDATATRANSFER_GETEXPECTEDDATASIZEL, "GetMetaDataL leave with %d", err);
 			    User::Leave(err);
 			    }
 			
 			iMetaDataSize = iMetaData->Size();
 			BuildPackageFileList();
 			}
-		__LOG("CPackageDataTransfer::GetExpectedDataSizeL - End getmetadata");
+		OstTrace0(TRACE_NORMAL, DUP3_CPACKAGEDATATRANSFER_GETEXPECTEDDATASIZEL, "End getmetadata");
 		
 		if (!IsDataOnDrive(aDriveNumber))
 			{
 			// no data on drive
 			aSize = 0;
+			OstTraceFunctionExit0( DUP1_CPACKAGEDATATRANSFER_GETEXPECTEDDATASIZEL_EXIT );
 			return;
 			}
 		
@@ -274,15 +294,15 @@ namespace conn
 			{
 			case ESystemSnapshotData:
 				{
-				__LOG1("CPackageDataTransfer::GetExpectedDataSizeL() - START - ESystemSnapshotData - aDriveNumber: %c", aDriveNumber + 'A');
+				OstTraceExt1(TRACE_NORMAL, DUP4_CPACKAGEDATATRANSFER_GETEXPECTEDDATASIZEL, "ESystemSnapshotData - aDriveNumber: %c", aDriveNumber + 'A');
 				// Find all files
 				aSize = (count * sizeof(TSnapshot));
-				__LOG1("CPackageDataTransfer::GetExpectedDataSizeL() - passive snapshot count: %d", count);
+				OstTrace1(TRACE_NORMAL, DUP5_CPACKAGEDATATRANSFER_GETEXPECTEDDATASIZEL, "passive snapshot count: %d", count);
 				for (TUint x = 0; x < count; x++)
 					{
 					const TDesC& fileName = *iFiles[x];
                 	const TInt fileSize = fileName.Length();;
-                	__LOG2("CPackageDataTransfer::GetExpectedDataSizeL() - passive snapshot file: %S, size: %d", &fileName, fileSize);
+                	OstTraceExt2(TRACE_NORMAL, DUP6_CPACKAGEDATATRANSFER_GETEXPECTEDDATASIZEL, "passive snapshot file: %S, size: %d", fileName, fileSize);
 					aSize += fileSize;
 					} // for x
 					
@@ -290,18 +310,18 @@ namespace conn
 				}
 			case ESystemData:
 				{
-				__LOG1("CPackageDataTransfer::GetExpectedDataSizeL() - START - ESystemData - aDriveNumber: %c", aDriveNumber + 'A');
+				OstTraceExt1(TRACE_NORMAL, DUP7_CPACKAGEDATATRANSFER_GETEXPECTEDDATASIZEL, "ESystemData - aDriveNumber: %c", aDriveNumber + 'A');
 				
 				aSize += sizeof(TInt);
 			
 				TEntry entry;
-				__LOG1("CPackageDataTransfer::GetExpectedDataSizeL() - passive file count: %d", count);
+				OstTrace1(TRACE_NORMAL, DUP8_CPACKAGEDATATRANSFER_GETEXPECTEDDATASIZEL, "passive file count: %d", count);
 				for (TUint x = 0; x < count; x++)
 					{
 					const TDesC& fileName = *iFiles[x];
 					TInt err = iFs.Entry(fileName, entry);
 					TUint fileSize = entry.iSize;
-					__LOG2("CPackageDataTransfer::GetExpectedDataSizeL() - passive file: %S, size: %d", &fileName, fileSize);
+					OstTraceExt2(TRACE_NORMAL, DUP9_CPACKAGEDATATRANSFER_GETEXPECTEDDATASIZEL, "passive file: %S, size: %d", fileName, static_cast<TInt32>(fileSize));
 					switch(err)
 						{
 					case KErrNone:
@@ -310,9 +330,10 @@ namespace conn
 					case KErrNotFound:
 					case KErrPathNotFound:
 					case KErrBadName:
-						__LOG2("CPackageDataTransfer::GetExpectedDataSizeL() - error getting passive file: %S, error: %d", &fileName, err);
+					    OstTraceExt2(TRACE_NORMAL, DUP10_CPACKAGEDATATRANSFER_GETEXPECTEDDATASIZEL, "error getting passive file: %S, error: %d", fileName, err);
 						break;
 					default:
+					    OstTrace1(TRACE_ERROR, DUP13_CPACKAGEDATATRANSFER_GETEXPECTEDDATASIZEL, "Leave: %d", err);
 						User::Leave(err);
 						}
 					}
@@ -321,11 +342,12 @@ namespace conn
 				}
 			default:
 				{
-				__LOG2("CPackageDataTransfer::GetExpectedDataSizeL() - No case for TransferType: %d, data owner 0x%08x", aTransferType, iPackageID.iUid);
+				OstTraceExt2(TRACE_ERROR, DUP11_CPACKAGEDATATRANSFER_GETEXPECTEDDATASIZEL, "No case for TransferType: %d, data owner 0x%08x", static_cast<TInt32>(aTransferType), iPackageID.iUid);
 				User::Leave(KErrNotSupported);
 				}
 			} // switch
-		__LOG2("CPackageDataTransfer::GetExpectedDataSizeL() - END - size is: %d, data owner 0x%08x", aSize, iPackageID.iUid);
+		OstTraceExt2(TRACE_NORMAL, DUP12_CPACKAGEDATATRANSFER_GETEXPECTEDDATASIZEL, "size is: %d, data owner 0x%08x", static_cast<TInt32>(aSize), iPackageID.iUid);
+		OstTraceFunctionExit0( DUP2_CPACKAGEDATATRANSFER_GETEXPECTEDDATASIZEL_EXIT );
 		}
 	
 	void CPackageDataTransfer::RequestDataL(TDriveNumber aDriveNumber, 
@@ -342,8 +364,9 @@ namespace conn
 			   data.
 		*/
 		{
-		__LOG6("CPackageDataTransfer::RequestDataL() - START - aDrive: %c, aTransferType: %d, iSecureId: 0x%08x, iState.iState: %d, iState.iTransferType: %d, aBuffer.Length(): %d", aDriveNumber + 'A', aTransferType, iPackageID.iUid, iState.iState, iState.iTransferType, aBuffer.Length());
-        //__LOGDATA("CPackageDataTransfer::RequestDataL() - %S", aBuffer.Ptr(), aBuffer.Length() );
+		OstTraceFunctionEntry0( CPACKAGEDATATRANSFER_REQUESTDATAL_ENTRY );
+		OstTraceExt3(TRACE_NORMAL, CPACKAGEDATATRANSFER_REQUESTDATAL, "aDrive: %c, aTransferType: %d, iSecureId: 0x%08x", static_cast<TInt8>(aDriveNumber + 'A'), static_cast<TInt32>(aTransferType), static_cast<TUint32>(iPackageID.iUid));
+		OstTraceExt3(TRACE_NORMAL, DUP4_CPACKAGEDATATRANSFER_REQUESTDATAL, "iState.iState: %d, iState.iTransferType: %d, aBuffer.Length(): %d", static_cast<TInt32>(iState.iState), static_cast<TInt32>(iState.iTransferType), static_cast<TInt32>(aBuffer.Length()));
 		
 		TInt err = KErrNone;
 		
@@ -356,6 +379,7 @@ namespace conn
                 iState.iState = ENone;
                 aLastSection = ETrue;
                 Cleanup();
+                OstTraceFunctionExit0( CPACKAGEDATATRANSFER_REQUESTDATAL_EXIT );
                 return;
                 }
             else if(KErrNone != err)
@@ -363,6 +387,7 @@ namespace conn
                 iState.iState = ENone;
                 aLastSection = ETrue;
                 Cleanup();
+                OstTrace1(TRACE_ERROR, DUP3_CPACKAGEDATATRANSFER_REQUESTDATAL, "Leave: %d", err);
                 User::Leave(err);
                 }
             
@@ -375,7 +400,7 @@ namespace conn
 		     ((iState.iState == ERequest) && (iState.iDriveNumber == aDriveNumber) && 
 		      (iState.iTransferType == aTransferType))))
 			{
-		    __LOG("CPackageDataTransfer::RequestDataL() - bad state => ERROR => KErrNotReady");
+		    OstTrace0(TRACE_ERROR, DUP1_CPACKAGEDATATRANSFER_REQUESTDATAL, "bad state => ERROR => KErrNotReady");
 			User::Leave(KErrNotReady);			
 			}
 			
@@ -408,10 +433,11 @@ namespace conn
 			{
 			iState.iState = ENone;
 			Cleanup();
-			__LOG1("CPackageDataTransfer::RequestDataL() - Left with error: %d", err);
+			OstTrace1(TRACE_ERROR, DUP2_CPACKAGEDATATRANSFER_REQUESTDATAL, "Leave with error: %d", err);
 			User::Leave(err);
 			} // if
-		__LOG("CPackageDataTransfer::RequestDataL() - END");
+		
+		OstTraceFunctionExit0( DUP1_CPACKAGEDATATRANSFER_REQUESTDATAL_EXIT );
 		}
 
 
@@ -423,11 +449,13 @@ namespace conn
 	@param aSize the size of the item to fill
 	*/
 		{
+        OstTraceFunctionEntry0( CPACKAGEDATATRANSFER_READDATA_ENTRY );
         TUint8* pos = reinterpret_cast<TUint8*>(aDestinationAddress);
 		for (TInt i = 0; i < aSize; ++i)
 			{
 			pos[i] = aBuffer[i];
 			}
+		OstTraceFunctionExit0( CPACKAGEDATATRANSFER_READDATA_EXIT );
 		}
 
 	void CPackageDataTransfer::SupplyFileDataL( const TDesC8& aBuffer, TBool aLastSection)
@@ -437,7 +465,8 @@ namespace conn
 	@param aLastSection has all data been supplied
 	*/
 		{
-		__LOG1("CPackageDataTransfer::SupplyFileDataL() - START - aLastSection: %d", aLastSection);
+		OstTraceFunctionEntry0( CPACKAGEDATATRANSFER_SUPPLYFILEDATAL_ENTRY );
+		OstTrace1(TRACE_NORMAL, CPACKAGEDATATRANSFER_SUPPLYFILEDATAL, "aLastSection: %d", aLastSection);
 		TUint8* current = const_cast<TUint8*>(aBuffer.Ptr());
 		const TUint8* end = current + aBuffer.Size();
 		while (current < end)
@@ -446,17 +475,17 @@ namespace conn
 				{
 				if (ReadFromBufferF(iFixedHeader, current, end) == EFalse)
 					{
-					__LOG("CPackageDataTransfer::SupplyFileDataL() - ReadFromBufferF() returned False so breaking!");
+				    OstTrace0(TRACE_NORMAL, DUP1_CPACKAGEDATATRANSFER_SUPPLYFILEDATAL, "ReadFromBufferF() returned False so breaking!");
 					break;
 					} // if
 				
-				__LOG1("CPackageDataTransfer::SupplyFileDataL() - fixed header - iFileNameLength:  %d", iFixedHeader.iFileNameLength);
-                __LOG1("CPackageDataTransfer::SupplyFileDataL() - fixed header - iFileSize:        %d", iFixedHeader.iFileSize);
-                __LOG1("CPackageDataTransfer::SupplyFileDataL() - fixed header - iAttributes:      %d", iFixedHeader.iAttributes);
+				OstTrace1(TRACE_NORMAL, DUP2_CPACKAGEDATATRANSFER_SUPPLYFILEDATAL, "fixed header - iFileNameLength:  %d", iFixedHeader.iFileNameLength);
+				OstTrace1(TRACE_NORMAL, DUP3_CPACKAGEDATATRANSFER_SUPPLYFILEDATAL, "fixed header - iFileSize:        %d", iFixedHeader.iFileSize);
+				OstTrace1(TRACE_NORMAL, DUP4_CPACKAGEDATATRANSFER_SUPPLYFILEDATAL, "fixed header - iAttributes:      %d", iFixedHeader.iAttributes);
                 
                 if ((iFixedHeader.iFileNameLength > KMaxFileName) || (!iFixedHeader.iFileNameLength))
 					{
-					__LOG1("CBufferFileReader::SupplyFileDataL() - Leaving - iFileNameLength: %d more then MaxLength", iFixedHeader.iFileNameLength);
+                    OstTrace1(TRACE_ERROR, DUP5_CPACKAGEDATATRANSFER_SUPPLYFILEDATAL, "Leave with KErrOverflow - iFileNameLength: %d more then MaxLength", iFixedHeader.iFileNameLength);
 					User::Leave(KErrOverflow);
 					}
                 
@@ -469,20 +498,20 @@ namespace conn
 				if (ReadFromBufferV(ptr, iFixedHeader.iFileNameLength * KCharWidthInBytes, current, end) == EFalse)
 					{
 					iBytesRead = ptr.Size();
-					__LOG1("CPackageDataTransfer::SupplyFileDataL() - ReadFromBufferV() returned False - Filename bytes read: %d", iBytesRead);
+					OstTrace1(TRACE_NORMAL, DUP6_CPACKAGEDATATRANSFER_SUPPLYFILEDATAL, "ReadFromBufferV() returned False - Filename bytes read: %d", iBytesRead);
 					break;
 					} // if
 				
 				if (iFixedHeader.iFileNameLength > KMaxFileName)
 					{
-					__LOG("CBufferFileReader::SupplyFileDataL() - Leave with KErrOverflow");
+				    OstTrace0(TRACE_ERROR, DUP7_CPACKAGEDATATRANSFER_SUPPLYFILEDATAL, "Leave with KErrOverflow");
 					User::Leave(KErrOverflow);
 					}
 				
 				iFileName->Des().SetLength(iFixedHeader.iFileNameLength);
 				iFileNameRead = ETrue;
 				
-				__LOG1("CPackageDataTransfer::SupplyFileDataL() - FileName: %S", iFileName);
+				OstTraceExt1(TRACE_NORMAL, DUP8_CPACKAGEDATATRANSFER_SUPPLYFILEDATAL, "FileName: %S", *iFileName);
 				}
 				
 				if (!iFileOpen)
@@ -506,7 +535,7 @@ namespace conn
 					
 					if (tempErr != KErrNone)
 						{
-						__LOG2("CPackageDataTransfer::SupplyFileDataL() - Left creating temp file in: %S , with %d", &tempPath, tempErr);
+					    OstTraceExt2(TRACE_ERROR, DUP9_CPACKAGEDATATRANSFER_SUPPLYFILEDATAL, "Leave while creating temp file in: %S , with %d", tempPath, tempErr);
 						User::Leave(tempErr);
 						}
 					
@@ -515,16 +544,19 @@ namespace conn
 					}
 				
 			// Write to the file
+			TInt err;
 			TInt filesize;
 			iFileHandle.Size(filesize);
 			
 			if ((end - current) >= (iFixedHeader.iFileSize - filesize))
 				{
 				TPtr8 ptr(current, iFixedHeader.iFileSize - filesize, iFixedHeader.iFileSize - filesize);
-				User::LeaveIfError(iFileHandle.Write(ptr));
+				err = iFileHandle.Write(ptr);
+				LEAVEIFERROR(err, OstTrace1(TRACE_ERROR, DUP13_CPACKAGEDATATRANSFER_SUPPLYFILEDATAL, "error = %d", err));
 				
 				// Write the attributes & modified time
-				User::LeaveIfError(iFileHandle.Set(iFixedHeader.iModified, iFixedHeader.iAttributes, KEntryAttNormal));
+				err = iFileHandle.Set(iFixedHeader.iModified, iFixedHeader.iAttributes, KEntryAttNormal);
+				LEAVEIFERROR(err, OstTrace1(TRACE_ERROR, DUP14_CPACKAGEDATATRANSFER_SUPPLYFILEDATAL, "error = %d", err));
 				
 				TInt err = KErrNone;
 				if (((*iFileName).FindC(KPrimaryBackupRegistrationFile) >= 0) ||
@@ -532,14 +564,16 @@ namespace conn
 					((*iFileName).MatchC(KResource) >= 0) ||
   					((*iFileName).MatchC(KImport) >= 0) )
 					{
-					__LOG("CPackageDataTransfer::SupplyFileDataL() - about to call RestoreFileL()");		
+				    OstTrace0(TRACE_NORMAL, DUP10_CPACKAGEDATATRANSFER_SUPPLYFILEDATAL, "about to call RestoreFileL()");		
 					TRAP(err, iSWIRestore.RestoreFileL(iFileHandle, *iFileName));
-					__LOG1("CPackageDataTransfer::SupplyFileDataL() - RestoreFileL() - err :%d", err);		
+					OstTrace1(TRACE_NORMAL, DUP11_CPACKAGEDATATRANSFER_SUPPLYFILEDATAL, "RestoreFileL() - err :%d", err);		
 					}
 				else if ((*iFileName).MatchC(KPrivateMatch) >= 0)
 					{
-					User::LeaveIfError(iFs.MkDirAll((*iFileName)));
-					User::LeaveIfError(iFileHandle.Rename((*iFileName)));
+				    err = iFs.MkDirAll((*iFileName));
+					LEAVEIFERROR(err, OstTrace1(TRACE_ERROR, DUP15_CPACKAGEDATATRANSFER_SUPPLYFILEDATAL, "error = %d", err));
+					err = iFileHandle.Rename((*iFileName));
+					LEAVEIFERROR(err, OstTrace1(TRACE_ERROR, DUP16_CPACKAGEDATATRANSFER_SUPPLYFILEDATAL, "error = %d", err));
 					}
 				
 								
@@ -566,16 +600,19 @@ namespace conn
 				{	
 				TInt fsize = end - current;
 				TPtr8 ptr(current, fsize, fsize);
-				User::LeaveIfError(iFileHandle.Write(ptr));
+				err = iFileHandle.Write(ptr);
+				LEAVEIFERROR(err, OstTrace1(TRACE_ERROR, DUP17_CPACKAGEDATATRANSFER_SUPPLYFILEDATAL, "error = %d", err));
 				break;
 				}
 			} // while
 			
 		if (aLastSection && iFileOpen)
 			{
+		    OstTrace0(TRACE_ERROR, DUP12_CPACKAGEDATATRANSFER_SUPPLYFILEDATAL, "Leave with KErrUnderflow");
 			User::Leave(KErrUnderflow);
 			} // if
-		__LOG("CPackageDataTransfer::SupplyFileDataL() - END");
+		
+		OstTraceFunctionExit0( CPACKAGEDATATRANSFER_SUPPLYFILEDATAL_EXIT );
 		} // SupplyFileDataL
 			
 	void CPackageDataTransfer::SupplyDataL(TDriveNumber aDriveNumber, 
@@ -590,7 +627,8 @@ namespace conn
 		@param aLastSection is this the last section
 		*/
 		{
-		__LOG5("CPackageDataTransfer::SupplyDataL() - START - aDrive: %c, aTransferType: %d, iSecureId: 0x%08x, iState.iState: %d, iState.iTransferType: %d", aDriveNumber + 'A', aTransferType, iPackageID.iUid, iState.iState, iState.iTransferType);
+		OstTraceFunctionEntry0( CPACKAGEDATATRANSFER_SUPPLYDATAL_ENTRY );
+		OstTraceExt5(TRACE_NORMAL, CPACKAGEDATATRANSFER_SUPPLYDATAL, "aDrive: %c, aTransferType: %d, iSecureId: 0x%08x, iState.iState: %d, iState.iTransferType: %d", aDriveNumber + 'A', aTransferType, iPackageID.iUid, iState.iState, iState.iTransferType);
 	
 		if (!iRestored)
 			{
@@ -599,7 +637,7 @@ namespace conn
 			     ((iState.iState == ESupply || iState.iState == EBuffer) && (iState.iDriveNumber == aDriveNumber) && 
 			      (iState.iTransferType == aTransferType))))
 				{
-				__LOG("CPackageDataTransfer::SupplyDataL() - bad state => ERROR => KErrNotReady");
+			    OstTrace0(TRACE_ERROR, DUP1_CPACKAGEDATATRANSFER_SUPPLYDATAL, "bad state => ERROR => KErrNotReady");
 				User::Leave(KErrNotReady);			
 				}
 				
@@ -635,15 +673,15 @@ namespace conn
 					{
 					Cleanup();
 					iSWIRestore.Close();
-					User::LeaveIfError(iSWIRestore.Connect());
+					TInt err1 = iSWIRestore.Connect();
+					LEAVEIFERROR(err1, OstTrace1(TRACE_ERROR, DUP3_CPACKAGEDATATRANSFER_SUPPLYDATAL, "error = %d", err1));
 					}
-				__LOG1("CPackageDataTransfer::SupplyDataL() - Left with error: %d", err);
+				OstTrace1(TRACE_ERROR, DUP2_CPACKAGEDATATRANSFER_SUPPLYDATAL, "Left with error: %d", err);
 				User::Leave(err);
 				} //else
 			}
 		
-		__LOG("CPackageDataTransfer::SupplyDataL() - END");
-		
+		OstTraceFunctionExit0( CPACKAGEDATATRANSFER_SUPPLYDATAL_EXIT );
 		}
 
     void CPackageDataTransfer::DoSupplyDataL(TDriveNumber /*aDriveNumber*/, const TDesC8& aBuffer, TBool aLastSection)
@@ -654,8 +692,8 @@ namespace conn
 	@param aLastSection was this the last section of data
 	*/
     	{
-    	__LOG3("CPackageDataTransfer::DoSupplyDataL() - START - aBuffer length: %d, aLastSection: %d, iState: %d", aBuffer.Length(), aLastSection, iState.iState);
-        //__LOGDATA("CPackageDataTransfer::DoSupplyDataL() -       %S", aBuffer.Ptr(), Min( aBuffer.Length(), 1024 ));
+    	OstTraceFunctionEntry0( CPACKAGEDATATRANSFER_DOSUPPLYDATAL_ENTRY );
+    	OstTraceExt3(TRACE_NORMAL, CPACKAGEDATATRANSFER_DOSUPPLYDATAL, "aBuffer length: %d, aLastSection: %d, iState: %d", aBuffer.Length(), aLastSection, iState.iState);        
 
 		TInt currentPos = 0;
         const TInt sourceBufferLength = aBuffer.Length();
@@ -664,20 +702,20 @@ namespace conn
             {
 		    if (iState.iState == ENone )
 			    {
-			    __LOG("CPackageDataTransfer::DoSupplyDataL() - iState == ENone - set up for initial meta data read...");
+		        OstTrace0(TRACE_NORMAL, DUP1_CPACKAGEDATATRANSFER_DOSUPPLYDATAL, "iState == ENone - set up for initial meta data read...");
 
                 // Retrieve metadata and file list from the buffer
 			    ReadData(&iMetaDataSize, aBuffer, sizeof(TInt));
-			    __LOG1("CPackageDataTransfer::DoSupplyDataL() - meta data size: %d", iMetaDataSize);
+			    OstTrace1(TRACE_NORMAL, DUP2_CPACKAGEDATATRANSFER_DOSUPPLYDATAL, "meta data size: %d", iMetaDataSize);
 			    currentPos += sizeof(TInt);
 			    
 			    if (iMetaDataSize >= (KMaxTInt/2) || iMetaDataSize < 0)
 				    {
-				    __LOG("CPackageDataTransfer::DoSupplyDataL() - size read is too big");
+			        OstTrace0(TRACE_ERROR, DUP3_CPACKAGEDATATRANSFER_DOSUPPLYDATAL, "size read is too big");
 				    User::Leave(KErrCorrupt);
 				    }
 			    
-			    __LOG1("CPackageDataTransfer::DoSupplyDataL() - creating meta data buffer of length: %d bytes", iMetaDataSize);
+			    OstTrace1(TRACE_NORMAL, DUP4_CPACKAGEDATATRANSFER_DOSUPPLYDATAL, "creating meta data buffer of length: %d bytes", iMetaDataSize);
 			    HBufC8* metaDataBuffer = HBufC8::NewL(iMetaDataSize);
                 delete iMetaData;
 			    iMetaData = metaDataBuffer;
@@ -685,97 +723,98 @@ namespace conn
 
                 if (iMetaDataSize > sourceBufferLength )
 				    {
-				    __LOG("CPackageDataTransfer::DoSupplyDataL() - not enough source data to obtain entire meta data in one pass...");
+                    OstTrace0(TRACE_NORMAL, DUP5_CPACKAGEDATATRANSFER_DOSUPPLYDATAL, "not enough source data to obtain entire meta data in one pass...");
 
                     if (aLastSection)
 					    {
-					    __LOG("CPackageDataTransfer::DoSupplyDataL() - Underflow1");
+                        OstTrace0(TRACE_ERROR, DUP6_CPACKAGEDATATRANSFER_DOSUPPLYDATAL, "Underflow1");
 					    User::Leave(KErrUnderflow);
 					    }
                     else
                         {
                         data.Append(aBuffer.Mid(currentPos));
 				        iState.iState = EBuffer;
-				        __LOG2("CPackageDataTransfer::DoSupplyDataL() - got %d bytes of meta data (%d bytes remaining) => changing state to EBuffer", data.Length(), iMetaDataSize - data.Length() );
+				        OstTraceExt2(TRACE_NORMAL, DUP7_CPACKAGEDATATRANSFER_DOSUPPLYDATAL, "got %d bytes of meta data (%d bytes remaining) => changing state to EBuffer", data.Length(), iMetaDataSize - data.Length() );
                         }
 				    }
 			    else
 				    {
-				    __LOG("CPackageDataTransfer::DoSupplyDataL() - able to read entire meta data buffer in a single pass... ");
+			        OstTrace0(TRACE_NORMAL, DUP8_CPACKAGEDATATRANSFER_DOSUPPLYDATAL, "able to read entire meta data buffer in a single pass... ");
 				    data.Append(aBuffer.Mid(currentPos, iMetaDataSize));
 				    currentPos += iMetaDataSize;
 				    }
 			    }
 		    else if (iState.iState == EBuffer)
 			    {
-			    __LOG1("CPackageDataTransfer::DoSupplyDataL() - iState == EBuffer, iMetaData length: %d", iMetaData->Length());
+		        OstTrace1(TRACE_NORMAL, DUP9_CPACKAGEDATATRANSFER_DOSUPPLYDATAL, "iState == EBuffer, iMetaData length: %d", iMetaData->Length());
 			    TPtr8 ptr( iMetaData->Des() );
 			    const TInt leftToRead = iMetaDataSize - ptr.Length();
-                __LOG1("CPackageDataTransfer::DoSupplyDataL() - meta data buffer left to read: %d", leftToRead);
+			    OstTrace1(TRACE_NORMAL, DUP10_CPACKAGEDATATRANSFER_DOSUPPLYDATAL, "meta data buffer left to read: %d", leftToRead);
 
                 if (sourceBufferLength < leftToRead)
 				    {
-				    __LOG("CPackageDataTransfer::DoSupplyDataL() - not enough source data to obtain remaining required meta data in this pass...");
+                    OstTrace0(TRACE_NORMAL, DUP11_CPACKAGEDATATRANSFER_DOSUPPLYDATAL, "not enough source data to obtain remaining required meta data in this pass...");
 
                     if (aLastSection)
 					    {
-					    __LOG("CPackageDataTransfer::DoSupplyDataL() - Underflow2");
+                        OstTrace0(TRACE_ERROR, DUP12_CPACKAGEDATATRANSFER_DOSUPPLYDATAL, "Underflow2");
 					    User::Leave(KErrUnderflow);
 					    }
 					    
 				    ptr.Append(aBuffer);
-				    __LOG1("CPackageDataTransfer::DoSupplyDataL() - meta data buffered again: %d", ptr.Length());
+				    OstTrace1(TRACE_NORMAL, DUP13_CPACKAGEDATATRANSFER_DOSUPPLYDATAL, "meta data buffered again: %d", ptr.Length());
 				    iState.iState = EBuffer;
+				    OstTraceFunctionExit0( CPACKAGEDATATRANSFER_DOSUPPLYDATAL_EXIT );
 				    return;
 				    }
 			    else
 				    {
-				    __LOG("CPackageDataTransfer::DoSupplyDataL() - able to complete meta data read in this pass...");
+			        OstTrace0(TRACE_NORMAL, DUP14_CPACKAGEDATATRANSFER_DOSUPPLYDATAL, "able to complete meta data read in this pass...");
                     ptr.Append( aBuffer.Left(leftToRead) );
-                    __LOG1("CPackageDataTransfer::DoSupplyDataL() - meta data finished buffering, meta data size is now: %d", ptr.Length());
+                    OstTrace1(TRACE_NORMAL, DUP15_CPACKAGEDATATRANSFER_DOSUPPLYDATAL, "meta data finished buffering, meta data size is now: %d", ptr.Length());
 				    currentPos += leftToRead;
 				    }
 			    }
 		    
             const TBool metaDataComplete = ( iMetaData->Length() == iMetaDataSize );
-    	    __LOG4("CPackageDataTransfer::DoSupplyDataL() - meta data complete?: %d ( %d bytes remaining out of total: %d with current length of: %d)", metaDataComplete, iMetaDataSize - iMetaData->Length(), iMetaDataSize, iMetaData->Length() );
+            OstTraceExt4(TRACE_NORMAL, DUP16_CPACKAGEDATATRANSFER_DOSUPPLYDATAL, "meta data complete?: %d ( %d bytes remaining out of total: %d with current length of: %d)", metaDataComplete, iMetaDataSize - iMetaData->Length(), iMetaDataSize, iMetaData->Length() );
 
             if  ( metaDataComplete )
                 {
-    	        __LOG("CPackageDataTransfer::DoSupplyDataL() - Asking SWI to start a package...");
+                OstTrace0(TRACE_NORMAL, DUP17_CPACKAGEDATATRANSFER_DOSUPPLYDATAL, "Asking SWI to start a package...");
 		        iState.iState = ESupply;
 		        iSWIRestore.StartPackageL(iPackageID, *iMetaData);
-		        __LOG("CPackageDataTransfer::DoSupplyDataL() - SWI StartPackageL() completed OK");
+		        OstTrace0(TRACE_NORMAL, DUP18_CPACKAGEDATATRANSFER_DOSUPPLYDATAL, "SWI StartPackageL() completed OK");
                 }
             }
 		
         if  ( iState.iState == ESupply )
             {
-			__LOG1("CPackageDataTransfer::DoSupplyDataL() - iState == ESupply, currentPos: %d", currentPos);
+            OstTrace1(TRACE_NORMAL, DUP19_CPACKAGEDATATRANSFER_DOSUPPLYDATAL, "iState == ESupply, currentPos: %d", currentPos);
 
             // Now restore each file and commit the changes 
-            const TPtrC8 ptr( aBuffer.Mid( currentPos ) );
-            //__LOGDATA("CPackageDataTransfer::DoSupplyDataL() - for supplyFileData   %S", ptr.Ptr(), Min( ptr.Length(), 1024 ));
+            const TPtrC8 ptr( aBuffer.Mid( currentPos ) );            
 		    
 		    SupplyFileDataL(ptr, aLastSection);
-		    __LOG("CPackageDataTransfer::DoSupplyDataL() - SupplyFileDataL() completed OK");
+		    OstTrace0(TRACE_NORMAL, DUP20_CPACKAGEDATATRANSFER_DOSUPPLYDATAL, "SupplyFileDataL() completed OK");
 		    
 		    if (aLastSection)
 			    {
-			    __LOG("CPackageDataTransfer::DoSupplyDataL() - aLastSection - asking SWI to commit package...");
+		        OstTrace0(TRACE_NORMAL, DUP21_CPACKAGEDATATRANSFER_DOSUPPLYDATAL, "aLastSection - asking SWI to commit package...");
 			    // now we can finalise the restore
 			    iSWIRestore.CommitPackageL();
-			    __LOG("CPackageDataTransfer::DoSupplyDataL() - Package commited OK");
+			    OstTrace0(TRACE_NORMAL, DUP22_CPACKAGEDATATRANSFER_DOSUPPLYDATAL, "Package commited OK");
 			    iRestored = ETrue;
 			    iState.iState = ENone;
 			    
 			    Cleanup();
 			    iSWIRestore.Close();
-			    User::LeaveIfError(iSWIRestore.Connect());
+			    TInt err = iSWIRestore.Connect();
+			    LEAVEIFERROR(err, OstTrace1(TRACE_ERROR, DUP23_CPACKAGEDATATRANSFER_DOSUPPLYDATAL, "error = %d", err));
 			    }
             }
 
-		__LOG("CPackageDataTransfer::DoSupplyDataL() - END");
+    	OstTraceFunctionExit0( DUP1_CPACKAGEDATATRANSFER_DOSUPPLYDATAL_EXIT );
     	} // SupplyDataL
 		
 	void CPackageDataTransfer::SupplySnapshotL(TDriveNumber aDriveNumber, const TDesC8& aBuffer, TBool aLastSection)
@@ -786,7 +825,8 @@ namespace conn
 	@param aLastSection was this the last section of data
 	*/
 		{
-		__LOG("CPackageDataTransfer::SupplySnapshotL() - START");
+		OstTraceFunctionEntry0( CPACKAGEDATATRANSFER_SUPPLYSNAPSHOTL_ENTRY );
+		
 		TInt err = KErrNone;
 		if (iBufferSnapshotReader == NULL)
 			{
@@ -808,9 +848,10 @@ namespace conn
 			delete iBufferSnapshotReader;
 			iBufferSnapshotReader = NULL;
 			
-			User::LeaveIfError(err);
+			LEAVEIFERROR(err, OstTrace1(TRACE_ERROR, CPACKAGEDATATRANSFER_SUPPLYSNAPSHOTL, "error = %d", err));
 			} // if
-		__LOG("CPackageDataTransfer::SupplySnapshotL() - END");
+		
+		OstTraceFunctionExit0( CPACKAGEDATATRANSFER_SUPPLYSNAPSHOTL_EXIT );
 		}
 	    
     void CPackageDataTransfer::DoRequestDataL(TDriveNumber aDriveNumber, TPtr8& aBuffer, TBool& aLastSection)
@@ -823,15 +864,16 @@ namespace conn
 		   data.
 	*/
     	{
-    	__LOG3("CPackageDataTransfer::DoRequestDataL() - START - iState: %d, iMetaData length: %d, iMetaDataSize: %d", iState.iState, iMetaData->Length(), iMetaDataSize);
+    	OstTraceFunctionEntry0( CPACKAGEDATATRANSFER_DOREQUESTDATAL_ENTRY );
+    	OstTraceExt3(TRACE_NORMAL, CPACKAGEDATATRANSFER_DOREQUESTDATAL, "iState: %d, iMetaData length: %d, iMetaDataSize: %d", iState.iState, iMetaData->Length(), iMetaDataSize);
 	
         if (iState.iState == ENone || iState.iState == EBuffer)
 			{
 			if (!IsDataOnDrive(aDriveNumber))
 				{
 				aLastSection = ETrue;
-    	        __LOG("CPackageDataTransfer::DoRequestDataL() - END - no data on drive");
-                //__LOGDATA("CPackageDataTransfer::DoRequestDataL() -       %S", aBuffer.Ptr(), aBuffer.Length());
+				OstTrace0(TRACE_NORMAL, DUP1_CPACKAGEDATATRANSFER_DOREQUESTDATAL, "no data on drive");                
+				OstTraceFunctionExit0( CPACKAGEDATATRANSFER_DOREQUESTDATAL_EXIT );
 				return;
 				}
 			
@@ -839,23 +881,23 @@ namespace conn
             // Now write the meta data to the buffer. 
 			const TInt KSizeOfTInt = sizeof(TInt);
 			const TInt availableBuffer = aBuffer.MaxSize() - aBuffer.Size();
-			__LOG1("CPackageDataTransfer::DoRequestDataL() - available Buffer %d", availableBuffer);
+			OstTrace1(TRACE_NORMAL, DUP2_CPACKAGEDATATRANSFER_DOREQUESTDATAL, "available Buffer %d", availableBuffer);
 			
 			if (iState.iState == ENone)
 				{		
 				if ((availableBuffer - KSizeOfTInt) >= iMetaDataSize)
 					{
-					__LOG("CPackageDataTransfer::DoRequestDataL() - iState = ENone - can write entire meta data in single pass...");
+				    OstTrace0(TRACE_NORMAL, DUP3_CPACKAGEDATATRANSFER_DOREQUESTDATAL, "iState = ENone - can write entire meta data in single pass...");
 
                     WriteData(&iMetaDataSize, aBuffer, KSizeOfTInt);
 					aBuffer.Append(*iMetaData);
 
-                    __LOG1("CPackageDataTransfer::DoRequestDataL() - iState = ENone - Written Meta Data, size %d", iMetaDataSize);
+					OstTrace1(TRACE_NORMAL, DUP4_CPACKAGEDATATRANSFER_DOREQUESTDATAL, "iState = ENone - Written Meta Data, size %d", iMetaDataSize);
 					}
 				else if (availableBuffer - KSizeOfTInt > 0)
 					{
 				    // can we write metasize and something else?
-					__LOG("CPackageDataTransfer::DoRequestDataL() - iState = ENone - have room for some meta data (not all)...");
+				    OstTrace0(TRACE_NORMAL, DUP5_CPACKAGEDATATRANSFER_DOREQUESTDATAL, "iState = ENone - have room for some meta data (not all)...");
 
                     WriteData(&iMetaDataSize, aBuffer, KSizeOfTInt);
 					
@@ -868,12 +910,14 @@ namespace conn
 					aLastSection = EFalse;
 					
                     iState.iState = EBuffer;
-                    __LOG2("CPackageDataTransfer::DoRequestDataL() - END - iState = ENone - Written MetaData %d, left %d", amountOfMetaDataToWrite, iMetaDataLeft);
+                    OstTraceExt2(TRACE_NORMAL, DUP6_CPACKAGEDATATRANSFER_DOREQUESTDATAL, "iState = ENone - Written MetaData %d, left %d", amountOfMetaDataToWrite, iMetaDataLeft);
+					OstTraceFunctionExit0( DUP1_CPACKAGEDATATRANSFER_DOREQUESTDATAL_EXIT );
 					return;
 					}
 				else
 					{
-					__LOG("CPackageDataTransfer::DoRequestDataL() - END - iState = ENone - not enough space to write MetaData, Return for more");
+				    OstTrace0(TRACE_NORMAL, DUP7_CPACKAGEDATATRANSFER_DOREQUESTDATAL, "iState = ENone - not enough space to write MetaData, Return for more");
+					OstTraceFunctionExit0( DUP2_CPACKAGEDATATRANSFER_DOREQUESTDATAL_EXIT );
 					return;
 					}
 				}// if
@@ -882,31 +926,33 @@ namespace conn
 				if (availableBuffer - iMetaDataLeft >= 0)
 					{
                     const TInt readPosition = iMetaDataSize - iMetaDataLeft;
-					__LOG2("CPackageDataTransfer::DoRequestDataL() - iState = EBuffer - enough space for remaining meta data in this pass, size %d, readPos: %d", iMetaDataLeft, readPosition);
+                    OstTraceExt2(TRACE_NORMAL, DUP8_CPACKAGEDATATRANSFER_DOREQUESTDATAL, "iState = EBuffer - enough space for remaining meta data in this pass, size %d, readPos: %d", iMetaDataLeft, readPosition);
 					aBuffer.Append(iMetaData->Mid(readPosition));
 					}
 				else 
 					{
 				    // continute buffer
 					const TInt readPosition = iMetaDataSize - iMetaDataLeft;
-                    __LOG2("CPackageDataTransfer::DoRequestDataL() - iState = EBuffer - Still buffering Meta Data, Left to write %d, readPos: %d", iMetaDataLeft, readPosition);
+					OstTraceExt2(TRACE_NORMAL, DUP9_CPACKAGEDATATRANSFER_DOREQUESTDATAL, "iState = EBuffer - Still buffering Meta Data, Left to write %d, readPos: %d", iMetaDataLeft, readPosition);
 
 					aBuffer.Append(iMetaData->Mid(readPosition, availableBuffer));
 					iMetaDataLeft -= availableBuffer;
 					aLastSection = EFalse;
 
-                    __LOG1("CPackageDataTransfer::DoRequestDataL() - iState = EBuffer - END - Still buffering Meta Data, Left to write %d", iMetaDataLeft);
+					OstTrace1(TRACE_NORMAL, DUP10_CPACKAGEDATATRANSFER_DOREQUESTDATAL, "iState = EBuffer - END - Still buffering Meta Data, Left to write %d", iMetaDataLeft);
+					OstTraceFunctionExit0( DUP3_CPACKAGEDATATRANSFER_DOREQUESTDATAL_EXIT );
 					return;
 					}
 				}
 			
 			TUint count = iFiles.Count();			
-			__LOG1("CPackageDataTransfer::DoRequestDataL() - No of fileNames: %d", count);
+			OstTrace1(TRACE_NORMAL, DUP11_CPACKAGEDATATRANSFER_DOREQUESTDATAL, "No of fileNames: %d", count);
 			
 			if (count == 0)
 				{
 				aLastSection = ETrue;
-    	        __LOG("CPackageDataTransfer::DoRequestDataL() - END - no files");
+				OstTrace0(TRACE_NORMAL, DUP12_CPACKAGEDATATRANSFER_DOREQUESTDATAL, "no files");
+				OstTraceFunctionExit0( DUP4_CPACKAGEDATATRANSFER_DOREQUESTDATAL_EXIT );
 				return;
 				}
 			
@@ -918,14 +964,14 @@ namespace conn
 				}
 			
 			
-			__LOG("CPackageDataTransfer::DoRequestDataL() - starting buffer file writer...");
+			OstTrace0(TRACE_NORMAL, DUP13_CPACKAGEDATATRANSFER_DOREQUESTDATAL, "starting buffer file writer...");
 			CBufferFileWriter* bufferFileWriter = CBufferFileWriter::NewL(iFs, files);
    			delete iBufferFileWriter;  
    			iBufferFileWriter = bufferFileWriter;
 			
 			iBufferFileWriter->StartL(aBuffer, aLastSection);
 			iState.iState = ERequest;
-			__LOG("CPackageDataTransfer::DoRequestDataL() - iState is now ERequest");
+			OstTrace0(TRACE_NORMAL, DUP14_CPACKAGEDATATRANSFER_DOREQUESTDATAL, "iState is now ERequest");
 			
 			if (aLastSection)
 				{
@@ -938,7 +984,7 @@ namespace conn
 			}
 		else if (iBufferFileWriter != NULL)
 			{
-			__LOG("CPackageDataTransfer::DoRequestDataL() - continuing buffer file writer from last time...");
+		    OstTrace0(TRACE_NORMAL, DUP15_CPACKAGEDATATRANSFER_DOREQUESTDATAL, "continuing buffer file writer from last time...");
 			iBufferFileWriter->ContinueL(aBuffer, aLastSection);
 			if (aLastSection)
 				{
@@ -948,8 +994,7 @@ namespace conn
 				}
 			}
 
-        //__LOGDATA("CPackageDataTransfer::DoRequestDataL() -       %S", aBuffer.Ptr(), aBuffer.Length());
-		__LOG("CPackageDataTransfer::DoRequestDataL() - END");			
+    	OstTraceFunctionExit0( DUP5_CPACKAGEDATATRANSFER_DOREQUESTDATAL_EXIT );
     	} // RequestDataL
 		
 	void CPackageDataTransfer::RequestSnapshotL(TDriveNumber aDriveNumber, TPtr8& aBuffer, TBool& aLastSection)
@@ -962,17 +1007,19 @@ namespace conn
 		   data.
 	*/
 		{
-		__LOG("CPackageDataTransfer::RequestSnapshotL() - START");
+		OstTraceFunctionEntry0( CPACKAGEDATATRANSFER_REQUESTSNAPSHOTL_ENTRY );
+		
 		if (iBufferSnapshotWriter == NULL)
 			{
 			if (!IsDataOnDrive(aDriveNumber))
 				{
 				aLastSection = ETrue;
+				OstTraceFunctionExit0( CPACKAGEDATATRANSFER_REQUESTSNAPSHOTL_EXIT );
 				return;
 				}
 			
 			TUint count = iFiles.Count();
-			__LOG1("CPackageDataTransfer::RequestSnapshotL() - No of fileNames: %d", count);
+			OstTrace1(TRACE_NORMAL, CPACKAGEDATATRANSFER_REQUESTSNAPSHOTL, "No of fileNames: %d", count);
 			if (count > 0)
 				{
 				RSnapshots* snapshots = new(ELeave) RSnapshots();
@@ -1021,7 +1068,7 @@ namespace conn
 			delete iBufferSnapshotWriter;
 			iBufferSnapshotWriter = NULL;
 			}
-		__LOG("CPackageDataTransfer::RequestSnapshotL() - END");
+		OstTraceFunctionExit0( DUP1_CPACKAGEDATATRANSFER_REQUESTSNAPSHOTL_EXIT );
 		}
 		
 	
@@ -1029,6 +1076,7 @@ namespace conn
 	*/
 	void CPackageDataTransfer::Cleanup()
 		{
+		OstTraceFunctionEntry0( CPACKAGEDATATRANSFER_CLEANUP_ENTRY );
 		delete iBufferFileWriter;
   		iBufferFileWriter = NULL;
    		delete iBufferSnapshotReader;
@@ -1039,6 +1087,7 @@ namespace conn
   		iSnapshot = NULL;
   		delete iMetaData;
   		iMetaData = NULL;
+		OstTraceFunctionExit0( CPACKAGEDATATRANSFER_CLEANUP_EXIT );
 		}
 		
 	/**
@@ -1049,12 +1098,15 @@ namespace conn
 	*/
 	TBool CPackageDataTransfer::IsDataOnDrive(TDriveNumber aDrive)
 		{
+		OstTraceFunctionEntry0( CPACKAGEDATATRANSFER_ISDATAONDRIVE_ENTRY );
 		if (!iDriveList[aDrive])
 			{
+			OstTraceFunctionExit0( CPACKAGEDATATRANSFER_ISDATAONDRIVE_EXIT );
 			return EFalse;
 			}
 		else
 			{
+			OstTraceFunctionExit0( DUP1_CPACKAGEDATATRANSFER_ISDATAONDRIVE_EXIT );
 			return ETrue;
 			}
 		
@@ -1068,14 +1120,16 @@ namespace conn
 	@leave KErrNotReady if CPackageDataTransfer::ParseFilesL() not called
 	*/
 		{
+		OstTraceFunctionEntry0( CPACKAGEDATATRANSFER_COMMONSETTINGSL_ENTRY );
 		TCommonBURSettings settings = ENoOptions;
 
-		__LOG1("CPackageDataTransfer::CommonSettingsL() - System Supported: %d", iSystemInformation.iSupported);
+		OstTrace1(TRACE_NORMAL, CPACKAGEDATATRANSFER_COMMONSETTINGSL, "System Supported: %d", iSystemInformation.iSupported);
 		if (iSystemInformation.iSupported)
 			{
 			settings |= EHasSystemFiles;
 			}		
 
+		OstTraceFunctionExit0( CPACKAGEDATATRANSFER_COMMONSETTINGSL_EXIT );
 		return settings;
 		}
 
@@ -1087,7 +1141,8 @@ namespace conn
 	@leave KErrNotReady if CPackageDataTransfer::ParseFilesL() not called
 	*/
 		{
-		__LOG1("CPackageDataTransfer::CommonSettingsL() - Public Supported: %d", iPublicInformation.iSupported);
+		OstTraceFunctionEntry0( CPACKAGEDATATRANSFER_PASSIVESETTINGSL_ENTRY );
+		OstTrace1(TRACE_NORMAL, CPACKAGEDATATRANSFER_PASSIVESETTINGSL, "Public Supported: %d", iPublicInformation.iSupported);
 		
 		TPassiveBURSettings settings = ENoPassiveOptions;
 		
@@ -1097,6 +1152,7 @@ namespace conn
 			} // if
 			
 			
+		OstTraceFunctionExit0( CPACKAGEDATATRANSFER_PASSIVESETTINGSL_EXIT );
 		return settings;
 		}
 
@@ -1118,8 +1174,10 @@ namespace conn
 	*/
 	void CPackageDataTransfer::SetRegistrationFileL(const TDesC& aFileName)
 		{
+		OstTraceFunctionEntry0( CPACKAGEDATATRANSFER_SETREGISTRATIONFILEL_ENTRY );
 		delete iRegistrationFile;
 		iRegistrationFile = aFileName.AllocL();
+		OstTraceFunctionExit0( CPACKAGEDATATRANSFER_SETREGISTRATIONFILEL_EXIT );
 		}
 		
 	/** Parses the package registration file
@@ -1127,12 +1185,15 @@ namespace conn
 	*/
 	void CPackageDataTransfer::ParseL()
 		{
+		OstTraceFunctionEntry0( CPACKAGEDATATRANSFER_PARSEL_ENTRY );
 		if ((*iRegistrationFile).FindF(KPrimaryBackupRegistrationFile) == KErrNotFound)
 			{
+		    OstTrace0(TRACE_ERROR, CPACKAGEDATATRANSFER_PARSEL, "Leave: KErrNotReady");
 			User::Leave(KErrNotReady);
 			}
 			
 		ipDataOwnerManager->ParserProxy().ParseL(*iRegistrationFile, *this);
+		OstTraceFunctionExit0( CPACKAGEDATATRANSFER_PARSEL_EXIT );
 		}
 		
 		
@@ -1144,9 +1205,11 @@ namespace conn
 	@param aRestoreFileFilter on return the file filter
 	*/
 		{
+		OstTraceFunctionEntry0( CPACKAGEDATATRANSFER_GETRAWPUBLICFILELISTL_ENTRY );
 		// Convert drive number to letter
 		TChar drive;
-		User::LeaveIfError(iFs.DriveToChar(aDriveNumber, drive));
+		TInt err = iFs.DriveToChar(aDriveNumber, drive);
+		LEAVEIFERROR(err, OstTrace1(TRACE_ERROR, CPACKAGEDATATRANSFER_GETRAWPUBLICFILELISTL, "error = %d", err));
 		
 		const TInt count = iPublicSelections.Count();
 		for (TInt x = 0; x < count; x++)
@@ -1189,6 +1252,7 @@ namespace conn
 				aRestoreFileFilter.AppendL(TRestoreFileFilter(include, filename));
 				} // if
 			} // for x
+		OstTraceFunctionExit0( CPACKAGEDATATRANSFER_GETRAWPUBLICFILELISTL_EXIT );
 		}
 		
 	
@@ -1200,6 +1264,7 @@ namespace conn
 	@param aFiles on return a list of public files
 	*/
 		{
+		OstTraceFunctionEntry0( CPACKAGEDATATRANSFER_GETPUBLICFILELISTL_ENTRY );
 		_LIT(KDrive, "?:");
 		_LIT(KDriveAndSlash, "?:\\");
 		_LIT( KExclamationAsDrive, "!"); // Used to generic drives for public data as in .SIS file package
@@ -1212,11 +1277,11 @@ namespace conn
 		TInt count = iPublicSelections.Count();
 
         
-        __LOG("CPackageDataTransfer::GetPublicFileListL() - file selection listing...:");
+		OstTrace0(TRACE_NORMAL, CPACKAGEDATATRANSFER_GETPUBLICFILELISTL, "file selection listing...:");
 		for (TInt x = 0; x < count; x++)
 			{
             const TDesC& selectionName = iPublicSelections[x]->SelectionName();
-            __LOG3("CPackageDataTransfer::GetPublicFileListL() - selection[%03d]: %S, type: %d", x, &selectionName, iPublicSelections[x]->SelectionType());
+            OstTraceExt3(TRACE_NORMAL, DUP1_CPACKAGEDATATRANSFER_GETPUBLICFILELISTL, "selection[%03d]: %S, type: %d", x, selectionName, iPublicSelections[x]->SelectionType());
 			if (iPublicSelections[x]->SelectionType() == EInclude)
 				{
 				include.AppendL(selectionName);
@@ -1229,15 +1294,16 @@ namespace conn
 			
 		// Loop through all includes
 		count = include.Count();
-        __LOG("CPackageDataTransfer::GetPublicFileListL() - include listing...:");
+		OstTrace0(TRACE_NORMAL, DUP2_CPACKAGEDATATRANSFER_GETPUBLICFILELISTL, "include listing...:");
 		for (TInt x = 0; x < count; x++)
 			{
 			TFileName fileName;
 			TChar drive;
-			User::LeaveIfError(iFs.DriveToChar(aDriveNumber, drive));
+			TInt err = iFs.DriveToChar(aDriveNumber, drive);
+			LEAVEIFERROR(err, OstTrace1(TRACE_ERROR, DUP13_CPACKAGEDATATRANSFER_GETPUBLICFILELISTL, "error = %d", err));
 
             const TPtrC includeEntry( include[x] );
-            __LOG2("CPackageDataTransfer::GetPublicFileListL() - entry[%03d] is: %S", x, &includeEntry);
+            OstTraceExt2(TRACE_NORMAL, DUP3_CPACKAGEDATATRANSFER_GETPUBLICFILELISTL, "entry[%03d] is: %S", x, includeEntry);
             
             // See if the drive is specified
 			if (include[x][0] == KBackSlash()[0])
@@ -1271,7 +1337,7 @@ namespace conn
 				
 				} // else
 
-            __LOG2("CPackageDataTransfer::GetPublicFileListL() - entry[%03d] filename is therefore: %S", x, &fileName);
+			OstTraceExt2(TRACE_NORMAL, DUP4_CPACKAGEDATATRANSFER_GETPUBLICFILELISTL, "entry[%03d] filename is therefore: %S", x, fileName);
 			if (fileName.Length() > 0)
 				{
 				
@@ -1281,7 +1347,7 @@ namespace conn
 				    (fileName.MatchF(KDriveAndSlash) != KErrNotFound))
 					{
 					isDrive = ETrue;
-                    __LOG("CPackageDataTransfer::GetPublicFileListL() - filename is a drive");
+					OstTrace0(TRACE_NORMAL, DUP5_CPACKAGEDATATRANSFER_GETPUBLICFILELISTL, "filename is a drive");
 					} // if
 					
 				TEntry entry;
@@ -1289,7 +1355,7 @@ namespace conn
 				if (!isDrive)
 					{
 					TInt err = iFs.Entry(fileName, entry);
-                    __LOG1("CPackageDataTransfer::GetPublicFileListL() - get entry error: %d", err);
+					OstTrace1(TRACE_NORMAL, DUP6_CPACKAGEDATATRANSFER_GETPUBLICFILELISTL, "get entry error: %d", err);
 					entry.iName = fileName;
 					switch (err)
 						{
@@ -1301,28 +1367,27 @@ namespace conn
 					case KErrBadName:
 						break;
 					default:
+					    OstTrace1(TRACE_ERROR, DUP12_CPACKAGEDATATRANSFER_GETPUBLICFILELISTL, "Leave: %d", err);
 						User::Leave(err);
 						} // switch
 					} // if
 					
 				if (isDrive || (isEntry && entry.IsDir()))
 					{
-                    __LOG("CPackageDataTransfer::GetPublicFileListL() - parsing directory...");
+				    OstTrace0(TRACE_NORMAL, DUP7_CPACKAGEDATATRANSFER_GETPUBLICFILELISTL, "parsing directory...");
 					ParseDirL(fileName, exclude, aFiles);
 
-				#ifdef SBE_LOGGING_ENABLED
 					const TInt fNameCount = aFiles.Count();
                     if  (fNameCount)
                         {
                         for(TInt k=0; k<fNameCount; k++)
                             {
                             const TDesC& fileName = aFiles[k].iName;
-                            __LOG2("CPackageDataTransfer::GetPublicFileListL() - directory entry[%03d] %S", k, &fileName);
+                            OstTraceExt2(TRACE_NORMAL, DUP8_CPACKAGEDATATRANSFER_GETPUBLICFILELISTL, "directory entry[%03d] %S", k, fileName);
                             }
                         }
 
-                    __LOG("CPackageDataTransfer::GetPublicFileListL() - end of parsing directory");
-				#endif
+                    OstTrace0(TRACE_NORMAL, DUP9_CPACKAGEDATATRANSFER_GETPUBLICFILELISTL, "end of parsing directory");
 					} // if
 				else
 					{
@@ -1331,13 +1396,13 @@ namespace conn
                         const TBool isExcluded = IsExcluded(ETrue, fileName, exclude);
 						if (!isExcluded)
 							{
-						    __LOG1("CPackageDataTransfer::GetPublicFileListL() - adding fully verified file: %S", &fileName);
+						    OstTraceExt1(TRACE_NORMAL, DUP10_CPACKAGEDATATRANSFER_GETPUBLICFILELISTL, "adding fully verified file: %S", fileName);
 							// Add to list of files
 							aFiles.AppendL(entry);
 							} // if
                         else
                             {
-                            __LOG("CPackageDataTransfer::GetPublicFileListL() - file is excluded!");
+                            OstTrace0(TRACE_NORMAL, DUP11_CPACKAGEDATATRANSFER_GETPUBLICFILELISTL, "file is excluded!");
                             }
 						} // if
 					} // else
@@ -1346,7 +1411,8 @@ namespace conn
 			
 		CleanupStack::PopAndDestroy(&exclude);
 		CleanupStack::PopAndDestroy(&include);
-        __LOG("CPackageDataTransfer::GetPublicFileListL() - END");
+        
+		OstTraceFunctionExit0( CPACKAGEDATATRANSFER_GETPUBLICFILELISTL_EXIT );
 		}
 		
 	void CPackageDataTransfer::ParseDirL(const TDesC& aDirName, const RArray<TPtrC>& aExclude, RFileArray& apFileEntries)
@@ -1359,6 +1425,7 @@ namespace conn
 	@param apFileEntries Array of file entries to populate
 	*/							   
 		{
+		OstTraceFunctionEntry0( CPACKAGEDATATRANSFER_PARSEDIRL_ENTRY );
 		CDir* pFiles = NULL;
 		
 		// This function requires a / on the end otherwise it does not work!
@@ -1371,6 +1438,7 @@ namespace conn
 		
 		if ((err != KErrNone) && (err != KErrNotFound)) // Do we need to leave?
 			{
+		    OstTrace1(TRACE_ERROR, CPACKAGEDATATRANSFER_PARSEDIRL, "Leave: %d", err);
 			User::Leave(err);
 			} // if
 
@@ -1400,6 +1468,7 @@ namespace conn
 			
 		// Cleanup
 		CleanupStack::PopAndDestroy(pFiles);
+		OstTraceFunctionExit0( CPACKAGEDATATRANSFER_PARSEDIRL_EXIT );
 		}
 
 	void CPackageDataTransfer::GetDriveListL(TDriveList& aDriveList)
@@ -1410,7 +1479,8 @@ namespace conn
 	@leave KErrNotReady if CDataOwner::ParseFilesL() not called
 	*/
 		{
-        __LOG1("CPackageDataTransfer::GetDriveListL() - Begin - SID: 0x%08x", iPackageID.iUid);
+        OstTraceFunctionEntry0( CPACKAGEDATATRANSFER_GETDRIVELISTL_ENTRY );
+        OstTrace1(TRACE_NORMAL, CPACKAGEDATATRANSFER_GETDRIVELISTL, "SID: 0x%08x", iPackageID.iUid);
         
 		// We now no longer return the Z drive, it has been decided that the Z drive will always be the
 		// ROM. Backing up and restoring the ROM drive should not be possible, as what is the point
@@ -1424,6 +1494,7 @@ namespace conn
 				{
 				iMetaData = NULL;
 				iMetaDataSize = 0;
+				OstTrace1(TRACE_ERROR, DUP2_CPACKAGEDATATRANSFER_GETDRIVELISTL, "Leave: %d", err);
 				User::Leave( err );
 				}
 			else
@@ -1446,7 +1517,8 @@ namespace conn
 		
 		aDriveList = iDriveList;
 		
-		__LOG1("CPackageDataTransfer::GetDriveListL() - end - SID: 0x%08x", iPackageID.iUid);
+		OstTrace1(TRACE_NORMAL, DUP1_CPACKAGEDATATRANSFER_GETDRIVELISTL, "SID: 0x%08x", iPackageID.iUid);
+		OstTraceFunctionExit0( CPACKAGEDATATRANSFER_GETDRIVELISTL_EXIT );
 		}
 
 	TBool CPackageDataTransfer::IsExcluded(const TBool aIsPublic, const TDesC& aFileName, const RArray<TPtrC>& aExclude)
@@ -1459,6 +1531,7 @@ namespace conn
 	@return ETrue if excluded otherwise EFalse
 	*/
 		{
+		OstTraceFunctionEntry0( CPACKAGEDATATRANSFER_ISEXCLUDED_ENTRY );
 		_LIT(KPrivateMatch, "?:\\private\\*");
 		_LIT(KSystem, "?:\\system\\*");
 		_LIT(KResource, "?:\\resource\\*");
@@ -1501,7 +1574,8 @@ namespace conn
 				} // for x
 			} // if
 		
-        __LOG2("CDataOwner::IsExcluded() - END - returns excluded: %d for file: %S", ret, &aFileName);
+		OstTraceExt2(TRACE_NORMAL, CPACKAGEDATATRANSFER_ISEXCLUDED, "returns excluded: %d for file: %S", ret, aFileName);
+		OstTraceFunctionExit0( CPACKAGEDATATRANSFER_ISEXCLUDED_EXIT );
 		return ret;
 		}
 		
@@ -1515,16 +1589,20 @@ namespace conn
 	*/
 	TInt CPackageDataTransfer::Compare(const CPackageDataTransfer& aFirst, const CPackageDataTransfer& aSecond)
 		{
+		OstTraceFunctionEntry0( CPACKAGEDATATRANSFER_COMPARE_ENTRY );
 		if (aFirst.PackageId().iUid < aSecond.PackageId().iUid)
 			{
+			OstTraceFunctionExit0( CPACKAGEDATATRANSFER_COMPARE_EXIT );
 			return -1;
 			}
  		else if (aFirst.PackageId().iUid > aSecond.PackageId().iUid)
  			{
+ 			OstTraceFunctionExit0( DUP1_CPACKAGEDATATRANSFER_COMPARE_EXIT );
  			return 1;
  			}
  		else 
  			{
+ 			OstTraceFunctionExit0( DUP2_CPACKAGEDATATRANSFER_COMPARE_EXIT );
  			return 0;
  			}
 		}
@@ -1553,20 +1631,24 @@ namespace conn
 	/** MContentHandler::OnStartDocumentL()
 	*/
 		{
+		OstTraceFunctionEntry0( CPACKAGEDATATRANSFER_ONSTARTDOCUMENTL_ENTRY );
 		if (aErrorCode != KErrNone)
 			{
-			__LOG1("CPackageDataTransfer::OnStartDocumentL() - error = %d", aErrorCode);
+		    OstTrace1(TRACE_ERROR, CPACKAGEDATATRANSFER_ONSTARTDOCUMENTL, "error = %d", aErrorCode);
 			User::Leave(aErrorCode);
 			}
+		OstTraceFunctionExit0( CPACKAGEDATATRANSFER_ONSTARTDOCUMENTL_EXIT );
 		}
 		
 	void CPackageDataTransfer::OnEndDocumentL(TInt aErrorCode)
 	/** MContentHandler::OnEndDocumentL()
 	*/
 		{
+		OstTraceFunctionEntry0( CPACKAGEDATATRANSFER_ONENDDOCUMENTL_ENTRY );
 		// just to satisfy UREL compiler
 		(void) aErrorCode;
-		__LOG1("CPackageDataTransfer::OnEndDocumentL() - error = %d", aErrorCode);
+		OstTrace1(TRACE_NORMAL, CPACKAGEDATATRANSFER_ONENDDOCUMENTL, "error = %d", aErrorCode);
+		OstTraceFunctionExit0( CPACKAGEDATATRANSFER_ONENDDOCUMENTL_EXIT );
 		}
 		
 	void CPackageDataTransfer::OnStartElementL(const RTagInfo& aElement, 
@@ -1577,12 +1659,14 @@ namespace conn
 	@leave KErrUnknown an unknown element
 	*/
 		{
+		OstTraceFunctionEntry0( CPACKAGEDATATRANSFER_ONSTARTELEMENTL_ENTRY );
 		if (aErrorCode != KErrNone)
 			{
-			__LOG1("CPackageDataTransfer::OnStartElementL() - error = %d", aErrorCode);
+		    OstTrace1(TRACE_ERROR, CPACKAGEDATATRANSFER_ONSTARTELEMENTL, "error = %d", aErrorCode);
 			User::Leave(aErrorCode);
 			}
 		
+		TInt err;
 		TPtrC8 localName = aElement.LocalName().DesC();
 		if (localName == KIncludeFile) 
 			{
@@ -1602,17 +1686,20 @@ namespace conn
 			}
 		else if (!localName.CompareF(KPublicBackup))
 			{
-			User::LeaveIfError(HandlePublicBackup(aAttributes));
+		    err = HandlePublicBackup(aAttributes);
+			LEAVEIFERROR(err, OstTrace1(TRACE_ERROR, DUP2_CPACKAGEDATATRANSFER_ONSTARTELEMENTL, "error = %d", err));
 			}
 		else if (!localName.CompareF(KSystemBackup))
 			{
-			User::LeaveIfError(HandleSystemBackup(aAttributes));
+		    err = HandleSystemBackup(aAttributes);
+			LEAVEIFERROR(err, OstTrace1(TRACE_ERROR, DUP3_CPACKAGEDATATRANSFER_ONSTARTELEMENTL, "error = %d", err));
 			}
 		else
 			{
-			__LOG1("CPackageDataTransfer::OnStartElementL() - Unknown element while parsing 0x%08x", iPackageID.iUid);
+		    OstTrace1(TRACE_NORMAL, DUP1_CPACKAGEDATATRANSFER_ONSTARTELEMENTL, "Unknown element while parsing 0x%08x", iPackageID.iUid);
 			}
 			
+		OstTraceFunctionExit0( CPACKAGEDATATRANSFER_ONSTARTELEMENTL_EXIT );
 		}
 
 	
@@ -1620,9 +1707,10 @@ namespace conn
 	/** MContentHandler::OnEndElementL()
 	*/
 		{
+		OstTraceFunctionEntry0( CPACKAGEDATATRANSFER_ONENDELEMENTL_ENTRY );
 		if (aErrorCode != KErrNone)
 			{
-			__LOG1("CPackageDataTransfer::OnEndElementL() - error = %d", aErrorCode);
+		    OstTrace1(TRACE_ERROR, CPACKAGEDATATRANSFER_ONENDELEMENTL, "error = %d", aErrorCode);
 			User::Leave(aErrorCode);
 			}
 		
@@ -1631,6 +1719,7 @@ namespace conn
 			{
 			iCurrentElement = ENoElement;
 			} // if
+		OstTraceFunctionExit0( CPACKAGEDATATRANSFER_ONENDELEMENTL_EXIT );
 		}
 
 	void CPackageDataTransfer::OnContentL(const TDesC8& /*aBytes*/, TInt /*aErrorCode*/)
@@ -1684,8 +1773,10 @@ namespace conn
 	@leave aErrorCode
 	*/
 		{
+		OstTraceFunctionEntry0( CPACKAGEDATATRANSFER_ONERROR_ENTRY );
 		(void)aErrorCode;
-		__LOG1("CPackageDataTransfer::OnError() - error = %d", aErrorCode);
+		OstTrace1(TRACE_NORMAL, CPACKAGEDATATRANSFER_ONERROR, "error = %d", aErrorCode);
+		OstTraceFunctionExit0( CPACKAGEDATATRANSFER_ONERROR_EXIT );
 		}
 
 	TAny* CPackageDataTransfer::GetExtendedInterface(const TInt32 /*aUid*/)
@@ -1703,6 +1794,7 @@ namespace conn
 	@return KErrUnknown unknown version
 	*/
 		{
+		OstTraceFunctionEntry0( CPACKAGEDATATRANSFER_HANDLEBACKUPREGISTRATIONL_ENTRY );
 		_LIT8(KVersion, "1.0");
 		
 		if (aAttributes.Count() == 1)
@@ -1710,10 +1802,11 @@ namespace conn
 			// Check the version is correct.
 			if (aAttributes[0].Value().DesC() != KVersion()) // Only version we know about
 				{
-				__LOG1("CDataOwner::HandleBackupRegistrationL() - Unknown version at SID(0x%08x)", iPackageID.iUid);
+			    OstTrace1(TRACE_ERROR, CPACKAGEDATATRANSFER_HANDLEBACKUPREGISTRATIONL, "Unknown version at SID(0x%08x)", iPackageID.iUid);
 				User::Leave(KErrNotSupported);
 				} // else
 			} // if
+		OstTraceFunctionExit0( CPACKAGEDATATRANSFER_HANDLEBACKUPREGISTRATIONL_EXIT );
 		}
 
 
@@ -1724,17 +1817,19 @@ namespace conn
 	@return KErrNone
 	*/
 		{
+		OstTraceFunctionEntry0( CPACKAGEDATATRANSFER_HANDLEPUBLICBACKUP_ENTRY );
 		iPublicInformation.iSupported = ETrue;
 		
 		if (aAttributes.Count() > 0)
 			{
             const TBool deleteBeforeRestore = ( aAttributes[0].Value().DesC().CompareF(KYes) == 0 );
 			iPublicInformation.iDeleteBeforeRestore = deleteBeforeRestore;
-			__LOG2("CPackageDataTransfer::HandlePublicBackup(0x%08x) - iPublicInformation.iDeleteBeforeRestore: %d", iPackageID.iUid, deleteBeforeRestore);
+			OstTraceExt2(TRACE_NORMAL, CPACKAGEDATATRANSFER_HANDLEPUBLICBACKUP, "(0x%08x) - iPublicInformation.iDeleteBeforeRestore: %d", iPackageID.iUid, static_cast<TInt32>(deleteBeforeRestore));
 			} // if
 		
 		iCurrentElement = EPublic;
 		
+		OstTraceFunctionExit0( CPACKAGEDATATRANSFER_HANDLEPUBLICBACKUP_EXIT );
 		return KErrNone;
 		}
 
@@ -1745,9 +1840,11 @@ namespace conn
 	@return KErrNone
 	*/
 		{
+		OstTraceFunctionEntry0( CPACKAGEDATATRANSFER_HANDLESYSTEMBACKUP_ENTRY );
 		iSystemInformation.iSupported = ETrue;
-		__LOG2("CPackageDataTransfer::HandlePublicBackup(0x%08x) - iSystemInformation.iSupported: %d", iPackageID.iUid, iSystemInformation.iSupported);
+		OstTraceExt2(TRACE_NORMAL, CPACKAGEDATATRANSFER_HANDLESYSTEMBACKUP, "(0x%08x) - iSystemInformation.iSupported: %d", iPackageID.iUid, static_cast<TInt32>(iSystemInformation.iSupported));
 
+		OstTraceFunctionExit0( CPACKAGEDATATRANSFER_HANDLESYSTEMBACKUP_EXIT );
 		return KErrNone;	
 		}
 
@@ -1762,6 +1859,7 @@ namespace conn
 	@param aDir The element was found in an <include_dir/> element?
 	*/
 		{
+		OstTraceFunctionEntry0( CPACKAGEDATATRANSFER_HANDLEPATHL_ENTRY );
 		// Check we dont have a NULL string
 		if (aAttributes[0].Value().DesC().Length() > 0)
 			{
@@ -1787,31 +1885,32 @@ namespace conn
 								CSelection* selection = CSelection::NewLC(aType, selectionName);
 								iPublicSelections.AppendL(selection);
 								CleanupStack::Pop(selection);
-								__LOG3("CPackageDataTransfer::HandlePathL(0x%08x) - Added selection: %S [type: %d]", iPackageID.iUid, &selectionName, aType);
+								OstTraceExt3(TRACE_NORMAL, CPACKAGEDATATRANSFER_HANDLEPATHL, "(0x%08x) - Added selection: %S [type: %d]", iPackageID.iUid, selectionName, static_cast<TInt32>(aType));
 								} //if 
 							}// if
 						else
 							{
-							__LOG3("CPackageDataTransfer::HandlePathL(0x%08x) - Wrong format: %S [type: %d]", iPackageID.iUid, &selectionName, aType);
+						    OstTraceExt3(TRACE_NORMAL, DUP1_CPACKAGEDATATRANSFER_HANDLEPATHL, "(0x%08x) - Wrong format: %S [type: %d]", iPackageID.iUid, selectionName, static_cast<TInt32>(aType));
 							}
 						} // if
 					else
 						{
-						__LOG1("CPackageDataTransfer::HandlePathL(0x%08x) - EPublic - Could not convert filename", iPackageID.iUid);
+					    OstTrace1(TRACE_NORMAL, DUP2_CPACKAGEDATATRANSFER_HANDLEPATHL, "(0x%08x) - EPublic - Could not convert filename", iPackageID.iUid);
 						} // else
 					break;
 					};
 			default:
 					{
-					__LOG1("CPackageDataTransfer::HandlePathL(0x%08x) - Private data is Not Supported", iPackageID.iUid);		
+					OstTrace1(TRACE_NORMAL, DUP3_CPACKAGEDATATRANSFER_HANDLEPATHL, "(0x%08x) - Private data is Not Supported", iPackageID.iUid);		
 					}
 				break;
 				} // switch
 			} // if
 		else
 			{
-			__LOG1("CPackageDataTransfer::HandlePathL(0x%08x) - Path attribute error", iPackageID.iUid);
+		    OstTrace1(TRACE_NORMAL, DUP4_CPACKAGEDATATRANSFER_HANDLEPATHL, "(0x%08x) - Path attribute error", iPackageID.iUid);
 			} // else
+		OstTraceFunctionExit0( CPACKAGEDATATRANSFER_HANDLEPATHL_EXIT );
 		}
 //					// 
 // MContentHandler //

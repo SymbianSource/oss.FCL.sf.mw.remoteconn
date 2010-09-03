@@ -22,7 +22,6 @@
 #include "sbedataowner.h"
 #include "sbedataownermanager.h"
 #include "sbebufferhandler.h"
-#include "sblog.h"
 #include "abserver.h"
 
 #include "sbecompressionandencryption.h"
@@ -35,6 +34,11 @@
 #include <swi/sisregistrypackage.h>
 #include <swi/sisregistryentry.h>
 #include <swi/swispubsubdefs.h>
+#include "OstTraceDefinitions.h"
+#include "sbtrace.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "sbedataownermanagerTraces.h"
+#endif
 
 namespace conn
 	{
@@ -47,11 +51,13 @@ namespace conn
 	/** Symbian OS static constructor
 	*/
 		{
+		OstTraceFunctionEntry0( CDATAOWNERCONTAINER_NEWL_ENTRY );
 		CDataOwnerContainer* self = new(ELeave) CDataOwnerContainer(aSecureId);
 		CleanupStack::PushL(self);
 		self->ConstructL(apDataOwnerManager);			
 		CleanupStack::Pop(self);
 		
+		OstTraceFunctionExit0( CDATAOWNERCONTAINER_NEWL_EXIT );
 		return self;
 		}
 		
@@ -60,18 +66,24 @@ namespace conn
 	/** Standard C++ constructor
 	*/
 		{
+		OstTraceFunctionEntry0( CDATAOWNERCONTAINER_CDATAOWNERCONTAINER_CONS_ENTRY );
+		OstTraceFunctionExit0( CDATAOWNERCONTAINER_CDATAOWNERCONTAINER_CONS_EXIT );
 		}
 		
 	CDataOwnerContainer::~CDataOwnerContainer()
 		{
+		OstTraceFunctionEntry0( CDATAOWNERCONTAINER_CDATAOWNERCONTAINER_DES_ENTRY );
 		delete ipDataOwner;
+		OstTraceFunctionExit0( CDATAOWNERCONTAINER_CDATAOWNERCONTAINER_DES_EXIT );
 		}
 		
 	void CDataOwnerContainer::ConstructL(CDataOwnerManager* apDataOwnerManager)
 	/* Symbian second phase constructor
 	*/
 		{
+		OstTraceFunctionEntry0( CDATAOWNERCONTAINER_CONSTRUCTL_ENTRY );
 		ipDataOwner = CDataOwner::NewL(iSecureId, apDataOwnerManager);
+		OstTraceFunctionExit0( CDATAOWNERCONTAINER_CONSTRUCTL_EXIT );
 		}
 		
 	TSecureId CDataOwnerContainer::SecureId() const
@@ -102,16 +114,20 @@ namespace conn
 	*/
 	TInt CDataOwnerContainer::Compare(const CDataOwnerContainer& aFirst, const CDataOwnerContainer& aSecond)
 		{
+		OstTraceFunctionEntry0( CDATAOWNERCONTAINER_COMPARE_ENTRY );
 		if (aFirst.SecureId() < aSecond.SecureId())
 			{
+			OstTraceFunctionExit0( CDATAOWNERCONTAINER_COMPARE_EXIT );
 			return -1;
 			}
  		else if (aFirst.SecureId() > aSecond.SecureId())
  			{
+ 			OstTraceFunctionExit0( DUP1_CDATAOWNERCONTAINER_COMPARE_EXIT );
  			return 1;
  			}
  		else 
  			{
+ 			OstTraceFunctionExit0( DUP2_CDATAOWNERCONTAINER_COMPARE_EXIT );
  			return 0;
  			}
 		}
@@ -133,10 +149,12 @@ namespace conn
 	/** Symbian OS static constructor	
 	*/
 		{
+		OstTraceFunctionEntry0( CDATAOWNERMANAGER_NEWLC_ENTRY );
 		CDataOwnerManager* self	= new(ELeave) CDataOwnerManager();
 		CleanupStack::PushL(self);
 		self->ConstructL();
 		
+		OstTraceFunctionExit0( CDATAOWNERMANAGER_NEWLC_EXIT );
 		return self;
 		}
 		
@@ -149,18 +167,23 @@ namespace conn
 	  iResetAfterRestore(EFalse), iJavaDOM(NULL), iSIDListForPartial(NULL),
 	  iConfig(NULL), iBaBackupSession(NULL)
 		{
+		OstTraceFunctionEntry0( CDATAOWNERMANAGER_CDATAOWNERMANAGER_CONS_ENTRY );
+		OstTraceFunctionExit0( CDATAOWNERMANAGER_CDATAOWNERMANAGER_CONS_EXIT );
 		}
 		
 	void CDataOwnerManager::ConstructL()
 	/** Symbian OS second phase contrutor
 	*/
 		{
-		User::LeaveIfError(iFs.Connect());
-		TInt err = RProperty::Define(TUid::Uid(KUidSystemCategoryValue), 
+		OstTraceFunctionEntry0( CDATAOWNERMANAGER_CONSTRUCTL_ENTRY );
+		TInt err = iFs.Connect();
+		LEAVEIFERROR(err, OstTrace1(TRACE_ERROR, DUP4_CDATAOWNERMANAGER_CONSTRUCTL, "Leave: %d", err));
+		err = RProperty::Define(TUid::Uid(KUidSystemCategoryValue), 
 						  KUidBackupRestoreKey, 
 						  RProperty::EInt, KReadPolicy, KWritePolicy, 0);
 		if ((err != KErrNone) && (err != KErrAlreadyExists))
 			{
+		    OstTrace1(TRACE_ERROR, DUP3_CDATAOWNERMANAGER_CONSTRUCTL, "Leave: %d", err);
 			User::Leave(err);
 			}
 			
@@ -173,16 +196,17 @@ namespace conn
 		TRAP(err, iConfig->ParseL());
 		if (err != KErrNone)
 			{
-			__LOG1("Error trying to parse sbeconfig.xml : %d", err);
-			__LOG("Using Default Settings !");
+		    OstTrace1(TRACE_NORMAL, CDATAOWNERMANAGER_CONSTRUCTL, "Error trying to parse sbeconfig.xml : %d", err);
+		    OstTrace0(TRACE_NORMAL, DUP1_CDATAOWNERMANAGER_CONSTRUCTL, "Using Default Settings !");
 			iConfig->SetDefault();
 			}
 		else
 			{
-			__LOG("sbeconfig.xml parsed sucessfully");
+		    OstTrace0(TRACE_NORMAL, DUP2_CDATAOWNERMANAGER_CONSTRUCTL, "sbeconfig.xml parsed sucessfully");
 			}
 		iBaBackupSession = CBaBackupSessionWrapper::NewL();
 		iParserProxy = CSBEParserProxy::NewL(iFs);
+		OstTraceFunctionExit0( CDATAOWNERMANAGER_CONSTRUCTL_EXIT );
 		}
 
 
@@ -195,6 +219,7 @@ namespace conn
 	The destructor is commonly used to "clean up" when an object is no longer necessary.
 	*/
 		{
+		OstTraceFunctionEntry0( CDATAOWNERMANAGER_CDATAOWNERMANAGER_DES_ENTRY );
 		if(iJavaDOM)
 			{
 			delete iJavaDOM;
@@ -215,6 +240,7 @@ namespace conn
 			}
 		delete iConfig;
 		delete iBaBackupSession;
+		OstTraceFunctionExit0( CDATAOWNERMANAGER_CDATAOWNERMANAGER_DES_EXIT );
 		}
 
 	void CDataOwnerManager::AllSystemFilesRestoredL()
@@ -223,16 +249,17 @@ namespace conn
 	we can parse/start active data owners etc.
 	*/
 		{
+		OstTraceFunctionEntry0( CDATAOWNERMANAGER_ALLSYSTEMFILESRESTOREDL_ENTRY );
 		if(iBURType == EBURRestoreFull || iBURType == EBURRestorePartial)
 			{
-			__LOG("CDataOwnerManager::AllSystemFilesRestored() - called, parse reg files & start active DO's");
+		    OstTrace0(TRACE_NORMAL, CDATAOWNERMANAGER_ALLSYSTEMFILESRESTOREDL, "called, parse reg files & start active DO's");
 			// Build the list of dataOwners
 
 			TInt err;
 			TRAP(err, FindDataOwnersL());
 			if (err != KErrNone)
 				{
-				__LOG1("CDataOwnerManager::AllSystemFilesRestored() - Error while finding data owners: %d", err);
+			    OstTrace1(TRACE_NORMAL, DUP1_CDATAOWNERMANAGER_ALLSYSTEMFILESRESTOREDL, "Error while finding data owners: %d", err);
 				}
 
 			TInt doCount = iDataOwners.Count();
@@ -251,7 +278,7 @@ namespace conn
 			TRAP(err, UpdateDataOwnersPartialStateL());
 			if (err != KErrNone)
 				{
-				__LOG1("CDataOwnerManager::AllSystemFilesRestored() - Error while updating state: %d", err);
+			    OstTrace1(TRACE_NORMAL, DUP2_CDATAOWNERMANAGER_ALLSYSTEMFILESRESTOREDL, "Error while updating state: %d", err);
 				}
 				
 			for (TInt index = 0; index < doCount; index++)
@@ -260,14 +287,14 @@ namespace conn
 				TRAP(err, iDataOwners[index]->DataOwner().StartProcessIfNecessaryL());
 				if (err != KErrNone)
 					{
-					__LOG1("CDataOwnerManager::AllSystemFilesRestored() - Error while starting process if necessary: %d", err);
+				    OstTrace1(TRACE_NORMAL, DUP3_CDATAOWNERMANAGER_ALLSYSTEMFILESRESTOREDL, "Error while starting process if necessary: %d", err);
 					}
 				
 				// Set up the internal state of the data owners now that all reg files and proxies are back
 				TRAP(err, iDataOwners[index]->DataOwner().BuildDriveStateArrayL());
 				if (err != KErrNone)
 					{
-					__LOG1("CDataOwnerManager::AllSystemFilesRestored() - Error while building drive array: %d", err);
+				    OstTrace1(TRACE_NORMAL, DUP4_CDATAOWNERMANAGER_ALLSYSTEMFILESRESTOREDL, "Error while building drive array: %d", err);
 					}
 				}
 			
@@ -277,7 +304,7 @@ namespace conn
 				}
 			else
 				{
-				__LOG("CDataOwnerManager::AllSystemFilesRestored() - Java Backup-Restore Plug-In not loaded, java files won't be backed or restored");
+			    OstTrace0(TRACE_NORMAL, DUP5_CDATAOWNERMANAGER_ALLSYSTEMFILESRESTOREDL, "Java Backup-Restore Plug-In not loaded, java files won't be backed or restored");
 				}
 			
 			// now deal with special case packages
@@ -303,10 +330,11 @@ namespace conn
 							{
 							TRAP(err, pDataTransfer->ParseL());
 							}
-						__LOG2("CDataOwnerManager::AllSystemFilesRestored() - found reg file: %S for Package: 0x%08x", &fileName, sid.iId);
+						OstTraceExt2(TRACE_NORMAL, DUP6_CDATAOWNERMANAGER_ALLSYSTEMFILESRESTOREDL, "found reg file: %S for Package: 0x%08x", fileName, sid.iId);
 						}
 					if (err == KErrNoMemory)
 						{
+					    OstTrace0(TRACE_ERROR, DUP8_CDATAOWNERMANAGER_ALLSYSTEMFILESRESTOREDL, "Leave: KErrNoMemory");
 						User::Leave(KErrNoMemory);
 						}
 					}
@@ -317,9 +345,10 @@ namespace conn
 			} // end if
 		else
 			{
-			__LOG("CDataOwnerManager::AllSystemFilesRestored() - *Error: called when device is not in Restore mode !");
+		    OstTrace0(TRACE_NORMAL, DUP7_CDATAOWNERMANAGER_ALLSYSTEMFILESRESTOREDL, "*Error: called when device is not in Restore mode !");
 			}
 		
+		OstTraceFunctionExit0( CDATAOWNERMANAGER_ALLSYSTEMFILESRESTOREDL_EXIT );
 		}
 
 		
@@ -333,8 +362,9 @@ namespace conn
 	@leave KErrInUse a Software install is in progress, plus system wide errors
 	*/						 		  
 		{
-		__LOG2("CDataOwnerManager::SetBURModeL() - Request new BURType (0x%08x), IncType (0x%08x)", aBURType, aBackupIncType);
-		__LOG2("CDataOwnerManager::SetBURModeL() - Previous BURType (0x%08x), IncType (0x%08x)", iBURType, iIncType);
+		OstTraceFunctionEntry0( CDATAOWNERMANAGER_SETBURMODEL_ENTRY );
+		OstTraceExt2(TRACE_NORMAL, CDATAOWNERMANAGER_SETBURMODEL, "Request new BURType (0x%08x), IncType (0x%08x)", aBURType, aBackupIncType);
+		OstTraceExt2(TRACE_NORMAL, DUP1_CDATAOWNERMANAGER_SETBURMODEL, "CDataOwnerManager::SetBURModeL() - Previous BURType (0x%08x), IncType (0x%08x)", iBURType, iIncType);
 		// Ensure that the device can't transition directly from backup to restore mode. It must
 		// go through a normal state first. Allow the state to be set to the same.
 		switch(aBURType)
@@ -343,6 +373,7 @@ namespace conn
 			// allow to set Normal mode in any case. no need to do anything if previous mode was Normal
 				if (iBURType == EBURNormal)
 					{
+					OstTraceFunctionExit0( CDATAOWNERMANAGER_SETBURMODEL_EXIT );
 					return;
 					}
 				break;
@@ -350,6 +381,7 @@ namespace conn
 			// don't do anything if previous modes were Normal or Unset
 				if (iBURType == EBURNormal || iBURType == EBURUnset)
 					{
+					OstTraceFunctionExit0( DUP1_CDATAOWNERMANAGER_SETBURMODEL_EXIT );
 					return;
 					}
 				break;
@@ -360,7 +392,7 @@ namespace conn
 			// don't allow mode change unless , device was put into normal mode before
 				if (iBURType != EBURNormal && iBURType != EBURUnset)
 					{
-					__LOG2("CDataOwnerManager::SetBURModeL() - *Error: BUR type has not transitioned between modes correctly, %d became %d", iBURType, aBURType);
+				    OstTraceExt2(TRACE_ERROR, DUP2_CDATAOWNERMANAGER_SETBURMODEL, "*Error: BUR type has not transitioned between modes correctly, %d became %d", iBURType, aBURType);
 					User::Leave(KErrCorrupt);
 					}
 				break;
@@ -371,11 +403,11 @@ namespace conn
 		// Need to reset the list of data owners, and old style babackup
 		if ((aBURType == EBURNormal) || (aBURType == EBURUnset))
 			{
-			__LOG1("CDataOwnerManager::SetBURModeL() - Going Normal/Unset/NoBackup (%d)", aBURType);
+		    OstTrace1(TRACE_NORMAL, DUP3_CDATAOWNERMANAGER_SETBURMODEL, "Going Normal/Unset/NoBackup (%d)", aBURType);
 			// If we've transitioned from a Restore to a Normal mode, we need to send a RestoreComplete
 			if (previousBURType == EBURRestoreFull || previousBURType == EBURRestorePartial) 
 				{
-				__LOG("CDataOwnerManager::SetBURModeL() - Calling RestoreCompleteL on all active data owners");
+			    OstTrace0(TRACE_NORMAL, DUP4_CDATAOWNERMANAGER_SETBURMODEL, "Calling RestoreCompleteL on all active data owners");
 				TInt restoreCompleteCount = iDataOwners.Count();
 
 				for (TInt index = 0; index < restoreCompleteCount; index++)
@@ -401,7 +433,7 @@ namespace conn
 			iResetAfterRestore = EFalse;
 			iDataOwners.ResetAndDestroy();
 			iPackageDataOwners.ResetAndDestroy();
-			__LOG("CDataOwnerManager::SetBURModeL() - Restart All Non-System Applications");
+			OstTrace0(TRACE_NORMAL, DUP5_CDATAOWNERMANAGER_SETBURMODEL, "Restart All Non-System Applications");
 			iBaBackupSession->NotifyBackupOperationL(TBackupOperationAttributes(MBackupObserver::ETakeLock, MBackupOperationObserver::EEnd));
 			iBaBackupSession->RestartAll();
 			}
@@ -412,18 +444,18 @@ namespace conn
 			TInt regErr = RProperty::Get(KUidSystemCategory, Swi::KUidSoftwareInstallKey, value);
 			if (regErr == KErrNone && value != Swi::ESwisNone)
 				{
-				__LOG("CDataOwnerManager::SetBURModeL() - *Error: Leave software Install in progress.");
+			    OstTrace0(TRACE_ERROR, DUP6_CDATAOWNERMANAGER_SETBURMODEL, "*Error: Leave software Install in progress.");
 				User::Leave(KErrInUse);
 				} // if
 			else if (regErr != KErrNotFound && regErr != KErrNone)
 				{
-				__LOG("CDataOwnerManager::SetBURModeL() - *Error: Leave could not get KUidSoftwareInsallKey");
+			    OstTrace0(TRACE_ERROR, DUP7_CDATAOWNERMANAGER_SETBURMODEL, "*Error: Leave could not get KUidSoftwareInsallKey");
 				User::Leave(regErr);
 				} // else	
 			
 			// Clobber files that are locked open
 			TRequestStatus status;
-			__LOG("CDataOwnerManager::SetBURModeL() - Calling CloseAll()");
+			OstTrace0(TRACE_NORMAL, DUP8_CDATAOWNERMANAGER_SETBURMODEL, "Calling CloseAll()");
 			if(aBURType == EBURBackupFull || aBURType == EBURBackupPartial)
  				{
  				TBackupOperationAttributes atts(MBackupObserver::EReleaseLockReadOnly, MBackupOperationObserver::EStart);
@@ -438,7 +470,7 @@ namespace conn
  				}
  		 	User::WaitForRequest(status);
  		 	
-			__LOG("CDataOwnerManager::SetBURModeL() - CloseAll() returned");
+ 		 	OstTrace0(TRACE_NORMAL, DUP9_CDATAOWNERMANAGER_SETBURMODEL, "CloseAll() returned");
 			
 			// update partial state for active data owners
 			if (aBURType == EBURBackupPartial)
@@ -455,15 +487,15 @@ namespace conn
 					TRAPD(err, iDataOwners[index]->DataOwner().StartProcessIfNecessaryL());
 					if (err != KErrNone)
 						{
-						__LOG2("CDataOwnerManager::SetBURModeL() - Data owner (or proxy) with SID 0x%08x errored (%d) whilst starting", iDataOwners[index]->SecureId().iId, err);
+					    OstTraceExt2(TRACE_NORMAL, DUP10_CDATAOWNERMANAGER_SETBURMODEL, "Data owner (or proxy) with SID 0x%08x errored (%d) whilst starting", iDataOwners[index]->SecureId().iId, static_cast<TInt32>(err));
 						}
 					}
 				}
 			}
 		
 		TInt setError = RProperty::Set(TUid::Uid(KUidSystemCategoryValue), KUidBackupRestoreKey, aBURType | aBackupIncType);
-		__LOG3("CDataOwnerManager::SetBURModeL() - Setting P&S flag to BURType (0x%08x), IncType (0x%08x), err: ", aBURType, aBackupIncType, setError);
-		User::LeaveIfError(setError);
+		OstTraceExt3(TRACE_NORMAL, DUP11_CDATAOWNERMANAGER_SETBURMODEL, "Setting P&S flag to BURType (0x%08x), IncType (0x%08x), err: %d", static_cast<TUint>(aBURType), static_cast<TUint>(aBackupIncType), setError);
+		LEAVEIFERROR(setError, OstTrace1(TRACE_ERROR, DUP13_CDATAOWNERMANAGER_SETBURMODEL, "Leave: %d", setError));
 		
 		// This configurable delay allows extra time to close all non-system apps.
 		TUint closeDelay = iConfig->AppCloseDelay();
@@ -481,9 +513,10 @@ namespace conn
 		//CABSessions,since they could not be used in sequent backup/restore event
 		if (aBURType == EBURUnset || aBURType == EBURNormal) 
 			{
-			__LOG1("Invalidate all ABSessions after set Setting P&S flag to 0x%08x", aBURType);
+		    OstTrace1(TRACE_NORMAL, DUP12_CDATAOWNERMANAGER_SETBURMODEL, "Invalidate all ABSessions after set Setting P&S flag to 0x%08x", aBURType);
 			ipABServer->InvalidateABSessions();
 			}
+		OstTraceFunctionExit0( DUP2_CDATAOWNERMANAGER_SETBURMODEL_EXIT );
 		}
 
 	
@@ -493,19 +526,21 @@ namespace conn
 	@param aDataOwners on return the list of data owners
 	*/
 		{
+		OstTraceFunctionEntry0( CDATAOWNERMANAGER_GETDATAOWNERSL_ENTRY );
 		if (iBURType != EBURNormal && iBURType != EBURUnset)
 			{
-			__LOG("CDataOwnerManager::GetDataOwnersL() - *Error: ListOfDataOnwers called when device isn't in Normal/Unset mode");
+		    OstTrace0(TRACE_ERROR, CDATAOWNERMANAGER_GETDATAOWNERSL, "*Error: ListOfDataOnwers called when device isn't in Normal/Unset mode");
 			User::Leave(KErrAccessDenied);
 			}
 			
 		// Build the list of dataOwners
 		FindDataOwnersL();
 		Swi::RSisRegistrySession registrySession;
-		User::LeaveIfError(registrySession.Connect());
+		TInt err = registrySession.Connect();
+		LEAVEIFERROR(err, OstTrace1(TRACE_ERROR, DUP9_CDATAOWNERMANAGER_GETDATAOWNERSL, "Leave: %d", err));
 		CleanupClosePushL(registrySession);
 		
-		TInt err = KErrNone;
+		err = KErrNone;
 		TUint count = iDataOwners.Count();
 		// Loop throught the list
 		while(count--)
@@ -524,7 +559,7 @@ namespace conn
 			TRAP(err, dataOwner.ParseFilesL());
 			if (err != KErrNone)
 				{
-				__LOG2("CDataOwnerManager::GetDataOwnersL() - ParseFilesL() - Error in sid: 0x%08x (%d)", secureId.iId, err);
+			    OstTraceExt2(TRACE_NORMAL, DUP1_CDATAOWNERMANAGER_GETDATAOWNERSL, "ParseFilesL() - Error in sid: 0x%08x (%d)", secureId.iId, static_cast<TInt32>(err));
 				} // if
 			else
 				{
@@ -532,7 +567,7 @@ namespace conn
 				TRAP(err, dataOwner.BuildDriveStateArrayL());
 				if (err != KErrNone)
 					{
-					__LOG2("CDataOwnerManager::GetDataOwnersL() - BuildDriveStateArrayL() - Error in sid: 0x%08x (%d)", secureId.iId, err);
+				    OstTraceExt2(TRACE_NORMAL, DUP2_CDATAOWNERMANAGER_GETDATAOWNERSL, "BuildDriveStateArrayL() - Error in sid: 0x%08x (%d)", secureId.iId, static_cast<TInt32>(err));
 					}//if
 				else 
 					{
@@ -540,14 +575,14 @@ namespace conn
 					TRAP(err, dataOwner.GetDriveListL(driveList));
 					if (err != KErrNone)
 						{
-						__LOG2("CDataOwnerManager::GetDataOwnersL() - GetDriveListL() - Error in sid: 0x%08x (%d)", secureId.iId, err);
+					    OstTraceExt2(TRACE_NORMAL, DUP3_CDATAOWNERMANAGER_GETDATAOWNERSL, "GetDriveListL() - Error in sid: 0x%08x (%d)", secureId.iId, static_cast<TInt32>(err));
 						}//if		
 					else
 						{
 						TRAP(err, commonSettings = dataOwner.CommonSettingsL());
 						if (err != KErrNone)
 							{
-							__LOG2("CDataOwnerManager::GetDataOwnersL() - CommonSettingsL() - Error in sid: 0x%08x (%d)", secureId.iId, err);
+						    OstTraceExt2(TRACE_NORMAL, DUP4_CDATAOWNERMANAGER_GETDATAOWNERSL, "CommonSettingsL() - Error in sid: 0x%08x (%d)", secureId.iId, static_cast<TInt32>(err));
 							}//if		
 						}//else
 					}
@@ -564,7 +599,7 @@ namespace conn
 					if ((error == KErrNone))
 						{
 						TUid packageUid = pRegistryPackage->Uid();
-						__LOG2("CDataOwnerManager::GetDataOwnersL() - Found package for secure id 0x%08x, package id 0x%08x", secureId.iId, packageUid);
+						OstTraceExt2(TRACE_NORMAL, DUP5_CDATAOWNERMANAGER_GETDATAOWNERSL, "Found package for secure id 0x%08x, package id 0x%08x", secureId.iId, packageUid.iUid);
 						
 						CleanupStack::PushL(pRegistryPackage);
 						pId = CSBPackageId::NewL(packageUid, secureId, pRegistryPackage->Name());
@@ -577,13 +612,13 @@ namespace conn
 						TRAP(err, pak->GetDriveListL(driveList));
 						if( err == KErrNotSupported)
 							{
-							__LOG("CDataOwnerManager::GetDataOwnersL() - Error KErrNotSupported");
+						    OstTrace0(TRACE_NORMAL, DUP6_CDATAOWNERMANAGER_GETDATAOWNERSL, "Error KErrNotSupported");
 							err = KErrNone;
 							}
 						} // if
 					else
 						{
-						__LOG2("CDataOwnerManager::GetDataOwnersL() - Error(%d) retrieving package data for sid 0x%08x", error, secureId.iId);
+					    OstTraceExt2(TRACE_NORMAL, DUP7_CDATAOWNERMANAGER_GETDATAOWNERSL, "Error(%d) retrieving package data for sid 0x%08x", static_cast<TInt32>(error), secureId.iId);
 						} // else
 					} // if
 				} // if
@@ -638,8 +673,9 @@ namespace conn
 			}
 		else
 			{
-			__LOG("CDataOwnerManager::GetDataOwnersL() - Java Backup-Restore Plug-In not loaded, java files won't be backed or restored");
+		    OstTrace0(TRACE_NORMAL, DUP8_CDATAOWNERMANAGER_GETDATAOWNERSL, "Java Backup-Restore Plug-In not loaded, java files won't be backed or restored");
 			}
+		OstTraceFunctionExit0( CDATAOWNERMANAGER_GETDATAOWNERSL_EXIT );
 		}		
 		
 	CDataOwner& CDataOwnerManager::DataOwnerL(TSecureId aSID)
@@ -649,16 +685,20 @@ namespace conn
 	@param aSID The SID of the active data owner
 	*/
 		{
+		OstTraceFunctionEntry0( CDATAOWNERMANAGER_DATAOWNERL_ENTRY );
 		CDataOwnerContainer* pDOContainer = NULL;
 		
 		pDOContainer = FindL(aSID);
 
 		if (!pDOContainer)
 			{
+		    OstTrace0(TRACE_ERROR, CDATAOWNERMANAGER_DATAOWNERL, "Leave: KErrNotFound");
 			User::Leave(KErrNotFound);
 			}
 
-		return pDOContainer->DataOwner();
+		CDataOwner& dataOwner = pDOContainer->DataOwner();
+		OstTraceFunctionExit0( CDATAOWNERMANAGER_DATAOWNERL_EXIT );
+		return dataOwner;
 		}
 
 	void CDataOwnerManager::GetExpectedDataSizeL(CSBGenericTransferType* apGenericTransferType, TUint& aSize)
@@ -671,9 +711,10 @@ namespace conn
 	@leave KErrNotFound object relating to apGenericTransferType not found
 	*/
 		{
+		OstTraceFunctionEntry0( CDATAOWNERMANAGER_GETEXPECTEDDATASIZEL_ENTRY );
 		if (iBURType != EBURBackupPartial && iBURType != EBURBackupFull)
 			{
-			__LOG("CDataOwnerManager::GetExpectedDataSizeL() - *Error: GetExpectedDataSizeL called when device is not in Backup mode !");
+		    OstTrace0(TRACE_ERROR, CDATAOWNERMANAGER_GETEXPECTEDDATASIZEL, "*Error: GetExpectedDataSizeL called when device is not in Backup mode !");
 			User::Leave(KErrAccessDenied);
 			}
 			
@@ -681,7 +722,7 @@ namespace conn
 			{
 			case ESIDTransferDerivedType:
 				{
-				__LOG("CDataOwnerManager::GetExpectedDataSizeL() - ESIDTransferDerivedType");
+				OstTrace0(TRACE_NORMAL, DUP1_CDATAOWNERMANAGER_GETEXPECTEDDATASIZEL, "ESIDTransferDerivedType");
 				CSBSIDTransferType* pSIDTransferType = CSBSIDTransferType::NewL(apGenericTransferType);
 				CleanupStack::PushL(pSIDTransferType);
 				
@@ -691,7 +732,7 @@ namespace conn
 				};
 			case EPackageTransferDerivedType:
 				{
-				__LOG("CDataOwnerManager::GetExpectedDataSizeL() - EPackageTransferDerivedType");
+				OstTrace0(TRACE_NORMAL, DUP2_CDATAOWNERMANAGER_GETEXPECTEDDATASIZEL, "EPackageTransferDerivedType");
 
 				// This code should be changed.  Ideally, the GetExpectedDataSizeL method should be virtual, rendering 
 				// this switch statement unnecessary.  When java support is added this will become even more important.
@@ -706,7 +747,7 @@ namespace conn
 				const TPackageDataType dataType = pPackageTransferType->DataTypeL();
 				const TDriveNumber driveNumber = pPackageTransferType->DriveNumberL();
 				//
-				__LOG3("CDataOwnerManager::GetExpectedDataSizeL() - package id: 0x%08x, dataType: %d, drive: %c ", packageId.iUid, dataType, driveNumber + 'A');
+				OstTraceExt3(TRACE_NORMAL, DUP3_CDATAOWNERMANAGER_GETEXPECTEDDATASIZEL, "package id: 0x%08x, dataType: %d, drive: %c ", packageId.iUid, static_cast<TInt32>(dataType), static_cast<TInt8>(driveNumber + 'A'));
 				CPackageDataTransfer* pDataTransfer = FindPackageDataContainerL(pPackageTransferType->PackageIdL());
 				pDataTransfer->GetExpectedDataSizeL(dataType, driveNumber, aSize);
 				CleanupStack::PopAndDestroy(pPackageTransferType);
@@ -715,7 +756,7 @@ namespace conn
 
 			case EJavaTransferDerivedType:
 				{
-				__LOG("CDataOwnerManager::GetExpectedDataSizeL() - EJavaTransferDerivedType");
+				OstTrace0(TRACE_NORMAL, DUP4_CDATAOWNERMANAGER_GETEXPECTEDDATASIZEL, "EJavaTransferDerivedType");
 
 				// Call the Java DOM to calculate and return the expected size of the data specified in 
 				// apGenericTransferType
@@ -725,7 +766,7 @@ namespace conn
 					}
 				else
 					{
-					__LOG("CDataOwnerManager::GetExpectedDataSizeL() - Java Backup-Restore Plug-In not loaded, java files won't be backed or restored");
+				    OstTrace0(TRACE_NORMAL, DUP5_CDATAOWNERMANAGER_GETEXPECTEDDATASIZEL, "Java Backup-Restore Plug-In not loaded, java files won't be backed or restored");
 					}
 
 				break;
@@ -733,11 +774,12 @@ namespace conn
 
 			default:
 				{
-				__LOG("CDataOwnerManager::GetExpectedDataSizeL() - ERROR - unsupported transfer type");
+				OstTrace0(TRACE_ERROR, DUP6_CDATAOWNERMANAGER_GETEXPECTEDDATASIZEL, "unsupported transfer type");
 				User::Leave(KErrNotSupported);
 				}
 			} // switch
-		__LOG1("CDataOwnerManager::GetExpectedDataSizeL() - END - size is: %d", aSize);
+		OstTrace1(TRACE_NORMAL, DUP7_CDATAOWNERMANAGER_GETEXPECTEDDATASIZEL, "size is: %d", aSize);
+		OstTraceFunctionExit0( CDATAOWNERMANAGER_GETEXPECTEDDATASIZEL_EXIT );
 		}
 
 
@@ -751,15 +793,16 @@ namespace conn
 	@param aFiles			on return the list of public files
 	*/
 		{
+		OstTraceFunctionEntry0( CDATAOWNERMANAGER_GETPUBLICFILELISTL_ENTRY );
 		if (iBURType != EBURBackupPartial && iBURType != EBURBackupFull)
 			{
-			__LOG("CDataOwnerManager::GetPublicFileListL() - *Error: GetPublicFileListL called when device is not in Backup mode !");
+		    OstTrace0(TRACE_ERROR, CDATAOWNERMANAGER_GETPUBLICFILELISTL, "*Error: GetPublicFileListL called when device is not in Backup mode !");
 			User::Leave(KErrAccessDenied);
 			}
 		
 		if (!(iDriveList[aDriveNumber]))
 			{
-			__LOG("CDataOwnerManager::GetPublicFileListL() - The drive in the argument is not in the list of the drives for backup/restore");
+		    OstTrace0(TRACE_ERROR, DUP1_CDATAOWNERMANAGER_GETPUBLICFILELISTL, "The drive in the argument is not in the list of the drives for backup/restore");
 			User::Leave(KErrArgument);
 			}
 		
@@ -792,16 +835,18 @@ namespace conn
 					}
 				else
 					{
-					__LOG("CDataOwnerManager::GetPublicFileListL() - Java Backup-Restore Plug-In not loaded, java files won't be backed or restored");
+				    OstTrace0(TRACE_NORMAL, DUP2_CDATAOWNERMANAGER_GETPUBLICFILELISTL, "Java Backup-Restore Plug-In not loaded, java files won't be backed or restored");
 					}
 				break;
 				}
 
 			default:
 				{
+				OstTrace0(TRACE_ERROR, DUP3_CDATAOWNERMANAGER_GETPUBLICFILELISTL, "Leave: KErrNotSupported");
 				User::Leave(KErrNotSupported);
 				}
 			}
+		OstTraceFunctionExit0( CDATAOWNERMANAGER_GETPUBLICFILELISTL_EXIT );
 		}
 
 		
@@ -814,15 +859,16 @@ namespace conn
 	@param aFileFilter on return an array of TRestoreFileFilter
 	*/
 		{
+		OstTraceFunctionEntry0( CDATAOWNERMANAGER_GETRAWPUBLICFILELISTL_ENTRY );
 		if (iBURType != EBURBackupPartial && iBURType != EBURBackupFull)
 			{
-			__LOG("CDataOwnerManager::GetRawPublicFileListL() - *Error: GetRawPublicFileListL called when device is not in Backup mode !");
+		    OstTrace0(TRACE_ERROR, CDATAOWNERMANAGER_GETRAWPUBLICFILELISTL, "*Error: GetRawPublicFileListL called when device is not in Backup mode !");
 			User::Leave(KErrAccessDenied);
 			}
 			
 		if (!(iDriveList[aDriveNumber]))
 			{
-			__LOG("CDataOwnerManager::GetRawPublicFileListL() - The drive in the argument is not in the list of the drives for backup/restore");
+		    OstTrace0(TRACE_ERROR, DUP1_CDATAOWNERMANAGER_GETRAWPUBLICFILELISTL, "The drive in the argument is not in the list of the drives for backup/restore");
 			User::Leave(KErrArgument);
 			}
 		
@@ -856,16 +902,18 @@ namespace conn
 					}
 				else
 					{
-					__LOG("CDataOwnerManager::GetRawPublicFileListL() - Java Backup-Restore Plug-In not loaded, java files won't be backed or restored");
+				    OstTrace0(TRACE_NORMAL, DUP2_CDATAOWNERMANAGER_GETRAWPUBLICFILELISTL, "Java Backup-Restore Plug-In not loaded, java files won't be backed or restored");
 					}
 				break;
 				}
 
 			default:
 				{
+				OstTrace0(TRACE_ERROR, DUP3_CDATAOWNERMANAGER_GETRAWPUBLICFILELISTL, "Leave: KErrNotSupported");
 				User::Leave(KErrNotSupported);
 				}
 			}
+		OstTraceFunctionExit0( CDATAOWNERMANAGER_GETRAWPUBLICFILELISTL_EXIT );
 		}
     	
     	
@@ -879,17 +927,19 @@ namespace conn
 	
 	*/
     	{
+    	OstTraceFunctionEntry0( CDATAOWNERMANAGER_GETXMLPUBLICFILELISTL_ENTRY );
     	if (iBURType != EBURBackupPartial && iBURType != EBURBackupFull)
 			{
-			__LOG("CDataOwnerManager::GetXMLPublicFileListL() - *Error: GetXMLPublicFileListL called when device is not in Backup mode !");
+    	    OstTrace0(TRACE_ERROR, CDATAOWNERMANAGER_GETXMLPUBLICFILELISTL, "*Error: GetXMLPublicFileListL called when device is not in Backup mode !");
 			User::Leave(KErrAccessDenied);
 			}
 		else 
 			{
 			//will need to check if the drive exists in our list
-			__LOG("CDataOwnerManager::GetXMLPublicFileListL() - *Error: GetXMLPublicFileListL Not Yet Implemented");
+		    OstTrace0(TRACE_ERROR, DUP1_CDATAOWNERMANAGER_GETXMLPUBLICFILELISTL, "*Error: GetXMLPublicFileListL Not Yet Implemented");
 			User::Leave(KErrNotSupported);
 			}
+    	OstTraceFunctionExit0( CDATAOWNERMANAGER_GETXMLPUBLICFILELISTL_EXIT );
     	}
     	
 	void CDataOwnerManager::SetSIDListForPartialBURL(TDesC8& aFlatArrayPtr)
@@ -899,9 +949,10 @@ namespace conn
 	@param aFlatArrayPtr Flat Array Pointer
 	*/
 		{
+		OstTraceFunctionEntry0( CDATAOWNERMANAGER_SETSIDLISTFORPARTIALBURL_ENTRY );
 		if (iBURType != EBURNormal && iBURType != EBURUnset)
 			{
-			__LOG("CDataOwnerManager::SetSIDListForPartialBURL() - *Error: called when device isn't in Normal/Unset mode");
+		    OstTrace0(TRACE_ERROR, CDATAOWNERMANAGER_SETSIDLISTFORPARTIALBURL, "*Error: called when device isn't in Normal/Unset mode");
 			User::Leave(KErrAccessDenied);
 			}
 		
@@ -913,6 +964,7 @@ namespace conn
 			}
 			
 		iSIDListForPartial = RSIDArray::InternaliseL(aFlatArrayPtr);
+		OstTraceFunctionExit0( CDATAOWNERMANAGER_SETSIDLISTFORPARTIALBURL_EXIT );
 		}
 	
 	void CDataOwnerManager::UpdateDataOwnersPartialStateL()
@@ -921,6 +973,7 @@ namespace conn
 	
 	*/
 		{
+		OstTraceFunctionEntry0( CDATAOWNERMANAGER_UPDATEDATAOWNERSPARTIALSTATEL_ENTRY );
 		if (iSIDListForPartial != NULL)
 			{
 			TUint count = iSIDListForPartial->Count();
@@ -931,6 +984,7 @@ namespace conn
 				DataOwnerL((*iSIDListForPartial)[count]).SetBackedUpAsPartial(ETrue);
 				} // for
 			} // if
+		OstTraceFunctionExit0( CDATAOWNERMANAGER_UPDATEDATAOWNERSPARTIALSTATEL_EXIT );
 		}
 	
 	void CDataOwnerManager::SIDStatusL(RSIDStatusArray& aSIDStatus)
@@ -940,9 +994,10 @@ namespace conn
 	@param aSIDStatus Array of SID's and their associated statuses. The statuses will be populated upon return
 	*/
 		{
+		OstTraceFunctionEntry0( CDATAOWNERMANAGER_SIDSTATUSL_ENTRY );
 		if (iBURType == EBURNormal || iBURType == EBURUnset)
 			{
-			__LOG("CDataOwnerManager::SIDStatusL() - *Error: called when device is in Normal/Unset mode");
+		    OstTrace0(TRACE_ERROR, CDATAOWNERMANAGER_SIDSTATUSL, "*Error: called when device is in Normal/Unset mode");
 			User::Leave(KErrAccessDenied);
 			}
 			
@@ -962,6 +1017,7 @@ namespace conn
 				aSIDStatus[count].iStatus = pDOContainer->DataOwner().ReadyState();
 				}
 			}
+		OstTraceFunctionExit0( CDATAOWNERMANAGER_SIDSTATUSL_EXIT );
 		}
 		
 	void CDataOwnerManager::AllSnapshotsSuppliedL()
@@ -969,7 +1025,7 @@ namespace conn
 	All the snapshots have been supplied
 	*/
 		{
-		__LOG("CDataOwnerManager::AllSnapshotsSuppliedL() - Begin");
+		OstTraceFunctionEntry0( CDATAOWNERMANAGER_ALLSNAPSHOTSSUPPLIEDL_ENTRY );		
 		if (iBURType == EBURBackupPartial || iBURType == EBURBackupFull)
 			{
 			TUint count = iDataOwners.Count();
@@ -1000,10 +1056,10 @@ namespace conn
 			} //if
 		else 
 			{
-			__LOG("CDataOwnerManager::AllSnapshotsSuppliedL() - *Error: can only be called in Backup mode");
+		    OstTrace0(TRACE_ERROR, CDATAOWNERMANAGER_ALLSNAPSHOTSSUPPLIEDL, "*Error: can only be called in Backup mode");
 			User::Leave(KErrAccessDenied);
-			} // else
-		__LOG("CDataOwnerManager::AllSnapshotsSuppliedL() - End");
+			} // else		
+		OstTraceFunctionExit0( CDATAOWNERMANAGER_ALLSNAPSHOTSSUPPLIEDL_EXIT );
 		}
 
 	void CDataOwnerManager::GetNextPublicFileL(CSBGenericDataType* aGenericDataType,
@@ -1018,16 +1074,16 @@ namespace conn
 	@param aEntry on return the next entry in the list, an empty entry indicates the end of the list has been reached
 	*/
 		{
-		__LOG("CDataOwnerManager::GetNextPublicFileL() - Begin");
+		OstTraceFunctionEntry0( CDATAOWNERMANAGER_GETNEXTPUBLICFILEL_ENTRY );		
 		if (iBURType != EBURBackupPartial && iBURType != EBURBackupFull)
 			{
-			__LOG("CDataOwnerManager::GetNextPublicFileL() - *Error: GetPublicFileListL called when device is not in Backup mode !");
+		    OstTrace0(TRACE_ERROR, CDATAOWNERMANAGER_GETNEXTPUBLICFILEL, "*Error: GetPublicFileListL called when device is not in Backup mode !");
 			User::Leave(KErrAccessDenied);
 			}
 		
 		if (!(iDriveList[aDriveNumber]))
 			{
-			__LOG("CDataOwnerManager::GetNextPublicFileL() - The drive in the argument is not in the list of the drives for backup/restore");
+		    OstTrace0(TRACE_ERROR, DUP1_CDATAOWNERMANAGER_GETNEXTPUBLICFILEL, "The drive in the argument is not in the list of the drives for backup/restore");
 			User::Leave(KErrArgument);
 			}
 		
@@ -1041,9 +1097,10 @@ namespace conn
 			}
 		else
 			{
+		    OstTrace0(TRACE_ERROR, DUP2_CDATAOWNERMANAGER_GETNEXTPUBLICFILEL, "Leave: KErrNotSupported");
 			User::Leave(KErrNotSupported);
-			}
-		__LOG("CDataOwnerManager::GetNextPublicFileL() - End");
+			}		
+		OstTraceFunctionExit0( CDATAOWNERMANAGER_GETNEXTPUBLICFILEL_EXIT );
 		}
 
 
@@ -1058,11 +1115,12 @@ namespace conn
     @leave KErrNotFound Unknown object
     */
 		{
-		__LOG1("CDataOwnerManager::SupplyDataL() - START - about to decompress %d bytes of data", aBuffer.Length());
+		OstTraceFunctionEntry0( CDATAOWNERMANAGER_SUPPLYDATAL_ENTRY );
+		OstTrace1(TRACE_NORMAL, CDATAOWNERMANAGER_SUPPLYDATAL, "about to decompress %d bytes of data", aBuffer.Length());
 
         if (iBURType == EBURNormal || iBURType == EBURUnset)
 			{
-			__LOG("CDataOwnerManager::SupplyDataL() - *Error: called not when device in Normal/Unset mode");
+            OstTrace0(TRACE_ERROR, DUP1_CDATAOWNERMANAGER_SUPPLYDATAL, "*Error: called not when device in Normal/Unset mode");
 			User::Leave(KErrAccessDenied);
 			}
 			
@@ -1081,10 +1139,10 @@ namespace conn
 			uncompressedData = NULL;
 			if (!iDecompressor->NextLC(uncompressedData, moreData))
 				{
-				__LOG("CDataOwnerManager::SupplyDataL() - iDecompressor->NextLC returned EFalse");
+			    OstTrace0(TRACE_NORMAL, DUP2_CDATAOWNERMANAGER_SUPPLYDATAL, "iDecompressor->NextLC returned EFalse");
 				if (uncompressedData != NULL)
 					{
-					__LOG("CDataOwnerManager::SupplyDataL() - uncompressedData not NULL so cleaning up");
+				    OstTrace0(TRACE_NORMAL, DUP3_CDATAOWNERMANAGER_SUPPLYDATAL, "uncompressedData not NULL so cleaning up");
 					CleanupStack::PopAndDestroy(uncompressedData);
 					}
 				break;
@@ -1092,12 +1150,12 @@ namespace conn
 				
 			if (uncompressedData == NULL)
 				{
-				__LOG("CDataOwnerManager::SupplyDataL() - uncompressedData is NULL after NextLC, corrupt data");
+			    OstTrace0(TRACE_ERROR, DUP4_CDATAOWNERMANAGER_SUPPLYDATAL, "uncompressedData is NULL after NextLC, corrupt data");
 				User::Leave(KErrCorrupt);
 				}
 			
 			TPtr8 dataPtr(uncompressedData->Des());
-			__LOG1("CDataOwnerManager::SupplyDataL() - decompressed data length: %d", dataPtr.Length());
+			OstTrace1(TRACE_NORMAL, DUP5_CDATAOWNERMANAGER_SUPPLYDATAL, "decompressed data length: %d", dataPtr.Length());
 			
 			// Check aLastSection
 			TBool lastSection = aLastSection && !moreData;
@@ -1106,13 +1164,14 @@ namespace conn
 				{
 			case ESIDTransferDerivedType:
 				{
-				__LOG("CDataOwnerManager::SupplyDataL() - ESIDTransferDerivedType");
+				OstTrace0(TRACE_NORMAL, DUP6_CDATAOWNERMANAGER_SUPPLYDATAL, "ESIDTransferDerivedType");
 				CSBSIDTransferType* pSIDTransferType = CSBSIDTransferType::NewL(apGenericTransferType);
 				CleanupStack::PushL(pSIDTransferType);
 				
 				// Is this the data for registration files? These are now not supported
 				if (pSIDTransferType->DataTypeL() == ERegistrationData)
 					{
+				    OstTrace0(TRACE_ERROR, DUP12_CDATAOWNERMANAGER_SUPPLYDATAL, "Leave: KErrNotSupported");
 					User::Leave(KErrNotSupported);
 					} // if
 				else
@@ -1121,11 +1180,11 @@ namespace conn
 					const TSecureId sid = pSIDTransferType->SecureIdL();
 					const TDriveNumber driveNumber = pSIDTransferType->DriveNumberL();
 					CDataOwner& dataOwner = DataOwnerL(sid);
-					__LOG2("CDataOwnerManager::SupplyDataL() - trying to restore data for SID: 0x%08x, drive: %c", sid.iId, 'A' + driveNumber);
+					OstTraceExt2(TRACE_NORMAL, DUP7_CDATAOWNERMANAGER_SUPPLYDATAL, "trying to restore data for SID: 0x%08x, drive: %c", sid.iId, static_cast<TInt8>('A' + driveNumber));
 
 					if ((dataOwner.CommonSettingsL() & ERequiresReboot) == ERequiresReboot)
 						{
-						__LOG1("CDataOwnerManager::SupplyDataL() - data owner 0x%08x requires a REBOOT!", sid.iId);
+					    OstTrace1(TRACE_NORMAL, DUP8_CDATAOWNERMANAGER_SUPPLYDATAL, "data owner 0x%08x requires a REBOOT!", sid.iId);
 						iResetAfterRestore = ETrue;
 						}
 					
@@ -1137,7 +1196,7 @@ namespace conn
 				}
 			case EPackageTransferDerivedType:
 				{
-				__LOG("CDataOwnerManager::SupplyDataL() - EPackageTransferDerivedType");
+				OstTrace0(TRACE_NORMAL, DUP9_CDATAOWNERMANAGER_SUPPLYDATAL, "EPackageTransferDerivedType");
 				// Ideally, we would use the same CDataOwner class, or a class derived
 				// from it to handle the package backup/restore, however to do this would 
 				// require a re-design.
@@ -1157,28 +1216,29 @@ namespace conn
 
 		    case EJavaTransferDerivedType:
 			    { 
-				__LOG("CDataOwnerManager::SupplyDataL() - EJavaTransferDerivedType");
+			    OstTrace0(TRACE_NORMAL, DUP10_CDATAOWNERMANAGER_SUPPLYDATAL, "EJavaTransferDerivedType");
 			   if(iJavaDOM)
 					{
 				    iJavaDOM->SupplyDataL(apGenericTransferType, dataPtr, lastSection);
 					}
 				else
 					{
-					__LOG("CDataOwnerManager::SupplyDataL() - Java Backup-Restore Plug-In not loaded, java files won't be backed or restored");
+				    OstTrace0(TRACE_NORMAL, DUP11_CDATAOWNERMANAGER_SUPPLYDATAL, "Java Backup-Restore Plug-In not loaded, java files won't be backed or restored");
 					}
 			    break;
 			    }					
 
             default:
 				{
+				OstTrace0(TRACE_ERROR, DUP13_CDATAOWNERMANAGER_SUPPLYDATAL, "Leave: KErrNotSupported");
 				User::Leave(KErrNotSupported);
 				}
 				} // switch
 
 			// Cleanup
 			CleanupStack::PopAndDestroy(uncompressedData);
-			} // while
-		__LOG("CDataOwnerManager::SupplyDataL() - END");
+			} // while		
+    	OstTraceFunctionExit0( CDATAOWNERMANAGER_SUPPLYDATAL_EXIT );
     	}
 
 
@@ -1193,10 +1253,11 @@ namespace conn
     @leave KErrNotFound Unknown object
 	*/
     	{
-		__LOG2("CDataOwnerManager::RequestDataL() - START - aBuffer.Ptr(): 0x%08x, aBuffer.Length(): %d", aBuffer.Ptr(), aBuffer.Length());
+		OstTraceFunctionEntry0( CDATAOWNERMANAGER_REQUESTDATAL_ENTRY );
+		OstTraceExt2(TRACE_NORMAL, CDATAOWNERMANAGER_REQUESTDATAL, "aBuffer.Ptr(): 0x%08x, aBuffer.Length(): %d", reinterpret_cast<TInt32>(aBuffer.Ptr()), static_cast<TInt32>(aBuffer.Length()));
     	if (iBURType == EBURNormal || iBURType == EBURUnset)
 			{
-			__LOG("CDataOwnerManager::RequestDataL() - *Error: called when device is in Normal/Unset mode");
+    	    OstTrace0(TRACE_ERROR, DUP1_CDATAOWNERMANAGER_REQUESTDATAL, "*Error: called when device is in Normal/Unset mode");
 			User::Leave(KErrAccessDenied);
 			}
 			
@@ -1242,13 +1303,14 @@ namespace conn
 				}
 			else
 				{
-				__LOG("CDataOwnerManager::RequestDataL() - Java Backup-Restore Plug-In not loaded, java files won't be backed or restored");
+			    OstTrace0(TRACE_NORMAL, DUP2_CDATAOWNERMANAGER_REQUESTDATAL, "Java Backup-Restore Plug-In not loaded, java files won't be backed or restored");
 				}
 			break;
 			}
 
 		default:
 			{
+			OstTrace0(TRACE_ERROR, DUP5_CDATAOWNERMANAGER_REQUESTDATAL, "Leave: KErrNotSupported");
 			User::Leave(KErrNotSupported);
 			}
 			} // switch
@@ -1256,24 +1318,24 @@ namespace conn
 		// Compress the data block
 		if (aBuffer.Size() > 0) // Dont compress no data
 			{
-		    __LOG1("CDataOwnerManager::RequestDataL() - got %d bytes of uncompressed data, about to pack it...", aBuffer.Length());
+		    OstTrace1(TRACE_NORMAL, DUP3_CDATAOWNERMANAGER_REQUESTDATAL, "got %d bytes of uncompressed data, about to pack it...", aBuffer.Length());
 			pCE->PackL(aBuffer);
 			}
 		else
 			{
-		    __LOG1("CDataOwnerManager::RequestDataL() - got %d bytes of uncompressed data, free reserved space...", aBuffer.Length());
+		    OstTrace1(TRACE_NORMAL, DUP4_CDATAOWNERMANAGER_REQUESTDATAL, "got %d bytes of uncompressed data, free reserved space...", aBuffer.Length());
 			pCE->FreeReservedSpace(aBuffer);
 			}
 		
 		
-		CleanupStack::PopAndDestroy(pCE);
-		__LOG("CDataOwnerManager::RequestDataL() - End");
+		CleanupStack::PopAndDestroy(pCE);		
+    	OstTraceFunctionExit0( CDATAOWNERMANAGER_REQUESTDATAL_EXIT );
     	}
 	                     
 	// Accessors
 	void CDataOwnerManager::SetActiveBackupServer(CABServer* aABServer)
 		{
-		ipABServer = aABServer;
+		ipABServer = aABServer;		
 		}
 		
 	RFs& CDataOwnerManager::GetRFs()
@@ -1289,7 +1351,7 @@ namespace conn
 	*/
 	void CDataOwnerManager::FindImportPackagesL(Swi::RSisRegistrySession& aRegistry, RPointerArray<CDataOwnerInfo>& aDataOwners)
 		{
-		__LOG("CDataOwnerManager::FindImportPackagesL() - Begin");
+		OstTraceFunctionEntry0( CDATAOWNERMANAGER_FINDIMPORTPACKAGESL_ENTRY );		
 		CDesCArray* files = new(ELeave) CDesCArrayFlat(KDesCArrayGranularity);
 		CleanupStack::PushL(files);
 		FindRegistrationFilesL(KImportDir, *files);
@@ -1310,7 +1372,7 @@ namespace conn
 				err = entry.Open(aRegistry, sid);
 				if (err == KErrNone)
 					{
-					__LOG2("CDataOwnerManager::FindImportPackagesL() - found reg file: %S for Package: 0x%08x", &fileName, sid.iId);
+				    OstTraceExt2(TRACE_NORMAL, CDATAOWNERMANAGER_FINDIMPORTPACKAGESL, "found reg file: %S for Package: 0x%08x", fileName, sid.iId);
 					CPackageDataTransfer* pDataTransfer = FindPackageDataContainerL(sid);
 					
 					TRAP(err, pDataTransfer->SetRegistrationFileL(fileName));
@@ -1320,6 +1382,7 @@ namespace conn
 						}
 					if (err == KErrNoMemory)
 						{
+					    OstTrace0(TRACE_ERROR, DUP8_CDATAOWNERMANAGER_FINDIMPORTPACKAGESL, "Leave: KErrNoMemory");
 						User::Leave(KErrNoMemory);
 						}
 					// create generic data type
@@ -1334,6 +1397,7 @@ namespace conn
 					if (err != KErrNone)
 					    {//Non-removable, ignore this data owner
 						CleanupStack::PopAndDestroy(pId);
+						entry.Close();
 						continue;
 					    }
 					// create a data owner info
@@ -1357,7 +1421,7 @@ namespace conn
 						CDataOwnerContainer* pDataOwner = FindL(sid);
 						if (pDataOwner == NULL)  // If it does not exist we need to create it
 							{
-							__LOG1("CDataOwnerManager::FindImportPackagesL() - Package has the public files for SID: 0x%08x", sid.iId);
+						    OstTrace1(TRACE_NORMAL, DUP1_CDATAOWNERMANAGER_FINDIMPORTPACKAGESL, "Package has the public files for SID: 0x%08x", sid.iId);
 	
 							pDataOwner = CDataOwnerContainer::NewL(sid, this);
 							CleanupStack::PushL(pDataOwner);
@@ -1367,7 +1431,7 @@ namespace conn
 							} // if
 						else
 							{
-							__LOG1("CDataOwnerManager::FindImportPackagesL() - SID already exists in the list SID: 0x%08x", sid.iId);
+						    OstTrace1(TRACE_NORMAL, DUP2_CDATAOWNERMANAGER_FINDIMPORTPACKAGESL, "SID already exists in the list SID: 0x%08x", sid.iId);
 							}
 	
 						TRAP_IGNORE(pDataOwner->DataOwner().AddRegistrationFilesL(fileName));					
@@ -1381,7 +1445,7 @@ namespace conn
 						TRAP(err, pDataOwner->DataOwner().ParseFilesL());
 						if (err != KErrNone)
 							{
-							__LOG2("CDataOwnerManager::GetDataOwnersL() - ParseFilesL() - Error in sid: 0x%08x (%d)", sid.iId, err);
+						    OstTraceExt2(TRACE_NORMAL, DUP3_CDATAOWNERMANAGER_FINDIMPORTPACKAGESL, "ParseFilesL() - Error in sid: 0x%08x (%d)", sid.iId, static_cast<TInt32>(err));
 							} // if
 						else
 							{
@@ -1389,7 +1453,7 @@ namespace conn
 							TRAP(err, pDataOwner->DataOwner().BuildDriveStateArrayL());
 							if (err != KErrNone)
 								{
-								__LOG2("CDataOwnerManager::GetDataOwnersL() - BuildDriveStateArrayL() - Error in sid: 0x%08x (%d)", sid.iId, err);
+							    OstTraceExt2(TRACE_NORMAL, DUP4_CDATAOWNERMANAGER_FINDIMPORTPACKAGESL, "BuildDriveStateArrayL() - Error in sid: 0x%08x (%d)", sid.iId, static_cast<TInt32>(err));
 								}//if
 							else 
 								{
@@ -1397,14 +1461,14 @@ namespace conn
 								TRAP(err, pDataOwner->DataOwner().GetDriveListL(driveList));
 								if (err != KErrNone)
 									{
-									__LOG2("CDataOwnerManager::GetDataOwnersL() - GetDriveListL() - Error in sid: 0x%08x (%d)", sid.iId, err);
+								    OstTraceExt2(TRACE_NORMAL, DUP5_CDATAOWNERMANAGER_FINDIMPORTPACKAGESL, "GetDriveListL() - Error in sid: 0x%08x (%d)", sid.iId, static_cast<TInt32>(err));
 									}//if		
 								else
 									{
 									TRAP(err, pDataOwner->DataOwner().CommonSettingsL());
 									if (err != KErrNone)
 										{
-										__LOG2("CDataOwnerManager::GetDataOwnersL() - CommonSettingsL() - Error in sid: 0x%08x (%d)", sid.iId, err);
+									    OstTraceExt2(TRACE_NORMAL, DUP6_CDATAOWNERMANAGER_FINDIMPORTPACKAGESL, "CommonSettingsL() - Error in sid: 0x%08x (%d)", sid.iId, static_cast<TInt32>(err));
 										}//if		
 									}//else
 								}
@@ -1418,7 +1482,7 @@ namespace conn
 				
 			if (err != KErrNone)
 				{
-				__LOG1("CDataOwnerManager::FindImportPackagesL() - cannot get Package UID for reg file: %S", &fileName);
+			    OstTraceExt1(TRACE_NORMAL, DUP7_CDATAOWNERMANAGER_FINDIMPORTPACKAGESL, "cannot get Package UID for reg file: %S", fileName);
 				
 				CSBGenericDataType* pId = CSBPackageId::NewL(sid, KDummyId, KNullDesC);
 				CleanupStack::PushL(pId);
@@ -1440,8 +1504,8 @@ namespace conn
 			
 		CleanupStack::PopAndDestroy(&entry);
 		
-		CleanupStack::PopAndDestroy(files);
-		__LOG("CDataOwnerManager::FindImportPackagesL() - End");
+		CleanupStack::PopAndDestroy(files);		
+		OstTraceFunctionExit0( CDATAOWNERMANAGER_FINDIMPORTPACKAGESL_EXIT );
 		}
 	
 	void CDataOwnerManager::FindRegistrationFilesL(const TDesC& aPath, CDesCArray& aFiles)
@@ -1450,7 +1514,7 @@ namespace conn
 	@param aFiles on return a list of registration files on the device
 	*/
 		{
-		__LOG("CDataOwnerManager::FindRegistrationFilesL() - START");
+		OstTraceFunctionEntry0( CDATAOWNERMANAGER_FINDREGISTRATIONFILESL_ENTRY );		
 		
 		// Find private directorys
 		TFindFile findDir(iFs);
@@ -1485,7 +1549,7 @@ namespace conn
 						while(fileCount--)
 							{
 							path.Set((*pFile)[fileCount].iName, &findFile.File(), NULL);
-							__LOG1("CDataOwnerManager::FindRegistrationFilesL() - found file: %S", &path.FullName());
+							OstTraceExt1(TRACE_NORMAL, CDATAOWNERMANAGER_FINDREGISTRATIONFILESL, "found file: %S", path.FullName());
 							aFiles.AppendL(path.FullName());
 							} // for y
 						
@@ -1502,7 +1566,8 @@ namespace conn
 			errD = findDir.FindWild(pDir);
 			} // while
 		
-		__LOG1("CDataOwnerManager::FindRegistrationFilesL() - END - total files %d", aFiles.Count());
+		OstTrace1(TRACE_NORMAL, DUP1_CDATAOWNERMANAGER_FINDREGISTRATIONFILESL, "total files %d", aFiles.Count());
+		OstTraceFunctionExit0( CDATAOWNERMANAGER_FINDREGISTRATIONFILESL_EXIT );
 		}
 
 	CDataOwnerContainer* CDataOwnerManager::FindL(TSecureId aSID)
@@ -1512,16 +1577,19 @@ namespace conn
 	@leave KErrNotFound		no such secure id
 	*/
 		{
+		OstTraceFunctionEntry0( CDATAOWNERMANAGER_FINDL_ENTRY );
 		CDataOwnerContainer* tempCont = CDataOwnerContainer::NewL(aSID, this);
 		TInt res = iDataOwners.Find(tempCont, CDataOwnerContainer::Match);
 		delete tempCont;
 		
 		if (res == KErrNotFound)
 			{
+			OstTraceFunctionExit0( CDATAOWNERMANAGER_FINDL_EXIT );
 			return NULL;
 			}
 		else
 			{
+			OstTraceFunctionExit0( DUP1_CDATAOWNERMANAGER_FINDL_EXIT );
 			return iDataOwners[res];
 			}
 		}
@@ -1533,18 +1601,22 @@ namespace conn
 	@param aPid The process id
 	*/
 		{
+		OstTraceFunctionEntry0( CDATAOWNERMANAGER_FINDPACKAGEDATACONTAINERL_ENTRY );
 		CPackageDataTransfer* pPackageTransfer = CPackageDataTransfer::NewL(aPid, this);
 		CleanupStack::PushL(pPackageTransfer);
 		TInt res = iPackageDataOwners.Find(pPackageTransfer, CPackageDataTransfer::Match);
 		if (res == KErrNotFound)
 			{
-			User::LeaveIfError(iPackageDataOwners.InsertInOrder(pPackageTransfer, CPackageDataTransfer::Compare));
+		    TInt err = iPackageDataOwners.InsertInOrder(pPackageTransfer, CPackageDataTransfer::Compare);
+			LEAVEIFERROR(err, OstTrace1(TRACE_ERROR, CDATAOWNERMANAGER_FINDPACKAGEDATACONTAINERL, "Leave: %d", err));
 			CleanupStack::Pop(pPackageTransfer);
+			OstTraceFunctionExit0( CDATAOWNERMANAGER_FINDPACKAGEDATACONTAINERL_EXIT );
 			return pPackageTransfer;
 			}
 		else
 			{
 			CleanupStack::PopAndDestroy(pPackageTransfer);
+			OstTraceFunctionExit0( DUP1_CDATAOWNERMANAGER_FINDPACKAGEDATACONTAINERL_EXIT );
 			return iPackageDataOwners[res];
 			}
 		}
@@ -1555,6 +1627,7 @@ namespace conn
 	Looks for a "//private//" directory in the string and strips the SID after it.
 	*/
 		{
+		OstTraceFunctionEntry0( CDATAOWNERMANAGER_STRIPSECUREIDL_ENTRY );
 		
 		TInt start = aStrip.FindF(KImportDir);
 		if (start == KErrNotFound)
@@ -1562,6 +1635,7 @@ namespace conn
 			start = aStrip.FindF(KPrivate);
 			if (start == KErrNotFound)
 				{
+			    OstTrace0(TRACE_ERROR, CDATAOWNERMANAGER_STRIPSECUREIDL, "Leave: KErrArgument");
 				User::Leave(KErrArgument);
 				}
 			start += KPrivate().Length();
@@ -1580,8 +1654,10 @@ namespace conn
 		// If we cant do the convert then ignore as it is a directory that is not a SID.
 		if (sIdLex.Val(aSecureId.iId, EHex) != KErrNone)
 			{
+		    OstTrace0(TRACE_ERROR, DUP1_CDATAOWNERMANAGER_STRIPSECUREIDL, "Leave: KErrArgument");
 			User::Leave(KErrArgument);
 			}
+		OstTraceFunctionExit0( CDATAOWNERMANAGER_STRIPSECUREIDL_EXIT );
 		}
 
 	
@@ -1592,7 +1668,7 @@ namespace conn
 	registration files.
 	*/
 		{
-		__LOG("CDataOwnerManager::FindDataOwnersL() - Begin");
+		OstTraceFunctionEntry0( CDATAOWNERMANAGER_FINDDATAOWNERSL_ENTRY );		
 		// Clear out any current list
 		iDataOwners.ResetAndDestroy();
 		
@@ -1600,7 +1676,7 @@ namespace conn
 		CDesCArray* registrationFiles = new(ELeave) CDesCArrayFlat(KDesCArrayGranularity);
 		CleanupStack::PushL(registrationFiles);
 		FindRegistrationFilesL(KPrivate, *registrationFiles);
-		__LOG(" ");
+		OstTrace0(TRACE_NORMAL, CDATAOWNERMANAGER_FINDDATAOWNERSL, " ");
 		
 		// Add registration files to iDataOwners
 		const TInt count = registrationFiles->Count();
@@ -1615,7 +1691,7 @@ namespace conn
 				CDataOwnerContainer* pDataOwner = FindL(sid);
 				if (pDataOwner == NULL)  // If it does not exist we need to create it
 					{
-					__LOG2("CDataOwnerManager::FindDataOwnersL() - found reg file: %S for sid: 0x%08x", &fileName, sid.iId);
+				    OstTraceExt2(TRACE_NORMAL, DUP1_CDATAOWNERMANAGER_FINDDATAOWNERSL, "found reg file: %S for sid: 0x%08x", fileName, sid.iId);
 
 					pDataOwner = CDataOwnerContainer::NewL(sid, this);
 					CleanupStack::PushL(pDataOwner);
@@ -1625,15 +1701,15 @@ namespace conn
 					} // if
 				else
 					{
-					__LOG2("CDataOwnerManager::FindDataOwnersL() - found reg file: %S for existing sid: 0x%08x", &fileName, sid.iId);
+				    OstTraceExt2(TRACE_NORMAL, DUP2_CDATAOWNERMANAGER_FINDDATAOWNERSL, "found reg file: %S for existing sid: 0x%08x", fileName, sid.iId);
 					}
 
 				pDataOwner->DataOwner().AddRegistrationFilesL(fileName);
 				} // if
 			} // for x
 		
-		CleanupStack::PopAndDestroy(registrationFiles);
-		__LOG("CDataOwnerManager::FindDataOwnersL() - End");
+		CleanupStack::PopAndDestroy(registrationFiles);		
+		OstTraceFunctionExit0( CDATAOWNERMANAGER_FINDDATAOWNERSL_EXIT );
 		}
 		
 	CSBEConfig& CDataOwnerManager::Config()
@@ -1649,6 +1725,7 @@ namespace conn
 	@return TBool specifying whether a SID is included or not
 	*/
 		{
+		OstTraceFunctionEntry0( CDATAOWNERMANAGER_ISSETFORPARTIALL_ENTRY );
 		TBool found = EFalse;
 		
 		if (iSIDListForPartial != NULL)
@@ -1661,12 +1738,13 @@ namespace conn
 			}
 		else
 			{
-			__LOG("CDataOwnerManager::IsSetForPartialL() - SID list not created yet so leaving!");
+		    OstTrace0(TRACE_ERROR, CDATAOWNERMANAGER_ISSETFORPARTIALL, "SID list not created yet so leaving!");
 			User::Leave(KErrNotFound);
 			}
 		
-		__LOG2("CDataOwnerManager::IsSetForPartialL() - SID: 0x%08x, found: %d", aSecureId.iId, found);	
+		OstTraceExt2(TRACE_NORMAL, DUP1_CDATAOWNERMANAGER_ISSETFORPARTIALL, "SID: 0x%08x, found: %d", aSecureId.iId, static_cast<TInt32>(found));	
 		
+		OstTraceFunctionExit0( CDATAOWNERMANAGER_ISSETFORPARTIALL_EXIT );
 		return found;
 		}
 	} // namespace conn

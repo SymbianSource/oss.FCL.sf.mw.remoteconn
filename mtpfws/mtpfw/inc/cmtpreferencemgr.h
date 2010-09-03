@@ -22,6 +22,7 @@
 #define CMTPREFERENCEMGR_H
 
 #include <e32base.h>
+#include <d32dbms.h>
 #include <mtp/mmtpreferencemgr.h>
 
 #include "mtpframeworkconst.h"

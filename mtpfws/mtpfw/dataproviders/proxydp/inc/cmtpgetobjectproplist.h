@@ -72,7 +72,6 @@ private:
     static void OnBrowseObjectL( TAny* aSelf, TUint aHandle, TUint32 aCurDepth );
     
 private: // Owned
-    __FLOG_DECLARATION_MEMBER_MUTABLE;
 
     CMTPTypeObjectPropList* iObjectPropList;
     RMTPFramework           iSingletons;

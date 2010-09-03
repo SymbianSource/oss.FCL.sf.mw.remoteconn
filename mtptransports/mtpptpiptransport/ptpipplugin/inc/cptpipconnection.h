@@ -40,7 +40,6 @@
 #include "tptpipstartdatapayload.h"
 #include "tptpipinitevtack.h"
 
-#include "mtpdebug.h"
 #include "ptpipprotocolconstants.h"
 
 
@@ -331,12 +330,7 @@ private: // Owned
 	/**
 	Buffer for reading discarded data into.
 	*/
-	RBuf8                       iNullBuffer;
-	
-    /**
-    FLOGGER debug trace member variable.
-    */
-    __FLOG_DECLARATION_MEMBER;    
+	RBuf8                       iNullBuffer; 
 	
 private: // Not Owned
 

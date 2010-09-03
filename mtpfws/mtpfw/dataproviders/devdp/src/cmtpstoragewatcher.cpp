@@ -25,10 +25,15 @@
 #include "cmtpobjectmgr.h"
 #include "cmtpstoragewatcher.h"
 #include "cmtpdevicedpconfigmgr.h"
+#include "mtpdebug.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpstoragewatcherTraces.h"
+#endif
+
 
 
 // Class constants.
-__FLOG_STMT(_LIT8(KComponent,"StorageWatcher");)
 static const TBool KAllDrives(ETrue);
 static const TBool KAvailableDrives(EFalse);
 
@@ -54,20 +59,19 @@ Destructor.
 */    
 CMTPStorageWatcher::~CMTPStorageWatcher()
     {
-    __FLOG(_L8("~CMTPStorageWatcher - Entry"));
+    OstTraceFunctionEntry0( CMTPSTORAGEWATCHER_CMTPSTORAGEWATCHER_ENTRY );
     Cancel();
     delete iFolderExclusionList;
     iDpSingletons.Close();
     iDrivesExcluded.Close();
     iFrameworkSingletons.Close();
     iDevDpSingletons.Close();
-    __FLOG(_L8("~CMTPStorageWatcher - Exit"));
-    __FLOG_CLOSE;
+    OstTraceFunctionExit0( CMTPSTORAGEWATCHER_CMTPSTORAGEWATCHER_EXIT );
     }
     
 void CMTPStorageWatcher::EnumerateStoragesL()
     {
-    __FLOG(_L8("EnumerateStoragesL - Entry"));
+    OstTraceFunctionEntry0( CMTPSTORAGEWATCHER_ENUMERATESTORAGESL_ENTRY );
 
     //Use Hash to replace it
     AppendFolderExclusionListL();
@@ -99,7 +103,8 @@ void CMTPStorageWatcher::EnumerateStoragesL()
         if (iDrivesConfig & mask)
             {
             TChar driveChar;
-            User::LeaveIfError(iFramework.Fs().DriveToChar(drive, driveChar));
+            LEAVEIFERROR(iFramework.Fs().DriveToChar(drive, driveChar),
+                    OstTrace1( TRACE_ERROR, CMTPSTORAGEWATCHER_ENUMERATESTORAGESL, "drive %d convert to char error!", drive ));
             suid[0] = driveChar;
             storage->SetDesCL(CMTPStorageMetaData::EStorageSuid, suid);
                     
@@ -151,7 +156,7 @@ void CMTPStorageWatcher::EnumerateStoragesL()
        mgr.SetDefaultStorageId(defaultDrive);
        }
        
-    __FLOG(_L8("EnumerateStoragesL - Exit"));
+    OstTraceFunctionExit0( CMTPSTORAGEWATCHER_ENUMERATESTORAGESL_EXIT );
     }
 
 /**
@@ -159,25 +164,25 @@ Initiates storage change notice subscription.
 */
 void CMTPStorageWatcher::Start()
     {
-    __FLOG(_L8("Start - Entry"));
+    OstTraceFunctionEntry0( CMTPSTORAGEWATCHER_START_ENTRY );
     if (!(iState & EStarted))
         {
-        __FLOG(_L8("Starting RFs notifier"));
+        OstTrace0( TRACE_NORMAL, CMTPSTORAGEWATCHER_START, "Starting RFs notifier" );
         TRequestStatus* status(&iStatus);
         User::RequestComplete(status, KErrNone);
         SetActive();
         iState |= EStarted;
         }
-    __FLOG(_L8("Start - Exit"));    
+    OstTraceFunctionExit0( CMTPSTORAGEWATCHER_START_EXIT );
     }
     
 void CMTPStorageWatcher::DoCancel()
     {
-    __FLOG(_L8("DoCancel - Entry"));
-    __FLOG(_L8("Stopping RFs notifier"));
+    OstTraceFunctionEntry0( CMTPSTORAGEWATCHER_DOCANCEL_ENTRY );
+    OstTrace0( TRACE_NORMAL, CMTPSTORAGEWATCHER_DOCANCEL, "Stopping RFs notifier" );
     iFrameworkSingletons.Fs().NotifyChangeCancel();
     iState &= (!EStarted);
-    __FLOG(_L8("DoCancel - Exit"));
+    OstTraceFunctionExit0( CMTPSTORAGEWATCHER_DOCANCEL_EXIT );
     }
 
 /**
@@ -212,25 +217,25 @@ Handles leaves occurring in RunL.
 @param aError leave error code
 @return KErrNone
 */
-#ifdef __FLOG_ACTIVE
+#ifdef OST_TRACE_COMPILER_IN_USE
 TInt CMTPStorageWatcher::RunError(TInt aError)
 #else
 TInt CMTPStorageWatcher::RunError(TInt /*aError*/)
 #endif
     {
-    __FLOG(_L8("RunError - Entry"));
-    __FLOG_VA((_L8("Error = %d"), aError));
+    OstTraceFunctionEntry0( CMTPSTORAGEWATCHER_RUNERROR_ENTRY );
+    OstTrace1( TRACE_NORMAL, CMTPSTORAGEWATCHER_RUNERROR, "Error = %d", aError );    
 
     // Ignore the error, meaning that the storages may not be accurately accounted for
     RequestNotification();
 
-    __FLOG(_L8("RunError - Exit"));
+    OstTraceFunctionExit0( CMTPSTORAGEWATCHER_RUNERROR_EXIT );
     return KErrNone;
     }
     
 void CMTPStorageWatcher::RunL()
     {
-    __FLOG(_L8("RunL - Entry"));
+    OstTraceFunctionEntry0( CMTPSTORAGEWATCHER_RUNL_ENTRY );
     const TUint32 previous(iDrivesConfig);
     const TUint32 current(DriveConfigurationL(KAvailableDrives));
     if (current != previous)
@@ -254,7 +259,7 @@ void CMTPStorageWatcher::RunL()
         }
     iDrivesConfig = current;
     RequestNotification();
-    __FLOG(_L8("RunL - Exit"));
+    OstTraceFunctionExit0( CMTPSTORAGEWATCHER_RUNL_EXIT );
     }
     
 /**
@@ -273,8 +278,7 @@ Second phase constructor.
 */
 void CMTPStorageWatcher::ConstructL()
     {
-    __FLOG_OPEN(KMTPSubsystem, KComponent);
-    __FLOG(_L8("ConstructL - Entry"));
+    OstTraceFunctionEntry0( CMTPSTORAGEWATCHER_CONSTRUCTL_ENTRY );
     iFrameworkSingletons.OpenL();
     iFrameworkSingletons.FrameworkConfig().GetValueL(CMTPFrameworkConfig::ELogicalStorageIdsAllocationEnable, iAllocateLogicalStorages);
     
@@ -282,12 +286,12 @@ void CMTPStorageWatcher::ConstructL()
     iDevDpSingletons.OpenL(iFramework);
     iFolderExclusionList = iDevDpSingletons.ConfigMgr().GetArrayValueL(CMTPDeviceDpConfigMgr::EFolderExclusionList); 
 
-    __FLOG(_L8("ConstructL - Exit"));
+    OstTraceFunctionExit0( CMTPSTORAGEWATCHER_CONSTRUCTL_EXIT );
     }
     
 TUint32 CMTPStorageWatcher::DriveConfigurationL(TBool aAllDrives) const
     {
-    __FLOG(_L8("DriveConfigurationL - Entry"));
+    OstTraceFunctionEntry0( CMTPSTORAGEWATCHER_DRIVECONFIGURATIONL_ENTRY );
     TUint32     config(0);
     TDriveList  drives;
     RFs&        fs(iFrameworkSingletons.Fs());
@@ -295,12 +299,15 @@ TUint32 CMTPStorageWatcher::DriveConfigurationL(TBool aAllDrives) const
     TInt i(KMaxDrives);
     while (i--)
         {        
-        __FLOG_VA((_L8("Drive number %d, available = 0x%02d"), i, drives [i]));
+        OstTraceExt2( TRACE_NORMAL, CMTPSTORAGEWATCHER_DRIVECONFIGURATIONL, 
+                "Drive number %d, available = 0x%02d", i, drives[i] );
         if ((drives[i]) &&
             (!Excluded(static_cast<TDriveNumber>(i))))
             {
             TDriveInfo info;
-            User::LeaveIfError(fs.Drive(info, i));
+            LEAVEIFERROR(fs.Drive(info, i),
+                    OstTrace1( TRACE_ERROR, DUP2_CMTPSTORAGEWATCHER_DRIVECONFIGURATIONL, "can't get info for drive %d", i ));
+                    
             if ((info.iType != EMediaNotPresent) || (aAllDrives))
                 {
                 TVolumeInfo volumeInfo;
@@ -311,35 +318,38 @@ TUint32 CMTPStorageWatcher::DriveConfigurationL(TBool aAllDrives) const
                 }
             }
         }
-    __FLOG_VA((_L8("Drives list = 0x%08X, AllDrives = %d"), config, aAllDrives));
-    __FLOG(_L8("DriveConfigurationL - Exit"));
+    OstTraceExt2( TRACE_NORMAL, DUP1_CMTPSTORAGEWATCHER_DRIVECONFIGURATIONL, 
+            "Drives list = 0x%08X, AllDrives = %d", config, (TUint32)aAllDrives );    
+    OstTraceFunctionExit0( CMTPSTORAGEWATCHER_DRIVECONFIGURATIONL_EXIT );
     return config;
     }
 
 TBool CMTPStorageWatcher::Excluded(TDriveNumber aDriveNumber) const
     {
-    __FLOG(_L8("Excluded - Entry"));
+    OstTraceFunctionEntry0( CMTPSTORAGEWATCHER_EXCLUDED_ENTRY );
     TBool ret(iDrivesExcluded.FindInOrder(aDriveNumber) != KErrNotFound);
-    __FLOG_VA((_L8("Drive = %d, excluded = %d"), aDriveNumber, ret));
-    __FLOG(_L8("Excluded - Exit"));
+    OstTraceExt2( TRACE_NORMAL, CMTPSTORAGEWATCHER_EXCLUDED, 
+            "Drive = %d, excluded = %d", aDriveNumber, ret );      
+    OstTraceFunctionExit0( CMTPSTORAGEWATCHER_EXCLUDED_EXIT );
     return ret;
     }
     
 void CMTPStorageWatcher::RequestNotification()
     {
-    __FLOG(_L8("RequestNotification - Entry"));
+    OstTraceFunctionEntry0( CMTPSTORAGEWATCHER_REQUESTNOTIFICATION_ENTRY );
     _LIT(KPath, "?:\\..");
     iFrameworkSingletons.Fs().NotifyChange(ENotifyEntry, iStatus, KPath);
     SetActive();
-    __FLOG(_L8("RequestNotification - Exit"));
+    OstTraceFunctionExit0( CMTPSTORAGEWATCHER_REQUESTNOTIFICATION_EXIT );
     }
  
 void CMTPStorageWatcher::SendEventL(TUint16 aEvent, TUint32 aStorageId)
     {
-    __FLOG(_L8("SendEventL - Entry"));
+    OstTraceFunctionEntry0( CMTPSTORAGEWATCHER_SENDEVENTL_ENTRY );
     if (iState & EStarted)
         {
-        __FLOG_VA((_L8("Sending event 0x%04X for StorageID 0x%08X"), aEvent, aStorageId));
+        OstTraceExt2( TRACE_NORMAL, CMTPSTORAGEWATCHER_SENDEVENTL, 
+                "Sending event 0x%04X for StorageID 0x%08X", (TUint32)aEvent, aStorageId );  
         iEvent.Reset();
         iEvent.SetUint16(TMTPTypeEvent::EEventCode, aEvent);
         iEvent.SetUint32(TMTPTypeEvent::EEventSessionID, KMTPSessionAll);
@@ -347,7 +357,7 @@ void CMTPStorageWatcher::SendEventL(TUint16 aEvent, TUint32 aStorageId)
         iEvent.SetUint32(TMTPTypeEvent::EEventParameter1, aStorageId);
         iFramework.SendEventL(iEvent);
         }
-    __FLOG(_L8("SendEventL - Exit"));
+    OstTraceFunctionExit0( CMTPSTORAGEWATCHER_SENDEVENTL_EXIT );
     }
 
 /**
@@ -357,8 +367,8 @@ Configures the specified drive as an available MTP storage.
 */    
 void CMTPStorageWatcher::StorageAvailableL(TDriveNumber aDriveNumber)
     {
-    __FLOG(_L8("StorageAvailableL - Entry"));
-    __FLOG_VA((_L8("Drive = %d is available."), aDriveNumber));
+    OstTraceFunctionEntry0( CMTPSTORAGEWATCHER_STORAGEAVAILABLEL_ENTRY );
+    OstTrace1( TRACE_NORMAL, CMTPSTORAGEWATCHER_STORAGEAVAILABLEL, "Drive = %d is available.", aDriveNumber);
     CMTPStorageMgr& mgr(iFrameworkSingletons.StorageMgr());
     TInt32 physical(mgr.PhysicalStorageId(aDriveNumber));
     _LIT(KSuidTemplate, "?:");
@@ -367,7 +377,8 @@ void CMTPStorageWatcher::StorageAvailableL(TDriveNumber aDriveNumber)
     suid.CleanupClosePushL();
     suid.Assign((KSuidTemplate().AllocL()));
     TChar driveChar;
-    User::LeaveIfError(iFramework.Fs().DriveToChar(aDriveNumber, driveChar));
+    LEAVEIFERROR(iFramework.Fs().DriveToChar(aDriveNumber, driveChar),
+            OstTrace1( TRACE_ERROR, DUP6_CMTPSTORAGEWATCHER_STORAGEAVAILABLEL, "driver %d convert to char error!", aDriveNumber ));       
     driveChar.LowerCase();
     suid[0] = driveChar;
     // Create the storage meta-data.
@@ -380,14 +391,15 @@ void CMTPStorageWatcher::StorageAvailableL(TDriveNumber aDriveNumber)
         mgr.SetDriveMappingL(aDriveNumber, id);
     	}
     physical = mgr.PhysicalStorageId(aDriveNumber);
-
-    User::LeaveIfError(physical);
+    LEAVEIFERROR(physical, 
+            OstTrace1( TRACE_ERROR, DUP7_CMTPSTORAGEWATCHER_STORAGEAVAILABLEL, "can't get physical storage id for drive %d", aDriveNumber));
+            
     TUint32 logical(physical);
 
     // If configured to do so, assign a logical storage ID mapping.
     if (iAllocateLogicalStorages)
         {
-        __FLOG(_L8("Assigning local storage ID mapping"));
+        OstTrace0( TRACE_NORMAL, DUP1_CMTPSTORAGEWATCHER_STORAGEAVAILABLEL, "Assigning local storage ID mapping" );       
         
         // Try to read from resource file to use a specified root dir path, if available.
         RBuf rootDirPath;
@@ -397,10 +409,10 @@ void CMTPStorageWatcher::StorageAvailableL(TDriveNumber aDriveNumber)
         devSingletons.OpenL(iFramework);
         CleanupClosePushL(devSingletons);
         TRAPD(resError, devSingletons.ConfigMgr().GetRootDirPathL(aDriveNumber, rootDirPath));
-        __FLOG_VA((_L8("ResError = %d"), resError));
+        OstTrace1( TRACE_NORMAL, DUP2_CMTPSTORAGEWATCHER_STORAGEAVAILABLEL, "ResError = %d", resError);    
         if ((KErrNone == resError) && (0 < rootDirPath.Length()))
             {
-            __FLOG(_L8("Reading resource file succeeded"));
+            OstTrace0(TRACE_NORMAL, DUP3_CMTPSTORAGEWATCHER_STORAGEAVAILABLEL, "Reading resource file succeeded");
             // If there is a root directory information in rss file then check the directory exist or not. 
             // If not exists, then create it. 
             // Before doing anything, delete the leading and trailing white space.
@@ -419,7 +431,7 @@ void CMTPStorageWatcher::StorageAvailableL(TDriveNumber aDriveNumber)
 
             if ((KErrNone == error) || (KErrAlreadyExists == error))
                 {
-                __FLOG(_L8("Overwriting SUID to specified root dir path from resource file"));  
+                OstTrace0( TRACE_NORMAL, DUP4_CMTPSTORAGEWATCHER_STORAGEAVAILABLEL, "Overwriting SUID to specified root dir path from resource file" );                
                 //if dir already existed or created, make that as root directory
                 suid.ReAllocL(buffer.Length());
                 suid = buffer;
@@ -461,7 +473,8 @@ void CMTPStorageWatcher::StorageAvailableL(TDriveNumber aDriveNumber)
         logical = mgr.AllocateLogicalStorageIdL(iFramework.DataProviderId(), physical, *storage);
         mgr.SetDriveMappingL(aDriveNumber, logical);
 
-        __FLOG_VA((_L8("Drive = %d mapped as storage 0x%08X"), aDriveNumber, logical));
+        OstTraceExt2( TRACE_NORMAL, DUP5_CMTPSTORAGEWATCHER_STORAGEAVAILABLEL, 
+                "Drive = %d mapped as storage 0x%08X", (TUint32)aDriveNumber, logical);
         }
 
     CleanupStack::PopAndDestroy(storage);
@@ -485,7 +498,7 @@ void CMTPStorageWatcher::StorageAvailableL(TDriveNumber aDriveNumber)
         SendEventL(EMTPEventCodeStoreAdded, logical);
         }
         
-    __FLOG(_L8("StorageAvailableL - Exit"));
+    OstTraceFunctionExit0( CMTPSTORAGEWATCHER_STORAGEAVAILABLEL_EXIT );
     }
 
 /**
@@ -495,11 +508,13 @@ Configures the specified drive as an unavailable MTP storage.
 */    
 void CMTPStorageWatcher::StorageUnavailableL(TDriveNumber aDriveNumber)
 {
-    __FLOG(_L8("StorageUnavailableL - Entry"));
-    __FLOG_VA((_L8("Drive = %d is unavailable."), aDriveNumber));
+    OstTraceFunctionEntry0( CMTPSTORAGEWATCHER_STORAGEUNAVAILABLEL_ENTRY );
+    OstTrace1( TRACE_NORMAL, CMTPSTORAGEWATCHER_STORAGEUNAVAILABLEL, "Drive = %d is unavailable.", aDriveNumber );
+    
     CMTPStorageMgr& mgr(iFrameworkSingletons.StorageMgr());
     TInt32 physical(mgr.PhysicalStorageId(aDriveNumber));
-    User::LeaveIfError(physical);
+    LEAVEIFERROR(physical,
+            OstTrace1( TRACE_ERROR, DUP2_CMTPSTORAGEWATCHER_STORAGEUNAVAILABLEL, "can't get physical storage id for drive %d", aDriveNumber));
     TUint32 logical(0);
     
     // If configured to do so, assign a logical storage ID mapping.
@@ -510,7 +525,8 @@ void CMTPStorageWatcher::StorageUnavailableL(TDriveNumber aDriveNumber)
         // Deassign the logical storage ID mapping.
         mgr.DeallocateLogicalStorageIds(iFramework.DataProviderId(), physical);
         mgr.SetDriveMappingL(aDriveNumber, physical);
-        __FLOG_VA((_L8("Drive = %d unmapped as storage 0x%08X"), aDriveNumber, logical));
+        OstTraceExt2( TRACE_NORMAL, DUP1_CMTPSTORAGEWATCHER_STORAGEUNAVAILABLEL, 
+                "Drive = %d unmapped as storage 0x%08X", (TUint32)aDriveNumber, logical);        
         }
 
     // Notify the active data providers.
@@ -528,5 +544,5 @@ void CMTPStorageWatcher::StorageUnavailableL(TDriveNumber aDriveNumber)
         {
         SendEventL(EMTPEventCodeStoreRemoved, logical);
         }   
-    __FLOG(_L8("StorageUnavailableL - Exit"));
+    OstTraceFunctionExit0( CMTPSTORAGEWATCHER_STORAGEUNAVAILABLEL_EXIT );
     }

@@ -21,8 +21,6 @@
 #include "cmtpusbconnection.h"
 #include "cmtpusbepwatcher.h"
 
-__FLOG_STMT(_LIT8(KComponent,"UsbEpWatcher");)
-
 /**
 USB MTP device class endpoint stall status observer factory method.
 @return A pointer to an USB MTP device class endpoint stall status 

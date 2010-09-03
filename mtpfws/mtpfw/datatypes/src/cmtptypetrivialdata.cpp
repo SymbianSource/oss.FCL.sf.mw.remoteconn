@@ -75,7 +75,11 @@ EXPORT_C TInt CMTPTypeTrivialData::NextWriteChunk(TPtr8& aChunk)
     {    
     if (iBuffer.MaxSize() == 0)
     {
-    iBuffer.Create(KMaxSizeOfWriteBuffer);
+    TInt err = iBuffer.Create(KMaxSizeOfWriteBuffer);
+    if(KErrNone != err)
+        {
+        return err;
+        }
     }
     aChunk.Set( const_cast<TUint8*>(iBuffer.Ptr()), 0, KMaxSizeOfWriteBuffer);
     return KErrNone;    
@@ -98,7 +102,11 @@ EXPORT_C TInt CMTPTypeTrivialData::NextWriteChunk(TPtr8& aChunk, TUint aDataLeng
     
     if (iBuffer.MaxSize() == 0)
     {
-    iBuffer.Create(len);
+    ret = iBuffer.Create(len);
+    if(KErrNone != ret)
+        {
+        return ret;
+        }
     }
     
     aChunk.Set( const_cast<TUint8*>(iBuffer.Ptr()), 0, len);

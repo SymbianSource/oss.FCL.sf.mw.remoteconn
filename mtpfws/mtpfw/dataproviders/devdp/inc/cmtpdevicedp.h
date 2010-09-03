@@ -23,7 +23,6 @@
 #include <e32base.h>
 #include <d32usbc.h>
 #include <mtp/cmtpdataproviderplugin.h>
-#include "mtpdebug.h"
 #include "mmtpenumerationcallback.h"
 #include "rmtpdevicedpsingletons.h"
 #include "rmtpdpsingletons.h"
@@ -106,10 +105,6 @@ private:
     
 private: // Owned
 
-    /**
-    FLOGGER debug trace member variable.
-    */
-    __FLOG_DECLARATION_MEMBER_MUTABLE;
 
     /**
     The active request processors table. Multiple request processors may be 
@@ -203,11 +198,7 @@ private:
     CMTPDeviceInfoTimer(CMTPDeviceDataProvider& aDeviceProvider);
     void ConstructL();    
 
-private:
-/**
-FLOGGER debug trace member variable.
-*/
-__FLOG_DECLARATION_MEMBER_MUTABLE;        
+private:    
     
     CMTPDeviceDataProvider& iDeviceProvider;
     RDevUsbcClient          iLdd;

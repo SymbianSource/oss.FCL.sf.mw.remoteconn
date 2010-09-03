@@ -16,7 +16,6 @@
 */
 
 
-#include <e32debug.h>
 #include "dpsoperation.h"
 #include "dpsconst.h"
 #include "dpstransaction.h"
@@ -24,12 +23,11 @@
 #include "dpsxmlparser.h"
 #include "dpsxmlgenerator.h"
 #include "dpsstatemachine.h"
-
-#ifdef _DEBUG
-#	define IF_DEBUG(t) {RDebug::t;}
-#else
-#	define IF_DEBUG(t)
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "dpsoperationTraces.h"
 #endif
+
 
 const TInt KConfigPrintService = 5;
 const TInt KCopyFileWidth = 3;
@@ -44,7 +42,7 @@ EXPORT_C void TMDpsOperation::CreateReqScriptL(
                                       RWriteStream& aScript, 
                                       CDpsTransaction* aTrader)
     {
-    IF_DEBUG(Print(_L(">>>TMDpsOperation::CreateReqScript")));        
+    OstTraceFunctionEntry0( TMDPSOPERATION_CREATEREQSCRIPTL_ENTRY );       
     CDpsXmlGenerator* g = aTrader->Generator();
     g->StartDocumentL(aScript);
     g->StartInputL(aScript);
@@ -64,8 +62,8 @@ EXPORT_C void TMDpsOperation::CreateReqScriptL(
 		}
 			
     g->EndInputL(aScript);
-	g->EndDocumentL(aScript);	
-	IF_DEBUG(Print(_L("<<<TMDpsOperation::CreateReqScript")));        	
+	g->EndDocumentL(aScript);	     	
+    OstTraceFunctionExit0( TMDPSOPERATION_CREATEREQSCRIPTL_EXIT );
     }
     
 // ---------------------------------------------------------------------------
@@ -77,15 +75,17 @@ EXPORT_C TInt TDpsStartJob::FillReqArgs(TDpsArgArray& aArgs,
                                         TDpsAttribute& /*aAttrib*/, 
                                         CDpsTransaction* aTrader)
     {
-    IF_DEBUG(Print(_L(">>>TDpsStartJob::FillReqArgs")));                    
+    OstTraceFunctionEntry0( TDPSSTARTJOB_FILLREQARGS_ENTRY );                    
     TInt imageCount = iReqParam.iPrintInfo.Count();
     if (!imageCount) 
         {
+        OstTraceFunctionExit0( TDPSSTARTJOB_FILLREQARGS_EXIT );
         return KErrUnknown;
         }
     TUint32* objectHandles = new TUint32[imageCount];
     if (!objectHandles)
         {
+        OstTraceFunctionExit0( DUP1_TDPSSTARTJOB_FILLREQARGS_EXIT );
         return KErrNoMemory;
         }
     for (TInt i = 0; i < imageCount; i++)
@@ -95,9 +95,10 @@ EXPORT_C TInt TDpsStartJob::FillReqArgs(TDpsArgArray& aArgs,
                  iReqParam.iPrintInfo[i].iFile, objectHandles[i], ETrue); 
         if (err != KErrNone)
             {
-            IF_DEBUG(Print(_L("---error %d"), err));
-            
+            OstTrace1( TRACE_ERROR, TDPSSTARTJOB_FILLREQARGS, "---error %d", err );
+
             delete[] objectHandles;
+            OstTraceFunctionExit0( DUP2_TDPSSTARTJOB_FILLREQARGS_EXIT );
             return err;
             }
         }
@@ -105,6 +106,7 @@ EXPORT_C TInt TDpsStartJob::FillReqArgs(TDpsArgArray& aArgs,
     if (!argsP)
         {
 		delete[] objectHandles;
+        OstTraceFunctionExit0( DUP3_TDPSSTARTJOB_FILLREQARGS_EXIT );
         return KErrNoMemory;
         }
     TDpsEle* elemsP = new TDpsEle[1 + imageCount];
@@ -112,6 +114,7 @@ EXPORT_C TInt TDpsStartJob::FillReqArgs(TDpsArgArray& aArgs,
         {
 		delete[] argsP;
 		delete[] objectHandles;
+        OstTraceFunctionExit0( DUP4_TDPSSTARTJOB_FILLREQARGS_EXIT );
         return KErrNoMemory;
         }
     // jobConfig    
@@ -128,8 +131,8 @@ EXPORT_C TInt TDpsStartJob::FillReqArgs(TDpsArgArray& aArgs,
     	// we have to append the low bytes (0000)
     	argsP[i].iContent.Append(KDpsLowZero);
     	aArgs.Append(argsP[i]);
-    	IF_DEBUG(Print(_L("the element is %d"), argsP[i].iElement));
-    	IF_DEBUG(Print(_L("the content is %S"), &(argsP[i].iContent)));
+    	OstTrace1( TRACE_NORMAL, DUP1_TDPSSTARTJOB_FILLREQARGS, "the element is %d", argsP[i].iElement );
+    	OstTraceExt1( TRACE_NORMAL, DUP2_TDPSSTARTJOB_FILLREQARGS, "the content is %s", argsP[i].iContent );
     	}    
     	
     // printInfo
@@ -143,8 +146,9 @@ EXPORT_C TInt TDpsStartJob::FillReqArgs(TDpsArgArray& aArgs,
     	                                          KFullWordWidth);
     	aArgs.Append(argsP[count]);
     
-    	IF_DEBUG(Print(_L("the element is %d"), argsP[count].iElement));
-    	IF_DEBUG(Print(_L("the content is %S"), &(argsP[count].iContent)));
+        OstTrace1( TRACE_NORMAL, DUP3_TDPSSTARTJOB_FILLREQARGS, "the element is %d", argsP[count].iElement);
+        OstTraceExt1( TRACE_NORMAL, DUP4_TDPSSTARTJOB_FILLREQARGS, "the content is %s", argsP[count].iContent);
+
     	count++;
     	
     	// not empty
@@ -153,10 +157,10 @@ EXPORT_C TInt TDpsStartJob::FillReqArgs(TDpsArgArray& aArgs,
     	    argsP[count].iElement = EDpsArgFileName;
     	    argsP[count].iContent.Copy(iReqParam.iPrintInfo[j].iFile);
     	    aArgs.Append(argsP[count]);
-    	    
-    	    IF_DEBUG(Print(_L("the element is %d"), argsP[count].iElement));
-    	    IF_DEBUG(Print(_L("the content is %S"), &(argsP[count].iContent)));
-    	    
+
+    	    OstTrace1( TRACE_NORMAL, DUP5_TDPSSTARTJOB_FILLREQARGS, "the element is %d", argsP[count].iElement);
+    	    OstTraceExt1( TRACE_NORMAL, DUP6_TDPSSTARTJOB_FILLREQARGS, "the content is %s", argsP[count].iContent);
+
     	    k++; count++;
     	    }
     	// not empty    
@@ -165,8 +169,8 @@ EXPORT_C TInt TDpsStartJob::FillReqArgs(TDpsArgArray& aArgs,
             argsP[count].iElement = EDpsArgDate;
             argsP[count].iContent.Copy(iReqParam.iPrintInfo[j].iDate);
             aArgs.Append(argsP[count]);
-            IF_DEBUG(Print(_L("the element is %d"), argsP[count].iElement));
-    	    IF_DEBUG(Print(_L("the content is %S"), &(argsP[count].iContent)));
+            OstTrace1( TRACE_NORMAL, DUP7_TDPSSTARTJOB_FILLREQARGS, "the element is %d", argsP[count].iElement);
+            OstTraceExt1( TRACE_NORMAL, DUP8_TDPSSTARTJOB_FILLREQARGS, "the content is %s", argsP[count].iContent);   	    
             k++; count++;
     	    }
     	if (iReqParam.iPrintInfo[j].iCopies != 0)
@@ -175,8 +179,8 @@ EXPORT_C TInt TDpsStartJob::FillReqArgs(TDpsArgArray& aArgs,
             argsP[count].iContent.AppendNumFixedWidthUC(
                 iReqParam.iPrintInfo[j].iCopies, EDecimal, KCopyFileWidth);
             aArgs.Append(argsP[count]);
-            IF_DEBUG(Print(_L("the element is %d"), argsP[count].iElement));
-    	    IF_DEBUG(Print(_L("the content is %S"), &(argsP[count].iContent)));
+            OstTrace1( TRACE_NORMAL, DUP9_TDPSSTARTJOB_FILLREQARGS, "the element is %d", argsP[count].iElement);
+            OstTraceExt1( TRACE_NORMAL, DUP10_TDPSSTARTJOB_FILLREQARGS, "the content is %s", argsP[count].iContent);           	    
     	    k++; count++;
     	    }    
     	if (iReqParam.iPrintInfo[j].iPrtPID != 0)
@@ -184,8 +188,8 @@ EXPORT_C TInt TDpsStartJob::FillReqArgs(TDpsArgArray& aArgs,
             argsP[count].iElement = EDpsArgPrtPID;
             argsP[count].iContent.AppendNumUC(iReqParam.iPrintInfo[j].iPrtPID);
             aArgs.Append(argsP[count]);
-            IF_DEBUG(Print(_L("the element is %d"), argsP[count].iElement));
-    	    IF_DEBUG(Print(_L("the content is %S"), &(argsP[count].iContent)));
+            OstTrace1( TRACE_NORMAL, DUP11_TDPSSTARTJOB_FILLREQARGS, "the element is %d", argsP[count].iElement);
+            OstTraceExt1( TRACE_NORMAL, DUP12_TDPSSTARTJOB_FILLREQARGS, "the content is %s", argsP[count].iContent);                   
     	    k++; count++;
     	    }
     	if (iReqParam.iPrintInfo[j].iCopyID != 0)
@@ -193,8 +197,8 @@ EXPORT_C TInt TDpsStartJob::FillReqArgs(TDpsArgArray& aArgs,
             argsP[count].iElement = EDpsArgCopyID;
             argsP[count].iContent.AppendNumUC(iReqParam.iPrintInfo[j].iCopyID);
             aArgs.Append(argsP[count]);
-            IF_DEBUG(Print(_L("the element is %d"), argsP[count].iElement));
-    	    IF_DEBUG(Print(_L("the content is %S"), &(argsP[count].iContent)));
+            OstTrace1( TRACE_NORMAL, DUP13_TDPSSTARTJOB_FILLREQARGS, "the element is %d", argsP[count].iElement);
+            OstTraceExt1( TRACE_NORMAL, DUP14_TDPSSTARTJOB_FILLREQARGS, "the content is %s", argsP[count].iContent);                   
     	    k++; count++;
     	    }
         
@@ -204,8 +208,8 @@ EXPORT_C TInt TDpsStartJob::FillReqArgs(TDpsArgArray& aArgs,
     	        
     delete[] objectHandles;	
     delete[] argsP;
-    delete[] elemsP;
-    IF_DEBUG(Print(_L("<<<TDpsStartJob::FillReqArgs")));                        
+    delete[] elemsP;                      
+    OstTraceFunctionExit0( DUP5_TDPSSTARTJOB_FILLREQARGS_EXIT );
     return KErrNone;
     }
 
@@ -219,7 +223,7 @@ EXPORT_C void TDpsStartJob::CreateReqScriptL(const TDpsArgArray& aArguments,
                                             RWriteStream& aScript, 
                                             CDpsTransaction* aTrader)
     {
-    IF_DEBUG(Print(_L(">>>TDpsStartJob::CreateReqScript")));                        
+    OstTraceFunctionEntry0( TDPSSTARTJOB_CREATEREQSCRIPTL_ENTRY );                       
     CDpsXmlGenerator* g = aTrader->Generator();
     g->StartDocumentL(aScript);
     g->StartInputL(aScript);
@@ -239,8 +243,8 @@ EXPORT_C void TDpsStartJob::CreateReqScriptL(const TDpsArgArray& aArguments,
 		}
 	g->EndOperationL((TDpsOperation)iOperation, aScript);
 	g->EndInputL(aScript);
-	g->EndDocumentL(aScript);	
-	IF_DEBUG(Print(_L("<<<TDpsStartJob::CreateReqScript")));                        	
+	g->EndDocumentL(aScript);	                      	
+    OstTraceFunctionExit0( TDPSSTARTJOB_CREATEREQSCRIPTL_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -252,13 +256,13 @@ EXPORT_C TInt TDpsAbortJob::FillReqArgs(TDpsArgArray& aArgs,
                                         TDpsAttribute& /*aAttrib*/, 
                                         CDpsTransaction* /*aParam*/)
     {
-    IF_DEBUG(Print(_L(">>>TDpsAbortJob::FillReqArgs")));                            
+    OstTraceFunctionEntry0( TDPSABORTJOB_FILLREQARGS_ENTRY );                           
     TDpsArg arg;
     arg.iElement = EDpsArgAbortStyle;
     arg.iContent.AppendNumUC(iReqParam.iAbortStyle, EHex);
     arg.iContent.Append(KDpsLowZero);
-    aArgs.Append(arg);
-    IF_DEBUG(Print(_L("<<<TDpsAbortJob::FillReqArgs")));                            
+    aArgs.Append(arg);                         
+    OstTraceFunctionExit0( TDPSABORTJOB_FILLREQARGS_EXIT );
     return KErrNone;
     }
     
@@ -271,7 +275,7 @@ EXPORT_C TInt TDpsGetCapability::FillReqArgs(TDpsArgArray& aArgs,
                                              TDpsAttribute& aAttrib, 
                                              CDpsTransaction* /*aParam*/)
     {
-    IF_DEBUG(Print(_L(">>>TDpsGetCapability::FillReqArgs")));                                
+    OstTraceFunctionEntry0( TDPSGETCAPABILITY_FILLREQARGS_ENTRY );                              
     // only one element
     TDpsEle elems;
     elems.iElement = EDpsCapability;
@@ -288,8 +292,8 @@ EXPORT_C TInt TDpsGetCapability::FillReqArgs(TDpsArgArray& aArgs,
             {
             aAttrib = iReqParam.iAttribute;
             }
-        }
-    IF_DEBUG(Print(_L("<<<TDpsGetCapability::FillReqArgs")));                                    
+        }                                 
+    OstTraceFunctionExit0( TDPSGETCAPABILITY_FILLREQARGS_EXIT );
     return KErrNone;    
     }
 
@@ -304,7 +308,7 @@ EXPORT_C void TDpsGetCapability::CreateReqScriptL(
                                              RWriteStream& aScript, 
                                              CDpsTransaction* aTrader)
     {
-    IF_DEBUG(Print(_L(">>>TDpsGetCapability::CreateReqScript")));    
+    OstTraceFunctionEntry0( TDPSGETCAPABILITY_CREATEREQSCRIPTL_ENTRY );   
     CDpsXmlGenerator* g = aTrader->Generator();
     g->StartDocumentL(aScript);
     g->StartInputL(aScript);
@@ -318,8 +322,8 @@ EXPORT_C void TDpsGetCapability::CreateReqScriptL(
 	g->EndElementL(aElements[0].iElement, aScript);
 	g->EndOperationL((TDpsOperation)iOperation, aScript);	
 	g->EndInputL(aScript);
-	g->EndDocumentL(aScript);
-	IF_DEBUG(Print(_L("<<<TDpsGetCapability::CreateReqScript")));    		
+	g->EndDocumentL(aScript); 		
+    OstTraceFunctionExit0( TDPSGETCAPABILITY_CREATEREQSCRIPTL_EXIT );
     }
         
 // ---------------------------------------------------------------------------
@@ -331,10 +335,11 @@ EXPORT_C TInt TDpsConfigPrintService::FillReqArgs(TDpsArgArray& aArgs,
                                                   TDpsAttribute& /*aAttrib*/, 
                                                   CDpsTransaction* /*aParam*/)
     {
-    IF_DEBUG(Print(_L(">>>TDpsConfigPrintService::FillReqArgs")));
+    OstTraceFunctionEntry0( TDPSCONFIGPRINTSERVICE_FILLREQARGS_ENTRY );
     TDpsArg* argsP = new TDpsArg[KConfigPrintService]; 
     if (!argsP)
         {
+        OstTraceFunctionExit0( TDPSCONFIGPRINTSERVICE_FILLREQARGS_EXIT );
         return KErrNoMemory;
         }
     TInt count;     
@@ -395,14 +400,15 @@ EXPORT_C TInt TDpsConfigPrintService::FillReqArgs(TDpsArgArray& aArgs,
         break;
         
         default:
-            IF_DEBUG(Print(_L("***Wrong parameter")));
+            OstTrace0( TRACE_ERROR, TDPSCONFIGPRINTSERVICE_FILLREQARGS, "***Wrong parameter" );
             delete[] argsP;
+            OstTraceFunctionExit0( DUP1_TDPSCONFIGPRINTSERVICE_FILLREQARGS_EXIT );
             return KErrArgument;
             }
         
         }
-    delete[] argsP;
-    IF_DEBUG(Print(_L("<<<TDpsConfigPrintService::FillReqArgs")));    
+    delete[] argsP;  
+    OstTraceFunctionExit0( DUP2_TDPSCONFIGPRINTSERVICE_FILLREQARGS_EXIT );
     return KErrNone;    
     }
 
@@ -416,7 +422,7 @@ EXPORT_C TInt TDpsConfigPrintService::FillReqArgs(TDpsArgArray& aArgs,
 EXPORT_C TInt TDpsGetCapability::FillRepArgs(const TDpsArgArray& aArgs, 
                                              CDpsTransaction* aTrader)
     {
-    IF_DEBUG(Print(_L(">>>TDpsGetCapability::FillRepArgs")));    
+    OstTraceFunctionEntry0( TDPSGETCAPABILITY_FILLREPARGS_ENTRY );
     CDpsXmlParser* XmlPar = aTrader->Parser();
     
     if (aArgs.Count())
@@ -451,13 +457,15 @@ EXPORT_C TInt TDpsGetCapability::FillRepArgs(const TDpsArgArray& aArgs,
                 }
             else
                 {
-                IF_DEBUG(Print(_L("***Wrong argument")));
+                OstTrace0( TRACE_ERROR, TDPSGETCAPABILITY_FILLREPARGS, "***Wrong argument" );
+                OstTraceFunctionExit0( TDPSGETCAPABILITY_FILLREPARGS_EXIT );
                 return KErrArgument;
                 }
             TInt error = converter.Val(value, EHex);
             if (error != KErrNone)
                 {
-                IF_DEBUG(Print(_L("convert error %d"), error));
+                OstTrace1( TRACE_ERROR, DUP1_TDPSGETCAPABILITY_FILLREPARGS, "convert error %d", error );
+                OstTraceFunctionExit0( DUP1_TDPSGETCAPABILITY_FILLREPARGS_EXIT );
                 return error;
                 }
             if (EDpsArgPaperTypes == aArgs[0].iElement)
@@ -473,7 +481,7 @@ EXPORT_C TInt TDpsGetCapability::FillRepArgs(const TDpsArgArray& aArgs,
                 // remove the extra zeros
                 value = value >> KShiftLength; 
                 iRepParam.iContent.Append(value);
-                IF_DEBUG(Print(_L("the value is %x"), value));
+                OstTrace1( TRACE_NORMAL, DUP2_TDPSGETCAPABILITY_FILLREPARGS, "the value is %x", value );
                 }
             
             }
@@ -481,7 +489,7 @@ EXPORT_C TInt TDpsGetCapability::FillRepArgs(const TDpsArgArray& aArgs,
            
         }
     
-    IF_DEBUG(Print(_L("<<<TDpsGetCapability::FillRepArgs")));
+    OstTraceFunctionExit0( DUP2_TDPSGETCAPABILITY_FILLREPARGS_EXIT );
     return KErrNone;    
     }
 
@@ -495,7 +503,7 @@ EXPORT_C TInt TDpsGetCapability::FillRepArgs(const TDpsArgArray& aArgs,
 EXPORT_C TInt TDpsConfigPrintService::FillRepArgs(const TDpsArgArray& aArgs, 
                                                   CDpsTransaction* aTrader)
     {
-    IF_DEBUG(Print(_L(">>>TDpsConfigPrintService::FillRepArgs")));    
+    OstTraceFunctionEntry0( TDPSCONFIGPRINTSERVICE_FILLREPARGS_ENTRY ); 
     TInt error = KErrNone;
     TLex8 converter, parser;
     const TInt count = aArgs.Count();
@@ -510,11 +518,12 @@ EXPORT_C TInt TDpsConfigPrintService::FillRepArgs(const TDpsArgArray& aArgs,
                 error = converter.Val(result, EHex);
                 if (error != KErrNone)
                     {
-                    IF_DEBUG(Print(_L("*** convert error")));
+                    OstTrace0( TRACE_ERROR, TDPSCONFIGPRINTSERVICE_FILLREPARGS, "*** convert error" );
+                    OstTraceFunctionExit0( TDPSCONFIGPRINTSERVICE_FILLREPARGS_EXIT );
                     return error;
                     }
                 // removes the low four bytes zeros. 
-                IF_DEBUG(Print(_L("--Printer available is %x"), result));   
+                OstTrace1( TRACE_NORMAL, DUP1_TDPSCONFIGPRINTSERVICE_FILLREPARGS, "--Printer available is %x", result );
                 result = result >> KShiftLength;    
                 iRepParam.iPrintAvailable = result;
             break;
@@ -535,12 +544,14 @@ EXPORT_C TInt TDpsConfigPrintService::FillRepArgs(const TDpsArgArray& aArgs,
                         }
                     else
                         {
-                        IF_DEBUG(Print(_L("***wrong !!!")));
+                        OstTrace0( TRACE_ERROR, DUP2_TDPSCONFIGPRINTSERVICE_FILLREPARGS, "***wrong !!!");
+                        OstTraceFunctionExit0( DUP1_TDPSCONFIGPRINTSERVICE_FILLREPARGS_EXIT );
                         return KErrArgument;
                         }
                     error = aTrader->ConvertVersion(converter, version);
                     if (error != KErrNone)
                         {
+                        OstTraceFunctionExit0( DUP2_TDPSCONFIGPRINTSERVICE_FILLREPARGS_EXIT );
                         return error;
                         }
                     iRepParam.iDpsVersions.Append(version);            
@@ -549,36 +560,38 @@ EXPORT_C TInt TDpsConfigPrintService::FillRepArgs(const TDpsArgArray& aArgs,
         
             case EDpsArgVendorName:
                 iRepParam.iVendorName.Copy(aArgs[i].iContent);
-                IF_DEBUG(Print(_L
-                                ("vendor name is %S"), &iRepParam.iVendorName));
+                OstTraceExt1( TRACE_NORMAL, DUP3_TDPSCONFIGPRINTSERVICE_FILLREPARGS, 
+                        "vendor name is %S", iRepParam.iVendorName );
             break;
         
             case EDpsArgVendorSpecificVersion:
                 parser.Assign(aArgs[i].iContent);
                 aTrader->ConvertVersion(parser, version);
                 iRepParam.iVendorVersion = version;
-                IF_DEBUG(Print(_L
-                        ("vendor version is %x"), iRepParam.iVendorVersion));
+                OstTraceExt2( TRACE_NORMAL, DUP4_TDPSCONFIGPRINTSERVICE_FILLREPARGS, 
+                        "vendor version is %d.%d", iRepParam.iVendorVersion.iMajor, iRepParam.iVendorVersion.iMinor );
             break;
        
             case EDpsArgProductName:
                 iRepParam.iProductName.Copy(aArgs[i].iContent);
-                IF_DEBUG(Print(_L
-                        ("product name is %S"), &iRepParam.iProductName));
+                OstTraceExt1( TRACE_NORMAL, DUP5_TDPSCONFIGPRINTSERVICE_FILLREPARGS, 
+                        "product name is %S", iRepParam.iProductName );
             break;
         
             case EDpsArgSerialNo:
                 iRepParam.iSerialNo.Copy(aArgs[i].iContent);
-                IF_DEBUG(Print(_L("SerialNo is %S"), &iRepParam.iSerialNo));
+                OstTraceExt1( TRACE_NORMAL, DUP6_TDPSCONFIGPRINTSERVICE_FILLREPARGS, 
+                        "SerialNo is %S", iRepParam.iSerialNo );
             break;
         
             default:
-                IF_DEBUG(Print(_L("--Unknown param!!")));
+                OstTrace0( TRACE_ERROR, DUP7_TDPSCONFIGPRINTSERVICE_FILLREPARGS, "--Unknown param!!" );
+                OstTraceFunctionExit0( DUP3_TDPSCONFIGPRINTSERVICE_FILLREPARGS_EXIT );
                 return KErrArgument;
             }
         }
-        
-    IF_DEBUG(Print(_L("<<<TDpsConfigPrintService::FillRepArgs")));
+
+    OstTraceFunctionExit0( DUP4_TDPSCONFIGPRINTSERVICE_FILLREPARGS_EXIT );
     return KErrNone;
     }
 
@@ -592,7 +605,7 @@ EXPORT_C TInt TDpsConfigPrintService::FillRepArgs(const TDpsArgArray& aArgs,
 EXPORT_C TInt TDpsGetJobStatus::FillRepArgs(const TDpsArgArray& aArgs, 
                                             CDpsTransaction* aTrader)
     {
-    IF_DEBUG(Print(_L(">>>TDpsGetJobStatus::FillRepArgs")));
+    OstTraceFunctionEntry0( TDPSGETJOBSTATUS_FILLREPARGS_ENTRY );
     TInt value, error, per;
     TBuf<KMaxArgLen> fileName;
     TLex8 converter;    
@@ -615,6 +628,7 @@ EXPORT_C TInt TDpsGetJobStatus::FillRepArgs(const TDpsArgArray& aArgs,
                 error = converter.Val(value);
                 if (error != KErrNone)
                     {
+                    OstTraceFunctionExit0( TDPSGETJOBSTATUS_FILLREPARGS_EXIT );
                     return error;
                     }
                 if (reply)
@@ -645,6 +659,7 @@ EXPORT_C TInt TDpsGetJobStatus::FillRepArgs(const TDpsArgArray& aArgs,
                 error = converter.Val(value);
                 if (error != KErrNone)
                     {
+                     OstTraceFunctionExit0( DUP1_TDPSGETJOBSTATUS_FILLREPARGS_EXIT );
                      return error;
                     }
                 if (reply)
@@ -662,6 +677,7 @@ EXPORT_C TInt TDpsGetJobStatus::FillRepArgs(const TDpsArgArray& aArgs,
                 per = aTrader->ParsePercentage(aArgs[i].iContent);
                 if (per < KErrNone)
                     {
+                    OstTraceFunctionExit0( DUP2_TDPSGETJOBSTATUS_FILLREPARGS_EXIT );
                     return per;
                     }
                 
@@ -681,6 +697,7 @@ EXPORT_C TInt TDpsGetJobStatus::FillRepArgs(const TDpsArgArray& aArgs,
                 error = converter.Val(value);
                 if (error != KErrNone)
                     {
+                     OstTraceFunctionExit0( DUP3_TDPSGETJOBSTATUS_FILLREPARGS_EXIT );
                      return error;
                     }
                 if (reply)
@@ -695,11 +712,12 @@ EXPORT_C TInt TDpsGetJobStatus::FillRepArgs(const TDpsArgArray& aArgs,
             break;
             
             default:
-                IF_DEBUG(Print(_L("***wrong param!!!")));
+                OstTrace0( TRACE_ERROR, TDPSGETJOBSTATUS_FILLREPARGS, "***wrong param!!!" );
+                OstTraceFunctionExit0( DUP4_TDPSGETJOBSTATUS_FILLREPARGS_EXIT );
                 return KErrArgument;                
             }
         }
-    IF_DEBUG(Print(_L("<<<TDpsGetJobStatus::FillRepArgs")));    
+    OstTraceFunctionExit0( DUP5_TDPSGETJOBSTATUS_FILLREPARGS_EXIT );
     return KErrNone;    
     }
 
@@ -713,10 +731,11 @@ EXPORT_C TInt TDpsGetJobStatus::FillRepArgs(const TDpsArgArray& aArgs,
 EXPORT_C TInt TDpsGetPrinterStatus::FillRepArgs(const TDpsArgArray& aArgs, 
                                                 CDpsTransaction* aTrader)
     {
-    IF_DEBUG(Print(_L(">>>TDpsGetPrinterStatus::FillRepArgs")));
+    OstTraceFunctionEntry0( TDPSGETPRINTERSTATUS_FILLREPARGS_ENTRY );
     // if UI has not pass the event pointer, we do need to fill in it
     if (!aTrader->Engine()->Event())
         {
+        OstTraceFunctionExit0( TDPSGETPRINTERSTATUS_FILLREPARGS_EXIT );
         return KErrNone;
         }
     TLex8 converter;
@@ -738,10 +757,11 @@ EXPORT_C TInt TDpsGetPrinterStatus::FillRepArgs(const TDpsArgArray& aArgs,
         TInt error = converter.Val(value, EHex);
         if (error != KErrNone)
             {
+            OstTraceFunctionExit0( DUP1_TDPSGETPRINTERSTATUS_FILLREPARGS_EXIT );
             return error;
             }
-        IF_DEBUG(Print(_L("--the value is %x"), value));
-        
+        OstTrace1( TRACE_NORMAL, TDPSGETPRINTERSTATUS_FILLREPARGS, "--the value is %x", value );
+
         switch (aArgs[i].iElement)
             {
             case EDpsArgDpsPrintServiceStatus:
@@ -763,6 +783,7 @@ EXPORT_C TInt TDpsGetPrinterStatus::FillRepArgs(const TDpsArgArray& aArgs,
                     }
                 else
                     {
+                    OstTraceFunctionExit0( DUP2_TDPSGETPRINTERSTATUS_FILLREPARGS_EXIT );
                     return KErrArgument;
                     }
                     
@@ -788,6 +809,7 @@ EXPORT_C TInt TDpsGetPrinterStatus::FillRepArgs(const TDpsArgArray& aArgs,
                     }
                 else
                     {
+                    OstTraceFunctionExit0( DUP3_TDPSGETPRINTERSTATUS_FILLREPARGS_EXIT );
                     return KErrArgument;
                     }
                 
@@ -811,6 +833,7 @@ EXPORT_C TInt TDpsGetPrinterStatus::FillRepArgs(const TDpsArgArray& aArgs,
                     }
                 else
                     {
+                    OstTraceFunctionExit0( DUP4_TDPSGETPRINTERSTATUS_FILLREPARGS_EXIT );
                     return KErrArgument;
                     }
                 
@@ -826,7 +849,7 @@ EXPORT_C TInt TDpsGetPrinterStatus::FillRepArgs(const TDpsArgArray& aArgs,
                     {
                     param.iJobEndReason.iMajor = 
                         (TDpsJobEndReasonMajor)(temp);
-                    IF_DEBUG(Print(_L("the end reason is %x"), temp));
+                    OstTrace1( TRACE_NORMAL, DUP1_TDPSGETPRINTERSTATUS_FILLREPARGS, "the end reason is %x", temp );
                     value = value & KDpsMinorMask;
                     switch (param.iJobEndReason.iMajor)
                         {
@@ -851,7 +874,7 @@ EXPORT_C TInt TDpsGetPrinterStatus::FillRepArgs(const TDpsArgArray& aArgs,
                         break;
         
                         default:
-                            IF_DEBUG(Print(_L("no minor error")));
+                            OstTrace0( TRACE_NORMAL, DUP2_TDPSGETPRINTERSTATUS_FILLREPARGS, "no minor error" );
                         break; 
                         }
                     if (reply)
@@ -866,6 +889,7 @@ EXPORT_C TInt TDpsGetPrinterStatus::FillRepArgs(const TDpsArgArray& aArgs,
                     }
                 else
                     {
+                    OstTraceFunctionExit0( DUP5_TDPSGETPRINTERSTATUS_FILLREPARGS_EXIT );
                     return KErrArgument;
                     }
                 
@@ -883,6 +907,7 @@ EXPORT_C TInt TDpsGetPrinterStatus::FillRepArgs(const TDpsArgArray& aArgs,
                     }
                 else
                     {
+                    OstTraceFunctionExit0( DUP6_TDPSGETPRINTERSTATUS_FILLREPARGS_EXIT );
                     return KErrArgument;
                     }
                 if (reply)
@@ -908,6 +933,7 @@ EXPORT_C TInt TDpsGetPrinterStatus::FillRepArgs(const TDpsArgArray& aArgs,
                     }
                 else
                     {
+                    OstTraceFunctionExit0( DUP7_TDPSGETPRINTERSTATUS_FILLREPARGS_EXIT );
                     return KErrArgument;
                     }
                 if (reply)
@@ -933,6 +959,7 @@ EXPORT_C TInt TDpsGetPrinterStatus::FillRepArgs(const TDpsArgArray& aArgs,
                     }
                 else
                     {
+                    OstTraceFunctionExit0( DUP8_TDPSGETPRINTERSTATUS_FILLREPARGS_EXIT );
                     return KErrArgument;
                     }
                 if (reply)
@@ -947,11 +974,12 @@ EXPORT_C TInt TDpsGetPrinterStatus::FillRepArgs(const TDpsArgArray& aArgs,
             break;
             
             default:
-                IF_DEBUG(Print(_L("***wrong param")));
+                OstTrace0( TRACE_ERROR, DUP3_TDPSGETPRINTERSTATUS_FILLREPARGS, "***wrong param" );
+                OstTraceFunctionExit0( DUP9_TDPSGETPRINTERSTATUS_FILLREPARGS_EXIT );
                 return KErrArgument;
             }
         }
  
-    IF_DEBUG(Print(_L("<<<TDpsGetPrinterStatus::FillRepArgs")));    
+    OstTraceFunctionExit0( DUP10_TDPSGETPRINTERSTATUS_FILLREPARGS_EXIT );
     return KErrNone;    
 	}

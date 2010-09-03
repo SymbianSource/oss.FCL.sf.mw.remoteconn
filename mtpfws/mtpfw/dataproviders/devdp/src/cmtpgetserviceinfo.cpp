@@ -33,11 +33,15 @@
 #include "rmtpframework.h"
 #include "mtpdevdppanic.h"
 #include "cmtpservicemgr.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpgetserviceinfoTraces.h"
+#endif
+
 
 
 
 // Class constants.
-__FLOG_STMT(_LIT8(KComponent,"GetServiceInfo");)
 
 /**
 Two-phase construction method
@@ -60,12 +64,11 @@ Destructor.
 */    
 CMTPGetServiceInfo::~CMTPGetServiceInfo()
     {    
-    __FLOG(_L8("~CMTPGetServiceInfo - Entry"));
+    OstTraceFunctionEntry0( CMTPGETSERVICEINFO_CMTPGETSERVICEINFO_ENTRY );
     delete iServiceInfo;
 
     iSingletons.Close();
-    __FLOG(_L8("~CMTPGetServiceInfo - Exit"));
-    __FLOG_CLOSE;
+    OstTraceFunctionExit0( CMTPGETSERVICEINFO_CMTPGETSERVICEINFO_EXIT );
     }
 
 /**
@@ -82,7 +85,7 @@ GetServiceInfo request handler. Build and send device info data set.
 */    
 void CMTPGetServiceInfo::ServiceL()
     {
-    __FLOG(_L8("ServiceL - Entry"));
+    OstTraceFunctionEntry0( CMTPGETSERVICEINFO_SERVICEL_ENTRY );
        
     TUint32 serviceId = Request().Uint32(TMTPTypeRequest::ERequestParameter1);
     if ( KErrNotFound == iSingletons.ServiceMgr().GetServiceIDs().Find(serviceId) )
@@ -104,7 +107,7 @@ void CMTPGetServiceInfo::ServiceL()
         __DEBUG_ONLY(Panic(EMTPDevDpUnknownServiceID));
         }
     
-    __FLOG(_L8("ServiceL - Exit"));
+    OstTraceFunctionExit0( CMTPGETSERVICEINFO_SERVICEL_EXIT );
     }
 
 /**
@@ -112,10 +115,9 @@ Second-phase constructor.
 */        
 void CMTPGetServiceInfo::ConstructL()
     {
-    __FLOG_OPEN(KMTPSubsystem, KComponent);
-    __FLOG(_L8("ConstructL - Entry")); 
+    OstTraceFunctionEntry0( CMTPGETSERVICEINFO_CONSTRUCTL_ENTRY );
     iSingletons.OpenL();
-    __FLOG(_L8("ConstructL - Exit")); 
+    OstTraceFunctionExit0( CMTPGETSERVICEINFO_CONSTRUCTL_EXIT );
     }
 
 /**
@@ -123,7 +125,7 @@ Populates service info data set
 */
 void CMTPGetServiceInfo::BuildServiceInfoL()
     {
-    __FLOG(_L8("BuildServiceInfoL - Entry")); 
+    OstTraceFunctionEntry0( CMTPGETSERVICEINFO_BUILDSERVICEINFOL_ENTRY );
     
     delete iServiceInfo;
     iServiceInfo = CMTPTypeServiceInfo::NewL();
@@ -132,8 +134,9 @@ void CMTPGetServiceInfo::BuildServiceInfoL()
     CMTPServiceInfo* svcinfo = iSingletons.ServiceMgr().ServiceInfo( serviceId );
     if( NULL == svcinfo )
         {
-        __FLOG_1(_L8("BuildServiceInfoL - CMTPServiceInfo is NULL!!! ServiceID is %d."),serviceId ); 
-        __FLOG(_L8("BuildServiceInfoL - Exit")); 
+        OstTrace1( TRACE_WARNING, CMTPGETSERVICEINFO_BUILDSERVICEINFOL, 
+                "BuildServiceInfoL - CMTPServiceInfo is NULL!!! ServiceID is %d.", serviceId );        
+        OstTraceFunctionExit0( CMTPGETSERVICEINFO_BUILDSERVICEINFOL_EXIT );
         return;
         }
     BuildServiceInfoHeadL(*svcinfo);
@@ -142,14 +145,14 @@ void CMTPGetServiceInfo::BuildServiceInfoL()
 	BuildServiceFormatL(*svcinfo);
 	BuildServiceMethodL(*svcinfo);
 	BuildDataBlockL(*svcinfo);    
-    
-    __FLOG(_L8("BuildServiceInfoL - Exit")); 
+
+    OstTraceFunctionExit0( DUP1_CMTPGETSERVICEINFO_BUILDSERVICEINFOL_EXIT );
     }
 
 
 void CMTPGetServiceInfo::BuildServiceInfoHeadL(CMTPServiceInfo& aServiceInfo)
 	{
-	__FLOG(_L8("BuildServiceInfoHeadL - Entry"));
+	OstTraceFunctionEntry0( CMTPGETSERVICEINFO_BUILDSERVICEINFOHEADL_ENTRY );
 	
 	iServiceInfo->SetUint32L(CMTPTypeServiceInfo::EServiceID,aServiceInfo.ServiceID());
 	iServiceInfo->SetUint32L(CMTPTypeServiceInfo::EServiceStorageID,aServiceInfo.ServiceStorageID());
@@ -159,13 +162,13 @@ void CMTPGetServiceInfo::BuildServiceInfoHeadL(CMTPServiceInfo& aServiceInfo)
 	iServiceInfo->SetStringL(CMTPTypeServiceInfo::EServiceName,aServiceInfo.ServiceName());
 	iServiceInfo->SetUint32L(CMTPTypeServiceInfo::EServiceType,aServiceInfo.ServiceType());
 	iServiceInfo->SetUint32L(CMTPTypeServiceInfo::EBaseServiceID,aServiceInfo.BaseServiceID());
-	
-	__FLOG(_L8("BuildServiceInfoHeadL - Exit")); 
+
+	OstTraceFunctionExit0( CMTPGETSERVICEINFO_BUILDSERVICEINFOHEADL_EXIT );
 	}
 
 void CMTPGetServiceInfo::BuildUsedServiceGUIDL(CMTPServiceInfo& aServiceInfo)
 	{
-	__FLOG(_L8("BuildUsedServiceGUIDL - Entry"));
+	OstTraceFunctionEntry0( CMTPGETSERVICEINFO_BUILDUSEDSERVICEGUIDL_ENTRY );
 	TInt count = aServiceInfo.UsedServiceGUIDs().Count();
 	const RArray<TMTPTypeGuid> UsedServiceGUIDs = aServiceInfo.UsedServiceGUIDs();
 	for (TInt i=0;i<count;i++)
@@ -173,12 +176,12 @@ void CMTPGetServiceInfo::BuildUsedServiceGUIDL(CMTPServiceInfo& aServiceInfo)
           iServiceInfo->AppendUsedServiceL( UsedServiceGUIDs[i] );
 		}
 	
-	__FLOG(_L8("BuildUsedServiceGUIDL - Exit"));
+	OstTraceFunctionExit0( CMTPGETSERVICEINFO_BUILDUSEDSERVICEGUIDL_EXIT );
 	}
 
 void CMTPGetServiceInfo::BuildServicePropertyL(CMTPServiceInfo& aServiceInfo)
 	{
-	__FLOG(_L8("BuildServicePropertyL - Entry"));
+	OstTraceFunctionEntry0( CMTPGETSERVICEINFO_BUILDSERVICEPROPERTYL_ENTRY );
 
 	TInt count = aServiceInfo.ServiceProperties().Count();
 	CMTPTypeServicePropertyElement* PropElement = NULL;
@@ -195,12 +198,12 @@ void CMTPGetServiceInfo::BuildServicePropertyL(CMTPServiceInfo& aServiceInfo)
 		CleanupStack::Pop(PropElement);
 		}
 	
-	__FLOG(_L8("BuildServicePropertyL - Exit"));
+	OstTraceFunctionExit0( CMTPGETSERVICEINFO_BUILDSERVICEPROPERTYL_EXIT );
 	}
 
 void CMTPGetServiceInfo::BuildServiceFormatL(CMTPServiceInfo& aServiceInfo)
 	{
-	__FLOG(_L8("BuildServiceFormatL - Entry"));
+	OstTraceFunctionEntry0( CMTPGETSERVICEINFO_BUILDSERVICEFORMATL_ENTRY );
 
 	CMTPTypeServiceFormatElement* FormatElement = NULL; 
 	CServiceFormat* format = NULL;  
@@ -217,12 +220,12 @@ void CMTPGetServiceInfo::BuildServiceFormatL(CMTPServiceInfo& aServiceInfo)
 		CleanupStack::Pop(FormatElement);
 		}
 	
-	__FLOG(_L8("BuildServiceFormatL - Exit"));
+	OstTraceFunctionExit0( CMTPGETSERVICEINFO_BUILDSERVICEFORMATL_EXIT );
 	}
 
 void CMTPGetServiceInfo::BuildServiceMethodL(CMTPServiceInfo& aServiceInfo)
 	{
-	__FLOG(_L8("BuildServiceMethodL - Entry"));
+	OstTraceFunctionEntry0( CMTPGETSERVICEINFO_BUILDSERVICEMETHODL_ENTRY );
 
 	CMTPTypeServiceMethodElement* methodElement = NULL;
 	CServiceMethod* method = NULL;
@@ -238,21 +241,21 @@ void CMTPGetServiceInfo::BuildServiceMethodL(CMTPServiceInfo& aServiceInfo)
 		CleanupStack::Pop(methodElement);		
 		}
 	
-	__FLOG(_L8("BuildServiceMethodL - Exit"));
+	OstTraceFunctionExit0( CMTPGETSERVICEINFO_BUILDSERVICEMETHODL_EXIT );
 	}
 
 
 void CMTPGetServiceInfo::BuildDataBlockL(CMTPServiceInfo& aServiceInfo)
     {
-    __FLOG(_L8("BuildDataBlockL - Entry"));
+    OstTraceFunctionEntry0( CMTPGETSERVICEINFO_BUILDDATABLOCKL_ENTRY );
     TInt count = aServiceInfo.DataBlockGUIDs().Count();
     const RArray<TMTPTypeGuid> DataBlockGUIDs = aServiceInfo.DataBlockGUIDs();
     for (TInt i=0;i<count;i++)
         {
         iServiceInfo->AppendServiceDataBlockL( DataBlockGUIDs[i] );
         }
-
-    __FLOG(_L8("BuildDataBlockL - Exit"));
+    
+    OstTraceFunctionExit0( CMTPGETSERVICEINFO_BUILDDATABLOCKL_EXIT );
     }
 
 

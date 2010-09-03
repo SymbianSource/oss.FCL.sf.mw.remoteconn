@@ -48,10 +48,6 @@ private:
 private:
 	MMTPServiceDataProvider&     iDataProvider;
 	CMTPTypeObjectPropList*      iPropertyList;
-	/**
-	FLOGGER debug trace member variable.
-	*/
-	__FLOG_DECLARATION_MEMBER_MUTABLE;
 	};
 
 #endif // __CMTPSVCSETOBJECTPROPLIST_H__

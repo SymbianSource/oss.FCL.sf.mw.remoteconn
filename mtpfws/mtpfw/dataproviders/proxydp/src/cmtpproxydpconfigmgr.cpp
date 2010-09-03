@@ -21,7 +21,11 @@
 #include <barsread.h>
 #include <mtp/mmtpdataproviderconfig.h>
 #include <mtp/mmtpdataproviderframework.h>
-__FLOG_STMT(_LIT8(KComponent1,"ProxyDPConfigmanager");)
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpproxydpconfigmgrTraces.h"
+#endif
+
 
 CMTPProxyDpConfigMgr* CMTPProxyDpConfigMgr::NewL(MMTPDataProviderFramework& aFramework)
 	{
@@ -39,7 +43,7 @@ CMTPProxyDpConfigMgr::CMTPProxyDpConfigMgr(MMTPDataProviderFramework& aFramework
 	
 void CMTPProxyDpConfigMgr::ConstructL()
 	{
-	__FLOG_OPEN(KMTPSubsystem, KComponent1);
+	OstTraceFunctionEntry0( CMTPPROXYDPCONFIGMGR_CONSTRUCTL_ENTRY );
 	TUint32 resourceId = iFramework.DataProviderConfig().UintValue(MMTPDataProviderConfig::EOpaqueResource);
 	// Reading from resource file mtpproxydp_config.rss 
 	RResourceFile resourceFile;
@@ -59,10 +63,12 @@ void CMTPProxyDpConfigMgr::ConstructL()
 		
 	CleanupStack::PopAndDestroy(2, &resourceFile);
 	
+	OstTraceFunctionExit0( CMTPPROXYDPCONFIGMGR_CONSTRUCTL_EXIT );
 	}
 	
 CMTPProxyDpConfigMgr::~CMTPProxyDpConfigMgr()
 	{
+	OstTraceFunctionEntry0( CMTPPROXYDPCONFIGMGR_CMTPPROXYDPCONFIGMGR_DES_ENTRY );
 	TInt count = iMappingStruct.Count();
 	for(TInt i=0 ; i<count ; i++)
 		{
@@ -70,7 +76,7 @@ CMTPProxyDpConfigMgr::~CMTPProxyDpConfigMgr()
 		}
 	iMappingStruct.Reset();
 	iMappingStruct.Close(); 
-	__FLOG_CLOSE;
+	OstTraceFunctionExit0( CMTPPROXYDPCONFIGMGR_CMTPPROXYDPCONFIGMGR_DES_EXIT );
 	}
 	
 void CMTPProxyDpConfigMgr::InsertToMappingStruct(FileMappingStruct& aRef)
@@ -80,25 +86,24 @@ void CMTPProxyDpConfigMgr::InsertToMappingStruct(FileMappingStruct& aRef)
 	
 TBool CMTPProxyDpConfigMgr::GetFileName(const TDesC& aFileName,TInt& aIndex)
 	{
-    __FLOG(_L8("GetFileName - Entry"));
-    
-    __FLOG_1( _L8("aFileName = %s"), &aFileName );
-    
+    OstTraceFunctionEntry0( CMTPPROXYDPCONFIGMGR_GETFILENAME_ENTRY );
+    OstTraceExt1( TRACE_NORMAL, CMTPPROXYDPCONFIGMGR_GETFILENAME, "aFileName = %S",  aFileName);
+        
 	TInt count = iMappingStruct.Count();
-    __FLOG_1( _L8("count = %d"), count );
+    OstTrace1( TRACE_NORMAL, DUP1_CMTPPROXYDPCONFIGMGR_GETFILENAME, "count = %d", count );    
 	for(TInt i=0 ; i<count ; i++)
 		{
 		TInt err=iMappingStruct[i].iFileArray->Find(aFileName,aIndex);
 		if(err == KErrNone)
 			{
 			aIndex=i;
-		    __FLOG_1( _L8("aIndex = %d"), aIndex );
-		    __FLOG(_L8("GetFileName - Exit"));
+		    OstTrace1( TRACE_NORMAL, DUP2_CMTPPROXYDPCONFIGMGR_GETFILENAME, "aIndex = %d", aIndex );    
+			OstTraceFunctionExit0( CMTPPROXYDPCONFIGMGR_GETFILENAME_EXIT );
 			return ETrue;			
 			}
 		}
 	
-    __FLOG(_L8("GetFileName - Exit"));
+	OstTraceFunctionExit0( DUP1_CMTPPROXYDPCONFIGMGR_GETFILENAME_EXIT );
 	return EFalse;
 	}
 	

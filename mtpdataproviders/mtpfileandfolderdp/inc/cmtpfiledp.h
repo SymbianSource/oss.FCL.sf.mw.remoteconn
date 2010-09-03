@@ -24,7 +24,6 @@
 #include <mtp/cmtpdataproviderplugin.h>
 
 #include "mmtpenumerationcallback.h"
-#include "mtpdebug.h"
 #include "rmtpfiledpsingletons.h"
 #include "rmtpdpsingletons.h"
 #include "rmtpframework.h"
@@ -81,10 +80,6 @@ private:
     static void ImplementationsCleanup(TAny* aData);
     
 private:
-	/**
-    FLOGGER debug trace member variable.
-    */
-    __FLOG_DECLARATION_MEMBER_MUTABLE;
     
     /**
     The active request processors table.

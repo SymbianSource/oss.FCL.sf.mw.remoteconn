@@ -153,11 +153,6 @@ private:
     TBool IsTooLarge(TUint64 aObjectSize) const;
 private: // Owned
 
-    /**
-    FLOGGER debug trace member variable.
-    */
-    __FLOG_DECLARATION_MEMBER_MUTABLE;
-
     CMTPImageDataProvider&   iDataProvider;    
     CMTPTypeFile*            iFileReceived;
     CMTPTypeObjectInfo*      iObjectInfo;
@@ -175,6 +170,7 @@ private: // Owned
     CMTPObjectMetaData*      iReceivedObject;
     TMTPTypeRequest          iExpectedSendObjectRequest;
     TUint16                  iProtectionStatus;
+    TUint16                  iHiddenStatus;
     TUint16                  iFormatCode;
     TUint32                  iPreviousTransactionID;
     CMTPImageDpObjectPropertyMgr&  iObjectPropertyMgr;

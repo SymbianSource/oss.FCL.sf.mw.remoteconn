@@ -97,10 +97,6 @@ private:
      TUint32 iTransactionID;
 
      RArray<TUint32> iReceiveQ;
-     /**
-     FLOGGER debug trace member variable.
-     */
-     __FLOG_DECLARATION_MEMBER_MUTABLE;
     };
 #endif //  CPTPRECEIVEDMSGHANDLER_H
 

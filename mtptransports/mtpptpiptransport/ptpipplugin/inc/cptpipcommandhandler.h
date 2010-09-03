@@ -52,12 +52,6 @@ private :
 
 	void SendDataCompleteL(TInt aError, const MMTPType& aSource);
 	void ReceiveDataCompleteL(TInt aError, MMTPType& aSink);
-
-    /**
-    FLOGGER debug trace member variable.
-    */
-    __FLOG_DECLARATION_MEMBER;    
-	
 	};
 
 #endif /*CCOMMANDHANDLER_H_*/

@@ -23,6 +23,11 @@
 #include "cmtpobjectstore.h"
 #include "tmtptypeobjecthandle.h"
 #include "cmtppkgidstore.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpobjectmgrTraces.h"
+#endif
+
 /**
 MTP object manager information record factory method. This method creates an 
 empty object information record.
@@ -156,6 +161,7 @@ TMTPTypeUint128 CMTPObjectMgr::PuidL(TUint32 aHandle) const
     
 TMTPTypeUint128 CMTPObjectMgr::PuidL(TInt64 /*aObjectUid*/) const
     {
+    OstTrace0( TRACE_ERROR, CMTPOBJECTMGR_PUIDL, "PuidL doesn't support TInt64 type parameter" );
     User::Leave(KErrNotSupported);
     return TMTPTypeUint128(0);
     }

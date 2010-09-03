@@ -18,19 +18,18 @@
 */
 
 
-#include <e32debug.h>
 #include <usbstates.h>
 #include <rptp.h>
 #include "dpsusbnotifier.h"
 #include "dpsconst.h"
 #include "dpsptpnotifier.h"
 #include "dpsconnectnotifier.h"
-
-#ifdef _DEBUG
-#	define IF_DEBUG(t) {RDebug::t;}
-#else
-#	define IF_DEBUG(t)
+#include "mtpdebug.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "dpsusbnotifierTraces.h"
 #endif
+
 
 const TInt KUnknownPersonality = 0;
 
@@ -40,7 +39,6 @@ const TInt KUnknownPersonality = 0;
 //
 CDpsUsbNotifier* CDpsUsbNotifier::NewL(CDpsEngine* aEngine)
 	{
-	IF_DEBUG(Print(_L("CDpsUsbNotifier::NewL")));
 	CDpsUsbNotifier* self = new(ELeave) CDpsUsbNotifier(aEngine);
 	CleanupStack::PushL(self);
 	self->ConstructL();
@@ -58,9 +56,9 @@ CDpsUsbNotifier::CDpsUsbNotifier(CDpsEngine* aEngine) :
     iConnectState(EUsbDeviceStateUndefined), iConfigured(EFalse), 
     iConnection(CDpsEngine::ENotConnected), iRollback(EFalse)
     {
-    IF_DEBUG(Print(_L(">>>CDpsUsbNotifier::Ctor")));
+    OstTraceFunctionEntry0( CDPSUSBNOTIFIER_CDPSUSBNOTIFIER_CONS_ENTRY );
     CActiveScheduler::Add(this);        
-    IF_DEBUG(Print(_L("<<<CDpsUsbNotifier::Ctor")));
+    OstTraceFunctionExit0( CDPSUSBNOTIFIER_CDPSUSBNOTIFIER_CONS_EXIT );
     }  
   
 // ---------------------------------------------------------------------------
@@ -69,14 +67,14 @@ CDpsUsbNotifier::CDpsUsbNotifier(CDpsEngine* aEngine) :
 //	
 CDpsUsbNotifier::~CDpsUsbNotifier()
 	{
-	IF_DEBUG(Print(_L(">>>~CDpsUsbNotifier")));
+	OstTraceFunctionEntry0( CDPSUSBNOTIFIER_CDPSUSBNOTIFIER_DES_ENTRY );
 	Cancel();
 	Rollback();
     delete iPtpP; iPtpP = NULL;
     delete iConnectP; iConnectP = NULL;	
     iUsbM.Close();
     iUsbW.Close();
-    IF_DEBUG(Print(_L("<<<~CDpsUsbNotifier")));
+	OstTraceFunctionExit0( CDPSUSBNOTIFIER_CDPSUSBNOTIFIER_DES_EXIT );
 	}
 
 // ---------------------------------------------------------------------------
@@ -85,12 +83,16 @@ CDpsUsbNotifier::~CDpsUsbNotifier()
 //	
 void CDpsUsbNotifier::ConstructL()
     {
-    IF_DEBUG(Print(_L(">>>CDpsUsbNotifier::ConstructL")));
-    User::LeaveIfError(iUsbM.Connect());
-    User::LeaveIfError(iUsbW.Connect());
+    OstTraceFunctionEntry0( CDPSUSBNOTIFIER_CONSTRUCTL_ENTRY );
+    LEAVEIFERROR(iUsbM.Connect(),
+            OstTrace1( TRACE_ERROR, CDPSUSBNOTIFIER_CONSTRUCTL, 
+                    "Connect to iUsbM failed! error code %d", munged_err));       
+    LEAVEIFERROR(iUsbW.Connect(),
+            OstTrace1( TRACE_ERROR, DUP1_CDPSUSBNOTIFIER_CONSTRUCTL, 
+                    "Connect to iUsbM failed! error code %d", munged_err));   
     iPtpP = CDpsPtpNotifier::NewL(this);
     iConnectP = CDpsConnectNotifier::NewL(this);
-    IF_DEBUG(Print(_L("<<<CDpsUsbNotifier::ConstructL")));
+    OstTraceFunctionExit0( CDPSUSBNOTIFIER_CONSTRUCTL_EXIT );
     }    
 
 // ---------------------------------------------------------------------------
@@ -99,8 +101,9 @@ void CDpsUsbNotifier::ConstructL()
 //
 void CDpsUsbNotifier::WaitForPrinterNotify()
     {
-    IF_DEBUG(Print(_L("CDpsUsbNotifier::WaitForPrinterNotify")));
+    OstTraceFunctionEntry0( CDPSUSBNOTIFIER_WAITFORPRINTERNOTIFY_ENTRY );
     iPtpP->ChangePtpPersonality();
+    OstTraceFunctionExit0( CDPSUSBNOTIFIER_WAITFORPRINTERNOTIFY_EXIT );
     }
   
 // ---------------------------------------------------------------------------
@@ -109,7 +112,7 @@ void CDpsUsbNotifier::WaitForPrinterNotify()
 //  
 void CDpsUsbNotifier::CancelPrinterNotify()
     {
-    IF_DEBUG(Print(_L(">>>CDpsUsbNotifier::CancelPrinterNotify")));
+    OstTraceFunctionEntry0( CDPSUSBNOTIFIER_CANCELPRINTERNOTIFY_ENTRY );
     if (CDpsEngine::ENotConnected == iConnection)
         {
         iPtpP->Cancel(); 
@@ -125,7 +128,7 @@ void CDpsUsbNotifier::CancelPrinterNotify()
         {
 	    User::RequestComplete(iEngine->PrinterConnectRequest(), KErrCancel);   
         }    
-    IF_DEBUG(Print(_L("<<<CDpsUsbNotifier::CancelWaitForPrinterNotify")));
+    OstTraceFunctionExit0( CDPSUSBNOTIFIER_CANCELPRINTERNOTIFY_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -134,9 +137,9 @@ void CDpsUsbNotifier::CancelPrinterNotify()
 //
 void CDpsUsbNotifier::ConnectNotify()
     {
-    IF_DEBUG(Print(_L(">>>CDpsUsbNotifier::ConnectNotify")));
+    OstTraceFunctionEntry0( CDPSUSBNOTIFIER_CONNECTNOTIFY_ENTRY );
     iConnectP->ConnectNotify();
-    IF_DEBUG(Print(_L("<<<CDpsUsbNotifier::ConnectNotify")));
+    OstTraceFunctionExit0( CDPSUSBNOTIFIER_CONNECTNOTIFY_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -145,14 +148,14 @@ void CDpsUsbNotifier::ConnectNotify()
 //	
 void CDpsUsbNotifier::Rollback()
     {
-    IF_DEBUG(Print(_L(">>>CDpsUsbNotifier::Rollback")));
+    OstTraceFunctionEntry0( CDPSUSBNOTIFIER_ROLLBACK_ENTRY );
     // only when the personality has changed, we switch back to the previous
     // personality
     if (iPersonality)
         {
         TInt personalityId = KUsbPersonalityIdMTP;
         iUsbM.GetCurrentPersonalityId(personalityId);
-        IF_DEBUG(Print(_L("CDpsUsbNotifier::Rollback, current personality= %d"), personalityId));
+        OstTrace1( TRACE_NORMAL, CDPSUSBNOTIFIER_ROLLBACK, "current personality= %d", personalityId );
         if(KUsbPersonalityIdPCSuiteMTP != personalityId)
             {
             if (!iConfigured || iRollback)
@@ -165,7 +168,7 @@ void CDpsUsbNotifier::Rollback()
                 }
             }
         }
-    IF_DEBUG(Print(_L("<<<CDpsUsbNotifier::Rollback")));
+    OstTraceFunctionExit0( CDPSUSBNOTIFIER_ROLLBACK_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -174,8 +177,9 @@ void CDpsUsbNotifier::Rollback()
 //
 void CDpsUsbNotifier::PtpNotify(TInt aErr)
     {
-    IF_DEBUG(Print(_L(">>>CDpsUsbNotifier::PtpNotify %x %d"), 
-        iConnectState, aErr));
+    OstTraceFunctionEntry0( CDPSUSBNOTIFIER_PTPNOTIFY_ENTRY );
+    OstTraceExt2( TRACE_NORMAL, CDPSUSBNOTIFIER_PTPNOTIFY, "connect status %x, error no %d", iConnectState, aErr );
+
     if (aErr == KErrNone)
         {
         // personality changed to MTP, but cable is not connected        
@@ -198,8 +202,8 @@ void CDpsUsbNotifier::PtpNotify(TInt aErr)
         iConnection = CDpsEngine::EWrongPrintModeConnected;
         User::RequestComplete(iEngine->PrinterConnectRequest(), iConnection); 
         }
-        	
-    IF_DEBUG(Print(_L("<<<CDpsUsbNotifier::PtpNotify")));        
+      
+    OstTraceFunctionExit0( CDPSUSBNOTIFIER_PTPNOTIFY_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -208,8 +212,9 @@ void CDpsUsbNotifier::PtpNotify(TInt aErr)
 //    
 void CDpsUsbNotifier::PersonalityChanged()
     {
-    IF_DEBUG(Print(_L(">>>CDpsUsbNotifier::PersonalityChanged %x"), 
-                                                              iPersonality));     
+    OstTraceFunctionEntry0( CDPSUSBNOTIFIER_PERSONALITYCHANGED_ENTRY );
+    OstTrace1( TRACE_NORMAL, CDPSUSBNOTIFIER_PERSONALITYCHANGED, "iPersonality %x", iPersonality );
+    
     if (iPersonality != KUsbPersonalityIdMTP)
         {
         iConnection = CDpsEngine::EWrongPrintModeConnected;
@@ -222,8 +227,8 @@ void CDpsUsbNotifier::PersonalityChanged()
         }
     // when UI gets this notification, it must quit. As the result, the dps 
     // engine will be deleted so we do not need to care the further change.
-    
-    IF_DEBUG(Print(_L(">>>CDpsUsbNotifier::PersonalityChanged ")));     
+      
+    OstTraceFunctionExit0( CDPSUSBNOTIFIER_PERSONALITYCHANGED_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -232,7 +237,7 @@ void CDpsUsbNotifier::PersonalityChanged()
 //    
 void CDpsUsbNotifier::RunL()
     {
-    IF_DEBUG(Print(_L(">>>CDpsUsbNotifier::RunL")));
+    OstTraceFunctionEntry0( CDPSUSBNOTIFIER_RUNL_ENTRY );
     
     if (EPrinterAvailable == iStatus.Int())
         {
@@ -245,8 +250,8 @@ void CDpsUsbNotifier::RunL()
         iConnection = CDpsEngine::EOtherConnected;
         }
     User::RequestComplete(iEngine->PrinterConnectRequest(), iConnection);    
-        
-    IF_DEBUG(Print(_L("<<<CDpsUsbNotifier::RunL")));
+
+    OstTraceFunctionExit0( CDPSUSBNOTIFIER_RUNL_EXIT );
     }
     
 // ---------------------------------------------------------------------------
@@ -255,9 +260,9 @@ void CDpsUsbNotifier::RunL()
 //       
 void CDpsUsbNotifier::DoCancel()
     {
-    IF_DEBUG(Print(_L(">>>CDpsUsbNotifier::DoCancel")));
+    OstTraceFunctionEntry0( CDPSUSBNOTIFIER_DOCANCEL_ENTRY );
     iEngine->Ptp().CancelIsDpsPrinter();
-    IF_DEBUG(Print(_L(">>>CDpsUsbNotifier::DoCancel")));
+    OstTraceFunctionExit0( CDPSUSBNOTIFIER_DOCANCEL_EXIT );
     }
     
 // ---------------------------------------------------------------------------
@@ -266,7 +271,8 @@ void CDpsUsbNotifier::DoCancel()
 //       
 TInt CDpsUsbNotifier::RunError(TInt aErr)
     {
-    IF_DEBUG(Print(_L("CDpsUsbNotifier::RunError is %d"), aErr));
+    OstTraceDef1( OST_TRACE_CATEGORY_PRODUCTION, TRACE_IMPORTANT, CDPSUSBNOTIFIER_RUNERROR, 
+            "error code %d", aErr);
     return aErr;
     }
     
@@ -276,7 +282,9 @@ TInt CDpsUsbNotifier::RunError(TInt aErr)
 //    
 void CDpsUsbNotifier::DisconnectNotify(TUsbDeviceState aState)
     {
-    IF_DEBUG(Print(_L(">>>CDpsUsbNotifier::DisconnectNotify %d"), aState));
+    OstTraceFunctionEntry0( CDPSUSBNOTIFIER_DISCONNECTNOTIFY_ENTRY );
+    OstTrace1( TRACE_NORMAL, CDPSUSBNOTIFIER_DISCONNECTNOTIFY, "status %d", aState );
+
     if (iConfigured)
         {
         iConnection = CDpsEngine::EPrinterDisconnected;
@@ -294,8 +302,8 @@ void CDpsUsbNotifier::DisconnectNotify(TUsbDeviceState aState)
         {
         User::RequestComplete(iEngine->PrinterConnectRequest(), iConnection);    
         }
-    
-    IF_DEBUG(Print(_L("<<<CDpsUsbNotifier::DisconnectNotify")));
+
+    OstTraceFunctionExit0( CDPSUSBNOTIFIER_DISCONNECTNOTIFY_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -304,9 +312,11 @@ void CDpsUsbNotifier::DisconnectNotify(TUsbDeviceState aState)
 //
 TInt CDpsUsbNotifier::ConnectState()
     {
-    IF_DEBUG(Print(_L(">>>CDpsUsbNotifier::ConnectState")));    
-    TInt ret = iUsbM.GetDeviceState(iConnectState);
-	IF_DEBUG(Print(_L("<<<CDpsUsbNotifier::ConnectState %x"), iConnectState));    
+    OstTraceFunctionEntry0( CDPSUSBNOTIFIER_CONNECTSTATE_ENTRY );    
+    TInt ret = iUsbM.GetDeviceState(iConnectState);  
+	OstTraceFunctionExit0( CDPSUSBNOTIFIER_CONNECTSTATE_EXIT );
+	OstTrace1( TRACE_NORMAL, CDPSUSBNOTIFIER_CONNECTSTATE, "ConnectState %x", iConnectState );
+
 	return ret;    
     }
 

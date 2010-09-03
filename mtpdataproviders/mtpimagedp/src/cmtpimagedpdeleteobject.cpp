@@ -30,8 +30,12 @@
 #include "cmtpimagedpobjectpropertymgr.h"
 #include "mtpimagedputilits.h"
 #include "cmtpimagedp.h"
-// Class constants.
-__FLOG_STMT(_LIT8(KComponent,"ImageDeleteObject");)
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpimagedpdeleteobjectTraces.h"
+#endif
+
+
 /**
  Standard c++ constructor
  */
@@ -42,9 +46,8 @@ CMTPImageDpDeleteObject::CMTPImageDpDeleteObject(
     iDataProvider(aDataProvider),
     iResponseCode( EMTPRespCodeOK )
     {
-    __FLOG_OPEN(KMTPSubsystem, KComponent);
-    __FLOG(_L8(">> CMTPImageDpDeleteObject"));
-    __FLOG(_L8("<< CMTPImageDpDeleteObject"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPDELETEOBJECT_CMTPIMAGEDPDELETEOBJECT_CONS_ENTRY );
+    OstTraceFunctionExit0( CMTPIMAGEDPDELETEOBJECT_CMTPIMAGEDPDELETEOBJECT_CONS_EXIT );
     }
 
 /**
@@ -67,21 +70,20 @@ MMTPRequestProcessor* CMTPImageDpDeleteObject::NewL(
 
 void CMTPImageDpDeleteObject::ConstructL()
     {
-    __FLOG(_L8(">> CMTPImageDpDeleteObject::ConstructL"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPDELETEOBJECT_CONSTRUCTL_ENTRY );
     iObjectMeta = CMTPObjectMetaData::NewL();
-    __FLOG(_L8("<< CMTPImageDpDeleteObject::ConstructL"));
+    OstTraceFunctionExit0( CMTPIMAGEDPDELETEOBJECT_CONSTRUCTL_EXIT );
     }
 /**
  Destructor
  */
 CMTPImageDpDeleteObject::~CMTPImageDpDeleteObject()
     {
-    __FLOG(_L8("~CMTPImageDpDeleteObject - Entry"));
+    OstTraceFunctionEntry0( DUP1_CMTPIMAGEDPDELETEOBJECT_CMTPIMAGEDPDELETEOBJECT_DES_ENTRY );
     Cancel();
     delete iObjectMeta;
     iObjectsToDelete.Close();
-    __FLOG(_L8("~CMTPImageDpDeleteObject - Exit"));
-    __FLOG_CLOSE;
+    OstTraceFunctionExit0( DUP1_CMTPIMAGEDPDELETEOBJECT_CMTPIMAGEDPDELETEOBJECT_DES_EXIT );
     }
 
 /**
@@ -91,14 +93,14 @@ CMTPImageDpDeleteObject::~CMTPImageDpDeleteObject()
 
 TMTPResponseCode CMTPImageDpDeleteObject::CheckRequestL()
     {
-    __FLOG(_L8(">> CMTPImageDpDeleteObject::CheckRequestL"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPDELETEOBJECT_CHECKREQUESTL_ENTRY );
     TMTPResponseCode result = EMTPRespCodeOK;
     TUint32 handle(Request().Uint32(TMTPTypeRequest::ERequestParameter1));
     if ( handle != KMTPHandleAll )
         {
         result = CheckStorageL( handle );
         }
-    __FLOG(_L8("<< CMTPImageDpDeleteObject::CheckRequestL"));
+    OstTraceFunctionExit0( CMTPIMAGEDPDELETEOBJECT_CHECKREQUESTL_EXIT );
     return result;
     }
 
@@ -107,7 +109,7 @@ TMTPResponseCode CMTPImageDpDeleteObject::CheckRequestL()
  */
 void CMTPImageDpDeleteObject::ServiceL()
     {
-    __FLOG(_L8(">> CMTPImageDpDeleteObject::ServiceL"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPDELETEOBJECT_SERVICEL_ENTRY );
     
     //begin to find object
     iObjectsToDelete.Reset();
@@ -120,7 +122,7 @@ void CMTPImageDpDeleteObject::ServiceL()
     if ( objectHandle == KMTPHandleAll )
         {
         //add for test
-        __FLOG(_L8("delete all objects"));
+        OstTrace0( TRACE_FLOW, CMTPIMAGEDPDELETEOBJECT_SERVICEL, "delete all objects" );
         GetObjectHandlesL( KMTPStorageAll, formatCode, KMTPHandleNone );
         iObjectsNotDelete = iObjectsToDelete.Count();
         StartL();
@@ -128,19 +130,19 @@ void CMTPImageDpDeleteObject::ServiceL()
     else
         {
         //add for test
-        __FLOG(_L8("delete only one object"));
+        OstTrace0( TRACE_FLOW, DUP1_CMTPIMAGEDPDELETEOBJECT_SERVICEL, "delete only one object" );
         iObjectsNotDelete = 1;
         DeleteObjectL( objectHandle );
         
         SendResponseL();
         }
     
-    __FLOG(_L8("<< CMTPImageDpDeleteObject::ServiceL"));
+    OstTraceFunctionExit0( CMTPIMAGEDPDELETEOBJECT_SERVICEL_EXIT );
     }
 
 void CMTPImageDpDeleteObject::RunL()
     {
-    __FLOG(_L8(">> CMTPImageDpDeleteObject::RunL"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPDELETEOBJECT_RUNL_ENTRY );
     
     TInt numObjectsToDelete = iObjectsToDelete.Count();
     
@@ -152,17 +154,17 @@ void CMTPImageDpDeleteObject::RunL()
     
     // Start the process again to read the next row...
     StartL();
-    
-    __FLOG(_L8("<< CMTPImageDpDeleteObject::RunL"));
+
+    OstTraceFunctionExit0( CMTPIMAGEDPDELETEOBJECT_RUNL_EXIT );
     }
 
 void CMTPImageDpDeleteObject::DoCancel()
     {
-    __FLOG(_L8(">> CMTPImageDpDeleteObject::DoCancel"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPDELETEOBJECT_DOCANCEL_ENTRY );
     
     TRAP_IGNORE( SendResponseL());
-    
-    __FLOG(_L8("<< CMTPImageDpDeleteObject::DoCancel"));
+
+    OstTraceFunctionExit0( CMTPIMAGEDPDELETEOBJECT_DOCANCEL_EXIT );
     }
 
 /**
@@ -171,29 +173,33 @@ void CMTPImageDpDeleteObject::DoCancel()
  */
 TMTPResponseCode CMTPImageDpDeleteObject::CheckStorageL(TUint32 aObjectHandle)
     {
-    __FLOG(_L8(">> CMTPImageDpDeleteObject::CheckStorageL"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPDELETEOBJECT_CHECKSTORAGEL_ENTRY );
     TMTPResponseCode result = MTPImageDpUtilits::VerifyObjectHandleL(
             iFramework, aObjectHandle, *iObjectMeta);
     if (EMTPRespCodeOK == result)
         {
         TDriveNumber drive= static_cast<TDriveNumber>(iFramework.StorageMgr().DriveNumber(
                                                       iObjectMeta->Uint(CMTPObjectMetaData::EStorageId)));
-        User::LeaveIfError(drive);
+        LEAVEIFERROR(drive,
+                OstTraceExt2( TRACE_ERROR, CMTPIMAGEDPDELETEOBJECT_CHECKSTORAGEL, 
+                        "No driver number for %d! error code %d",iObjectMeta->Uint(CMTPObjectMetaData::EStorageId), munged_err));        
         TVolumeInfo volumeInfo;
-        User::LeaveIfError(iFramework.Fs().Volume(volumeInfo, drive));
+        LEAVEIFERROR(iFramework.Fs().Volume(volumeInfo, drive),
+                OstTraceExt2( TRACE_ERROR, DUP1_CMTPIMAGEDPDELETEOBJECT_CHECKSTORAGEL, 
+                        "Gets volume information for driver %d failed! error code %d", drive, munged_err ));
         if (volumeInfo.iDrive.iMediaAtt == KMediaAttWriteProtected)
             {
             result = EMTPRespCodeStoreReadOnly;
             }
         }
-    __FLOG(_L8("<< CMTPImageDpDeleteObject::CheckStorageL"));
+    OstTraceFunctionExit0( CMTPIMAGEDPDELETEOBJECT_CHECKSTORAGEL_EXIT );
     return result;
     }
 
 void CMTPImageDpDeleteObject::GetObjectHandlesL( TUint32 aStorageId, TUint32 aFormatCode, TUint32 aParentHandle )
     {
-    __FLOG(_L8(">> CMTPImageDpDeleteObject::GetObjectHandlesL"));
-    
+    OstTraceFunctionEntry0( CMTPIMAGEDPDELETEOBJECT_GETOBJECTHANDLESL_ENTRY );
+
     RMTPObjectMgrQueryContext context;
     RArray<TUint> handles;
     TMTPObjectMgrQueryParams params( aStorageId, aFormatCode, aParentHandle, iFramework.DataProviderId());
@@ -212,13 +218,13 @@ void CMTPImageDpDeleteObject::GetObjectHandlesL( TUint32 aStorageId, TUint32 aFo
     
     CleanupStack::PopAndDestroy( &handles ); // - handles
     CleanupStack::PopAndDestroy( &context ); // - context
-    
-    __FLOG(_L8("<< CMTPImageDpDeleteObject::GetObjectHandlesL"));
+
+    OstTraceFunctionExit0( CMTPIMAGEDPDELETEOBJECT_GETOBJECTHANDLESL_EXIT );
     }
 
 void CMTPImageDpDeleteObject::DeleteObjectL( TUint32 aHandle )
     {
-    __FLOG(_L8(">> CMTPImageDpDeleteObject::DeleteObjectL"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPDELETEOBJECT_DELETEOBJECTL_ENTRY );
     
     iFramework.ObjectMgr().ObjectL( aHandle, *iObjectMeta);
     iDataProvider.PropertyMgr().SetCurrentObjectL(*iObjectMeta, EFalse);
@@ -227,14 +233,14 @@ void CMTPImageDpDeleteObject::DeleteObjectL( TUint32 aHandle )
     if(EMTPProtectionNoProtection == protectionStatus)
         {
         TInt err = iFramework.Fs().Delete(iObjectMeta->DesC(CMTPObjectMetaData::ESuid));
-        __FLOG_1(_L8("delete file error is %d"), err );
+        OstTrace1( TRACE_FLOW, CMTPIMAGEDPDELETEOBJECT_DELETEOBJECTL, "delete file error is %d", err );
         switch ( err )
             {
             case KErrInUse:
                 //coverity[fallthrough]
             case KErrAccessDenied:
                 //add for test 
-                __FLOG_1(_L8("err:%d"), err);
+                OstTrace1( TRACE_FLOW, DUP1_CMTPIMAGEDPDELETEOBJECT_DELETEOBJECTL, "err:%d", err );
                 //add Suid to deleteobjectlist
                 iDataProvider.AppendDeleteObjectsArrayL(iObjectMeta->DesC(CMTPObjectMetaData::ESuid));
                 //coverity[unterminated_case]
@@ -242,8 +248,8 @@ void CMTPImageDpDeleteObject::DeleteObjectL( TUint32 aHandle )
                 //if the file does not exist on device, remove it from objectstore
                 //coverity[fallthrough]
             case KErrNone:            
-                //add for test
-                __FLOG(_L8("KErrNone"));                
+                //add for test   
+                OstTrace0( TRACE_NORMAL, DUP2_CMTPIMAGEDPDELETEOBJECT_DELETEOBJECTL, "KErrNone" );
                 //if the image object is new, we should update new picture count
                 if (MTPImageDpUtilits::IsNewPicture(*iObjectMeta))
                     {
@@ -255,8 +261,10 @@ void CMTPImageDpDeleteObject::DeleteObjectL( TUint32 aHandle )
                 break;
             default:
                 //add for test
-                __FLOG(_L8("default"));
-                User::LeaveIfError( err );
+                OstTrace0( TRACE_NORMAL, DUP3_CMTPIMAGEDPDELETEOBJECT_DELETEOBJECTL, "default" );
+                LEAVEIFERROR( err,
+                        OstTraceExt2( TRACE_ERROR, DUP4_CMTPIMAGEDPDELETEOBJECT_DELETEOBJECTL, 
+                                "delete %S failed! error code %d", iObjectMeta->DesC(CMTPObjectMetaData::ESuid), munged_err));
                 break;
             }
         }
@@ -264,19 +272,20 @@ void CMTPImageDpDeleteObject::DeleteObjectL( TUint32 aHandle )
         {
         iResponseCode = EMTPRespCodeObjectWriteProtected;
         }
-    __FLOG(_L8("<< CMTPImageDpDeleteObject::DeleteObjectL"));
+    OstTraceFunctionExit0( CMTPIMAGEDPDELETEOBJECT_DELETEOBJECTL_EXIT );
     }
 
 void CMTPImageDpDeleteObject::StartL()
     {
-    __FLOG(_L8(">> CMTPImageDpDeleteObject::StartL"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPDELETEOBJECT_STARTL_ENTRY );
     
     if(iCancelled)
         {
-        __FLOG(_L8("Cancell the delete"));
+        OstTrace0( TRACE_NORMAL, CMTPIMAGEDPDELETEOBJECT_STARTL, "Cancell the delete" );
         CMTPRequestProcessor::SendResponseL(EMTPRespCodeTransactionCancelled);
         iObjectsToDelete.Reset();
         iCancelled = EFalse;
+        OstTraceFunctionExit0( CMTPIMAGEDPDELETEOBJECT_STARTL_EXIT );
         return;
         }
     
@@ -293,19 +302,19 @@ void CMTPImageDpDeleteObject::StartL()
         {
         SendResponseL();
         }
-    __FLOG(_L8("<< CMTPImageDpDeleteObject::StartL"));
+    OstTraceFunctionExit0( DUP1_CMTPIMAGEDPDELETEOBJECT_STARTL_EXIT );
     }
 
 void CMTPImageDpDeleteObject::SendResponseL()
     {
-    __FLOG(_L8(">> CMTPImageDpDeleteObject::SendResponseL"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPDELETEOBJECT_SENDRESPONSEL_ENTRY );
     
     if ( iResponseCode == EMTPRespCodePartialDeletion && iObjectsNotDelete == 0 )
         {
         iResponseCode = EMTPRespCodeOK;
         }
     CMTPRequestProcessor::SendResponseL( iResponseCode );
-    
-    __FLOG(_L8("<< CMTPImageDpDeleteObject::SendResponseL"));
+
+    OstTraceFunctionExit0( CMTPIMAGEDPDELETEOBJECT_SENDRESPONSEL_EXIT );
     }
 

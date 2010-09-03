@@ -24,7 +24,10 @@ UID             0x1000008d 0x10274798
 CAPABILITY 	    CAP_GENERAL_DLL
 VENDORID 	    VID_DEFAULT
 
-USERINCLUDE 	../inc
+USERINCLUDE 	../inc 
+USERINCLUDE 	../traces
+USERINCLUDE	../../../../mtpfws/mtpfw/common/inc
+
 MW_LAYER_SYSTEMINCLUDE
 SYSTEMINCLUDE   /epoc32/include/xml 
 
@@ -53,3 +56,4 @@ END
 LIBRARY     euser.lib xmlframework.lib efsrv.lib bafl.lib platformenv.lib
 LIBRARY     rptp.lib usbman.lib usbwatcher.lib centralrepository.lib estor.lib
 
+SMPSAFE

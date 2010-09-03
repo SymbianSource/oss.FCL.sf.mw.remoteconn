@@ -59,7 +59,6 @@ private:
 	void SetKeywordL();
 		
 private:
-	__FLOG_DECLARATION_MEMBER_MUTABLE;
 	
 	CMTPTypeObjectInfo*           iObjectInfoToBuild;
 	CMTPObjectMetaData*           iObjectMeta;

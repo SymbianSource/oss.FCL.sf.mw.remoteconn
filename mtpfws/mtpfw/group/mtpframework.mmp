@@ -19,7 +19,6 @@
  @file
 */
 
-#include <comms-infras/commsdebugutility.mmh>
 #include "../common/inc/mtpbuildoptions.hrh"
 
 TARGET              mtpframework.dll
@@ -33,7 +32,8 @@ MW_LAYER_SYSTEMINCLUDE_SYMBIAN
 
 USERINCLUDE         ../inc/ 
 USERINCLUDE         ../common/inc 
-USERINCLUDE         ../transports/transportapi/inc
+USERINCLUDE         ../transports/transportapi/inc 
+USERINCLUDE					../traces
 
 SOURCEPATH          ../src/ 
 SOURCE              cmtpconnection.cpp

@@ -51,10 +51,6 @@ private:
 	CMTPTypeArray*               iReferences;
 	MMTPServiceDataProvider&     iDataProvider;
 	CMTPObjectMetaData*          iReceivedObjectMetaData;
-	/**
-	FLOGGER debug trace member variable.
-	*/
-	__FLOG_DECLARATION_MEMBER_MUTABLE;
 	};
 	
 #endif // __CMTPSVCGETREFERENCES_H__

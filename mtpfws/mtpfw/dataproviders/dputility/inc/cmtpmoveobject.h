@@ -23,7 +23,6 @@
 
 #include "rmtpframework.h"
 #include "cmtprequestprocessor.h"
-#include "mtpdebug.h"
 #include "rmtpdpsingletons.h"
 
 class CFileMan;
@@ -85,10 +84,7 @@ private:
 	CPeriodic*						iTimer;
 	HBufC*								iNewFileName;
 	TBool									iIsFolder;
-	/**
-    FLOGGER debug trace member variable.
-    */
-    __FLOG_DECLARATION_MEMBER_MUTABLE;
+	TBool                                   iIsHidden;
 	};
 	
 #endif

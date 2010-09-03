@@ -19,12 +19,16 @@
 
 #include <ecom/implementationproxy.h>
 
+#include "mtpdebug.h"
 #include "cptpiptransport.h"
 #include "cptpipconnection.h"
 #include "mmtpconnectionmgr.h"
 #include "ptpippanic.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cptpiptransportTraces.h"
+#endif
 
-__FLOG_STMT(_LIT8(KComponent,"PTPIPTransport");)
 
 /**
 PTPIP transport plug-in factory method.
@@ -33,15 +37,18 @@ PTPIP transport plug-in factory method.
 */
 TAny* CPTPIPTransport::NewL(TAny* aParameter)
 	{
+	OstTraceFunctionEntry0( CPTPIPTRANSPORT_NEWL_ENTRY );
 	if ( aParameter != NULL )
 		{
-		User::Leave(KErrArgument);
+        LEAVEIFERROR(KErrArgument, 
+                        OstTrace0( TRACE_ERROR, CPTPIPTRANSPORT_NEWL, "Error argument" ));
 		}
 
 	CPTPIPTransport* self = new (ELeave) CPTPIPTransport;
 	CleanupStack::PushL(self);
 	self->ConstructL();
 	CleanupStack::Pop(self);
+	OstTraceFunctionExit0( CPTPIPTRANSPORT_NEWL_EXIT );
 	return self;
 	}
 	
@@ -52,10 +59,9 @@ Destructor
 */
 CPTPIPTransport::~CPTPIPTransport()
 	{
-    __FLOG(_L8("~Destructor - Entry"));
+    OstTraceFunctionEntry0( CPTPIPTRANSPORT_CPTPIPTRANSPORT_ENTRY );
     delete iConnection;
-    __FLOG(_L8("~Destructor - Exit"));
-    __FLOG_CLOSE;
+	OstTraceFunctionExit0( CPTPIPTRANSPORT_CPTPIPTRANSPORT_EXIT );
 	}
 
 /**
@@ -63,10 +69,9 @@ Second phase constructor.
 */
 void CPTPIPTransport::ConstructL()
 	{
-	__FLOG_OPEN(KMTPSubsystem, KComponent);
-	__FLOG(_L8("ConstructL - Entry"));
-	__FLOG(_L8("PTPIP MTP Device class plug-in loaded."));    
-	__FLOG(_L8("ConstructL - Exit"));	
+	OstTraceFunctionEntry0( CPTPIPTRANSPORT_CONSTRUCTL_ENTRY );
+	OstTrace0( TRACE_NORMAL, CPTPIPTRANSPORT_CONSTRUCTL, "PTPIP MTP Device class plug-in loaded." );
+	OstTraceFunctionExit0( CPTPIPTRANSPORT_CONSTRUCTL_EXIT );
 	}
 
 /**
@@ -74,7 +79,9 @@ Constructor
 */
 CPTPIPTransport::CPTPIPTransport()
 	{
+	OstTraceFunctionEntry0( DUP1_CPTPIPTRANSPORT_CPTPIPTRANSPORT_ENTRY );
 	// Do nothing.
+	OstTraceFunctionExit0( DUP1_CPTPIPTRANSPORT_CPTPIPTRANSPORT_EXIT );
 	}
 	
 /**
@@ -82,11 +89,12 @@ Starts the Transport. Creates the connection object which controls the TCP/IP so
 */
 void CPTPIPTransport::StartL(MMTPConnectionMgr& aConnectionMgr)
 	{
-    __FLOG(_L8("CPTPIPTransport::StartL - Entry"));
+    OstTraceFunctionEntry0( CPTPIPTRANSPORT_STARTL_ENTRY );
+    
     __ASSERT_ALWAYS(!iConnection, Panic(EPTPIPConnectionAlreadyExist));
     iConnection = CPTPIPConnection::NewL(aConnectionMgr);
     aConnectionMgr.ConnectionOpenedL(*iConnection);
-    __FLOG(_L8("CPTPIPTransport::StartL - Exit"));
+	OstTraceFunctionExit0( CPTPIPTRANSPORT_STARTL_EXIT );
 	}
 
 /**
@@ -94,7 +102,7 @@ Stops the transport. Deletes the connection object controlling the TCP/IP socket
 */
 void CPTPIPTransport::Stop(MMTPConnectionMgr& aConnectionMgr)
 	{
-	__FLOG(_L8("Stop - Entry"));
+	OstTraceFunctionEntry0( CPTPIPTRANSPORT_STOP_ENTRY );
     if(iConnection)
 	    {
 	    // Check that we did not earlier close the connection due to some
@@ -107,7 +115,7 @@ void CPTPIPTransport::Stop(MMTPConnectionMgr& aConnectionMgr)
 	    iConnection = NULL;
 	    }
 	
-	__FLOG(_L8("Stop - Exit"));
+	OstTraceFunctionExit0( CPTPIPTRANSPORT_STOP_EXIT );
 	}
 
 /**
@@ -115,8 +123,8 @@ Nothing to do in mode change.
 */
 void CPTPIPTransport::ModeChanged(TMTPOperationalMode /*aMode*/)
 	{
-	__FLOG(_L8("ModeChanged - Entry"));
-	__FLOG(_L8("ModeChanged - Exit"));
+	OstTraceFunctionEntry0( CPTPIPTRANSPORT_MODECHANGED_ENTRY );
+	OstTraceFunctionExit0( CPTPIPTRANSPORT_MODECHANGED_EXIT );
 	}
 
 /**
@@ -124,8 +132,8 @@ No Extended Interface.
 */
 TAny* CPTPIPTransport::GetExtendedInterface(TUid /*aInterfaceUid*/)
 	{
-	__FLOG(_L8("GetExtendedInterface - Entry"));
-	__FLOG(_L8("GetExtendedInterface - Exit"));	
+	OstTraceFunctionEntry0( CPTPIPTRANSPORT_GETEXTENDEDINTERFACE_ENTRY );
+	OstTraceFunctionExit0( CPTPIPTRANSPORT_GETEXTENDEDINTERFACE_EXIT );
 	return 0;
 	}
 
@@ -144,7 +152,9 @@ PTPIP transport implementation table.
 */
 EXPORT_C const TImplementationProxy* ImplementationGroupProxy(TInt& aTableCount)
     {
+    OstTraceFunctionEntry0( _IMPLEMENTATIONGROUPPROXY_ENTRY );
     aTableCount = sizeof(ImplementationTable) / sizeof(TImplementationProxy);
+    OstTraceFunctionExit0( _IMPLEMENTATIONGROUPPROXY_EXIT );
     return ImplementationTable;
     }
 
@@ -153,6 +163,8 @@ Dummy dll entry point.
 */
 TBool E32Dll()
     {
+    OstTraceFunctionEntry0( _E32DLL_ENTRY );
+    OstTraceFunctionExit0( _E32DLL_EXIT );
     return ETrue;
     }
 

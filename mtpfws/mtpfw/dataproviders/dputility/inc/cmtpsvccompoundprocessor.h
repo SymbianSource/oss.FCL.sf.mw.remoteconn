@@ -125,10 +125,6 @@ private:
 	TUint32                      iLastSessionID; // Last valid session id
 	TBool                        iIsCommited; // Is received ObjectInfo or ObjectPropList commited
 	TBool                        iIsRollBackHandlerObject; // Roll back handle which has been insert in handler db
-	/**
-	FLOGGER debug trace member variable.
-	*/
-	__FLOG_DECLARATION_MEMBER_MUTABLE;
 	};
 
 #endif // __CMTPSVCCOMPOUNDPROCESSOR_H__

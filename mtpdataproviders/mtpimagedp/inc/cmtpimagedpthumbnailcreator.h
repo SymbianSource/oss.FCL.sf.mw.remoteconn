@@ -32,9 +32,6 @@
 #include <bitmaptransforms.h>
 
 class CMTPTypeOpaqueData;
-
-#include "mtpdebug.h"
-
 class CMTPImageDataProvider;
 
 #define MTPTHUMBSCALING
@@ -106,10 +103,6 @@ private:
     void ConstructL();
 
 private:
-    /**
-    FLOGGER debug trace member variable.
-    **/
-    __FLOG_DECLARATION_MEMBER_MUTABLE;
     
     enum{
         EIdle,

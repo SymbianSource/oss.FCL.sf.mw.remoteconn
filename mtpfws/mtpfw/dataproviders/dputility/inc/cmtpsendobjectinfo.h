@@ -27,7 +27,6 @@
 #include "cmtprequestprocessor.h"
 #include "rmtpdpsingletons.h"
 #include "rmtpframework.h"
-#include "mtpdebug.h"
 
 class CMTPTypeFile;
 class CMTPTypeObjectInfo;
@@ -102,11 +101,6 @@ private:
         
 private: // Owned
 
-    /**
-    FLOGGER debug trace member variable.
-    */
-    __FLOG_DECLARATION_MEMBER_MUTABLE;
-
     CMTPTypeFile*           iFileReceived;
     CMTPTypeObjectInfo*     iObjectInfo;
     CMTPTypeObjectPropList* iObjectPropList;
@@ -123,6 +117,7 @@ private: // Owned
     TBool                   iIsFolder;
     TMTPTypeNull            iNullObject;
     TUint16                 iProtectionStatus;
+    TUint16                 iHiddenStatus;
     TUint32                 iPreviousTransactionID;
     RMTPDpSingletons		iDpSingletons;
     TFileName				iName;

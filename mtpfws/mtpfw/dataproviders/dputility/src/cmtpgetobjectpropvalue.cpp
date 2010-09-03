@@ -27,6 +27,12 @@
 #include "cmtpgetobjectpropvalue.h"
 #include "mtpdpconst.h"
 #include "mtpdppanic.h"
+#include "mtpdebug.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpgetobjectpropvalueTraces.h"
+#endif
+
 
 
 /**
@@ -124,8 +130,10 @@ void CMTPGetObjectPropValue::ServiceL()
 	
 	TUint32 handle = Request().Uint32(TMTPTypeRequest::ERequestParameter1);
 	iFramework.ObjectMgr().ObjectL(TMTPTypeUint32(handle), *iObjMeta);
-	User::LeaveIfError(iRfs.Entry(iObjMeta->DesC(CMTPObjectMetaData::ESuid), iFileEntry));
-	
+	LEAVEIFERROR(iRfs.Entry(iObjMeta->DesC(CMTPObjectMetaData::ESuid), iFileEntry),
+	        OstTraceExt1(TRACE_ERROR, CMTPGETOBJECTPROPVALUE_SERVICEL, 
+	                "can't get entry details for %S!", iObjMeta->DesC(CMTPObjectMetaData::ESuid)));
+
 	TUint32 propCode = Request().Uint32(TMTPTypeRequest::ERequestParameter2);
 	switch(propCode)
 		{
@@ -165,7 +173,11 @@ void CMTPGetObjectPropValue::ServiceL()
 		case EMTPObjectPropCodeNonConsumable:
 			ServiceNonConsumableL();
 			break;
+		case EMTPObjectPropCodeHidden:
+		    ServiceHiddenL();
+		    break;
 		default:
+		    OstTrace1(TRACE_ERROR, DUP1_CMTPGETOBJECTPROPVALUE_SERVICEL, "Invalid property code %d", propCode );
 		    User::Leave( KErrNotSupported );
 			break;
 		}	
@@ -265,6 +277,19 @@ void CMTPGetObjectPropValue::ServiceNonConsumableL()
 	SendDataL(iMTPTypeUint8);
 	}
 
+void CMTPGetObjectPropValue::ServiceHiddenL()
+    {
+    TBool isHidden = iFileEntry.IsHidden();
+    if ( isHidden )
+        {
+        iMTPTypeUint16.Set(EMTPHidden);
+        }
+    else
+        {
+        iMTPTypeUint16.Set(EMTPVisible);
+        } 
+    SendDataL(iMTPTypeUint16);
+    }
 
 
 	

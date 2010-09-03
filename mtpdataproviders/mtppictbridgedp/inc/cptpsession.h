@@ -209,10 +209,6 @@ private: 	// Data
 	RMessage2    iCancelMsg;
     TFileName    iReceivedFile;
     CPtpTimer*   iTimerP;  // owned
-    /**
-    FLOGGER debug trace member variable.
-    */
-    __FLOG_DECLARATION_MEMBER_MUTABLE;
 	};
 
 #endif // PTPSESSION_H

@@ -29,9 +29,13 @@
 #include "cmtpgetnumobjects.h"
 #include "mtpdevicedpconst.h"
 #include "mtpdevdppanic.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpgetnumobjectsTraces.h"
+#endif
+
 
 // Class constants.
-__FLOG_STMT(_LIT8(KComponent,"GetNumObjects");)
 static const TInt KMTPGetObjectNumTimeOut(1);
 
 /**
@@ -67,7 +71,6 @@ CMTPGetNumObjects::~CMTPGetNumObjects()
 	{	
 	iDevDpSingletons.Close();
     iSingletons.Close();
-    __FLOG_CLOSE;
 	}
 /**
 Standard c++ constructor
@@ -83,7 +86,6 @@ Second phase constructor.
 */
 void CMTPGetNumObjects::ConstructL()
     {
-	__FLOG_OPEN(KMTPSubsystem, KComponent);
     iSingletons.OpenL();
     iDevDpSingletons.OpenL(iFramework);
     }
@@ -122,8 +124,9 @@ GetNumObjects request handler
 */	
 void CMTPGetNumObjects::ServiceL()
 	{
-    __FLOG(_L8("ServiceL - Entry"));
-    __FLOG_VA((_L8("IsConnectMac = %d; ERequestParameter2 = %d" ), iDevDpSingletons.DeviceDataStore().IsConnectMac(), Request().Uint32(TMTPTypeRequest::ERequestParameter2)));
+    OstTraceFunctionEntry0( CMTPGETNUMOBJECTS_SERVICEL_ENTRY );
+    OstTraceExt2( TRACE_NORMAL, CMTPGETNUMOBJECTS_SERVICEL, 
+            "IsConnectMac = %d; ERequestParameter2 = %d", iDevDpSingletons.DeviceDataStore().IsConnectMac(), Request().Uint32(TMTPTypeRequest::ERequestParameter2));
     
     if(iSingletons.DpController().EnumerateState() != CMTPDataProviderController::EEnumeratedFulllyCompleted)
         {
@@ -135,15 +138,19 @@ void CMTPGetNumObjects::ServiceL()
             {
             if (iTimeoutCount++ >= KMTPGetObjectNumTimeOut)
                 {
-                __FLOG(_L8("Wait for enumeration time out, return busy."));
+                OstTrace0( TRACE_NORMAL, DUP1_CMTPGETNUMOBJECTS_SERVICEL, 
+                        "Wait for enumeration time out, return busy." );
                 SendResponseL(EMTPRespCodeDeviceBusy);
                 iTimeoutCount = 0;
+                OstTraceFunctionExit0( CMTPGETNUMOBJECTS_SERVICEL_EXIT );
                 return;
                 }
             else
                 {
-                __FLOG(_L8("Enumeration not completed, suspend request."));
+                OstTrace0( TRACE_NORMAL, DUP2_CMTPGETNUMOBJECTS_SERVICEL, 
+                        "Enumeration not completed, suspend request." );
                 RegisterPendingRequest(20);
+                OstTraceFunctionExit0( DUP1_CMTPGETNUMOBJECTS_SERVICEL_EXIT );
                 return; 
                 }
             }
@@ -159,17 +166,19 @@ void CMTPGetNumObjects::ServiceL()
         HandleObjectHandlesUnderMacL(*handles);
         count = handles->NumElements();
         CleanupStack::PopAndDestroy(handles);         
-        __FLOG_VA((_L8("ConnectMac and Fetch all, total count = %d"), count));        
+        OstTrace1( TRACE_NORMAL, DUP3_CMTPGETNUMOBJECTS_SERVICEL, 
+                "ConnectMac and Fetch all, total count = %d", count );           
     	SendResponseL(EMTPRespCodeOK, 1, &count); 
         }
     else
         {       
     	TMTPObjectMgrQueryParams params(Request().Uint32(TMTPTypeRequest::ERequestParameter1), Request().Uint32(TMTPTypeRequest::ERequestParameter2), Request().Uint32(TMTPTypeRequest::ERequestParameter3));
     	TUint32 count = iFramework.ObjectMgr().CountL(params);	
-        __FLOG_VA((_L8("NOT ConnectMac or NOT Fetch all, total count = %d"), count));         
-    	SendResponseL(EMTPRespCodeOK, 1, &count);
+        OstTrace1( TRACE_NORMAL, DUP4_CMTPGETNUMOBJECTS_SERVICEL, 
+                "NOT ConnectMac or NOT Fetch all, total count = %d", count );
+        SendResponseL(EMTPRespCodeOK, 1, &count);
         }
-    __FLOG(_L8("ServiceL - Exit"));	    
+	OstTraceFunctionExit0( DUP2_CMTPGETNUMOBJECTS_SERVICEL_EXIT );
 	}
 
 /**
@@ -201,7 +210,7 @@ Only expose the Folder, Image File and Viedo, Script under Drive:\Images, Drive\
 */
 void CMTPGetNumObjects::HandleObjectHandlesUnderMacL(CMTPTypeArray &aObjectHandles)
     {
-    __FLOG(_L8("HandleObjectHandlesUnderMacL - Entry"));
+    OstTraceFunctionEntry0( CMTPGETNUMOBJECTS_HANDLEOBJECTHANDLESUNDERMACL_ENTRY );
     
     CMTPTypeArray* totalHandles = CMTPTypeArray::NewLC(EMTPTypeAUINT32);
     
@@ -238,11 +247,12 @@ void CMTPGetNumObjects::HandleObjectHandlesUnderMacL(CMTPTypeArray &aObjectHandl
          iFramework.ObjectMgr().ObjectL(totalHandles->ElementUint(i),*object);
          const TDesC& suid(object->DesC(CMTPObjectMetaData::ESuid));
          
-#ifdef __FLOG_ACTIVE    
+#ifdef OST_TRACE_COMPILER_IN_USE    
         TBuf8<KMaxFileName> tmp;
         tmp.Copy(suid);
-        __FLOG_VA((_L8("HandleObjectHandlesUnderMacL - suid: %S"), &tmp));
-#endif // __FLOG_ACTIVE
+        OstTraceExt1( TRACE_NORMAL, DUP2_CMTPGETNUMOBJECTS_HANDLEOBJECTHANDLESUNDERMACL, 
+                "HandleObjectHandlesUnderMacL - suid: %s", tmp);       
+#endif // OST_TRACE_COMPILER_IN_USE
          if((KErrNotFound != suid.MatchF(KImagesFolderPre)) ||
             (KErrNotFound != suid.MatchF(KViedosFolderPre)))
             {
@@ -255,11 +265,13 @@ void CMTPGetNumObjects::HandleObjectHandlesUnderMacL(CMTPTypeArray &aObjectHandl
                 (KErrNotFound != suid.Find(KUnderline))||
                 (KErrNotFound != suid.Find(Ksemicolon)))
                 {
-                __FLOG(_L8("HandleObjectHandlesUnderMacL - Skip handle"));
+                OstTrace0( TRACE_NORMAL, CMTPGETNUMOBJECTS_HANDLEOBJECTHANDLESUNDERMACL, 
+                        "HandleObjectHandlesUnderMacL - Skip handle" );              
                 }
             else
                 {
-                __FLOG_VA((_L8("HandleObjectHandlesUnderMacL - Add handle: %x"), totalHandles->ElementUint(i)));
+                OstTrace1( TRACE_NORMAL, DUP1_CMTPGETNUMOBJECTS_HANDLEOBJECTHANDLESUNDERMACL, 
+                        "HandleObjectHandlesUnderMacL - Add handle: %x", totalHandles->ElementUint(i));
                 RArray<TUint>   tmphandles;
                 CleanupClosePushL(tmphandles);
                 tmphandles.AppendL(totalHandles->ElementUint(i));
@@ -274,14 +286,16 @@ void CMTPGetNumObjects::HandleObjectHandlesUnderMacL(CMTPTypeArray &aObjectHandl
     //get script object handles    
     GetObjectHandlesByFormatCodeL(EMTPFormatCodeScript,aObjectHandles);
     
-    __FLOG(_L8("HandleObjectHandlesUnderMacL - Exit"));    
+    OstTraceFunctionExit0( CMTPGETNUMOBJECTS_HANDLEOBJECTHANDLESUNDERMACL_EXIT );
     }
 /**
 Get Object Handles by format code
 */
 void CMTPGetNumObjects::GetObjectHandlesByFormatCodeL(TUint32 aFormatCode, CMTPTypeArray &aObjectHandles)
     {
-    __FLOG_VA((_L8("GetObjectHandlesByFormatCodeL - Entry FormatCode: %x"), aFormatCode));    
+    OstTraceFunctionEntry0( CMTPGETNUMOBJECTS_GETOBJECTHANDLESBYFORMATCODEL_ENTRY );
+    OstTrace1( TRACE_NORMAL, CMTPGETNUMOBJECTS_GETOBJECTHANDLESBYFORMATCODEL, 
+            "FormatCode: %x",  aFormatCode); 
     RMTPObjectMgrQueryContext   context;
     RArray<TUint>               handles;   
     CleanupClosePushL(context);
@@ -295,6 +309,6 @@ void CMTPGetNumObjects::GetObjectHandlesByFormatCodeL(TUint32 aFormatCode, CMTPT
     while (!context.QueryComplete());
     CleanupStack::PopAndDestroy(&context);
     CleanupStack::PopAndDestroy(&handles);
-    __FLOG(_L8("GetObjectHandlesByFormatCode - Exit"));    
+    OstTraceFunctionExit0( CMTPGETNUMOBJECTS_GETOBJECTHANDLESBYFORMATCODEL_EXIT );
     }
 

@@ -23,7 +23,6 @@
 #define CMTPGETSERVICEINFO_H_
 
 #include "cmtprequestprocessor.h"
-#include "mtpdebug.h"
 #include "rmtpdevicedpsingletons.h"
 #include "rmtpframework.h"
 #include "cmtpserviceinfo.h"
@@ -67,11 +66,6 @@ private:
     
 private: // Owned.
 
-    /**
-    FLOGGER debug trace member variable.
-    */
-    __FLOG_DECLARATION_MEMBER_MUTABLE;
-    
     /**
     The DeviceInfo dataset buffer.
     */

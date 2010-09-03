@@ -23,8 +23,11 @@
 #include "cmtpimagedpsetobjectreferences.h"
 #include "mtpimagedputilits.h"
 #include "cmtpimagedp.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpimagedpsetobjectreferencesTraces.h"
+#endif
 
-__FLOG_STMT(_LIT8(KComponent,"SetObjectReferences");)
 
 /**
 Two-phase construction method
@@ -47,10 +50,9 @@ Destructor
 */    
 CMTPImageDpSetObjectReferences::~CMTPImageDpSetObjectReferences()
     {
-    __FLOG(_L8(">> CMTPImageDpSetObjectReferences::~CMTPImageDpSetObjectReferences"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPSETOBJECTREFERENCES_CMTPIMAGEDPSETOBJECTREFERENCES_DES_ENTRY );
     delete iReferences;
-    __FLOG(_L8("<< CMTPImageDpSetObjectReferences::~CMTPImageDpSetObjectReferences"));
-    __FLOG_CLOSE;
+    OstTraceFunctionExit0( CMTPIMAGEDPSETOBJECTREFERENCES_CMTPIMAGEDPSETOBJECTREFERENCES_DES_EXIT );
     }
 
 /**
@@ -66,21 +68,21 @@ Second phase constructor
 */
 void CMTPImageDpSetObjectReferences::ConstructL()
     {
-    __FLOG_OPEN(KMTPSubsystem, KComponent);
-    __FLOG(_L8(">> CMTPImageDpSetObjectReferences::ConstructL"));
-    __FLOG(_L8("<< CMTPImageDpSetObjectReferences::ConstructL"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPSETOBJECTREFERENCES_CONSTRUCTL_ENTRY );
+    OstTraceFunctionExit0( CMTPIMAGEDPSETOBJECTREFERENCES_CONSTRUCTL_EXIT );
     }
 
 TMTPResponseCode CMTPImageDpSetObjectReferences::CheckRequestL()
     {
-    __FLOG(_L8(">> CMTPImageDpSetObjectReferences::CheckRequestL"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPSETOBJECTREFERENCES_CHECKREQUESTL_ENTRY );
     
     TUint32 objectHandle = Request().Uint32(TMTPTypeRequest::ERequestParameter1);
     CMTPObjectMetaData* objectInfo = CMTPObjectMetaData::NewLC();    
     TMTPResponseCode responseCode = MTPImageDpUtilits::VerifyObjectHandleL(iFramework, objectHandle, *objectInfo);      
     CleanupStack::PopAndDestroy(objectInfo);
-    __FLOG_VA((_L8("CheckRequestL - Exit with responseCode = 0x%04X"), responseCode));
-    __FLOG(_L8("<< CMTPImageDpSetObjectReferences::CheckRequestL"));
+    OstTrace1( TRACE_NORMAL, CMTPIMAGEDPSETOBJECTREFERENCES_CHECKREQUESTL, 
+            "Exit with responseCode = 0x%04X", responseCode );
+    OstTraceFunctionExit0( CMTPIMAGEDPSETOBJECTREFERENCES_CHECKREQUESTL_EXIT );
     return responseCode;
     }
 
@@ -110,12 +112,12 @@ GetReferences request handler
 */    
 void CMTPImageDpSetObjectReferences::ServiceL()
     {
-    __FLOG(_L8(">> CMTPImageDpCopyObject::ServiceL"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPSETOBJECTREFERENCES_SERVICEL_ENTRY );
     delete iReferences;
     iReferences = NULL;
     iReferences = CMTPTypeArray::NewL(EMTPTypeAUINT32);
     ReceiveDataL(*iReferences);
-    __FLOG(_L8("<< CMTPImageDpCopyObject::ServiceL"));
+    OstTraceFunctionExit0( CMTPIMAGEDPSETOBJECTREFERENCES_SERVICEL_EXIT );
     }
 
 TBool CMTPImageDpSetObjectReferences::HasDataphase() const

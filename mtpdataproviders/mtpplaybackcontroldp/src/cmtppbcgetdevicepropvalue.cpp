@@ -28,10 +28,11 @@
 #include "cmtpplaybackproperty.h"
 #include "cmtpplaybackcommand.h"
 #include "mtpplaybackcontrolpanic.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtppbcgetdevicepropvalueTraces.h"
+#endif
 
-
-// Class constants.
-__FLOG_STMT(_LIT8(KComponent,"GetPlaybackDevicePropValue");)
 
 /**
 Two-phase constructor.
@@ -44,7 +45,9 @@ MMTPRequestProcessor* CMTPPbcGetDevicePropValue::NewL(MMTPDataProviderFramework&
                                                    MMTPConnection& aConnection, 
                                                    CMTPPlaybackControlDataProvider& aDataProvider)
     {
+    OstTraceFunctionEntry0( CMTPPBCGETDEVICEPROPVALUE_NEWL_ENTRY );
     CMTPPbcGetDevicePropValue* self = new (ELeave) CMTPPbcGetDevicePropValue(aFramework, aConnection, aDataProvider);
+    OstTraceFunctionExit0( CMTPPBCGETDEVICEPROPVALUE_NEWL_EXIT );
     return self;
     }
 
@@ -53,10 +56,9 @@ Destructor.
 */    
 CMTPPbcGetDevicePropValue::~CMTPPbcGetDevicePropValue()
     {
-    __FLOG(_L8("~CMTPPbcGetDevicePropValue - Entry"));
+    OstTraceFunctionEntry0( CMTPPBCGETDEVICEPROPVALUE_CMTPPBCGETDEVICEPROPVALUE_ENTRY );
     delete iPbCmd;
-    __FLOG(_L8("~CMTPPbcGetDevicePropValue - Exit"));
-    __FLOG_CLOSE;
+    OstTraceFunctionExit0( CMTPPBCGETDEVICEPROPVALUE_CMTPPBCGETDEVICEPROPVALUE_EXIT );
     }
 
 /**
@@ -68,8 +70,8 @@ CMTPPbcGetDevicePropValue::CMTPPbcGetDevicePropValue(MMTPDataProviderFramework& 
     CMTPRequestProcessor(aFramework, aConnection, 0, NULL),
     iPlaybackControlDp(aDataProvider)
     {
-    //Open the log system
-    __FLOG_OPEN(KMTPSubsystem, KComponent);
+    OstTraceFunctionEntry0( DUP1_CMTPPBCGETDEVICEPROPVALUE_CMTPPBCGETDEVICEPROPVALUE_ENTRY );
+    OstTraceFunctionExit0( DUP1_CMTPPBCGETDEVICEPROPVALUE_CMTPPBCGETDEVICEPROPVALUE_EXIT );
     }
 
 /**
@@ -78,7 +80,7 @@ CMTPPbcGetDevicePropValue request validator.
 */
 TMTPResponseCode CMTPPbcGetDevicePropValue::CheckRequestL()
     {
-    __FLOG(_L8("CheckRequestL - Entry"));
+    OstTraceFunctionEntry0( CMTPPBCGETDEVICEPROPVALUE_CHECKREQUESTL_ENTRY );
     TMTPResponseCode respCode = CMTPRequestProcessor::CheckRequestL();
     if(respCode == EMTPRespCodeOK)
         {
@@ -95,7 +97,7 @@ TMTPResponseCode CMTPPbcGetDevicePropValue::CheckRequestL()
                 }
             }
         }
-    __FLOG(_L8("CheckRequestL - Exit"));
+    OstTraceFunctionExit0( CMTPPBCGETDEVICEPROPVALUE_CHECKREQUESTL_EXIT );
     return respCode;
     }
 
@@ -104,7 +106,7 @@ CMTPPbcGetDevicePropValue request handler.
 */   
 void CMTPPbcGetDevicePropValue::ServiceL()
     {
-    __FLOG(_L8("ServiceL - Entry"));
+    OstTraceFunctionEntry0( CMTPPBCGETDEVICEPROPVALUE_SERVICEL_ENTRY );
     //Destroy the previous playback command.
     delete iPbCmd;
     iPbCmd = NULL;
@@ -135,13 +137,14 @@ void CMTPPbcGetDevicePropValue::ServiceL()
         {
         SendResponseL(EMTPRespCodeParameterNotSupported);
         }
-    __FLOG(_L8("ServiceL - Exit"));
+    OstTraceFunctionExit0( CMTPPBCGETDEVICEPROPVALUE_SERVICEL_EXIT );
     }
 
 void CMTPPbcGetDevicePropValue::HandlePlaybackCommandCompleteL(CMTPPlaybackCommand* aCmd, TInt aErr)
     {
-    __FLOG(_L8("HandlePlaybackCommandCompleteL - Entry"));
-    __FLOG_1(_L8("aErr %d"), aErr);
+    OstTraceFunctionEntry0( CMTPPBCGETDEVICEPROPVALUE_HANDLEPLAYBACKCOMMANDCOMPLETEL_ENTRY );
+    OstTrace1( TRACE_NORMAL, CMTPPBCGETDEVICEPROPVALUE_HANDLEPLAYBACKCOMMANDCOMPLETEL, "aErr %d", aErr );
+    
 
     //Handle the error
     TBool useDefault = EFalse;
@@ -151,9 +154,9 @@ void CMTPPbcGetDevicePropValue::HandlePlaybackCommandCompleteL(CMTPPlaybackComma
             {
             __ASSERT_DEBUG((aCmd != NULL), Panic(EMTPPBDataNullErr));
             __ASSERT_DEBUG((aCmd->PlaybackCommand() == iPbCmd->PlaybackCommand()), Panic(EMTPPBArgumentErr));
-            __ASSERT_ALWAYS((aCmd != NULL), User::Leave(KErrArgument));
-            __ASSERT_ALWAYS((aCmd->PlaybackCommand() == iPbCmd->PlaybackCommand()), User::Leave(KErrArgument));
-            __FLOG_1(_L8("aCmd %d"), aCmd->PlaybackCommand());
+            __ASSERT_ALWAYS_OST((aCmd != NULL), OstTrace0( TRACE_ERROR, DUP2_CMTPPBCGETDEVICEPROPVALUE_HANDLEPLAYBACKCOMMANDCOMPLETEL, "Error argument" ), User::Leave(KErrArgument));
+            __ASSERT_ALWAYS_OST((aCmd->PlaybackCommand() == iPbCmd->PlaybackCommand()), OstTrace0( TRACE_ERROR, DUP3_CMTPPBCGETDEVICEPROPVALUE_HANDLEPLAYBACKCOMMANDCOMPLETEL, "Error argument" ), User::Leave(KErrArgument));
+            OstTrace1( TRACE_NORMAL, DUP1_CMTPPBCGETDEVICEPROPVALUE_HANDLEPLAYBACKCOMMANDCOMPLETEL, "aCmd %d", aCmd->PlaybackCommand() );
             }
             break;
         case KPlaybackErrContextInvalid:
@@ -166,11 +169,13 @@ void CMTPPbcGetDevicePropValue::HandlePlaybackCommandCompleteL(CMTPPlaybackComma
             iPlaybackControlDp.RequestToResetPbCtrl();
             SendResponseL(EMTPRespCodeDeviceBusy);
             }
+            OstTraceFunctionExit0( CMTPPBCGETDEVICEPROPVALUE_HANDLEPLAYBACKCOMMANDCOMPLETEL_EXIT );
             return;
         default:
             {
             SendResponseL(EMTPRespCodeDeviceBusy);
             }
+            OstTraceFunctionExit0( DUP1_CMTPPBCGETDEVICEPROPVALUE_HANDLEPLAYBACKCOMMANDCOMPLETEL_EXIT );
             return;
         }
 
@@ -237,6 +242,6 @@ void CMTPPbcGetDevicePropValue::HandlePlaybackCommandCompleteL(CMTPPlaybackComma
         SendResponseL(EMTPRespCodeDevicePropNotSupported);
         break;             
         }
-    __FLOG(_L8("HandlePlaybackCommandCompleteL - Exit"));
+    OstTraceFunctionExit0( DUP2_CMTPPBCGETDEVICEPROPVALUE_HANDLEPLAYBACKCOMMANDCOMPLETEL_EXIT );
     }
 

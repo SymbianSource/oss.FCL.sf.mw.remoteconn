@@ -27,7 +27,6 @@
 #include <mtp/tmtptyperesponse.h>
 #include <mtp/tmtptypenull.h>
 #include "cmtprequestchecker.h"
-#include "mtpdebug.h"
 
 class MMTPConnection;
 class TMTPTypeRequest;
@@ -194,10 +193,6 @@ private:
 	TMTPResponseCode 				iResponseCode;		// contains response from CheckRequestL call
 	RBuf8 							iNullBuffer; 		// buffer to receive data from discarded data phase
 	TMTPTypeNull 					iNull;
-	/**
-    FLOGGER debug trace member variable.
-    */
-    __FLOG_DECLARATION_MEMBER_MUTABLE;
 	};
 	
 #endif // __CMTPREQUESTPROCESSOR_H__

@@ -43,7 +43,6 @@ MW_LAYER_SYSTEMINCLUDE
 #endif  //NO101APPDEPFIXES
 
 USERINCLUDE   ../inc ../hidremconbearer/inc
-USERINCLUDE   ../../../inc
 
 LIBRARY       euser.lib
 LIBRARY       ecom.lib

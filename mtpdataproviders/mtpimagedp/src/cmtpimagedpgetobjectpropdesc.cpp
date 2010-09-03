@@ -31,8 +31,11 @@
 #include "mtpimagedpconst.h"
 #include "mtpimagedppanic.h"
 #include "cmtpimagedp.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpimagedpgetobjectpropdescTraces.h"
+#endif
 
-__FLOG_STMT(_LIT8(KComponent,"GetObjectPropDesc");)
 
 _LIT(KMtpObjDescObjFileName, "[a-zA-Z!#\\$%&'\\(\\)\\-0-9@\\^_\\`\\{\\}\\~][a-zA-Z!#\\$%&'\\(\\)\\-0-9@\\^_\\`\\{\\}\\~ ]{0, 7}\\.[[a-zA-Z!#\\$%&'\\(\\)\\-0-9@\\^_\\`\\{\\}\\~][a-zA-Z!#\\$%&'\\(\\)\\-0-9@\\^_\\`\\{\\}\\~ ]{0, 2}]?");
 
@@ -60,11 +63,9 @@ Destructor
 */		
 CMTPImageDpGetObjectPropDesc::~CMTPImageDpGetObjectPropDesc()
     {	
-    __FLOG(_L8(">> ~CMTPImageDpGetObjectPropDesc"));
-    __FLOG(_L8(">> CMTPImageDpCopyObject::~CMTPImageDpCopyObject"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPGETOBJECTPROPDESC_CMTPIMAGEDPGETOBJECTPROPDESC_DES_ENTRY );
     delete iObjectProperty;
-    __FLOG(_L8("<< ~CMTPImageDpGetObjectPropDesc"));
-    __FLOG_CLOSE;
+    OstTraceFunctionExit0( CMTPIMAGEDPGETOBJECTPROPDESC_CMTPIMAGEDPGETOBJECTPROPDESC_DES_EXIT );
     }
 
 /**
@@ -75,7 +76,6 @@ CMTPImageDpGetObjectPropDesc::CMTPImageDpGetObjectPropDesc(
                                     MMTPConnection& aConnection)
     :CMTPRequestProcessor(aFramework, aConnection, 0, NULL)
     {
-    __FLOG_OPEN(KMTPSubsystem, KComponent);
     }
 
 /**
@@ -83,7 +83,7 @@ check property code
 */
 TMTPResponseCode CMTPImageDpGetObjectPropDesc::CheckRequestL()
     {
-    __FLOG(_L8(">> CMTPImageDpGetObjectPropDesc::CheckRequestL"));
+    OstTraceFunctionEntry0( DUP1_CMTPIMAGEDPGETOBJECTPROPDESC_CHECKREQUESTL_ENTRY );
     TMTPResponseCode response = CMTPRequestProcessor::CheckRequestL(); 
     TUint32 propCode = Request().Uint32(TMTPTypeRequest::ERequestParameter1);
     TUint32 formatCode = Request().Uint32(TMTPTypeRequest::ERequestParameter2);
@@ -102,7 +102,7 @@ TMTPResponseCode CMTPImageDpGetObjectPropDesc::CheckRequestL()
         response = EMTPRespCodeInvalidObjectPropCode;
         }
 
-    __FLOG(_L8("<< CMTPImageDpGetObjectPropDesc::CheckRequestL"));
+    OstTraceFunctionExit0( DUP1_CMTPIMAGEDPGETOBJECTPROPDESC_CHECKREQUESTL_EXIT );
     return response;	
     }
 
@@ -112,11 +112,13 @@ GetObjectPropDesc request handler
 */	
 void CMTPImageDpGetObjectPropDesc::ServiceL()
     {
+    OstTraceFunctionEntry0( CMTPIMAGEDPGETOBJECTPROPDESC_SERVICEL_ENTRY );
     delete iObjectProperty;
     iObjectProperty = NULL;	
     
-    TUint32 propCode = Request().Uint32(TMTPTypeRequest::ERequestParameter1);
-    __FLOG_VA((_L8(">> CMTPImageDpGetObjectPropDesc::ServiceL propcode %d"), propCode));	    
+    TUint32 propCode = Request().Uint32(TMTPTypeRequest::ERequestParameter1);	
+    OstTrace1( TRACE_NORMAL, CMTPIMAGEDPGETOBJECTPROPDESC_SERVICEL, "propcode %d", propCode );
+    
     switch(propCode)
         {
         case EMTPObjectPropCodeStorageID:
@@ -175,10 +177,14 @@ void CMTPImageDpGetObjectPropDesc::ServiceL()
             break;
         case EMTPObjectPropCodeNonConsumable:
             ServiceNonConsumableL();
-            break;            
+            break;
+        case EMTPObjectPropCodeHidden:
+            ServiceHiddenL();
+            break;
         default:
             {
             //Leave 
+            OstTrace1( TRACE_ERROR, DUP1_CMTPIMAGEDPGETOBJECTPROPDESC_SERVICEL, "Invalid property code %d", propCode );
             User::Leave(KErrGeneral);
             }
             break;
@@ -189,7 +195,7 @@ void CMTPImageDpGetObjectPropDesc::ServiceL()
     iObjectProperty->SetUint32L(CMTPTypeObjectPropDesc::EGroupCode, GetPropertyGroupNumber(propCode));
     SendDataL(*iObjectProperty);
 
-    __FLOG(_L8("<< CMTPImageDpGetObjectPropDesc::ServiceL"));
+    OstTraceFunctionExit0( CMTPIMAGEDPGETOBJECTPROPDESC_SERVICEL_EXIT );
     }
 
 
@@ -432,6 +438,21 @@ void CMTPImageDpGetObjectPropDesc::ServiceNonConsumableL()
         expectedForm->AppendSupportedValueL(data);
         }   
     iObjectProperty = CMTPTypeObjectPropDesc::NewL(EMTPObjectPropCodeNonConsumable, *expectedForm);     
+    CleanupStack::PopAndDestroy(expectedForm);
+    }
+	
+void CMTPImageDpGetObjectPropDesc::ServiceHiddenL()
+    {
+    CMTPTypeObjectPropDescEnumerationForm* expectedForm = CMTPTypeObjectPropDescEnumerationForm::NewL(EMTPTypeUINT16);
+    CleanupStack::PushL(expectedForm);
+    TUint16 values[] = {EMTPVisible,EMTPHidden};
+    TUint   numValues((sizeof(values) / sizeof(values[0])));
+    for (TUint i = 0; i < numValues; i++)
+        {
+        TMTPTypeUint16 data(values[i]);
+        expectedForm->AppendSupportedValueL(data);
+        }   
+    iObjectProperty = CMTPTypeObjectPropDesc::NewL(EMTPObjectPropCodeHidden, *expectedForm);
     CleanupStack::PopAndDestroy(expectedForm);
     }
 

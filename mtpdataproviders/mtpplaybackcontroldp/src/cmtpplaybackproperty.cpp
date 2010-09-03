@@ -21,9 +21,11 @@
 #include "cmtpplaybackmap.h"
 #include "cmtpplaybackproperty.h"
 #include "mtpplaybackcontrolpanic.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpplaybackpropertyTraces.h"
+#endif
 
-// Class constants.
-__FLOG_STMT(_LIT8(KComponent,"MTPPlaybackProperty");)
 
 const TInt32 KMTPDefaultPlaybackRate = 0;
 
@@ -44,10 +46,12 @@ Two-phase constructor.
 */  
 CMTPPlaybackProperty* CMTPPlaybackProperty::NewL()
     {
+    OstTraceFunctionEntry0( CMTPPLAYBACKPROPERTY_NEWL_ENTRY );
     CMTPPlaybackProperty* self = new (ELeave) CMTPPlaybackProperty();
     CleanupStack::PushL(self);
     self->ConstructL();
     CleanupStack::Pop(self);
+    OstTraceFunctionExit0( CMTPPLAYBACKPROPERTY_NEWL_EXIT );
     return self;
     }
 
@@ -56,10 +60,9 @@ Destructor.
 */    
 CMTPPlaybackProperty::~CMTPPlaybackProperty()
     {    
-    __FLOG(_L8("~CMTPPlaybackProperty - Entry"));
+    OstTraceFunctionEntry0( CMTPPLAYBACKPROPERTY_CMTPPLAYBACKPROPERTY_ENTRY );
     delete iPlaybackVolumeData;
-    __FLOG(_L8("~CMTPPlaybackProperty - Exit"));
-    __FLOG_CLOSE;
+    OstTraceFunctionExit0( CMTPPLAYBACKPROPERTY_CMTPPLAYBACKPROPERTY_EXIT );
     }
 
 /**
@@ -67,6 +70,8 @@ Constructor.
 */    
 CMTPPlaybackProperty::CMTPPlaybackProperty()
     {    
+    OstTraceFunctionEntry0( DUP1_CMTPPLAYBACKPROPERTY_CMTPPLAYBACKPROPERTY_ENTRY );
+    OstTraceFunctionExit0( DUP1_CMTPPLAYBACKPROPERTY_CMTPPLAYBACKPROPERTY_EXIT );
     }
     
 /**
@@ -74,24 +79,24 @@ Second-phase constructor.
 */        
 void CMTPPlaybackProperty::ConstructL()
     {
-    __FLOG_OPEN(KMTPSubsystem, KComponent);
-    __FLOG(_L8("ConstructL - Entry")); 
-    __FLOG(_L8("ConstructL - Exit")); 
+    OstTraceFunctionEntry0( CMTPPLAYBACKPROPERTY_CONSTRUCTL_ENTRY );
+    OstTraceFunctionExit0( CMTPPLAYBACKPROPERTY_CONSTRUCTL_EXIT );
     }
 
 void CMTPPlaybackProperty::GetDefaultPropertyValueL(TMTPDevicePropertyCode aProp, TInt32& aValue)
     {
-    __FLOG(_L8("GetDefaultPropertyValueL - Entry"));
+    OstTraceFunctionEntry0( CMTPPLAYBACKPROPERTY_GETDEFAULTPROPERTYVALUEL_ENTRY );
     
-    __ASSERT_ALWAYS((aProp == EMTPDevicePropCodePlaybackRate), User::Leave(KErrArgument));
+    __ASSERT_ALWAYS_OST((aProp == EMTPDevicePropCodePlaybackRate), OstTrace0( TRACE_ERROR, CMTPPLAYBACKPROPERTY_GETDEFAULTPROPERTYVALUEL, "Error argument" ), User::Leave(KErrArgument));
+
     aValue = KMTPDefaultPlaybackRate;
 
-    __FLOG(_L8("GetDefaultPropertyValueL - Exit")); 
+    OstTraceFunctionExit0( CMTPPLAYBACKPROPERTY_GETDEFAULTPROPERTYVALUEL_EXIT );
     }
 
 void CMTPPlaybackProperty::GetDefaultPropertyValueL(TMTPDevicePropertyCode aProp, TUint32& aValue)
     {
-    __FLOG(_L8("GetDefaultPropertyValueL - Entry"));
+    OstTraceFunctionEntry0( DUP1_CMTPPLAYBACKPROPERTY_GETDEFAULTPROPERTYVALUEL_ENTRY );
     switch(aProp)
         {
     case EMTPDevicePropCodeVolume:
@@ -126,13 +131,15 @@ void CMTPPlaybackProperty::GetDefaultPropertyValueL(TMTPDevicePropertyCode aProp
         break;
         
     default:
-        User::Leave(KErrArgument);   
+        LEAVEIFERROR(KErrArgument, 
+                                OstTrace0( TRACE_ERROR, DUP1_CMTPPLAYBACKPROPERTY_GETDEFAULTPROPERTYVALUEL, "Error argument" ));
         }
-    __FLOG(_L8("GetDefaultPropertyValueL - Exit"));
+    OstTraceFunctionExit0( DUP1_CMTPPLAYBACKPROPERTY_GETDEFAULTPROPERTYVALUEL_EXIT );
     }
 
 void CMTPPlaybackProperty::GetDefaultVolSet(TMTPPbDataVolume& aValue)
     {
+    OstTraceFunctionEntry0( CMTPPLAYBACKPROPERTY_GETDEFAULTVOLSET_ENTRY );
     if(iPlaybackVolumeData == NULL)
         {
         aValue.SetVolume(KMTPMaxPlaybackVolume,
@@ -145,10 +152,12 @@ void CMTPPlaybackProperty::GetDefaultVolSet(TMTPPbDataVolume& aValue)
         {
         aValue = (*iPlaybackVolumeData);
         }
+    OstTraceFunctionExit0( CMTPPLAYBACKPROPERTY_GETDEFAULTVOLSET_EXIT );
     }
 
 void CMTPPlaybackProperty::SetDefaultVolSetL(const TMTPPbDataVolume& aValue)
     {
+    OstTraceFunctionEntry0( CMTPPLAYBACKPROPERTY_SETDEFAULTVOLSETL_ENTRY );
     if(iPlaybackVolumeData == NULL)
         {
         iPlaybackVolumeData = new (ELeave) TMTPPbDataVolume(aValue);
@@ -157,11 +166,12 @@ void CMTPPlaybackProperty::SetDefaultVolSetL(const TMTPPbDataVolume& aValue)
         {
         (*iPlaybackVolumeData) = aValue;
         }
+    OstTraceFunctionExit0( CMTPPLAYBACKPROPERTY_SETDEFAULTVOLSETL_EXIT );
     }
 
 void CMTPPlaybackProperty::GetDefaultPropertyValueL(TMTPPbCtrlData& aValue)
     {
-    __FLOG(_L8("GetDefaultPropertyValueL - Entry"));
+    OstTraceFunctionEntry0( DUP2_CMTPPLAYBACKPROPERTY_GETDEFAULTPROPERTYVALUEL_ENTRY );
     __ASSERT_DEBUG((aValue.iOptCode == EMTPOpCodeResetDevicePropValue), Panic(EMTPPBArgumentErr));
     
     switch(aValue.iDevPropCode)
@@ -186,14 +196,15 @@ void CMTPPlaybackProperty::GetDefaultPropertyValueL(TMTPPbCtrlData& aValue)
         break;
         
     default:
-        User::Leave(KErrArgument);
+        LEAVEIFERROR(KErrArgument, 
+                                OstTrace0( TRACE_ERROR, DUP2_CMTPPLAYBACKPROPERTY_GETDEFAULTPROPERTYVALUEL, "Error argument" ));
         }
-    __FLOG(_L8("GetDefaultPropertyValueL - Exit"));
+    OstTraceFunctionExit0( DUP2_CMTPPLAYBACKPROPERTY_GETDEFAULTPROPERTYVALUEL_EXIT );
     }
 
 TBool CMTPPlaybackProperty::IsDefaultPropertyValueL(const TMTPPbCtrlData& aValue) const
     {
-    __FLOG(_L8("EqualToDefaultPropertyValueL - Entry"));
+    OstTraceFunctionEntry0( CMTPPLAYBACKPROPERTY_ISDEFAULTPROPERTYVALUEL_ENTRY );
     
     TInt result(EFalse);
 
@@ -255,11 +266,12 @@ TBool CMTPPlaybackProperty::IsDefaultPropertyValueL(const TMTPPbCtrlData& aValue
         break;
         
     default:
-        User::Leave(KErrArgument);
+        LEAVEIFERROR(KErrArgument, 
+                OstTrace0( TRACE_ERROR, CMTPPLAYBACKPROPERTY_ISDEFAULTPROPERTYVALUEL, "error argument" ));
         }
 
-    __FLOG(_L8("EqualToDefaultPropertyValueL - Exit"));
     
+    OstTraceFunctionExit0( CMTPPLAYBACKPROPERTY_ISDEFAULTPROPERTYVALUEL_EXIT );
     return result;
     }
 

@@ -22,7 +22,6 @@
 #define CMTPGETOBJECT_H
 
 #include "cmtprequestprocessor.h"
-#include "mtpdebug.h"
 
 class CMTPTypeFile;
 
@@ -51,11 +50,6 @@ private:
         
 private: // Owned
 
-    /**
-    FLOGGER debug trace member variable.
-    */
-    __FLOG_DECLARATION_MEMBER_MUTABLE;
-    
     CMTPTypeFile*       iFileObject;
     TMTPResponseCode    iError;
     };

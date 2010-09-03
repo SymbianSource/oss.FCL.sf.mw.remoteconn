@@ -30,8 +30,12 @@
 #include "cmtpobjectbrowser.h"
 #include "mtpdppanic.h"
 #include "cmtpobjectmgr.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpgetobjectproplistTraces.h"
+#endif
 
-__FLOG_STMT( _LIT8( KComponent,"PrxyGetObjPrpLst" ); )
+
 const TUint KInvalidDpId = 0xFF;
 
 /**
@@ -62,13 +66,13 @@ Destructor.
 */	
 CMTPGetObjectPropList::~CMTPGetObjectPropList()
 	{
+	OstTraceFunctionEntry0( CMTPGETOBJECTPROPLIST_CMTPGETOBJECTPROPLIST_ENTRY );
 	delete iObjectPropList;
 	iSingletons.Close();
 	iTargetDps.Close();
     iHandles.Close();
     delete iObjBrowser;
-    __FLOG( _L8("+/-Dtor") );
-    __FLOG_CLOSE;
+	OstTraceFunctionExit0( CMTPGETOBJECTPROPLIST_CMTPGETOBJECTPROPLIST_EXIT );
 	}
 
 /**
@@ -127,14 +131,14 @@ void CMTPGetObjectPropList::ProxySendResponseL(const TMTPTypeResponse& aResponse
 void CMTPGetObjectPropList::ProxySendResponseL(const TMTPTypeResponse& aResponse, const TMTPTypeRequest& /*aRequest*/, MMTPConnection& /*aConnection*/, TRequestStatus& aStatus)
 #endif
 	{
-    __FLOG( _L8("+ProxySendResponseL") );
+    OstTraceFunctionEntry0( CMTPGETOBJECTPROPLIST_PROXYSENDRESPONSEL_ENTRY );
     
 	__ASSERT_DEBUG((( (iRequest == &aRequest) || ( &iCurrentRequest == &aRequest ) ) && (&iConnection == &aConnection)), Panic(EMTPNotSameRequestProxy));
 	MMTPType::CopyL(aResponse, iResponse);
 	TRequestStatus* status(&aStatus);
 	User::RequestComplete(status, KErrNone);
-	
-    __FLOG( _L8("-ProxySendResponseL") );
+
+	OstTraceFunctionExit0( CMTPGETOBJECTPROPLIST_PROXYSENDRESPONSEL_EXIT );
 	}
 
 #ifdef _DEBUG		
@@ -143,8 +147,9 @@ void CMTPGetObjectPropList::ProxyTransactionCompleteL(const TMTPTypeRequest& aRe
 void CMTPGetObjectPropList::ProxyTransactionCompleteL(const TMTPTypeRequest& /*aRequest*/, MMTPConnection& /*aConnection*/)
 #endif
 	{
-    __FLOG( _L8("+ProxyTransactionCompleteL") );
-    __FLOG_1( _L8("Response code is 0x%08X,"), iResponse.Uint16(TMTPTypeResponse::EResponseCode) );
+    OstTraceFunctionEntry0( CMTPGETOBJECTPROPLIST_PROXYTRANSACTIONCOMPLETEL_ENTRY );
+    OstTrace1( TRACE_NORMAL, CMTPGETOBJECTPROPLIST_PROXYTRANSACTIONCOMPLETEL, 
+            "Response code is 0x%08X",  iResponse.Uint16(TMTPTypeResponse::EResponseCode));
     
 	__ASSERT_DEBUG((( (iRequest == &aRequest) || ( &iCurrentRequest == &aRequest ) ) && (&iConnection == &aConnection)), Panic(EMTPNotSameRequestProxy));
 	TUint16 response = iResponse.Uint16(TMTPTypeResponse::EResponseCode);
@@ -166,7 +171,7 @@ void CMTPGetObjectPropList::ProxyTransactionCompleteL(const TMTPTypeRequest& /*a
         }
     
     
-    __FLOG( _L8("-ProxyTransactionCompleteL") );
+    OstTraceFunctionExit0( CMTPGETOBJECTPROPLIST_PROXYTRANSACTIONCOMPLETEL_EXIT );
 	}	
 
 /**
@@ -175,7 +180,7 @@ one each iteration of the active object.
 */
 void CMTPGetObjectPropList::RunL()
     {
-    __FLOG( _L8("+RunL") );
+    OstTraceFunctionEntry0( CMTPGETOBJECTPROPLIST_RUNL_ENTRY );
     
     // We cannot use assertion here, because it might be completed with KErrGeneral. See ProxyTransactionCompleteL()
     
@@ -192,8 +197,8 @@ void CMTPGetObjectPropList::RunL()
         {
         SendResponseL( iResponse.Uint16( TMTPTypeResponse::EResponseCode ) );
         }
-    
-    __FLOG( _L8("-RunL") );
+
+    OstTraceFunctionExit0( CMTPGETOBJECTPROPLIST_RUNL_EXIT );
     }
 
 /**
@@ -202,8 +207,8 @@ Constructor.
 CMTPGetObjectPropList::CMTPGetObjectPropList(MMTPDataProviderFramework& aFramework, MMTPConnection& aConnection) :
     CMTPRequestProcessor(aFramework, aConnection, sizeof(KMTPGetObjectPropListPolicy)/sizeof(TMTPRequestElementInfo), KMTPGetObjectPropListPolicy)
     {
-    __FLOG_OPEN( KMTPSubsystem, KComponent );
-    __FLOG( _L8("+/-Ctor") );
+    OstTraceFunctionEntry0( DUP1_CMTPGETOBJECTPROPLIST_CMTPGETOBJECTPROPLIST_ENTRY );
+    OstTraceFunctionExit0( DUP1_CMTPGETOBJECTPROPLIST_CMTPGETOBJECTPROPLIST_EXIT );
     }
 
 /**
@@ -211,10 +216,10 @@ Second phase constructor.
 */
 void CMTPGetObjectPropList::ConstructL()
     {
-    __FLOG( _L8("+ConstructL") );
+    OstTraceFunctionEntry0( CMTPGETOBJECTPROPLIST_CONSTRUCTL_ENTRY );
     iSingletons.OpenL();
     iOwnerDp = KInvalidDpId;
-    __FLOG( _L8("-ConstructL") );
+    OstTraceFunctionExit0( CMTPGETOBJECTPROPLIST_CONSTRUCTL_EXIT );
     }
 
 /**
@@ -244,7 +249,7 @@ void CMTPGetObjectPropList::SendResponseL(TUint16 aCode)
 
 void CMTPGetObjectPropList::GetObjectHandlesL()
     {
-    __FLOG( _L8("+GetObjectHandlesL") );
+    OstTraceFunctionEntry0( CMTPGETOBJECTPROPLIST_GETOBJECTHANDLESL_ENTRY );
     
     delete iObjBrowser;
     iObjBrowser = NULL;
@@ -266,8 +271,9 @@ void CMTPGetObjectPropList::GetObjectHandlesL()
     TUint32 fmtCode = Request().Uint32( TMTPTypeRequest::ERequestParameter2 );
     TUint32 depth = Request().Uint32( TMTPTypeRequest::ERequestParameter5 );
     iObjBrowser->GoL( fmtCode, handle, depth, callback );
-    __FLOG_1( _L8("The total of object handles is %d"), iHandles.Count() );
-    
+    OstTrace1( TRACE_NORMAL, CMTPGETOBJECTPROPLIST_GETOBJECTHANDLESL, 
+            "The total of object handles is %d", iHandles.Count() );
+
     if ( 0 == iHandles.Count() )
         {
           SendDataL( *iObjectPropList );
@@ -276,13 +282,13 @@ void CMTPGetObjectPropList::GetObjectHandlesL()
         {
         Schedule( KErrNone );
         }
-    
-    __FLOG( _L8("-GetObjectHandlesL") );
+
+    OstTraceFunctionExit0( CMTPGETOBJECTPROPLIST_GETOBJECTHANDLESL_EXIT );
     }
 
 void CMTPGetObjectPropList::GetNextObjectPropL()
     {
-    __FLOG( _L8("+GetNextObjectPropL") );
+    OstTraceFunctionEntry0( CMTPGETOBJECTPROPLIST_GETNEXTOBJECTPROPL_ENTRY );
 
     iOwnerDp = KInvalidDpId;
     if ( iCurrentHandle < iHandles.Count() )
@@ -302,8 +308,8 @@ void CMTPGetObjectPropList::GetNextObjectPropL()
         {
         SendDataL( *iObjectPropList );
         }
-    
-    __FLOG( _L8("-GetNextObjectPropL") );
+
+    OstTraceFunctionExit0( CMTPGETOBJECTPROPLIST_GETNEXTOBJECTPROPL_EXIT );
     }
 
 void CMTPGetObjectPropList::OnBrowseObjectL( TAny* aSelf, TUint aHandle, TUint32 /*aCurDepth*/ )

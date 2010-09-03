@@ -18,10 +18,12 @@
 
 #include <mtp/mmtpdataproviderframework.h>
 #include <mtp/cmtpobjectmetadata.h>
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "rmtpdpsingletonsTraces.h"
+#endif
 
 
-// Class constants.
-__FLOG_STMT(_LIT8(KComponent,"DataProviderSingletons");)
 
 /**
 Constructor.
@@ -36,11 +38,10 @@ Opens the singletons reference.
 */
 EXPORT_C void RMTPDpSingletons::OpenL(MMTPDataProviderFramework& aFramework)
     {
-    __FLOG_OPEN(KMTPSubsystem, KComponent);
-    __FLOG(_L8("OpenL - Entry"));
+    OstTraceFunctionEntry0( RMTPDPSINGLETONS_OPENL_ENTRY );
     iFramework = &aFramework;
     iSingletons = &CSingletons::OpenL(aFramework);
-    __FLOG(_L8("OpenL - Exit"));
+    OstTraceFunctionExit0( RMTPDPSINGLETONS_OPENL_EXIT );
     }
     
 /**
@@ -48,14 +49,13 @@ Closes the singletons reference.
 */
 EXPORT_C void RMTPDpSingletons::Close()
     {
-    __FLOG(_L8("Close - Entry"));
+    OstTraceFunctionEntry0( RMTPDPSINGLETONS_CLOSE_ENTRY );
     if (iSingletons)
         {
         iSingletons->Close();
         iSingletons = NULL;
         }
-    __FLOG(_L8("Close - Exit"));
-    __FLOG_CLOSE;
+    OstTraceFunctionExit0( RMTPDPSINGLETONS_CLOSE_EXIT );
     }
 
 
@@ -98,7 +98,7 @@ RMTPDpSingletons::CSingletons* RMTPDpSingletons::CSingletons::NewL(MMTPDataProvi
 
 RMTPDpSingletons::CSingletons& RMTPDpSingletons::CSingletons::OpenL(MMTPDataProviderFramework& aFramework)
     {
-    __FLOG_STATIC(KMTPSubsystem, KComponent, _L8("CSingletons::OpenL - Entry"));
+    OstTraceFunctionEntry0( RMTPDPSIGNGLETONS_CSINGLETONS_OPENL_ENTRY );
     CSingletons* self(reinterpret_cast<CSingletons*>(Dll::Tls()));
     if (!self)
         {
@@ -109,51 +109,49 @@ RMTPDpSingletons::CSingletons& RMTPDpSingletons::CSingletons::OpenL(MMTPDataProv
         {        
         self->Inc();
         }
-    __FLOG_STATIC(KMTPSubsystem, KComponent, _L8("CSingletons::OpenL - Exit"));
+    OstTraceFunctionExit0( RMTPDPSIGNGLETONS_CSINGLETONS_OPENL_EXIT );
     return *self;
     }
     
 void RMTPDpSingletons::CSingletons::Close()
     {
+    OstTraceFunctionEntry0( CSINGLETONS_CLOSE_ENTRY );    
     CSingletons* self(reinterpret_cast<CSingletons*>(Dll::Tls()));
     if (self)
         {
-        __FLOG(_L8("CSingletons::Close - Entry"));
         self->Dec();
         if (self->AccessCount() == 0)
             {
-            __FLOG(_L8("CSingletons::Close - Exit"));
             delete self;
             Dll::SetTls(NULL);
+            OstTraceFunctionExit0( CSINGLETONS_CLOSE_EXIT );
             }
         else
             {
-            __FLOG(_L8("CSingletons::Close - Exit"));
+            OstTraceFunctionExit0( DUP1_CSINGLETONS_CLOSE_EXIT );
             }
         }
     }
     
 RMTPDpSingletons::CSingletons::~CSingletons()
     {
-    __FLOG(_L8("CSingletons::~CSingletons - Entry"));
+    OstTraceFunctionEntry0( CSINGLETONS_CSINGLETONS_DES_ENTRY );
     iExclusionList.Close();
     iMTPUtility.Close();
     delete iCopyingBigFileCache;
     delete iMovingBigFileCache;
-    __FLOG(_L8("CSingletons::~CSingletons - Exit"));
-    __FLOG_CLOSE;
+    OstTraceFunctionExit0( CSINGLETONS_CSINGLETONS_DES_EXIT );
     }
     
 void RMTPDpSingletons::CSingletons::ConstructL(MMTPDataProviderFramework& aFramework)
     {
-    __FLOG_OPEN(KMTPSubsystem, KComponent);
-    __FLOG(_L8("CSingletons::ConstructL - Entry"));
+    OstTraceFunctionEntry0( CSINGLETONS_CONSTRUCTL_ENTRY );
     
     iMTPUtility.OpenL(aFramework);
     iCopyingBigFileCache = CMTPFSEntryCache::NewL();
     iMovingBigFileCache = CMTPFSEntryCache::NewL();
-    
-    __FLOG(_L8("CSingletons::ConstructL - Exit"));
+
+    OstTraceFunctionExit0( CSINGLETONS_CONSTRUCTL_EXIT );
     }
 
 EXPORT_C RMTPUtility& RMTPDpSingletons::MTPUtility() const

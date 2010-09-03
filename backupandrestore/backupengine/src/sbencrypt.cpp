@@ -21,16 +21,23 @@
 */
 #include "sbencrypt.h"
 #include "sbencryptimpl.h"
+#include "OstTraceDefinitions.h"
+#include "sbtrace.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "sbencryptTraces.h"
+#endif
 
 namespace conn
 	{
 	EXPORT_C CSecureBUREncryptKeySource* CSecureBUREncryptKeySource::NewL()
 		{
+		OstTraceFunctionEntry0( CSECUREBURENCRYPTKEYSOURCE_NEWL_ENTRY );
 		CSecureBUREncryptKeySource* pSelf = new CSecureBUREncryptKeySource();
 		CleanupStack::PushL(pSelf);
 		pSelf->ConstructL();
 		CleanupStack::Pop(pSelf);
 		
+		OstTraceFunctionExit0( CSECUREBURENCRYPTKEYSOURCE_NEWL_EXIT );
 		return pSelf;
 		}
 
@@ -39,11 +46,16 @@ namespace conn
 	C++ constructor
 	*/
 		{
+		OstTraceFunctionEntry0( CSECUREBURENCRYPTKEYSOURCE_CSECUREBURENCRYPTKEYSOURCE_CONS_ENTRY );
+		OstTraceFunctionExit0( CSECUREBURENCRYPTKEYSOURCE_CSECUREBURENCRYPTKEYSOURCE_CONS_EXIT );
 		}
 		
 	EXPORT_C CSecureBUREncryptKeySource::~CSecureBUREncryptKeySource()
 		{
+		OstTraceFunctionEntry0( CSECUREBURENCRYPTKEYSOURCE_CSECUREBURENCRYPTKEYSOURCE_DES_ENTRY );
 		delete iImpl;
+		iImpl = NULL;
+		OstTraceFunctionExit0( CSECUREBURENCRYPTKEYSOURCE_CSECUREBURENCRYPTKEYSOURCE_DES_EXIT );
 		}
 
 	void CSecureBUREncryptKeySource::ConstructL()
@@ -51,14 +63,18 @@ namespace conn
 	Symbian 2nd phase construction
 	*/
 		{
+		OstTraceFunctionEntry0( CSECUREBURENCRYPTKEYSOURCE_CONSTRUCTL_ENTRY );
 		iImpl = CSecureBURKeySourceImpl::NewL();
+		OstTraceFunctionExit0( CSECUREBURENCRYPTKEYSOURCE_CONSTRUCTL_EXIT );
 		}
 
 	EXPORT_C void CSecureBUREncryptKeySource::GetDefaultBufferForBackupL(TDriveNumber aDrive, 
 																TBool& aGotBuffer, 
 																TDes& aBuffer)
 		{
+		OstTraceFunctionEntry0( CSECUREBURENCRYPTKEYSOURCE_GETDEFAULTBUFFERFORBACKUPL_ENTRY );
 		iImpl->GetDefaultBufferForBackupL(aDrive, aGotBuffer, aBuffer);
+		OstTraceFunctionExit0( CSECUREBURENCRYPTKEYSOURCE_GETDEFAULTBUFFERFORBACKUPL_EXIT );
 		}
 
 
@@ -67,7 +83,9 @@ namespace conn
 	                            		  	   TBool &aDoEncrypt, TDes8& aKey,
 	                            		  	   TBool& aGotBuffer, TDes& aBuffer)
 		{
+		OstTraceFunctionEntry0( CSECUREBURENCRYPTKEYSOURCE_GETBACKUPKEYL_ENTRY );
 		iImpl->GetBackupKeyL(aDrive, aSID, aDoEncrypt, aKey, aGotBuffer, aBuffer);
+		OstTraceFunctionExit0( CSECUREBURENCRYPTKEYSOURCE_GETBACKUPKEYL_EXIT );
 		}
 
 
@@ -76,7 +94,9 @@ namespace conn
 	                             				TBool aGotBuffer, TDes& aBuffer,
 	                             				TBool &aGotKey, TDes8& aKey)
 		{
+		OstTraceFunctionEntry0( CSECUREBURENCRYPTKEYSOURCE_GETRESTOREKEYL_ENTRY );
 		iImpl->GetRestoreKeyL(aDrive, aSID, aGotBuffer, aBuffer, aGotKey, aKey);
+		OstTraceFunctionExit0( CSECUREBURENCRYPTKEYSOURCE_GETRESTOREKEYL_EXIT );
 		}
 	}
 

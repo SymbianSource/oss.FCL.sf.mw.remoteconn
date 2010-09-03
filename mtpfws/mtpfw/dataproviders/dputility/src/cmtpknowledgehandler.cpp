@@ -25,9 +25,12 @@
 #include <mtp/mtpdatatypeconstants.h>
 
 #include "cmtpknowledgehandler.h"
+#include "mtpdebug.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpknowledgehandlerTraces.h"
+#endif
 
-// Class constants.
-__FLOG_STMT(_LIT8(KComponent,"KwgObjHdler");)
 
 const TInt KDateTimeMaxLength = 22;
 const TInt KNameMaxLength = 255;
@@ -55,59 +58,61 @@ CKnowledgeObject::CKnowledgeObject(CRepository& aRepository) : iRepository(aRepo
 	}
 CKnowledgeObject::~CKnowledgeObject()
 	{
-	__FLOG(_L8("~CKnowledgeObject - Entry")); 
+	OstTraceFunctionEntry0( CKNOWLEDGEOBJECT_CKNOWLEDGEOBJECT_DES_ENTRY );
 	iDateModified.Close();
 	iName.Close();
-	__FLOG(_L8("~CKnowledgeObject - Exit")); 
-	__FLOG_CLOSE;
+	OstTraceFunctionExit0( CKNOWLEDGEOBJECT_CKNOWLEDGEOBJECT_DES_EXIT );
 	}
 void CKnowledgeObject::ConstructL()
 	{
-	__FLOG_OPEN(KMTPSubsystem, KComponent);
-	__FLOG(_L8("CKnowledgeObject Construct - Entry"));
+	OstTraceFunctionEntry0( CKNOWLEDGEOBJECT_CONSTRUCTL_ENTRY );
 	iKnowledgeObjectSize = KObjectSizeNotAvaiable;
 	iDateModified.CreateL(KDateTimeMaxLength);
 	iName.CreateL(KNameMaxLength);
 	iLastAuthorProxyID.Set(KMTPUnInitialized64, KMTPUnInitialized64);
 	iDirty = EBitFlagAll;
-	__FLOG(_L8("CKnowledgeObject Construct - Exit"));
+	OstTraceFunctionExit0( CKNOWLEDGEOBJECT_CONSTRUCTL_EXIT );
 	}
 
 void CKnowledgeObject::LoadL()
 	{
-	__FLOG(_L8("CKnowledgeObject LoadL - Entry"));
+	OstTraceFunctionEntry0( CKNOWLEDGEOBJECT_LOADL_ENTRY );
 	// Load ObjectSize
 	TInt objSize;
-	User::LeaveIfError(iRepository.Get(ESize, objSize));
+	LEAVEIFERROR(iRepository.Get(ESize, objSize),
+	        OstTrace0( TRACE_ERROR, CKNOWLEDGEOBJECT_LOADL, "Can't Load ObjectSize from iRepository!" ));
 	iKnowledgeObjectSize = objSize;
 
 	// Load DateModify
 	iDateModified.Zero();
-	User::LeaveIfError(iRepository.Get(EDateModified, iDateModified));
+	LEAVEIFERROR(iRepository.Get(EDateModified, iDateModified),
+	        OstTrace0( TRACE_ERROR, DUP1_CKNOWLEDGEOBJECT_LOADL, "Can't Load DateModify from iRepository!" ));
 	
 	// Load Name
 	iName.Zero();
-	User::LeaveIfError(iRepository.Get(EName, iName));
+	LEAVEIFERROR(iRepository.Get(EName, iName),
+	        OstTrace0( TRACE_ERROR, DUP2_CKNOWLEDGEOBJECT_LOADL, "Can't Load Name from iRepository!" ));
 
 	// Load LastAuthorProxyID:
 	TPtr8 writeBuf(NULL, 0); //walkaroud for the TMTPTypeUint128
 	iLastAuthorProxyID.FirstWriteChunk(writeBuf);
-	User::LeaveIfError(iRepository.Get(ELastAuthorProxyID, writeBuf));
+	LEAVEIFERROR(iRepository.Get(ELastAuthorProxyID, writeBuf),
+	        OstTrace0( TRACE_ERROR, DUP3_CKNOWLEDGEOBJECT_LOADL, "Can't Load LastAuthorProxyID from iRepository!" ));
 	iDirty = EBitFlagNone;
-	__FLOG(_L8("CKnowledgeObject LoadL - Exit"));
+	OstTraceFunctionExit0( CKNOWLEDGEOBJECT_LOADL_EXIT );
 	return;
 	}
 
 
 void CKnowledgeObject::Clear()
 	{
-	__FLOG(_L8("CKnowledgeObject Clear - Entry"));
+	OstTraceFunctionEntry0( CKNOWLEDGEOBJECT_CLEAR_ENTRY );
 	iKnowledgeObjectSize = KObjectSizeNotAvaiable;
 	iDateModified.Zero();
 	iName.Zero();
 	iLastAuthorProxyID.Set(KMTPUnInitialized64, KMTPUnInitialized64);
 	iDirty = EBitFlagAll;
-	__FLOG(_L8("CKnowledgeObject Clear - Exit"));
+	OstTraceFunctionExit0( CKNOWLEDGEOBJECT_CLEAR_EXIT );
 	}
 
 void CKnowledgeObject::SetSize(TUint64 aSize)
@@ -141,39 +146,43 @@ void CKnowledgeObject::SetLastAuthorProxyID(TUint64 aHigh, TUint64 aLow)
 
 void CKnowledgeObject::CommitL()
 	{
-	__FLOG(_L8("CKnowledgeObject CommitL - Entry"));
+	OstTraceFunctionEntry0( CKNOWLEDGEOBJECT_COMMITL_ENTRY );
 	if (EBitFlagSize == (iDirty & EBitFlagSize))
 		{
 		// TUint64 -> TInt, some capability is lost, 
 		// anyway, it's enough for knowledge object.   
-		User::LeaveIfError(iRepository.Set(ESize, (TInt)iKnowledgeObjectSize));
+		LEAVEIFERROR(iRepository.Set(ESize, (TInt)iKnowledgeObjectSize),
+		        OstTrace1( TRACE_ERROR, CKNOWLEDGEOBJECT_COMMITL, "set Size to %d failed against iRepository!", iKnowledgeObjectSize)); 
 		}
 
 	if (EBitFlagName == (iDirty & EBitFlagName))
 		{
-		User::LeaveIfError(iRepository.Set(EName, iName));
+		LEAVEIFERROR(iRepository.Set(EName, iName),
+		        OstTraceExt1( TRACE_ERROR, DUP1_CKNOWLEDGEOBJECT_COMMITL, "set name to %S failed against iRepository!", iName)); 
 		}
 	
 	if (EBitFlagLastAuthorProxyID == (iDirty & EBitFlagLastAuthorProxyID))
 		{
 		if (EMTPRespCodeOK != SetColumnType128Value(ELastAuthorProxyID, iLastAuthorProxyID))
 			{
+            OstTrace0( TRACE_ERROR, DUP2_CKNOWLEDGEOBJECT_COMMITL, "set LastAuthorProxyID failed!" );
 			User::Leave(KErrGeneral);
 			}
 		}
 	
 	// update DateModified to be the time of Commit
 	RefreshDateModifed();
-	User::LeaveIfError(iRepository.Set(EDateModified, iDateModified));
+	LEAVEIFERROR(iRepository.Set(EDateModified, iDateModified),
+	        OstTraceExt1( TRACE_ERROR, DUP3_CKNOWLEDGEOBJECT_COMMITL, "set DateModified to %S failed against iRepository!", iDateModified));  
 
 	iDirty = EBitFlagNone;
-	__FLOG(_L8("CKnowledgeObject KnowledgeObject CommitL - Exit"));
+	OstTraceFunctionExit0( CKNOWLEDGEOBJECT_COMMITL_EXIT );
 	return;
 	}
 
 TMTPResponseCode CKnowledgeObject::SetColumnType128Value(TMTPKnowledgeStoreKeyNum aColumnNum, TMTPTypeUint128& aNewData)
 	{
-	__FLOG(_L8("CKnowledgeObject SetColumnType128ValueL - Entry"));
+	OstTraceFunctionEntry0( CKNOWLEDGEOBJECT_SETCOLUMNTYPE128VALUE_ENTRY );
 	TInt ret;
 	TMTPResponseCode responseCode = EMTPRespCodeOK;
 	TBuf8<KMTPTypeINT128Size>  data;
@@ -198,21 +207,22 @@ TMTPResponseCode CKnowledgeObject::SetColumnType128Value(TMTPKnowledgeStoreKeyNu
 		{
 		responseCode = EMTPRespCodeGeneralError;
 		}
-	__FLOG_VA((_L8("CKnowledgeObject SetColumnType128ValueL - Exit with responseCode = 0x%04X"), responseCode));
+	OstTraceFunctionExit0( CKNOWLEDGEOBJECT_SETCOLUMNTYPE128VALUE_EXIT );
+	OstTrace1( TRACE_NORMAL, CKNOWLEDGEOBJECT_SETCOLUMNTYPE128VALUE, "responseCode = 0x%04X", responseCode );
 	return responseCode;
 	}
 
 
 void CKnowledgeObject::RefreshDateModifed()
 	{
-	__FLOG(_L8("CKnowledgeObject RefreshDateModifed - Entry"));
+	OstTraceFunctionEntry0( CKNOWLEDGEOBJECT_REFRESHDATEMODIFED_ENTRY );
 	//get current time
 	TTime now;	
 	now.UniversalTime();
 	_LIT(KFormat,"%F%Y%M%DT%H%T%SZ");
 	iDateModified.Zero();
 	now.FormatL(iDateModified, KFormat);
-	__FLOG(_L8("CKnowledgeObject RefreshDateModifed - Exit"));
+	OstTraceFunctionExit0( CKNOWLEDGEOBJECT_REFRESHDATEMODIFED_EXIT );
 	return;
 	}
 
@@ -228,12 +238,11 @@ EXPORT_C CMTPKnowledgeHandler* CMTPKnowledgeHandler::NewL(MMTPDataProviderFramew
 
 EXPORT_C CMTPKnowledgeHandler::~CMTPKnowledgeHandler()
 	{
-	__FLOG(_L8("~CMTPKnowledgeHandler - Entry")); 
+	OstTraceFunctionEntry0( CMTPKNOWLEDGEHANDLER_CMTPKNOWLEDGEHANDLER_DES_ENTRY );
 	delete iKnowledgeObj;
 	delete iKnowledgeSwpBuffer;
 	delete iCachedKnowledgeObject;
-	__FLOG(_L8("~CMTPKnowledgeHandler - Exit"));
-	__FLOG_CLOSE;
+	OstTraceFunctionExit0( CMTPKNOWLEDGEHANDLER_CMTPKNOWLEDGEHANDLER_DES_EXIT );
 	}
 
 CMTPKnowledgeHandler::CMTPKnowledgeHandler(MMTPDataProviderFramework& aFramework, TUint16 aFormatCode, 
@@ -244,8 +253,7 @@ CMTPKnowledgeHandler::CMTPKnowledgeHandler(MMTPDataProviderFramework& aFramework
 
 void CMTPKnowledgeHandler::ConstructL()
 	{
-	__FLOG_OPEN(KMTPSubsystem, KComponent);
-	__FLOG(_L8("Construct - Entry"));
+	OstTraceFunctionEntry0( CMTPKNOWLEDGEHANDLER_CONSTRUCTL_ENTRY );
 	
 	iFramework.Fs().PrivatePath(iKnowObjFileName);
 	iKnowObjFileName.Insert(0, KMTPKnowledgeObjDriveLocation);
@@ -265,13 +273,14 @@ void CMTPKnowledgeHandler::ConstructL()
 	if(BaflUtils::FileExists(iFramework.Fs(), iKnowObjSwpFileName))
 		{
 		// In case DP received some object content
-		User::LeaveIfError(iFramework.Fs().Delete(iKnowObjSwpFileName));
+		LEAVEIFERROR(iFramework.Fs().Delete(iKnowObjSwpFileName),
+		        OstTraceExt1( TRACE_ERROR, CMTPKNOWLEDGEHANDLER_CONSTRUCTL, "delete %S failed!", iKnowObjSwpFileName ));
 		}
 
 	// create and load knowledge object properties
 	iCachedKnowledgeObject = CKnowledgeObject::NewL(iRepository);
 	iCachedKnowledgeObject->LoadL();
-	__FLOG(_L8("ConstructL - Exit"));
+	OstTraceFunctionExit0( CMTPKNOWLEDGEHANDLER_CONSTRUCTL_EXIT );
 	}
 
 EXPORT_C void CMTPKnowledgeHandler::SetStorageId(TUint32 aStorageId)
@@ -281,8 +290,10 @@ EXPORT_C void CMTPKnowledgeHandler::SetStorageId(TUint32 aStorageId)
 
 void CMTPKnowledgeHandler::CommitL()
 	{
-	__FLOG(_L8("CommitL - Entry"));
-	User::LeaveIfError(iRepository.StartTransaction(CRepository::EReadWriteTransaction));
+	OstTraceFunctionEntry0( CMTPKNOWLEDGEHANDLER_COMMITL_ENTRY );
+	LEAVEIFERROR(iRepository.StartTransaction(CRepository::EReadWriteTransaction),
+	        OstTrace0( TRACE_ERROR, CMTPKNOWLEDGEHANDLER_COMMITL, "start readwrite transaction for iRepository failed!"));
+	        
 	iRepository.CleanupCancelTransactionPushL();
 	
 	iCachedKnowledgeObject->CommitL();
@@ -300,47 +311,55 @@ void CMTPKnowledgeHandler::CommitL()
 		iKnowledgeSwpBuffer = NULL;
 		}
 
-	if(BaflUtils::FileExists(iFramework.Fs(), iKnowObjSwpFileName))
+	if(BaflUtils::FileExists(iFramework.Fs(), iKnowObjSwpFileName) && iCachedKnowledgeObject->Size() > 0)
 		{
 		// In case DP received some object content
-		User::LeaveIfError(iFramework.Fs().Replace(iKnowObjSwpFileName, iKnowObjFileName));
+		LEAVEIFERROR(iFramework.Fs().Replace(iKnowObjSwpFileName, iKnowObjFileName),
+		        OstTraceExt2( TRACE_ERROR, DUP1_CMTPKNOWLEDGEHANDLER_COMMITL, 
+		                "replace %S with %S failed!", iKnowObjSwpFileName, iKnowObjFileName));      
 		}
 	// If swp file isn't exsited, that means 0 sized object received, need do nothing.
 
 	TUint32 keyInfo;
-	User::LeaveIfError(iRepository.CommitTransaction(keyInfo));
+	LEAVEIFERROR(iRepository.CommitTransaction(keyInfo),
+	        OstTrace1( TRACE_ERROR, DUP2_CMTPKNOWLEDGEHANDLER_COMMITL, 
+	                "Commits transaction failed. The number of keys whose values were modified is %d", keyInfo));
+	        
+	        
 	CleanupStack::Pop(&iRepository);
 
-	__FLOG(_L8("CommitL - Exit"));
+	OstTraceFunctionExit0( CMTPKNOWLEDGEHANDLER_COMMITL_EXIT );
 	}
 
 void CMTPKnowledgeHandler::CommitForNewObjectL(TDes& aSuid)
 	{
+	OstTraceFunctionEntry0( CMTPKNOWLEDGEHANDLER_COMMITFORNEWOBJECTL_ENTRY );
 	aSuid = iSuid;
 	CommitL();
+	OstTraceFunctionExit0( CMTPKNOWLEDGEHANDLER_COMMITFORNEWOBJECTL_EXIT );
 	}
 	
 void CMTPKnowledgeHandler::RollBack()
 	{
-	__FLOG(_L8("Rollback - Entry"));
+	OstTraceFunctionEntry0( CMTPKNOWLEDGEHANDLER_ROLLBACK_ENTRY );
 	iCachedKnowledgeObject->Clear();
 	TRAP_IGNORE(iCachedKnowledgeObject->LoadL());
-	__FLOG(_L8("Rollback - Exit"));
+	OstTraceFunctionExit0( CMTPKNOWLEDGEHANDLER_ROLLBACK_EXIT );
 	}
 
 EXPORT_C void CMTPKnowledgeHandler::GetObjectSuidL(TDes& aSuid) const
 	{
-	__FLOG(_L8("GetObjectSuidL - Entry"));
+	OstTraceFunctionEntry0( CMTPKNOWLEDGEHANDLER_GETOBJECTSUIDL_ENTRY );
 	if(iCachedKnowledgeObject->Size() != KObjectSizeNotAvaiable)
 		{
 		aSuid.Append(iSuid);
 		}
-	__FLOG(_L8("GetObjectSuidL - Exit"));
+	OstTraceFunctionExit0( CMTPKNOWLEDGEHANDLER_GETOBJECTSUIDL_EXIT );
 	}
 
 TMTPResponseCode CMTPKnowledgeHandler::SendObjectInfoL(const CMTPTypeObjectInfo& aObjectInfo, TUint32& aParentHandle, TDes& aSuid)
 	{
-	__FLOG(_L("SendObjectInfoL - Entry"));
+	OstTraceFunctionEntry0( CMTPKNOWLEDGEHANDLER_SENDOBJECTINFOL_ENTRY );
 	TMTPResponseCode responseCode = EMTPRespCodeOK;
 	if (aParentHandle != KMTPHandleNone && aParentHandle != KMTPHandleNoParent)
 		{
@@ -351,7 +370,7 @@ TMTPResponseCode CMTPKnowledgeHandler::SendObjectInfoL(const CMTPTypeObjectInfo&
 		//if there's a read error reread
 		if(iCachedKnowledgeObject->IsDirty())
 			{
-			__FLOG(_L8("Warning: The cached knowledge is dirty"));
+			OstTrace0( TRACE_WARNING, CMTPKNOWLEDGEHANDLER_SENDOBJECTINFOL, "The cached knowledge is dirty" );
 			iCachedKnowledgeObject->Clear();
 			iCachedKnowledgeObject->LoadL();
 			}
@@ -368,14 +387,14 @@ TMTPResponseCode CMTPKnowledgeHandler::SendObjectInfoL(const CMTPTypeObjectInfo&
 			aSuid = iSuid;
 			}
 		}
-	__FLOG(_L("SendObjectInfoL - Exit"));
+	OstTraceFunctionExit0( CMTPKNOWLEDGEHANDLER_SENDOBJECTINFOL_EXIT );
 	return responseCode;
 	}
 
 TMTPResponseCode CMTPKnowledgeHandler::SendObjectPropListL(TUint64 aObjectSize, const CMTPTypeObjectPropList& /*aObjectPropList*/, 
 															TUint32& aParentHandle, TDes& aSuid)
 	{
-	__FLOG(_L8("SendObjectPropListL - Entry"));
+	OstTraceFunctionEntry0( CMTPKNOWLEDGEHANDLER_SENDOBJECTPROPLISTL_ENTRY );
 	TMTPResponseCode responseCode = EMTPRespCodeOK;
 	if (aParentHandle != KMTPHandleNone && aParentHandle != KMTPHandleNoParent)
 		{
@@ -387,7 +406,7 @@ TMTPResponseCode CMTPKnowledgeHandler::SendObjectPropListL(TUint64 aObjectSize, 
 		aParentHandle = KMTPHandleNoParent;
 		if(iCachedKnowledgeObject->IsDirty())
 			{
-			__FLOG(_L8("Warning: The cached knowledge is dirty"));
+			OstTrace0( TRACE_WARNING, CMTPKNOWLEDGEHANDLER_SENDOBJECTPROPLISTL, "The cached knowledge is dirty" );
 			iCachedKnowledgeObject->Clear();
 			iCachedKnowledgeObject->LoadL();
 			}
@@ -403,21 +422,21 @@ TMTPResponseCode CMTPKnowledgeHandler::SendObjectPropListL(TUint64 aObjectSize, 
 			aSuid = iSuid;
 			}
 		}
-	__FLOG(_L8("SendObjectPropListL - Exit"));
+	OstTraceFunctionExit0( CMTPKNOWLEDGEHANDLER_SENDOBJECTPROPLISTL_EXIT );
 	return responseCode;
 	}
 
 TMTPResponseCode CMTPKnowledgeHandler::GetObjectPropertyL(const CMTPObjectMetaData& aObjectMetaData, 
 																TUint16 aPropertyCode, CMTPTypeObjectPropList& aPropList)
 	{
-	__FLOG(_L8("GetObjectPropertyL - Entry"));
+	OstTraceFunctionEntry0( CMTPKNOWLEDGEHANDLER_GETOBJECTPROPERTYL_ENTRY );
 	TMTPResponseCode responseCode = EMTPRespCodeOK;
 	CMTPTypeObjectPropListElement* propertyElement = NULL;
 	TUint32 aHandle = aObjectMetaData.Uint(CMTPObjectMetaData::EHandle);
 	
 	if(iCachedKnowledgeObject->IsDirty())
 		{
-		__FLOG(_L8("Warning: The cached knowledge is dirty"));
+		OstTrace0( TRACE_WARNING, CMTPKNOWLEDGEHANDLER_GETOBJECTPROPERTYL, "The cached knowledge is dirty" );
 		iCachedKnowledgeObject->LoadL();
 		}
 	
@@ -524,7 +543,7 @@ TMTPResponseCode CMTPKnowledgeHandler::GetObjectPropertyL(const CMTPObjectMetaDa
 		{
 		aPropList.CommitPropElemL(*propertyElement);
 		}
-	__FLOG(_L8("GetObjectPropertyL - Exit"));
+	OstTraceFunctionExit0( CMTPKNOWLEDGEHANDLER_GETOBJECTPROPERTYL_EXIT );
 	return responseCode;
 	}
 
@@ -532,7 +551,7 @@ TMTPResponseCode CMTPKnowledgeHandler::SetObjectPropertyL(const TDesC& /*aSuid*/
 															const CMTPTypeObjectPropListElement& aElement, 
 															TMTPOperationCode aOperationCode)
 	{
-	__FLOG(_L8("SetObjectPropertyL - Entry"));
+	OstTraceFunctionEntry0( CMTPKNOWLEDGEHANDLER_SETOBJECTPROPERTYL_ENTRY );
 	TMTPResponseCode responseCode = CheckGenObjectPropertyL(aElement, aOperationCode);
 	if (responseCode == EMTPRespCodeOK)
 		{
@@ -569,16 +588,17 @@ TMTPResponseCode CMTPKnowledgeHandler::SetObjectPropertyL(const TDesC& /*aSuid*/
 				break;
 			}
 		}
-	__FLOG(_L8("SetObjectPropertyL - Exit"));
+	OstTraceFunctionExit0( CMTPKNOWLEDGEHANDLER_SETOBJECTPROPERTYL_EXIT );
 	return responseCode;
 	}
 
 // Remove the knowledge object
 TMTPResponseCode CMTPKnowledgeHandler::DeleteObjectL(const CMTPObjectMetaData& /*aObjectMetaData*/)
 	{
-	__FLOG(_L8("DeleteObjectL - Entry"));
+	OstTraceFunctionEntry0( CMTPKNOWLEDGEHANDLER_DELETEOBJECTL_ENTRY );
 
-	User::LeaveIfError(iRepository.StartTransaction(CRepository::EReadWriteTransaction));
+	LEAVEIFERROR(iRepository.StartTransaction(CRepository::EReadWriteTransaction),
+	        OstTrace0( TRACE_ERROR, CMTPKNOWLEDGEHANDLER_DELETEOBJECTL, "Start readwrite transaction failed!"));
 	iRepository.CleanupCancelTransactionPushL();
 
 	// Delete obejct properties in transaction, if leave, mgr will rollback all properties.
@@ -595,26 +615,31 @@ TMTPResponseCode CMTPKnowledgeHandler::DeleteObjectL(const CMTPObjectMetaData& /
 	// Keep file delete is atomic.
 	if (BaflUtils::FileExists(iFramework.Fs(), iKnowObjFileName))
 		{
-		User::LeaveIfError(iFramework.Fs().Delete(iKnowObjFileName));
+		LEAVEIFERROR(iFramework.Fs().Delete(iKnowObjFileName),
+		        OstTraceExt1( TRACE_ERROR, DUP1_CMTPKNOWLEDGEHANDLER_DELETEOBJECTL, "delete %S failed!", iKnowObjFileName));   
 		}
 
 	TUint32 keyInfo;
-	User::LeaveIfError(iRepository.CommitTransaction(keyInfo));
+	LEAVEIFERROR(iRepository.CommitTransaction(keyInfo),
+	           OstTrace1( TRACE_ERROR, DUP2_CMTPKNOWLEDGEHANDLER_DELETEOBJECTL, 
+	                    "Commits transaction failed. The number of keys whose values were modified is %d", keyInfo));
+
 	CleanupStack::Pop(&iRepository);
 
-	__FLOG(_L8("DeleteObjectL - Exit"));
+	OstTraceFunctionExit0( CMTPKNOWLEDGEHANDLER_DELETEOBJECTL_EXIT );
 	return EMTPRespCodeOK;
 	}
 
 // Return the knowledge object content
 TMTPResponseCode CMTPKnowledgeHandler::GetObjectL(const CMTPObjectMetaData& /*aObjectMetaData*/, MMTPType** aBuffer)
 	{
-	__FLOG(_L8("GetObjectL - Entry"));
+	OstTraceFunctionEntry0( CMTPKNOWLEDGEHANDLER_GETOBJECTL_ENTRY );
 	if (!BaflUtils::FileExists(iFramework.Fs(), iKnowObjFileName))
 		{
 		RFile file;
 		CleanupClosePushL(file);
-		User::LeaveIfError(file.Create(iFramework.Fs(), iKnowObjFileName, EFileRead));
+		LEAVEIFERROR(file.Create(iFramework.Fs(), iKnowObjFileName, EFileRead),
+		        OstTraceExt1( TRACE_ERROR, CMTPKNOWLEDGEHANDLER_GETOBJECTL, "Create readonly %S failed!", iKnowObjFileName));
 		CleanupStack::PopAndDestroy(&file);
 		}
 	
@@ -625,13 +650,13 @@ TMTPResponseCode CMTPKnowledgeHandler::GetObjectL(const CMTPObjectMetaData& /*aO
 		iKnowledgeObj = CMTPTypeFile::NewL(iFramework.Fs(), iKnowObjFileName, EFileRead);
 		}
 	*aBuffer = iKnowledgeObj;
-	__FLOG(_L8("GetObjectL - Exit"));
+	OstTraceFunctionExit0( CMTPKNOWLEDGEHANDLER_GETOBJECTL_EXIT );
 	return EMTPRespCodeOK;
 	}
 
 TMTPResponseCode CMTPKnowledgeHandler::DeleteObjectPropertyL(const CMTPObjectMetaData& /*aObjectMetaData*/, const TUint16 aPropertyCode)
 	{
-	__FLOG(_L8("DeleteObjectPropertyL - Entry"));
+	OstTraceFunctionEntry0( CMTPKNOWLEDGEHANDLER_DELETEOBJECTPROPERTYL_ENTRY );
 	TMTPResponseCode responseCode = EMTPRespCodeOK;
 	switch (aPropertyCode)
 		{
@@ -660,13 +685,13 @@ TMTPResponseCode CMTPKnowledgeHandler::DeleteObjectPropertyL(const CMTPObjectMet
 			responseCode = EMTPRespCodeInvalidObjectPropCode;
 			break;
 		}
-	__FLOG(_L8("DeleteObjectPropertyL - Exit"));
+	OstTraceFunctionExit0( CMTPKNOWLEDGEHANDLER_DELETEOBJECTPROPERTYL_EXIT );
 	return responseCode;
 	}
 
 TMTPResponseCode CMTPKnowledgeHandler::GetBufferForSendObjectL(const CMTPObjectMetaData& /*aObjectMetaData*/, MMTPType** aBuffer)
 	{
-	__FLOG(_L8("GetBufferForSendObjectL - Entry"));
+	OstTraceFunctionEntry0( CMTPKNOWLEDGEHANDLER_GETBUFFERFORSENDOBJECTL_ENTRY );
 	if (iKnowledgeSwpBuffer)
 		{
 		delete iKnowledgeSwpBuffer;
@@ -675,12 +700,13 @@ TMTPResponseCode CMTPKnowledgeHandler::GetBufferForSendObjectL(const CMTPObjectM
 	iKnowledgeSwpBuffer = CMTPTypeFile::NewL(iFramework.Fs(), iKnowObjSwpFileName, EFileWrite);
 	iKnowledgeSwpBuffer->SetSizeL(0);
 	*aBuffer = iKnowledgeSwpBuffer;
-	__FLOG(_L8("GetBufferForSendObjectL - Exit"));
+	OstTraceFunctionExit0( CMTPKNOWLEDGEHANDLER_GETBUFFERFORSENDOBJECTL_EXIT );
 	return EMTPRespCodeOK;
 	}
 
 void CMTPKnowledgeHandler::BuildObjectInfoL(CMTPTypeObjectInfo& aObjectInfo) const
 	{
+	OstTraceFunctionEntry0( CMTPKNOWLEDGEHANDLER_BUILDOBJECTINFOL_ENTRY );
 	aObjectInfo.SetUint32L(CMTPTypeObjectInfo::EStorageID, iStorageID);	
 	aObjectInfo.SetUint16L(CMTPTypeObjectInfo::EObjectFormat, iKnowledgeFormatCode);
 	// Not use
@@ -701,46 +727,48 @@ void CMTPKnowledgeHandler::BuildObjectInfoL(CMTPTypeObjectInfo& aObjectInfo) con
 	aObjectInfo.SetStringL(CMTPTypeObjectInfo::EDateModified, KNullDesC);
 	aObjectInfo.SetStringL(CMTPTypeObjectInfo::EDateCreated, KNullDesC);
 	aObjectInfo.SetStringL(CMTPTypeObjectInfo::EKeywords, KNullDesC);
+	OstTraceFunctionExit0( CMTPKNOWLEDGEHANDLER_BUILDOBJECTINFOL_EXIT );
 	}
 
 TMTPResponseCode CMTPKnowledgeHandler::GetObjectInfoL(const CMTPObjectMetaData& /*aObjectMetaData*/, CMTPTypeObjectInfo& aObjectInfo)
 	{
-	__FLOG(_L8("GetObjectInfoL - Entry"));
+	OstTraceFunctionEntry0( CMTPKNOWLEDGEHANDLER_GETOBJECTINFOL_ENTRY );
 	if(iCachedKnowledgeObject->Size() != KObjectSizeNotAvaiable)
 		{
 		BuildObjectInfoL(aObjectInfo);
 		}
-	__FLOG(_L8("GetObjectInfoL - Exit"));
+	OstTraceFunctionExit0( CMTPKNOWLEDGEHANDLER_GETOBJECTINFOL_EXIT );
 	return EMTPRespCodeOK;
 	}
 
 
 void CMTPKnowledgeHandler::ReleaseObjectBuffer()
 	{
-	__FLOG(_L8("ReleaseObjectBuffer - Entry"));
+	OstTraceFunctionEntry0( CMTPKNOWLEDGEHANDLER_RELEASEOBJECTBUFFER_ENTRY );
 	if (iKnowledgeObj)
 		{
 		delete iKnowledgeObj;
 		iKnowledgeObj = NULL;
 		}
-	__FLOG(_L8("ReleaseObjectBuffer - Exit"));
+	OstTraceFunctionExit0( CMTPKNOWLEDGEHANDLER_RELEASEOBJECTBUFFER_EXIT );
 	}
 
 TMTPResponseCode CMTPKnowledgeHandler::GetObjectSizeL(const TDesC& aSuid, TUint64& aObjectSize)
 	{
-	__FLOG(_L8("GetObjectSizeL - Entry"));
+	OstTraceFunctionEntry0( CMTPKNOWLEDGEHANDLER_GETOBJECTSIZEL_ENTRY );
 	if (aSuid != iSuid)
 		{
+		OstTraceFunctionExit0( CMTPKNOWLEDGEHANDLER_GETOBJECTSIZEL_EXIT );
 		return EMTPRespCodeGeneralError;
 		}
 	aObjectSize = iCachedKnowledgeObject->Size();
-	__FLOG(_L8("GetObjectSizeL - Exit"));
+	OstTraceFunctionExit0( DUP1_CMTPKNOWLEDGEHANDLER_GETOBJECTSIZEL_EXIT );
 	return EMTPRespCodeOK;
 	}
 
 TMTPResponseCode CMTPKnowledgeHandler::GetAllObjectPropCodeByGroupL(TUint32 aGroupId, RArray<TUint32>& aPropCodes)
 	{
-	__FLOG(_L8("GetAllObjectPropCodeByGroupL - Entry"));
+	OstTraceFunctionEntry0( CMTPKNOWLEDGEHANDLER_GETALLOBJECTPROPCODEBYGROUPL_ENTRY );
 	TMTPResponseCode responseCode = EMTPRespCodeOK;
 	if (0 == aGroupId)
 		{
@@ -770,7 +798,7 @@ TMTPResponseCode CMTPKnowledgeHandler::GetAllObjectPropCodeByGroupL(TUint32 aGro
 		{
 		responseCode = (TMTPResponseCode)0xA805;
 		}
-	__FLOG(_L8("GetAllObjectPropCodeByGroupL - Exit"));
+	OstTraceFunctionExit0( CMTPKNOWLEDGEHANDLER_GETALLOBJECTPROPCODEBYGROUPL_EXIT );
 	return responseCode;
 	}
 

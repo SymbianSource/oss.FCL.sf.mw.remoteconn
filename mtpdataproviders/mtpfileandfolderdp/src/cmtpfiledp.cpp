@@ -29,11 +29,15 @@
 #include "mtpfiledppanic.h"
 #include "mtpfiledpprocessor.h"
 #include "cmtpdataprovidercontroller.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpfiledpTraces.h"
+#endif
+
 
 // Class constants
 static const TInt KArrayGranularity = 3;
 static const TInt KActiveEnumeration = 0;
-__FLOG_STMT(_LIT8(KComponent,"CMTPFileDataProvider");)
 
 /**
 File data provider factory method.
@@ -54,7 +58,7 @@ Destructor
 */    
 CMTPFileDataProvider::~CMTPFileDataProvider()
     {
-    __FLOG(_L8("~CMTPFileDataProvider - Entry"));
+    OstTraceFunctionEntry0( CMTPFILEDATAPROVIDER_CMTPFILEDATAPROVIDER_DES_ENTRY );
     iPendingEnumerations.Close();
     TUint count(iActiveProcessors.Count());
     while (count--)
@@ -67,32 +71,31 @@ CMTPFileDataProvider::~CMTPFileDataProvider()
 	iSingletons.Close();
     delete iFileEnumerator;
     delete iExclusionMgr;
-    __FLOG(_L8("~CMTPFileDataProvider - Exit"));
-    __FLOG_CLOSE; 
+    OstTraceFunctionExit0( CMTPFILEDATAPROVIDER_CMTPFILEDATAPROVIDER_DES_EXIT );
     }
 
 void CMTPFileDataProvider::Cancel()
     {
-    __FLOG(_L8("Cancel - Entry"));
+    OstTraceFunctionEntry0( CMTPFILEDATAPROVIDER_CANCEL_ENTRY );
     iFileEnumerator->Cancel();
-    __FLOG(_L8("Cancel - Exit"));
+    OstTraceFunctionExit0( CMTPFILEDATAPROVIDER_CANCEL_EXIT );
     }
         
 void CMTPFileDataProvider::ProcessEventL(const TMTPTypeEvent& aEvent, MMTPConnection& aConnection)
     {
-    __FLOG(_L8("ProcessEventL - Entry"));
+    OstTraceFunctionEntry0( CMTPFILEDATAPROVIDER_PROCESSEVENTL_ENTRY );
     TInt idx(LocateRequestProcessorL(aEvent, aConnection));
     
     if (idx != KErrNotFound)
         {
         iActiveProcessors[idx]->HandleEventL(aEvent);
         }
-    __FLOG(_L8("ProcessEventL - Exit"));
+    OstTraceFunctionExit0( CMTPFILEDATAPROVIDER_PROCESSEVENTL_EXIT );
     }
      
 void CMTPFileDataProvider::ProcessNotificationL(TMTPNotification aNotification, const TAny* aParams)
     {
-    __FLOG(_L8("ProcessNotificationL - Entry"));
+    OstTraceFunctionEntry0( CMTPFILEDATAPROVIDER_PROCESSNOTIFICATIONL_ENTRY );
     switch (aNotification)
         {
     case EMTPSessionClosed:
@@ -107,12 +110,12 @@ void CMTPFileDataProvider::ProcessNotificationL(TMTPNotification aNotification, 
         // Ignore all other notifications.
         break;
         }
-    __FLOG(_L8("ProcessNotificationL - Exit"));
+    OstTraceFunctionExit0( CMTPFILEDATAPROVIDER_PROCESSNOTIFICATIONL_EXIT );
     }
         
 void CMTPFileDataProvider::ProcessRequestPhaseL(TMTPTransactionPhase aPhase, const TMTPTypeRequest& aRequest, MMTPConnection& aConnection)
     {    
-    __FLOG(_L8("ProcessRequestPhaseL - Entry"));
+    OstTraceFunctionEntry0( CMTPFILEDATAPROVIDER_PROCESSREQUESTPHASEL_ENTRY );
     TInt idx(LocateRequestProcessorL(aRequest, aConnection));
     __ASSERT_DEBUG((idx != KErrNotFound), Panic(EMTPFileDpNoMatchingProcessor));
     MMTPRequestProcessor* processor(iActiveProcessors[idx]);
@@ -130,32 +133,32 @@ void CMTPFileDataProvider::ProcessRequestPhaseL(TMTPTransactionPhase aPhase, con
 	    }
     iActiveProcessor = -1;
 
-    __FLOG(_L8("ProcessRequestPhaseL - Exit"));
+    OstTraceFunctionExit0( CMTPFILEDATAPROVIDER_PROCESSREQUESTPHASEL_EXIT );
     }
     
 void CMTPFileDataProvider::StartObjectEnumerationL(TUint32 aStorageId, TBool /*aPersistentFullEnumeration*/)
     {
-    __FLOG(_L8("StartObjectEnumerationL - Entry"));
+    OstTraceFunctionEntry0( CMTPFILEDATAPROVIDER_STARTOBJECTENUMERATIONL_ENTRY );
     iPendingEnumerations.AppendL(aStorageId);
     CMTPDataProviderController& dpController(iSingletons.DpController());
     //must read this NeedEnumeratingPhase2 before this function return
     TBool bScanAll = dpController.NeedEnumeratingPhase2();
     iFileEnumerator->StartL(iPendingEnumerations[KActiveEnumeration], bScanAll);
-    __FLOG(_L8("StartObjectEnumerationL - Exit"));
+    OstTraceFunctionExit0( CMTPFILEDATAPROVIDER_STARTOBJECTENUMERATIONL_EXIT );
     }
     
 void CMTPFileDataProvider::StartStorageEnumerationL()
     {
-    __FLOG(_L8("StartStorageEnumerationL - Entry"));
+    OstTraceFunctionEntry0( CMTPFILEDATAPROVIDER_STARTSTORAGEENUMERATIONL_ENTRY );
     iExclusionMgr->AppendFormatExclusionListL();
     iDpSingletons.MTPUtility().FormatExtensionMapping();
     Framework().StorageEnumerationCompleteL();
-    __FLOG(_L8("StartStorageEnumerationL - Exit"));
+    OstTraceFunctionExit0( CMTPFILEDATAPROVIDER_STARTSTORAGEENUMERATIONL_EXIT );
     }
     
 void CMTPFileDataProvider::Supported(TMTPSupportCategory aCategory, RArray<TUint>& aArray) const
     {
-    __FLOG(_L8("Supported - Entry"));
+    OstTraceFunctionEntry0( CMTPFILEDATAPROVIDER_SUPPORTED_ENTRY );
     switch (aCategory) 
         {        
     case EEvents:
@@ -204,22 +207,19 @@ void CMTPFileDataProvider::Supported(TMTPSupportCategory aCategory, RArray<TUint
         // Unrecognised category, leave aArray unmodified.
         break;
         }
-    __FLOG(_L8("Supported - Exit"));
+    OstTraceFunctionExit0( CMTPFILEDATAPROVIDER_SUPPORTED_EXIT );
     }    
        
-#ifdef __FLOG_ACTIVE  
 void CMTPFileDataProvider::NotifyEnumerationCompleteL(TUint32 aStorageId, TInt aError)
-#else
-void CMTPFileDataProvider::NotifyEnumerationCompleteL(TUint32 /*aStorageId*/, TInt /*aError*/)
-#endif // __FLOG_ACTIVE
     {
-    __FLOG(_L8("HandleEnumerationCompletedL - Entry"));
-    __FLOG_VA((_L8("Enumeration of storage 0x%08X completed with error status %d"), aStorageId, aError));
+    OstTraceFunctionEntry0( CMTPFILEDATAPROVIDER_NOTIFYENUMERATIONCOMPLETEL_ENTRY );
+    OstTraceExt2( TRACE_NORMAL, CMTPFILEDATAPROVIDER_NOTIFYENUMERATIONCOMPLETEL, 
+            "Enumeration of storage 0x%08X completed with error status %d", aStorageId, (TInt32)aError);
     __ASSERT_DEBUG((aStorageId == iPendingEnumerations[KActiveEnumeration]), User::Invariant());
     
     Framework().ObjectEnumerationCompleteL(iPendingEnumerations[KActiveEnumeration]);
     iPendingEnumerations.Remove(KActiveEnumeration);
-    __FLOG(_L8("HandleEnumerationCompletedL - Exit"));
+    OstTraceFunctionExit0( CMTPFILEDATAPROVIDER_NOTIFYENUMERATIONCOMPLETEL_EXIT );
     }
     
 /**
@@ -239,8 +239,7 @@ Second-phase constructor.
 */    
 void CMTPFileDataProvider::ConstructL()
     {
-    __FLOG_OPEN(KMTPSubsystem, KComponent);  
-    __FLOG(_L8("ConstructL - Entry"));
+    OstTraceFunctionEntry0( CMTPFILEDATAPROVIDER_CONSTRUCTL_ENTRY );
   	iDpSingletons.OpenL(Framework());
   	iFileDPSingletons.OpenL(Framework());
   	iSingletons.OpenL();
@@ -250,7 +249,7 @@ void CMTPFileDataProvider::ConstructL()
   	
   	TUint processLimit = iFileDPSingletons.FrameworkConfig().UintValueL(CMTPFileDpConfigMgr::EEnumerationIterationLength);
     iFileEnumerator = CMTPFSEnumerator::NewL(Framework(), iDpSingletons.ExclusionMgrL(), *this, processLimit);
-    __FLOG(_L8("ConstructL - Exit"));
+    OstTraceFunctionExit0( CMTPFILEDATAPROVIDER_CONSTRUCTL_EXIT );
     }
 
 /**
@@ -261,7 +260,7 @@ Find or create a request processor that can process the specified request.
 */    
 TInt CMTPFileDataProvider::LocateRequestProcessorL(const TMTPTypeRequest& aRequest, MMTPConnection& aConnection)
     {
-    __FLOG(_L8("LocateRequestProcessorL - Entry"));  
+    OstTraceFunctionEntry0( CMTPFILEDATAPROVIDER_LOCATEREQUESTPROCESSORL_ENTRY ); 
     TInt idx(KErrNotFound);
     TInt count(iActiveProcessors.Count());
     for (TInt i(0); (i < count); i++)
@@ -281,8 +280,8 @@ TInt CMTPFileDataProvider::LocateRequestProcessorL(const TMTPTypeRequest& aReque
         CleanupStack::Pop();
         idx = count;
         }
-        
-    __FLOG(_L8("LocateRequestProcessorL - Exit"));
+
+    OstTraceFunctionExit0( CMTPFILEDATAPROVIDER_LOCATEREQUESTPROCESSORL_EXIT );
     return idx;
     }
 
@@ -294,7 +293,7 @@ Find or create a request processor that can process the specified event.
 */    
 TInt CMTPFileDataProvider::LocateRequestProcessorL(const TMTPTypeEvent& aEvent, MMTPConnection& aConnection)
     {
-    __FLOG(_L8("LocateRequestProcessorL - Entry"));
+    OstTraceFunctionEntry0( DUP1_CMTPFILEDATAPROVIDER_LOCATEREQUESTPROCESSORL_ENTRY );
     TInt idx(KErrNotFound);
     TInt count(iActiveProcessors.Count());
     for (TInt i(0); (i < count); i++)
@@ -305,7 +304,7 @@ TInt CMTPFileDataProvider::LocateRequestProcessorL(const TMTPTypeEvent& aEvent, 
             break;
             }
         }    
-    __FLOG(_L8("LocateRequestProcessorL - Exit"));
+    OstTraceFunctionExit0( DUP1_CMTPFILEDATAPROVIDER_LOCATEREQUESTPROCESSORL_EXIT );
     return idx;    
     }
 
@@ -315,7 +314,7 @@ Cleans up outstanding request processors when a session is closed.
 */
 void CMTPFileDataProvider::SessionClosedL(const TMTPNotificationParamsSessionChange& aSession)
     {
-    __FLOG(_L8("SessionClosedL - Entry"));
+    OstTraceFunctionEntry0( CMTPFILEDATAPROVIDER_SESSIONCLOSEDL_ENTRY );
     TInt count = iActiveProcessors.Count();
     while(count--)
         {
@@ -334,22 +333,22 @@ void CMTPFileDataProvider::SessionClosedL(const TMTPNotificationParamsSessionCha
 	       		}
             }
         } 
-    __FLOG(_L8("SessionClosedL - Exit"));   
+    OstTraceFunctionExit0( CMTPFILEDATAPROVIDER_SESSIONCLOSEDL_EXIT );
     }
 
 /**
 Prepares for a newly-opened session.
 @param aSession notification parameter block
 */
-#ifdef __FLOG_ACTIVE
+#ifdef OST_TRACE_COMPILER_IN_USE
 void CMTPFileDataProvider::SessionOpenedL(const TMTPNotificationParamsSessionChange& aSession)
 #else
 void CMTPFileDataProvider::SessionOpenedL(const TMTPNotificationParamsSessionChange& /*aSession*/)
 #endif
     {
-    __FLOG(_L8("SessionOpenedL - Entry"));
-    __FLOG_VA((_L8("SessionID = %d"), aSession.iMTPId));
-    __FLOG(_L8("SessionOpenedL - Exit"));
+    OstTraceFunctionEntry0( CMTPFILEDATAPROVIDER_SESSIONOPENEDL_ENTRY );
+    OstTrace1( TRACE_NORMAL, CMTPFILEDATAPROVIDER_SESSIONOPENEDL, "SessionID = %d", aSession.iMTPId );
+    OstTraceFunctionExit0( CMTPFILEDATAPROVIDER_SESSIONOPENEDL_EXIT );
     }
 
 /**
@@ -360,7 +359,7 @@ void CMTPFileDataProvider::SessionOpenedL(const TMTPNotificationParamsSessionCha
  */
 TBool CMTPFileDataProvider::PictbridgeDpExistL() const
 	{
-    __FLOG(_L8("PictbridgeDpExistL - Entry"));
+    OstTraceFunctionEntry0( CMTPFILEDATAPROVIDER_PICTBRIDGEDPEXISTL_ENTRY );
     
 	RImplInfoPtrArray   implementations;
 	TCleanupItem        cleanup(ImplementationsCleanup, reinterpret_cast<TAny*>(&implementations));
@@ -379,9 +378,9 @@ TBool CMTPFileDataProvider::PictbridgeDpExistL() const
 			}
 		}
     CleanupStack::PopAndDestroy(&implementations);
-    
-    __FLOG_VA((_L8("return value ret = %d"), ret));
-    __FLOG(_L8("PictbridgeDpExistL - Exit"));
+
+    OstTrace1( TRACE_NORMAL, CMTPFILEDATAPROVIDER_PICTBRIDGEDPEXISTL, "return value ret = %d", ret );
+    OstTraceFunctionExit0( CMTPFILEDATAPROVIDER_PICTBRIDGEDPEXISTL_EXIT );
     return ret;
 	}
 

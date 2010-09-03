@@ -22,8 +22,12 @@
 #include "cmtpobjectbrowser.h"
 #include "mtpdppanic.h"
 #include "cmtpobjectmgr.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpcopyobjectTraces.h"
+#endif
 
-__FLOG_STMT( _LIT8( KComponent,"PrxyCopyObj" ); )
+
 const TUint KInvalidDpId = 0xFF;
 
 /**
@@ -57,15 +61,14 @@ Destructor
 */    
 CMTPCopyObject::~CMTPCopyObject()
     {
+    OstTraceFunctionEntry0( CMTPCOPYOBJECT_CMTPCOPYOBJECT_DES_ENTRY );
     iSingletons.Close();
     iTargetDps.Close();
     iNewHandleParentStack.Close();
     iHandleDepths.Close();
     iHandles.Close();
     delete iObjBrowser;
-    
-    __FLOG( _L8("+/-Dtor") );
-    __FLOG_CLOSE;
+    OstTraceFunctionExit0( CMTPCOPYOBJECT_CMTPCOPYOBJECT_DES_EXIT );
     }
 
 /**
@@ -74,8 +77,7 @@ Constructor
 CMTPCopyObject::CMTPCopyObject(MMTPDataProviderFramework& aFramework, MMTPConnection& aConnection) :
     CMTPRequestProcessor(aFramework, aConnection, sizeof(KMTPCopyObjectPolicy)/sizeof(TMTPRequestElementInfo), KMTPCopyObjectPolicy)
     {
-    __FLOG_OPEN( KMTPSubsystem, KComponent );
-    __FLOG( _L8("+/-Ctor") );
+
     }
     
 /**
@@ -83,10 +85,10 @@ Second phase constructor.
 */
 void CMTPCopyObject::ConstructL()
     {
-    __FLOG( _L8("+ConstructL") );
+    OstTraceFunctionEntry0( CMTPCOPYOBJECT_CONSTRUCTL_ENTRY );
     iSingletons.OpenL();
     iOwnerDp = KInvalidDpId;
-    __FLOG( _L8("-ConstructL") );
+    OstTraceFunctionExit0( CMTPCOPYOBJECT_CONSTRUCTL_EXIT );
     }
     
 /**
@@ -94,7 +96,7 @@ DeleteObject request handler
 */ 
 void CMTPCopyObject::ServiceL()
     {
-    __FLOG( _L8("+ServiceL") );
+    OstTraceFunctionEntry0( CMTPCOPYOBJECT_SERVICEL_ENTRY );
     iTargetDps.Reset();
     CMTPParserRouter& router(iSingletons.Router());
     CMTPParserRouter::TRoutingParameters params(Request(), iConnection);
@@ -102,8 +104,8 @@ void CMTPCopyObject::ServiceL()
     router.RouteOperationRequestL(params, iTargetDps);
     
     BrowseHandlesL();
-    
-    __FLOG( _L8("-ServiceL") );
+
+    OstTraceFunctionExit0( CMTPCOPYOBJECT_SERVICEL_EXIT );
     }
 
 void CMTPCopyObject::ProxyReceiveDataL(MMTPType& /*aData*/, const TMTPTypeRequest& /*aRequest*/, MMTPConnection& /*aConnection*/, TRequestStatus& /*aStatus*/)
@@ -122,7 +124,7 @@ void CMTPCopyObject::ProxySendResponseL(const TMTPTypeResponse& aResponse, const
 void CMTPCopyObject::ProxySendResponseL(const TMTPTypeResponse& aResponse, const TMTPTypeRequest& /*aRequest*/, MMTPConnection& /*aConnection*/, TRequestStatus& aStatus)
 #endif
     {
-    __FLOG( _L8("+ProxySendResponseL") );
+    OstTraceFunctionEntry0( CMTPCOPYOBJECT_PROXYSENDRESPONSEL_ENTRY );
     __ASSERT_DEBUG(((&iCurrentRequest == &aRequest) && (&iConnection == &aConnection)), Panic(EMTPNotSameRequestProxy));
     
     if ( aStatus == KErrNone )
@@ -140,7 +142,7 @@ void CMTPCopyObject::ProxySendResponseL(const TMTPTypeResponse& aResponse, const
     MMTPType::CopyL(aResponse, iResponse);
 	TRequestStatus* status = &aStatus;
 	User::RequestComplete(status, KErrNone);
-    __FLOG( _L8("-ProxySendResponseL") );
+	OstTraceFunctionExit0( CMTPCOPYOBJECT_PROXYSENDRESPONSEL_EXIT );
     }
 
 #ifdef _DEBUG    
@@ -149,7 +151,7 @@ void CMTPCopyObject::ProxyTransactionCompleteL(const TMTPTypeRequest& aRequest, 
 void CMTPCopyObject::ProxyTransactionCompleteL(const TMTPTypeRequest& /*aRequest*/, MMTPConnection& /*aConnection*/)
 #endif
     {
-    __FLOG( _L8("+ProxyTransactionCompleteL") );
+    OstTraceFunctionEntry0( CMTPCOPYOBJECT_PROXYTRANSACTIONCOMPLETEL_ENTRY );
     __ASSERT_DEBUG(((&iCurrentRequest == &aRequest) && (&iConnection == &aConnection)), Panic(EMTPNotSameRequestProxy));
     TInt err((iResponse.Uint16(TMTPTypeResponse::EResponseCode) == EMTPRespCodeOK) ? KErrNone : KErrGeneral);    
     if (err == KErrNone)
@@ -161,15 +163,14 @@ void CMTPCopyObject::ProxyTransactionCompleteL(const TMTPTypeRequest& /*aRequest
         {
         SendResponseL( iResponse.Uint16( TMTPTypeResponse::EResponseCode ) );        
         }
-    __FLOG( _L8("-ProxyTransactionCompleteL") );
+    OstTraceFunctionExit0( CMTPCOPYOBJECT_PROXYTRANSACTIONCOMPLETEL_EXIT );
     }
 
 void CMTPCopyObject::RunL()
     {
-    __FLOG( _L8("+RunL") );
+    OstTraceFunctionEntry0( CMTPCOPYOBJECT_RUNL_ENTRY ); 
+    OstTrace1( TRACE_NORMAL, CMTPCOPYOBJECT_RUNL, "iStatus == %d", iStatus.Int() );
     
-    __FLOG_1( _L8("iStatus == %d"), iStatus.Int() );
-
     if ( iStatus == KErrNone )
         {
         NextObjectHandleL();
@@ -183,7 +184,7 @@ void CMTPCopyObject::RunL()
         {
         SendResponseL( iResponse.Uint16( TMTPTypeResponse::EResponseCode ) );
         }
-    __FLOG( _L8("-RunL") );
+    OstTraceFunctionExit0( CMTPCOPYOBJECT_RUNL_EXIT );
     }
     
 TInt CMTPCopyObject::RunError(TInt /*aError*/)
@@ -219,7 +220,7 @@ void CMTPCopyObject::SendResponseL(TUint16 aCode)
 
 void CMTPCopyObject::BrowseHandlesL()
     {
-    __FLOG( _L8("+BrowseHandlesL") );
+    OstTraceFunctionEntry0( CMTPCOPYOBJECT_BROWSEHANDLESL_ENTRY );
     
     delete iObjBrowser;
     iObjBrowser = NULL;
@@ -238,7 +239,8 @@ void CMTPCopyObject::BrowseHandlesL()
     TUint32 newHandleParent = Request().Uint32( TMTPTypeRequest::ERequestParameter3 );
     iNewHandleParentStack.AppendL( newHandleParent );
     iObjBrowser->GoL( KMTPFormatsAll, handle, KMaxTUint32, callback );
-    __FLOG_1( _L8("iHandles.Count() = %d"), iHandles.Count() );
+    OstTrace1( TRACE_NORMAL, CMTPCOPYOBJECT_BROWSEHANDLESL, "iHandles.Count() = %d", iHandles.Count() );
+    
     
     if ( iHandles.Count() > 0 )
         {
@@ -250,24 +252,24 @@ void CMTPCopyObject::BrowseHandlesL()
         SendResponseL( EMTPRespCodeInvalidObjectHandle );
         }
     
-    __FLOG( _L8("-BrowseHandlesL") );
+    OstTraceFunctionExit0( CMTPCOPYOBJECT_BROWSEHANDLESL_EXIT );
     }
 
 void CMTPCopyObject::NextObjectHandleL()
     {
-    __FLOG( _L8("+NextObjectHandleL") );
+    OstTraceFunctionEntry0( CMTPCOPYOBJECT_NEXTOBJECTHANDLEL_ENTRY );
     __ASSERT_DEBUG( ( iNewHandleParentStack.Count() > 0 ), User::Invariant() );
     iOwnerDp = KInvalidDpId;
     if ( iCurrentHandle >=0 )
         {
-        __FLOG_1( _L8("iCurrentHandle = %d"), iCurrentHandle );
+        OstTrace1( TRACE_NORMAL, CMTPCOPYOBJECT_NEXTOBJECTHANDLEL, "iCurrentHandle = %d", iCurrentHandle );
         TUint32 handle = iHandles[iCurrentHandle];
         TUint32 depth = iHandleDepths[iCurrentHandle];
-        __FLOG_1( _L8("depth = %d"), depth );
+        OstTrace1( TRACE_NORMAL, DUP1_CMTPCOPYOBJECT_NEXTOBJECTHANDLEL, "depth = %d", depth );
         if ( iCurrentHandle != ( iHandles.Count() - 1 ) )
             {
             TUint32 previousDepth = iHandleDepths[iCurrentHandle+1];
-            __FLOG_1( _L8("previousDepth = %d"), previousDepth );
+            OstTrace1( TRACE_NORMAL, DUP2_CMTPCOPYOBJECT_NEXTOBJECTHANDLEL, "previousDepth = %d", previousDepth );
             if ( depth < previousDepth )
                 {
                 // Completed copying folder and all its sub-folder and files, pop all copied folders' handle which are not shallower than the current one.
@@ -313,16 +315,18 @@ void CMTPCopyObject::NextObjectHandleL()
         SendResponseL( iResponse.Uint16( TMTPTypeResponse::EResponseCode ) );
         }
   
-    __FLOG( _L8("-NextObjectHandleL") );
+    OstTraceFunctionExit0( CMTPCOPYOBJECT_NEXTOBJECTHANDLEL_EXIT );
     }
 
 void CMTPCopyObject::OnBrowseObjectL( TAny* aSelf, TUint aHandle, TUint32 aCurDepth )
     {
+    OstTraceFunctionEntry0( CMTPCOPYOBJECT_ONBROWSEOBJECTL_ENTRY );
     CMTPCopyObject* self = reinterpret_cast< CMTPCopyObject* >( aSelf );
     if ( self->iTargetDps.Find(self->iSingletons.ObjectMgr().ObjectOwnerId(aHandle)) != KErrNotFound )
         {
         self->iHandles.AppendL( aHandle );
         self->iHandleDepths.AppendL( aCurDepth );        
         }    
+    OstTraceFunctionExit0( CMTPCOPYOBJECT_ONBROWSEOBJECTL_EXIT );
     }
 

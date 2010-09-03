@@ -24,8 +24,11 @@
 #include <locodservicepluginobserver.h>
 
 #include "cmtpbluetoothcontroller.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpbearermonitorTraces.h"
+#endif
 
-__FLOG_STMT( _LIT8( KComponent, "mtpbearermonitor" ); )
 
 CMTPBearerMonitor* CMTPBearerMonitor::NewL( TLocodServicePluginParams& aParams )
     {
@@ -38,20 +41,24 @@ CMTPBearerMonitor* CMTPBearerMonitor::NewL( TLocodServicePluginParams& aParams )
 
 CMTPBearerMonitor::~CMTPBearerMonitor()
     {
+    OstTraceFunctionEntry0( CMTPBEARERMONITOR_DES_ENTRY );
     iMTPControllers.ResetAndDestroy();
     iMTPControllers.Close();
-    __FLOG( _L8("+/-Dtor") );
-    __FLOG_CLOSE;
+    OstTraceFunctionExit0( CMTPBEARERMONITOR_DES_EXIT );
     }
 
 void CMTPBearerMonitor::ManageServiceCompleted( TLocodBearer aBearer, TBool aStatus, TInt aError )
     {
+    OstTraceFunctionEntry0( CMTPBEARERMONITOR_MANAGESERVICECOMPLETED_ENTRY );
     Observer().ManageServiceCompleted( aBearer, aStatus, ImplementationUid(), aError );
+    OstTraceFunctionExit0( CMTPBEARERMONITOR_MANAGESERVICECOMPLETED_EXIT );
     }
 
 void CMTPBearerMonitor::ManageService( TLocodBearer aBearer, TBool aStatus )
     {
-    __FLOG_2( _L8("+/-ManageService( 0x%08X, %d )"), aBearer, aStatus );
+    OstTraceFunctionEntry0( CMTPBEARERMONITOR_MANAGESERVICE_ENTRY );
+    OstTraceExt2( TRACE_NORMAL, CMTPBEARERMONITOR_MANAGESERVICE, "The bear is 0x%08X, The status is %d", aBearer, aStatus );
+    
     TInt count = iMTPControllers.Count();
     TBool foundController = EFalse;
     for ( TInt i = 0; i < count; ++i )
@@ -66,24 +73,23 @@ void CMTPBearerMonitor::ManageService( TLocodBearer aBearer, TBool aStatus )
         {
         ManageServiceCompleted( aBearer, aStatus, KErrNone );
         }
+    OstTraceFunctionExit0( CMTPBEARERMONITOR_MANAGESERVICE_EXIT );
     }
 
 CMTPBearerMonitor::CMTPBearerMonitor( TLocodServicePluginParams& aParams ):
     CLocodServicePlugin( aParams )
     {
-    __FLOG_OPEN( KMTPSubsystem, KComponent );
-    __FLOG( _L8("+/-Ctor") );
+    OstTraceFunctionEntry0( CMTPBEARERMONITOR_CONS_ENTRY );
+    OstTraceFunctionExit0( CMTPBEARERMONITOR_CONS_EXIT );
     }
 
 void CMTPBearerMonitor::ConstructL()
     {
-    __FLOG( _L8("+ConstructL") );
-    
+    OstTraceFunctionEntry0( CMTPBEARERMONITOR_CONSTRUCTL_ENTRY );
     CMTPBluetoothController* btController = CMTPBluetoothController::NewL( *this );
-    CleanupStack::PushL(btController);
+	CleanupStack::PushL(btController);
     iMTPControllers.AppendL( btController );
-    CleanupStack::Pop(btController);
-    
-    __FLOG( _L8("-ConstructL") );
+	CleanupStack::Pop(btController);
+    OstTraceFunctionExit0( CMTPBEARERMONITOR_CONSTRUCTL_EXIT );
     }
 

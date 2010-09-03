@@ -23,9 +23,14 @@
 #include "cmtprequestchecker.h"
 #include "cmtpfsexclusionmgr.h"
 #include "cmtpfsentrycache.h"
+#include "mtpdebug.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtprequestcheckerTraces.h"
+#endif
+
 
 static const TInt KMTPRequestCheckerHandleGranularity = 2;
-__FLOG_STMT(_LIT8(KComponent,"MTPRequestChecker");)
 
 /**
 Two-phase construction method
@@ -47,10 +52,11 @@ Destructor
 */	
 EXPORT_C CMTPRequestChecker::~CMTPRequestChecker()
 	{
+	OstTraceFunctionEntry0( CMTPREQUESTCHECKER_CMTPREQUESTCHECKER_ENTRY );
 	iDpSingletons.Close();
 	iHandles.Close();
 	iObjectArray.ResetAndDestroy();
-	__FLOG_CLOSE;
+	OstTraceFunctionExit0( CMTPREQUESTCHECKER_CMTPREQUESTCHECKER_EXIT );
 	}
 
 /**
@@ -206,7 +212,8 @@ Check the object handle in the request parameter, whether the handle is in the o
 */		
 TMTPResponseCode CMTPRequestChecker::VerifyObjectHandleL(TUint32 aHandle, const TMTPRequestElementInfo& aElementInfo)
 	{
-	__FLOG_VA((_L8("VerifyObjectHandleL entry with handle 0x%08X"), aHandle));
+	OstTraceFunctionEntry0( CMTPREQUESTCHECKER_VERIFYOBJECTHANDLEL_ENTRY );
+	OstTrace1( TRACE_NORMAL, CMTPREQUESTCHECKER_VERIFYOBJECTHANDLEL, "with handle 0x%08X", aHandle );
     TMTPResponseCode ret = EMTPRespCodeOK; 
 
 	CMTPObjectMetaData* object(CMTPObjectMetaData::NewLC());
@@ -221,12 +228,14 @@ TMTPResponseCode CMTPRequestChecker::VerifyObjectHandleL(TUint32 aHandle, const 
 	    TUint storageID = object->Uint(CMTPObjectMetaData::EStorageId);
 	    if(!iFramework.StorageMgr().ValidStorageId(storageID))
 	    	{
+			OstTraceFunctionExit0( CMTPREQUESTCHECKER_VERIFYOBJECTHANDLEL_EXIT );
 			return EMTPRespCodeInvalidObjectHandle;
 	    	}
 	    
 		CMTPStorageMetaData* storageMetaData = (CMTPStorageMetaData *)& iFramework.StorageMgr().StorageL(storageID);
 		if (storageMetaData->Uint(CMTPStorageMetaData::EStorageSystemType) != CMTPStorageMetaData::ESystemTypeDefaultFileSystem)
 			{
+			OstTraceFunctionExit0( DUP1_CMTPREQUESTCHECKER_VERIFYOBJECTHANDLEL_EXIT );
 			return ret;
 			}
 		
@@ -238,6 +247,7 @@ TMTPResponseCode CMTPRequestChecker::VerifyObjectHandleL(TUint32 aHandle, const 
              (object->Uint(CMTPObjectMetaData::EFormatSubCode) != EMTPAssociationTypeGenericFolder ) )
             {
             // Special association type .. not always present on the filesystem.
+            OstTraceFunctionExit0( DUP2_CMTPREQUESTCHECKER_VERIFYOBJECTHANDLEL_EXIT );
             return ret;
             }   
         else
@@ -248,7 +258,8 @@ TMTPResponseCode CMTPRequestChecker::VerifyObjectHandleL(TUint32 aHandle, const 
             			(iDpSingletons.CopyingBigFileCache().IsOnGoing()))
             		{
             		// The object is being copied, it is not created in fs yet. Use its cache entry for check
-            		__FLOG(_L8("VerifyObjectHandleL - The object is being copied, use its cache entry for check"));
+            		OstTrace0( TRACE_NORMAL, DUP1_CMTPREQUESTCHECKER_VERIFYOBJECTHANDLEL, 
+            		        "VerifyObjectHandleL - The object is being copied, use its cache entry for check" );
             		entry = iDpSingletons.CopyingBigFileCache().FileEntry();
             		err = KErrNone;
             		}
@@ -256,12 +267,15 @@ TMTPResponseCode CMTPRequestChecker::VerifyObjectHandleL(TUint32 aHandle, const 
             						(iDpSingletons.MovingBigFileCache().IsOnGoing()))
             		{
             		// The object is being moved, it is not created in fs yet. Use its cache entry for check
-            		__FLOG(_L8("VerifyObjectHandleL - The object is being moved, use its cache entry for check"));
+            		OstTrace0( TRACE_NORMAL, DUP2_CMTPREQUESTCHECKER_VERIFYOBJECTHANDLEL, 
+            		        "VerifyObjectHandleL - The object is being moved, use its cache entry for check" );
             		entry = iDpSingletons.MovingBigFileCache().FileEntry();
             		err = KErrNone;
             		}            	
             	}
-            User::LeaveIfError(err);
+            LEAVEIFERROR(err,
+                    OstTraceExt2( TRACE_ERROR, DUP5_CMTPREQUESTCHECKER_VERIFYOBJECTHANDLEL, 
+                            "Can't get entry details for %S even after error handling! error code %d", suid, err));
             }
 		
 		if (aElementInfo.iElementAttr & EMTPElementAttrWrite)
@@ -297,10 +311,11 @@ TMTPResponseCode CMTPRequestChecker::VerifyObjectHandleL(TUint32 aHandle, const 
 		 }
 	else
 		{
-		__FLOG(_L8("Object does not exist."));
+		OstTrace0( TRACE_WARNING, DUP3_CMTPREQUESTCHECKER_VERIFYOBJECTHANDLEL, "Object does not exist." );
 		ret = EMTPRespCodeInvalidObjectHandle;
 		}
-	__FLOG_VA((_L8("VerifyObjectHandleL exit with repsonse code 0x%04X"), ret)); 
+	OstTrace1( TRACE_WARNING, DUP4_CMTPREQUESTCHECKER_VERIFYOBJECTHANDLEL, "with repsonse code 0x%04X", ret );
+	OstTraceFunctionExit0( DUP3_CMTPREQUESTCHECKER_VERIFYOBJECTHANDLEL_EXIT );
 	return ret;	
 	}
 
@@ -329,7 +344,8 @@ TMTPResponseCode CMTPRequestChecker::VerifyStorageIdL(TUint32 aStorageId, const 
         if (drive != KErrNotFound)
             {
     		TDriveInfo info;
-    		User::LeaveIfError(iFramework.Fs().Drive(info, drive));
+    		LEAVEIFERROR(iFramework.Fs().Drive(info, drive),
+    		        OstTrace1( TRACE_ERROR, CMTPREQUESTCHECKER_VERIFYSTORAGEIDL, "Gets information about drive %d failed!", drive));    
     		if (info.iType == EMediaNotPresent)
     		    {
     		    /* 
@@ -413,7 +429,6 @@ CMTPRequestChecker::CMTPRequestChecker(MMTPDataProviderFramework& aFramework, MM
 	iHandles(KMTPRequestCheckerHandleGranularity),
 	iObjectArray(KMTPRequestCheckerHandleGranularity)
 	{
-	__FLOG_OPEN(KMTPSubsystem, KComponent);
 	}
 
 /**
@@ -421,7 +436,9 @@ CMTPRequestChecker::CMTPRequestChecker(MMTPDataProviderFramework& aFramework, MM
 */
 void CMTPRequestChecker::ConstructL()
 	{
+	OstTraceFunctionEntry0( CMTPREQUESTCHECKER_CONSTRUCTL_ENTRY );
 	iDpSingletons.OpenL(iFramework);
+	OstTraceFunctionExit0( CMTPREQUESTCHECKER_CONSTRUCTL_EXIT );
 	}
 
 

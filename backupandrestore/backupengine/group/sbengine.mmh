@@ -22,38 +22,4 @@
 #ifndef __SBENGINE_MMH__
 #define __SBENGINE_MMH__
 
-
-/** By default, the SBE logs only in DEBUG builds. If you want
- both release and debug logging, then comment this line out */
-#define __SBE_DISABLE_RELEASE_LOGGING
-
-
-#if defined(__SBE_DISABLE_RELEASE_LOGGING)
-    
-    MACRO SBE_LOGGING_DEBUG_ONLY
-
-#else
-
-    MACRO SBE_LOGGING_DEBUG_AND_RELEASE
-
-#endif
-
-
-/** The following macros are used (when logging is enabled) to
- configure the type of logging to perform */
-
-
-/** Uncomment this line to enable FLOGGER (File) logging */
-MACRO SBE_LOGGING_METHOD_FLOGGER
-
-/** Uncomment this line to enable RDEBUG logging */
-//MACRO SBE_LOGGING_METHOD_RDEBUG
-
-/** Uncomment this line to enable UI (User::InfoPrint) logging. This
- can cause UI deadlock in some UI systems. */
-//MACRO SBE_LOGGING_METHOD_UI
-
-
-
-
 #endif

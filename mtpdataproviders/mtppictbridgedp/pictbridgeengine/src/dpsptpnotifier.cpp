@@ -13,20 +13,17 @@
 *
 * Description:  This class implements functions of setting personality to 
 *                MTP. 
-*  Version     : %version: 1 % 
+*  Version     : %version: 2 % 
 *
 */
 
 
-#include <e32debug.h>
 #include "dpsptpnotifier.h"
 #include "dpsusbnotifier.h"
 #include "dpsconst.h"
-
-#ifdef _DEBUG
-#	define IF_DEBUG(t) {RDebug::t;}
-#else
-#	define IF_DEBUG(t)
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "dpsptpnotifierTraces.h"
 #endif
 
 // ---------------------------------------------------------------------------
@@ -35,7 +32,6 @@
 //
 CDpsPtpNotifier* CDpsPtpNotifier::NewL(CDpsUsbNotifier* aParent)
     {
-    IF_DEBUG(Print(_L("CDpsPtpNotifier::NewL")));
     CDpsPtpNotifier* self = new(ELeave) CDpsPtpNotifier(aParent);
     return self;	    
     }
@@ -47,9 +43,9 @@ CDpsPtpNotifier* CDpsPtpNotifier::NewL(CDpsUsbNotifier* aParent)
 CDpsPtpNotifier::CDpsPtpNotifier(CDpsUsbNotifier* aParent) :
     CActive(EPriorityNormal), iNotifier(aParent)
     {
-    IF_DEBUG(Print(_L(">>>CDpsPtpNotifier::Ctor")));    
+    OstTraceFunctionEntry0( CDPSPTPNOTIFIER_CDPSPTPNOTIFIER_CONS_ENTRY );
     CActiveScheduler::Add(this);
-    IF_DEBUG(Print(_L("<<<CDpsPtpNotifier::Ctor")));    
+    OstTraceFunctionExit0( CDPSPTPNOTIFIER_CDPSPTPNOTIFIER_CONS_EXIT );
     }    
     
 // ---------------------------------------------------------------------------
@@ -58,9 +54,9 @@ CDpsPtpNotifier::CDpsPtpNotifier(CDpsUsbNotifier* aParent) :
 //
 CDpsPtpNotifier::~CDpsPtpNotifier()
     {
-    IF_DEBUG(Print(_L(">>>CDpsPtpNotifier::")));        
-    Cancel();
-    IF_DEBUG(Print(_L("<<<CDpsPtpNotifier::~")));        
+    OstTraceFunctionEntry0( CDPSPTPNOTIFIER_CDPSPTPNOTIFIER_DES_ENTRY );       
+    Cancel();   
+    OstTraceFunctionExit0( DUP1_CDPSPTPNOTIFIER_CDPSPTPNOTIFIER_DES_EXIT );
     }
     
 // ---------------------------------------------------------------------------
@@ -69,12 +65,12 @@ CDpsPtpNotifier::~CDpsPtpNotifier()
 //    
 void CDpsPtpNotifier::ChangePtpPersonality()    
     {
-    IF_DEBUG(Print(_L(">>>CDpsPtpNotifier::ChangePtpPersonality")));            
+    OstTraceFunctionEntry0( CDPSPTPNOTIFIER_CHANGEPTPPERSONALITY_ENTRY );         
     if (!IsActive())
         {
         TInt personalityId = KUsbPersonalityIdMTP;
         iNotifier->iUsbM.GetCurrentPersonalityId(personalityId);
-        IF_DEBUG(Print(_L("CDpsPtpNotifier::ChangePtpPersonality, current personality= %d"), personalityId));
+        OstTrace1(TRACE_NORMAL, CDPSPTPNOTIFIER_CHANGEPTPPERSONALITY, "current personality= %d", personalityId );
         if(KUsbPersonalityIdPCSuiteMTP == personalityId)
             {
             TRequestStatus* statusPtr = &iStatus;
@@ -86,8 +82,8 @@ void CDpsPtpNotifier::ChangePtpPersonality()
             iNotifier->iUsbW.SetPersonality(iStatus, KUsbPersonalityIdMTP, ETrue);
             SetActive();
             }
-        }
-    IF_DEBUG(Print(_L("<<<CDpsPtpNotifier::ChangePtpPersonality")));        
+        }     
+    OstTraceFunctionExit0( CDPSPTPNOTIFIER_CHANGEPTPPERSONALITY_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -96,18 +92,19 @@ void CDpsPtpNotifier::ChangePtpPersonality()
 //
 void CDpsPtpNotifier::RunL()
     {
-    IF_DEBUG(Print(_L(">>>CDpsPtpNotifier::RunL %d"), iStatus.Int()));            
+    OstTraceFunctionEntry0( CDPSPTPNOTIFIER_RUNL_ENTRY );
+    OstTrace1( TRACE_NORMAL, CDPSPTPNOTIFIER_RUNL, "iStatus %d", iStatus.Int());         
     if (KErrNone == iStatus.Int())
         {
         iNotifier->iPersonality = KUsbPersonalityIdMTP;
         TInt ret = iNotifier->ConnectState();
         if (ret != KErrNone)
             {
-            IF_DEBUG(Print(_L("error happened %d"), ret));
+            OstTrace1( TRACE_WARNING, DUP1_CDPSPTPNOTIFIER_RUNL, "error happened %d", ret );
             }
         }
     iNotifier->PtpNotify(iStatus.Int());        
-    IF_DEBUG(Print(_L("<<<CDpsPtpNotifier::RunL")));
+    OstTraceFunctionExit0( CDPSPTPNOTIFIER_RUNL_EXIT );
     }
     
 // ---------------------------------------------------------------------------
@@ -116,9 +113,9 @@ void CDpsPtpNotifier::RunL()
 //
 void CDpsPtpNotifier::DoCancel()
     {
-    IF_DEBUG(Print(_L(">>>CDpsPtpNotifier::DoCancel")));                
-    iNotifier->iUsbW.CancelSetPersonality();
-    IF_DEBUG(Print(_L("<<<CDpsPtpNotifier::DoCancel")));                
+    OstTraceFunctionEntry0( CDPSPTPNOTIFIER_DOCANCEL_ENTRY );               
+    iNotifier->iUsbW.CancelSetPersonality();          
+    OstTraceFunctionExit0( CDPSPTPNOTIFIER_DOCANCEL_EXIT );
     }
     
 // ---------------------------------------------------------------------------
@@ -127,6 +124,7 @@ void CDpsPtpNotifier::DoCancel()
 //
 TInt CDpsPtpNotifier::RunError(TInt aErr)
     {
-    IF_DEBUG(Print(_L("CDpsPtpNotifier::RunError")));                    
+    OstTraceDef1( OST_TRACE_CATEGORY_PRODUCTION, TRACE_IMPORTANT, CDPSPTPNOTIFIER_RUNERROR, 
+            "error code %d", aErr);
     return aErr;
     }

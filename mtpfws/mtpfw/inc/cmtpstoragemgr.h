@@ -25,7 +25,6 @@
 #include <f32file.h>
 #include <mtp/mmtpstoragemgr.h>
 
-#include "mtpdebug.h"
 #include "rmtpframework.h"
 
 /** 
@@ -99,11 +98,6 @@ private:
     
 private: // Owned
 
-    /**
-    FLOGGER debug trace member variable.
-    */
-    __FLOG_DECLARATION_MEMBER_MUTABLE;
-    
     /**
     The default MTP storage ID.
     */

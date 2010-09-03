@@ -24,8 +24,11 @@
 #include "mtpimagedputilits.h"
 #include "cmtpimagedp.h"
 #include "cmtpimagedpsetobjectprotection.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpimagedpsetobjectprotectionTraces.h"
+#endif
 
-__FLOG_STMT(_LIT8(KComponent,"SetObjectProtection");)
 
 /**
 Two-phase construction method
@@ -48,11 +51,9 @@ Destructor
 */    
 CMTPImageDpSetObjectProtection::~CMTPImageDpSetObjectProtection()
     {
-    __FLOG(_L8(">> CMTPImageDpSetObjectProtection::~CMTPImageDpSetObjectProtection"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPSETOBJECTPROTECTION_CMTPIMAGEDPSETOBJECTPROTECTION_DES_ENTRY );
     delete iObjMeta;
-    __FLOG(_L8("<< CMTPImageDpSetObjectProtection::~CMTPImageDpSetObjectProtection"));
-    
-    __FLOG_CLOSE;
+    OstTraceFunctionExit0( CMTPIMAGEDPSETOBJECTPROTECTION_CMTPIMAGEDPSETOBJECTPROTECTION_DES_EXIT );
     }
 
 /**
@@ -69,17 +70,14 @@ Second phase constructor
 */
 void CMTPImageDpSetObjectProtection::ConstructL()
     {
-    __FLOG_OPEN(KMTPSubsystem, KComponent);
-    
-    __FLOG(_L8(">> CMTPImageDpSetObjectProtection::ConstructL"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPSETOBJECTPROTECTION_CONSTRUCTL_ENTRY );
     iObjMeta = CMTPObjectMetaData::NewL();
-    __FLOG(_L8("<< CMTPImageDpSetObjectProtection::ConstructL"));
-    
+    OstTraceFunctionExit0( CMTPIMAGEDPSETOBJECTPROTECTION_CONSTRUCTL_EXIT );
     }
 
 TMTPResponseCode CMTPImageDpSetObjectProtection::CheckRequestL()
     {
-    __FLOG(_L8(">> CMTPImageDpSetObjectProtection::CheckRequestL"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPSETOBJECTPROTECTION_CHECKREQUESTL_ENTRY );
     
     TUint32 objectHandle = Request().Uint32(TMTPTypeRequest::ERequestParameter1);
     TUint32 statusValue = Request().Uint32(TMTPTypeRequest::ERequestParameter2);
@@ -103,9 +101,10 @@ TMTPResponseCode CMTPImageDpSetObjectProtection::CheckRequestL()
                 break;     
             }
         }
-    __FLOG_VA((_L8("CheckRequestL - Exit with responseCode = 0x%04X"), responseCode));
-    __FLOG(_L8("<< CMTPImageDpSetObjectProtection::CheckRequestL"));
-    
+    OstTrace1( TRACE_NORMAL, CMTPIMAGEDPSETOBJECTPROTECTION_CHECKREQUESTL, 
+            "Exit with responseCode = 0x%04X", responseCode );
+
+    OstTraceFunctionExit0( CMTPIMAGEDPSETOBJECTPROTECTION_CHECKREQUESTL_EXIT );
     return responseCode;
     }
 
@@ -124,7 +123,7 @@ GetReferences request handler
 */    
 void CMTPImageDpSetObjectProtection::ServiceL()
     {
-    __FLOG(_L8(">> CMTPImageDpCopyObject::ServiceL"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPSETOBJECTPROTECTION_SERVICEL_ENTRY );
     TUint32 statusValue = Request().Uint32(TMTPTypeRequest::ERequestParameter2);
     TMTPResponseCode responseCode = EMTPRespCodeOK;
     TInt ret = KErrNone;
@@ -152,6 +151,6 @@ void CMTPImageDpSetObjectProtection::ServiceL()
         }
     
     SendResponseL(responseCode);    
-    __FLOG(_L8("<< CMTPImageDpCopyObject::ServiceL"));
+    OstTraceFunctionExit0( CMTPIMAGEDPSETOBJECTPROTECTION_SERVICEL_EXIT );
     }
 

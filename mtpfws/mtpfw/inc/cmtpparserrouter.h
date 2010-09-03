@@ -25,8 +25,8 @@
 #include <mtp/tmtptyperequest.h>
 
 #include "cmtpdataprovidercontroller.h"
-#include "mtpdebug.h"
 #include "rmtpframework.h"
+#include "../traces/OstTraceDefinitions.h"
 
 class CMTPConnection;
 class CMTPDataProvider;
@@ -555,9 +555,9 @@ private: // Owned
         void GetToL(const RArray<TUint>& aFrom, RArray<TUint>& aTo) const;
         TUint SubType() const;
         
-#ifdef __FLOG_ACTIVE
-        void FLOGMapL(RArray<TUint>& aFrom) const;
-        void FLOGMapEntryL(const RArray<TUint>& aFrom, TUint aTo) const;
+#ifdef OST_TRACE_COMPILER_IN_USE
+        void OSTMapL(RArray<TUint>& aFrom) const;
+        void OSTMapEntryL(const RArray<TUint>& aFrom, TUint aTo) const;
 #endif
         
     private:
@@ -589,11 +589,6 @@ private: // Owned
         static TInt NodeOrderFromToDescending(const TMap& aL, const TMap& aR);
         
     private:
-
-        /**
-        FLOGGER debug trace member variable.
-        */
-        __FLOG_DECLARATION_MEMBER_MUTABLE;
  
         /**
         The routing parameter.
@@ -655,16 +650,11 @@ private:
     static TUint ParamsCount(TUint aSubType);
     static TUint SubType(TUint aIndex, TUint aFlags, TUint aParamsCount);
     
-#ifdef __FLOG_ACTIVE
-    void FLOGMapsL() const;
+#ifdef OST_TRACE_COMPILER_IN_USE
+    void OSTMapsL() const;
 #endif
 
 private: // Owned
-
-    /**
-    FLOGGER debug trace member variable.
-    */
-    __FLOG_DECLARATION_MEMBER_MUTABLE;
     
     /**
     The operation parameter routing sub-type map tables.

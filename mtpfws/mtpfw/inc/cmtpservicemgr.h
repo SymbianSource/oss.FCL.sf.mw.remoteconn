@@ -28,7 +28,6 @@
 
 #include "cmtpserviceinfo.h"
 #include "rmtpframework.h"
-#include "mtpdebug.h"
 
 class CMTPServiceConfig;
 
@@ -98,11 +97,6 @@ private:
      */
 	CMTPServiceConfig*	iServiceCfg;
 	
-	/**
-	FLOGGER debug trace member variable.
-	*/
-	__FLOG_DECLARATION_MEMBER_MUTABLE;    
-    
 	};
 
 #endif /*CMTPSERVICEMGR_H_*/

@@ -23,9 +23,13 @@
 #include "rmtpframework.h"
 #include "cmtpdatacodegenerator.h"
 #include "cmtpservicemgr.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "rmtpframeworkTraces.h"
+#endif
+
 
 // Class constants.
-__FLOG_STMT(_LIT8(KComponent,"Framework");)
 
 /**
 Constructor.
@@ -41,11 +45,10 @@ Opens the singletons reference.
 */
 EXPORT_C void RMTPFramework::OpenL()
     {
-    __FLOG_OPEN(KMTPSubsystem, KComponent);
-    __FLOG(_L8("OpenL - Entry"));
+    OstTraceFunctionEntry0( RMTPFRAMEWORK_OPENL_ENTRY );
     iSingletons = &CSingletons::OpenL();
     iNested     = iSingletons->iConstructing;
-    __FLOG(_L8("OpenL - Exit"));
+    OstTraceFunctionExit0( RMTPFRAMEWORK_OPENL_EXIT );
     }
 
 /**
@@ -54,11 +57,10 @@ cleanup stack.
 */
 EXPORT_C void RMTPFramework::OpenLC()
     {
-    __FLOG_OPEN(KMTPSubsystem, KComponent);
-    __FLOG(_L8("OpenLC - Entry"));
+    OstTraceFunctionEntry0( RMTPFRAMEWORK_OPENLC_ENTRY );
     ::CleanupClosePushL(*this);
     OpenL();
-    __FLOG(_L8("OpenLC - Exit"));
+    OstTraceFunctionExit0( RMTPFRAMEWORK_OPENLC_EXIT );
     }
     
 /**
@@ -66,108 +68,107 @@ Closes the singletons reference.
 */
 EXPORT_C void RMTPFramework::Close()
     {
-    __FLOG(_L8("Close - Entry"));
+    OstTraceFunctionEntry0( RMTPFRAMEWORK_CLOSE_ENTRY );
     if ((iSingletons) && (!iNested))
         {
         iSingletons->Close();
         iSingletons = NULL;
         }
-    __FLOG(_L8("Close - Exit"));
-    __FLOG_CLOSE;
+    OstTraceFunctionExit0( RMTPFRAMEWORK_CLOSE_EXIT );
     }
 
 EXPORT_C CMTPConnectionMgr& RMTPFramework::ConnectionMgr() const
     {
-    __FLOG(_L8("ConnectionMgr - Entry"));
+    OstTraceFunctionEntry0( RMTPFRAMEWORK_CONNECTIONMGR_ENTRY );
     __ASSERT_DEBUG(iSingletons, User::Invariant());
     __ASSERT_DEBUG(iSingletons->iSingletonConnectionMgr, User::Invariant());
-    __FLOG(_L8("ConnectionMgr - Exit"));
+    OstTraceFunctionExit0( RMTPFRAMEWORK_CONNECTIONMGR_EXIT );
     return *(iSingletons->iSingletonConnectionMgr);
     }
     
 EXPORT_C CMTPDataProviderController& RMTPFramework::DpController() const
     {
-    __FLOG(_L8("DpController - Entry"));
+    OstTraceFunctionEntry0( RMTPFRAMEWORK_DPCONTROLLER_ENTRY );
     __ASSERT_DEBUG(iSingletons, User::Invariant());
     __ASSERT_DEBUG(iSingletons->iSingletonDpController, User::Invariant());
-    __FLOG(_L8("DpController - Exit"));
+    OstTraceFunctionExit0( RMTPFRAMEWORK_DPCONTROLLER_EXIT );
     return *(iSingletons->iSingletonDpController);
     }
    
 EXPORT_C CMTPFrameworkConfig& RMTPFramework::FrameworkConfig() const
     {
-    __FLOG(_L8("FrameworkConfig - Entry"));
+    OstTraceFunctionEntry0( RMTPFRAMEWORK_FRAMEWORKCONFIG_ENTRY );
     __ASSERT_DEBUG(iSingletons, User::Invariant());
     __ASSERT_DEBUG(iSingletons->iSingletonFrameworkConfig, User::Invariant());
-    __FLOG(_L8("FrameworkConfig - Exit"));
+    OstTraceFunctionExit0( RMTPFRAMEWORK_FRAMEWORKCONFIG_EXIT );
     return *(iSingletons->iSingletonFrameworkConfig);
     }
 
 EXPORT_C RFs& RMTPFramework::Fs() const
     {
-    __FLOG(_L8("Fs - Entry"));
+    OstTraceFunctionEntry0( RMTPFRAMEWORK_FS_ENTRY );
     __ASSERT_DEBUG(iSingletons, User::Invariant());
-    __FLOG(_L8("Fs - Exit"));
+    OstTraceFunctionExit0( RMTPFRAMEWORK_FS_EXIT );
     return iSingletons->iSingletonFs;
     }
 
 EXPORT_C CMTPObjectMgr& RMTPFramework::ObjectMgr() const
     {
-    __FLOG(_L8("ObjectMgr - Entry"));
+    OstTraceFunctionEntry0( RMTPFRAMEWORK_OBJECTMGR_ENTRY );
     __ASSERT_DEBUG(iSingletons, User::Invariant());
     __ASSERT_DEBUG(iSingletons->iSingletonObjectMgr, User::Invariant());
-    __FLOG(_L8("ObjectMgr - Exit"));
+    OstTraceFunctionExit0( RMTPFRAMEWORK_OBJECTMGR_EXIT );
     return *(iSingletons->iSingletonObjectMgr);
     }
 
 EXPORT_C CMTPReferenceMgr& RMTPFramework::ReferenceMgr() const
     {
-    __FLOG(_L8("ReferenceMgr - Entry"));
+    OstTraceFunctionEntry0( RMTPFRAMEWORK_REFERENCEMGR_ENTRY );
     __ASSERT_DEBUG(iSingletons, User::Invariant());
     __ASSERT_DEBUG(iSingletons->iSingletonRouter, User::Invariant());
-    __FLOG(_L8("ReferenceMgr - Exit"));
+    OstTraceFunctionExit0( RMTPFRAMEWORK_REFERENCEMGR_EXIT );
     return (iSingletons->iSingletonObjectMgr->ObjectStore().ReferenceMgr());
     }
 
 EXPORT_C CMTPParserRouter& RMTPFramework::Router() const
     {
-    __FLOG(_L8("Router - Entry"));
+    OstTraceFunctionEntry0( RMTPFRAMEWORK_ROUTER_ENTRY );
     __ASSERT_DEBUG(iSingletons, User::Invariant());
     __ASSERT_DEBUG(iSingletons->iSingletonRouter, User::Invariant());
-    __FLOG(_L8("Router - Exit"));
+    OstTraceFunctionExit0( RMTPFRAMEWORK_ROUTER_EXIT );
     return *(iSingletons->iSingletonRouter);
     }
 
 EXPORT_C CMTPStorageMgr& RMTPFramework::StorageMgr() const
     {
-    __FLOG(_L8("StorageMgr - Entry"));
+    OstTraceFunctionEntry0( RMTPFRAMEWORK_STORAGEMGR_ENTRY );
     __ASSERT_DEBUG(iSingletons, User::Invariant());
     __ASSERT_DEBUG(iSingletons->iSingletonStorageMgr, User::Invariant());
-    __FLOG(_L8("StorageMgr - Exit"));
+    OstTraceFunctionExit0( RMTPFRAMEWORK_STORAGEMGR_EXIT );
     return *(iSingletons->iSingletonStorageMgr);
     }
 
 EXPORT_C CMTPDataCodeGenerator& RMTPFramework::DataCodeGenerator() const
     {
-    __FLOG(_L8("DataCodeGenerator - Entry"));
+    OstTraceFunctionEntry0( RMTPFRAMEWORK_DATACODEGENERATOR_ENTRY );
     __ASSERT_DEBUG(iSingletons, User::Invariant());
     __ASSERT_DEBUG(iSingletons->iSingleDataCodeGenerator, User::Invariant());
-    __FLOG(_L8("DataCodeGenerator - Exit"));
+    OstTraceFunctionExit0( RMTPFRAMEWORK_DATACODEGENERATOR_EXIT );
     return *(iSingletons->iSingleDataCodeGenerator);
     }
 
 EXPORT_C CMTPServiceMgr& RMTPFramework::ServiceMgr() const
     {
-    __FLOG(_L8("ServiceMgr - Entry"));
+    OstTraceFunctionEntry0( RMTPFRAMEWORK_SERVICEMGR_ENTRY );
    __ASSERT_DEBUG(iSingletons, User::Invariant());
    __ASSERT_DEBUG(iSingletons->iSingleServiceMgr, User::Invariant());
-   __FLOG(_L8("ServiceMgr - Exit"));
+   OstTraceFunctionExit0( RMTPFRAMEWORK_SERVICEMGR_EXIT );
    return *(iSingletons->iSingleServiceMgr);
     }
 
 RMTPFramework::CSingletons& RMTPFramework::CSingletons::OpenL()
     {
-    __FLOG_STATIC(KMTPSubsystem, KComponent, _L8("CSingletons::OpenL - Entry"));
+    OstTraceFunctionEntry0( CSINGLETONS_OPENL_ENTRY );
     CSingletons* self(reinterpret_cast<CSingletons*>(Dll::Tls()));
     if (!self)
         {
@@ -179,33 +180,33 @@ RMTPFramework::CSingletons& RMTPFramework::CSingletons::OpenL()
         {        
         self->Inc();
         }
-    __FLOG_STATIC(KMTPSubsystem, KComponent, _L8("CSingletons::OpenL - Exit"));
+    OstTraceFunctionExit0( CSINGLETONS_OPENL_EXIT );
     return *self;
     }
     
 void RMTPFramework::CSingletons::Close()
-    {
+    {   
     CSingletons* self(reinterpret_cast<CSingletons*>(Dll::Tls()));
     if (self)
         {
-        __FLOG(_L8("CSingletons::Close - Entry"));
+        OstTraceFunctionEntry0( CSINGLETONS_CLOSE_ENTRY );
         self->Dec();
         if (self->AccessCount() == 0)
             {
-            __FLOG(_L8("CSingletons::Close - Exit"));
+            OstTraceFunctionExit0( CSINGLETONS_CLOSE_EXIT );
             delete self;
             Dll::SetTls(NULL);
             }
         else
             {
-            __FLOG(_L8("CSingletons::Close - Exit"));
+            OstTraceFunctionExit0( DUP1_CSINGLETONS_CLOSE_EXIT );
             }
         }
     }
     
 RMTPFramework::CSingletons::~CSingletons()
     {
-    __FLOG(_L8("CSingletons::~CSingletons - Entry"));
+    OstTraceFunctionEntry0( RMTPFRAMEWORK_CSINGLETONS_CSINGLETONS_DES_ENTRY );
     delete iSingletonStorageMgr;
     delete iSingletonRouter;
     delete iSingletonDpController;
@@ -216,14 +217,12 @@ RMTPFramework::CSingletons::~CSingletons()
     delete iSingleServiceMgr;
     
     iSingletonFs.Close();
-    __FLOG(_L8("CSingletons::~CSingletons - Exit"));
-    __FLOG_CLOSE;
+    OstTraceFunctionExit0( RMTPFRAMEWORK_CSINGLETONS_CSINGLETONS_DES_EXIT );
     }
     
 void RMTPFramework::CSingletons::ConstructL()
     {
-    __FLOG_OPEN(KMTPSubsystem, KComponent);
-    __FLOG(_L8("CSingletons::ConstructL - Entry"));
+    OstTraceFunctionEntry0( CSINGLETONS_CONSTRUCTL_ENTRY );
     iConstructing = ETrue;
     
 	User::LeaveIfError(iSingletonFs.Connect());
@@ -237,5 +236,5 @@ void RMTPFramework::CSingletons::ConstructL()
     iSingleServiceMgr           = CMTPServiceMgr::NewL();
     
     iConstructing = EFalse;
-    __FLOG(_L8("CSingletons::ConstructL - Exit"));
+    OstTraceFunctionExit0( CSINGLETONS_CONSTRUCTL_EXIT );
     }

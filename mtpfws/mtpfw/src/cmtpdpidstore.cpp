@@ -17,6 +17,12 @@
 
 #include "cmtpdpidstore.h"
 #include "dbutility.h"
+#include "mtpdebug.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpdpidstoreTraces.h"
+#endif
+
 
 
 _LIT(KSQLDPIDTableName, "DPIDStore");
@@ -63,13 +69,16 @@ void CMTPDPIDStore::CreateDPIDStoteTableL()
 	{	
 	if (!DBUtility::IsTableExistsL(iDatabase, KSQLDPIDTableName))
 		{
-		User::LeaveIfError(iDatabase.Execute(KSQLCreateDPIDTableText));			
+		LEAVEIFERROR(iDatabase.Execute(KSQLCreateDPIDTableText),
+		        OstTrace0( TRACE_ERROR, CMTPDPIDSTORE_CREATEDPIDSTOTETABLEL, "TABLE DPIDStore create failed!" ));
 		}
 	iSqlStatement.Format(KSQLGetDPIDUID);    
     RDbView view;
     CleanupClosePushL(view);
-    User::LeaveIfError(view.Prepare(iDatabase, TDbQuery(iSqlStatement)));
-    User::LeaveIfError(view.Evaluate());
+    LEAVEIFERROR(view.Prepare(iDatabase, TDbQuery(iSqlStatement)),
+            OstTrace0( TRACE_ERROR, DUP1_CMTPDPIDSTORE_CREATEDPIDSTOTETABLEL, "view for DPIDStore prepare failed!" ));
+    LEAVEIFERROR(view.Evaluate(),
+            OstTrace0( TRACE_ERROR, DUP2_CMTPDPIDSTORE_CREATEDPIDSTOTETABLEL, "view evaluate failed!" ));
 	while (view.NextL())
         {
         view.GetL();

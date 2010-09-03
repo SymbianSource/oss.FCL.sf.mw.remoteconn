@@ -25,9 +25,11 @@
 
 #include "cmtpgetobject.h"
 #include "mtpdppanic.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpgetobjectTraces.h"
+#endif
 
-// Class constants.
-__FLOG_STMT(_LIT8(KComponent,"GetObject");)
 
 /**
 Verification data for the GetNumObjects request
@@ -58,10 +60,9 @@ Destructor
 */	
 EXPORT_C CMTPGetObject::~CMTPGetObject()
 	{	
-    __FLOG(_L8("~CMTPGetObject - Entry"));
+    OstTraceFunctionEntry0( CMTPGETOBJECT_CMTPGETOBJECT_DES_ENTRY );
 	delete iFileObject;
-    __FLOG(_L8("~CMTPGetObject - Exit"));
-    __FLOG_CLOSE;
+	OstTraceFunctionExit0( CMTPGETOBJECT_CMTPGETOBJECT_DES_EXIT );
 	}
 	
 /**
@@ -79,9 +80,8 @@ Second-phase constructor.
 */        
 void CMTPGetObject::ConstructL()
     {
-    __FLOG_OPEN(KMTPSubsystem, KComponent);
-    __FLOG(_L8("ConstructL - Entry"));
-    __FLOG(_L8("ConstructL - Exit"));
+    OstTraceFunctionEntry0( CMTPGETOBJECT_CONSTRUCTL_ENTRY );
+    OstTraceFunctionExit0( CMTPGETOBJECT_CONSTRUCTL_EXIT );
     }
 
 /**
@@ -89,7 +89,7 @@ GetObject request handler
 */		
 void CMTPGetObject::ServiceL()
 	{
-    __FLOG(_L8("ServiceL - Entry"));
+    OstTraceFunctionEntry0( CMTPGETOBJECT_SERVICEL_ENTRY );
 	__ASSERT_DEBUG(iRequestChecker, Panic(EMTPDpRequestCheckNull));
 	TUint32 objectHandle = Request().Uint32(TMTPTypeRequest::ERequestParameter1);
 	//does not take ownership
@@ -118,7 +118,7 @@ void CMTPGetObject::ServiceL()
     			SendResponseL(EMTPRespCodeAccessDenied);
     			}
         }
-    __FLOG(_L8("ServiceL - Exit"));
+	OstTraceFunctionExit0( CMTPGETOBJECT_SERVICEL_EXIT );
 	}
 		
 
@@ -128,11 +128,11 @@ Build the file object data set for the file requested
 */
 void CMTPGetObject::BuildFileObjectL(const TDesC& aFileName)
 	{
-    __FLOG(_L8("BuildFileObjectL - Entry"));
+    OstTraceFunctionEntry0( CMTPGETOBJECT_BUILDFILEOBJECTL_ENTRY );
 	delete iFileObject;
 	iFileObject = NULL;
 	iFileObject = CMTPTypeFile::NewL(iFramework.Fs(), aFileName, EFileRead);
-    __FLOG(_L8("BuildFileObjectL - Exit"));
+	OstTraceFunctionExit0( CMTPGETOBJECT_BUILDFILEOBJECTL_EXIT );
 	}
 	
 
@@ -142,9 +142,9 @@ Handle the response phase of the current request
 */		
 TBool CMTPGetObject::DoHandleResponsePhaseL()
 	{
-    __FLOG(_L8("DoHandleResponsePhaseL - Entry"));
+    OstTraceFunctionEntry0( CMTPGETOBJECT_DOHANDLERESPONSEPHASEL_ENTRY );
 	TMTPResponseCode responseCode = (iCancelled ? EMTPRespCodeIncompleteTransfer : iError);
 	SendResponseL(responseCode);
-    __FLOG(_L8("DoHandleResponsePhaseL - Exit"));
+	OstTraceFunctionExit0( CMTPGETOBJECT_DOHANDLERESPONSEPHASEL_EXIT );
 	return EFalse;
 	}

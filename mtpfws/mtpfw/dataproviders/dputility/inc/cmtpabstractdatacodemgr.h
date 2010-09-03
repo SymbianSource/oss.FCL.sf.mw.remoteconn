@@ -25,7 +25,6 @@
 #include <mtp/mtpdataproviderapitypes.h>
 #include <mtp/tmtptypeguid.h>
 
-#include "mtpdebug.h"
 #include "mtpsvcdpconst.h"
 
 class MMTPDataProviderFramework;
@@ -110,10 +109,5 @@ private:
 	TUint iServiceID;
 	TMTPTypeGuid iServiceGUID;
 	TMTPTypeGuid iPersistentServiceGUID;
-
-	/**
-	FLOGGER debug trace member variable.
-	*/
-	__FLOG_DECLARATION_MEMBER_MUTABLE;
 	};
 #endif // __CMTPABSTRACTDATACODEMGR_H__

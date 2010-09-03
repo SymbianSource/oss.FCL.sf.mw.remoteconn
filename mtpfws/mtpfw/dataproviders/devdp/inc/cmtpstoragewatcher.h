@@ -24,7 +24,6 @@
 #include <e32base.h>
 #include <mtp/tmtptypeevent.h>
 
-#include "mtpdebug.h"
 #include "rmtpframework.h"
 #include "rmtpdpsingletons.h"
 #include "rmtpdevicedpsingletons.h"
@@ -76,11 +75,6 @@ private: // Owned
     
 private: // Owned
 
-    /**
-    FLOGGER debug trace member variable.
-    */
-    __FLOG_DECLARATION_MEMBER_MUTABLE;
-    
     /**
     The available drives configuration.
     */

@@ -46,10 +46,6 @@ private: // From CMTPRequestProcessor
     void ServiceL();
         
 private:
-	/**
-    FLOGGER debug trace member variable.
-    */
-    __FLOG_DECLARATION_MEMBER_MUTABLE;
 
     CMTPTypeArray* iHandles;
     };

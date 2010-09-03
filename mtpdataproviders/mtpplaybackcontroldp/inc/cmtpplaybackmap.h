@@ -27,6 +27,7 @@
 #include "mmtpplaybackinterface.h"
 #include "mtpdebug.h"
 
+
 class CMTPPlaybackCommand;
 class CMTPPlaybackProperty;
 class MMTPDataProviderFramework;
@@ -88,8 +89,7 @@ private:
     void GetObjecInfoFromHandleL(TUint32 aHandle, TDes& aSuid, TUint& aFormat) const;
 
 private: // Owned.
-
-    __FLOG_DECLARATION_MEMBER_MUTABLE;
+    
     MMTPDataProviderFramework&      iFramework;
     CMTPPlaybackProperty& iProperty;
     };

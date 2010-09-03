@@ -23,8 +23,11 @@
 #include "cmtpserviceconfig.h"
 #include "cmtpservicemgr.h"
 #include <mtp/mtpprotocolconstants.h>
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpservicemgrTraces.h"
+#endif
 
-__FLOG_STMT(_LIT8(KComponent,"ServiceMgr");)
 
 
 /**
@@ -46,29 +49,27 @@ CMTPServiceMgr::CMTPServiceMgr()
 
 void CMTPServiceMgr::ConstructL()
 	{
-	__FLOG_OPEN(KMTPSubsystem, KComponent);
-	__FLOG(_L8("ConstructL - Entry"));
+	OstTraceFunctionEntry0( CMTPSERVICEMGR_CONSTRUCTL_ENTRY );
 	
     iSingletons.OpenL();
 	iServiceCfg = CMTPServiceConfig::NewL( iSingletons.Fs() );
-	   
-	__FLOG(_L8("ConstructL - Exit"));
+
+	OstTraceFunctionExit0( CMTPSERVICEMGR_CONSTRUCTL_EXIT );
 	}
 /**
 Destructor
 */    
 CMTPServiceMgr::~CMTPServiceMgr()
     {
-    __FLOG(_L8("~CMTPServiceMgr - Entry"));
+    OstTraceFunctionEntry0( CMTPSERVICEMGR_CMTPSERVICEMGR_DES_ENTRY );
     
     delete iServiceCfg;
     
     iSingletons.Close();
     
     iServiceIDs.Close();
-    
-    __FLOG(_L8("~CMTPServiceMgr - Exit"));
-    __FLOG_CLOSE;
+
+    OstTraceFunctionExit0( CMTPSERVICEMGR_CMTPSERVICEMGR_DES_EXIT );
     }
 
 EXPORT_C TBool CMTPServiceMgr::IsSupportedService( const TUint aServiceID ) const
@@ -83,7 +84,7 @@ EXPORT_C TBool CMTPServiceMgr::IsSupportedService( const TMTPTypeGuid& aPGUID ) 
 
 TInt CMTPServiceMgr::EnableService(const TMTPTypeGuid& aPGUID, const TUint aServiceID )
     {
-    __FLOG(_L8("CMTPServiceMgr::EnableService : "));
+    OstTraceFunctionEntry0( CMTPSERVICEMGR_ENABLESERVICE_ENTRY );
     
     if( NULL == iServiceCfg->ServiceInfo(aPGUID)  )
         {
@@ -92,13 +93,15 @@ TInt CMTPServiceMgr::EnableService(const TMTPTypeGuid& aPGUID, const TUint aServ
             {
             iServiceCfg->ServiceInfo(aPGUID)->SetServiceID( aServiceID );
             }
-        
-        __FLOG_1(_L8("CMTPServiceMgr::EnableService - Fail to Load service! error = %d "), err );
+        else
+            OstTraceDef1(OST_TRACE_CATEGORY_PRODUCTION, TRACE_IMPORTANT, CMTPSERVICEMGR_ENABLESERVICE, 
+                    "CMTPServiceMgr::EnableService - Fail to Load service! error = %d", err);
+        OstTraceFunctionExit0( CMTPSERVICEMGR_ENABLESERVICE_EXIT );
         return err;
         }
     
-    __FLOG(_L8("CMTPServiceMgr::EnableService - Has been loaded!"));
-    
+    OstTrace0(TRACE_NORMAL, DUP1_CMTPSERVICEMGR_ENABLESERVICE, "CMTPServiceMgr::EnableService - Has been loaded!");
+    OstTraceFunctionExit0( DUP1_CMTPSERVICEMGR_ENABLESERVICE_EXIT );
     return KErrNone;
     }
 
@@ -134,17 +137,17 @@ TInt CMTPServiceMgr::InsertServiceId(const TUint aServiceId)
 
 void CMTPServiceMgr::LoadServiceL( const TMTPTypeGuid& aPGUID )
 	{
-	__FLOG(_L8("CMTPServiceMgr::LoadServiceL - Entry"));
+	OstTraceFunctionEntry0( CMTPSERVICEMGR_LOADSERVICEL_ENTRY );
 
 	iServiceCfg->LoadServiceDataL(aPGUID);
-	
-    __FLOG(_L8("CMTPServiceMgr::LoadServiceL - Exit"));
+
+	OstTraceFunctionExit0( CMTPSERVICEMGR_LOADSERVICEL_EXIT );
 	}
 
 TInt CMTPServiceMgr::GetServiceProperty( const TMTPTypeGuid& aServicePGUID, const TMTPTypeGuid& aPKNamespace, const TUint aPKID, CServiceProperty** aServicePropertye) const
     {
-    __FLOG(_L8("CMTPServiceMgr::GetServiceProperty :"));
-        
+    OstTraceFunctionEntry0( CMTPSERVICEMGR_GETSERVICEPROPERTY_ENTRY );
+
     CMTPServiceInfo* svcinfo = iServiceCfg->ServiceInfo( aServicePGUID );
     if( NULL == svcinfo )
        return KErrNotSupported;
@@ -154,15 +157,15 @@ TInt CMTPServiceMgr::GetServiceProperty( const TMTPTypeGuid& aServicePGUID, cons
        return KErrNotSupported;
     
     *aServicePropertye = prop;
-    
-    __FLOG(_L8("CMTPServiceMgr::GetServiceProperty Exit"));
+
+    OstTraceFunctionExit0( CMTPSERVICEMGR_GETSERVICEPROPERTY_EXIT );
     return KErrNone;
     }
 
 TInt CMTPServiceMgr::GetServiceFormat( const TMTPTypeGuid& aServicePGUID, const TMTPTypeGuid& aGUID, CServiceFormat** aServiceFormat ) const
    {
-    __FLOG(_L8("CMTPServiceMgr::GetServiceFormat :"));
-    
+    OstTraceFunctionEntry0( CMTPSERVICEMGR_GETSERVICEFORMAT_ENTRY );
+
     CMTPServiceInfo* svcinfo = iServiceCfg->ServiceInfo( aServicePGUID );
     if( NULL == svcinfo )
        return KErrNotSupported;
@@ -172,14 +175,14 @@ TInt CMTPServiceMgr::GetServiceFormat( const TMTPTypeGuid& aServicePGUID, const 
        return KErrNotSupported;
     
     *aServiceFormat = format;
-   
-    __FLOG(_L8("CMTPServiceMgr::GetServiceFormat Exit"));
+
+    OstTraceFunctionExit0( CMTPSERVICEMGR_GETSERVICEFORMAT_EXIT );
     return KErrNone;
    }
 
 TInt CMTPServiceMgr::GetServiceMethod( const TMTPTypeGuid& aServicePGUID, const TMTPTypeGuid& aGUID, CServiceMethod** aServiceMethod ) const
    {
-    __FLOG(_L8("CMTPServiceMgr::GetServiceMethod :"));
+    OstTraceFunctionEntry0( CMTPSERVICEMGR_GETSERVICEMETHOD_ENTRY );
     
     CMTPServiceInfo* svcinfo = iServiceCfg->ServiceInfo( aServicePGUID );
     if( NULL == svcinfo )
@@ -191,35 +194,36 @@ TInt CMTPServiceMgr::GetServiceMethod( const TMTPTypeGuid& aServicePGUID, const 
     
     *aServiceMethod = method ;
     
-    __FLOG(_L8("CMTPServiceMgr::GetServiceMethod - Exit"));
+    OstTraceFunctionExit0( CMTPSERVICEMGR_GETSERVICEMETHOD_EXIT );
     return KErrNone;
    }
 
 TInt CMTPServiceMgr::GetServiceId( const TMTPTypeGuid& aServiceGUID, TUint& aServiceID) const
 	{
-	__FLOG(_L8("CMTPServiceMgr::FindServiceId :"));
+	OstTraceFunctionEntry0( CMTPSERVICEMGR_GETSERVICEID_ENTRY );
 	
 	CMTPServiceInfo* svcinfo = ServiceInfo( aServiceGUID );
 	
 	if( NULL ==  svcinfo )
 	    {
-	    __FLOG(_L8("CMTPServiceMgr::GetServiceId - Invalid serviceID"));
-	    
+	    OstTrace0(TRACE_ERROR, CMTPSERVICEMGR_GETSERVICEID, "CMTPServiceMgr::GetServiceId - Invalid serviceID");   
+	    OstTraceFunctionExit0( CMTPSERVICEMGR_GETSERVICEID_EXIT );
 	    return KErrNotFound;
 	    }
 	else
 	    {
 	    aServiceID = svcinfo->ServiceID();
 	    
-	    __FLOG_1(_L8("CMTPServiceMgr::GetServiceId = %d"),aServiceID );
-	    
+	    OstTrace1(TRACE_NORMAL, DUP1_CMTPSERVICEMGR_GETSERVICEID, 
+	            "CMTPServiceMgr::GetServiceId = %d", aServiceID);
+	    OstTraceFunctionExit0( DUP1_CMTPSERVICEMGR_GETSERVICEID_EXIT );
 	    return KErrNone;
 	    }
 	}
 
 TInt CMTPServiceMgr::GetServicePropertyCode( const TMTPTypeGuid& aServicePGUID, const TMTPTypeGuid& aPKNamespace, const TUint aPKID, TUint& aServicePropertyCode ) const
     {
-    __FLOG(_L8("CMTPServiceMgr::GetServicePropertyCode :"));
+    OstTraceFunctionEntry0( CMTPSERVICEMGR_GETSERVICEPROPERTYCODE_ENTRY );
     
     CServiceProperty* prop = NULL;
     TInt err =  GetServiceProperty( aServicePGUID, aPKNamespace, aPKID, &prop );
@@ -227,14 +231,14 @@ TInt CMTPServiceMgr::GetServicePropertyCode( const TMTPTypeGuid& aServicePGUID, 
         return err;
     
     aServicePropertyCode = prop->Code();
- 
-    __FLOG(_L8("CMTPServiceMgr::GetServicePropertyCode - Exit"));
+
+    OstTraceFunctionExit0( CMTPSERVICEMGR_GETSERVICEPROPERTYCODE_EXIT );
     return KErrNone;
     }
 
 TInt CMTPServiceMgr::SetServicePropertyCode( const TMTPTypeGuid& aServicePGUID, const TMTPTypeGuid& aPKNamespace, const TUint aPKID, const TUint aCurrPropertyCode )
     {
-    __FLOG(_L8("CMTPServiceMgr::SetServicePropertyCode :"));
+    OstTraceFunctionEntry0( CMTPSERVICEMGR_SETSERVICEPROPERTYCODE_ENTRY );
     
     CServiceProperty* prop = NULL;
     TInt err =  GetServiceProperty( aServicePGUID, aPKNamespace, aPKID, &prop );
@@ -243,58 +247,58 @@ TInt CMTPServiceMgr::SetServicePropertyCode( const TMTPTypeGuid& aServicePGUID, 
     
     prop->SetCode( aCurrPropertyCode );
     
-    __FLOG(_L8("CMTPServiceMgr::SetServicePropertyCode - Exit"));
+    OstTraceFunctionExit0( CMTPSERVICEMGR_SETSERVICEPROPERTYCODE_EXIT );
     return KErrNone;
     }
 
 TInt CMTPServiceMgr::GetServiceFormatCode( const TMTPTypeGuid& aServicePGUID, const TMTPTypeGuid& aGUID, TUint& aServiceFormatCode ) const
     {
-    __FLOG(_L8("CMTPServiceMgr::GetServiceFormatCode :"));
-    
+    OstTraceFunctionEntry0( CMTPSERVICEMGR_GETSERVICEFORMATCODE_ENTRY );
+
     CServiceFormat* format = NULL;
     TInt err = GetServiceFormat( aServicePGUID, aGUID, &format );
     if( KErrNone != err )
         return err;
     
     aServiceFormatCode = format->Code();
-    
-    __FLOG(_L8("CMTPServiceMgr::GetServiceFormatCode - Exit"));
+
+    OstTraceFunctionExit0( CMTPSERVICEMGR_GETSERVICEFORMATCODE_EXIT );
     return KErrNone;
     }
 
 TInt CMTPServiceMgr::SetServiceFormatCode( const TMTPTypeGuid& aServicePGUID, const TMTPTypeGuid& aGUID, const TUint aCurrFormatCode )
     {
-    __FLOG(_L8("CMTPServiceMgr::SetServiceFormatCode :"));
-    
+    OstTraceFunctionEntry0( CMTPSERVICEMGR_SETSERVICEFORMATCODE_ENTRY );
+
     CServiceFormat* format = NULL;
     TInt err = GetServiceFormat( aServicePGUID, aGUID, &format );
     if( KErrNone != err )
        return err;
     
     format->SetCode( aCurrFormatCode );
-    
-    __FLOG(_L8("CMTPServiceMgr::SetServiceFormatCode - Exit"));
+
+    OstTraceFunctionExit0( CMTPSERVICEMGR_SETSERVICEFORMATCODE_EXIT );
     return KErrNone;
     }
 
 TInt CMTPServiceMgr::GetServiceMethodCode( const TMTPTypeGuid& aServicePGUID, const TMTPTypeGuid& aGUID, TUint& aServiceMethodCode ) const
     {
-    __FLOG(_L8("CMTPServiceMgr::GetServiceMethodCode :"));
-    
+    OstTraceFunctionEntry0( CMTPSERVICEMGR_GETSERVICEMETHODCODE_ENTRY );
+
     CServiceMethod* method = NULL;
     TInt err = GetServiceMethod( aServicePGUID, aGUID, &method );
     if ( KErrNone != err )
         return err;
     
     aServiceMethodCode = method->Code();
-    
-    __FLOG(_L8("CMTPServiceMgr::GetServiceMethodCode - Exit"));
+
+    OstTraceFunctionExit0( CMTPSERVICEMGR_GETSERVICEMETHODCODE_EXIT );
     return KErrNone;
     }
 
 TInt CMTPServiceMgr::SetServiceMethodCode( const TMTPTypeGuid& aServicePGUID, const TMTPTypeGuid& aGUID, const TUint aCurrMethodCode )
     {
-    __FLOG(_L8("CMTPServiceMgr::SetServiceMethodCode :"));
+    OstTraceFunctionEntry0( CMTPSERVICEMGR_SETSERVICEMETHODCODE_ENTRY );
     
     CServiceMethod* method = NULL;
     TInt err = GetServiceMethod( aServicePGUID, aGUID, &method );
@@ -303,7 +307,7 @@ TInt CMTPServiceMgr::SetServiceMethodCode( const TMTPTypeGuid& aServicePGUID, co
     
     method->SetCode( aCurrMethodCode );
     
-    __FLOG(_L8("CMTPServiceMgr::SetServiceMethodCode - Exit"));
+    OstTraceFunctionExit0( CMTPSERVICEMGR_SETSERVICEMETHODCODE_EXIT );
     return KErrNone;
     }
 

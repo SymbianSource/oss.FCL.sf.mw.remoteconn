@@ -24,9 +24,11 @@
 #include "cmtpusbepbulkin.h"
 #include "mtpdebug.h"
 #include "mtpusbpanic.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpusbepbulkinTraces.h"
+#endif
 
-// Class constants.
-__FLOG_STMT(_LIT8(KComponent,"UsbEpBulkIn");)
 
 /**
 USB MTP device class bulk-in endpoint data transfer controller factory method.
@@ -41,12 +43,8 @@ CMTPUsbEpBulkIn* CMTPUsbEpBulkIn::NewL(TUint aId, CMTPUsbConnection& aConnection
     {
     CMTPUsbEpBulkIn* self = new(ELeave) CMTPUsbEpBulkIn(aId, aConnection);
     CleanupStack::PushL(self);
-    
-#ifdef __FLOG_ACTIVE    
-    self->ConstructL(KComponent);
-#else
+
     self->ConstructL();
-#endif
 
     CleanupStack::Pop(self);
     return self;    
@@ -57,8 +55,8 @@ Destructor.
 */
 CMTPUsbEpBulkIn::~CMTPUsbEpBulkIn()
     {
-    __FLOG(_L8("~CMTPUsbEpBulkIn - Entry"));
-    __FLOG(_L8("~CMTPUsbEpBulkIn - Exit"));
+    OstTraceFunctionEntry0( CMTPUSBEPBULKIN_CMTPUSBEPBULKIN_DES_ENTRY );
+    OstTraceFunctionExit0( CMTPUSBEPBULKIN_CMTPUSBEPBULKIN_DES_EXIT );
     }
 
 /**
@@ -68,17 +66,17 @@ Initiates an asynchronous bulk data send sequence.
 */
 void CMTPUsbEpBulkIn::SendBulkDataL(const MMTPType& aData)
     {
-    __FLOG(_L8("SendBulkDataL - Entry"));
+    OstTraceFunctionEntry0( CMTPUSBEPBULKIN_SENDBULKDATAL_ENTRY );
     // Pass the bulk data source buffer to the base class for processing.
     SendDataL(aData);
-    __FLOG(_L8("SendBulkDataL - Exit"));
+    OstTraceFunctionExit0( CMTPUSBEPBULKIN_SENDBULKDATAL_EXIT );
     }
     
 void CMTPUsbEpBulkIn::SendDataCompleteL(TInt aError, const MMTPType& aSource)
     {
-    __FLOG(_L8("SendDataCompleteL - Entry"));
+    OstTraceFunctionEntry0( CMTPUSBEPBULKIN_SENDDATACOMPLETEL_ENTRY );
     Connection().SendBulkDataCompleteL(aError, aSource);
-    __FLOG(_L8("SendDataCompleteL - Exit"));
+    OstTraceFunctionExit0( CMTPUSBEPBULKIN_SENDDATACOMPLETEL_EXIT );
     }
 
 /**

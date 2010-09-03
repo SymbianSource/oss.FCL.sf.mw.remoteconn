@@ -24,7 +24,6 @@
 
 #include <e32base.h>
 #include <e32property.h>
-#include "mtpdebug.h"
 
 
 // FORWARD DECLARATION
@@ -80,10 +79,6 @@ class CMTPPictBridgeUsbConnection : public CActive
         CMTPPictBridgePrinter& iPrinter;
         RProperty              iProperty;
         TInt                   iPreviousPersonality;
-        /**
-        FLOGGER debug trace member variable.
-        */
-        __FLOG_DECLARATION_MEMBER_MUTABLE;
     };
     
 #endif

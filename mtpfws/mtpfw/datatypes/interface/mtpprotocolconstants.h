@@ -800,6 +800,12 @@ enum TMTPProtectionStatus
     EMTPProtectionNonTransferable   = 0x8003
     };
 
+enum TMTPHiddenStatus
+    {
+    EMTPVisible      = 0x0000,
+    EMTPHidden       = 0x0001
+    };
+
 /**
 The MTP consumable status datacodes. For a description of these datacodes, 
 please refer to the "Media Transfer Protocol Enhanced" specification.

@@ -18,7 +18,6 @@
 /**
  @file
 */
-#include <comms-infras/commsdebugutility.mmh>
 
 TARGET mtpusbsiccc.dll
 TARGETTYPE PLUGIN
@@ -31,7 +30,8 @@ SOURCE cmtpusbsicclassimpcollection.cpp
 
 USERINCLUDE ../inc
 USERINCLUDE ../../common/inc
-USERINCLUDE ../../../../mtpfws/mtpfw/common/inc
+USERINCLUDE ../../../../mtpfws/mtpfw/common/inc 
+USERINCLUDE ../traces
 
 MW_LAYER_SYSTEMINCLUDE_SYMBIAN
 

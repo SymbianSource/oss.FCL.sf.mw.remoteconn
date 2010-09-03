@@ -22,7 +22,6 @@
 #define CMTPPCBRESETPBDEVICEPROPVALUE_H
 
 #include "cmtppbcgetdevicepropdesc.h"
-#include "mtpdebug.h"
 #include "cmtpplaybackmap.h"
 
 class CMTPTypeString;
@@ -59,11 +58,7 @@ private:
     void SaveGUID( const TUint aKey, TMTPTypeGuid& aValue );
 
 private: // Owned
-
-    /**
-    FLOGGER debug trace member variable.
-    */
-    __FLOG_DECLARATION_MEMBER_MUTABLE;
+    
     CMTPPlaybackControlDataProvider& iPlaybackControlDp;
     TMTPPbCtrlData iData;
     CMTPPlaybackCommand* iPbCmd;

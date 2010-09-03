@@ -21,9 +21,13 @@
 #include "mtpdpconst.h"
 #include "mmtpservicedataprovider.h"
 #include "mmtpsvcobjecthandler.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpsvcdeleteobjectTraces.h"
+#endif
+
 
 // Class constants.
-__FLOG_STMT(_LIT8(KComponent,"SvcDeleteObject");)
 
 EXPORT_C MMTPRequestProcessor* CMTPSvcDeleteObject::NewL(MMTPDataProviderFramework& aFramework, 
 												MMTPConnection& aConnection, 
@@ -35,18 +39,16 @@ EXPORT_C MMTPRequestProcessor* CMTPSvcDeleteObject::NewL(MMTPDataProviderFramewo
 
 EXPORT_C CMTPSvcDeleteObject::~CMTPSvcDeleteObject()
 	{
-	__FLOG(_L8("~CMTPSvcDeleteObject - Entry"));
+	OstTraceFunctionEntry0( CMTPSVCDELETEOBJECT_CMTPSVCDELETEOBJECT_DES_ENTRY );
 	iObjectHandles.Close();
 	delete iReceivedObjectMetaData;
-	__FLOG(_L8("~CMTPSvcDeleteObject - Exit"));
-	__FLOG_CLOSE;
+	OstTraceFunctionExit0( CMTPSVCDELETEOBJECT_CMTPSVCDELETEOBJECT_DES_EXIT );
 	}
 
 CMTPSvcDeleteObject::CMTPSvcDeleteObject(MMTPDataProviderFramework& aFramework, MMTPConnection& aConnection, MMTPServiceDataProvider& aDataProvider) :
 	CMTPRequestProcessor(aFramework, aConnection, 0, NULL), iDataProvider(aDataProvider), iDeleteError(KErrNone)
 	{
-	__FLOG_OPEN(KMTPSubsystem, KComponent);
-	__FLOG(_L8("CMTPSvcDeleteObject - Constructed"));
+	OstTrace0( TRACE_NORMAL, CMTPSVCDELETEOBJECT_CMTPSVCDELETEOBJECT, "CMTPSvcDeleteObject - Constructed" );
 	}
 
 /**
@@ -54,7 +56,7 @@ DeleteObject request handler
 */
 void CMTPSvcDeleteObject::LoadAllObjHandlesL(TUint32 aParentHandle)
 	{
-	__FLOG(_L8("LoadAllObjHandlesL - Entry"));
+	OstTraceFunctionEntry0( CMTPSVCDELETEOBJECT_LOADALLOBJHANDLESL_ENTRY );
 	const TUint32 KFormatCode = Request().Uint32(TMTPTypeRequest::ERequestParameter2);
 	RMTPObjectMgrQueryContext context;
 	CleanupClosePushL(context);
@@ -67,16 +69,17 @@ void CMTPSvcDeleteObject::LoadAllObjHandlesL(TUint32 aParentHandle)
 		}
 	while (!context.QueryComplete());
 	CleanupStack::PopAndDestroy(&context);
-	__FLOG(_L8("LoadAllObjHandlesL - Exit"));
+	OstTraceFunctionExit0( CMTPSVCDELETEOBJECT_LOADALLOBJHANDLESL_EXIT );
 	}
 
 void CMTPSvcDeleteObject::ServiceL()
 	{
-	__FLOG(_L8("ServiceL - Entry"));
+	OstTraceFunctionEntry0( CMTPSVCDELETEOBJECT_SERVICEL_ENTRY );
 	if (iFormatCode == EMTPFormatCodeAssociation)
 		{
 		// Framework may send deleteobject for a directory, allow framework do this.
 		SendResponseL(EMTPRespCodeOK);
+		OstTraceFunctionExit0( CMTPSVCDELETEOBJECT_SERVICEL_EXIT );
 		return;
 		}
 	
@@ -95,15 +98,17 @@ void CMTPSvcDeleteObject::ServiceL()
 		// Remove from framework.
 		iFramework.ObjectMgr().RemoveObjectL(iReceivedObjectMetaData->DesC(CMTPObjectMetaData::ESuid));
 		SendResponseL(responseCode);
-		__FLOG_VA((_L8("Delete single object exit with response code = 0x%04X"), responseCode));
+		OstTrace1( TRACE_NORMAL, CMTPSVCDELETEOBJECT_SERVICEL, 
+		        "Delete single object exit with response code = 0x%04X", responseCode );
 		}
-	__FLOG(_L8("ServiceL - Exit"));
+	OstTraceFunctionExit0( DUP1_CMTPSVCDELETEOBJECT_SERVICEL_EXIT );
 	}
 
 void CMTPSvcDeleteObject::RunL()
 	{
-	__FLOG(_L8("RunL - Entry"));
-	__FLOG_VA((_L8("the number of objects to be deleted is %d, iDeleteIndex is %d"), iObjectHandles.Count(), iDeleteIndex));
+	OstTraceFunctionEntry0( CMTPSVCDELETEOBJECT_RUNL_ENTRY );
+	OstTraceExt2( TRACE_NORMAL, CMTPSVCDELETEOBJECT_RUNL, 
+	        "the number of objects to be deleted is %d, iDeleteIndex is %d", iObjectHandles.Count(), iDeleteIndex );
 
 	if (iStatus != KErrNone)
 		{
@@ -128,7 +133,8 @@ void CMTPSvcDeleteObject::RunL()
 		else
 			{
 			++errCount;
-			__FLOG_VA((_L8("Delete object failed, SUID:%S"), &(iReceivedObjectMetaData->DesC(CMTPObjectMetaData::ESuid))));
+			OstTraceExt1( TRACE_NORMAL, DUP1_CMTPSVCDELETEOBJECT_RUNL, 
+			        "Delete object failed, SUID:%S", iReceivedObjectMetaData->DesC(CMTPObjectMetaData::ESuid));
 			}
 		}
 
@@ -145,7 +151,7 @@ void CMTPSvcDeleteObject::RunL()
 		TInt err = (errCount > 0) ? KErrGeneral : KErrNone;
 		CompleteSelf(err);
 		}
-	__FLOG(_L8("RunL - Exit")); 
+	OstTraceFunctionExit0( CMTPSVCDELETEOBJECT_RUNL_EXIT );
 	}
 
 /**
@@ -153,9 +159,9 @@ Handle an error in the delete loop by storing the error code and continuing dele
 */
 TInt CMTPSvcDeleteObject::RunError(TInt aError)
 	{
-	__FLOG(_L8("RunError - Entry")); 
+	OstTraceFunctionEntry0( CMTPSVCDELETEOBJECT_RUNERROR_ENTRY );
 	CompleteSelf(aError);
-	__FLOG(_L8("RunError - Exit"));
+	OstTraceFunctionExit0( CMTPSVCDELETEOBJECT_RUNERROR_EXIT );
 	return KErrNone;
 	}
 
@@ -164,17 +170,17 @@ Complete myself
 */
 void CMTPSvcDeleteObject::CompleteSelf(TInt aError)
 	{
-	__FLOG(_L8("CompleteSelf - Entry"));
+	OstTraceFunctionEntry0( CMTPSVCDELETEOBJECT_COMPLETESELF_ENTRY );
 	SetActive();
 	TRequestStatus* status = &iStatus;
 	*status = KRequestPending;
 	User::RequestComplete(status, aError);
-	__FLOG(_L8("CompleteSelf - Exit"));
+	OstTraceFunctionExit0( CMTPSVCDELETEOBJECT_COMPLETESELF_EXIT );
 	}
 
 TMTPResponseCode CMTPSvcDeleteObject::CheckRequestL()
 	{
-	__FLOG(_L8("CheckRequestL - Entry"));
+	OstTraceFunctionEntry0( CMTPSVCDELETEOBJECT_CHECKREQUESTL_ENTRY );
 	TMTPResponseCode responseCode = CMTPRequestProcessor::CheckRequestL();
 	if (EMTPRespCodeOK == responseCode)
 		{
@@ -192,7 +198,7 @@ TMTPResponseCode CMTPSvcDeleteObject::CheckRequestL()
 				if (iReceivedObjectMetaData->Uint(CMTPObjectMetaData::EDataProviderId) != iFramework.DataProviderId() && (iFormatCode != EMTPFormatCodeAssociation))
 					{
 					responseCode = EMTPRespCodeInvalidObjectHandle;
-					__FLOG(_L8("DataProviderId dismatch"));
+					OstTrace0( TRACE_WARNING, DUP1_CMTPSVCDELETEOBJECT_CHECKREQUESTL, "DataProviderId dismatch" );
 					}
 				else
 					{
@@ -216,13 +222,14 @@ TMTPResponseCode CMTPSvcDeleteObject::CheckRequestL()
 			}
 		}
 
-	__FLOG_VA((_L8("CheckRequestL Exit with response code = 0x%04X"), responseCode));
+	OstTrace1( TRACE_NORMAL, CMTPSVCDELETEOBJECT_CHECKREQUESTL, "Exit with response code = 0x%04X", responseCode );
+	OstTraceFunctionExit0( CMTPSVCDELETEOBJECT_CHECKREQUESTL_EXIT );
 	return responseCode;
 	}
 
 void CMTPSvcDeleteObject::ProcessFinalPhaseL()
 	{
-	__FLOG(_L8("ProcessFinalPhaseL - Entry"));
+	OstTraceFunctionEntry0( CMTPSVCDELETEOBJECT_PROCESSFINALPHASEL_ENTRY );
 	TMTPResponseCode responseCode = EMTPRespCodeOK;
 	if (iDeleteError != KErrNone)
 		{
@@ -236,25 +243,26 @@ void CMTPSvcDeleteObject::ProcessFinalPhaseL()
 			}
 		}
 	SendResponseL(responseCode);
-	__FLOG_VA((_L8("ProcessFinalPhaseL - Exit with response code = 0x%04X"), responseCode));
+	OstTrace1( TRACE_NORMAL, CMTPSVCDELETEOBJECT_PROCESSFINALPHASEL, "Exit with response code = 0x%04X", responseCode );
+	OstTraceFunctionExit0( CMTPSVCDELETEOBJECT_PROCESSFINALPHASEL_EXIT );
 	}
 
 TMTPResponseCode CMTPSvcDeleteObject::CheckFmtAndSetHandler(TUint32 aFormatCode)
 	{
-	__FLOG(_L8("CheckFmtAndSetHandler - Entry")); 
+	OstTraceFunctionEntry0( CMTPSVCDELETEOBJECT_CHECKFMTANDSETHANDLER_ENTRY );
 	TMTPResponseCode responseCode = EMTPRespCodeOK;
 	iObjectHandler = iDataProvider.ObjectHandler(aFormatCode);
 	if (!iObjectHandler)
 		{
 		responseCode = EMTPRespCodeInvalidObjectFormatCode;
 		}
-	__FLOG(_L8("CheckFmtAndSetHandler - Exit"));
+	OstTraceFunctionExit0( CMTPSVCDELETEOBJECT_CHECKFMTANDSETHANDLER_EXIT );
 	return responseCode;
 	}
 
 TMTPResponseCode CMTPSvcDeleteObject::DeleteObjectL(const CMTPObjectMetaData& aObjectMetaData)
 	{
-	__FLOG(_L8("DeleteObjectL - Entry"));
+	OstTraceFunctionEntry0( CMTPSVCDELETEOBJECT_DELETEOBJECTL_ENTRY );
 	TMTPResponseCode responseCode = EMTPRespCodeOK;
 	TUint16 formatCode = aObjectMetaData.Uint(CMTPObjectMetaData::EFormatCode);
 	responseCode = CheckFmtAndSetHandler(formatCode);
@@ -262,6 +270,6 @@ TMTPResponseCode CMTPSvcDeleteObject::DeleteObjectL(const CMTPObjectMetaData& aO
 		{
 		responseCode = iObjectHandler->DeleteObjectL(aObjectMetaData);
 		}
-	__FLOG(_L8("DeleteObjectL - Exit"));
+	OstTraceFunctionExit0( CMTPSVCDELETEOBJECT_DELETEOBJECTL_EXIT );
 	return responseCode;
 	}

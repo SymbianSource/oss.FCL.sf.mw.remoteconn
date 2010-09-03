@@ -19,15 +19,21 @@
  @internalComponent
 */
 
+#include "mtpdebug.h"
 #include "cptpipsockhandlerbase.h"
 #include "cptpipconnection.h"
 #include "ptpippanic.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cptpipsockhandlerbaseTraces.h"
+#endif
+
 
 const TUint32 KPTPIPHeaderSize = 8;
 const TUint KMaxPacketSixe   = 16;
 const TUint64 KMaxPTPIPPacketSize = 0x18FF4; // 100 KB - 12
 
-//#define MTP_DEBUG_FLOG_HEX_DUMP
+//#define MTP_DEBUG_OST_HEX_DUMP 
 
 #define UNUSED_VAR(a) (a)=(a)
 
@@ -55,7 +61,9 @@ CPTPIPSocketHandlerBase::CPTPIPSocketHandlerBase(CPTPIPConnection& aConnection, 
 						iSendDataSource(NULL),
 						iCurrentChunkData(NULL,0,0)
 	{
+	OstTraceFunctionEntry0( CPTPIPSOCKETHANDLERBASE_CPTPIPSOCKETHANDLERBASE_ENTRY );
 	CActiveScheduler::Add(this);
+	OstTraceFunctionExit0( CPTPIPSOCKETHANDLERBASE_CPTPIPSOCKETHANDLERBASE_EXIT );
 	}
 
 
@@ -63,18 +71,13 @@ CPTPIPSocketHandlerBase::CPTPIPSocketHandlerBase(CPTPIPConnection& aConnection, 
 /**
 Second phase constructor.
 */
-#ifdef __FLOG_ACTIVE    
-void CPTPIPSocketHandlerBase::ConstructL(const TDesC8& aComponentName)
-#else
 void CPTPIPSocketHandlerBase::ConstructL()
-#endif
     {
-    __FLOG_OPEN(KMTPSubsystem, aComponentName);
-    __FLOG(_L8("CSocketHandler::ConstructL - Entry"));
+    OstTraceFunctionEntry0( CPTPIPSOCKETHANDLERBASE_CONSTRUCTL_ENTRY );
     iPacketSizeMax = KMaxPacketSixe; 
     iPacketBuffer.ReAllocL(iPacketSizeMax);
     iPTPIPDataHeader = CPTPIPDataContainer::NewL();
-    __FLOG(_L8("CSocketHandler::ConstructL - Exit"));
+    OstTraceFunctionExit0( CPTPIPSOCKETHANDLERBASE_CONSTRUCTL_EXIT );
     }
   
  /**
@@ -82,13 +85,12 @@ void CPTPIPSocketHandlerBase::ConstructL()
  */  
  CPTPIPSocketHandlerBase::~CPTPIPSocketHandlerBase()
  {
-    __FLOG(_L8("CSocketHandler::~CSocketHandler - Entry"));
+    OstTraceFunctionEntry0( DUP1_CPTPIPSOCKETHANDLERBASE_CPTPIPSOCKETHANDLERBASE_ENTRY );
     Cancel();
     iPacketBuffer.Close();
     iSocket.Close();
     delete iPTPIPDataHeader;
-    __FLOG(_L8("CSocketHandler::~CSocketHandler - Exit"));
-    __FLOG_CLOSE;
+    OstTraceFunctionExit0( DUP1_CPTPIPSOCKETHANDLERBASE_CPTPIPSOCKETHANDLERBASE_EXIT );
  }
 
 
@@ -101,14 +103,18 @@ void CPTPIPSocketHandlerBase::ConstructL()
 */
 void CPTPIPSocketHandlerBase::RunL()
 	{
-	__FLOG(_L8("RunL - Entry"));
-    __FLOG_VA((_L8("Current State is 0x%08X, and status is %d"), iState, iStatus.Int()));	
+	OstTraceFunctionEntry0( CPTPIPSOCKETHANDLERBASE_RUNL_ENTRY );
+    OstTraceExt2( TRACE_NORMAL, CPTPIPSOCKETHANDLERBASE_RUNL, "Current State is 0x%08X, and status is %d",
+            iState, iStatus.Int());
+    
     
 	switch ( DataStreamDirection() )
 		{
 	case EReceivingState:
 	
-        __FLOG_VA((_L8("Receive data completion status = %d"), iStatus.Int()));
+        OstTrace1( TRACE_NORMAL, DUP1_CPTPIPSOCKETHANDLERBASE_RUNL, "Receive data completion status = %d",
+                iStatus.Int());
+        
         if (iState == EReceiveFastInProgress)
         	{
         	InitiateFirstChunkReceiveL(); 
@@ -117,7 +123,9 @@ void CPTPIPSocketHandlerBase::RunL()
         else if (iStatus != KErrNone)
             {
             // Abnormal completion.
-            __FLOG_VA((_L8("PTPIP Error: Receive data completed with error = %d"), iStatus.Int()));
+            OstTrace1( TRACE_NORMAL, DUP2_CPTPIPSOCKETHANDLERBASE_RUNL, "PTPIP Error: Receive data completed with error = %d",
+                    iStatus.Int());
+            
             SetState(EReceiveComplete);
             }
         else if (iState != EReceiveComplete)
@@ -148,7 +156,9 @@ void CPTPIPSocketHandlerBase::RunL()
             TRAPD(err, ReceiveDataCompleteL(iStatus.Int(), data));
             if (err != KErrNone)
             	{
-            	__FLOG_VA((_L8("Framework threw an error from ReceiveDataCompleteL = %d"), err)); 
+            	OstTrace1( TRACE_NORMAL, DUP3_CPTPIPSOCKETHANDLERBASE_RUNL, "Framework threw an error from ReceiveDataCompleteL = %d",
+            	        err);
+            	
             	ReceiveDataCompleteL(err, data);
             	}
             }
@@ -162,7 +172,9 @@ void CPTPIPSocketHandlerBase::RunL()
 			break;
 			}
 
-        __FLOG_VA((_L8("Send data stream completion status = %d"), iStatus.Int())); 
+        OstTrace1( TRACE_NORMAL, DUP4_CPTPIPSOCKETHANDLERBASE_RUNL, "Send data stream completion status = %d",
+                iStatus.Int());
+        
         if (iStatus != KErrNone)
             {
             // Abnormal completion.
@@ -180,7 +192,9 @@ void CPTPIPSocketHandlerBase::RunL()
             TRAPD(err, SendDataCompleteL(iStatus.Int(), data));
             if (err != KErrNone)
             	{
-            	__FLOG_VA((_L8("Framework threw an error from SendDataCompleteL = %d"), err)); 
+            	OstTrace1( TRACE_NORMAL, DUP5_CPTPIPSOCKETHANDLERBASE_RUNL, "Framework threw an error from SendDataCompleteL = %d",
+            	        err);
+            	
             	SendDataCompleteL(err, data);
             	}
             }
@@ -220,14 +234,17 @@ void CPTPIPSocketHandlerBase::RunL()
 		
 	default:
 		
-		__FLOG_VA((_L8("PTPIP ERROR: Invalid state of the sockethandler: RunL should not be called with 0x%08X state"), iState));	
+		OstTrace1( TRACE_NORMAL, DUP6_CPTPIPSOCKETHANDLERBASE_RUNL, "PTPIP ERROR: Invalid state of the sockethandler: RunL should not be called with 0x%08X state",
+		        iState);
+		
         Panic(EPTPIPBadState);
 		break;
 		
 		}// switch
-		
-    __FLOG_VA((_L8("IsActive = %d"), IsActive()));
-	__FLOG(_L8("RunL - Exit"));
+    OstTrace1( TRACE_NORMAL, DUP7_CPTPIPSOCKETHANDLERBASE_RUNL, "IsActive = %d",
+            IsActive());
+    
+	OstTraceFunctionExit0( CPTPIPSOCKETHANDLERBASE_RUNL_EXIT );
 	}
 
 /**
@@ -235,23 +252,26 @@ Tell the Asynchronous Service provider to cancel all outstanding operations.
 */
 void CPTPIPSocketHandlerBase::DoCancel()
 	{
-	__FLOG(_L8("DoCancel - Entry"));
+	OstTraceFunctionEntry0( CPTPIPSOCKETHANDLERBASE_DOCANCEL_ENTRY );
     switch (iState & EStateDirection)
         {
     case EReceivingState:
-        __FLOG(_L8("Cancelling receive on the socket"));
+        OstTrace0( TRACE_NORMAL, CPTPIPSOCKETHANDLERBASE_DOCANCEL, "Cancelling receive on the socket" );
+        
         iSocket.CancelRecv();
         ResetReceiveDataStream();
         break;
 
     case ESendingState:    
-        __FLOG(_L8("Cancelling send on the socket"));
+        OstTrace0( TRACE_NORMAL, DUP1_CPTPIPSOCKETHANDLERBASE_DOCANCEL, "Cancelling send on the socket" );
+        
         iSocket.CancelSend();
         ResetSendDataStream();
         break;
         
     case ESendDataState:
-	    __FLOG(_L8("Cancelling send on the socket"));
+	    OstTrace0( TRACE_NORMAL, DUP2_CPTPIPSOCKETHANDLERBASE_DOCANCEL, "Cancelling send on the socket" );
+	    
 	    iSocket.CancelSend();
 	    ResetSendDataStream();
 	    break;
@@ -259,7 +279,7 @@ void CPTPIPSocketHandlerBase::DoCancel()
     default:
         break;
 		}
-	__FLOG(_L8("DoCancel - Exit"));
+	OstTraceFunctionExit0( CPTPIPSOCKETHANDLERBASE_DOCANCEL_EXIT );
 	}
 
 /**
@@ -270,8 +290,10 @@ a send or recv operation, we complete it with the error code.
 */
 TInt CPTPIPSocketHandlerBase::RunError(TInt aError)
 	{
-	__FLOG(_L8("RunError - Entry"));
-    __FLOG_VA((_L8("Error reported is  %d and state is 0x%08X, and status is %d"), aError, iState, iStatus.Int()));
+	OstTraceFunctionEntry0( CPTPIPSOCKETHANDLERBASE_RUNERROR_ENTRY );
+    OstTraceExt3( TRACE_NORMAL, CPTPIPSOCKETHANDLERBASE_RUNERROR, "Error reported is  %d and state is 0x%08X, and status is %d",
+            aError, iState, iStatus.Int());
+    
  
     // Cancel any outstanding request.
     Cancel();  
@@ -280,7 +302,8 @@ TInt CPTPIPSocketHandlerBase::RunError(TInt aError)
     TInt32 streamDirection = DataStreamDirection();
     if (streamDirection == EReceivingState)
 	    {
-		__FLOG(_L8("Error in EReceivingState"));            
+		OstTrace0( TRACE_NORMAL, DUP1_CPTPIPSOCKETHANDLERBASE_RUNERROR, "Error in EReceivingState" );
+		
         // Notify the connection and reset the receive data stream.
         MMTPType& data(*iReceiveDataSink);
         ResetReceiveDataStream();
@@ -289,7 +312,8 @@ TInt CPTPIPSocketHandlerBase::RunError(TInt aError)
 	    }
 	else if (streamDirection == ESendingState || (streamDirection == ESendDataState))
 		{
-		__FLOG(_L8("Error in ESendingState"));
+		OstTrace0( TRACE_NORMAL, DUP2_CPTPIPSOCKETHANDLERBASE_RUNERROR, "Error in ESendingState" );
+		
         // Notify the connection and reset the send data stream.
         const MMTPType& data(*iSendDataSource);
         ResetSendDataStream();
@@ -304,7 +328,7 @@ TInt CPTPIPSocketHandlerBase::RunError(TInt aError)
 		Connection().HandleError(aError);
 		}
  
-	__FLOG(_L8("RunError - Exit"));
+	OstTraceFunctionExit0( CPTPIPSOCKETHANDLERBASE_RUNERROR_EXIT );
 	return KErrNone;
 	}
 	
@@ -321,16 +345,19 @@ This sends the data over the socket. The buffer is provided by the MTP fw.
 */
 void CPTPIPSocketHandlerBase::SendDataL(const MMTPType& aData, TUint32 aTransactionId )
 	{
-	__FLOG(_L8("SendDataL - Entry"));
+	OstTraceFunctionEntry0( CPTPIPSOCKETHANDLERBASE_SENDDATAL_ENTRY );
     iSendDataSource = &aData;
 	TUint64 size = iSendDataSource->Size();
-    __FLOG_VA((_L8("Size of total data to be sent = %ld bytes"), size));
+    OstTrace1( TRACE_NORMAL, CPTPIPSOCKETHANDLERBASE_SENDDATAL, "Size of total data to be sent = %ld bytes",
+            size);
+    
 	
 	// if the data is less than KMaxPTPIPPacketSize then it can be sent in a shot, 
 	// Currently the ptp ip packet has the end data packet already, so it can be sent directly. 
 	if ( size < KMaxPTPIPPacketSize)
 		{
-		__FLOG(_L8("Size of data is less than KMaxPTPIPPacketSize, sending as one ptpip packet."));
+		OstTrace0( TRACE_NORMAL, DUP2_CPTPIPSOCKETHANDLERBASE_SENDDATAL, "Size of data is less than KMaxPTPIPPacketSize, sending as one ptpip packet." );
+		
 	    SetState(ESendInitialising);
 		ProcessSendDataL();
 		}
@@ -340,7 +367,8 @@ void CPTPIPSocketHandlerBase::SendDataL(const MMTPType& aData, TUint32 aTransact
 	// and then one chunk will be sent as one PTPIP packet.
 	else 
 		{
-		__FLOG(_L8("Size of data is more than KMaxPTPIPPacketSize, sending as multiple ptpip packets."));
+		OstTrace0( TRACE_NORMAL, DUP1_CPTPIPSOCKETHANDLERBASE_SENDDATAL, "Size of data is more than KMaxPTPIPPacketSize, sending as multiple ptpip packets." );
+		
 		iPTPIPDataHeader->SetUint32L(CPTPIPDataContainer::ETransactionId, aTransactionId);
 		iPTPIPDataHeader->SetPayloadL(NULL);
 		
@@ -351,7 +379,7 @@ void CPTPIPSocketHandlerBase::SendDataL(const MMTPType& aData, TUint32 aTransact
 		CreateAndSendDataPacketsL();
 		}
 	
-	__FLOG(_L8("SendDataL - Exit"));
+	OstTraceFunctionExit0( CPTPIPSOCKETHANDLERBASE_SENDDATAL_EXIT );
 	}
 
 /**
@@ -360,7 +388,7 @@ only when buffer exceeds the max socket send size, or all chunks have been buffe
 */
 void CPTPIPSocketHandlerBase::ProcessSendDataL()
 	{
-	__FLOG(_L8("ProcessSendDataL - Entry"));	
+	OstTraceFunctionEntry0( CPTPIPSOCKETHANDLERBASE_PROCESSSENDDATAL_ENTRY );
 	
     iSendData.Set(KNullDesC8);
 
@@ -371,13 +399,15 @@ void CPTPIPSocketHandlerBase::ProcessSendDataL()
         switch (iState)
             {
         case ESendInitialising:
-            __FLOG(_L8("Fetching first read data chunk"));
+            OstTrace0( TRACE_NORMAL, CPTPIPSOCKETHANDLERBASE_PROCESSSENDDATAL, "Fetching first read data chunk" );
+            
             iChunkStatus = iSendDataSource->FirstReadChunk(iSendChunkData);
             iPacketBuffer.Zero();
             break;
             
         case ESendInProgress:
-            __FLOG(_L8("Fetching next read data chunk"));
+            OstTrace0( TRACE_NORMAL, DUP1_CPTPIPSOCKETHANDLERBASE_PROCESSSENDDATAL, "Fetching next read data chunk" );
+            
             iChunkStatus = iSendDataSource->NextReadChunk(iSendChunkData);
             break;
             
@@ -386,7 +416,8 @@ void CPTPIPSocketHandlerBase::ProcessSendDataL()
            
         case EIdle:
         default:
-            __FLOG(_L8("Invalid send data stream state"));
+            OstTrace0( TRACE_NORMAL, DUP2_CPTPIPSOCKETHANDLERBASE_PROCESSSENDDATAL, "Invalid send data stream state" );
+            
             Panic(EPTPIPBadState);
             break;
             }
@@ -426,20 +457,28 @@ void CPTPIPSocketHandlerBase::ProcessSendDataL()
                 }  
                 break;
         default:
-            User::Leave(iChunkStatus);
+            LEAVEIFERROR(iChunkStatus, 
+                                OstTrace1( TRACE_ERROR, DUP17_CPTPIPSOCKETHANDLERBASE_PROCESSSENDDATAL, "iChunkStatus is %d", iChunkStatus ));
+
             break;
             }          
         }
-    __FLOG_VA((_L8("Chunk status = %d"), iChunkStatus));
+    OstTrace1( TRACE_NORMAL, DUP3_CPTPIPSOCKETHANDLERBASE_PROCESSSENDDATAL, "Chunk status = %d",
+            iChunkStatus);
+    
     
     // Process the buffered residual and/or available chunk data.
     TUint bufferedLen(iPacketBuffer.Length());
     TUint chunkIntegralLen((chunkAvailableLen / iPacketSizeMax) * iPacketSizeMax);
     TUint chunkResidualLen(chunkAvailableLen % iPacketSizeMax);
-    __FLOG_VA((_L8("Buffered residual data = %d bytes"), bufferedLen));
-    __FLOG_VA((_L8("Chunk data available = %d bytes"), chunkAvailableLen));
-    __FLOG_VA((_L8("Chunk data packet integral portion = %d bytes"), chunkIntegralLen));
-    __FLOG_VA((_L8("Chunk data packet residual portion = %d bytes"), chunkResidualLen));
+    OstTrace1( TRACE_NORMAL, DUP4_CPTPIPSOCKETHANDLERBASE_PROCESSSENDDATAL, "Buffered residual data = %d bytes",
+            bufferedLen);
+    OstTrace1( TRACE_NORMAL, DUP5_CPTPIPSOCKETHANDLERBASE_PROCESSSENDDATAL, "Chunk data available = %d bytes",
+            chunkAvailableLen);
+    OstTrace1( TRACE_NORMAL, DUP6_CPTPIPSOCKETHANDLERBASE_PROCESSSENDDATAL, "Chunk data packet integral portion = %d bytes",
+            chunkIntegralLen);
+    OstTrace1( TRACE_NORMAL, DUP7_CPTPIPSOCKETHANDLERBASE_PROCESSSENDDATAL, "Chunk data packet residual portion = %d bytes",
+            chunkResidualLen);
     
     if (bufferedLen)
         {
@@ -459,11 +498,14 @@ void CPTPIPSocketHandlerBase::ProcessSendDataL()
                 {
                 consumedLen = chunkAvailableLen;
                 }
-            __FLOG_VA((_L8("Buffering %d bytes"), consumedLen));
+            OstTrace1( TRACE_NORMAL, DUP8_CPTPIPSOCKETHANDLERBASE_PROCESSSENDDATAL, "Buffering %d bytes",
+                    consumedLen);
+            
             iPacketBuffer.Append(iSendChunkData.Left(consumedLen));
             
             // Update the available chunk data to reflect only the unconsumed portion.
-            __FLOG_VA((_L8("Residual chunk data = %d bytes"), unconsumedLen));
+            OstTrace0( TRACE_NORMAL, DUP9_CPTPIPSOCKETHANDLERBASE_PROCESSSENDDATAL, "CPTPIPSocketHandlerBase::ProcessSendDataL" );
+            
             if (unconsumedLen)
                 {
                 iSendChunkData.Set(iSendChunkData.Right(unconsumedLen));
@@ -493,7 +535,10 @@ void CPTPIPSocketHandlerBase::ProcessSendDataL()
         // Buffer the chunk data packet residual portion.
         if (chunkResidualLen)
             {
-            __FLOG_VA((_L8("Buffering %d bytes"), chunkResidualLen));
+            OstTrace1( TRACE_NORMAL, DUP10_CPTPIPSOCKETHANDLERBASE_PROCESSSENDDATAL, "Buffering %d bytes",
+                    chunkResidualLen);
+            
+            
             iPacketBuffer.Append(iSendChunkData.Right(chunkResidualLen));  
             }
             
@@ -513,13 +558,22 @@ void CPTPIPSocketHandlerBase::ProcessSendDataL()
     TUint sendBytes(iSendData.Length());
     if (sendBytes)
         {
-        __FLOG_VA((_L8("Send data length = %d bytes"), iSendData.Length()));
-#ifdef MTP_DEBUG_FLOG_HEX_DUMP 
-        __FLOG_HEXDUMP((iSendData, _L8("Sending data on socket ")));
+        OstTrace1( TRACE_NORMAL, DUP16_CPTPIPSOCKETHANDLERBASE_PROCESSSENDDATAL, "Send data length = %d bytes", 
+                iSendData.Length());
+        
+        OstTrace1( TRACE_NORMAL, DUP11_CPTPIPSOCKETHANDLERBASE_PROCESSSENDDATAL, "Send data length = %d bytes",
+                iSendData.Length());
+        
+#ifdef MTP_DEBUG_OST_HEX_DUMP
+        OstTrace0( TRACE_NORMAL, DUP12_CPTPIPSOCKETHANDLERBASE_PROCESSSENDDATAL, "Sending data on socket " );
+        OstTraceData( TRACE_DUMP, DUP13_CPTPIPSOCKETHANDLERBASE_PROCESSSENDDATAL, 
+                "%x", iSendData.Ptr(), iSendData.Size());
 #endif
+
         iSocket.Send(iSendData, 0, iStatus);
         SetActive(); 
-        __FLOG(_L8("Request issued"));
+        OstTrace0( TRACE_NORMAL, DUP14_CPTPIPSOCKETHANDLERBASE_PROCESSSENDDATAL, "Request issued" );
+        
         }
     else if (iState != ESendComplete)
         {    
@@ -527,8 +581,9 @@ void CPTPIPSocketHandlerBase::ProcessSendDataL()
 		CompleteSelf(KErrNone);      
 		}
 
-    __FLOG_VA((_L8("CSocketHandler state on exit = 0x%08X"), iState));
-	__FLOG(_L8("ProcessSendDataL - Exit"));
+    OstTrace1( TRACE_NORMAL, DUP15_CPTPIPSOCKETHANDLERBASE_PROCESSSENDDATAL, "CSocketHandler state on exit = 0x%08X", iState );
+    
+	OstTraceFunctionExit0( CPTPIPSOCKETHANDLERBASE_PROCESSSENDDATAL_EXIT );
 	}
 
 
@@ -542,7 +597,7 @@ in case this is the last chunk, then the data header will have the last data
 	
 void CPTPIPSocketHandlerBase::CreateAndSendDataPacketsL()	
 	{
-	__FLOG(_L8("CreateAndSendDataPacketsL - Entry"));
+	OstTraceFunctionEntry0( CPTPIPSOCKETHANDLERBASE_CREATEANDSENDDATAPACKETSL_ENTRY );
 	
 	// Create the data header and prepare to send it.
 	if (iState == ESendingDataHeader)
@@ -552,7 +607,9 @@ void CPTPIPSocketHandlerBase::CreateAndSendDataPacketsL()
 			{
 			iState = ESendDataCancelled;
 			CompleteSelf(KErrNone);
-			__FLOG(_L8("Sending the PTPIP data "));
+			OstTrace0( TRACE_NORMAL, CPTPIPSOCKETHANDLERBASE_CREATEANDSENDDATAPACKETSL, "Sending the PTPIP data " );
+			
+			OstTraceFunctionExit0( CPTPIPSOCKETHANDLERBASE_CREATEANDSENDDATAPACKETSL_EXIT );
 			return;
 			}
 		else 
@@ -560,7 +617,8 @@ void CPTPIPSocketHandlerBase::CreateAndSendDataPacketsL()
 			iChunkStatus = iSendDataSource->NextReadChunk(iSendChunkData);
 			TInt32 size = iPTPIPDataHeader->Size() + iSendChunkData.Size();
 			iPTPIPDataHeader->SetUint32L(CPTPIPDataContainer::EPacketLength, size);
-	   		__FLOG_VA((_L8("Size of ptpip packet data to be sent = %d bytes"), size));
+	   		OstTrace1( TRACE_NORMAL, DUP1_CPTPIPSOCKETHANDLERBASE_CREATEANDSENDDATAPACKETSL, "Size of ptpip packet data to be sent = %d bytes", size );
+	   		
 	
 			switch (iChunkStatus)
 		        {
@@ -573,8 +631,11 @@ void CPTPIPSocketHandlerBase::CreateAndSendDataPacketsL()
 		        break;
 		        
 		    default:
-		    	__FLOG(_L8("PTPIP Error :chunkStatus returned an error"));
-		        User::Leave(iChunkStatus);
+		    	OstTrace0( TRACE_NORMAL, DUP2_CPTPIPSOCKETHANDLERBASE_CREATEANDSENDDATAPACKETSL, "PTPIP Error :chunkStatus returned an error" );
+		    	
+		        LEAVEIFERROR(iChunkStatus, 
+		                            OstTrace1( TRACE_ERROR, CINTERNETCONNECTIONHANDLER_CONSTRUCTL, "iChunkStatus is %d", iChunkStatus ));
+
 		        break;
 		        } 
 			// Set the iSendData to point to the ptpip header. 
@@ -586,7 +647,8 @@ void CPTPIPSocketHandlerBase::CreateAndSendDataPacketsL()
 	else if (iState == ESendingDataPacket)
 		{
 		iSendData.Set(iSendChunkData);
-    	__FLOG(_L8("Sending the PTPIP data "));
+    	OstTrace0( TRACE_NORMAL, DUP3_CPTPIPSOCKETHANDLERBASE_CREATEANDSENDDATAPACKETSL, "Sending the PTPIP data " );
+    	
 		// if this is the last packet then set state. 	
 		if (iChunkStatus == KMTPChunkSequenceCompletion)
 			SetState(ESendDataPacketCompleting);
@@ -597,14 +659,20 @@ void CPTPIPSocketHandlerBase::CreateAndSendDataPacketsL()
         Panic(EPTPIPBadState);
 		}
 		
-    __FLOG_VA((_L8("Send data length = %d bytes"), iSendData.Length()));
-#ifdef MTP_DEBUG_FLOG_HEX_DUMP 
-    __FLOG_HEXDUMP((iSendData, _L8("Sending data on socket ")));
+    OstTrace1( TRACE_NORMAL, DUP4_CPTPIPSOCKETHANDLERBASE_CREATEANDSENDDATAPACKETSL, "Send data length = %d bytes",
+            iSendData.Length());
+    
+#ifdef MTP_DEBUG_OST_HEX_DUMP
+        OstTrace0( TRACE_NORMAL, DUP5_CPTPIPSOCKETHANDLERBASE_CREATEANDSENDDATAPACKETSL, "Sending data on socket " );
+        OstTraceData( TRACE_DUMP, DUP6_CPTPIPSOCKETHANDLERBASE_CREATEANDSENDDATAPACKETSL, 
+                "%x", iSendData.Ptr(), iSendData.Size());
 #endif
+
     iSocket.Send(iSendData, 0, iStatus);
     SetActive();
-    __FLOG(_L8("Request issued"));
-	__FLOG(_L8("CreateAndSendDataPacketsL - Exit"));
+    OstTrace0( TRACE_NORMAL, DUP7_CPTPIPSOCKETHANDLERBASE_CREATEANDSENDDATAPACKETSL, "Request issued" );
+    
+	OstTraceFunctionExit0( DUP1_CPTPIPSOCKETHANDLERBASE_CREATEANDSENDDATAPACKETSL_EXIT );
 	}
 	
 	
@@ -618,9 +686,9 @@ implemented the send data path.
 */
 void CPTPIPSocketHandlerBase::SendDataCompleteL(TInt /*aError*/, const MMTPType& /*aSource*/)
     {
-    __FLOG(_L8("CSocketHandler::SendDataCompleteL - Entry"));
+    OstTraceFunctionEntry0( CPTPIPSOCKETHANDLERBASE_SENDDATACOMPLETEL_ENTRY );
     __DEBUG_ONLY(Panic(EPTPIPNotSupported));
-    __FLOG(_L8("CSocketHandler::SendDataCompleteL - Exit"));
+    OstTraceFunctionExit0( CPTPIPSOCKETHANDLERBASE_SENDDATACOMPLETEL_EXIT );
     }	
 
 /**
@@ -631,18 +699,19 @@ Forces the completion of a transfer in progress.
 */
 void CPTPIPSocketHandlerBase::CancelSendL(TInt aReason)
 	{
-	__FLOG(_L8("CSocketHandler::CancelSendL - Entry"));
+	OstTraceFunctionEntry0( CPTPIPSOCKETHANDLERBASE_CANCELSENDL_ENTRY );
     
 	if ( (DataStreamDirection() == ESendingState) || (DataStreamDirection() == ESendDataState))
 		{
-		__FLOG(_L8("Cancel in ESendingState"));
+		OstTrace0( TRACE_NORMAL, CPTPIPSOCKETHANDLERBASE_CANCELSENDL, "Cancel in ESendingState" );
+		
 		// Cancel any outstanding request.
 		Cancel();
 		ResetSendDataStream();
 		SendDataCompleteL(aReason, *iSendDataSource);
 		}
 		
-	__FLOG(_L8("CSocketHandler::CancelSendL - Exit"));
+	OstTraceFunctionExit0( CPTPIPSOCKETHANDLERBASE_CANCELSENDL_EXIT );
 	}
 
 	
@@ -657,7 +726,7 @@ The buffer is provided by the fw in case its a data in.
 */
 void CPTPIPSocketHandlerBase::ReceiveDataL(MMTPType& aSink)
 	{
-	__FLOG(_L8("ReceiveDataL - Entry"));
+	OstTraceFunctionEntry0( CPTPIPSOCKETHANDLERBASE_RECEIVEDATAL_ENTRY );
 	
 	// Set the state 
 	SetState(EReceiveInProgress);
@@ -672,7 +741,7 @@ void CPTPIPSocketHandlerBase::ReceiveDataL(MMTPType& aSink)
     iReceiveDataCommit  = iReceiveDataSink->CommitRequired();
     
     InitiateFirstChunkReceiveL(); 
-	__FLOG(_L8("ReceiveDataL - Exit"));
+	OstTraceFunctionExit0( CPTPIPSOCKETHANDLERBASE_RECEIVEDATAL_EXIT );
 	}
 
 /**
@@ -680,7 +749,7 @@ Reads the first chunk. Then validates what was read and adjusts the buffer accor
 */
 void CPTPIPSocketHandlerBase::InitiateFirstChunkReceiveL()
 	{
-	__FLOG(_L8("InitiateFirstChunkReceiveL - Entry"));
+	OstTraceFunctionEntry0( CPTPIPSOCKETHANDLERBASE_INITIATEFIRSTCHUNKRECEIVEL_ENTRY );
 	
 	// sink refers to the buffer from connection.
 	// Now the ptr iReceiveChunkData is set to it first chunk.
@@ -688,8 +757,12 @@ void CPTPIPSocketHandlerBase::InitiateFirstChunkReceiveL()
 	
 	// The first chunk is going to be read.
 	iIsFirstChunk = ETrue;
-    __FLOG_VA((_L8("Receive chunk capacity = %d bytes, length = %d bytes"), iReceiveChunkData.MaxLength(), iReceiveChunkData.Length()));
-    __FLOG_VA((_L8("Chunk status = %d"), iChunkStatus)); 
+    OstTraceExt2( TRACE_NORMAL, CPTPIPSOCKETHANDLERBASE_INITIATEFIRSTCHUNKRECEIVEL, "Receive chunk capacity = %d bytes, length = %d bytes",
+            iReceiveChunkData.MaxLength(), iReceiveChunkData.Length());
+    
+    OstTrace1( TRACE_NORMAL, DUP1_CPTPIPSOCKETHANDLERBASE_INITIATEFIRSTCHUNKRECEIVEL, "Chunk status = %d",
+            iChunkStatus);
+    
 
 	iReceiveData.Set(iReceiveChunkData);
 	
@@ -698,13 +771,18 @@ void CPTPIPSocketHandlerBase::InitiateFirstChunkReceiveL()
 	// Make the async request to read on the socket and set ourselves active.
 	// once data is read on the socket, the iStatus will be changed by the comms framework. 
  	iSocket.Recv(iReceiveData, 0, iStatus);
-#ifdef MTP_DEBUG_FLOG_HEX_DUMP 
-    __FLOG_HEXDUMP((iReceiveData, _L8("Received data on socket ")));
+ 	
+#ifdef MTP_DEBUG_OST_HEX_DUMP
+        OstTrace0( TRACE_NORMAL, DUP2_CPTPIPSOCKETHANDLERBASE_INITIATEFIRSTCHUNKRECEIVEL, "Received data on socket" );
+        OstTraceData( TRACE_DUMP, DUP3_CPTPIPSOCKETHANDLERBASE_INITIATEFIRSTCHUNKRECEIVEL, 
+                "%x", iReceiveData.Ptr(), iReceiveData.Size());
 #endif
 
+
     SetActive();
-    __FLOG(_L8("Request issued"));
-	__FLOG(_L8("InitiateFirstChunkReceiveL - Exit"));
+    OstTrace0( TRACE_NORMAL, DUP4_CPTPIPSOCKETHANDLERBASE_INITIATEFIRSTCHUNKRECEIVEL, "Request issued" );
+    
+	OstTraceFunctionExit0( CPTPIPSOCKETHANDLERBASE_INITIATEFIRSTCHUNKRECEIVEL_EXIT );
 	}
 
 /**
@@ -714,7 +792,7 @@ Set the state to complete or read further depending on the size.
 */
 void CPTPIPSocketHandlerBase::ProcessFirstReceivedChunkL()
 	{
-	__FLOG(_L8("ProcessFirstReceivedChunkL - Entry"));
+	OstTraceFunctionEntry0( CPTPIPSOCKETHANDLERBASE_PROCESSFIRSTRECEIVEDCHUNKL_ENTRY );
     iIsFirstChunk = EFalse;
     // Reset the data counter, This will be filled in later in the ResumeReceiveDataStreamL.
     iPTPPacketLengthReceived = 0; 
@@ -729,7 +807,8 @@ void CPTPIPSocketHandlerBase::ProcessFirstReceivedChunkL()
 	// This current RunL will 
 	if (EPTPIPPacketTypeUndefined == iType ) 
 		{
-		__FLOG(_L8("PTPIP ERROR: Unexpected value in the type field of PTPIP header, appears corrupt"));
+		OstTrace0( TRACE_NORMAL, CPTPIPSOCKETHANDLERBASE_PROCESSFIRSTRECEIVEDCHUNKL, "PTPIP ERROR: Unexpected value in the type field of PTPIP header, appears corrupt" );
+		
 		SetState(EReceiveComplete);
 		iStatus = KErrCorrupt;
 		}
@@ -741,15 +820,19 @@ void CPTPIPSocketHandlerBase::ProcessFirstReceivedChunkL()
 		}
 	   
     if (iState == EReceiveComplete)
-		{
-#ifdef MTP_DEBUG_FLOG_HEX_DUMP 
-        __FLOG_HEXDUMP((iReceiveChunkData, _L8("Received data ")));
+		{     
+#ifdef MTP_DEBUG_OST_HEX_DUMP 
+        OstTrace0( TRACE_NORMAL, DUP1_CPTPIPSOCKETHANDLERBASE_PROCESSFIRSTRECEIVEDCHUNKL, "Received data" );
+        OstTraceData( TRACE_DUMP, DUP2_CPTPIPSOCKETHANDLERBASE_PROCESSFIRSTRECEIVEDCHUNKL, 
+                "%x", iReceiveChunkData.Ptr(), iReceiveChunkData.Size());
 #endif
+
 
 		// Commit the received data if required.
         if (iReceiveDataCommit)
 		    {
-		 	__FLOG(_L8("Commiting write data chunk"));
+		 	OstTrace0( TRACE_NORMAL, DUP3_CPTPIPSOCKETHANDLERBASE_PROCESSFIRSTRECEIVEDCHUNKL, "Commiting write data chunk" );
+		 	
 	        iReceiveDataSink->CommitChunkL(iReceiveChunkData);       
 		    }
 		}
@@ -758,7 +841,7 @@ void CPTPIPSocketHandlerBase::ProcessFirstReceivedChunkL()
 		ResumeReceiveDataStreamL();
 		}
 
-	__FLOG(_L8("ProcessFirstReceivedChunkL - Exit"));
+	OstTraceFunctionExit0( CPTPIPSOCKETHANDLERBASE_PROCESSFIRSTRECEIVEDCHUNKL_EXIT );
 	}
 
 
@@ -769,13 +852,15 @@ This will be called repeatedly until all the packets have been received.
 */
 void CPTPIPSocketHandlerBase::ResumeReceiveDataStreamL()
 	{
-	__FLOG(_L8("ResumeReceiveDataStreamL - Entry"));
+	OstTraceFunctionEntry0( CPTPIPSOCKETHANDLERBASE_RESUMERECEIVEDATASTREAML_ENTRY );
 	TBool endStream(EFalse);
 	MMTPType *needCommit = NULL;
 		
     // Process the received chunk (if any).
    	iPTPPacketLengthReceived += iReceiveData.Length();
-   	__FLOG_VA((_L8("Data received = iPTPPacketLengthReceived = %d bytes, Data expected = iPTPPacketLength = %d"), iPTPPacketLengthReceived, iPTPPacketLength));
+   	OstTraceExt2( TRACE_NORMAL, DUP1_CPTPIPSOCKETHANDLERBASE_RESUMERECEIVEDATASTREAML, "Data received = iPTPPacketLengthReceived = %d bytes, Data expected = iPTPPacketLength = %d",
+   	     iPTPPacketLengthReceived, iPTPPacketLength);
+   	
    	
 	if (iPTPPacketLengthReceived == iPTPPacketLength)
 	   	{
@@ -787,10 +872,15 @@ void CPTPIPSocketHandlerBase::ResumeReceiveDataStreamL()
 	   	endStream = EFalse;
 	   	}
 
-    __FLOG_VA((_L8("Received = %d bytes, write data chunk capacity = %d bytes"), iReceiveChunkData.Length(), iReceiveChunkData.MaxLength()));		   
-#ifdef MTP_DEBUG_FLOG_HEX_DUMP 
-    __FLOG_HEXDUMP((iReceiveChunkData, _L8("Received data ")));
+    OstTraceExt2( TRACE_NORMAL, DUP2_CPTPIPSOCKETHANDLERBASE_RESUMERECEIVEDATASTREAML, "Received = %d bytes, write data chunk capacity = %d bytes",
+            iReceiveChunkData.Length(), iReceiveChunkData.MaxLength());
+    
+#ifdef MTP_DEBUG_OST_HEX_DUMP
+        OstTrace0( TRACE_NORMAL, DUP3_CPTPIPSOCKETHANDLERBASE_RESUMERECEIVEDATASTREAML, "Received data " );
+        OstTraceData( TRACE_DUMP, DUP4_CPTPIPSOCKETHANDLERBASE_RESUMERECEIVEDATASTREAML, 
+                "%x", iReceiveChunkData.Ptr(), iReceiveChunkData.Size());
 #endif
+
 
 
     // Commit the received data if required.
@@ -830,28 +920,38 @@ void CPTPIPSocketHandlerBase::ResumeReceiveDataStreamL()
     		iChunkStatus = iReceiveDataSink->NextWriteChunk(iReceiveChunkData);
     		
     		}
-    	__FLOG_VA((_L8("iReceiveChunkData pointer address is %08x"), iReceiveChunkData.Ptr()));
+    	OstTrace1( TRACE_NORMAL, DUP5_CPTPIPSOCKETHANDLERBASE_RESUMERECEIVEDATASTREAML, "iReceiveChunkData pointer address is %08x",
+    	        iReceiveChunkData.Ptr());
+    	
 	    break;
         
     case EReceiveComplete:
-        __FLOG(_L8("Write data chunk sequence complet"));
+        OstTrace0( TRACE_NORMAL, DUP6_CPTPIPSOCKETHANDLERBASE_RESUMERECEIVEDATASTREAML, "Write data chunk sequence complet" );
+        
         break;
                   
     case EIdle:
     default:
-        __FLOG(_L8("Invalid stream state"));
+        OstTrace0( TRACE_NORMAL, DUP7_CPTPIPSOCKETHANDLERBASE_RESUMERECEIVEDATASTREAML, "Invalid stream state" );
+        
         Panic(EPTPIPBadState);
         break;
         }
         
-    __FLOG_VA((_L8("Chunk status = %d"), iChunkStatus)); 
+    OstTrace1( TRACE_NORMAL, DUP8_CPTPIPSOCKETHANDLERBASE_RESUMERECEIVEDATASTREAML, "Chunk status = %d",
+            iChunkStatus);
+    
         
         
     // If necessary, process the next chunk. 
     if (iState != EReceiveComplete)
         {
-        __FLOG_VA((_L8("Receive chunk capacity = %d bytes, length = %d bytes"), iReceiveChunkData.MaxLength(), iReceiveChunkData.Length()));
-        __FLOG_VA((_L8("iReceiveChunkData pointer address is %08x"), iReceiveChunkData.Ptr()));
+        OstTraceExt2( TRACE_NORMAL, DUP9_CPTPIPSOCKETHANDLERBASE_RESUMERECEIVEDATASTREAML, "Receive chunk capacity = %d bytes, length = %d bytes",
+                iReceiveChunkData.MaxLength(), iReceiveChunkData.Length());
+        
+        OstTrace1( TRACE_NORMAL, DUP10_CPTPIPSOCKETHANDLERBASE_RESUMERECEIVEDATASTREAML, "iReceiveChunkData pointer address is %08x",
+                iReceiveChunkData.Ptr());
+        
         
         
 	        // When we reach the end of receiving a PTPIP packet, it is possible that our PTPIP chunk
@@ -873,23 +973,28 @@ void CPTPIPSocketHandlerBase::ResumeReceiveDataStreamL()
 	        	}        	
 	       
         	
-        	
-	        __FLOG_VA((_L8("Length read this time is= %d"), iReceiveData.MaxLength()));
+	        OstTrace1( TRACE_NORMAL, DUP11_CPTPIPSOCKETHANDLERBASE_RESUMERECEIVEDATASTREAML, "Length read this time is= %d", iReceiveData.MaxLength());
+	        
         	
         
  		iSocket.Recv(iReceiveData, 0, iStatus);
-#ifdef MTP_DEBUG_FLOG_HEX_DUMP 
-    __FLOG_HEXDUMP((iReceiveData, _L8("Received data on socket ")));
-#endif 		
+
+#ifdef MTP_DEBUG_OST_HEX_DUMP 
+        OstTrace0( TRACE_NORMAL, DUP12_CPTPIPSOCKETHANDLERBASE_RESUMERECEIVEDATASTREAML, "Received data on socket " );
+        OstTraceData( TRACE_DUMP, DUP13_CPTPIPSOCKETHANDLERBASE_RESUMERECEIVEDATASTREAML, 
+                "%x", iReceiveData.Ptr(), iReceiveData.Size());
+#endif
+
         SetActive();
-        __FLOG(_L8("Request issued"));
+        OstTrace0( TRACE_NORMAL, CPTPIPSOCKETHANDLERBASE_RESUMERECEIVEDATASTREAML, "Request issued" );
+        
         }
         if(needCommit != NULL)
             {
             TPtr8 tmp(NULL, 0, 0);
             needCommit->CommitChunkL(tmp);
             }
- 	__FLOG(_L8("ResumeReceiveDataStreamL - Exit"));
+	OstTraceFunctionExit0( CPTPIPSOCKETHANDLERBASE_RESUMERECEIVEDATASTREAML_EXIT );
 	}
 
 /**
@@ -901,9 +1006,9 @@ implemented the receive data path.
 */
 void CPTPIPSocketHandlerBase::ReceiveDataCompleteL(TInt /*aError*/, MMTPType& /*aSink*/)
     {
-    __FLOG(_L8("CSocketHandler::ReceiveDataCompleteL - Entry"));
+    OstTraceFunctionEntry0( CPTPIPSOCKETHANDLERBASE_RECEIVEDATACOMPLETEL_ENTRY );
     __DEBUG_ONLY(Panic(EPTPIPNotSupported));
-    __FLOG(_L8("CSocketHandler::ReceiveDataCompleteL - Exit"));
+    OstTraceFunctionExit0( CPTPIPSOCKETHANDLERBASE_RECEIVEDATACOMPLETEL_EXIT );
     }
 
 /**
@@ -914,11 +1019,12 @@ Forces the completion of a transfer in progress.
 */
 void CPTPIPSocketHandlerBase::CancelReceiveL(TInt aReason)
 	{
-	__FLOG(_L8("CSocketHandler::CancelReceiveL - Entry"));
+	OstTraceFunctionEntry0( CPTPIPSOCKETHANDLERBASE_CANCELRECEIVEL_ENTRY );
      
     if (DataStreamDirection() == EReceivingState)
 	    {
-		__FLOG(_L8("Cancel in EReceivingState"));            
+		OstTrace0( TRACE_NORMAL, CPTPIPSOCKETHANDLERBASE_CANCELRECEIVEL, "Cancel in EReceivingState" );
+		
 	    // Cancel any outstanding request.
     	Cancel();  
 
@@ -926,8 +1032,8 @@ void CPTPIPSocketHandlerBase::CancelReceiveL(TInt aReason)
 		ResetReceiveDataStream();
         ReceiveDataCompleteL(aReason, *iReceiveDataSink);
 	    }
-	    
-    __FLOG(_L8("CSocketHandler::CancelReceiveL - Exit"));	
+	    	
+	OstTraceFunctionExit0( CPTPIPSOCKETHANDLERBASE_CANCELRECEIVEL_EXIT );
 	}
 
 //
@@ -936,51 +1042,59 @@ void CPTPIPSocketHandlerBase::CancelReceiveL(TInt aReason)
 
 CPTPIPConnection& CPTPIPSocketHandlerBase::Connection()
 	{
+	OstTraceFunctionEntry0( CPTPIPSOCKETHANDLERBASE_CONNECTION_ENTRY );
+	OstTraceFunctionExit0( CPTPIPSOCKETHANDLERBASE_CONNECTION_EXIT );
 	return iConnection;
 	}
 
 RSocket& CPTPIPSocketHandlerBase::Socket()
 	{
+	OstTraceFunctionEntry0( CPTPIPSOCKETHANDLERBASE_SOCKET_ENTRY );
+	OstTraceFunctionExit0( CPTPIPSOCKETHANDLERBASE_SOCKET_EXIT );
 	return iSocket;	
 	}
 
 
 void CPTPIPSocketHandlerBase::ResetSendDataStream()
     {
-	__FLOG(_L8("CSocketHandler::ResetSendDataStream - Entry"));
+	OstTraceFunctionEntry0( CPTPIPSOCKETHANDLERBASE_RESETSENDDATASTREAM_ENTRY );
     iSendChunkData.Set(NULL, 0);
     iSendData.Set(NULL, 0);
     iSendDataSource = NULL;
     iCancelReceived = EFalse;
     SetState(EIdle);
-	__FLOG(_L8("CSocketHandler::ResetSendDataStream - Exit"));
+    OstTraceFunctionExit0( CPTPIPSOCKETHANDLERBASE_RESETSENDDATASTREAM_EXIT );
     }
     
 void CPTPIPSocketHandlerBase::ResetReceiveDataStream()
     {
-	__FLOG(_L8("CSocketHandler::ResetReceiveDataStream - Entry"));
+	OstTraceFunctionEntry0( CPTPIPSOCKETHANDLERBASE_RESETRECEIVEDATASTREAM_ENTRY );
     iReceiveChunkData.Set(NULL, 0, 0);
     iReceiveData.Set(NULL, 0, 0);
     iReceiveDataSink = NULL;
     iCancelReceived = EFalse;
     SetState(EIdle);
-	__FLOG(_L8("CSocketHandler::ResetReceiveDataStream - Exit"));
+    OstTraceFunctionExit0( CPTPIPSOCKETHANDLERBASE_RESETRECEIVEDATASTREAM_EXIT );
     }
 
     
 void CPTPIPSocketHandlerBase::SetState(TSocketState aState)
 	{
-	__FLOG(_L8("SetState - Entry"));
+	OstTraceFunctionEntry0( CPTPIPSOCKETHANDLERBASE_SETSTATE_ENTRY );
 	iState = aState;
-	__FLOG_VA((_L8(" state = 0x%08X"), iState));
-	__FLOG(_L8("SetState - Exit"));
+	OstTrace1( TRACE_NORMAL, CPTPIPSOCKETHANDLERBASE_SETSTATE, "state = 0x%08X",
+	        iState);
+	
+	OstTraceFunctionExit0( CPTPIPSOCKETHANDLERBASE_SETSTATE_EXIT );
 	}
 	
 void CPTPIPSocketHandlerBase::CompleteSelf(TInt aCompletionCode)
      {
+     OstTraceFunctionEntry0( CPTPIPSOCKETHANDLERBASE_COMPLETESELF_ENTRY );
      SetActive();
      TRequestStatus* stat = &iStatus;
      User::RequestComplete(stat, aCompletionCode);
+     OstTraceFunctionExit0( CPTPIPSOCKETHANDLERBASE_COMPLETESELF_EXIT );
      }	
 
 /**
@@ -988,12 +1102,16 @@ Provides the current data stream direction, sending or receiving
 */
 TInt32 CPTPIPSocketHandlerBase::DataStreamDirection() const
     {
+    OstTraceFunctionEntry0( CPTPIPSOCKETHANDLERBASE_DATASTREAMDIRECTION_ENTRY );
+    OstTraceFunctionExit0( CPTPIPSOCKETHANDLERBASE_DATASTREAMDIRECTION_EXIT );
     return (iState & EStateDirection);
     }
     
 void CPTPIPSocketHandlerBase::SetSocket(RSocket& aSocket)
 	{
+	OstTraceFunctionEntry0( CPTPIPSOCKETHANDLERBASE_SETSOCKET_ENTRY );
 	iSocket = aSocket;	
+	OstTraceFunctionExit0( CPTPIPSOCKETHANDLERBASE_SETSOCKET_EXIT );
 	}
 
 /**
@@ -1001,8 +1119,12 @@ Ignore any errors in setting the socket options
 */
 void CPTPIPSocketHandlerBase::SetSocketOptions()
 	{
+	OstTraceFunctionEntry0( CPTPIPSOCKETHANDLERBASE_SETSOCKETOPTIONS_ENTRY );
 	TInt error=iSocket.SetOpt(KSoTcpKeepAlive,KSolInetTcp,1);
-	__FLOG_VA((_L8(" setting the keep alive option returned = %d"), error));
+	OstTrace1( TRACE_NORMAL, CPTPIPSOCKETHANDLERBASE_SETSOCKETOPTIONS, "setting the keep alive option returned = %d", error );
+	
 	error=iSocket.SetOpt(KSoTcpNoDelay,KSolInetTcp,1);
-	__FLOG_VA((_L8(" setting the no delay to disable Nagle's algo returned %d"), error));
+	OstTrace1( TRACE_NORMAL, DUP1_CPTPIPSOCKETHANDLERBASE_SETSOCKETOPTIONS, "setting the no delay to disable Nagle's algo returned %d", error );
+	
+	OstTraceFunctionExit0( CPTPIPSOCKETHANDLERBASE_SETSOCKETOPTIONS_EXIT );
 	}

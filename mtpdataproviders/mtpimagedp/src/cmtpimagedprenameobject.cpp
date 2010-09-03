@@ -27,8 +27,11 @@
 
 #include "cmtpimagedprenameobject.h"
 #include "cmtpimagedp.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpimagedprenameobjectTraces.h"
+#endif
 
-__FLOG_STMT(_LIT8(KComponent,"CMTPImageDpRenameObject");)
 
 const TInt KMmMtpRArrayGranularity = 4;
 const TInt KUpdateThreshold = 30;
@@ -53,9 +56,7 @@ CMTPImageDpRenameObject::CMTPImageDpRenameObject(MMTPDataProviderFramework& aFra
     iFramework(aFramework),
     iDataProvider(aDataProvider),
     iObjectHandles(KMmMtpRArrayGranularity)
-    {
-    __FLOG_OPEN(KMTPSubsystem, KComponent);
-    __FLOG(_L8("CMTPImageDpRenameObject::CMTPImageDpRenameObject"));    
+    {  
     }
 
 // -----------------------------------------------------------------------------
@@ -65,15 +66,14 @@ CMTPImageDpRenameObject::CMTPImageDpRenameObject(MMTPDataProviderFramework& aFra
 //
 CMTPImageDpRenameObject::~CMTPImageDpRenameObject()
     {
-    __FLOG(_L8(">> ~CMTPImageDpRenameObject"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPRENAMEOBJECT_CMTPIMAGEDPRENAMEOBJECT_DES_ENTRY );
     Cancel();
     iObjectHandles.Close();
     delete iObjectInfo;
     delete iParentObjectInfo;
     iNewFileName.Close();
     delete iRenameWaiter;
-    __FLOG(_L8("<< ~CMTPImageDpRenameObject"));
-    __FLOG_CLOSE;    
+    OstTraceFunctionExit0( CMTPIMAGEDPRENAMEOBJECT_CMTPIMAGEDPRENAMEOBJECT_DES_EXIT );
     }
 
 // -----------------------------------------------------------------------------
@@ -83,13 +83,15 @@ CMTPImageDpRenameObject::~CMTPImageDpRenameObject()
 //
 void CMTPImageDpRenameObject::StartL(const TUint32 aParentHandle, const TDesC& /*aOldFolderName*/)
     {
-    __FLOG_VA((_L16(">> CMTPImageDpRenameObject::StartL aParentHandle(0x%x)"), aParentHandle));
+    OstTraceFunctionEntry0( CMTPIMAGEDPRENAMEOBJECT_STARTL_ENTRY );
+    OstTrace1( TRACE_NORMAL, CMTPIMAGEDPRENAMEOBJECT_STARTL, "aParentHandle(0x%x)", aParentHandle );
 
     iObjectHandles.Reset();
 
     GenerateObjectHandleListL(aParentHandle);
     iCount = iObjectHandles.Count();
-    __FLOG_VA((_L8(">> CMTPImageDpRenameObject::StartL handle count = %u"), iCount));
+    OstTrace1( TRACE_NORMAL, DUP1_CMTPIMAGEDPRENAMEOBJECT_STARTL, "handle count = %u", iCount);
+    
     if (iCount > 0)
         {
         iIndex = 0;
@@ -102,7 +104,7 @@ void CMTPImageDpRenameObject::StartL(const TUint32 aParentHandle, const TDesC& /
         iObjectHandles.Reset();
         }
 
-    __FLOG(_L8("<< CMTPImageDpRenameObject::StartL"));
+    OstTraceFunctionExit0( CMTPIMAGEDPRENAMEOBJECT_STARTL_EXIT );
     }
 
 // -----------------------------------------------------------------------------
@@ -122,7 +124,9 @@ void CMTPImageDpRenameObject::DoCancel()
 //
 void CMTPImageDpRenameObject::RunL()
     {
-    __FLOG_VA((_L8(">> CMTPImageDpRenameObject::RunL iIndex = %d"), iIndex));
+    OstTraceFunctionEntry0( CMTPIMAGEDPRENAMEOBJECT_RUNL_ENTRY );
+    OstTrace1( TRACE_NORMAL, CMTPIMAGEDPRENAMEOBJECT_RUNL, "iIndex = %d", iIndex );
+
     if (iIndex < iCount)
         {
         TInt threshold = KUpdateThreshold;
@@ -140,8 +144,8 @@ void CMTPImageDpRenameObject::RunL()
                     iNewFileName.Append(parentUri.DriveAndPath());
                     iNewFileName.Append(objectUri.NameAndExt());
                     iNewFileName.Trim();
-                    __FLOG_VA((_L16("New file name(%S)"), &iNewFileName));
-                    
+                    OstTraceExt1( TRACE_NORMAL, DUP1_CMTPIMAGEDPRENAMEOBJECT_RUNL, "New file name(%S)", iNewFileName );
+
                     // update framework metadata DB
                     iObjectInfo->SetDesCL(CMTPObjectMetaData::ESuid, iNewFileName);
                     iObjectInfo->SetUint(CMTPObjectMetaData::EObjectMetaDataUpdate, 1);
@@ -160,7 +164,7 @@ void CMTPImageDpRenameObject::RunL()
             iRenameWaiter->AsyncStop();
         }
 
-    __FLOG(_L8("<< CMTPImageDpRenameObject::RunL"));
+    OstTraceFunctionExit0( CMTPIMAGEDPRENAMEOBJECT_RUNL_EXIT );
     }
 
 // -----------------------------------------------------------------------------
@@ -171,8 +175,9 @@ void CMTPImageDpRenameObject::RunL()
 TInt CMTPImageDpRenameObject::RunError( TInt aError )
     {
     if (aError != KErrNone)
-        __FLOG_VA((_L8(">> CMTPImageDpRenameObject::RunError with error %d"), aError));
-
+        OstTraceDef1(OST_TRACE_CATEGORY_PRODUCTION, TRACE_IMPORTANT, CMTPIMAGEDPRENAMEOBJECT_RUNERROR, 
+                "with error %d", aError );
+    
     return KErrNone;
     }
 
@@ -183,14 +188,14 @@ TInt CMTPImageDpRenameObject::RunError( TInt aError )
 //
 void CMTPImageDpRenameObject::ConstructL()
     {
-    __FLOG(_L8(">> CMTPImageDpRenameObject::ConstructL"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPRENAMEOBJECT_CONSTRUCTL_ENTRY );
     CActiveScheduler::Add( this );
 
     iObjectInfo = CMTPObjectMetaData::NewL();
     iParentObjectInfo = CMTPObjectMetaData::NewL();
     iNewFileName.CreateL(KMaxFileNameLength);
     iRenameWaiter = new( ELeave ) CActiveSchedulerWait;
-    __FLOG(_L8("<< CMTPImageDpRenameObject::ConstructL"));
+    OstTraceFunctionExit0( CMTPIMAGEDPRENAMEOBJECT_CONSTRUCTL_EXIT );
     }
 
 // -----------------------------------------------------------------------------
@@ -200,7 +205,9 @@ void CMTPImageDpRenameObject::ConstructL()
 //
 void CMTPImageDpRenameObject::GenerateObjectHandleListL(TUint32 aParentHandle)
     {
-    __FLOG_VA((_L8(">> CMTPImageDpRenameObject::GenerateObjectHandleListL aParentHandle(0x%x)"), aParentHandle));
+    OstTraceFunctionEntry0( CMTPIMAGEDPRENAMEOBJECT_GENERATEOBJECTHANDLELISTL_ENTRY );
+    OstTrace1( TRACE_NORMAL, CMTPIMAGEDPRENAMEOBJECT_GENERATEOBJECTHANDLELISTL, "aParentHandle(0x%x)", aParentHandle );
+
     RMTPObjectMgrQueryContext context;
     RArray<TUint> handles;
     CleanupClosePushL(context); // + context
@@ -233,6 +240,6 @@ void CMTPImageDpRenameObject::GenerateObjectHandleListL(TUint32 aParentHandle)
     CleanupStack::PopAndDestroy(&handles); // - handles
     CleanupStack::PopAndDestroy(&context); // - context
 
-    __FLOG(_L8("<< CMTPImageDpRenameObject::GenerateObjectHandleListL"));
+    OstTraceFunctionExit0( CMTPIMAGEDPRENAMEOBJECT_GENERATEOBJECTHANDLELISTL_EXIT );
     }
 //end of file

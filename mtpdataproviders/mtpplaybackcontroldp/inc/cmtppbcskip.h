@@ -54,7 +54,6 @@ private:
              CMTPPlaybackControlDataProvider& aDataProvider);
 
 private: // Owned
-    __FLOG_DECLARATION_MEMBER_MUTABLE;
     CMTPPlaybackControlDataProvider& iPlaybackControlDp;
     CMTPPlaybackCommand* iPbCmd;
     };

@@ -31,9 +31,13 @@
 #include "mmtpenumerationcallback.h"
 #include "mtpdevdppanic.h"
 #include "mtpdevicedpconst.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpdevicedatastoreTraces.h"
+#endif
+
 
 // Class constants.
-__FLOG_STMT(_LIT8(KComponent,"DeviceDataStore");)
 
 _LIT( KFileName, "z:\\private\\102827a2\\mtpdevice.ico");
 
@@ -98,7 +102,7 @@ Destructor.
 */
 CMTPDeviceDataStore::~CMTPDeviceDataStore()
     {
-    __FLOG(_L8("~CMTPDeviceDataStore - Entry"));
+    OstTraceFunctionEntry0( CMTPDEVICEDATASTORE_CMTPDEVICEDATASTORE_DES_ENTRY );
     Cancel();
     delete iDeviceFriendlyNameDefault;
     delete iSyncPartnerNameDefault;
@@ -113,8 +117,7 @@ CMTPDeviceDataStore::~CMTPDeviceDataStore()
     iSerialNumber.Close();
     iSingletons.Close();
     iMTPExtensions.Close();
-    __FLOG(_L8("~CMTPDeviceDataStore - Exit"));
-    __FLOG_CLOSE;
+    OstTraceFunctionExit0( CMTPDEVICEDATASTORE_CMTPDEVICEDATASTORE_DES_EXIT );
     }
 
 /**
@@ -132,12 +135,13 @@ TBool CMTPDeviceDataStore::RequestPending() const
 
 void CMTPDeviceDataStore::BatteryLevelL(TRequestStatus& aStatus, TUint& aBatteryLevel)
     {
-    __FLOG(_L8("BatteryLevel - Entry"));
+    OstTraceFunctionEntry0( CMTPDEVICEDATASTORE_BATTERYLEVELL_ENTRY );
 
 	if (RequestPending())
 		{
 		// We are already reading battery level
 		// leave so we don't set ourselves active twice
+        OstTrace0( TRACE_ERROR, CMTPDEVICEDATASTORE_BATTERYLEVELL, "already reading battery level, no need to set active twice" );
 		User::Leave(KErrInUse);
 		}
 
@@ -156,7 +160,7 @@ void CMTPDeviceDataStore::BatteryLevelL(TRequestStatus& aStatus, TUint& aBattery
         aBatteryLevel = KMTPDefaultBatteryLevel;
     	SetRequestComplete(*iPendingStatus, KErrNone);
         }
-    __FLOG(_L8("BatteryLevel - Exit"));
+    OstTraceFunctionExit0( CMTPDEVICEDATASTORE_BATTERYLEVELL_EXIT );
     }
 
 /**
@@ -165,8 +169,8 @@ Provides the MTP device friendly name.
 */
 const TDesC& CMTPDeviceDataStore::DeviceFriendlyName() const
     {
-    __FLOG(_L8("DeviceFriendlyName - Entry"));
-    __FLOG(_L8("DeviceFriendlyName - Exit"));
+    OstTraceFunctionEntry0( CMTPDEVICEDATASTORE_DEVICEFRIENDLYNAME_ENTRY );
+    OstTraceFunctionExit0( CMTPDEVICEDATASTORE_DEVICEFRIENDLYNAME_EXIT );
     return iDeviceFriendlyName->StringChars();
     }
 
@@ -176,8 +180,8 @@ Provides the default MTP device friendly name.
 */
 const TDesC& CMTPDeviceDataStore::DeviceFriendlyNameDefault() const
     {
-    __FLOG(_L8("DeviceFriendlyNameDefault - Entry"));
-    __FLOG(_L8("DeviceFriendlyNameDefault - Exit"));
+    OstTraceFunctionEntry0( CMTPDEVICEDATASTORE_DEVICEFRIENDLYNAMEDEFAULT_ENTRY );
+    OstTraceFunctionExit0( CMTPDEVICEDATASTORE_DEVICEFRIENDLYNAMEDEFAULT_EXIT );
     return *iDeviceFriendlyNameDefault;
     }
 
@@ -187,8 +191,8 @@ Provides the device firmware version identifier
 */
 const TDesC& CMTPDeviceDataStore::DeviceVersion() const
     {
-    __FLOG(_L8("DeviceVersion - Entry"));
-    __FLOG(_L8("DeviceVersion - Exit"));
+    OstTraceFunctionEntry0( CMTPDEVICEDATASTORE_DEVICEVERSION_ENTRY );
+    OstTraceFunctionExit0( CMTPDEVICEDATASTORE_DEVICEVERSION_EXIT );
     return iDeviceVersion;
     }
 
@@ -198,9 +202,9 @@ Provides the device manufacturer name.
 */
 const TDesC& CMTPDeviceDataStore::Manufacturer() const
     {
-    __FLOG(_L8("Manufacturer - Entry"));
+    OstTraceFunctionEntry0( CMTPDEVICEDATASTORE_MANUFACTURER_ENTRY );
     __ASSERT_DEBUG(Enumerated(), Panic(EMTPDevDpInvalidState));
-    __FLOG(_L8("Manufacturer - Exit"));
+    OstTraceFunctionExit0( CMTPDEVICEDATASTORE_MANUFACTURER_EXIT );
     return iPhoneIdV1.iManufacturer;
     }
 
@@ -210,9 +214,9 @@ Provides the device model identifier.
 */
 const TDesC& CMTPDeviceDataStore::Model() const
     {
-    __FLOG(_L8("Model - Entry"));
+    OstTraceFunctionEntry0( CMTPDEVICEDATASTORE_MODEL_ENTRY );
     __ASSERT_DEBUG(Enumerated(), Panic(EMTPDevDpInvalidState));
-    __FLOG(_L8("Model - Exit"));
+    OstTraceFunctionExit0( CMTPDEVICEDATASTORE_MODEL_EXIT );
     return iPhoneIdV1.iModel;
     }
 
@@ -222,8 +226,8 @@ Provides the MTP Vendor Extension string.
 */
 const TDesC& CMTPDeviceDataStore::MTPExtensions() const
     {
-    __FLOG(_L8("MTPExtensions - Entry"));
-    __FLOG(_L8("MTPExtensions - Exit"));
+    OstTraceFunctionEntry0( CMTPDEVICEDATASTORE_MTPEXTENSIONS_ENTRY );
+    OstTraceFunctionExit0( CMTPDEVICEDATASTORE_MTPEXTENSIONS_EXIT );
     return iMTPExtensions;
     }
 
@@ -233,9 +237,9 @@ Provides the device serial number.
 */
 const TDesC& CMTPDeviceDataStore::SerialNumber() const
     {
-    __FLOG(_L8("SerialNumber - Entry"));
+    OstTraceFunctionEntry0( CMTPDEVICEDATASTORE_SERIALNUMBER_ENTRY );
     __ASSERT_DEBUG(Enumerated(), Panic(EMTPDevDpInvalidState));
-    __FLOG(_L8("SerialNumber - Exit"));
+    OstTraceFunctionExit0( CMTPDEVICEDATASTORE_SERIALNUMBER_EXIT );
     return iPhoneIdV1.iSerialNumber;
     }
 
@@ -245,8 +249,8 @@ Provides the MTP synchronisation partner name.
 */
 const TDesC& CMTPDeviceDataStore::SynchronisationPartner() const
     {
-    __FLOG(_L8("SynchronisationPartner - Entry"));
-    __FLOG(_L8("SynchronisationPartner - Exit"));
+    OstTraceFunctionEntry0( CMTPDEVICEDATASTORE_SYNCHRONISATIONPARTNER_ENTRY );
+    OstTraceFunctionExit0( CMTPDEVICEDATASTORE_SYNCHRONISATIONPARTNER_EXIT );
     return iSynchronisationPartner->StringChars();
     }
 
@@ -256,8 +260,8 @@ Provides the default MTP synchronisation partner name.
 */
 const TDesC& CMTPDeviceDataStore::SynchronisationPartnerDefault() const
     {
-    __FLOG(_L8("SynchronisationPartnerDefault - Entry"));
-    __FLOG(_L8("SynchronisationPartnerDefault - Exit"));
+    OstTraceFunctionEntry0( CMTPDEVICEDATASTORE_SYNCHRONISATIONPARTNERDEFAULT_ENTRY );
+    OstTraceFunctionExit0( CMTPDEVICEDATASTORE_SYNCHRONISATIONPARTNERDEFAULT_EXIT );
     return *iSyncPartnerNameDefault;
     }
 
@@ -268,10 +272,10 @@ Sets the MTP device friendly name.
 */
 void CMTPDeviceDataStore::SetDeviceFriendlyNameL(const TDesC& aName)
     {
-    __FLOG(_L8("SetDeviceFriendlyNameL - Entry"));
+    OstTraceFunctionEntry0( CMTPDEVICEDATASTORE_SETDEVICEFRIENDLYNAMEL_ENTRY );
     iDeviceFriendlyName->SetL(aName);
     StoreL();
-    __FLOG(_L8("SetDeviceFriendlyNameL - Exit"));
+    OstTraceFunctionExit0( CMTPDEVICEDATASTORE_SETDEVICEFRIENDLYNAMEL_EXIT );
     }
 
 /**
@@ -281,10 +285,10 @@ Sets the synchronisation partner name.
 */
 void CMTPDeviceDataStore::SetSynchronisationPartnerL(const TDesC& aName)
     {
-    __FLOG(_L8("SetSynchronisationPartnerL - Entry"));
+    OstTraceFunctionEntry0( CMTPDEVICEDATASTORE_SETSYNCHRONISATIONPARTNERL_ENTRY );
     iSynchronisationPartner->SetL(aName);
     StoreL();
-    __FLOG(_L8("SetSynchronisationPartnerL - Exit"));
+    OstTraceFunctionExit0( CMTPDEVICEDATASTORE_SETSYNCHRONISATIONPARTNERL_EXIT );
     }
 
 /**
@@ -297,7 +301,7 @@ is signalled to the MTP data provider framework layer.
 */
 void CMTPDeviceDataStore::StartEnumerationL(TUint32 aStorageId, MMTPEnumerationCallback& aCallback)
     {
-    __FLOG(_L8("StartEnumerationL - Entry"));
+    OstTraceFunctionEntry0( CMTPDEVICEDATASTORE_STARTENUMERATIONL_ENTRY );
     if (State() != EUndefined)
         {
         aCallback.NotifyEnumerationCompleteL(aStorageId, KErrNone);
@@ -308,12 +312,12 @@ void CMTPDeviceDataStore::StartEnumerationL(TUint32 aStorageId, MMTPEnumerationC
         iCallback = &aCallback;
         Schedule(EEnumeratingDevicePropertyStore);
         }
-    __FLOG(_L8("StartEnumerationL - Exit"));
+    OstTraceFunctionExit0( CMTPDEVICEDATASTORE_STARTENUMERATIONL_EXIT );
     }
 
 void CMTPDeviceDataStore::DoCancel()
     {
-    __FLOG(_L8("DoCancel - Entry"));
+    OstTraceFunctionEntry0( CMTPDEVICEDATASTORE_DOCANCEL_ENTRY );
     if (iTelephony)
         {
         switch (State())
@@ -331,7 +335,7 @@ void CMTPDeviceDataStore::DoCancel()
             break;
             }
         }
-    __FLOG(_L8("DoCancel - Exit"));
+    OstTraceFunctionExit0( CMTPDEVICEDATASTORE_DOCANCEL_EXIT );
     }
 
 /**
@@ -341,8 +345,9 @@ Handles leaves occurring in RunL.
 */
 TInt CMTPDeviceDataStore::RunError(TInt aError)
     {
-    __FLOG(_L8("RunError - Entry"));
-    __FLOG_VA((_L8("Error = %d, State = %d"), aError, State()));
+    OstTraceFunctionEntry0( CMTPDEVICEDATASTORE_RUNERROR_ENTRY );
+    OstTraceExt2(TRACE_NORMAL, CMTPDEVICEDATASTORE_RUNERROR, 
+            "Error = %d, State = %d", aError, (TInt)State());
 	aError = aError;	// suppress compiler warning
 
     switch (State())
@@ -374,13 +379,13 @@ TInt CMTPDeviceDataStore::RunError(TInt aError)
         break;
         }
 
-    __FLOG(_L8("RunError - Exit"));
+    OstTraceFunctionExit0( CMTPDEVICEDATASTORE_RUNERROR_EXIT );
     return KErrNone;
     }
 
 void CMTPDeviceDataStore::RunL()
     {
-    __FLOG(_L8("RunL - Entry"));
+    OstTraceFunctionEntry0( CMTPDEVICEDATASTORE_RUNL_ENTRY );
     switch (State())
         {
     case EEnumeratingDevicePropertyStore:
@@ -477,7 +482,7 @@ case EEnumeratedBatteryLevel :
         __DEBUG_ONLY(Panic(EMTPDevDpInvalidState));
         break;
         }
-    __FLOG(_L8("RunL - Exit"));
+    OstTraceFunctionExit0( CMTPDEVICEDATASTORE_RUNL_EXIT );
     }
 
 /**
@@ -491,7 +496,9 @@ CMTPDeviceDataStore::CMTPDeviceDataStore() :
 	iIsConnectMac(EFalse),
 	iHasPendingRequest(EFalse)
     {
+    OstTraceFunctionEntry0( DUP1_CMTPDEVICEDATASTORE_CMTPDEVICEDATASTORE_ENTRY );
     CActiveScheduler::Add(this);
+    OstTraceFunctionExit0( DUP1_CMTPDEVICEDATASTORE_CMTPDEVICEDATASTORE_EXIT );
     }
 
 /**
@@ -499,8 +506,7 @@ Second phase constructor.
 */
 void CMTPDeviceDataStore::ConstructL()
     {
-    __FLOG_OPEN(KMTPSubsystem, KComponent);
-    __FLOG(_L8("ConstructL - Entry"));
+    OstTraceFunctionEntry0( CMTPDEVICEDATASTORE_CONSTRUCTL_ENTRY );
     iSingletons.OpenL();
 
     /*
@@ -545,7 +551,7 @@ void CMTPDeviceDataStore::ConstructL()
    //11 Device Icon property, Load the icon into Auint Atrray
    LoadDeviceIconL();
 
-    __FLOG(_L8("ConstructL - Exit"));
+    OstTraceFunctionExit0( CMTPDEVICEDATASTORE_CONSTRUCTL_EXIT );
     }
 
 /**
@@ -554,9 +560,9 @@ Indicates if the device information data store is in the EEnumerated state.
 */
 TBool CMTPDeviceDataStore::Enumerated() const
     {
-    __FLOG(_L8("Enumerated - Entry"));
+    OstTraceFunctionEntry0( CMTPDEVICEDATASTORE_ENUMERATED_ENTRY );
     TInt32 state(State());
-    __FLOG(_L8("Enumerated - Exit"));
+    OstTraceFunctionExit0( CMTPDEVICEDATASTORE_ENUMERATED_EXIT );
     return (state & EEnumerated);
     }
 
@@ -567,11 +573,11 @@ Externalizes device properties to the device property store.
 */
 void CMTPDeviceDataStore::ExternalizeL(RWriteStream& aWriteStream) const
     {
-    __FLOG(_L8("ExternalizeL - Entry"));
+    OstTraceFunctionEntry0( CMTPDEVICEDATASTORE_EXTERNALIZEL_ENTRY );
     aWriteStream.WriteInt32L(KMTPDevicePropertyStoreVersion);
     aWriteStream << DeviceFriendlyName();
     aWriteStream << SynchronisationPartner();
-    __FLOG(_L8("ExternalizeL - Exit"));
+    OstTraceFunctionExit0( CMTPDEVICEDATASTORE_EXTERNALIZEL_EXIT );
     }
 
 /**
@@ -581,7 +587,7 @@ Internalises device properties from the device property store.
 */
 void CMTPDeviceDataStore::InternalizeL(RReadStream& aReadStream)
     {
-    __FLOG(_L8("InternalizeL - Entry"));
+    OstTraceFunctionEntry0( CMTPDEVICEDATASTORE_INTERNALIZEL_ENTRY );
     RBuf buf;
     buf.CleanupClosePushL();
 
@@ -602,7 +608,7 @@ void CMTPDeviceDataStore::InternalizeL(RReadStream& aReadStream)
     buf.Close();
 
     CleanupStack::Pop();  //buf
-    __FLOG(_L8("InternalizeL - Exit"));
+    OstTraceFunctionExit0( CMTPDEVICEDATASTORE_INTERNALIZEL_EXIT );
     }
 
 /**
@@ -611,7 +617,7 @@ Provides the full pathname of the device property store.
 */
 const TDesC& CMTPDeviceDataStore::PropertyStoreName()
     {
-    __FLOG(_L8("PropertyStoreName - Entry"));
+    OstTraceFunctionEntry0( CMTPDEVICEDATASTORE_PROPERTYSTORENAME_ENTRY );
     if (iPropertyStoreName.Length() == 0)
         {
         iSingletons.Fs().PrivatePath(iPropertyStoreName);
@@ -620,7 +626,7 @@ const TDesC& CMTPDeviceDataStore::PropertyStoreName()
         iPropertyStoreName.Append(KMTPDevicePropertyStoreFileName);
         }
 
-    __FLOG(_L8("PropertyStoreName - Exit"));
+    OstTraceFunctionExit0( CMTPDEVICEDATASTORE_PROPERTYSTORENAME_EXIT );
     return iPropertyStoreName;
     }
 
@@ -630,7 +636,7 @@ Query all dps for the MTP Vendor extensions set.
 */
 void CMTPDeviceDataStore::AppendMTPExtensionSetsL(TBool& aCompleted)
     {
-    __FLOG(_L8("AppendMTPExtensionSetsL - Entry"));
+    OstTraceFunctionEntry0( CMTPDEVICEDATASTORE_APPENDMTPEXTENSIONSETSL_ENTRY );
 	CMTPDataProviderController& dps(iSingletons.DpController());
 	const TInt count = Min<TInt>(iCurrentDpIndex + KExtensionSetIterationRunLength, dps.Count());
 	aCompleted = EFalse;
@@ -648,7 +654,8 @@ void CMTPDeviceDataStore::AppendMTPExtensionSetsL(TBool& aCompleted)
 			len += (*extensions)[i].Length() + KMTPVendorExtensionSetDelimiter().Length();
 			if (len > KMTPMaxStringCharactersLength)
 				{
-				__FLOG(_L8("MTP Extensions set exceeded the maximum MTP String length"));
+				OstTrace0(TRACE_WARNING, CMTPDEVICEDATASTORE_APPENDMTPEXTENSIONSETSL,
+				        "MTP Extensions set exceeded the maximum MTP String length");
 				// End querying dps when the extension set exceeds the maximum mtp string length.
 				aCompleted = ETrue;
 				break;
@@ -672,7 +679,7 @@ void CMTPDeviceDataStore::AppendMTPExtensionSetsL(TBool& aCompleted)
 		aCompleted = ETrue;
 		}
 
-	__FLOG(_L8("AppendMTPExtensionSetsL - Exit"));
+    OstTraceFunctionExit0( CMTPDEVICEDATASTORE_APPENDMTPEXTENSIONSETSL_EXIT );
     }
 
 /**
@@ -681,7 +688,7 @@ Loads device properties from the device property store.
 */
 void CMTPDeviceDataStore::RestoreL()
     {
-    __FLOG(_L8("RestoreL - Entry"));
+    OstTraceFunctionEntry0( CMTPDEVICEDATASTORE_RESTOREL_ENTRY );
     RFs& fs(iSingletons.Fs());
     if(BaflUtils::FileExists(fs, PropertyStoreName()))
         {
@@ -691,7 +698,7 @@ void CMTPDeviceDataStore::RestoreL()
         InternalizeL(instream);
         CleanupStack::PopAndDestroy(2, store); // instream, store
         }
-    __FLOG(_L8("RestoreL - Exit"));
+    OstTraceFunctionExit0( CMTPDEVICEDATASTORE_RESTOREL_EXIT );
     }
 
 /**
@@ -700,12 +707,12 @@ Schedules the device information data store to transition to the specified state
 */
 void CMTPDeviceDataStore::Schedule(TInt32 aState)
     {
-    __FLOG(_L8("Schedule - Entry"));
+    OstTraceFunctionEntry0( CMTPDEVICEDATASTORE_SCHEDULE_ENTRY );
     SetState(aState);
     SetRequestPending(iStatus);
     SetActive();
     SetRequestComplete(iStatus,KErrNone);
-    __FLOG(_L8("Schedule - Exit"));
+    OstTraceFunctionExit0( CMTPDEVICEDATASTORE_SCHEDULE_EXIT );
     }
 
 /**
@@ -713,10 +720,10 @@ Completes the supplied asynchronous request completion status.
 */
 void CMTPDeviceDataStore::SetRequestComplete(TRequestStatus& aRequest, TUint aErr)
     {
-    __FLOG(_L8("CompleteRequest - Entry"));
+    OstTraceFunctionEntry0( CMTPDEVICEDATASTORE_SETREQUESTCOMPLETE_ENTRY );
     TRequestStatus* status(&aRequest);
     User::RequestComplete(status, aErr);
-    __FLOG(_L8("CompleteRequest - Exit"));
+    OstTraceFunctionExit0( CMTPDEVICEDATASTORE_SETREQUESTCOMPLETE_EXIT );
     }
 
 
@@ -725,9 +732,9 @@ Initialises the supplied asynchronous request completion status.
 */
 void CMTPDeviceDataStore::SetRequestPending(TRequestStatus& aRequest)
     {
-    __FLOG(_L8("SetRequestPending - Entry"));
+    OstTraceFunctionEntry0( CMTPDEVICEDATASTORE_SETREQUESTPENDING_ENTRY );
     aRequest = KRequestPending;
-    __FLOG(_L8("SetRequestPending - Exit"));
+    OstTraceFunctionExit0( CMTPDEVICEDATASTORE_SETREQUESTPENDING_EXIT );
     }
 
 /**
@@ -736,10 +743,11 @@ Sets the device information data store state variable.
 */
 void CMTPDeviceDataStore::SetState(TInt32 aState)
     {
-    __FLOG(_L8("SetState - Entry"));
+    OstTraceFunctionEntry0( CMTPDEVICEDATASTORE_SETSTATE_ENTRY );
     iState = ((EEnumerated & iState) | aState);
-    __FLOG_VA((_L8("State set to 0x%08X"), iState));
-    __FLOG(_L8("SetState - Exit"));
+    OstTrace1(TRACE_NORMAL, CMTPDEVICEDATASTORE_SETSTATE, 
+            "State set to 0x%08X", iState);
+    OstTraceFunctionExit0( CMTPDEVICEDATASTORE_SETSTATE_EXIT );
     }
 
 /**
@@ -748,9 +756,10 @@ Provides the device information data store state variable value.
 */
 TInt32 CMTPDeviceDataStore::State() const
     {
-    __FLOG(_L8("State - Entry"));
-    __FLOG_VA((_L8("State = 0x%08X"), iState));
-    __FLOG(_L8("State - Exit"));
+    OstTraceFunctionEntry0( CMTPDEVICEDATASTORE_STATE_ENTRY );
+    OstTrace1(TRACE_NORMAL, CMTPDEVICEDATASTORE_STATE, 
+            "State = 0x%08X", iState);    
+    OstTraceFunctionExit0( CMTPDEVICEDATASTORE_STATE_EXIT );
     return iState;
     }
 
@@ -760,7 +769,7 @@ Stores device properties in the device property store.
 */
 void CMTPDeviceDataStore::StoreL()
     {
-    __FLOG(_L8("StoreL - Entry"));
+    OstTraceFunctionEntry0( CMTPDEVICEDATASTORE_STOREL_ENTRY );
     CFileStore* store(CDirectFileStore::ReplaceLC(iSingletons.Fs(), PropertyStoreName(), EFileWrite));
     store->SetTypeL(KDirectFileStoreLayoutUid);
     RStoreWriteStream outstream;
@@ -771,7 +780,7 @@ void CMTPDeviceDataStore::StoreL()
     store->SetRootL(id);
     store->CommitL();
     CleanupStack::PopAndDestroy(store);
-    __FLOG(_L8("StoreL - Exit"));
+    OstTraceFunctionExit0( CMTPDEVICEDATASTORE_STOREL_EXIT );
     }
 
 /**
@@ -781,7 +790,7 @@ exactly 32 characters, with leading zeros as required.
 */
 void CMTPDeviceDataStore::StoreFormattedSerialNumber(const TDesC& aSerialNo)
     {
-    __FLOG(_L8("FormatSerialNumber - Entry"));
+    OstTraceFunctionEntry0( CMTPDEVICEDATASTORE_STOREFORMATTEDSERIALNUMBER_ENTRY );
     TBuf<KMTPSerialNumberLength> formatted;
     if (aSerialNo.Length() < KMTPSerialNumberLength)
         {
@@ -799,7 +808,7 @@ void CMTPDeviceDataStore::StoreFormattedSerialNumber(const TDesC& aSerialNo)
     // Store the formatted serial number.
     iPhoneIdV1.iSerialNumber = formatted;
 
-    __FLOG(_L8("FormatSerialNumber - Exit"));
+    OstTraceFunctionExit0( CMTPDEVICEDATASTORE_STOREFORMATTEDSERIALNUMBER_EXIT );
     }
 
 /**
@@ -809,7 +818,8 @@ void CMTPDeviceDataStore::StoreFormattedSerialNumber(const TDesC& aSerialNo)
 */
 const TDesC& CMTPDeviceDataStore::SessionInitiatorVersionInfo() const
 	{
-	__FLOG(_L8("SessionInitiatorVersionInfo - Entry:Exit"));
+	OstTraceFunctionEntry0( CMTPDEVICEDATASTORE_SESSIONINITIATORVERSIONINFO_ENTRY );
+	OstTraceFunctionExit0( CMTPDEVICEDATASTORE_SESSIONINITIATORVERSIONINFO_EXIT );
 	return iSessionInitiatorVersionInfo->StringChars();
 	}
 
@@ -820,7 +830,8 @@ const TDesC& CMTPDeviceDataStore::SessionInitiatorVersionInfo() const
 */
 const TDesC& CMTPDeviceDataStore::SessionInitiatorVersionInfoDefault() const
 	{
-	__FLOG(_L8("SessionInitiatorVersionInfoDefault - Entry:Exit"));
+	OstTraceFunctionEntry0( CMTPDEVICEDATASTORE_SESSIONINITIATORVERSIONINFODEFAULT_ENTRY );
+	OstTraceFunctionExit0( CMTPDEVICEDATASTORE_SESSIONINITIATORVERSIONINFODEFAULT_EXIT );
 	return KDefaultSessionInitiatorVersionInfo;
 	}
 
@@ -831,10 +842,10 @@ const TDesC& CMTPDeviceDataStore::SessionInitiatorVersionInfoDefault() const
 */
 void CMTPDeviceDataStore::SetSessionInitiatorVersionInfoL(const TDesC& aVerInfo)
 	{
-	 __FLOG(_L8("SetDeviceFriendlyNameL - Entry"));
+	 OstTraceFunctionEntry0( CMTPDEVICEDATASTORE_SETSESSIONINITIATORVERSIONINFOL_ENTRY );
 	 iSessionInitiatorVersionInfo->SetL(aVerInfo);
 	 StoreL();
-	 __FLOG(_L8("SetDeviceFriendlyNameL - Exit"));
+	OstTraceFunctionExit0( CMTPDEVICEDATASTORE_SETSESSIONINITIATORVERSIONINFOL_EXIT );
 	}
 
 /**
@@ -844,7 +855,8 @@ void CMTPDeviceDataStore::SetSessionInitiatorVersionInfoL(const TDesC& aVerInfo)
 */
 TUint32 CMTPDeviceDataStore::PerceivedDeviceTypeDefault() const
 	{
-	__FLOG(_L8("SessionInitiatorVersionInfoDefault - Entry:Exit"));
+	OstTraceFunctionEntry0( CMTPDEVICEDATASTORE_PERCEIVEDDEVICETYPEDEFAULT_ENTRY );
+	OstTraceFunctionExit0( CMTPDEVICEDATASTORE_PERCEIVEDDEVICETYPEDEFAULT_EXIT );
 	return DefaultPerceivedDeviceType;
 	}
 
@@ -862,7 +874,8 @@ TUint32 CMTPDeviceDataStore::PerceivedDeviceTypeDefault() const
 */
 TUint32 CMTPDeviceDataStore::PerceivedDeviceType() const
 	{
-	__FLOG(_L8("SessionInitiatorVersionInfo - Entry:Exit"));
+	OstTraceFunctionEntry0( CMTPDEVICEDATASTORE_PERCEIVEDDEVICETYPE_ENTRY );
+	OstTraceFunctionExit0( CMTPDEVICEDATASTORE_PERCEIVEDDEVICETYPE_Exit );
 	return iPerceivedDeviceType.Value();
 	}
 
@@ -872,11 +885,11 @@ TUint32 CMTPDeviceDataStore::PerceivedDeviceType() const
 **/
 const TDesC& CMTPDeviceDataStore::DateTimeL()
 	{
-	__FLOG(_L8("DateTime - Entry:Exit"));
+	OstTraceFunctionEntry0( CMTPDEVICEDATASTORE_DATETIMEL_ENTRY );
 	TBuf<30> dateTimeString;
 	DateTimeToStringL(dateTimeString);
 	iDateTime->SetL(dateTimeString);
-	__FLOG(_L8("DateTime -Exit"));
+	OstTraceFunctionExit0( CMTPDEVICEDATASTORE_DATETIMEL_EXIT );
 	return iDateTime->StringChars();
 	}
 
@@ -890,7 +903,7 @@ const TDesC& CMTPDeviceDataStore::DateTimeL()
 **/
 TInt CMTPDeviceDataStore::SetDateTimeL(const TDesC& aDateTime )
     {
-    __FLOG(_L8("SetDateTime - Entry"));
+    OstTraceFunctionEntry0( CMTPDEVICEDATASTORE_SETDATETIMEL_ENTRY );
     TBuf<30> dateTime;
     TInt offset = User::UTCOffset().Int();
 	//get actul time to set, offset  + ,- or UTC and offset from UTC in seconds.
@@ -910,16 +923,21 @@ TInt CMTPDeviceDataStore::SetDateTimeL(const TDesC& aDateTime )
 		  TTimeIntervalSeconds utcOffset(offset);
         	  // Subtract seconds ahead, to get to UTC timezone
          	  tt -= utcOffset;
-        	  __FLOG(_L8("Setting UTC time"));
+        	  OstTrace0( TRACE_NORMAL, DUP1_CMTPDEVICEDATASTORE_SETDATETIMEL, 
+        	          "Setting UTC time" );
         	  errorCode = User::SetUTCTime(tt);
-                  __FLOG_STMT(TBuf<30> readable;)
-        	  __FLOG_STMT(tt.FormatL(readable, _L("%F%Y%M%DT%H%T%SZ"));)
-        	  __FLOG_1(_L("Time now: %S"), &readable);
+        #ifdef OST_TRACE_COMPILER_IN_USE
+        	  TBuf<30> readable;
+        	  tt.FormatL(readable, _L("%F%Y%M%DT%H%T%SZ"));
+        #endif
+              OstTraceExt1( TRACE_NORMAL, DUP2_CMTPDEVICEDATASTORE_SETDATETIMEL, 
+                      "Time now: %S", readable);                  
                 }
         }
-        __FLOG_1(_L8("SetDateTime - Exit %d"), errorCode);
-
-	return errorCode;
+    
+    OstTrace1(TRACE_NORMAL, CMTPDEVICEDATASTORE_SETDATETIMEL, "Exit %d", errorCode);
+	OstTraceFunctionExit0( CMTPDEVICEDATASTORE_SETDATETIMEL_EXIT );
+		return errorCode;
     }
 
 
@@ -931,13 +949,13 @@ TInt CMTPDeviceDataStore::SetDateTimeL(const TDesC& aDateTime )
 **/
 void CMTPDeviceDataStore::DateTimeToStringL(TDes& aDateTime)
     {
-    __FLOG(_L8("DateTimeToString - Entry"));
+    OstTraceFunctionEntry0( CMTPDEVICEDATASTORE_DATETIMETOSTRINGL_ENTRY );
     //get home time and convert it to string
     TTime tt;
     tt.UniversalTime();    
     _LIT(KFormat,"%F%Y%M%DT%H%T%SZ");
     tt.FormatL(aDateTime, KFormat);
-    __FLOG(_L8("DateTimeToString - Exit"));
+	OstTraceFunctionExit0( CMTPDEVICEDATASTORE_DATETIMETOSTRINGL_EXIT );
 	}
 
 /**
@@ -947,7 +965,7 @@ void CMTPDeviceDataStore::DateTimeToStringL(TDes& aDateTime)
 **/
 void CMTPDeviceDataStore::StringToDateTimeL(TDes& aDateTime )
 	{
-    __FLOG(_L8("StringToDateTime - Entry"));
+    OstTraceFunctionEntry0( CMTPDEVICEDATASTORE_STRINGTODATETIMEL_ENTRY );
 	TBuf<30> newTime;
 	_LIT(KDlemMTP,"T");
 	_LIT(KDlemTTime,":");
@@ -978,10 +996,13 @@ void CMTPDeviceDataStore::StringToDateTimeL(TDes& aDateTime )
 		}
 	else
 		{
+        OstTraceExt1( TRACE_ERROR, DUP1_CMTPDEVICEDATASTORE_STRINGTODATETIMEL, 
+                "wrong argument, can't convert string %S to datetime", aDateTime); 
         User::Leave( KErrArgument );
 		}
-        __FLOG_1(_L("Processed DateTime: %S"), &aDateTime);	
-	__FLOG(_L8("StringToDateTime - Exit"));
+        OstTraceExt1(TRACE_NORMAL, CMTPDEVICEDATASTORE_STRINGTODATETIMEL,
+                "Processed DateTime: %S", aDateTime);
+	OstTraceFunctionExit0( CMTPDEVICEDATASTORE_STRINGTODATETIMEL_EXIT );
 	}
 
 /**
@@ -994,8 +1015,9 @@ void CMTPDeviceDataStore::StringToDateTimeL(TDes& aDateTime )
 */
 TInt CMTPDeviceDataStore::ValidateString(const TDesC& aDateTimeStr, TDes& aDateTime, TInt &aOffsetVal)
 	{
-        __FLOG(_L8("ValidateString - Entry"));
-        __FLOG_1(_L("Supplied date: %S"), &aDateTimeStr);
+    OstTraceFunctionEntry0( CMTPDEVICEDATASTORE_VALIDATESTRING_ENTRY );
+    OstTraceExt1(TRACE_NORMAL, CMTPDEVICEDATASTORE_VALIDATESTRING,
+            "Supplied date: %S", aDateTimeStr);
 	_LIT(KDlemMTP,"T");
 	TInt errCode = KErrNone;
 	TInt pos = aDateTimeStr.Find(KDlemMTP);
@@ -1013,7 +1035,8 @@ TInt CMTPDeviceDataStore::ValidateString(const TDesC& aDateTimeStr, TDes& aDateT
 	if((KErrNotFound ==  pos )	|| (aDateTimeStr.Length() > KMaxDateTimeLength) ||
 	    (aDateTimeStr.Length() < KMinDateTimeLength) || pos != KPosDelemT)
 		{
-                __FLOG_2(_L8("Invalid. pos: %d, len: %d"), pos, aDateTimeStr.Length());
+        OstTraceExt2(TRACE_NORMAL, DUP1_CMTPDEVICEDATASTORE_VALIDATESTRING,
+                "Invalid. pos: %d, len: %d", pos, aDateTimeStr.Length());
 		errCode = KErrGeneral;
 		}
 	else
@@ -1030,8 +1053,9 @@ TInt CMTPDeviceDataStore::ValidateString(const TDesC& aDateTimeStr, TDes& aDateT
 				case 't':
 				if(i != pos)
 					{
-                                        __FLOG_1(_L8("Invalid. 'T' encountered at offset %d"), i);
-					//error char at rong position
+                    OstTrace1(TRACE_NORMAL, DUP2_CMTPDEVICEDATASTORE_VALIDATESTRING,
+                            "Invalid. 'T' encountered at offset %d", i);
+                    //error char at rong position
 					errCode = KErrGeneral;
 					}//else fine
 				break;
@@ -1042,7 +1066,8 @@ TInt CMTPDeviceDataStore::ValidateString(const TDesC& aDateTimeStr, TDes& aDateT
 					//error char at wrong position
 					if(i <KMinDateTimeLength)
 						{
-                                                __FLOG_1(_L8("Invalid. 'Z' encountered at offset %d"), i);
+                        OstTrace1(TRACE_NORMAL, DUP3_CMTPDEVICEDATASTORE_VALIDATESTRING,
+                                "Invalid. 'Z' encountered at offset %d", i);                        
 						//error char at wrong position
 						errCode = KErrGeneral;
 						}//else fine
@@ -1053,7 +1078,8 @@ TInt CMTPDeviceDataStore::ValidateString(const TDesC& aDateTimeStr, TDes& aDateT
 						{
 						//error char at wrong position
 						errCode = KErrGeneral;
-                                                __FLOG_1(_L8("Invalid. '+/-' encountered at offset %d"), i);
+                        OstTrace1(TRACE_NORMAL, DUP4_CMTPDEVICEDATASTORE_VALIDATESTRING,
+                                "Invalid. '+/-' encountered at offset %d", i);  
 						break;
 						}
 					else
@@ -1074,7 +1100,8 @@ TInt CMTPDeviceDataStore::ValidateString(const TDesC& aDateTimeStr, TDes& aDateT
 						if ((hourOffset > 23) || (minuteOffset > 59))
                                                      {
                                                      errCode = KErrGeneral;
-                                                     __FLOG_2(_L8("Invalid. Hour(%d) or Minute(%d) offset out of range."), hourOffset, minuteOffset);
+                                                     OstTraceExt2(TRACE_NORMAL, DUP5_CMTPDEVICEDATASTORE_VALIDATESTRING,
+                                                             "Invalid. Hour(%d) or Minute(%d) offset out of range.", hourOffset, minuteOffset); 
                                                      break;
                                                      }
 
@@ -1084,7 +1111,8 @@ TInt CMTPDeviceDataStore::ValidateString(const TDesC& aDateTimeStr, TDes& aDateT
 							{
 					                aOffsetVal = -aOffsetVal;
 							}
-                                                __FLOG_1(_L8("Info: Timezone offset %d seconds"), aOffsetVal);	
+                                                OstTrace1(TRACE_NORMAL, DUP6_CMTPDEVICEDATASTORE_VALIDATESTRING,
+                                                        "Info: Timezone offset %d seconds", aOffsetVal);  
 						}
 
 					break;
@@ -1094,26 +1122,34 @@ TInt CMTPDeviceDataStore::ValidateString(const TDesC& aDateTimeStr, TDes& aDateT
 					{
 					//error char at wrong position
 					errCode = KErrGeneral;
-                                        __FLOG_1(_L8("Invalid. '.' or NULL at offset %d"), i);
+                    OstTrace1(TRACE_NORMAL, DUP7_CMTPDEVICEDATASTORE_VALIDATESTRING,
+                            "Invalid. '.' or NULL at offset %d", i); 
 					}
 				break;
 				default :
 				//wrong char
 				errCode = KErrGeneral;
-                                __FLOG_2(_L8("Invalid. Character %04x at offset %d"), aDateTimeStr[i], i);
+                OstTraceExt2(TRACE_NORMAL, DUP8_CMTPDEVICEDATASTORE_VALIDATESTRING,
+                        "Invalid. Character %04x at offset %d", aDateTimeStr[i], i); 
 				break;
 				}
 		}
 		if(KErrNone != errCode)
 			{
-		        __FLOG_2(_L("Processed date: %S, TimeZone: %ds ahead"), &aDateTimeStr, aOffsetVal);
-                        __FLOG_1(_L8("ValidateString - Exit %d"), errCode);
+            OstTraceExt2(TRACE_NORMAL, DUP9_CMTPDEVICEDATASTORE_VALIDATESTRING,
+                    "Processed date: %S, TimeZone: %ds ahead", aDateTimeStr, aOffsetVal); 
+            OstTrace1(TRACE_NORMAL, DUP10_CMTPDEVICEDATASTORE_VALIDATESTRING,
+                    "ValidateString - Exit %d", errCode); 
+			OstTraceFunctionExit0( CMTPDEVICEDATASTORE_VALIDATESTRING_EXIT );
 			return errCode;
 			}
 		}
 	}
-	__FLOG_2(_L("Processed date: %S, TimeZone: %ds ahead"), &aDateTimeStr, aOffsetVal);
-        __FLOG_1(_L8("ValidateString - Exit %d"), errCode);
+    OstTraceExt2(TRACE_NORMAL, DUP11_CMTPDEVICEDATASTORE_VALIDATESTRING,
+            "Processed date: %S, TimeZone: %ds ahead", aDateTimeStr, aOffsetVal); 
+    OstTrace1(TRACE_NORMAL, DUP12_CMTPDEVICEDATASTORE_VALIDATESTRING,
+            "ValidateString - Exit %d", errCode);         
+	OstTraceFunctionExit0( DUP1_CMTPDEVICEDATASTORE_VALIDATESTRING_EXIT );
 	return errCode;
 	}
 

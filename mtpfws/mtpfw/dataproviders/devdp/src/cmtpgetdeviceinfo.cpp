@@ -35,9 +35,13 @@
 #include "rmtpdevicedpsingletons.h"
 #include "cmtpdevicedpconfigmgr.h"
 #include "cmtpservicemgr.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpgetdeviceinfoTraces.h"
+#endif
+
 
 // Class constants.
-__FLOG_STMT(_LIT8(KComponent,"GetDeviceInfo");)
 
 /**
 This identifies, in hundredths, the PTP version this device can support
@@ -78,12 +82,11 @@ Destructor.
 */    
 CMTPGetDeviceInfo::~CMTPGetDeviceInfo()
     {    
-    __FLOG(_L8("~CMTPGetDeviceInfo - Entry"));
+    OstTraceFunctionEntry0( CMTPGETDEVICEINFO_CMTPGETDEVICEINFO_ENTRY );
     delete iDeviceInfo;
     iDpSingletons.Close();
     iSingletons.Close();
-    __FLOG(_L8("~CMTPGetDeviceInfo - Exit"));
-    __FLOG_CLOSE;
+    OstTraceFunctionExit0( CMTPGETDEVICEINFO_CMTPGETDEVICEINFO_EXIT );
     }
 
 /**
@@ -100,19 +103,21 @@ GetDeviceInfo request handler. Build and send device info data set.
 */    
 void CMTPGetDeviceInfo::ServiceL()
     {
-    __FLOG(_L8("ServiceL - Entry"));
+    OstTraceFunctionEntry0( CMTPGETDEVICEINFO_SERVICEL_ENTRY );
     
     if (!iDpSingletons.DeviceDataStore().Enumerated())
         {
-        __FLOG(_L8("MTPExtensionReady not ready, reschedule request")); 
+        OstTrace0(TRACE_NORMAL, CMTPGETDEVICEINFO_SERVICEL, 
+                "MTPExtensionReady not ready, reschedule request");
         iDpSingletons.DeviceDataStore().RegisterPendingRequest();
         RegisterPendingRequest();
+        OstTraceFunctionExit0( CMTPGETDEVICEINFO_SERVICEL_EXIT );
         return;
         }
     
     BuildDeviceInfoL();
     SendDataL(*iDeviceInfo);
-    __FLOG(_L8("ServiceL - Exit"));
+    OstTraceFunctionExit0( DUP1_CMTPGETDEVICEINFO_SERVICEL_EXIT );
     }
 
 /**
@@ -120,12 +125,11 @@ Second-phase constructor.
 */        
 void CMTPGetDeviceInfo::ConstructL()
     {
-    __FLOG_OPEN(KMTPSubsystem, KComponent);
-    __FLOG(_L8("ConstructL - Entry")); 
+    OstTraceFunctionEntry0( CMTPGETDEVICEINFO_CONSTRUCTL_ENTRY );
     iSingletons.OpenL();
     iDpSingletons.OpenL(iFramework);
     iDeviceInfo = CMTPTypeDeviceInfo::NewL();
-    __FLOG(_L8("ConstructL - Exit")); 
+    OstTraceFunctionExit0( CMTPGETDEVICEINFO_CONSTRUCTL_EXIT );
     }
 
 /**
@@ -133,13 +137,13 @@ Populates device info data set
 */
 void CMTPGetDeviceInfo::BuildDeviceInfoL()
     {
-    __FLOG(_L8("BuildDeviceInfoL - Entry")); 
+    OstTraceFunctionEntry0( CMTPGETDEVICEINFO_BUILDDEVICEINFOL_ENTRY );
     CMTPDeviceDataStore& device(iDpSingletons.DeviceDataStore());
     iDeviceInfo->SetUint16L(CMTPTypeDeviceInfo::EStandardVersion, KMTPStandardVersion);
     
     if(iDpSingletons.DeviceDataStore().IsConnectMac())
         {
-        __FLOG(_L8("Connect Mac = ETrue"));         
+        OstTrace0(TRACE_NORMAL, CMTPGETDEVICEINFO_BUILDDEVICEINFOL, "Connect Mac = ETrue");
         iDeviceInfo->SetUint32L(CMTPTypeDeviceInfo::EMTPVendorExtensionID, KMTPVendorExtensionId_Mac);
         iDeviceInfo->SetUint16L(CMTPTypeDeviceInfo::EMTPVersion, KMTPVersion);        
         RBuf  mtpExtensions;
@@ -150,7 +154,7 @@ void CMTPGetDeviceInfo::BuildDeviceInfoL()
         }
     else
         {
-        __FLOG(_L8("Connect Mac = EFalse")); 
+        OstTrace0(TRACE_NORMAL, DUP1_CMTPGETDEVICEINFO_BUILDDEVICEINFOL, "Connect Mac = EFalse");
         iDeviceInfo->SetUint32L(CMTPTypeDeviceInfo::EMTPVendorExtensionID, KMTPVendorExtensionId);
         iDeviceInfo->SetUint16L(CMTPTypeDeviceInfo::EMTPVersion, KMTPVersion);        
         iDeviceInfo->SetStringL(CMTPTypeDeviceInfo::EMTPExtensions, iDpSingletons.DeviceDataStore().MTPExtensions());  
@@ -168,8 +172,8 @@ void CMTPGetDeviceInfo::BuildDeviceInfoL()
     SetSupportedDevicePropertiesL(dps);
     SetSupportedCaptureFormatsL(dps);
     SetSupportedPlaybackFormatsL(dps);
-    
-    __FLOG(_L8("BuildDeviceInfoL - Exit")); 
+
+    OstTraceFunctionExit0( CMTPGETDEVICEINFO_BUILDDEVICEINFOL_EXIT );
     }
 
 /**
@@ -179,7 +183,7 @@ It enumerates the installed data provider plugins and retrieves the supported op
 */    
 void CMTPGetDeviceInfo::SetSupportedOperationsL(CMTPDataProviderController& aDpController)
     {
-    __FLOG(_L8("SetSupportedOperationsL - Entry")); 
+    OstTraceFunctionEntry0( CMTPGETDEVICEINFO_SETSUPPORTEDOPERATIONSL_ENTRY );
     
     TInt count = aDpController.Count();    
     RArray<TUint> supportedOperations(KMTPArrayGranularity);
@@ -212,8 +216,8 @@ void CMTPGetDeviceInfo::SetSupportedOperationsL(CMTPDataProviderController& aDpC
     CleanupStack::PopAndDestroy(&supportedOperations);
     CleanupStack::PushL(mtpOperationsArray); //unnecessary if Set operation below does not leave,         
     iDeviceInfo->SetL(CMTPTypeDeviceInfo::EOperationsSupported, *mtpOperationsArray);
-    CleanupStack::PopAndDestroy(mtpOperationsArray);  
-    __FLOG(_L8("SetSupportedOperationsL - Exit"));      
+    CleanupStack::PopAndDestroy(mtpOperationsArray);     
+    OstTraceFunctionExit0( CMTPGETDEVICEINFO_SETSUPPORTEDOPERATIONSL_EXIT );
     }
 
 /**
@@ -223,7 +227,7 @@ It enumerates the installed data provider plugins and retrieves the supported ev
 */    
 void CMTPGetDeviceInfo::SetSupportedEventsL(CMTPDataProviderController& aDpController)
     {
-    __FLOG(_L8("SetSupportedEventsL - Entry"));
+    OstTraceFunctionEntry0( CMTPGETDEVICEINFO_SETSUPPORTEDEVENTSL_ENTRY );
     TInt count = aDpController.Count();    
     RArray<TUint> supportedEvents(KMTPArrayGranularity);
     CleanupClosePushL(supportedEvents);
@@ -237,7 +241,7 @@ void CMTPGetDeviceInfo::SetSupportedEventsL(CMTPDataProviderController& aDpContr
     CleanupStack::PushL(mtpEventArray); //unnecessary if Set operation below does not leave,         
     iDeviceInfo->SetL(CMTPTypeDeviceInfo::EEventsSupported, *mtpEventArray);
     CleanupStack::PopAndDestroy(mtpEventArray);  
-    __FLOG(_L8("SetSupportedEventsL - Exit"));  
+    OstTraceFunctionExit0( CMTPGETDEVICEINFO_SETSUPPORTEDEVENTSL_EXIT );
     }
 
 /**
@@ -245,7 +249,7 @@ Populates the supported device properties field in the device info data set
 */       
 void CMTPGetDeviceInfo::SetSupportedDevicePropertiesL(CMTPDataProviderController& aDpController)
 	{ 
-	__FLOG(_L8("SetSupportedDevicePropertiesL - Entry"));	
+	OstTraceFunctionEntry0( CMTPGETDEVICEINFO_SETSUPPORTEDDEVICEPROPERTIESL_ENTRY );
     TInt count = aDpController.Count();    
     RArray<TUint> supportedOperations(KMTPArrayGranularity);
     CleanupClosePushL(supportedOperations);
@@ -278,8 +282,8 @@ void CMTPGetDeviceInfo::SetSupportedDevicePropertiesL(CMTPDataProviderController
     CleanupStack::PushL(mtpOperationsArray); //unnecessary if Set operation below does not leave,         
     iDeviceInfo->SetL(CMTPTypeDeviceInfo::EDevicePropertiesSupported, *mtpOperationsArray);
     CleanupStack::PopAndDestroy(mtpOperationsArray);  
-	
-	__FLOG(_L8("SetSupportedDevicePropertiesL - Exit"));  
+ 
+	OstTraceFunctionExit0( CMTPGETDEVICEINFO_SETSUPPORTEDDEVICEPROPERTIESL_EXIT );
 	}
 
 /**
@@ -289,7 +293,7 @@ It enumerates the installed data provider plugins and retrieves the supported ca
 */    
 void CMTPGetDeviceInfo::SetSupportedCaptureFormatsL(CMTPDataProviderController& aDpController)
     {
-    __FLOG(_L8("SetSupportedCaptureFormatsL - Entry"));
+    OstTraceFunctionEntry0( CMTPGETDEVICEINFO_SETSUPPORTEDCAPTUREFORMATSL_ENTRY );
     TInt count = aDpController.Count();    
     RArray<TUint> supportedCaptureFormats(KMTPArrayGranularity);
     CleanupClosePushL(supportedCaptureFormats);
@@ -301,7 +305,8 @@ void CMTPGetDeviceInfo::SetSupportedCaptureFormatsL(CMTPDataProviderController& 
   TRAPD(errorCode,iDpSingletons.ConfigMgr().GetRssConfigInfoArrayL(orderedFormats, EDevDpFormats));
   if(KErrNone != errorCode)
 	  {
-	  __FLOG(_L8("There is an issue in reading format info from rss file "));
+      OstTrace0(TRACE_WARNING, CMTPGETDEVICEINFO_SETSUPPORTEDCAPTUREFORMATSL, 
+              "There is an issue in reading format info from rss file ");
 	  }
 	
     while(count--)
@@ -329,7 +334,8 @@ void CMTPGetDeviceInfo::SetSupportedCaptureFormatsL(CMTPDataProviderController& 
 #ifdef _DEBUG
 	for(TInt i =0 ; i < supportedCaptureFormats.Count(); i++)
 	{
-	__FLOG_VA((_L8("Playback formats = %d"), supportedCaptureFormats[i]));
+    OstTrace1(TRACE_NORMAL, DUP1_CMTPGETDEVICEINFO_SETSUPPORTEDCAPTUREFORMATSL, 
+            "Playback formats = %d ", supportedCaptureFormats[i]);
 	}
 #endif 
 	//before deleting make sure all the elements are added to supportedPlaybackFormats
@@ -340,7 +346,7 @@ void CMTPGetDeviceInfo::SetSupportedCaptureFormatsL(CMTPDataProviderController& 
     CleanupStack::PushL(mtpCaptureFormatArray); //unnecessary if Set operation below does not leave,         
     iDeviceInfo->SetL(CMTPTypeDeviceInfo::ECaptureFormats, *mtpCaptureFormatArray);
     CleanupStack::PopAndDestroy(mtpCaptureFormatArray); 
-    __FLOG(_L8("SetSupportedCaptureFormatsL - Exit"));   
+    OstTraceFunctionExit0( CMTPGETDEVICEINFO_SETSUPPORTEDCAPTUREFORMATSL_EXIT );
     }
 
 /**
@@ -350,7 +356,7 @@ It enumerates the installed data provider plugins and retrieves the supported pl
 */    
 void CMTPGetDeviceInfo::SetSupportedPlaybackFormatsL(CMTPDataProviderController& aDpController)
     {
-    __FLOG(_L8("SetSupportedPlaybackFormatsL - Entry"));
+    OstTraceFunctionEntry0( CMTPGETDEVICEINFO_SETSUPPORTEDPLAYBACKFORMATSL_ENTRY );
     TInt count = aDpController.Count();    
     RArray<TUint> supportedPlaybackFormats(KMTPArrayGranularity);	
     CleanupClosePushL(supportedPlaybackFormats);
@@ -363,7 +369,8 @@ void CMTPGetDeviceInfo::SetSupportedPlaybackFormatsL(CMTPDataProviderController&
     TRAPD(errorCode,iDpSingletons.ConfigMgr().GetRssConfigInfoArrayL(orderedFormats, EDevDpFormats));
 	if(KErrNone != errorCode)
 		{
-		__FLOG(_L8("There is an issue in reading format info from rss file "));
+        OstTrace0(TRACE_WARNING, CMTPGETDEVICEINFO_SETSUPPORTEDPLAYBACKFORMATSL, 
+                "There is an issue in reading format info from rss file ");
 		}
 
     while(count--)
@@ -392,7 +399,8 @@ void CMTPGetDeviceInfo::SetSupportedPlaybackFormatsL(CMTPDataProviderController&
 #ifdef _DEBUG
 	for(TInt i =0 ; i < supportedPlaybackFormats.Count(); i++)
 	{
-	__FLOG_VA((_L8("Playback formats = %d"), supportedPlaybackFormats[i]));
+    OstTrace1(TRACE_NORMAL, DUP1_CMTPGETDEVICEINFO_SETSUPPORTEDPLAYBACKFORMATSL, 
+            "Playback formats = %d ", supportedPlaybackFormats[i]);
 	}
 #endif 
     //before deleting make sure all the elements are added to supportedPlaybackFormats
@@ -403,7 +411,7 @@ void CMTPGetDeviceInfo::SetSupportedPlaybackFormatsL(CMTPDataProviderController&
     CleanupStack::PushL(mtpPlaybackFormatArray); //unnecessary if Set operation below does not leave,         
     iDeviceInfo->SetL(CMTPTypeDeviceInfo::EPlaybackFormats, *mtpPlaybackFormatArray);
     CleanupStack::PopAndDestroy(mtpPlaybackFormatArray);  
-    __FLOG(_L8("SetSupportedPlaybackFormatsL - Exit"));  
+    OstTraceFunctionExit0( CMTPGETDEVICEINFO_SETSUPPORTEDPLAYBACKFORMATSL_EXIT );
     }
 
 /**
@@ -419,13 +427,15 @@ void CMTPGetDeviceInfo::AddToArrayL(RArray<TUint>& aDestArray, const RArray<TUin
         // Apply filter
         if(aSrcArray[i] == EMTPOpCodeResetDevicePropValue)
             {
-            __FLOG_VA((_L8("Filter ignored operation: %d"), aSrcArray[i]));
+            OstTrace1(TRACE_NORMAL, CMTPGETDEVICEINFO_ADDTOARRAYL, "Filter ignored operation: %d", aSrcArray[i]);
             continue;
             }
         
         TInt err(aDestArray.InsertInOrder(aSrcArray[i]));
         if ((err != KErrNone) && (err != KErrAlreadyExists))
             {
+            OstTrace1( TRACE_ERROR, DUP1_CMTPGETDEVICEINFO_ADDTOARRAYL, 
+                    "Add elements from source array to the destination array error! error code %d", err );
             User::Leave(err);
             }
         }
@@ -448,13 +458,16 @@ void CMTPGetDeviceInfo::AddToArrayWithFilterL(RArray<TUint>& aDestArray, const R
            aSrcArray[i] == EMTPOpCodeSendObjectPropList ||
 			aSrcArray[i] == EMTPOpCodeGetFormatCapabilities )
             {
-            __FLOG_VA((_L8("Filter ignored operation: %d"), aSrcArray[i]));
+            OstTrace1(TRACE_NORMAL, CMTPGETDEVICEINFO_ADDTOARRAYWITHFILTERL, 
+                    "Filter ignored operation: %d", aSrcArray[i]);
             continue;
             }
 
         TInt err(aDestArray.InsertInOrder(aSrcArray[i]));
         if ((err != KErrNone) && (err != KErrAlreadyExists))
             {
+            OstTrace1( TRACE_ERROR, DUP1_CMTPGETDEVICEINFO_ADDTOARRAYWITHFILTERL, 
+                    "Add elements from source array to the destination array error! error code %d", err );
             User::Leave(err);
             }
         }
@@ -463,7 +476,7 @@ void CMTPGetDeviceInfo::AddToArrayWithFilterL(RArray<TUint>& aDestArray, const R
 
 void CMTPGetDeviceInfo::RemoveServiceFormat(RArray<TUint>& aSupportedCaptureFormats)
 	{
-	__FLOG(_L8("RemovetServiceFormat - Entry"));
+	OstTraceFunctionEntry0( CMTPGETDEVICEINFO_REMOVESERVICEFORMAT_ENTRY );
 	
 	TInt count = aSupportedCaptureFormats.Count();
 	count--;
@@ -473,5 +486,5 @@ void CMTPGetDeviceInfo::RemoveServiceFormat(RArray<TUint>& aSupportedCaptureForm
             aSupportedCaptureFormats.Remove(count);
         count--;
 		}
-	__FLOG(_L8("RemovetServiceFormat - Exit")); 
+	OstTraceFunctionExit0( CMTPGETDEVICEINFO_REMOVESERVICEFORMAT_EXIT );
 	}

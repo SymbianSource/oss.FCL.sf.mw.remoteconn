@@ -22,7 +22,6 @@
 #define CMTPGETDEVICEPROPDESC_H
 
 #include "cmtprequestprocessor.h"
-#include "mtpdebug.h"
 #include "rmtpdevicedpsingletons.h"
 
 #include "mmtpdevdpextn.h"
@@ -103,11 +102,6 @@ protected: // Owned
   
     
 private: // Owned.
-
-    /**
-    FLOGGER debug trace member variable.
-    */
-    __FLOG_DECLARATION_MEMBER_MUTABLE;
     
     CMTPTypeDevicePropDesc* iPropDesc;
     TMTPTypeGuid*           iData;

@@ -35,8 +35,11 @@
 #include "cmtpimagedp.h"
 #include "cmtpimagedpobjectpropertymgr.h"
 #include "mtpimagedputilits.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpimagedpmdeobserverTraces.h"
+#endif
 
-__FLOG_STMT(_LIT8(KComponent, "CMTPImageDpMdeObserver");)
 
 CMTPImageDpMdeObserver* CMTPImageDpMdeObserver::NewL(MMTPDataProviderFramework& aFramework, CMTPImageDataProvider& aDataProvider)
     {
@@ -59,23 +62,21 @@ CMTPImageDpMdeObserver::CMTPImageDpMdeObserver(MMTPDataProviderFramework& aFrame
 
 void CMTPImageDpMdeObserver::ConstructL()
     {
-    __FLOG_OPEN(KMTPSubsystem, KComponent);
-    __FLOG(_L8("CMTPImageDpMdeObserver::ConstructL - Entry"));
-    __FLOG(_L8("CMTPImageDpMdeObserver::ConstructL - Exit"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPMDEOBSERVER_CONSTRUCTL_ENTRY );
+    OstTraceFunctionExit0( CMTPIMAGEDPMDEOBSERVER_CONSTRUCTL_EXIT );
     }
 
 CMTPImageDpMdeObserver::~CMTPImageDpMdeObserver()
     {
-    __FLOG(_L8("CMTPImageDpMdeObserver::~CMTPImageDpMdeObserver - Entry"));   
-    __FLOG(_L8("CMTPImageDpMdeObserver::~CMTPImageDpMdeObserver - Exit"));   
-    __FLOG_CLOSE;
+    OstTraceFunctionEntry0( CMTPIMAGEDPMDEOBSERVER_CMTPIMAGEDPMDEOBSERVER_ENTRY );
+    OstTraceFunctionExit0( CMTPIMAGEDPMDEOBSERVER_CMTPIMAGEDPMDEOBSERVER_EXIT );
     }
 
 void CMTPImageDpMdeObserver::CreateMetadataL(const TParsePtrC& aParse, TMTPFormatCode aFormat, TUint32 aParentHandle, CMTPObjectMetaData& aMetaData)
     {
     TInt32 storageId = MTPImageDpUtilits::FindStorage(iFramework, aParse.FullName());
-     
-    __FLOG_VA((_L16("Addition - New Image:%S"), &aParse.FullName()));
+
+    OstTraceExt1( TRACE_NORMAL, CMTPIMAGEDPMDEOBSERVER_CREATEMETADATAL, "Addition - New Image:%S", aParse.FullName() );
     aMetaData.SetUint(CMTPObjectMetaData::EDataProviderId, iFramework.DataProviderId());
     aMetaData.SetUint(CMTPObjectMetaData::EFormatCode, aFormat);
     aMetaData.SetUint(CMTPObjectMetaData::EStorageId, storageId);
@@ -89,7 +90,7 @@ void CMTPImageDpMdeObserver::CreateMetadataL(const TParsePtrC& aParse, TMTPForma
 
 void CMTPImageDpMdeObserver::ProcessMdeNotificationL(const RArray<TItemId>& aObjectIdArray, TObserverNotificationType /*aType*/)
     {    
-    __FLOG_VA((_L8("CMTPImageDpMdeObserver::ProcessMdeNotificationL Start")));       
+    OstTraceFunctionEntry0( CMTPIMAGEDPMDEOBSERVER_PROCESSMDENOTIFICATIONL_ENTRY );     
     
     //Because image dp only subscribe add notification from MdS, only the add notifictions can reach here
     //we ignore checking ENotifyAdd notification type to reduce complexity.    
@@ -106,8 +107,9 @@ void CMTPImageDpMdeObserver::ProcessMdeNotificationL(const RArray<TItemId>& aObj
             continue;
             }
         CleanupStack::PushL(mdeObject);
-        __FLOG_VA((_L16("Addition - ObjectId:%u, URI:%S"), aObjectIdArray[i], &mdeObject->Uri()));
-        
+        OstTraceExt2( TRACE_NORMAL, CMTPIMAGEDPMDEOBSERVER_PROCESSMDENOTIFICATIONL, 
+                "Addition - ObjectId:%u, URI:%S", aObjectIdArray[i], mdeObject->Uri());
+
         //filter out all image files other jpeg files       
         TParsePtrC parse(mdeObject->Uri());
         TMTPFormatCode format = iDataProvider.FindFormat(parse.Ext().Mid(1));
@@ -123,13 +125,13 @@ void CMTPImageDpMdeObserver::ProcessMdeNotificationL(const RArray<TItemId>& aObj
                 TUint32 parentHandle = MTPImageDpUtilits::FindParentHandleL(iFramework, iDataProvider, parse.FullName());
                 if (parentHandle == KMTPHandleNone)
                     {
-                    __FLOG_VA((_L16("Notify framework - URI:%S"), &mdeObject->Uri()));
+                    OstTraceExt1( TRACE_NORMAL, DUP1_CMTPIMAGEDPMDEOBSERVER_PROCESSMDENOTIFICATIONL, "Notify framework - URI:%S", mdeObject->Uri() );
                     TMTPNotificationParamsFolderChange param = {mdeObject->Uri()};                                       
                     iFramework.NotifyFrameworkL(EMTPAddFolder, &param);
                     
                     //try to get parent handle if framework complete it's tasks
                     parentHandle = MTPImageDpUtilits::FindParentHandleL(iFramework, iDataProvider, parse.FullName());
-                    __FLOG_VA((_L16("Framework enumeration parent handle:%u"), parentHandle));
+                    OstTrace1( TRACE_NORMAL, DUP2_CMTPIMAGEDPMDEOBSERVER_PROCESSMDENOTIFICATIONL, "Framework enumeration parent handle:%u", parentHandle );
                     }
                 
                 if (parentHandle != KMTPHandleNone)
@@ -137,7 +139,8 @@ void CMTPImageDpMdeObserver::ProcessMdeNotificationL(const RArray<TItemId>& aObj
                     CMTPObjectMetaData* object = CMTPObjectMetaData::NewLC();
                     CreateMetadataL(parse, format, parentHandle, *object);
                     iFramework.ObjectMgr().InsertObjectL(*object);                
-                    __FLOG_VA((_L16("Addition - New Handle:%u"), object->Uint(CMTPObjectMetaData::EHandle)));
+                    OstTrace1( TRACE_NORMAL, DUP3_CMTPIMAGEDPMDEOBSERVER_PROCESSMDENOTIFICATIONL, 
+                            "Addition - New Handle:%u", object->Uint(CMTPObjectMetaData::EHandle) );
                     
                     TMTPTypeEvent event;
                     event.SetUint16(TMTPTypeEvent::EEventCode, EMTPEventCodeObjectAdded);
@@ -146,8 +149,10 @@ void CMTPImageDpMdeObserver::ProcessMdeNotificationL(const RArray<TItemId>& aObj
                   
                     TUint32 handle = object->Uint(CMTPObjectMetaData::EHandle);            
                     event.SetUint32(TMTPTypeEvent::EEventParameter1, handle);                    
-                    iFramework.SendEventL(event);
-                    __FLOG_VA((_L8("ProcessMdeNotificationL - EMTPEventCodeObjectAdd, object handle:%u"), handle));                    
+                    iFramework.SendEventL(event);                  
+                    OstTrace1( TRACE_NORMAL, DUP4_CMTPIMAGEDPMDEOBSERVER_PROCESSMDENOTIFICATIONL, 
+                            "ProcessMdeNotificationL - EMTPEventCodeObjectAdd, object handle:%u", handle );
+                    
                     CleanupStack::PopAndDestroy(object);//object                 
                     }
                 }
@@ -156,7 +161,7 @@ void CMTPImageDpMdeObserver::ProcessMdeNotificationL(const RArray<TItemId>& aObj
         CleanupStack::PopAndDestroy(mdeObject);//mdeObject             
         }    
     
-    __FLOG_VA((_L8("CMTPImageDpMdeObserver::ProcessMdeNotificationL - Exit")));
+    OstTraceFunctionExit0( CMTPIMAGEDPMDEOBSERVER_PROCESSMDENOTIFICATIONL_EXIT );
     }
 
 /*
@@ -179,19 +184,20 @@ void CMTPImageDpMdeObserver::HandleObjectNotificationL(CMdESession& /*aSession*/
                                                     TObserverNotificationType aType,
                                                     const RArray<TItemId>& aObjectIdArray)
     {   
-    __FLOG_VA((_L8("CMTPImageDpMdeObserver::HandleObjectNotificationL - changeType = %d"), aType));   
+    OstTraceFunctionEntry0( CMTPIMAGEDPMDEOBSERVER_HANDLEOBJECTNOTIFICATIONL_ENTRY );
+    OstTrace1( TRACE_NORMAL, CMTPIMAGEDPMDEOBSERVER_HANDLEOBJECTNOTIFICATIONL, "changeType = %d", aType ); 
    
     ProcessMdeNotificationL(aObjectIdArray, aType);
 
     //Update RProperty to notify the subscribers.
     if (iNewPics > 0)
         {
-        __FLOG_1(_L16("CMTPImageDpMdeObserver::CMTPImageDpMdeObserver - New Pics: %u"), iNewPics);
+        OstTrace1( TRACE_NORMAL, DUP1_CMTPIMAGEDPMDEOBSERVER_HANDLEOBJECTNOTIFICATIONL, "CMTPImageDpMdeObserver::CMTPImageDpMdeObserver - New Pics: %u", iNewPics );
         iDataProvider.IncreaseNewPictures(iNewPics);
         iNewPics = 0;
         }
     
-    __FLOG(_L8("CMTPImageDpMdeObserver::CMTPImageDpMdeObserver - Exit"));
+    OstTraceFunctionExit0( CMTPIMAGEDPMDEOBSERVER_HANDLEOBJECTNOTIFICATIONL_EXIT );
     }
 
 /*
@@ -199,7 +205,7 @@ void CMTPImageDpMdeObserver::HandleObjectNotificationL(CMdESession& /*aSession*/
  */
 void CMTPImageDpMdeObserver::SubscribeForChangeNotificationL()
     {    
-    __FLOG_VA((_L8("CMTPImageDpMdeObserver::SubscribeForChangeNotificationL"))); 
+    OstTraceFunctionEntry0( CMTPIMAGEDPMDEOBSERVER_SUBSCRIBEFORCHANGENOTIFICATIONL_ENTRY );
 
     if (!iSubscribed)
         {
@@ -216,8 +222,8 @@ void CMTPImageDpMdeObserver::SubscribeForChangeNotificationL()
         
         iSubscribed = ETrue;
         }
-    
-    __FLOG(_L8("CMTPImageDpMdeObserver::SubscribeForChangeNotificationL - Exit")); 
+
+    OstTraceFunctionExit0( CMTPIMAGEDPMDEOBSERVER_SUBSCRIBEFORCHANGENOTIFICATIONL_EXIT );
     }
 
 /*
@@ -225,7 +231,7 @@ void CMTPImageDpMdeObserver::SubscribeForChangeNotificationL()
  */
 void CMTPImageDpMdeObserver::UnsubscribeForChangeNotificationL()
     {
-    __FLOG_VA((_L8("CMTPImageDpMdeObserver::UnsubscribeForChangeNotificationL"))); 
+    OstTraceFunctionEntry0( CMTPIMAGEDPMDEOBSERVER_UNSUBSCRIBEFORCHANGENOTIFICATIONL_ENTRY );
     
     if (iSubscribed)
         {
@@ -235,5 +241,5 @@ void CMTPImageDpMdeObserver::UnsubscribeForChangeNotificationL()
         iSubscribed = EFalse;
         }
     
-    __FLOG(_L8("CMTPImageDpMdeObserver::UnsubscribeForChangeNotificationL - Exit")); 
+    OstTraceFunctionExit0( CMTPIMAGEDPMDEOBSERVER_UNSUBSCRIBEFORCHANGENOTIFICATIONL_EXIT );
     }

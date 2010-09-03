@@ -183,10 +183,6 @@ private: // Owned
     TSglQue<CMTPEventLink>		iEventQ;
     TInt 						iPendingEventCount;   
     TInt 						iDataReceiveResult;
-    /**
-    FLOGGER debug trace member variable.
-    */
-    __FLOG_DECLARATION_MEMBER_MUTABLE;
     
 private: // Not owned
 

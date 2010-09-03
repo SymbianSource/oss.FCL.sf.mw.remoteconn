@@ -50,10 +50,6 @@ private:
     TBool VerifyReferenceHandlesL() const;
     
 private:
-    /**
-    FLOGGER debug trace member variable.
-    **/
-    __FLOG_DECLARATION_MEMBER_MUTABLE;
     
     CMTPTypeArray*          iReferences;
     };

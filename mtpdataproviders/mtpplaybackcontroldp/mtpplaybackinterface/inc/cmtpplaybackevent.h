@@ -21,7 +21,6 @@
 #ifndef CMTPPLAYBACKEVENT_H
 #define CMTPPLAYBACKEVENT_H
 
-#include "mtpdebug.h"
 #include "mmtpplaybackinterface.h"
 #include "cmtpplaybackparam.h"
 
@@ -68,7 +67,7 @@ private:
     void ConstructL();
 
 private: // Owned.
-    __FLOG_DECLARATION_MEMBER;
+
     const TMTPPlaybackEvent iPbEvent;
     CMTPPbEventParam* iParam;
     };

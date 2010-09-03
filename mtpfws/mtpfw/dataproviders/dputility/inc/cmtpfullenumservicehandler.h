@@ -26,7 +26,6 @@
 #include <mtp/tmtptypeguid.h>
 #include <mtp/cmtptypeobjectpropdesc.h>
 
-#include "mtpdebug.h"
 #include "mmtpservicehandler.h"
 
 class CMTPTypeServiceInfo;
@@ -105,10 +104,6 @@ private:
 	TMTPSyncSvcSyncObjectReferences iSyncObjectReference;
 	TMTPSyncSvcFilterType      	iFilterType;
 
-	/**
-	FLOGGER debug trace member variable.
-	*/
-	__FLOG_DECLARATION_MEMBER_MUTABLE;
 	};
 
 #endif // __CMTPFULLENUMSERVICEHANDLER_H__

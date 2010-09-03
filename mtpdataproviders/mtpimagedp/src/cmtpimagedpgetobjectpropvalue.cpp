@@ -37,9 +37,12 @@
 #include "mtpimagedppanic.h"
 #include "cmtpimagedp.h"
 #include "mtpimagedputilits.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpimagedpgetobjectpropvalueTraces.h"
+#endif
 
 
-__FLOG_STMT(_LIT8(KComponent,"GetObjectPropValue");)
 
 /**
 Two-phase construction method
@@ -67,7 +70,6 @@ CMTPImageDpGetObjectPropValue::~CMTPImageDpGetObjectPropValue()
     delete iMTPTypeString;	
     delete iMTPTypeArray;
     delete iObjectMeta;
-    __FLOG_CLOSE;
     }
 
 /**
@@ -79,7 +81,6 @@ CMTPImageDpGetObjectPropValue::CMTPImageDpGetObjectPropValue(
     :CMTPRequestProcessor(aFramework, aConnection,0, NULL),
     iObjectPropertyMgr(aDataProvider.PropertyMgr())
     {
-    __FLOG_OPEN(KMTPSubsystem, KComponent);	
     }
 
 /**
@@ -189,8 +190,12 @@ void CMTPImageDpGetObjectPropValue::ServiceL()
             break;
         case EMTPObjectPropCodeNonConsumable:
             ServiceNonConsumableL();
-            break;            
+            break;
+        case EMTPObjectPropCodeHidden:
+            ServiceHiddenL();
+            break;
         default:
+            OstTrace1( TRACE_ERROR, CMTPIMAGEDPGETOBJECTPROPVALUE_SERVICEL, "Invalid property code %d", propCode);
             User::Leave(KErrGeneral);
         }	
     }	
@@ -352,4 +357,12 @@ void CMTPImageDpGetObjectPropValue::ServiceNonConsumableL()
     iObjectPropertyMgr.GetPropertyL(EMTPObjectPropCodeNonConsumable, nonConsumable);
     iMTPTypeUint8.Set(nonConsumable);
     SendDataL(iMTPTypeUint8);
+    }
+
+void CMTPImageDpGetObjectPropValue::ServiceHiddenL()
+    {
+    TUint16 hiddenStatus;
+    iObjectPropertyMgr.GetPropertyL(EMTPObjectPropCodeHidden, hiddenStatus);
+    iMTPTypeUint16.Set(hiddenStatus);
+    SendDataL(iMTPTypeUint16);
     }

@@ -32,6 +32,12 @@
 #include "cmtpextensionmapping.h"
 #include "cmtpdataprovider.h"
 #include "mtpframeworkconst.h"
+#include "mtpdebug.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "rmtputilityTraces.h"
+#endif
+
 
 using namespace ContentAccess;
 // Class constants.
@@ -49,8 +55,6 @@ _LIT( KMimeTypeVideo3gpp, "video/3gpp" );
 _LIT( KMimeTypeAudioMp4, "audio/mp4" );
 _LIT( KMimeTypeVideoMp4, "video/mp4" );
 
-__FLOG_STMT(_LIT8(KComponent,"RMTPUtility");)
-
 RMTPUtility::RMTPUtility():
 	iFramework(NULL)
 	{
@@ -58,13 +62,12 @@ RMTPUtility::RMTPUtility():
 
 void RMTPUtility::OpenL(MMTPDataProviderFramework& aFramework)
 	{
-    __FLOG_OPEN(KMTPSubsystem, KComponent);
-    __FLOG(_L8("OpenL - Entry"));
+    OstTraceFunctionEntry0( RMTPUTILITY_OPENL_ENTRY );
     
 	iFramework = &aFramework;
 	iSingleton.OpenL();
-	
-    __FLOG(_L8("OpenL - Exit"));
+
+	OstTraceFunctionExit0( RMTPUTILITY_OPENL_EXIT );
 	}
 
 void RMTPUtility::Close()
@@ -72,7 +75,6 @@ void RMTPUtility::Close()
 	iSingleton.Close();
 	iFramework = NULL;
 	iFormatMappings.ResetAndDestroy();
-	__FLOG_CLOSE;
 	}
 
 /*
@@ -105,7 +107,7 @@ EXPORT_C TBool  RMTPUtility::TTime2MTPTimeStr(const TTime& aTime, TDes& aRet ) c
  */
 EXPORT_C TBool RMTPUtility::MTPTimeStr2TTime(const TDesC& aTimeString, TTime& aRet) const
 	{
-    __FLOG(_L8("ConvertMTPTimeStr2TTimeL - Entry"));
+    OstTraceFunctionEntry0( RMTPUTILITY_MTPTIMESTR2TTIME_ENTRY );
 
 	TBool result = EFalse;
 	TInt year = 0;
@@ -142,6 +144,7 @@ EXPORT_C TBool RMTPUtility::MTPTimeStr2TTime(const TDesC& aTimeString, TTime& aR
 		result = ETrue;
 		}
 	
+	OstTraceFunctionExit0( RMTPUTILITY_MTPTIMESTR2TTIME_EXIT );
 	return result;
 	}
 
@@ -252,22 +255,25 @@ TBool RMTPUtility::GetTimeZone(const TDesC& aTimeString, TBool& aPositiveTimeZon
 
 EXPORT_C void RMTPUtility::RenameObjectL( TUint aObjectHandle, const TDesC& aNewName )
 	{
-    __FLOG(_L8("RenameAssocationObjectL - Entry"));
+    OstTraceFunctionEntry0( RMTPUTILITY_RENAMEOBJECTL_ENTRY );
     
     CMTPObjectMetaData* meta = CMTPObjectMetaData::NewLC();
        
     if( !iFramework->ObjectMgr().ObjectL(aObjectHandle, *meta) )
     	{
+        OstTrace1( TRACE_ERROR, RMTPUTILITY_RENAMEOBJECTL, "Object information associated with the object handle %d doesn't exist", aObjectHandle );
     	User::Leave(KErrNotFound);
     	}
 			
    if( !BaflUtils::FileExists( iFramework->Fs(), meta->DesC(CMTPObjectMetaData::ESuid) ) )
 	   {
+       OstTraceExt1( TRACE_ERROR, DUP1_RMTPUTILITY_RENAMEOBJECTL, "%S doesn't exist", meta->DesC(CMTPObjectMetaData::ESuid));
 	   User::Leave(KErrNotFound);
 	   }
 	
 	TFileName filename;
-	User::LeaveIfError(BaflUtils::MostSignificantPartOfFullName(meta->DesC(CMTPObjectMetaData::ESuid), filename));
+	LEAVEIFERROR(BaflUtils::MostSignificantPartOfFullName(meta->DesC(CMTPObjectMetaData::ESuid), filename),
+	        OstTraceExt1( TRACE_ERROR, DUP2_RMTPUTILITY_RENAMEOBJECTL, "extract most significant part of %S failed", meta->DesC(CMTPObjectMetaData::ESuid)));
 	RBuf oldFullName;
 	oldFullName.CleanupClosePushL();
 	
@@ -299,8 +305,9 @@ EXPORT_C void RMTPUtility::RenameObjectL( TUint aObjectHandle, const TDesC& aNew
 	if(meta->Uint(CMTPObjectMetaData::EFormatCode) != EMTPFormatCodeAssociation)
 		{
 		// Modify the filename
-		User::LeaveIfError( iFramework->Fs().Rename(meta->DesC(CMTPObjectMetaData::ESuid), newFullName) );
-		
+		LEAVEIFERROR( iFramework->Fs().Rename(meta->DesC(CMTPObjectMetaData::ESuid), newFullName),
+		        OstTraceExt2( TRACE_ERROR, DUP3_RMTPUTILITY_RENAMEOBJECTL, "Rename %S to %S failed!",
+		                meta->DesC(CMTPObjectMetaData::ESuid), newFullName));	
 		meta->SetDesCL( CMTPObjectMetaData::ESuid, newFullName );
 		iFramework->ObjectMgr().ModifyObjectL(*meta);
 		}
@@ -310,7 +317,9 @@ EXPORT_C void RMTPUtility::RenameObjectL( TUint aObjectHandle, const TDesC& aNew
 		_LIT(KBackSlash, "\\");
 		newFullName.Append(KBackSlash);
 		// Modify the filename
-		User::LeaveIfError( iFramework->Fs().Rename(meta->DesC(CMTPObjectMetaData::ESuid), newFullName) );
+		LEAVEIFERROR( iFramework->Fs().Rename(meta->DesC(CMTPObjectMetaData::ESuid), newFullName),
+                OstTraceExt2( TRACE_ERROR, DUP4_RMTPUTILITY_RENAMEOBJECTL, "Rename %S to %S failed!",
+                        meta->DesC(CMTPObjectMetaData::ESuid), newFullName));   		        
 		
 		meta->SetDesCL( CMTPObjectMetaData::ESuid, newFullName );
 		iFramework->ObjectMgr().ModifyObjectL(*meta);
@@ -325,7 +334,7 @@ EXPORT_C void RMTPUtility::RenameObjectL( TUint aObjectHandle, const TDesC& aNew
 		}
 
 	CleanupStack::PopAndDestroy(3);//oldFullName, newFullName,meta
-    __FLOG(_L8("RenameAssocationObjectL - Exit"));
+	OstTraceFunctionExit0( RMTPUTILITY_RENAMEOBJECTL_EXIT );
 	}
 
 EXPORT_C TMTPFormatCode RMTPUtility::FormatFromFilename( const TDesC& aFullFileName )
@@ -374,7 +383,7 @@ EXPORT_C HBufC* RMTPUtility::ContainerMimeType( const TDesC& aFullPath )
     if ( file.Ext().CompareF( KTxtExtensionODF ) == 0 )
         {
         TRAP( err, mime = OdfMimeTypeL( aFullPath ) );
-        __FLOG_VA((_L("ContainerMimeType err %d mime %S"), err, mime));
+        OstTraceExt2( TRACE_NORMAL, RMTPUTILITY_CONTAINERMIMETYPE, "ContainerMimeType err %d mime %S", err, *mime );
         }
     return mime;
     }
@@ -476,7 +485,7 @@ EXPORT_C TUint RMTPUtility::GetEnumerationFlag(const TDesC& aExtension)
 
 void RMTPUtility::RenameAllChildrenL(TUint32 aStorageId, TUint32 aParentHandle, const TDesC& aNewFolderName, const TDesC& aOldFolderName)
 	{
-    __FLOG(_L8("RenameAllChildrenL - Entry"));
+    OstTraceFunctionEntry0( RMTPUTILITY_RENAMEALLCHILDRENL_ENTRY );
     
     CMTPObjectMetaData* objectInfo(CMTPObjectMetaData::NewLC());
     TInt count = 0; 
@@ -490,6 +499,7 @@ void RMTPUtility::RenameAllChildrenL(TUint32 aStorageId, TUint32 aParentHandle, 
         {
         if (!iFramework->ObjectMgr().ObjectL(handles[i], *objectInfo))
             {
+            OstTrace1( TRACE_ERROR, DUP1_RMTPUTILITY_RENAMEALLCHILDRENL, "Object information associated with the object handle %d doesn't exist", handles[i]);
             User::Leave(KErrCorrupt);
             }
         
@@ -546,8 +556,8 @@ void RMTPUtility::RenameAllChildrenL(TUint32 aStorageId, TUint32 aParentHandle, 
         }
     
     CleanupStack::PopAndDestroy(2); //objectInfo; &handles; 
-	
-    __FLOG(_L8("RenameAllChildrenL - Exit"));
+    
+	OstTraceFunctionExit0( RMTPUTILITY_RENAMEALLCHILDRENL_EXIT );
 	}
 
 void RMTPUtility::GetAllDecendents(TUint32 aStorageId, TUint aParentHandle, RArray<TUint>& aHandles) const
@@ -613,7 +623,8 @@ HBufC* RMTPUtility::OdfMimeTypeL( const TDesC& aFullPath )
     
             if (mimebuf == NULL)
                 {
-                User::LeaveIfError( KErrNotFound );
+                OstTrace0( TRACE_ERROR, RMTPUTILITY_ODFMIMETYPEL, "malloc buffer for mime failed!" );     
+                User::Leave(KErrNotFound);
                 }
             mimebuf->Des().Copy( *buffer );
             
@@ -622,6 +633,7 @@ HBufC* RMTPUtility::OdfMimeTypeL( const TDesC& aFullPath )
         // leave if NULL
         if ( mimebuf == NULL )
             {
+            OstTrace0( TRACE_ERROR, DUP1_RMTPUTILITY_ODFMIMETYPEL, "malloc buffer for mime failed!" ); 
             User::Leave( KErrNotFound );
             }
         
@@ -630,6 +642,7 @@ HBufC* RMTPUtility::OdfMimeTypeL( const TDesC& aFullPath )
         }
     else
         {
+        OstTrace0( TRACE_ERROR, DUP2_RMTPUTILITY_ODFMIMETYPEL, "Not ODF type file!" );
         User::Leave( KErrNotSupported );
         }
     
@@ -643,19 +656,19 @@ void RMTPUtility::ParseFormatCode(const TDesC& aString, CMTPExtensionMapping& aM
     lex.Val(formatCode, EHex);
     aMapping.SetFormatCode(static_cast<TMTPFormatCode>(formatCode));
     aState = Extension;
-    __FLOG_VA((_L("ParseFormatCode %S, 0x%x"), &aString, formatCode));
+    OstTraceExt2( TRACE_NORMAL, RMTPUTILITY_PARSEFORMATCODE, "ParseFormatCode %S, 0x%x", aString, formatCode );
     }
 void RMTPUtility::ParseExtension(const TDesC& aString, CMTPExtensionMapping& aMapping, TParseState& aState)
     {
     aMapping.SetExtensionL(aString);
     aState = EMimeType;
-    __FLOG_VA((_L("ParseExtension %S"), &aString));
+    OstTraceExt1( TRACE_NORMAL, RMTPUTILITY_PARSEEXTENSION, "ParseExtension %S", aString );
     }
 void RMTPUtility::ParseMimeType(const TDesC& aString, CMTPExtensionMapping& aMapping, TParseState& aState)
     {
     aMapping.SetMIMETypeL(aString);
     aState = ESubFormatCode;
-    __FLOG_VA((_L("ParseMimeType %S"), &aString));
+    OstTraceExt1( TRACE_NORMAL, RMTPUTILITY_PARSEMIMETYPEL, "ParseMimeType %S", aString );
     }
 void RMTPUtility::ParseSubFormatCode(const TDesC& aString, CMTPExtensionMapping& aMapping, TParseState& aState)
     {
@@ -676,7 +689,7 @@ void RMTPUtility::ParseSubFormatCode(const TDesC& aString, CMTPExtensionMapping&
         }
     aMapping.SetSubFormatCode(subFormatCode);
     aState = EnumerationFlag;
-    __FLOG_VA((_L("ParseSubFormatCode %S, 0x%x"), &aString, subFormatCode));
+    OstTraceExt2( TRACE_NORMAL, RMTPUTILITY_PARSESUBFORMATCODE, "ParseSubFormatCode %S, 0x%x", aString, subFormatCode );
     }
 void RMTPUtility::ParseEnumerationFlag(const TDesC& aString, CMTPExtensionMapping& aMapping, TParseState& aState)
     {
@@ -688,8 +701,8 @@ void RMTPUtility::ParseEnumerationFlag(const TDesC& aString, CMTPExtensionMappin
         lex.Val(enumFlag, EDecimal);
         }
     aMapping.SetEnumerationFlag(enumFlag);
-    
-    __FLOG_VA((_L8("ParseEnumerationFlag %S, %d"), &aString, enumFlag));
+
+    OstTraceExt2( TRACE_NORMAL, RMTPUTILITY_PARSEENUMERATIONFLAG, "ParseEnumerationFlag %S, %d", aString, enumFlag );
     aState = EParseStateEnd;
     }
 void RMTPUtility::Parse(const TDesC& aString, CMTPExtensionMapping& aMapping, TParseState& aState)

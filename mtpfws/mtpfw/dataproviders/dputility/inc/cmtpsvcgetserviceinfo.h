@@ -22,7 +22,6 @@
 #define __CMTPSVCGETSERVICEINFO_H__
 
 #include "cmtprequestprocessor.h"
-#include "mtpdebug.h"
 #include "cmtpserviceinfo.h"
 
 class MMTPServiceDataProvider;
@@ -51,10 +50,6 @@ private:
 	CMTPTypeServiceInfo*      iServiceInfo;
 	MMTPServiceDataProvider&  iDataProvider;
 	TMTPResponseCode          iResponseCode;
-	/**
-	FLOGGER debug trace member variable.
-	*/
-	__FLOG_DECLARATION_MEMBER_MUTABLE;
 	};
 
 #endif // __CMTPSVCGETSERVICEINFO_H__

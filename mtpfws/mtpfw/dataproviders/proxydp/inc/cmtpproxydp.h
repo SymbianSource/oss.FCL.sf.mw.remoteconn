@@ -47,7 +47,6 @@ private: // From CMTPDataProviderPlugin
     void StartObjectEnumerationL(TUint32 aStorageId, TBool aPersistentFullEnumeration);
     void StartStorageEnumerationL();
     void Supported(TMTPSupportCategory aCategory, RArray<TUint>& aArray) const;
-    TAny* GetExtendedInterface(TUid aInterfaceUid);
  	void SupportedL(TMTPSupportCategory aCategory, CDesCArray& aStrings) const;
 	void ConstructL();
 
@@ -70,11 +69,6 @@ private:
     TInt									iActiveProcessor;
     TBool									iActiveProcessorRemoved;
     RMTPProxyDpSingletons   iSingletons;
-
- 	/**
-    FLOGGER debug trace member variable.
-    */
-    __FLOG_DECLARATION_MEMBER_MUTABLE;
 
     };
 #endif // CMTPPROXYDP_H

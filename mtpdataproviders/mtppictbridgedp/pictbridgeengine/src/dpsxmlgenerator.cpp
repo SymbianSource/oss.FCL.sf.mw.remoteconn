@@ -21,13 +21,11 @@
 #include "pictbridge.h"
 #include "dpsconst.h"
 #include "dpsxmlstring.h"
-#include <e32debug.h>
-
-#ifdef _DEBUG
-#	define IF_DEBUG(t) {RDebug::t;}
-#else
-#	define IF_DEBUG(t)
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "dpsxmlgeneratorTraces.h"
 #endif
+
 
 const TInt KCodeSize = 4;
 
@@ -37,7 +35,6 @@ const TInt KCodeSize = 4;
 //
 CDpsXmlGenerator* CDpsXmlGenerator::NewL(CDpsEngine* aEngine)
     {
-    IF_DEBUG(Print(_L("CDpsXmlGenerator::NewL")));
     CDpsXmlGenerator* self= new (ELeave) CDpsXmlGenerator(aEngine);
     return self;
     }
@@ -48,7 +45,8 @@ CDpsXmlGenerator* CDpsXmlGenerator::NewL(CDpsEngine* aEngine)
 //
 CDpsXmlGenerator::~CDpsXmlGenerator()
     {
-    IF_DEBUG(Print(_L("~CDpsXmlGenerator")));
+    OstTraceFunctionEntry0( CDPSXMLGENERATOR_CDPSXMLGENERATOR_DES_ENTRY );
+    OstTraceFunctionExit0( CDPSXMLGENERATOR_CDPSXMLGENERATOR_DES_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -58,7 +56,8 @@ CDpsXmlGenerator::~CDpsXmlGenerator()
 CDpsXmlGenerator::CDpsXmlGenerator(CDpsEngine* aEngine) : 
     iEngine(aEngine)
     {        
-    IF_DEBUG(Print(_L("CDpsXmlGenerator::Ctor")));
+    OstTraceFunctionEntry0( DUP1_CDPSXMLGENERATOR_CDPSXMLGENERATOR_CONS_ENTRY );
+    OstTraceFunctionExit0( DUP1_CDPSXMLGENERATOR_CDPSXMLGENERATOR_CONS_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -69,7 +68,7 @@ void CDpsXmlGenerator::CreateResultScriptL(TDpsEvent aEvent,
 		                     			  RWriteStream& aScript,
 	           		         			  const TDpsResult& aResult) const
     {
-    IF_DEBUG(Print(_L(">>>CDpsXmlGenerator::CreateResultScript")));    
+    OstTraceFunctionEntry0( CDPSXMLGENERATOR_CREATERESULTSCRIPTL_ENTRY ); 
     StartDocumentL(aScript);       
     StartResultL(aScript, aResult);       
     if (aEvent != EDpsEvtEmpty)
@@ -78,7 +77,7 @@ void CDpsXmlGenerator::CreateResultScriptL(TDpsEvent aEvent,
         }    
     EndResultL(aScript);    
     EndDocumentL(aScript);    
-    IF_DEBUG(Print(_L("<<<CDpsXmlGenerator::CreateResultScript")));
+    OstTraceFunctionExit0( CDPSXMLGENERATOR_CREATERESULTSCRIPTL_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -106,11 +105,11 @@ void CDpsXmlGenerator::CreateReplyScriptL(TDpsOperation aOperation,
 //		           		         		
 void CDpsXmlGenerator::StartDocumentL(RWriteStream& aScript) const
 	{
-    IF_DEBUG(Print(_L(">>>CDpsXmlGenerator::StatrDocument")));
+    OstTraceFunctionEntry0( CDPSXMLGENERATOR_STARTDOCUMENTL_ENTRY );
     aScript.WriteL(KDpsXmlHeader);
     aScript.WriteL(KDpsXmlNS);
     aScript.WriteL(KDpsXmlSpace);
-    IF_DEBUG(Print(_L("<<<CDpsXmlGenerator::StartDocument")));	
+    OstTraceFunctionExit0( CDPSXMLGENERATOR_STARTDOCUMENTL_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -119,12 +118,12 @@ void CDpsXmlGenerator::StartDocumentL(RWriteStream& aScript) const
 //
 void CDpsXmlGenerator::EndDocumentL(RWriteStream& aScript) const
     {
-    IF_DEBUG(Print(_L(">>>CDpsXmlGenerator::EndDocument")));
+    OstTraceFunctionEntry0( CDPSXMLGENERATOR_ENDDOCUMENTL_ENTRY );
     aScript.WriteL(KDpsXmlBraceOpen);
     aScript.WriteL(KDpsXmlSlash);
     aScript.WriteL(KDpsXml);
-    aScript.WriteL(KDpsXmlBraceClose);
-    IF_DEBUG(Print(_L("<<<CDpsXmlGenerator::EndDocument")));		
+    aScript.WriteL(KDpsXmlBraceClose);	
+    OstTraceFunctionExit0( CDPSXMLGENERATOR_ENDDOCUMENTL_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -133,12 +132,12 @@ void CDpsXmlGenerator::EndDocumentL(RWriteStream& aScript) const
 //
 void CDpsXmlGenerator::StartInputL(RWriteStream& aScript) const
     {
-    IF_DEBUG(Print(_L(">>>CDpsXmlGenerator::StartInput")));
+    OstTraceFunctionEntry0( CDPSXMLGENERATOR_STARTINPUTL_ENTRY );
     aScript.WriteL(KDpsXmlBraceOpen);
     aScript.WriteL(KDpsXmlInput);
     aScript.WriteL(KDpsXmlBraceClose);
     aScript.WriteL(KDpsXmlSpace);
-    IF_DEBUG(Print(_L("<<<CDpsXmlGenerator::StartInput")));	
+    OstTraceFunctionExit0( CDPSXMLGENERATOR_STARTINPUTL_EXIT );
     }
   
 // ---------------------------------------------------------------------------
@@ -147,13 +146,13 @@ void CDpsXmlGenerator::StartInputL(RWriteStream& aScript) const
 //  
 void CDpsXmlGenerator::EndInputL(RWriteStream& aScript) const
     {
-    IF_DEBUG(Print(_L(">>>CDpsXmlGenerator::EndInput")));
+    OstTraceFunctionEntry0( CDPSXMLGENERATOR_ENDINPUTL_ENTRY );
     aScript.WriteL(KDpsXmlBraceOpen);
     aScript.WriteL(KDpsXmlSlash);
     aScript.WriteL(KDpsXmlInput);
     aScript.WriteL(KDpsXmlBraceClose);
-    aScript.WriteL(KDpsXmlSpace);
-    IF_DEBUG(Print(_L("<<<CDpsXmlGenerator::EndInput")));		
+    aScript.WriteL(KDpsXmlSpace);	
+    OstTraceFunctionExit0( CDPSXMLGENERATOR_ENDINPUTL_EXIT );
     }
   
 // ---------------------------------------------------------------------------
@@ -163,7 +162,7 @@ void CDpsXmlGenerator::EndInputL(RWriteStream& aScript) const
 void CDpsXmlGenerator::StartResultL(RWriteStream& aScript, 
 								   const TDpsResult& aResult) const
     {
-    IF_DEBUG(Print(_L(">>>CDpsXmlGenerator::StartResult")));
+    OstTraceFunctionEntry0( CDPSXMLGENERATOR_STARTRESULTL_ENTRY );
     aScript.WriteL(KDpsXmlBraceOpen);
     aScript.WriteL(KDpsXmlOutput);
     aScript.WriteL(KDpsXmlBraceClose);
@@ -181,8 +180,8 @@ void CDpsXmlGenerator::StartResultL(RWriteStream& aScript,
     aScript.WriteL(KDpsXmlSlash);
     aScript.WriteL(KDpsXmlResult);
     aScript.WriteL(KDpsXmlBraceClose);
-    aScript.WriteL(KDpsXmlSpace);
-    IF_DEBUG(Print(_L("<<<CDpsXmlGenerator::StartResult")));		
+    aScript.WriteL(KDpsXmlSpace);		
+    OstTraceFunctionExit0( CDPSXMLGENERATOR_STARTRESULTL_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -191,13 +190,13 @@ void CDpsXmlGenerator::StartResultL(RWriteStream& aScript,
 //
 void CDpsXmlGenerator::EndResultL(RWriteStream& aScript) const
 	{
-    IF_DEBUG(Print(_L(">>>CDpsXmlGenerator::EndResult")));
+    OstTraceFunctionEntry0( CDPSXMLGENERATOR_ENDRESULTL_ENTRY );
     aScript.WriteL(KDpsXmlBraceOpen);
     aScript.WriteL(KDpsXmlSlash);
     aScript.WriteL(KDpsXmlOutput);
     aScript.WriteL(KDpsXmlBraceClose);
-    aScript.WriteL(KDpsXmlSpace);
-    IF_DEBUG(Print(_L("<<<CDpsXmlGenerator::EndResult")));		
+    aScript.WriteL(KDpsXmlSpace);	
+    OstTraceFunctionExit0( CDPSXMLGENERATOR_ENDRESULTL_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -208,7 +207,8 @@ void CDpsXmlGenerator::StartOperationL(TDpsOperation aOperation,
                                        RWriteStream& aScript, 
 									   TBool aEnd) const
     {
-    IF_DEBUG(Print(_L(">>>CDpsXmlGenerator::StartOperation %d"), aOperation));
+    OstTraceFunctionEntry0( CDPSXMLGENERATOR_STARTOPERATIONL_ENTRY );
+    OstTrace1( TRACE_NORMAL, CDPSXMLGENERATOR_STARTOPERATIONL, "Operation %d", aOperation );
     aScript.WriteL(KDpsXmlBraceOpen);
     aScript.WriteL(iEngine->DpsParameters()->
         iDpsOperationStrings[aOperation - 1]);
@@ -218,7 +218,7 @@ void CDpsXmlGenerator::StartOperationL(TDpsOperation aOperation,
         }
     aScript.WriteL(KDpsXmlBraceClose);	
     aScript.WriteL(KDpsXmlSpace);
-    IF_DEBUG(Print(_L("<<<CDpsXmlGenerator::StartOperation")));
+    OstTraceFunctionExit0( CDPSXMLGENERATOR_STARTOPERATIONL_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -228,7 +228,7 @@ void CDpsXmlGenerator::StartOperationL(TDpsOperation aOperation,
 void CDpsXmlGenerator::EndOperationL(TDpsOperation aOperation, 
                                      RWriteStream& aScript) const 
     {
-    IF_DEBUG(Print(_L(">>>CDpsXmlGenerator::EndOperation")));
+    OstTraceFunctionEntry0( CDPSXMLGENERATOR_ENDOPERATIONL_ENTRY );
     aScript.WriteL(KDpsXmlBraceOpen);
     aScript.WriteL(KDpsXmlSlash);
     // there is an empty op in the op enum so we must reduce one
@@ -236,7 +236,7 @@ void CDpsXmlGenerator::EndOperationL(TDpsOperation aOperation,
         iDpsOperationStrings[aOperation - 1]);
     aScript.WriteL(KDpsXmlBraceClose);	
     aScript.WriteL(KDpsXmlSpace);
-    IF_DEBUG(Print(_L("<<<CDpsXmlGenerator::EndOperation")));
+    OstTraceFunctionExit0( CDPSXMLGENERATOR_ENDOPERATIONL_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -245,14 +245,14 @@ void CDpsXmlGenerator::EndOperationL(TDpsOperation aOperation,
 //	
 void CDpsXmlGenerator::CreateEventL(RWriteStream& aScript, TDpsEvent aEvent) const
     {
-    IF_DEBUG(Print(_L(">>>CDpsXmlGenerator::CreatEvent")));
+    OstTraceFunctionEntry0( CDPSXMLGENERATOR_CREATEEVENTL_ENTRY );
     aScript.WriteL(KDpsXmlBraceOpen);
     aScript.WriteL(iEngine->DpsParameters()->
         iDpsEventStrings[aEvent - 1]);
     aScript.WriteL(KDpsXmlSlash);
     aScript.WriteL(KDpsXmlBraceClose);
     aScript.WriteL(KDpsXmlSpace);
-    IF_DEBUG(Print(_L("<<<CDpsXmlGenerator::CreatEvent")));
+    OstTraceFunctionExit0( CDPSXMLGENERATOR_CREATEEVENTL_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -263,7 +263,7 @@ void CDpsXmlGenerator::CreateArgL(RWriteStream& aScript,
 								  const TDpsArg& aArgument, 
 					   			  TDpsAttribute aAttribute) const           
     {
-    IF_DEBUG(Print(_L(">>>CDpsXmlGenerator::CreatArg")));
+    OstTraceFunctionEntry0( CDPSXMLGENERATOR_CREATEARGL_ENTRY );
     aScript.WriteL(KDpsXmlBraceOpen); //<
     aScript.WriteL(iEngine->DpsParameters()->
         iDpsArgStrings[aArgument.iElement]);	
@@ -296,7 +296,7 @@ void CDpsXmlGenerator::CreateArgL(RWriteStream& aScript,
         aScript.WriteL(KDpsXmlBraceClose); // >
         }
     aScript.WriteL(KDpsXmlSpace);	
-    IF_DEBUG(Print(_L("<<<CDpsXmlGenerator::CreatArg")));
+    OstTraceFunctionExit0( CDPSXMLGENERATOR_CREATEARGL_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -306,13 +306,13 @@ void CDpsXmlGenerator::CreateArgL(RWriteStream& aScript,
 void CDpsXmlGenerator::StartElementL(TDpsElement aElement, 
                                      RWriteStream& aScript) const
     {
-    IF_DEBUG(Print(_L(">>>CDpsXmlGenerator::StartElement")));
+    OstTraceFunctionEntry0( CDPSXMLGENERATOR_STARTELEMENTL_ENTRY );
     aScript.WriteL(KDpsXmlBraceOpen); //<
     aScript.WriteL(iEngine->DpsParameters()->
         iDpsElementStrings[aElement - 1]);	
     aScript.WriteL(KDpsXmlBraceClose); // >
     aScript.WriteL(KDpsXmlSpace);
-    IF_DEBUG(Print(_L("<<<CDpsXmlGenerator::StartElement")));
+    OstTraceFunctionExit0( CDPSXMLGENERATOR_STARTELEMENTL_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -322,12 +322,12 @@ void CDpsXmlGenerator::StartElementL(TDpsElement aElement,
 void CDpsXmlGenerator::EndElementL(TDpsElement aElement, 
                                    RWriteStream& aScript) const
     {
-    IF_DEBUG(Print(_L(">>>CDpsXmlGenerator::EndElement")));
+    OstTraceFunctionEntry0( CDPSXMLGENERATOR_ENDELEMENTL_ENTRY );
     aScript.WriteL(KDpsXmlBraceOpen); //<
     aScript.WriteL(KDpsXmlSlash);
     aScript.WriteL(iEngine->DpsParameters()->
         iDpsElementStrings[aElement - 1]);	
     aScript.WriteL(KDpsXmlBraceClose); // >
     aScript.WriteL(KDpsXmlSpace);
-    IF_DEBUG(Print(_L("<<<CDpsXmlGenerator::EndElement")));
+    OstTraceFunctionExit0( CDPSXMLGENERATOR_ENDELEMENTL_EXIT );
     }

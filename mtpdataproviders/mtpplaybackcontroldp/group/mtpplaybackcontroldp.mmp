@@ -35,7 +35,8 @@ USERINCLUDE           ../../../mtpfws/mtpfw/common/inc
 USERINCLUDE           ../../../mtpfws/mtpfw/inc
 
 USERINCLUDE           ../mtpplaybackinterface/inc
-USERINCLUDE           ../mtpplaybackmpximplementation/inc
+USERINCLUDE           ../mtpplaybackmpximplementation/inc 
+USERINCLUDE           ../traces
 
 SOURCEPATH          ../src
 SOURCE              cmtppbcgetdevicepropdesc.cpp
@@ -91,3 +92,4 @@ LIBRARY             mpxcollectionhelper.lib
 LIBRARY             mpxcollectionutility.lib
 LIBRARY             platformenv.lib
 
+SMPSAFE

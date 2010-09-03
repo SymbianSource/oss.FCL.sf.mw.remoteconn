@@ -15,6 +15,12 @@
 
 #include "cmtppkgidstore.h"
 #include "dbutility.h"
+#include "mtpdebug.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtppkgidstoreTraces.h"
+#endif
+
 
 /**
 Two-phase construction
@@ -58,14 +64,17 @@ void CMTPPkgIDStore::CreatePkgIDStoreTableL()
         {
         _LIT(KSQLCreatePkgIDTableText,
             "CREATE TABLE PkgIDStore (DataProviderId UNSIGNED INTEGER, PkgId UNSIGNED INTEGER)");
-        User::LeaveIfError(iDatabase.Execute(KSQLCreatePkgIDTableText));            
+        LEAVEIFERROR(iDatabase.Execute(KSQLCreatePkgIDTableText),
+                OstTrace0( TRACE_ERROR, CMTPPKGIDSTORE_CREATEPKGIDSTORETABLEL, "TABLE PkgIDStore create failed!"));
         }
     _LIT(KSQLGetPKGID, "SELECT * FROM PkgIDStore");
     iSqlStatement.Format(KSQLGetPKGID);    
     RDbView view;
     CleanupClosePushL(view);
-    User::LeaveIfError(view.Prepare(iDatabase, TDbQuery(iSqlStatement)));
-    User::LeaveIfError(view.Evaluate());
+    LEAVEIFERROR(view.Prepare(iDatabase, TDbQuery(iSqlStatement)),
+            OstTrace0( TRACE_ERROR, DUP1_CMTPPKGIDSTORE_CREATEPKGIDSTORETABLEL, "view for PkgIDStore prepare failed!" ));   
+    LEAVEIFERROR(view.Evaluate(),
+            OstTrace0( TRACE_ERROR, DUP2_CMTPPKGIDSTORE_CREATEPKGIDSTORETABLEL, "view evaluate failed!"));   
     while (view.NextL())
         {
         view.GetL();
@@ -93,7 +102,8 @@ void CMTPPkgIDStore::InsertPkgIdL(TUint aDPId, TUint aPkgId)
         {
         _LIT(KSQLInsertPkgIDObjectText, "INSERT INTO PkgIDStore (DataProviderId, PkgId) VALUES (%u, %u)");
         iSqlStatement.Format(KSQLInsertPkgIDObjectText, aDPId, aPkgId);
-        User::LeaveIfError(iDatabase.Execute(iSqlStatement));
+        LEAVEIFERROR(iDatabase.Execute(iSqlStatement),
+                OstTrace0( TRACE_ERROR, CMTPPKGIDSTORE_INSERTPKGIDL, "INSERT INTO PkgIDStore failed!" ));
         iDPIDs.AppendL(aDPId);
         iPkgIDs.AppendL(aPkgId);
         }
@@ -103,7 +113,8 @@ void CMTPPkgIDStore::InsertPkgIdL(TUint aDPId, TUint aPkgId)
             {
             _LIT(KSQLSetPkgIDObjectText, "UPDATE PkgIDStore SET PkgId = %u WHERE DataProviderId = %u");
             iSqlStatement.Format(KSQLSetPkgIDObjectText, aPkgId,aDPId);
-            User::LeaveIfError(iDatabase.Execute(iSqlStatement));
+            LEAVEIFERROR(iDatabase.Execute(iSqlStatement),
+                    OstTrace0( TRACE_ERROR, DUP1_CMTPPKGIDSTORE_INSERTPKGIDL, "UPDATE PkgIDStore SET PkgId failed!" ));    
             iPkgIDs[index] = aPkgId;
             }
         }
@@ -130,7 +141,8 @@ TInt CMTPPkgIDStore::RemoveL(TUint aDpId)
         iPkgIDs.Remove(index);
         _LIT(KSQLDeleteObjectText, "DELETE FROM PkgIDStore WHERE DataProviderId = %u");
         iSqlStatement.Format(KSQLDeleteObjectText, aDpId);
-        User::LeaveIfError(iDatabase.Execute(iSqlStatement));
+        LEAVEIFERROR(iDatabase.Execute(iSqlStatement),
+                OstTrace0( TRACE_ERROR, CMTPPKGIDSTORE_REMOVEL, "DELETE FROM PkgIDStore failed!" ));
         }
     return index;
     }

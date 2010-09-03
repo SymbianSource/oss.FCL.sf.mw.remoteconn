@@ -27,12 +27,15 @@
 #include "sbepanic.h"
 #include "sbedataownermanager.h"
 #include <connect/sbtypes.h>
-#include "sblog.h"
 #include <apgcli.h>
+#include "OstTraceDefinitions.h"
+#include "sbtrace.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "sbesessionTraces.h"
+#endif
 
 namespace conn
-	{
-	
+	{	
 	/** This block size for the internal buffer
 	@internalTechnology
 	*/
@@ -43,6 +46,8 @@ namespace conn
     Class Constructor
     */
 		{
+		OstTraceFunctionEntry0( CSBESESSION_CSBESESSION_CONS_ENTRY );
+		OstTraceFunctionExit0( CSBESESSION_CSBESESSION_CONS_EXIT );
 		}
 
 	CSBESession::~CSBESession()
@@ -50,12 +55,14 @@ namespace conn
     Class destructor
     */
 		{
+		OstTraceFunctionEntry0( CSBESESSION_CSBESESSION_DES_ENTRY );
 		//
 		// If the client has detached properly, they should
 		// have done this - but just in case.
 		Server().DropSession();
 		ResetTransferBuf();
 		delete iExtCurEntry;
+		OstTraceFunctionExit0( CSBESESSION_CSBESESSION_DES_EXIT );
 		}
 
 	void CSBESession::CreateL()
@@ -64,9 +71,11 @@ namespace conn
 	Backup Engine session.  Increments the server's session count
 	*/
 		{
+		OstTraceFunctionEntry0( CSBESESSION_CREATEL_ENTRY );
 		//
 		// Increase the servers session count.
 		Server().AddSession();
+		OstTraceFunctionExit0( CSBESESSION_CREATEL_EXIT );
 		}
 
 	void CSBESession::ServiceL(const RMessage2& aMessage)
@@ -77,157 +86,160 @@ namespace conn
     @param aMessage  Reference to a RMessage2 object
 	*/
 		{
-	#ifdef SBE_LOGGING_ENABLED
+	    OstTraceFunctionEntry0( CSBESESSION_SERVICEL_ENTRY );
+	
 		RThread thread;
 		aMessage.Client(thread);
 		const TFullName threadName( thread.FullName() );
 		thread.Close();
-	#endif		
-		
+			
 		switch(aMessage.Function())
 			{
 			//
 			// Connection config getting/setting.
 			case ESBEMsgGetGSHHandle:
 				{
-        		__LOG1("CSBESession::ServiceL() - ESBEMsgGetGSHHandle for thread: %S", &threadName);
+				OstTraceExt1(TRACE_NORMAL, CSBESESSION_SERVICEL, "ESBEMsgGetGSHHandle for thread: %S", threadName);
 				aMessage.Complete(Server().GlobalSharedHeap());
 				break;
 				}
 			case ESBEMsgPrepDataOwnerInfo:
 				{
-        		__LOG1("CSBESession::ServiceL() - ESBEMsgPrepDataOwnerInfo for thread: %S", &threadName);
+				OstTraceExt1(TRACE_NORMAL, DUP1_CSBESESSION_SERVICEL, "ESBEMsgPrepDataOwnerInfo for thread: %S", threadName);
 				PrepDataOwnerInfoL(aMessage);
 				break;
 				}
 			case ESBEMsgGetDataOwnerInfo:
 				{
-        		__LOG1("CSBESession::ServiceL() - ESBEMsgGetDataOwnerInfo for thread: %S", &threadName);
+				OstTraceExt1(TRACE_NORMAL, DUP2_CSBESESSION_SERVICEL, "ESBEMsgGetDataOwnerInfo for thread: %S", threadName);
 				ReturnDataOwnerInfoL(aMessage);
 				break;
 				}
 			case ESBEMsgPrepPublicFiles:
 				{
-        		__LOG1("CSBESession::ServiceL() - ESBEMsgPrepPublicFiles for thread: %S", &threadName);
+				OstTraceExt1(TRACE_NORMAL, DUP3_CSBESESSION_SERVICEL, "ESBEMsgPrepPublicFiles for thread: %S", threadName);
 				PrepPublicFileListL(aMessage);
 				break;
 				}
 			case ESBEMsgGetPublicFiles:
 				{
-        		__LOG1("CSBESession::ServiceL() - ESBEMsgGetPublicFiles for thread: %S", &threadName);
+				OstTraceExt1(TRACE_NORMAL, DUP4_CSBESESSION_SERVICEL, "ESBEMsgGetPublicFiles for thread: %S", threadName);
 				ReturnPublicFileListL(aMessage);
 				break;
 				}
 			case ESBEMsgPrepPublicFilesRaw:
 				{
-        		__LOG1("CSBESession::ServiceL() - ESBEMsgPrepPublicFilesRaw for thread: %S", &threadName);
+				OstTraceExt1(TRACE_NORMAL, DUP5_CSBESESSION_SERVICEL, "ESBEMsgPrepPublicFilesRaw for thread: %S", threadName);
 				PrepPublicFileListRawL(aMessage);
 				break;
 				}
 			case ESBEMsgGetPublicFilesRaw:
 				{
-        		__LOG1("CSBESession::ServiceL() - ESBEMsgGetPublicFilesRaw for thread: %S", &threadName);
+				OstTraceExt1(TRACE_NORMAL, DUP6_CSBESESSION_SERVICEL, "ESBEMsgGetPublicFilesRaw for thread: %S", threadName);
 				ReturnPublicFileListRawL(aMessage);
 				break;
 				}
 			case ESBEMsgPrepPublicFilesXML:
 				{
-        		__LOG1("CSBESession::ServiceL() - ESBEMsgPrepPublicFilesXML for thread: %S", &threadName);
+				OstTraceExt1(TRACE_NORMAL, DUP7_CSBESESSION_SERVICEL, "ESBEMsgPrepPublicFilesXML for thread: %S", threadName);
 				PrepPublicFileListXMLL(aMessage);
 				break;
 				}
 			case ESBEMsgGetPublicFilesXML:
 				{
-        		__LOG1("CSBESession::ServiceL() - ESBEMsgGetPublicFilesXML for thread: %S", &threadName);
+				OstTraceExt1(TRACE_NORMAL, DUP8_CSBESESSION_SERVICEL, "ESBEMsgGetPublicFilesXML for thread: %S", threadName);
 				ReturnPublicFileListXMLL(aMessage);
 				break;
 				}
 			case ESBEMsgSetBURMode:
 				{
-        		__LOG1("CSBESession::ServiceL() - ESBEMsgSetBURMode for thread: %S", &threadName);
+				OstTraceExt1(TRACE_NORMAL, DUP9_CSBESESSION_SERVICEL, "ESBEMsgSetBURMode for thread: %S", threadName);
 				SetBURModeL(aMessage);
 				break;
 				}
 			case ESBEMsgSetSIDListPartial:
 				{
-        		__LOG1("CSBESession::ServiceL() - ESBEMsgSetSIDListPartial for thread: %S", &threadName);
+				OstTraceExt1(TRACE_NORMAL, DUP10_CSBESESSION_SERVICEL, "ESBEMsgSetSIDListPartial for thread: %S", threadName);
 				SetSIDListForPartialBURL(aMessage);
 				break;
 				}
 			case ESBEMsgPrepSIDStatus:
 				{
-        		__LOG1("CSBESession::ServiceL() - ESBEMsgPrepSIDStatus for thread: %S", &threadName);
+				OstTraceExt1(TRACE_NORMAL, DUP11_CSBESESSION_SERVICEL, "ESBEMsgPrepSIDStatus for thread: %S", threadName);
 				PrepSIDStatusL(aMessage);
 				break;
 				}
 			case ESBEMsgGetSIDStatus:
 				{
-        		__LOG1("CSBESession::ServiceL() - ESBEMsgGetSIDStatus for thread: %S", &threadName);
+				OstTraceExt1(TRACE_NORMAL, DUP12_CSBESESSION_SERVICEL, "ESBEMsgGetSIDStatus for thread: %S", threadName);
 				ReturnSIDStatusL(aMessage);
 				break;
 				}
 			case ESBEMsgRequestDataSync:
 			case ESBEMsgRequestDataAsync:
 				{
-        		__LOG1("CSBESession::ServiceL() - ESBEMsgRequestDataSync / ESBEMsgRequestDataAsync for thread: %S", &threadName);
+				OstTraceExt1(TRACE_NORMAL, DUP13_CSBESESSION_SERVICEL, "ESBEMsgRequestDataSync / ESBEMsgRequestDataAsync for thread: %S", threadName);
 				TRAPD(reqDataErr, RequestDataAsyncL(aMessage));
 				if (reqDataErr != KErrNone)
 					{
 					Server().GSHInterface().Header(Server().GlobalSharedHeap()).SetLockedFlag(EFalse);
+					OstTrace1(TRACE_ERROR, DUP22_CSBESESSION_SERVICEL, "Leave: %d", reqDataErr);
 					User::Leave(reqDataErr);
 					}
 				break;
 				}
 			case ESBEMsgSupplyDataSync:
 				{
-        		__LOG1("CSBESession::ServiceL() - ESBEMsgSupplyDataSync for thread: %S", &threadName);
+				OstTraceExt1(TRACE_NORMAL, DUP14_CSBESESSION_SERVICEL, "ESBEMsgSupplyDataSync for thread: %S", threadName);
 				TRAPD(supDataErr, SupplyDataSyncL(aMessage));
 				if (supDataErr != KErrNone)
 					{
 					Server().GSHInterface().Header(Server().GlobalSharedHeap()).SetLockedFlag(EFalse);
+					OstTrace1(TRACE_ERROR, DUP23_CSBESESSION_SERVICEL, "Leave: %d", supDataErr);
 					User::Leave(supDataErr);
 					}
 				break;
 				}
 			case ESBEMsgAllSnapshotsSupplied:
 				{
-        		__LOG1("CSBESession::ServiceL() - ESBEMsgAllSnapshotsSupplied for thread: %S", &threadName);
+				OstTraceExt1(TRACE_NORMAL, DUP15_CSBESESSION_SERVICEL, "ESBEMsgAllSnapshotsSupplied for thread: %S", threadName);
 				AllSnapshotsSuppliedL(aMessage);
 				break;
 				}
 			case ESBEMsgGetExpectedDataSize:
 				{
-        		__LOG1("CSBESession::ServiceL() - ESBEMsgGetExpectedDataSize for thread: %S", &threadName);
+				OstTraceExt1(TRACE_NORMAL, DUP16_CSBESESSION_SERVICEL, "ESBEMsgGetExpectedDataSize for thread: %S", threadName);
 				GetExpectedDataSizeL(aMessage);
 				break;
 				}
 			case ESBEMsgAllSystemFilesRestored:
 				{
-        		__LOG1("CSBESession::ServiceL() - ESBEMsgAllSystemFilesRestored for thread: %S", &threadName);
+				OstTraceExt1(TRACE_NORMAL, DUP17_CSBESESSION_SERVICEL, "ESBEMsgAllSystemFilesRestored for thread: %S", threadName);
 				AllSystemFilesRestoredL();
 				aMessage.Complete(KErrNone);
 				break;
 				}
 			case ESBEMsgPrepLargePublicFiles:
 				{
-        		__LOG1("CSBESession::ServiceL() - ESBEMsgPrepPublicFiles for thread: %S", &threadName);
+				OstTraceExt1(TRACE_NORMAL, DUP18_CSBESESSION_SERVICEL, "ESBEMsgPrepPublicFiles for thread: %S", threadName);
 				PrepLargePublicFileListL(aMessage);
 				break;
 				}
 			case ESBEMsgGetLargePublicFiles:
 				{
-        		__LOG1("CSBESession::ServiceL() - ESBEMsgGetPublicFiles for thread: %S", &threadName);
+				OstTraceExt1(TRACE_NORMAL, DUP19_CSBESESSION_SERVICEL, "ESBEMsgGetPublicFiles for thread: %S", threadName);
 				ReturnLargePublicFileListL(aMessage);
 				break;
 				}
 			default:
 				{
-        		__LOG1("CSBESession::ServiceL() - UNKNOWN OP CODE for thread: %S", &threadName);
+				OstTraceExt1(TRACE_ERROR, DUP20_CSBESESSION_SERVICEL, "UNKNOWN OP CODE for thread: %S", threadName);
 				User::Leave(KErrNotSupported);
 				}
 			}
 
-		__LOG1("CSBESession::ServiceL() - Completed OK for thread: %S", &threadName);
+		OstTraceExt1(TRACE_NORMAL, DUP21_CSBESESSION_SERVICEL, "Completed OK for thread: %S", threadName);
+		OstTraceFunctionExit0( CSBESESSION_SERVICEL_EXIT );
 		}
 
 	inline CSBEServer& CSBESession::Server() const
@@ -245,6 +257,7 @@ namespace conn
 	Prepares the 
 	*/
 		{
+		OstTraceFunctionEntry0( CSBESESSION_PREPDATAOWNERINFOL_ENTRY );
 		TInt err = KErrNone;
 		ResetTransferBuf();
 		RPointerArray<CDataOwnerInfo> doiArray;
@@ -279,11 +292,12 @@ namespace conn
 		doiArray.ResetAndDestroy();
 		doiArray.Close();
 
-		User::LeaveIfError(err);
+		LEAVEIFERROR(err, OstTrace1(TRACE_ERROR, CSBESESSION_PREPDATAOWNERINFOL, "error = %d", err));
 		
 		// complete the message with the total size of the buffer so that the 
 		// client can create the appropriate sized descriptor for receiving the data
 		aMessage.Complete(iTransferBuf->Des().Size());
+		OstTraceFunctionExit0( CSBESESSION_PREPDATAOWNERINFOL_EXIT );
 		}
 		
 	void CSBESession::ReturnDataOwnerInfoL(const RMessage2& aMessage)
@@ -292,6 +306,7 @@ namespace conn
 	@param aMessage The message sent by the client to the server
 	*/
 		{
+		OstTraceFunctionEntry0( CSBESESSION_RETURNDATAOWNERINFOL_ENTRY );
 		__ASSERT_DEBUG(iTransferBuf, Panic(KErrNotFound));
 		
 		// return the previously allocated transfer buffer
@@ -299,6 +314,7 @@ namespace conn
 		aMessage.Complete(iArrayCount);
 		
 		ResetTransferBuf();
+		OstTraceFunctionExit0( CSBESESSION_RETURNDATAOWNERINFOL_EXIT );
 		}
 		
 	void CSBESession::PrepPublicFileListL(const RMessage2& aMessage)
@@ -307,6 +323,7 @@ namespace conn
 	@param aMessage The message sent by the client to the server
 	*/
 		{
+		OstTraceFunctionEntry0( CSBESESSION_PREPPUBLICFILELISTL_ENTRY );
 		RFileArray fileArray;
 		CleanupClosePushL(fileArray);
 		HBufC8* pGenericDataTypeBuffer = HBufC8::NewLC(aMessage.GetDesLengthL(1));
@@ -329,12 +346,14 @@ namespace conn
 		// complete the message with the total size of the buffer so that the 
 		// client can create the appropriate sized descriptor for receiving the data
 		aMessage.Complete(iTransferBuf->Des().MaxSize());
+		OstTraceFunctionExit0( CSBESESSION_PREPPUBLICFILELISTL_EXIT );
 		}
 		
 	void CSBESession::ReturnPublicFileListL(const RMessage2& aMessage)
 	/** Return the previously populated buffer to the client
 	@param aMessage The message sent by the client to the server */
 		{
+		OstTraceFunctionEntry0( CSBESESSION_RETURNPUBLICFILELISTL_ENTRY );
 		__ASSERT_DEBUG(iTransferBuf, Panic(KErrArgument));
 		
 		// return the previously allocated transfer buffer
@@ -343,6 +362,7 @@ namespace conn
 		aMessage.Complete(KErrNone);
 		
 		ResetTransferBuf();
+		OstTraceFunctionExit0( CSBESESSION_RETURNPUBLICFILELISTL_EXIT );
 		}
 
 	void CSBESession::PrepPublicFileListRawL(const RMessage2& aMessage)
@@ -351,6 +371,7 @@ namespace conn
 	@param aMessage The message sent by the client to the server
 	*/
 		{
+		OstTraceFunctionEntry0( CSBESESSION_PREPPUBLICFILELISTRAWL_ENTRY );
 		RRestoreFileFilterArray fileFilterArray;
 		CleanupClosePushL(fileFilterArray);
 		TPckgBuf<TDriveNumber> driveNumPkg;
@@ -375,12 +396,14 @@ namespace conn
 		// complete the message with the total size of the buffer so that the 
 		// client can create the appropriate sized descriptor for receiving the data
 		aMessage.Complete(iTransferBuf->Des().MaxSize());
+		OstTraceFunctionExit0( CSBESESSION_PREPPUBLICFILELISTRAWL_EXIT );
 		}
 		
 	void CSBESession::ReturnPublicFileListRawL(const RMessage2& aMessage)
 	/** Return the previously populated buffer to the client
 	@param aMessage The message sent by the client to the server */
 		{
+		OstTraceFunctionEntry0( CSBESESSION_RETURNPUBLICFILELISTRAWL_ENTRY );
 		__ASSERT_DEBUG(iTransferBuf, Panic(KErrArgument));
 		
 		// return the previously allocated transfer buffer
@@ -389,12 +412,14 @@ namespace conn
 		aMessage.Complete(KErrNone);
 		
 		ResetTransferBuf();
+		OstTraceFunctionExit0( CSBESESSION_RETURNPUBLICFILELISTRAWL_EXIT );
 		}
 
 	void CSBESession::PrepPublicFileListXMLL(const RMessage2& aMessage)
 	/**
 	*/
 		{
+		OstTraceFunctionEntry0( CSBESESSION_PREPPUBLICFILELISTXMLL_ENTRY );
 		TPckgBuf<TDriveNumber> driveNumPkg;
 		TPckgBuf<TSecureId> sidPkg;
 
@@ -407,6 +432,7 @@ namespace conn
 		iTransferBuf = HBufC8::NewL(0);
 		
 		aMessage.Complete(iTransferBuf->Des().MaxSize());
+		OstTraceFunctionExit0( CSBESESSION_PREPPUBLICFILELISTXMLL_EXIT );
 		}
 		
 	void CSBESession::ReturnPublicFileListXMLL(const RMessage2& aMessage)
@@ -415,6 +441,7 @@ namespace conn
 	@param aMessage The message sent by the client to the server
 	*/
 		{
+		OstTraceFunctionEntry0( CSBESESSION_RETURNPUBLICFILELISTXMLL_ENTRY );
 		__ASSERT_DEBUG(iTransferBuf, Panic(KErrArgument));
 		
 		// return the previously allocated transfer buffer
@@ -423,6 +450,7 @@ namespace conn
 		aMessage.Complete(KErrNone);
 		
 		ResetTransferBuf();
+		OstTraceFunctionExit0( CSBESESSION_RETURNPUBLICFILELISTXMLL_EXIT );
 		}
 		
 	void CSBESession::SetBURModeL(const RMessage2& aMessage)
@@ -432,6 +460,7 @@ namespace conn
 	@param aMessage The message sent by the client to the server
 	*/
 		{
+		OstTraceFunctionEntry0( CSBESESSION_SETBURMODEL_ENTRY );
 		TDriveList driveList;
 		
 		aMessage.ReadL(0, driveList);
@@ -445,6 +474,7 @@ namespace conn
 		Server().DataOwnerManager().SetBURModeL(driveList, burType, incType);
 		
 		aMessage.Complete(KErrNone);
+		OstTraceFunctionExit0( CSBESESSION_SETBURMODEL_EXIT );
 		}
 
 	void CSBESession::SetSIDListForPartialBURL(const RMessage2& aMessage)
@@ -454,6 +484,7 @@ namespace conn
 	@param aMessage The message sent by the client to the server
 	*/
 		{
+		OstTraceFunctionEntry0( CSBESESSION_SETSIDLISTFORPARTIALBURL_ENTRY );
 		HBufC8* flatArray = HBufC8::NewLC(aMessage.GetDesLengthL(0));	
 		TPtr8 flatArrayPtr(flatArray->Des());
 		
@@ -464,6 +495,7 @@ namespace conn
 		CleanupStack::PopAndDestroy(flatArray);
 		
 		aMessage.Complete(KErrNone);
+		OstTraceFunctionExit0( CSBESESSION_SETSIDLISTFORPARTIALBURL_EXIT );
 		}
 
 	void CSBESession::PrepSIDStatusL(const RMessage2& aMessage)
@@ -473,6 +505,7 @@ namespace conn
 	@param aMessage The message sent from the client to the server
 	*/
 		{
+		OstTraceFunctionEntry0( CSBESESSION_PREPSIDSTATUSL_ENTRY );
 		ResetTransferBuf();
 		iTransferBuf = HBufC8::NewL(aMessage.GetDesLengthL(0));
 		
@@ -481,6 +514,7 @@ namespace conn
 		aMessage.ReadL(0, transBuf);
 		
 		aMessage.Complete(KErrNone);
+		OstTraceFunctionExit0( CSBESESSION_PREPSIDSTATUSL_EXIT );
 		}
 		
 	void CSBESession::ReturnSIDStatusL(const RMessage2& aMessage)
@@ -490,6 +524,7 @@ namespace conn
 	@param aMessage The message sent from the client to the server
 	*/
 		{
+		OstTraceFunctionEntry0( CSBESESSION_RETURNSIDSTATUSL_ENTRY );
 		RSIDStatusArray* pStatusArray = RSIDStatusArray::InternaliseL(*iTransferBuf);
 		CleanupStack::PushL(pStatusArray);
 		CleanupClosePushL(*pStatusArray);
@@ -508,6 +543,7 @@ namespace conn
 		aMessage.Complete(KErrNone);
 
 		ResetTransferBuf();
+		OstTraceFunctionExit0( CSBESESSION_RETURNSIDSTATUSL_EXIT );
 		}
 		
 	void CSBESession::RequestDataAsyncL(const RMessage2& aMessage)
@@ -515,9 +551,9 @@ namespace conn
 	Handle the client's asynchronous request for data from the SBE
 	*/
 		{
+		OstTraceFunctionEntry0( CSBESESSION_REQUESTDATAASYNCL_ENTRY );
 		iMessage = aMessage;
 		
-        __LOG("CSBESession::RequestDataAsyncL() - START");
 		TBool finished = EFalse;	// Set by DOM, initialised to eliminate warning
 		HBufC8* pTransferredBuf = HBufC8::NewLC(iMessage.GetDesLengthL(0));
 		
@@ -542,8 +578,7 @@ namespace conn
 		CleanupStack::PopAndDestroy(pGenericType);
 		
 		Server().GSHInterface().Header(Server().GlobalSharedHeap()).iFinished = finished;
-        __LOG2("CSBESession::RequestDataAsyncL() - Server-side data length: %d, address: 0x%08x", writeBuf.Length(), writeBuf.Ptr());
-        //__LOGDATA("CSBESession::RequestDataAsyncL() -       %S", writeBuf.Ptr(), writeBuf.Length());
+		OstTraceExt2(TRACE_NORMAL, CSBESESSION_REQUESTDATAASYNCL, "Server-side data length: %d, address: 0x%08x", static_cast<TInt32>(writeBuf.Length()), reinterpret_cast<TInt32>(writeBuf.Ptr()));
 
 		Server().GSHInterface().Header(Server().GlobalSharedHeap()).SetLockedFlag(EFalse);
 		
@@ -552,7 +587,7 @@ namespace conn
 			iMessage.Complete(KErrNone);
 			}
 		
-        __LOG("CSBESession::RequestDataAsyncL() - END");
+		OstTraceFunctionExit0( CSBESESSION_REQUESTDATAASYNCL_EXIT );
 		}
 		
 	void CSBESession::RequestDataSyncL(const RMessage2& aMessage)
@@ -560,7 +595,8 @@ namespace conn
 	Handle the client's synchronous request for data from the SBE
 	*/
 		{
-        __LOG("CSBESession::RequestDataSyncL() - START");
+        OstTraceFunctionEntry0( CSBESESSION_REQUESTDATASYNCL_ENTRY );
+        
 		TBool finished = EFalse;	// Set by DOM, initialised to eliminate warning
 		HBufC8* pTransferredBuf = HBufC8::NewLC(aMessage.GetDesLengthL(0));
 		
@@ -587,11 +623,11 @@ namespace conn
 		Server().GSHInterface().Header(Server().GlobalSharedHeap()).iFinished = finished;
 
 		Server().GSHInterface().Header(Server().GlobalSharedHeap()).SetLockedFlag(EFalse);
-        __LOG2("CSBESession::RequestDataSyncL() - Server-side data length: %d, address: 0x%08x", writeBuf.Length(), writeBuf.Ptr());
-        //__LOGDATA("CSBESession::RequestDataSyncL()        - %S", writeBuf.Ptr(), writeBuf.Length());
+		OstTraceExt2(TRACE_NORMAL, CSBESESSION_REQUESTDATASYNCL, "Server-side data length: %d, address: 0x%08x", static_cast<TInt32>(writeBuf.Length()), reinterpret_cast<TInt32>(writeBuf.Ptr()));
 
 		aMessage.Complete(KErrNone);
-        __LOG("CSBESession::RequestDataSyncL() - END");
+        
+		OstTraceFunctionExit0( CSBESESSION_REQUESTDATASYNCL_EXIT );
 		}
 	
 	void CSBESession::SupplyDataSyncL(const RMessage2& aMessage)
@@ -599,7 +635,8 @@ namespace conn
 	Handle the client's synchronous request to supply data to the SBE
 	*/
 		{
-        __LOG("CSBESession::SupplyDataSyncL() - START");
+        OstTraceFunctionEntry0( CSBESESSION_SUPPLYDATASYNCL_ENTRY );
+        
 		TBool finished = aMessage.Int0();
 
 		CSBGenericTransferType* pGenericType = CSBGenericTransferType::NewL(
@@ -610,8 +647,7 @@ namespace conn
 		TPtrC8& readBuf = Server().GSHInterface().ReadBufferL(Server().GlobalSharedHeap());
 
 		Server().GSHInterface().Header(Server().GlobalSharedHeap()).SetLockedFlag(ETrue);
-        __LOG2("CSBESession::SupplyDataSyncL() - Server-side data length: %d, address: 0x%08x", readBuf.Length(), readBuf.Ptr());
-        //__LOGDATA("CSBESession::SupplyDataSyncL()         - %S", readBuf.Ptr(), readBuf.Length());
+		OstTraceExt2(TRACE_NORMAL, CSBESESSION_SUPPLYDATASYNCL, "Server-side data length: %d, address: 0x%08x", static_cast<TInt32>(readBuf.Length()), reinterpret_cast<TInt32>(readBuf.Ptr()));
 
 		Server().DataOwnerManager().SupplyDataL(pGenericType, readBuf, finished);
 
@@ -621,7 +657,8 @@ namespace conn
 		Server().GSHInterface().Header(Server().GlobalSharedHeap()).SetLockedFlag(EFalse);
 
 		aMessage.Complete(KErrNone);
-        __LOG("CSBESession::SupplyDataSyncL() - END");
+        
+		OstTraceFunctionExit0( CSBESESSION_SUPPLYDATASYNCL_EXIT );
 		}
 		
 	void CSBESession::GetExpectedDataSizeL(const RMessage2& aMessage)
@@ -629,6 +666,7 @@ namespace conn
 	Return the size of data that the DOM expects to send back to the PC
 	*/
 		{
+		OstTraceFunctionEntry0( CSBESESSION_GETEXPECTEDDATASIZEL_ENTRY );
 		TUint size;
 		TPckg<TUint> sizePkg(size);
 
@@ -651,15 +689,18 @@ namespace conn
 		aMessage.WriteL(1, sizePkg);
 
 		aMessage.Complete(KErrNone);
+		OstTraceFunctionExit0( CSBESESSION_GETEXPECTEDDATASIZEL_EXIT );
 		}
 		
 	void CSBESession::AllSnapshotsSuppliedL(const RMessage2& aMessage)
 	/**
 	*/
 		{
+		OstTraceFunctionEntry0( CSBESESSION_ALLSNAPSHOTSSUPPLIEDL_ENTRY );
 		Server().DataOwnerManager().AllSnapshotsSuppliedL();
 
 		aMessage.Complete(KErrNone);
+		OstTraceFunctionExit0( CSBESESSION_ALLSNAPSHOTSSUPPLIEDL_EXIT );
 		}
 		
 	void CSBESession::AllSystemFilesRestoredL()
@@ -668,7 +709,9 @@ namespace conn
 	@param aMessage IPC message sent from the client
 	*/
 		{
+		OstTraceFunctionEntry0( CSBESESSION_ALLSYSTEMFILESRESTOREDL_ENTRY );
 		Server().DataOwnerManager().AllSystemFilesRestoredL();
+		OstTraceFunctionExit0( CSBESESSION_ALLSYSTEMFILESRESTOREDL_EXIT );
 		}
 
 	void CSBESession::PrepLargePublicFileListL(const RMessage2& aMessage)
@@ -677,6 +720,7 @@ namespace conn
 	@param aMessage The message sent by the client to the server
 	*/
 		{
+		OstTraceFunctionEntry0( CSBESESSION_PREPLARGEPUBLICFILELISTL_ENTRY );
 		HBufC8* pGenericDataTypeBuffer = HBufC8::NewLC(aMessage.GetDesLengthL(1));		
 		TPtr8 genericDataTypeBuffer(pGenericDataTypeBuffer->Des());
 		
@@ -721,7 +765,7 @@ namespace conn
 				}
 			default:
 				{
-				__LOG1("Unknown generic data type supplied, leaving with KErrUnknown (%d)", KErrUnknown);
+				OstTrace1(TRACE_ERROR, CSBESESSION_PREPLARGEPUBLICFILELISTL, "Unknown generic data type supplied, leaving with KErrUnknown (%d)", KErrUnknown);
 				User::Leave(KErrUnknown);
 				}
 			}
@@ -734,7 +778,8 @@ namespace conn
 
 		// This is required to look up the MIME type of the file entry and convert it into a textual representation	
 		RApaLsSession apaSession;
-		User::LeaveIfError(apaSession.Connect());
+		TInt err = apaSession.Connect();
+		LEAVEIFERROR(err, OstTrace1(TRACE_ERROR, DUP2_CSBESESSION_PREPLARGEPUBLICFILELISTL, "error = %d", err));
 		CleanupClosePushL(apaSession);
 
 		// Copy file entries from the cursor until either the end of the list is reached or the 
@@ -794,7 +839,7 @@ namespace conn
 				}
 			}
 		CleanupStack::PopAndDestroy(&apaSession);
-        __LOG2("CSBESession::PrepLargePublicFileListL() - Server-side data length: %d, address: 0x%08x", writeBuf.Length(), writeBuf.Ptr());
+		OstTraceExt2(TRACE_NORMAL, DUP1_CSBESESSION_PREPLARGEPUBLICFILELISTL, "Server-side data length: %d, address: 0x%08x", static_cast<TInt32>(writeBuf.Length()), reinterpret_cast<TInt32>(writeBuf.Ptr()));
 		
 		Server().GSHInterface().Header(Server().GlobalSharedHeap()).iFinished = iFinished;
 
@@ -804,23 +849,27 @@ namespace conn
 		CleanupStack::PopAndDestroy(pGenericDataType);
 
 		aMessage.Complete(KErrNone);
+		OstTraceFunctionExit0( CSBESESSION_PREPLARGEPUBLICFILELISTL_EXIT );
 		}
 		
 	void CSBESession::ReturnLargePublicFileListL(const RMessage2& aMessage)
 	/** Return the previously populated buffer to the client
 	@param aMessage The message sent by the client to the server */
 		{
+		OstTraceFunctionEntry0( CSBESESSION_RETURNLARGEPUBLICFILELISTL_ENTRY );
 		TPckg<TBool> finPkg(iFinished);
 		TPckg<TInt> totalPkg(iTotalEntries);
 		aMessage.WriteL(0, finPkg);
 		aMessage.WriteL(1, totalPkg);
 		aMessage.Complete(KErrNone);
+		OstTraceFunctionExit0( CSBESESSION_RETURNLARGEPUBLICFILELISTL_EXIT );
 		}
 				
 	void CSBESession::ResetTransferBuf()
 	/**
 	*/
 		{
+		OstTraceFunctionEntry0( CSBESESSION_RESETTRANSFERBUF_ENTRY );
 		if (iTransferBuf != NULL)
 			{
 			delete iTransferBuf;
@@ -834,5 +883,6 @@ namespace conn
 			}
 			
 		iArrayCount = 0;
+		OstTraceFunctionExit0( CSBESESSION_RESETTRANSFERBUF_EXIT );
 		}
 	}

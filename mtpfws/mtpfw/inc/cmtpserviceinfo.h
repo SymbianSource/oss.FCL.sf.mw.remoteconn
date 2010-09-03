@@ -30,9 +30,6 @@
 #include <mtp/tmtptypeuint128.h>
 #include <mtp/tmtptypeguid.h>
 
-#include "mtpdebug.h"
-
-
 /** 
 Implements the MTP service configure interface.
 @internalComponent
@@ -218,10 +215,6 @@ private:
         RPointerArray<CServiceMethod>     iServiceMethods;
         RPointerArray<CServiceEvent>		iServiceEvents;
         RArray<TMTPTypeGuid>     iDataBlock;
-        /**
-        FLOGGER debug trace member variable.
-        */
-        __FLOG_DECLARATION_MEMBER_MUTABLE;
 
     };
 

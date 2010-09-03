@@ -25,6 +25,11 @@
 #include "mtpbuildoptions.hrh"
 #include "mtpusbprotocolconstants.h"
 #include <e32debug.h>
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpusbepbaseTraces.h"
+#endif
+
 
 const TUint KUSBHeaderSize = 12;
 #define UNUSED_VAR(a) (a)=(a)
@@ -34,11 +39,10 @@ Destructor
 */
 CMTPUsbEpBase::~CMTPUsbEpBase()
     {
-    __FLOG(_L8("CMTPUsbEpBase::~CMTPUsbEpBase - Entry"));
+    OstTraceFunctionEntry0( CMTPUSBEPBASE_CMTPUSBEPBASE_DES_ENTRY );
     Cancel();
     iPacketBuffer.Close();
-    __FLOG(_L8("CMTPUsbEpBase::~CMTPUsbEpBase - Exit"));
-    __FLOG_CLOSE;
+    OstTraceFunctionExit0( CMTPUSBEPBASE_CMTPUSBEPBASE_DES_EXIT );
     }
     
 /**
@@ -82,15 +86,10 @@ CMTPUsbEpBase::CMTPUsbEpBase(TUint aId, TPriority aPriority, CMTPUsbConnection& 
 /**
 Second phase constructor.
 */
-#ifdef __FLOG_ACTIVE    
-void CMTPUsbEpBase::ConstructL(const TDesC8& aComponentName)
-#else
 void CMTPUsbEpBase::ConstructL()
-#endif
     {
-    __FLOG_OPEN(KMTPSubsystem, aComponentName);
-    __FLOG(_L8("CMTPUsbEpBase::ConstructL - Entry"));
-    __FLOG(_L8("CMTPUsbEpBase::ConstructL - Exit"));
+    OstTraceFunctionEntry0( CMTPUSBEPBASE_CONSTRUCTL_ENTRY );
+    OstTraceFunctionExit0( CMTPUSBEPBASE_CONSTRUCTL_EXIT );
     }
     
 /**
@@ -100,12 +99,12 @@ Sets the MaxPacketSize for the endpoint.
 */
 void CMTPUsbEpBase::SetMaxPacketSizeL(TUint aSize)
 	{
-	__FLOG(_L8("CMTPUsbEpBase::SetMaxPacketSizeL - Entry"));
+	OstTraceFunctionEntry0( CMTPUSBEPBASE_SETMAXPACKETSIZEL_ENTRY );
 	iPacketSizeMax = aSize;
-	__FLOG_VA((_L8("Endpoint %d maximum packetsize = %u"), iId, iPacketSizeMax));
+	OstTraceExt2( TRACE_NORMAL, CMTPUSBEPBASE_SETMAXPACKETSIZEL, "Endpoint %d maximum packetsize = %u", iId, iPacketSizeMax );
 	// Allocate the packet buffer.
     iPacketBuffer.ReAllocL(iPacketSizeMax);
-    __FLOG(_L8("CMTPUsbEpBase::SetMaxPacketSizeL - Exit"));
+	OstTraceFunctionExit0( CMTPUSBEPBASE_SETMAXPACKETSIZEL_EXIT );
 	}    
 
 /**
@@ -113,21 +112,21 @@ Creates a stall condition on the endpoint.
 */  
 void CMTPUsbEpBase::Stall()
     {
-    __FLOG(_L8("CMTPUsbEpBase::Stall - Entry"));
-    __FLOG_VA((_L8("CMTPUsbEpBase state on entry = 0x%08X"), iState));
+    OstTraceFunctionEntry0( CMTPUSBEPBASE_STALL_ENTRY );
+    OstTrace1( TRACE_NORMAL, CMTPUSBEPBASE_STALL, "CMTPUsbEpBase state on entry = 0x%08X", iState );
     Cancel();
     RDevUsbcClient& ldd(Connection().Ldd());
     const TEndpointNumber number(EndpointNumber());
     TEndpointState state;
     ldd.EndpointStatus(number, state);
-    __FLOG_VA((_L8("EndpointStatus = %d"), state));
+    OstTrace1( TRACE_NORMAL, DUP1_CMTPUSBEPBASE_STALL, "EndpointStatus = %d", state );
     if (state != EEndpointStateStalled)
         {
-        __FLOG_VA((_L8("Halting endpoint = %d"), number));
+        OstTrace1( TRACE_NORMAL, DUP2_CMTPUSBEPBASE_STALL, "Halting endpoint = %d", number );
         ldd.HaltEndpoint(number);
         }
     SetStreamState(EStalled);
-    __FLOG(_L8("CMTPUsbEpBase::Stall - Exit"));
+    OstTraceFunctionExit0( CMTPUSBEPBASE_STALL_EXIT );
     }
 
 /**
@@ -135,20 +134,20 @@ Clears a stall condition on the endpoint.
 */    
 void CMTPUsbEpBase::StallClear()
     {
-    __FLOG(_L8("CMTPUsbEpBase::StallClear - Entry"));
-    __FLOG_VA((_L8("CMTPUsbEpBase state on entry = 0x%08X"), iState));
+    OstTraceFunctionEntry0( CMTPUSBEPBASE_STALLCLEAR_ENTRY );
+    OstTrace1( TRACE_NORMAL, CMTPUSBEPBASE_STALLCLEAR, "CMTPUsbEpBase state on entry = 0x%08X", iState );
     RDevUsbcClient& ldd(Connection().Ldd());
     const TEndpointNumber number(EndpointNumber());
     TEndpointState state;
     ldd.EndpointStatus(number, state);
-    __FLOG_VA((_L8("EndpointStatus = %d"), state));
+    OstTrace1( TRACE_NORMAL, DUP1_CMTPUSBEPBASE_STALLCLEAR, "EndpointStatus = %d", state );
     if (state != EEndpointStateNotStalled)
         {
-        __FLOG_VA((_L8("Clearing halt on endpoint = %d"), number));
+        OstTrace1( TRACE_NORMAL, DUP2_CMTPUSBEPBASE_STALLCLEAR, "Clearing halt on endpoint = %d", number );
         Connection().Ldd().ClearHaltEndpoint(number);
         }
     SetStreamState(EIdle);
-    __FLOG(_L8("CMTPUsbEpBase::StallClear - Exit"));
+    OstTraceFunctionExit0( CMTPUSBEPBASE_STALLCLEAR_EXIT );
     }
 
 /**
@@ -194,11 +193,11 @@ stall on error conditions.
 
 void CMTPUsbEpBase::CancelReceiveL(TInt aReason)
 	{
-	__FLOG(_L8("CMTPUsbEpBase::CancelReceiveL - Entry"));
+	OstTraceFunctionEntry0( CMTPUSBEPBASE_CANCELRECEIVEL_ENTRY );
      
     if (DataStreamDirection() == EReceivingState)
 	    {
-		__FLOG(_L8("Cancel in EReceivingState"));            
+		OstTrace0( TRACE_NORMAL, CMTPUSBEPBASE_CANCELRECEIVEL, "Cancel in EReceivingState" );
 	    // Cancel any outstanding request.
     	Cancel();  
 
@@ -209,7 +208,7 @@ void CMTPUsbEpBase::CancelReceiveL(TInt aReason)
         FlushRxDataL();
 	    }
 	    
-    __FLOG(_L8("CMTPUsbEpBase::CancelReceiveL - Exit"));	
+	OstTraceFunctionExit0( CMTPUSBEPBASE_CANCELRECEIVEL_EXIT );
 	}
 
 /**
@@ -225,19 +224,19 @@ stall on error conditions.
 
 void CMTPUsbEpBase::CancelSendL(TInt aReason)
 	{
-	__FLOG(_L8("CMTPUsbEpBase::CancelSendL - Entry"));
+	OstTraceFunctionEntry0( CMTPUSBEPBASE_CANCELSENDL_ENTRY );
     
 	if (DataStreamDirection() == ESendingState)
 		{
- 		__FLOG(_L8("Cancel in ESendingState"));
+ 		OstTrace0( TRACE_NORMAL, CMTPUSBEPBASE_CANCELSENDL, "Cancel in ESendingState" );
  		// Cancel any outstanding request.
     	Cancel();  
         // Notify the connection and reset the send data stream.
         ResetSendDataStream();
         SendDataCompleteL(aReason, *iSendDataSource);
 		}
-		
-	__FLOG(_L8("CMTPUsbEpBase::CancelSendL - Exit"));
+
+	OstTraceFunctionExit0( CMTPUSBEPBASE_CANCELSENDL_EXIT );
 	}
 
 /**
@@ -247,8 +246,9 @@ Initiates an asynchronous data receive sequence.
 */
 void CMTPUsbEpBase::ReceiveDataL(MMTPType& aSink)
     {
-    __FLOG(_L8("CMTPUsbEpBase::ReceiveDataL - Entry"));
-    __FLOG_VA((_L8("CMTPUsbEpBase state on entry = 0x%08X"), iState));
+    OstTraceFunctionEntry0( CMTPUSBEPBASE_RECEIVEDATAL_ENTRY );
+    OstTrace1( TRACE_NORMAL, CMTPUSBEPBASE_RECEIVEDATAL, "CMTPUsbEpBase state on entry = 0x%08X", iState );
+    
     if(iState != EIdle)
       {
     	Cancel();
@@ -260,9 +260,9 @@ void CMTPUsbEpBase::ReceiveDataL(MMTPType& aSink)
     iReceiveDataCommit  = iReceiveDataSink->CommitRequired();
     SetStreamState(EReceiveInitialising);
     InitiateFirstChunkReceiveL(); 
-        
-    __FLOG_VA((_L8("CMTPUsbEpBase state on exit = 0x%08X"), iState));
-    __FLOG(_L8("CMTPUsbEpBase::ReceiveDataL - Exit")); 
+
+    OstTrace1( TRACE_NORMAL, DUP1_CMTPUSBEPBASE_RECEIVEDATAL, "CMTPUsbEpBase state on exit = 0x%08X", iState );
+    OstTraceFunctionExit0( CMTPUSBEPBASE_RECEIVEDATAL_EXIT );
     }
 
 /**
@@ -273,8 +273,9 @@ Resumes a halted data receive sequence.
 
 void CMTPUsbEpBase::ResumeReceiveDataL(MMTPType& aSink)
 	{
-	__FLOG(_L8("CMTPUsbEpBase::ResumeReceiveDataL - Entry"));
-    __FLOG_VA((_L8("CMTPUsbEpBase state on entry = 0x%08X"), iState));
+	OstTraceFunctionEntry0( CMTPUSBEPBASE_RESUMERECEIVEDATAL_ENTRY );
+    OstTrace1( TRACE_NORMAL, CMTPUSBEPBASE_RESUMERECEIVEDATAL, "CMTPUsbEpBase state on entry = 0x%08X", iState );
+    
     __ASSERT_DEBUG(iState == EIdle, Panic(EMTPUsbBadState));
     
     iReceiveDataSink    = &aSink;
@@ -283,13 +284,14 @@ void CMTPUsbEpBase::ResumeReceiveDataL(MMTPType& aSink)
     iChunkStatus = iReceiveDataSink->NextWriteChunk(iReceiveChunkData);
     // The first chunk is going to be read.
     iReceiveData.Set(iReceiveChunkData);
-    __FLOG_VA((_L8("Issuing ReadUntilShort request on endpoint %d"), EndpointNumber()));
-    __FLOG_VA((_L8("Receive chunk capacity = %d bytes, length = %d bytes"), iReceiveChunkData.MaxLength(), iReceiveChunkData.Length()));
-    __FLOG_VA((_L8("Chunk status = %d"), iChunkStatus)); 
+    OstTrace1( TRACE_NORMAL, DUP1_CMTPUSBEPBASE_RESUMERECEIVEDATAL, "Issuing ReadUntilShort request on endpoint %d", EndpointNumber());
+    OstTraceExt2( TRACE_NORMAL, DUP2_CMTPUSBEPBASE_RESUMERECEIVEDATAL, 
+            "Receive chunk capacity = %d bytes, length = %d bytes", iReceiveChunkData.MaxLength(), iReceiveChunkData.Length());
+    OstTrace1( TRACE_NORMAL, DUP3_CMTPUSBEPBASE_RESUMERECEIVEDATAL, "Chunk status = %d", iChunkStatus );
     Connection().Ldd().ReadUntilShort(iStatus, EndpointNumber(), iReceiveData);
     SetStreamState(EReceiveInProgress);
     SetActive();
-    __FLOG(_L8("CMTPUsbEpBase::ResumeReceiveDataL - Exit")); 
+	OstTraceFunctionExit0( CMTPUSBEPBASE_RESUMERECEIVEDATAL_EXIT );
 	}
 
 /**
@@ -301,9 +303,9 @@ implemented the receive data path.
 */
 void CMTPUsbEpBase::ReceiveDataCompleteL(TInt /*aError*/, MMTPType& /*aSink*/)
     {
-    __FLOG(_L8("CMTPUsbEpBase::ReceiveDataCompleteL - Entry"));
+    OstTraceFunctionEntry0( CMTPUSBEPBASE_RECEIVEDATACOMPLETEL_ENTRY );
     __DEBUG_ONLY(Panic(EMTPUsbNotSupported));
-    __FLOG(_L8("CMTPUsbEpBase::ReceiveDataCompleteL - Exit"));
+    OstTraceFunctionExit0( CMTPUSBEPBASE_RECEIVEDATACOMPLETEL_EXIT );
     }
 
 /**
@@ -313,16 +315,16 @@ Initiates an asynchronous data send sequence.
 */
 void CMTPUsbEpBase::SendDataL(const MMTPType& aSource)
     {
-    __FLOG(_L8("CMTPUsbEpBase::SendDataL - Entry"));
-    __FLOG_VA((_L8("CMTPUsbEpBase state on entry = 0x%08X"), iState));
+    OstTraceFunctionEntry0( CMTPUSBEPBASE_SENDDATAL_ENTRY );
+    OstTrace1( TRACE_NORMAL, CMTPUSBEPBASE_SENDDATAL, "CMTPUsbEpBase state on entry = 0x%08X", iState );
     __ASSERT_DEBUG(iState == EIdle, Panic(EMTPUsbBadState));
     
     iSendDataSource = &aSource;
     SetStreamState(ESendInitialising);
     ProcessSendDataStreamL();
-        
-    __FLOG_VA((_L8("CMTPUsbEpBase state on exit = 0x%08X"), iState));
-    __FLOG(_L8("CMTPUsbEpBase::SendDataL - Exit"));
+
+    OstTrace1( TRACE_NORMAL, DUP1_CMTPUSBEPBASE_SENDDATAL, "CMTPUsbEpBase state on exit = 0x%08X", iState );
+    OstTraceFunctionExit0( CMTPUSBEPBASE_SENDDATAL_EXIT );
     }
 
 /**
@@ -334,25 +336,26 @@ implemented the send data path.
 */
 void CMTPUsbEpBase::SendDataCompleteL(TInt /*aError*/, const MMTPType& /*aSource*/)
     {
-    __FLOG(_L8("CMTPUsbEpBase::SendDataCompleteL - Entry"));
+    OstTraceFunctionEntry0( CMTPUSBEPBASE_SENDDATACOMPLETEL_ENTRY );
     __DEBUG_ONLY(Panic(EMTPUsbNotSupported));
-    __FLOG(_L8("CMTPUsbEpBase::SendDataCompleteL - Exit"));
+    OstTraceFunctionExit0( CMTPUSBEPBASE_SENDDATACOMPLETEL_EXIT );
     }
 
 void CMTPUsbEpBase::DoCancel()
     {
-    __FLOG(_L8("CMTPUsbEpBase::DoCancel - Entry"));
-    __FLOG_VA((_L8("CMTPUsbEpBase state on entry = 0x%08X"), iState));
+    OstTraceFunctionEntry0( CMTPUSBEPBASE_DOCANCEL_ENTRY );
+    OstTrace1( TRACE_NORMAL, CMTPUSBEPBASE_DOCANCEL, "CMTPUsbEpBase state on entry = 0x%08X", iState );
+    
     switch (iState & EStateDirection)
         {
     case EReceivingState:
-        __FLOG_VA((_L8("Issuing ReadCancel on endpoint %d"), EndpointNumber()));
+        OstTrace1( TRACE_NORMAL, DUP1_CMTPUSBEPBASE_DOCANCEL, "Issuing ReadCancel on endpoint %d", EndpointNumber() );
         Connection().Ldd().ReadCancel(EndpointNumber());
         ResetReceiveDataStream();
         break;
 
     case ESendingState:    
-        __FLOG_VA((_L8("Issuing WriteCancel on endpoint %d"), EndpointNumber()));
+        OstTrace1( TRACE_NORMAL, DUP2_CMTPUSBEPBASE_DOCANCEL, "Issuing WriteCancel on endpoint %d", EndpointNumber());
         Connection().Ldd().WriteCancel(EndpointNumber());
         ResetSendDataStream();
         break;
@@ -360,13 +363,14 @@ void CMTPUsbEpBase::DoCancel()
     default:
         break;
         }
-    __FLOG(_L8("CMTPUsbEpBase::DoCancel - Exit"));
+    OstTraceFunctionExit0( CMTPUSBEPBASE_DOCANCEL_EXIT );
     }
     
 TInt CMTPUsbEpBase::RunError(TInt aError)
     {
-    __FLOG(_L8("CMTPUsbEpBase::RunError - Entry"));
-    __FLOG_VA((_L8("Error = %d"), aError));  
+    OstTraceFunctionEntry0( CMTPUSBEPBASE_RUNERROR_ENTRY );
+    OstTraceDef1( OST_TRACE_CATEGORY_PRODUCTION, TRACE_IMPORTANT, 
+            CMTPUSBEPBASE_RUNERROR, "error code %d", aError);
     
     // Cancel any outstanding request.
     Cancel();  
@@ -375,7 +379,7 @@ TInt CMTPUsbEpBase::RunError(TInt aError)
     TInt32 streamDirection = DataStreamDirection();
     if (streamDirection == EReceivingState)
 	    {
-		__FLOG(_L8("Error in EReceivingState"));            
+		OstTrace0( TRACE_NORMAL, DUP1_CMTPUSBEPBASE_RUNERROR, "Error in EReceivingState" );
         // Notify the connection and reset the receive data stream.
         MMTPType& data(*iReceiveDataSink);
         ResetReceiveDataStream();
@@ -384,28 +388,29 @@ TInt CMTPUsbEpBase::RunError(TInt aError)
 	    }
 	else if (streamDirection == ESendingState)
 		{
-		__FLOG(_L8("Error in ESendingState"));
+		OstTrace0( TRACE_NORMAL, DUP2_CMTPUSBEPBASE_RUNERROR, "Error in ESendingState" );
         // Notify the connection and reset the send data stream.
         const MMTPType& data(*iSendDataSource);
         ResetSendDataStream();
         TRAPD(err, SendDataCompleteL(aError, data));
         UNUSED_VAR(err);
 		}
-	    
-    __FLOG(_L8("CMTPUsbEpBase::RunError - Exit"));
+
+    OstTraceFunctionExit0( CMTPUSBEPBASE_RUNERROR_EXIT );
     return KErrNone;
     }
 
 void CMTPUsbEpBase::RunL()
     {
-    __FLOG(_L8("CMTPUsbEpBase::RunL - Entry"));
-    __FLOG_VA((_L8("Current endpoint is %d"), EndpointNumber()));
-    __FLOG_VA((_L8("CMTPUsbEpBase state on entry = 0x%08X"), iState));
+    OstTraceFunctionEntry0( CMTPUSBEPBASE_RUNL_ENTRY );
+    OstTrace1( TRACE_NORMAL, CMTPUSBEPBASE_RUNL, "Current endpoint is %d", EndpointNumber());
+    OstTrace1( TRACE_NORMAL, DUP1_CMTPUSBEPBASE_RUNL, "CMTPUsbEpBase state on entry = 0x%08X", iState );
     
     switch (DataStreamDirection())
         {
     case EReceivingState:
-        __FLOG_VA((_L8("Receive data completion status = %d"), iStatus.Int()));
+        OstTrace1( TRACE_NORMAL, DUP2_CMTPUSBEPBASE_RUNL, "Receive data completion status = %d", iStatus.Int() );
+        
         if (iStatus != KErrNone)
             {
             // Abnormal completion.
@@ -419,6 +424,7 @@ void CMTPUsbEpBase::RunL()
         		{
         		Connection().Ldd().ReadUntilShort(iStatus, EndpointNumber(), iReceiveData);
         		SetActive();
+        		OstTraceFunctionExit0( CMTPUSBEPBASE_RUNL_EXIT );
         		return;
         		}  
             // Update the chunk data length.
@@ -444,7 +450,8 @@ void CMTPUsbEpBase::RunL()
         break;
         
     case ESendingState:   
-        __FLOG_VA((_L8("Send data stream completion status = %d"), iStatus.Int())); 
+        OstTrace1( TRACE_NORMAL, DUP3_CMTPUSBEPBASE_RUNL, "Send data stream completion status = %d", iStatus.Int() );
+        
         if (iStatus != KErrNone)
             {
             // Abnormal completion.
@@ -465,13 +472,13 @@ void CMTPUsbEpBase::RunL()
         break;
         
     default:
-        __FLOG_VA((_L8("Invalid data stream state, status = %d"), iStatus.Int())); 
+        OstTraceDef1(OST_TRACE_CATEGORY_PRODUCTION, TRACE_FATAL, DUP4_CMTPUSBEPBASE_RUNL, "Invalid data stream state, status = %d", iStatus.Int());
         Panic(EMTPUsbBadState);
         break;
         }
-        
-    __FLOG_VA((_L8("IsActive = %d"), IsActive()));
-    __FLOG(_L8("CMTPUsbEpBase::RunL - Exit"));
+
+    OstTrace1( TRACE_NORMAL, DUP5_CMTPUSBEPBASE_RUNL, "IsActive = %d", IsActive() );
+    OstTraceFunctionExit0( DUP1_CMTPUSBEPBASE_RUNL_EXIT );
     }
 
 /**
@@ -491,12 +498,12 @@ setting the stream state to EIdle.
 */    
 void CMTPUsbEpBase::ResetReceiveDataStream()
     {
-	__FLOG(_L8("CMTPUsbEpBase::ResetReceiveDataStream - Entry"));
+	OstTraceFunctionEntry0( CMTPUSBEPBASE_RESETRECEIVEDATASTREAM_ENTRY );
     iReceiveChunkData.Set(NULL, 0, 0);
     iReceiveData.Set(NULL, 0, 0);
     iReceiveDataSink = NULL;
     SetStreamState(EIdle);
-	__FLOG(_L8("CMTPUsbEpBase::ResetReceiveDataStream - Exit"));
+    OstTraceFunctionExit0( CMTPUSBEPBASE_RESETRECEIVEDATASTREAM_EXIT );
     }
 
 /**
@@ -505,12 +512,12 @@ setting the stream state to EIdle.
 */    
 void CMTPUsbEpBase::ResetSendDataStream()
     {
-	__FLOG(_L8("CMTPUsbEpBase::ResetSendDataStream - Entry"));
+	OstTraceFunctionEntry0( CMTPUSBEPBASE_RESETSENDDATASTREAM_ENTRY );
     iSendChunkData.Set(NULL, 0);
     iSendData.Set(NULL, 0);
     iSendDataSource = NULL;
     SetStreamState(EIdle);
-	__FLOG(_L8("CMTPUsbEpBase::ResetSendDataStream - Exit"));
+    OstTraceFunctionExit0( CMTPUSBEPBASE_RESETSENDDATASTREAM_EXIT );
     }
     
 /**
@@ -521,16 +528,17 @@ USB header for BulkOut EP.
 */
 TBool CMTPUsbEpBase::ValidateUSBHeaderL()
 	{	
-	__FLOG(_L8("CMTPUsbEpBase::ValidateUSBHeader - Entry"));
+	OstTraceFunctionEntry0( CMTPUSBEPBASE_VALIDATEUSBHEADERL_ENTRY );
 	
 	TBool result(EFalse);
 	TUint16 containerType(Connection().BulkContainer().Uint16L(CMTPUsbContainer::EContainerType));
 	iDataLength = Connection().BulkContainer().Uint32L(CMTPUsbContainer::EContainerLength);
 	
-#ifdef __FLOG_ACTIVE
+#ifdef OST_TRACE_COMPILER_IN_USE
     TUint32 transactionId(Connection().BulkContainer().Uint32L(CMTPUsbContainer::ETransactionID));
 	TUint16 code(Connection().BulkContainer().Uint16L(CMTPUsbContainer::ECode));
-    __FLOG_VA((_L8("ContainerLength = %lu, containerType = 0x%x, code = 0x%x, transactionID = 0x%x"), iDataLength, containerType, code, transactionId));
+    OstTraceExt4( TRACE_NORMAL, DUP1_CMTPUSBEPBASE_VALIDATEUSBHEADERL, 
+            "ContainerLength = %lu, containerType = 0x%x, code = 0x%x, transactionID = 0x%x", iDataLength, containerType, code, transactionId );
 #endif
 	
 	//Due to an issue of Windows OS, the value of CMTPUsbContainer::EContainerLength is incorrect if the
@@ -538,13 +546,14 @@ TBool CMTPUsbEpBase::ValidateUSBHeaderL()
 	//implementation it will be a value between 0 and 11.
 	//Here we reset the iDateLength to the actual size of iReceiveDataSink as a walkaround.
 	if(containerType == 2 && (iDataLength <= 11 || iDataLength == KMaxTUint32))
-		{
-		__FLOG(_L8("iDataLength <= 11, change to size of receive data sink"));			
+		{	
+	    OstTrace0( TRACE_NORMAL, DUP2_CMTPUSBEPBASE_VALIDATEUSBHEADERL, "iDataLength <= 11, change to size of receive data sink" );	
 		iDataLength = iReceiveDataSink->Size();
 		}
 	
-	__FLOG_VA((_L8("containerType = %u , dataLength = %lu bytes"), containerType, iDataLength));
-	
+	OstTraceExt2( TRACE_NORMAL, DUP3_CMTPUSBEPBASE_VALIDATEUSBHEADERL, 
+	        "containerType = %u , dataLength = %lu bytes", (TUint)containerType, iDataLength );
+
     if (iDataLength >= KUSBHeaderSize && 
         (containerType == EMTPUsbContainerTypeCommandBlock || containerType == EMTPUsbContainerTypeDataBlock))
         {	
@@ -552,7 +561,8 @@ TBool CMTPUsbEpBase::ValidateUSBHeaderL()
         iDataCounter = 0;
         }
 	
-	__FLOG_VA((_L8("CMTPUsbEpBase::ValidateUSBHeader - Exit with the result of %d"), result));
+	OstTrace1( TRACE_NORMAL, CMTPUSBEPBASE_VALIDATEUSBHEADERL, "Exit with the result of %d", result );
+	OstTraceFunctionExit0( CMTPUSBEPBASE_VALIDATEUSBHEADERL_EXIT );
 	return result;
 	}
 
@@ -561,22 +571,24 @@ Initiates the first chunk received data.
 */
 void CMTPUsbEpBase::InitiateFirstChunkReceiveL()
 	{
-	__FLOG(_L8("CMTPUsbEpBase::InitiateFirstChunkReceiveL - Entry"));
-	
-	__FLOG(_L8("Fetching first write data chunk"));
+	OstTraceFunctionEntry0( CMTPUSBEPBASE_INITIATEFIRSTCHUNKRECEIVEL_ENTRY );
+
+	OstTrace0( TRACE_NORMAL, CMTPUSBEPBASE_INITIATEFIRSTCHUNKRECEIVEL, "Fetching first write data chunk" );
     iChunkStatus = iReceiveDataSink->FirstWriteChunk(iReceiveChunkData);
     // The first chunk is going to be read.
     iIsFirstChunk = ETrue;
     iReceiveData.Set(iReceiveChunkData);
-    __FLOG_VA((_L8("Issuing ReadUntilShort request on endpoint %d"), EndpointNumber()));
-    __FLOG_VA((_L8("Receive chunk capacity = %d bytes, length = %d bytes"), iReceiveChunkData.MaxLength(), iReceiveChunkData.Length()));
-    __FLOG_VA((_L8("Chunk status = %d"), iChunkStatus)); 
+    OstTrace1( TRACE_NORMAL, DUP1_CMTPUSBEPBASE_INITIATEFIRSTCHUNKRECEIVEL, 
+            "Issuing ReadUntilShort request on endpoint %d", EndpointNumber());
+    OstTraceExt2( TRACE_NORMAL, DUP2_CMTPUSBEPBASE_INITIATEFIRSTCHUNKRECEIVEL, 
+            "Receive chunk capacity = %d bytes, length = %d bytes", iReceiveChunkData.MaxLength(), iReceiveChunkData.Length());
+    OstTrace1( TRACE_NORMAL, DUP3_CMTPUSBEPBASE_INITIATEFIRSTCHUNKRECEIVEL, "Chunk status = %d", iChunkStatus);
     Connection().Ldd().ReadUntilShort(iStatus, EndpointNumber(), iReceiveData);
     SetStreamState(EReceiveInProgress);
     SetActive();
-    
-    __FLOG(_L8("Request issued"));
-	__FLOG(_L8("CMTPUsbEpBase::InitiateFirstChunkReceiveL - Exit"));
+
+    OstTrace0( TRACE_NORMAL, DUP4_CMTPUSBEPBASE_INITIATEFIRSTCHUNKRECEIVEL, "Request issued" );
+	OstTraceFunctionExit0( CMTPUSBEPBASE_INITIATEFIRSTCHUNKRECEIVEL_EXIT );
 	}
 	
 /**
@@ -584,7 +596,7 @@ Processes the first received chunk data.
 */
 void CMTPUsbEpBase::ProcessFirstReceivedChunkL()
 	{
-	__FLOG(_L8("CMTPUsbEpBase::ProcessFirstReceivedChunkL - Entry"));	
+	OstTraceFunctionEntry0( CMTPUSBEPBASE_PROCESSFIRSTRECEIVEDCHUNKL_ENTRY );
 	    
     // Reset it back.
     iIsFirstChunk = EFalse;
@@ -600,6 +612,7 @@ void CMTPUsbEpBase::ProcessFirstReceivedChunkL()
             FlushOnePacketL();
             
             InitiateFirstChunkReceiveL();  
+            OstTraceFunctionExit0( CMTPUSBEPBASE_PROCESSFIRSTRECEIVEDCHUNKL_EXIT );
             return;
 			}
 			
@@ -614,6 +627,7 @@ void CMTPUsbEpBase::ProcessFirstReceivedChunkL()
         {
         //trash data received, just diacard it and initiate next receiving
         InitiateFirstChunkReceiveL();  
+        OstTraceFunctionExit0( DUP1_CMTPUSBEPBASE_PROCESSFIRSTRECEIVEDCHUNKL_EXIT );
         return;
         }
     else if (iReceiveChunkData.MaxLength() == iReceiveChunkData.Length())
@@ -622,23 +636,28 @@ void CMTPUsbEpBase::ProcessFirstReceivedChunkL()
 	    // All the desired data should be received. 
 		SetStreamState(EReceiveComplete);			
 		}
-		
-	__FLOG_VA((_L8("CMTPUsbEpBase state = 0x%08X"), iState));
+
+	OstTrace1( TRACE_NORMAL, CMTPUSBEPBASE_PROCESSFIRSTRECEIVEDCHUNKL, "CMTPUsbEpBase state = 0x%08X", iState );
+	
 	
 	if (iState == EReceiveComplete)
 		{
 		// All data is received just using the first chunk. It could be a USB Command block without parameters
 		// or USB control request setup or data. 
-		__FLOG_VA((_L8("Received = %d bytes, write data chunk capacity = %d bytes"), iReceiveChunkData.Length(), iReceiveChunkData.MaxLength()));
+		OstTraceExt2( TRACE_NORMAL, DUP1_CMTPUSBEPBASE_PROCESSFIRSTRECEIVEDCHUNKL, 
+		        "Received = %d bytes, write data chunk capacity = %d bytes", iReceiveChunkData.Length(), iReceiveChunkData.MaxLength() );
 		
-#ifdef MTP_DEBUG_FLOG_HEX_DUMP 
-        __FLOG_HEXDUMP((iReceiveChunkData, _L8("Received data ")));
+#ifdef MTP_DEBUG_OST_HEX_DUMP 
+		OstTrace0( TRACE_DUMP, DUP4_CMTPUSBEPBASE_PROCESSFIRSTRECEIVEDCHUNKL, "<recved_chunk>" );
+        OstTraceData( TRACE_DUMP, DUP3_CMTPUSBEPBASE_PROCESSFIRSTRECEIVEDCHUNKL, 
+                "%x", iReceiveChunkData.Ptr(), iReceiveChunkData.Size());
+        OstTrace0( TRACE_DUMP, DUP5_CMTPUSBEPBASE_PROCESSFIRSTRECEIVEDCHUNKL, "</recved_chunk>" );
 #endif
 
 		// Commit the received data if required.
         if (iReceiveDataCommit)
 		    {
-		 	__FLOG(_L8("Commiting write data chunk"));
+		 	OstTrace0( TRACE_NORMAL, DUP2_CMTPUSBEPBASE_PROCESSFIRSTRECEIVEDCHUNKL, "Commiting write data chunk" );
 	        iReceiveDataSink->CommitChunkL(iReceiveChunkData);       
 		    }
 		}
@@ -648,7 +667,7 @@ void CMTPUsbEpBase::ProcessFirstReceivedChunkL()
 		ResumeReceiveDataStreamL();
 		}
 	
-	__FLOG(_L8("CMTPUsbEpBase::ProcessFirstReceivedChunkL - Exit"));
+	OstTraceFunctionExit0( DUP2_CMTPUSBEPBASE_PROCESSFIRSTRECEIVEDCHUNKL_EXIT );
 	}
 
 /**
@@ -657,16 +676,16 @@ there is still more data to be received.
 */
 void CMTPUsbEpBase::ResumeReceiveDataStreamL()
     {
-    __FLOG(_L8("CMTPUsbEpBase::ResumeReceiveDataStreamL - Entry"));
-    __FLOG_VA((_L8("CMTPUsbEpBase state on entry = 0x%08X"), iState));
+    OstTraceFunctionEntry0( CMTPUSBEPBASE_RESUMERECEIVEDATASTREAML_ENTRY );
+    OstTrace1( TRACE_NORMAL, CMTPUSBEPBASE_RESUMERECEIVEDATASTREAML, "CMTPUsbEpBase state on entry = 0x%08X", iState );
     TBool endStream(EFalse);
 	TBool lastChunkCommited(EFalse);
 	TBool nullPacketReceived(EFalse);
 	MMTPType *needCommit = NULL;
     // Process the received chunk (if any).
    	iDataCounter += iReceiveData.Length();
-   	__FLOG_VA((_L8("iDataLength = %lu bytes"), iDataLength));
-   	__FLOG_VA((_L8("iDataCounter = %lu bytes"), iDataCounter));   	
+   	OstTrace1( TRACE_NORMAL, DUP1_CMTPUSBEPBASE_RESUMERECEIVEDATASTREAML, "iDataLength = %lu bytes", iDataLength );
+   	OstTrace1( TRACE_NORMAL, DUP2_CMTPUSBEPBASE_RESUMERECEIVEDATASTREAML, "iDataCounter = %lu bytes", iDataCounter );
    	
    	if (iDataCounter == iDataLength)
 	   	{
@@ -674,11 +693,16 @@ void CMTPUsbEpBase::ResumeReceiveDataStreamL()
         nullPacketReceived = ((iState == EReceiveCompleting) && (iReceiveData.Length() == 0));
 	   	}
 
-    __FLOG_VA((_L8("Received = %d bytes, write data chunk capacity = %d bytes"), iReceiveChunkData.Length(), iReceiveChunkData.MaxLength()));		   
-#ifdef MTP_DEBUG_FLOG_HEX_DUMP 
-    __FLOG_HEXDUMP((iReceiveChunkData, _L8("Received data ")));
+   	OstTraceExt2( TRACE_NORMAL, DUP3_CMTPUSBEPBASE_RESUMERECEIVEDATASTREAML, 
+   	        "Received = %d bytes, write data chunk capacity = %d bytes", iReceiveChunkData.Length(), iReceiveChunkData.MaxLength() );
+	   
+#ifdef MTP_DEBUG_OST_HEX_DUMP 
+   	OstTrace0( TRACE_DUMP, DUP24_CMTPUSBEPBASE_RESUMERECEIVEDATASTREAML, "<recved_chunk>" );
+    OstTraceData( TRACE_DUMP, DUP23_CMTPUSBEPBASE_RESUMERECEIVEDATASTREAML, 
+            "%x", iReceiveChunkData.Ptr(), iReceiveChunkData.Size());
+    OstTrace0( TRACE_DUMP, DUP25_CMTPUSBEPBASE_RESUMERECEIVEDATASTREAML, "</recved_chunk>" );
 #endif
-    __FLOG_VA((_L8("End of stream = %d"), endStream)); 		   
+    OstTrace1( TRACE_NORMAL, DUP4_CMTPUSBEPBASE_RESUMERECEIVEDATASTREAML, "End of stream = %d", endStream );
         
       // Commit the received data if required.
 	if (iReceiveDataCommit)
@@ -691,7 +715,8 @@ void CMTPUsbEpBase::ResumeReceiveDataStreamL()
 	           	// 1. MTP file receiving: MTP type file never returns KMTPChunkSequenceCompletion,It can be received        
           		//    one part after another. Also it can be commited mutiple times.
             	// 2. Other MTP datatype receiving during the middle of data stream
-	           __FLOG(_L8("Commiting write data chunk - 1"));
+	           OstTrace0( TRACE_NORMAL, DUP5_CMTPUSBEPBASE_RESUMERECEIVEDATASTREAML, "Commiting write data chunk - 1" );
+
 	           needCommit = iReceiveDataSink->CommitChunkL(iReceiveChunkData);
 	           lastChunkCommited = ETrue;   
 	           }
@@ -701,7 +726,7 @@ void CMTPUsbEpBase::ResumeReceiveDataStreamL()
 		      {
 		      // It should be the end of MTP type file receiving since it never returns KMTPChunkSequenceCompletion.
 	 	      // it can be commited mutiple times.
-		      __FLOG(_L8("Commiting write data chunk - 2"));
+		      OstTrace0( TRACE_NORMAL, DUP6_CMTPUSBEPBASE_RESUMERECEIVEDATASTREAML, "Commiting write data chunk - 2" );
 		      needCommit = iReceiveDataSink->CommitChunkL(iReceiveChunkData);
 		      }
 		else if ((iChunkStatus == KMTPChunkSequenceCompletion)
@@ -710,7 +735,7 @@ void CMTPUsbEpBase::ResumeReceiveDataStreamL()
 		      {
 		      // The last chunk data which type is any other MTP data type than MTP file type. 
 		      // It will not be commited until all the chunk data is received.
-		      __FLOG(_L8("Commiting write data chunk - 3"));
+		      OstTrace0( TRACE_NORMAL, DUP7_CMTPUSBEPBASE_RESUMERECEIVEDATASTREAML, "Commiting write data chunk - 3" );
 		      needCommit = iReceiveDataSink->CommitChunkL(iReceiveChunkData); 
 		      }
         else if ((iChunkStatus == KMTPChunkSequenceCompletion)
@@ -720,8 +745,8 @@ void CMTPUsbEpBase::ResumeReceiveDataStreamL()
               // The last chunk data is received and chunk has been filled up:
               // just flush one packet and set endStream true and commit received data.
               // This condition tries to make MTP more robust if DP forgets to handle data-out phase. 
-              __FLOG(_L8("Commiting write data chunk - 4"));
-              
+              OstTrace0( TRACE_NORMAL, DUP8_CMTPUSBEPBASE_RESUMERECEIVEDATASTREAML, "Commiting write data chunk - 4" );
+
               FlushOnePacketL();  
               endStream = ETrue;
               needCommit = iReceiveDataSink->CommitChunkL(iReceiveChunkData); 
@@ -736,37 +761,37 @@ void CMTPUsbEpBase::ResumeReceiveDataStreamL()
 		    {
 		    if (lastChunkCommited)
 			    {
-			    __FLOG(_L8("Fetching next write data chunk"));
+			    OstTrace0( TRACE_NORMAL, DUP9_CMTPUSBEPBASE_RESUMERECEIVEDATASTREAML, "Fetching next write data chunk" );
 	    	 	iChunkStatus = iReceiveDataSink->NextWriteChunk(iReceiveChunkData, iDataLength - KUSBHeaderSize);
 			    }
 		    }
 		else
 			{
-			__FLOG(_L8("Fetching next write data chunk"));
+			OstTrace0( TRACE_NORMAL, DUP10_CMTPUSBEPBASE_RESUMERECEIVEDATASTREAML, "Fetching next write data chunk" );
     	 	iChunkStatus = iReceiveDataSink->NextWriteChunk(iReceiveChunkData, iDataLength - KUSBHeaderSize);	
 			}	         		    					      
         break;
         
     case EReceiveCompleting:
-        __FLOG(_L8("Write data chunk sequence completing"));
-        __FLOG_VA((_L8("Null packet received = %d"), nullPacketReceived)); 
+        OstTrace0( TRACE_NORMAL, DUP11_CMTPUSBEPBASE_RESUMERECEIVEDATASTREAML, "Write data chunk sequence completing" );
+        OstTrace1( TRACE_NORMAL, DUP12_CMTPUSBEPBASE_RESUMERECEIVEDATASTREAML, "Null packet received = %d", nullPacketReceived );
         break;
                   
     case EIdle:
     default:
-        __FLOG(_L8("Invalid receive data stream state"));
+        OstTraceDef0(OST_TRACE_CATEGORY_PRODUCTION, TRACE_FATAL, DUP13_CMTPUSBEPBASE_RESUMERECEIVEDATASTREAML, "Invalid receive data stream state" );
         Panic(EMTPUsbBadState);
         break;
         }
-    __FLOG_VA((_L8("Chunk status = %d"), iChunkStatus)); 
-        
+    OstTrace1( TRACE_NORMAL, DUP14_CMTPUSBEPBASE_RESUMERECEIVEDATASTREAML, "Chunk status = %d", iChunkStatus );
+
     // Update the data stream state.
     switch (iChunkStatus)
         {
     case KErrNone:
         if (endStream)
             {
-            __FLOG(_L8("Terminating packet received."));
+            OstTrace0( TRACE_NORMAL, DUP15_CMTPUSBEPBASE_RESUMERECEIVEDATASTREAML, "Terminating packet received." );
             SetStreamState(EReceiveComplete);
             }
         else
@@ -780,7 +805,7 @@ void CMTPUsbEpBase::ResumeReceiveDataStreamL()
 
         if (endStream)
             {
-            __FLOG(_L8("Terminating packet received."));
+            OstTrace0( TRACE_NORMAL, DUP16_CMTPUSBEPBASE_RESUMERECEIVEDATASTREAML, "Terminating packet received." );
             SetStreamState(EReceiveComplete);
             }
         else
@@ -792,6 +817,7 @@ void CMTPUsbEpBase::ResumeReceiveDataStreamL()
         break;
         
     default:
+        OstTrace1( TRACE_ERROR, DUP22_CMTPUSBEPBASE_RESUMERECEIVEDATASTREAML, "Invalid iChunkStatus %d", iChunkStatus);
         User::Leave(iChunkStatus);
         break;
         } 
@@ -799,9 +825,13 @@ void CMTPUsbEpBase::ResumeReceiveDataStreamL()
     // If necessary, process the next chunk. 
     if (iState != EReceiveComplete)
         {
-        __FLOG_VA((_L8("Issuing ReadUntilShort request on endpoint %d"), EndpointNumber()));
-        __FLOG_VA((_L8("Receive chunk capacity = %d bytes, length = %d bytes"), iReceiveChunkData.MaxLength(), iReceiveChunkData.Length()));
-        __FLOG_VA((_L8("iReceiveChunkData pointer address is %08x"), iReceiveChunkData.Ptr()));
+        OstTrace1( TRACE_NORMAL, DUP17_CMTPUSBEPBASE_RESUMERECEIVEDATASTREAML, 
+                "Issuing ReadUntilShort request on endpoint %d", EndpointNumber());
+        OstTraceExt2( TRACE_NORMAL, DUP18_CMTPUSBEPBASE_RESUMERECEIVEDATASTREAML, 
+                "Receive chunk capacity = %d bytes, length = %d bytes", iReceiveChunkData.MaxLength(), iReceiveChunkData.Length() );
+        OstTrace1( TRACE_NORMAL, DUP19_CMTPUSBEPBASE_RESUMERECEIVEDATASTREAML, 
+                "iReceiveChunkData pointer address is %08x", iReceiveChunkData.Ptr());
+
         // TDesC8's Right() method is not used here, because the parameter passed in like iReceiveChunkData.MaxLength() - iReceiveChunkData.Length()is greater than 
         // the length of the descriptor, the function extracts the whole of the descriptor.
         if(iDataLength-iDataCounter < iReceiveChunkData.MaxLength() - iReceiveChunkData.Length())
@@ -819,11 +849,12 @@ void CMTPUsbEpBase::ResumeReceiveDataStreamL()
         	TPtr8 tmp(NULL, 0, 0);
         	needCommit->CommitChunkL(tmp);
         	}
-        __FLOG(_L8("Request issued"));
+        OstTrace0( TRACE_NORMAL, DUP20_CMTPUSBEPBASE_RESUMERECEIVEDATASTREAML, "Request issued" );
         }
-        
-    __FLOG_VA((_L8("CMTPUsbEpBase state on exit = 0x%08X"), iState));
-    __FLOG(_L8("CMTPUsbEpBase::ResumeReceiveDataStreamL - Exit"));
+
+    OstTrace1( TRACE_NORMAL, DUP21_CMTPUSBEPBASE_RESUMERECEIVEDATASTREAML, 
+            "CMTPUsbEpBase state on exit = 0x%08X", iState );
+    OstTraceFunctionExit0( CMTPUSBEPBASE_RESUMERECEIVEDATASTREAML_EXIT );
     }
     
 /**
@@ -843,8 +874,9 @@ follows:
 */
 void CMTPUsbEpBase::ProcessSendDataStreamL()
     {
-    __FLOG(_L8("CMTPUsbEpBase::ProcessSendDataStreamL - Entry"));
-    __FLOG_VA((_L8("CMTPUsbEpBase state on entry = 0x%08X"), iState));
+    OstTraceFunctionEntry0( CMTPUSBEPBASE_PROCESSSENDDATASTREAML_ENTRY );
+    OstTrace1( TRACE_NORMAL, CMTPUSBEPBASE_PROCESSSENDDATASTREAML, "CMTPUsbEpBase state on entry = 0x%08X", iState );
+    
     
     // Clear the send data stream data pointer.
     iSendData.Set(KNullDesC8);
@@ -856,13 +888,13 @@ void CMTPUsbEpBase::ProcessSendDataStreamL()
         switch (iState)
             {
         case ESendInitialising:
-            __FLOG(_L8("Fetching first read data chunk"));
+            OstTrace0( TRACE_NORMAL, DUP1_CMTPUSBEPBASE_PROCESSSENDDATASTREAML, "Fetching first read data chunk" );
             iChunkStatus = iSendDataSource->FirstReadChunk(iSendChunkData);
             iPacketBuffer.Zero();
             break;
             
         case ESendInProgress:
-            __FLOG(_L8("Fetching next read data chunk"));
+            OstTrace0( TRACE_NORMAL, DUP2_CMTPUSBEPBASE_PROCESSSENDDATASTREAML, "Fetching next read data chunk" );
             iChunkStatus = iSendDataSource->NextReadChunk(iSendChunkData);
             break;
             
@@ -871,7 +903,8 @@ void CMTPUsbEpBase::ProcessSendDataStreamL()
             
         case EIdle:
         default:
-            __FLOG(_L8("Invalid send data stream state"));
+            OstTraceDef1( OST_TRACE_CATEGORY_PRODUCTION, TRACE_FATAL, DUP3_CMTPUSBEPBASE_PROCESSSENDDATASTREAML, 
+                    "Invalid send data stream state. iState %d", iState );
             Panic(EMTPUsbBadState);
             break;
             }
@@ -898,22 +931,28 @@ void CMTPUsbEpBase::ProcessSendDataStreamL()
             break;
             
         default:
+            OstTrace1( TRACE_ERROR, DUP16_CMTPUSBEPBASE_PROCESSSENDDATASTREAML, "Invalid iChunkStatus %d", iChunkStatus);
             User::Leave(iChunkStatus);
             break;
             }          
         }
         
-    __FLOG_VA((_L8("Chunk status = %d"), iChunkStatus));
+    OstTrace1( TRACE_NORMAL, DUP4_CMTPUSBEPBASE_PROCESSSENDDATASTREAML, "Chunk status = %d", iChunkStatus );
+
     
     // Process the buffered residual and/or available chunk data.
     TUint bufferedLen(iPacketBuffer.Length());
     TUint chunkIntegralLen((chunkAvailableLen / iPacketSizeMax) * iPacketSizeMax);
     TUint chunkResidualLen(chunkAvailableLen % iPacketSizeMax);
     TBool zlp(EFalse);
-    __FLOG_VA((_L8("Buffered residual data = %u bytes"), bufferedLen));
-    __FLOG_VA((_L8("Chunk data available = %u bytes"), chunkAvailableLen));
-    __FLOG_VA((_L8("Chunk data packet integral portion = %u bytes"), chunkIntegralLen));
-    __FLOG_VA((_L8("Chunk data packet residual portion = %u bytes"), chunkResidualLen));
+    OstTrace1( TRACE_NORMAL, DUP5_CMTPUSBEPBASE_PROCESSSENDDATASTREAML, 
+            "Buffered residual data = %u bytes", bufferedLen );
+    OstTrace1( TRACE_NORMAL, DUP6_CMTPUSBEPBASE_PROCESSSENDDATASTREAML, 
+            "Chunk data available = %u bytes", chunkAvailableLen );
+    OstTrace1( TRACE_NORMAL, DUP7_CMTPUSBEPBASE_PROCESSSENDDATASTREAML, 
+            "Chunk data packet integral portion = %u bytes", chunkIntegralLen );
+    OstTrace1( TRACE_NORMAL, DUP8_CMTPUSBEPBASE_PROCESSSENDDATASTREAML, 
+            "Chunk data packet residual portion = %u bytes", chunkResidualLen );
     
     if (bufferedLen)
         {
@@ -933,11 +972,13 @@ void CMTPUsbEpBase::ProcessSendDataStreamL()
                 {
                 consumedLen = chunkAvailableLen;
                 }
-            __FLOG_VA((_L8("Buffering %u bytes"), consumedLen));
+            OstTrace1( TRACE_NORMAL, DUP9_CMTPUSBEPBASE_PROCESSSENDDATASTREAML, "Buffering %u bytes", consumedLen );
             iPacketBuffer.Append(iSendChunkData.Left(consumedLen));
             
             // Update the available chunk data to reflect only the unconsumed portion.
-            __FLOG_VA((_L8("Residual chunk data = %u bytes"), unconsumedLen));
+            OstTrace1( TRACE_NORMAL, DUP10_CMTPUSBEPBASE_PROCESSSENDDATASTREAML, 
+                    "Residual chunk data = %u bytes", unconsumedLen );
+            
             if (unconsumedLen)
                 {
                 iSendChunkData.Set(iSendChunkData.Right(unconsumedLen));
@@ -969,7 +1010,7 @@ void CMTPUsbEpBase::ProcessSendDataStreamL()
         // Buffer the chunk data packet residual portion.
         if (chunkResidualLen)
             {
-            __FLOG_VA((_L8("Buffering %u bytes"), chunkResidualLen));
+            OstTrace1( TRACE_NORMAL, DUP11_CMTPUSBEPBASE_PROCESSSENDDATASTREAML, "Buffering %u bytes", chunkResidualLen );
             iPacketBuffer.Append(iSendChunkData.Right(chunkResidualLen));  
             }
             
@@ -990,11 +1031,13 @@ void CMTPUsbEpBase::ProcessSendDataStreamL()
     TUint sendBytes(iSendData.Length());
     if ( sendBytes||zlp )
         {
-        __FLOG_VA((_L8("Issuing Write request on endpoint %d, Zlp = %d"), EndpointNumber(), zlp));
-        __FLOG_VA((_L8("Send data length = %d bytes"), iSendData.Length()));
+        OstTraceExt2( TRACE_NORMAL, DUP12_CMTPUSBEPBASE_PROCESSSENDDATASTREAML, 
+                "Issuing Write request on endpoint %d, Zlp = %d", EndpointNumber(), zlp );
+        OstTrace1( TRACE_NORMAL, DUP13_CMTPUSBEPBASE_PROCESSSENDDATASTREAML, 
+                "Send data length = %d bytes", iSendData.Length() );
         Connection().Ldd().Write(iStatus, EndpointNumber(), iSendData, sendBytes, zlp);
         SetActive(); 
-        __FLOG(_L8("Request issued"));
+        OstTrace0( TRACE_NORMAL, DUP14_CMTPUSBEPBASE_PROCESSSENDDATASTREAML, "Request issued" );
         }
     else if (iState != ESendComplete)
         {    
@@ -1004,8 +1047,9 @@ void CMTPUsbEpBase::ProcessSendDataStreamL()
         User::RequestComplete(status, KErrNone);
         }
 
-    __FLOG_VA((_L8("CMTPUsbEpBase state on exit = 0x%08X"), iState));
-    __FLOG(_L8("CMTPUsbEpBase::ProcessSendDataStreamL - Exit"));   
+    OstTrace1( TRACE_NORMAL, DUP15_CMTPUSBEPBASE_PROCESSSENDDATASTREAML, 
+            "CMTPUsbEpBase state on exit = 0x%08X", iState );
+    OstTraceFunctionExit0( CMTPUSBEPBASE_PROCESSSENDDATASTREAML_EXIT );
     }
 
 /**
@@ -1014,10 +1058,10 @@ Sets the data stream state variable.
 */
 void CMTPUsbEpBase::SetStreamState(TInt aState)
     {
-    __FLOG(_L8("SetStreamState - Entry"));
+    OstTraceFunctionEntry0( CMTPUSBEPBASE_SETSTREAMSTATE_ENTRY );
     iState = aState;
-    __FLOG_VA((_L8("Stream state set to 0x%08X"), iState));
-    __FLOG(_L8("SetStreamState - Exit"));
+    OstTrace1( TRACE_NORMAL, CMTPUSBEPBASE_SETSTREAMSTATE, "Stream state set to 0x%08X", iState );
+    OstTraceFunctionExit0( CMTPUSBEPBASE_SETSTREAMSTATE_EXIT );
     }
 
 // Fix so that cancelling works.
@@ -1033,7 +1077,7 @@ const TInt KFlushBufferMaxLen = 50*1024; // 50K bytes
 
 void CMTPUsbEpBase::FlushRxDataL()
     {
-    __FLOG(_L8("FlushRxDataL - Entry"));    				  
+    OstTraceFunctionEntry0( CMTPUSBEPBASE_FLUSHRXDATAL_ENTRY );			  
     // create the read buff
     RBuf8 readBuf;
     readBuf.CreateL(KFlushBufferMaxLen);
@@ -1045,9 +1089,10 @@ void CMTPUsbEpBase::FlushRxDataL()
       // get the data size in the receive buffer ready to read
       TInt nbytes = 0;
       TInt err = Connection().Ldd().QueryReceiveBuffer(EndpointNumber(), nbytes);
-
-      __FLOG_VA((_L8("FlushRxDataL()--1---err is %d , nbytes is %d"), err, nbytes));	  
- 					  
+  
+      OstTraceExt2( TRACE_NORMAL, CMTPUSBEPBASE_FLUSHRXDATAL, 
+              "FlushRxDataL()--1---err is %d , nbytes is %d", err, nbytes );
+  
       // has data, read it
       if( (err == KErrNone) && (nbytes > 0) )
          {   
@@ -1058,29 +1103,34 @@ void CMTPUsbEpBase::FlushRxDataL()
 	 		 
          if(status.Int() != KErrNone)  break;
 
-#ifdef __FLOG_ACTIVE
+#ifdef OST_TRACE_COMPILER_IN_USE
          TInt length =  readBuf.Length();
-         __FLOG_VA((_L8("The length of trash data is %d"), length));
+         OstTrace1( TRACE_NORMAL, DUP1_CMTPUSBEPBASE_FLUSHRXDATAL, "The length of trash data is %d", length );
          
-         __FLOG(_L8("Begining of trash data"));       
+
+         OstTrace0( TRACE_NORMAL, DUP2_CMTPUSBEPBASE_FLUSHRXDATAL, "Begining of trash data" );
+         
          for (int i=0; i<4&&(i*4+4)<=length; i++)
-             {
-             __FLOG_VA((_L8("0x%x 0x%x 0x%x 0x%x"), readBuf[i*4], readBuf[i*4+1], readBuf[i*4+2], readBuf[i*4+3]));            
+             {          
+             OstTraceExt4( TRACE_NORMAL, DUP3_CMTPUSBEPBASE_FLUSHRXDATAL, 
+                     "0x%x 0x%x 0x%x 0x%x", (TUint)readBuf[i*4], readBuf[i*4+1], readBuf[i*4+2], readBuf[i*4+3] );
              }
-         
-         __FLOG(_L8("Residual of trash data if any"));          
+ 
+         OstTrace0( TRACE_NORMAL, DUP4_CMTPUSBEPBASE_FLUSHRXDATAL, "Residual of trash data if any" );
          TInt residualLength = length%512;
          for (int i=0; i<4&&(i*4+4)<=residualLength; i++)
              {
              TInt beginIndex = length - residualLength;
-             __FLOG_VA((_L8("0x%x 0x%x 0x%x 0x%x"), readBuf[beginIndex + i*4], readBuf[beginIndex + i*4+1], readBuf[beginIndex + i*4+2], readBuf[beginIndex + i*4+3]));            
+             OstTraceExt4( TRACE_NORMAL, DUP5_CMTPUSBEPBASE_FLUSHRXDATAL, 
+                     "0x%x 0x%x 0x%x 0x%x", (TUint)readBuf[beginIndex + i*4], readBuf[beginIndex + i*4+1], 
+                     readBuf[beginIndex + i*4+2], readBuf[beginIndex + i*4+3] );
              }
 #endif
          
          // whenever some data read, reset the rest wait time.
          uRestTimeToWait = INTERVAL_FOR_FLUSH_TRASH_DATA;
- 			                          
-         __FLOG(_L8("FlushRxDataL()---Reset the rest wait time"));	          
+
+         OstTrace0( TRACE_NORMAL, DUP6_CMTPUSBEPBASE_FLUSHRXDATAL, "FlushRxDataL()---Reset the rest wait time" );
          }
        else 
          {	
@@ -1089,13 +1139,14 @@ void CMTPUsbEpBase::FlushRxDataL()
          // reduce the rest time to wait 
          uRestTimeToWait -=  INTERVAL_FOR_READ_TRASH_DATA ;
          }	
- 	    
-      __FLOG_VA((_L8("FlushRxDataL()---uRestTimeToWait is %d"), uRestTimeToWait));
+
+      OstTrace1( TRACE_NORMAL, DUP7_CMTPUSBEPBASE_FLUSHRXDATAL, "FlushRxDataL()---uRestTimeToWait is %d", uRestTimeToWait );
+      
  			    	
     }while( uRestTimeToWait > 0);
 			    	
     readBuf.Close();
-    __FLOG(_L8("FlushRxDataL - Exit"));    
+    OstTraceFunctionExit0( CMTPUSBEPBASE_FLUSHRXDATAL_EXIT );
 }
 
 /*
@@ -1131,6 +1182,8 @@ void CMTPUsbEpBase::FlushOnePacketL()
     readBuf.CreateL(KMaxPacketTypeBulkHS);
     Connection().Ldd().ReadPacket(status, EndpointNumber(), readBuf, KMaxPacketTypeBulkHS);
     User::WaitForRequest(status);    
-    RDebug::Print(_L("CMTPUsbEpBase::ProcessFirstReceivedChunkL(), trash data length = %d"), readBuf.Length());
+    OstTrace1( TRACE_NORMAL, CMTPUSBEPBASE_FLUSHONEPACKETL, 
+            "trash data length = %d", readBuf.Length());
+    
     readBuf.Close();
     }

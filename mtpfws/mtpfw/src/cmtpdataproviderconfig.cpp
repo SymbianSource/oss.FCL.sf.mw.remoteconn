@@ -15,6 +15,11 @@
 
 #include <barsread.h>
 #include "cmtpdataproviderconfig.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpdataproviderconfigTraces.h"
+#endif
+
 
 /**
 CMTPDataProviderConfig factory method.
@@ -175,6 +180,7 @@ void CMTPDataProviderConfig::ConstructL(TResourceReader& aReader, const TDesC& a
     iType = static_cast<TMTPDataProviderTypes>(aReader.ReadUint16());
     if(KMTPDataProviderTypeECOM != iType)
         {
+        OstTrace1( TRACE_ERROR, CMTPDATAPROVIDERCONFIG_CONSTRUCTL, "type %d not MTP Dp ecom plugin", iType);
         User::Leave(KErrCorrupt);
         }
 

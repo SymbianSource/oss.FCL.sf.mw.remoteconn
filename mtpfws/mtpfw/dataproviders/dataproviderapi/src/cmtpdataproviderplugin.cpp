@@ -16,6 +16,11 @@
 #include <ecom/ecom.h>
 #include <mtp/cmtpdataproviderplugin.h>
 #include <mtp/mmtpdataproviderframework.h>
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpdataproviderpluginTraces.h"
+#endif
+
 
 /**
 MTP data provider plug-in factory method.
@@ -30,6 +35,7 @@ class.
 */
 EXPORT_C CMTPDataProviderPlugin* CMTPDataProviderPlugin::NewL(TUid aImplementationUid, TAny* aParams)
     {
+    OstTraceDef1( OST_TRACE_CATEGORY_PRODUCTION, TRACE_IMPORTANT, CMTPDATAPROVIDERPLUGIN_NEWL, "load DP with ImplementationUid 0x%X", aImplementationUid.iUid );
     CMTPDataProviderPlugin* self = reinterpret_cast<CMTPDataProviderPlugin*>(
         REComSession::CreateImplementationL(
             aImplementationUid,

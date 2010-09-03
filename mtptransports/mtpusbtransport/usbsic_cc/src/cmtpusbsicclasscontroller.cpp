@@ -22,11 +22,13 @@
 #include <musbclasscontrollernotify.h>
 #include "mtpdebug.h"
 #include "mtpusbprotocolconstants.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpusbsicclasscontrollerTraces.h"
+#endif
+
 
 const TInt  KSicCCStartupPriority           = 3;
-
-// Class constants.
-__FLOG_STMT(_LIT8(KComponent,"CMTPUsbSicClassController");)
 
 /**
 This method returns a pointer to a newly created CMTPUsbSicClassController object.
@@ -47,10 +49,9 @@ Destructor
 */
 CMTPUsbSicClassController::~CMTPUsbSicClassController()
 	{
-	__FLOG(_L8("~CMTPUsbSicClassController - Entry"));
+	OstTraceFunctionEntry0( CMTPUSBSICCLASSCONTROLLER_CMTPUSBSICCLASSCONTROLLER_ENTRY );
 	Cancel();
-	__FLOG(_L8("~CMTPUsbSicClassController - Exit"));
-	__FLOG_CLOSE;
+	OstTraceFunctionExit0( CMTPUSBSICCLASSCONTROLLER_CMTPUSBSICCLASSCONTROLLER_EXIT );
 	}
 	
 /**
@@ -68,9 +69,8 @@ Second phase constructor.
 */
 void CMTPUsbSicClassController::ConstructL()
 	{
-	__FLOG_OPEN(KMTPSubsystem, KComponent);
-	__FLOG(_L8("ConstructL - Entry"));
-	__FLOG(_L8("ConstructL - Exit"));
+	OstTraceFunctionEntry0( CMTPUSBSICCLASSCONTROLLER_CONSTRUCTL_ENTRY );
+	OstTraceFunctionExit0( CMTPUSBSICCLASSCONTROLLER_CONSTRUCTL_EXIT );
 	}
 
 /**
@@ -79,7 +79,7 @@ Called by UsbMan when it wants to start the MTP USB Still Image Capture class.
 */
 void CMTPUsbSicClassController::Start(TRequestStatus& aStatus)
 	{
-	__FLOG(_L8("Start - Entry"));
+	OstTraceFunctionEntry0( CMTPUSBSICCLASSCONTROLLER_START_ENTRY );
 	TRequestStatus* reportStatus = &aStatus;
 
 	iState = EUsbServiceStarting;
@@ -89,14 +89,15 @@ void CMTPUsbSicClassController::Start(TRequestStatus& aStatus)
 
 	if (err != KErrNone)
 		{
-		__FLOG_VA((_L8("iMTPSession.Connect()  failed with %d"), err));
+		OstTrace1( TRACE_ERROR, CMTPUSBSICCLASSCONTROLLER_START, "iMTPSession.Connect()  failed with %d", err);
 		iState = EUsbServiceIdle;
 		User::RequestComplete(reportStatus, err);
+		OstTraceFunctionExit0( CMTPUSBSICCLASSCONTROLLER_START_EXIT );
 		return;
 		}
 	// Start MTP USB Still Image class transport.
 	err = iMTPSession.StartTransport(TUid::Uid(KMTPUsbTransportImplementationUid));
-    __FLOG_VA((_L8("StartTransport returns %d"), err));
+    OstTrace1( TRACE_NORMAL, DUP1_CMTPUSBSICCLASSCONTROLLER_START, "StartTransport returns %d", err );
 	if (err != KErrNone)
 		{
 		iState = EUsbServiceIdle;
@@ -108,7 +109,7 @@ void CMTPUsbSicClassController::Start(TRequestStatus& aStatus)
         }
         
     User::RequestComplete(reportStatus, err);
-    __FLOG(_L8("Start - Exit"));
+    OstTraceFunctionExit0( DUP1_CMTPUSBSICCLASSCONTROLLER_START_EXIT );
     }
 
 
@@ -118,21 +119,22 @@ Called by UsbMan when it wants to stop the USB Still Image Capture class.
 */
 void CMTPUsbSicClassController::Stop(TRequestStatus& aStatus)
     {
-    __FLOG(_L8("Stop - Entry"));
+    OstTraceFunctionEntry0( CMTPUSBSICCLASSCONTROLLER_STOP_ENTRY );
     TRequestStatus* reportStatus = &aStatus;
         
     TInt err = iMTPSession.StopTransport(TUid::Uid(KMTPUsbTransportImplementationUid));
-    __FLOG_VA((_L8("StopTransport returns %d"), err));    
+    OstTrace1( TRACE_NORMAL, CMTPUSBSICCLASSCONTROLLER_STOP, "StopTransport returns %d", err );
     if (err != KErrNone)
         {
         iState = EUsbServiceStarted;
         User::RequestComplete(reportStatus, err);
+        OstTraceFunctionExit0( CMTPUSBSICCLASSCONTROLLER_STOP_EXIT );
         return;
         }
     iMTPSession.Close();
 
     User::RequestComplete(reportStatus, KErrNone);
-    __FLOG(_L8("Stop - Exit"));
+    OstTraceFunctionExit0( DUP1_CMTPUSBSICCLASSCONTROLLER_STOP_EXIT );
     }
 
 

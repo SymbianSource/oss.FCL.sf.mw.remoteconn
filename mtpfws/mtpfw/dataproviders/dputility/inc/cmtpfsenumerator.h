@@ -25,7 +25,6 @@
 #include <f32file.h>
 
 #include "rmtpdpsingletons.h"
-#include "mtpdebug.h"
 #include "rmtpframework.h"
 
 class MMTPDataProviderFramework;
@@ -108,11 +107,7 @@ private:
 	TInt                        iObjectNeedToScan;
 
 	
-	
-	/**
-    FLOGGER debug trace member variable.
-    */
-    __FLOG_DECLARATION_MEMBER_MUTABLE;
+
        
     };
 

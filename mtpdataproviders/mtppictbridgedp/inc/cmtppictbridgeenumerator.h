@@ -28,7 +28,6 @@
 
 #include <comms-infras/commsdebugutility.h>
 #include "mtppictbridgedpconst.h"
-#include "mtpdebug.h"
 #include "rmtpframework.h"
 
 class MMTPDataProviderFramework;
@@ -61,10 +60,6 @@ private:
     MMTPPictBridgeEnumeratorCallback&       iCallback;
     TUint32                                 iDpsDiscoveryHandle;
     RMTPFramework       iSingletons;
-    /**
-    FLOGGER debug trace member variable.
-    */
-    __FLOG_DECLARATION_MEMBER_MUTABLE;
     };
 
 #endif // CMTPPICTBRIDGEENUMERATOR_H

@@ -16,9 +16,12 @@
 #include <mtp/mtpprotocolconstants.h>
 
 #include "cmtpfsentrycache.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpfsentrycacheTraces.h"
+#endif
 
 
-__FLOG_STMT(_LIT8(KComponent,"MTPFSEntryCache");)
 
 // -----------------------------------------------------------------------------
 // CMTPFSEntryCache::NewL
@@ -36,9 +39,8 @@ EXPORT_C CMTPFSEntryCache* CMTPFSEntryCache::NewL()
 
 EXPORT_C CMTPFSEntryCache::~CMTPFSEntryCache()
     {
-    __FLOG(_L8("~CMTPFSEntryCache - Entry"));
-    __FLOG(_L8("~CMTPFSEntryCache - Exit"));
-    __FLOG_CLOSE;
+    OstTraceFunctionEntry0( CMTPFSENTRYCACHE_CMTPFSENTRYCACHE_DES_ENTRY );
+    OstTraceFunctionExit0( CMTPFSENTRYCACHE_CMTPFSENTRYCACHE_DES_EXIT );
     }
 
 EXPORT_C TBool CMTPFSEntryCache::IsOnGoing() const
@@ -48,9 +50,9 @@ EXPORT_C TBool CMTPFSEntryCache::IsOnGoing() const
 
 EXPORT_C void CMTPFSEntryCache::SetOnGoing(TBool aOnGoing)
     {
-    __FLOG(_L8("SetOnGoing - Entry"));
+    OstTraceFunctionEntry0( CMTPFSENTRYCACHE_SETONGOING_ENTRY );
     iIsOngoing = aOnGoing;
-    __FLOG(_L8("SetOnGoing - Exit"));
+    OstTraceFunctionExit0( CMTPFSENTRYCACHE_SETONGOING_EXIT );
     }
 
 EXPORT_C TUint32 CMTPFSEntryCache::TargetHandle() const
@@ -60,9 +62,9 @@ EXPORT_C TUint32 CMTPFSEntryCache::TargetHandle() const
 
 EXPORT_C void CMTPFSEntryCache::SetTargetHandle(TUint32 aHandle)
     {
-    __FLOG(_L8("SetTargetHandle - Entry"));
+    OstTraceFunctionEntry0( CMTPFSENTRYCACHE_SETTARGETHANDLE_ENTRY );
     iTargetHandle = aHandle;
-    __FLOG(_L8("SetTargetHandle - Exit"));
+    OstTraceFunctionExit0( CMTPFSENTRYCACHE_SETTARGETHANDLE_EXIT );
     }
 
 EXPORT_C TEntry& CMTPFSEntryCache::FileEntry()
@@ -72,18 +74,17 @@ EXPORT_C TEntry& CMTPFSEntryCache::FileEntry()
 
 EXPORT_C void CMTPFSEntryCache::SetFileEntry(const TEntry& aEntry)
     {
-    __FLOG(_L8("SetFileEntry - Entry"));
+    OstTraceFunctionEntry0( CMTPFSENTRYCACHE_SETFILEENTRY_ENTRY );
     iFileEntry = aEntry;
-    __FLOG(_L8("SetFileEntry - Exit"));
+    OstTraceFunctionExit0( CMTPFSENTRYCACHE_SETFILEENTRY_EXIT );
     }
 
 CMTPFSEntryCache::CMTPFSEntryCache():iIsOngoing(EFalse), iTargetHandle(KMTPHandleNone)
     {
-    __FLOG_OPEN(KMTPSubsystem, KComponent);
-    __FLOG(_L8("CMTPFSEntryCache - Entry"));
-    __FLOG(_L8("CMTPFSEntryCache - Exit"));
     }
 
 void CMTPFSEntryCache::ConstructL()
     {    
+    OstTraceFunctionEntry0( CMTPFSENTRYCACHE_CONSTRUCTL_ENTRY );
+    OstTraceFunctionExit0( CMTPFSENTRYCACHE_CONSTRUCTL_EXIT );
     }

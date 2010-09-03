@@ -17,7 +17,6 @@
 
 
 #include <e32base.h>
-#include <e32debug.h>
 #include <pathinfo.h>
 #include <s32file.h>
 #include "dpstransaction.h"
@@ -34,12 +33,12 @@
 #include "dpsparam.h"
 #include "dpsoperation.h"
 #include "dpsxmlstring.h"
-
-#ifdef _DEBUG
-#	define IF_DEBUG(t) {RDebug::t;}
-#else
-#	define IF_DEBUG(t)
+#include "mtpdebug.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "dpstransactionTraces.h"
 #endif
+
 
 const TInt KPathLength = 3;
 const TInt KPercentagePosition = 3;
@@ -50,7 +49,6 @@ const TInt KPercentage = 100;
 //
 CDpsTransaction* CDpsTransaction::NewL(CDpsStateMachine* aOperator)
     {
-    IF_DEBUG(Print(_L("CDpsTransaction::NewL")));
     CDpsTransaction* self = new(ELeave) CDpsTransaction(aOperator);
     CleanupStack::PushL(self);
     self->ConstructL();
@@ -65,7 +63,8 @@ CDpsTransaction* CDpsTransaction::NewL(CDpsStateMachine* aOperator)
 CDpsTransaction::CDpsTransaction(CDpsStateMachine* aOperator) :
     iOperator(aOperator), iReply(EFalse)
 	{
-    IF_DEBUG(Print(_L("CDpsTransaction::Ctor")));
+    OstTraceFunctionEntry0( CDPSTRANSACTION_CDPSTRANSACTION_CONS_ENTRY );
+	OstTraceFunctionExit0( CDPSTRANSACTION_CDPSTRANSACTION_CONS_EXIT );
 	}
 
 // ---------------------------------------------------------------------------
@@ -74,11 +73,11 @@ CDpsTransaction::CDpsTransaction(CDpsStateMachine* aOperator) :
 //
 void CDpsTransaction::ConstructL()
     {
-    IF_DEBUG(Print(_L(">>>CDpsTransaction::ConstructL")));	
+    OstTraceFunctionEntry0( CDPSTRANSACTION_CONSTRUCTL_ENTRY );
     iFile = CDpsFile::NewL();
     iXmlGen = CDpsXmlGenerator::NewL(iOperator->DpsEngine());
     iXmlPar = CDpsXmlParser::NewL(iOperator->DpsEngine());
-    IF_DEBUG(Print(_L("<<<CDpsTransaction::ConstructL")));
+    OstTraceFunctionExit0( CDPSTRANSACTION_CONSTRUCTL_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -87,7 +86,7 @@ void CDpsTransaction::ConstructL()
 //	
 CDpsTransaction::~CDpsTransaction()
 	{
-    IF_DEBUG(Print(_L(">>>~CDpsTransaction")));
+    OstTraceFunctionEntry0( DUP1_CDPSTRANSACTION_CDPSTRANSACTION_DES_ENTRY );
     delete iXmlPar;
     iXmlPar = NULL;
 	
@@ -96,8 +95,8 @@ CDpsTransaction::~CDpsTransaction()
 	
     delete iFile;
     iFile = NULL;
-	
-    IF_DEBUG(Print(_L("<<<~CDpsTransaction")));
+
+    OstTraceFunctionExit0( DUP1_CDPSTRANSACTION_CDPSTRANSACTION_DES_EXIT );
     }
     
 // ---------------------------------------------------------------------------
@@ -106,8 +105,8 @@ CDpsTransaction::~CDpsTransaction()
 //	
 void CDpsTransaction::CreateRequestL(TMDpsOperation* aOperation)
 	{
-    IF_DEBUG(Print(_L(">>>CDpsTransaction::CreateRequest ")));
-    IF_DEBUG(Print(_L("  the request is %d"), aOperation->iOperation));
+    OstTraceFunctionEntry0( CDPSTRANSACTION_CREATEREQUESTL_ENTRY );
+    OstTrace1( TRACE_NORMAL, CDPSTRANSACTION_CREATEREQUESTL, "  the request is %d", aOperation->iOperation );
     TDpsArgArray args;
     TDpsEleArray elements; 
     TDpsAttribute attrib = 0;
@@ -117,18 +116,21 @@ void CDpsTransaction::CreateRequestL(TMDpsOperation* aOperation)
     writer.PushL();
     TFileName defaultPath = iOperator->DpsEngine()->DpsFolder();
     defaultPath.Append(KDpsDeviceRequestFileName);
-    User::LeaveIfError(writer.Replace(iFile->FileSession(), defaultPath, 
-                                      EFileWrite));
-    IF_DEBUG(Print(_L("*** file created  ")));                                  
-    User::LeaveIfError(aOperation->FillReqArgs(args, elements, attrib, this));
+    LEAVEIFERROR(writer.Replace(iFile->FileSession(), defaultPath, EFileWrite),
+            OstTraceExt2( TRACE_ERROR, DUP2_CDPSTRANSACTION_CREATEREQUESTL, 
+                    "Creates %S for stream failed ! error code %d", defaultPath, munged_err ));
+    OstTrace0( TRACE_NORMAL, DUP1_CDPSTRANSACTION_CREATEREQUESTL, "*** file created  " );
+    LEAVEIFERROR(aOperation->FillReqArgs(args, elements, attrib, this),
+            OstTrace1( TRACE_ERROR, DUP3_CDPSTRANSACTION_CREATEREQUESTL, "FillReqArgs failed! error code %d", munged_err ));
     aOperation->CreateReqScriptL(args, elements, attrib, writer, this);    
     writer.CommitL();
     writer.Pop();
     writer.Release();
-    User::LeaveIfError(iOperator->ScriptSender()->SendScript(EFalse));
+    LEAVEIFERROR(iOperator->ScriptSender()->SendScript(EFalse),
+            OstTrace1( TRACE_ERROR, DUP4_CDPSTRANSACTION_CREATEREQUESTL, "SendScript failed! error code %d", munged_err ));
     CleanupStack::PopAndDestroy(&elements);
     CleanupStack::PopAndDestroy(&args);
-    IF_DEBUG(Print(_L("<<<CDpsTransaction::CreateRequest "))); 
+	OstTraceFunctionExit0( CDPSTRANSACTION_CREATEREQUESTL_EXIT );
 	}
 
 // ---------------------------------------------------------------------------
@@ -137,9 +139,10 @@ void CDpsTransaction::CreateRequestL(TMDpsOperation* aOperation)
 //	
 void CDpsTransaction::Filter(TDes8& aScript)
     {    
+    OstTraceFunctionEntry0( CDPSTRANSACTION_FILTER_ENTRY );
     TInt size = aScript.Size();
-    IF_DEBUG(Print(_L(">>>CDpsTransaction::Filter size %d"), size));
-    
+    OstTrace1( TRACE_NORMAL, CDPSTRANSACTION_FILTER, "size %d", size);
+
     for (TInt i = 0; i < size; )
         {
         // removes any unprintalbe char between two XML attributes, e.g. 
@@ -154,7 +157,8 @@ void CDpsTransaction::Filter(TDes8& aScript)
             i++;
             }
         }
-    IF_DEBUG(Print(_L("<<<CDpsTransaction::Filter size %d"), size));
+    OstTrace1( TRACE_NORMAL, DUP1_CDPSTRANSACTION_FILTER, "size %d", size);
+    OstTraceFunctionExit0( CDPSTRANSACTION_FILTER_EXIT );
     }
  
 // ---------------------------------------------------------------------------
@@ -163,7 +167,7 @@ void CDpsTransaction::Filter(TDes8& aScript)
 //
 void CDpsTransaction::ParseScriptL(TBool aReply)
     {
-    IF_DEBUG(Print(_L(">>>CDpsTransaction::ParseScript")));
+    OstTraceFunctionEntry0( CDPSTRANSACTION_PARSESCRIPTL_ENTRY );
     iReply = aReply;
     TInt size;
     iFile->FileSizeL(iOperator->ScriptReceiver()->FileNameAndPath(), size);
@@ -183,15 +187,16 @@ void CDpsTransaction::ParseScriptL(TBool aReply)
     for (TInt i = 0; i < args.Count(); i++)
         {
         print.Copy(args[i].iContent);
-        IF_DEBUG(Print(_L("element %d content %S"), 
-            args[i].iElement, &print));
+        OstTraceExt2( TRACE_NORMAL, CDPSTRANSACTION_PARSESCRIPTL, "element %d content %S", args[i].iElement, print );
         }
 #endif
    
     if (aReply)
         {
         TMDpsOperation* op = iOperator->MOperation();
-        User::LeaveIfError(op->FillRepArgs(args, this));
+        LEAVEIFERROR(op->FillRepArgs(args, this),
+                OstTrace1( TRACE_ERROR, DUP1_CDPSTRANSACTION_PARSESCRIPTL, 
+                        "FillRepArgs failed! error code %d", munged_err ));
         iXmlPar->SetOperationResult(op->iResult);    
         }  
     else 
@@ -205,13 +210,17 @@ void CDpsTransaction::ParseScriptL(TBool aReply)
             iOperator->SetEvent(event);
             if (event == EDpsEvtNotifyJobStatus)
                 {
-                User::LeaveIfError(iOperator->DpsEngine()->Event()->
-                    iJobEvent.FillRepArgs(args, this));
+                LEAVEIFERROR(iOperator->DpsEngine()->Event()->
+                    iJobEvent.FillRepArgs(args, this),
+                    OstTrace1( TRACE_ERROR, DUP2_CDPSTRANSACTION_PARSESCRIPTL, 
+                            "iJobEvent.FillRepArgs failed! error code %d", munged_err ));                   
                 }
             else
                 {
-                User::LeaveIfError(iOperator->DpsEngine()->Event()->
-                    iPrinterEvent.FillRepArgs(args, this));
+                LEAVEIFERROR(iOperator->DpsEngine()->Event()->
+                    iPrinterEvent.FillRepArgs(args, this),
+                    OstTrace1( TRACE_ERROR, DUP3_CDPSTRANSACTION_PARSESCRIPTL, 
+                            "iPrinterEvent.FillRepArgs failed! error code %d", munged_err ));                    
                 }
             CreateEventReplyL(event, result);    
             }
@@ -223,6 +232,8 @@ void CDpsTransaction::ParseScriptL(TBool aReply)
             iOperator->SetOperation(ope);
             if (iOperator->Operation() != EDpsOpGetFileID)
                 {
+                OstTrace1( TRACE_ERROR, DUP4_CDPSTRANSACTION_PARSESCRIPTL, 
+                        "The operation %d doesn't equal to EDpsOpGetFileID", iOperator->Operation());
                 User::Leave(KErrNotSupported);
                 }    		    
             CreateRequestReplyL(args, result);    
@@ -230,7 +241,7 @@ void CDpsTransaction::ParseScriptL(TBool aReply)
         }
     CleanupStack::PopAndDestroy(parser);
     CleanupStack::PopAndDestroy(script);
-    IF_DEBUG(Print(_L("<<<CDpsTransaction::ParseScript")));	
+    OstTraceFunctionExit0( CDPSTRANSACTION_PARSESCRIPTL_EXIT );
     }
         
 // ---------------------------------------------------------------------------
@@ -239,7 +250,8 @@ void CDpsTransaction::ParseScriptL(TBool aReply)
 //	
 void CDpsTransaction::HandleHostRequestError(TInt aErr)
     {
-    IF_DEBUG(Print(_L(">>>CDpsTransaction::HandleHostRequestError %d"), aErr));
+    OstTraceFunctionEntry0( CDPSTRANSACTION_HANDLEHOSTREQUESTERROR_ENTRY );
+    OstTrace1( TRACE_NORMAL, CDPSTRANSACTION_HANDLEHOSTREQUESTERROR, "Error %d", aErr );
     TDpsResult result; 
     // here we need to map the aErr to Dps standard error
     switch (aErr)
@@ -255,12 +267,13 @@ void CDpsTransaction::HandleHostRequestError(TInt aErr)
         break;
         
         default:
-            IF_DEBUG(Print(_L("unknown err")));
+            OstTrace0( TRACE_NORMAL, DUP1_CDPSTRANSACTION_HANDLEHOSTREQUESTERROR, "unknown err" );
+            OstTraceFunctionExit0( CDPSTRANSACTION_HANDLEHOSTREQUESTERROR_EXIT );
             return;    
         }
     TRAP_IGNORE(CreateEventReplyL(iXmlPar->Event(), result));
-    
-    IF_DEBUG(Print(_L("<<<CDpsTransaction::HandleHostRequestError")));    
+ 
+    OstTraceFunctionExit0( DUP1_CDPSTRANSACTION_HANDLEHOSTREQUESTERROR_EXIT );
     return;
     }
 
@@ -286,20 +299,20 @@ TInt CDpsTransaction::ConvertVersion(TLex8& aParser, TDpsVersion& aVersion)
                         
     if (error != KErrNone)
         {
-         IF_DEBUG(Print(_L("\t convert error 1")));
+         OstTrace0( TRACE_ERROR, CDPSTRANSACTION_CONVERTVERSION, "convert error 1" );
          return error;
         }
-    IF_DEBUG(Print(_L("verion major %d"), aVersion.iMajor));
+    OstTrace1( TRACE_NORMAL, DUP1_CDPSTRANSACTION_CONVERTVERSION, "verion major %d", aVersion.iMajor );
     aParser.Inc();
     TPtrC8 tokenDe = aParser.Remainder();
     converter.Assign(tokenDe);
     error = converter.Val(aVersion.iMinor);
     if (error != KErrNone)
         {
-        IF_DEBUG(Print(_L("\t convert error 2")));
+        OstTrace0( TRACE_ERROR, DUP2_CDPSTRANSACTION_CONVERTVERSION, "convert error 2" );
         return error;
         }
-    IF_DEBUG(Print(_L("verion minor %d"), aVersion.iMinor));        
+    OstTrace1( TRACE_NORMAL, DUP3_CDPSTRANSACTION_CONVERTVERSION, "verion minor %d", aVersion.iMinor );
     return KErrNone;
     }
  
@@ -345,23 +358,27 @@ void CDpsTransaction::CreateEventReplyL(TDpsEvent aEvent,
                                         const TDpsResult& aResult)
                                    
 	{
-	IF_DEBUG(Print(_L(">>>CDpsTransaction::CreateReply")));
-	IF_DEBUG(Print(_L
-	    ("  the operation reply is %d"), iOperator->Operation()));
-	IF_DEBUG(Print(_L("\t the event reply is %d"), iOperator->Event()));
+	OstTraceFunctionEntry0( CDPSTRANSACTION_CREATEEVENTREPLYL_ENTRY );
+	OstTrace1( TRACE_NORMAL, CDPSTRANSACTION_CREATEEVENTREPLYL, "the operation reply is %d", iOperator->Operation() );
+    OstTrace1( TRACE_NORMAL, DUP1_CDPSTRANSACTION_CREATEEVENTREPLYL, "the event reply is %d", iOperator->Event());
+    
     RFileWriteStream writer;
     writer.PushL();
     TFileName defaultPath = iOperator->DpsEngine()->DpsFolder();
     defaultPath.Append(KDpsDeviceResponseFileName);
-    User::LeaveIfError(writer.Replace(iFile->FileSession(), defaultPath, 
-                                      EFileWrite));
-    IF_DEBUG(Print(_L("*** file created  ")));     
+    LEAVEIFERROR(writer.Replace(iFile->FileSession(), defaultPath, EFileWrite),
+            OstTraceExt2( TRACE_ERROR, DUP3_CDPSTRANSACTION_CREATEEVENTREPLYL, 
+                    "Creates %S for stream failed ! error code %d", defaultPath, munged_err ));
+    OstTrace0( TRACE_NORMAL, DUP2_CDPSTRANSACTION_CREATEEVENTREPLYL, "*** file created  " );
+    
     iXmlGen->CreateResultScriptL(aEvent, writer, aResult);
     writer.CommitL();
     writer.Pop();
     writer.Release();
-	User::LeaveIfError(iOperator->ScriptSender()->SendScript(ETrue));
-    IF_DEBUG(Print(_L("<<<CDpsTransaction::CreateReply")));
+	LEAVEIFERROR(iOperator->ScriptSender()->SendScript(ETrue),
+	        OstTrace1( TRACE_ERROR, DUP4_CDPSTRANSACTION_CREATEEVENTREPLYL, 
+	                "SendScript failed! error code %d", munged_err ));
+	OstTraceFunctionExit0( CDPSTRANSACTION_CREATEEVENTREPLYL_EXIT );
 	}
 
 // ---------------------------------------------------------------------------
@@ -371,7 +388,7 @@ void CDpsTransaction::CreateEventReplyL(TDpsEvent aEvent,
 void CDpsTransaction::CreateRequestReplyL(const TDpsArgArray& aArgs, 
                                           const TDpsResult& aResult)
     {
-    IF_DEBUG(Print(_L(">>>CDpsTransaction::CreateRequestReply")));
+    OstTraceFunctionEntry0( CDPSTRANSACTION_CREATEREQUESTREPLYL_ENTRY );
     TInt count = aArgs.Count();
     TInt basePathId;
     TBuf8<KMaxArgLen> filePath;
@@ -383,7 +400,9 @@ void CDpsTransaction::CreateRequestReplyL(const TDpsArgArray& aArgs,
             {
             case EDpsArgBasePathID:
                 converter.Assign(aArgs[i].iContent);
-                User::LeaveIfError(converter.Val(basePathId));
+                LEAVEIFERROR(converter.Val(basePathId),
+                        OstTrace1( TRACE_ERROR, DUP2_CDPSTRANSACTION_CREATEREQUESTREPLYL, 
+                                "Parses the string failed! error code %d", munged_err ));
             break;
             
             case EDpsArgFilePath:
@@ -391,7 +410,7 @@ void CDpsTransaction::CreateRequestReplyL(const TDpsArgArray& aArgs,
             break;
             
             default:
-                __IF_DEBUG(Print(_L("***wrong args")));
+                OstTrace0( TRACE_ERROR, CDPSTRANSACTION_CREATEREQUESTREPLYL, "***wrong args" );
                 User::Leave(KErrArgument);
             break;
             }
@@ -400,7 +419,7 @@ void CDpsTransaction::CreateRequestReplyL(const TDpsArgArray& aArgs,
         SubstitutePath(filePath);
         TBuf<KMaxArgLen> file;  
         file.Copy(filePath);
-        User::LeaveIfError(iOperator->DpsEngine()->
+        (iOperator->DpsEngine()->
             Ptp().GetObjectHandleByName(file, fileId));
         TDpsArg arg;
         arg.iElement = EDpsArgFileID;
@@ -409,16 +428,16 @@ void CDpsTransaction::CreateRequestReplyL(const TDpsArgArray& aArgs,
         writer.PushL();
         TFileName defaultPath = iOperator->DpsEngine()->DpsFolder();
         defaultPath.Append(KDpsDeviceResponseFileName);
-        User::LeaveIfError(writer.Replace(iFile->FileSession(), defaultPath, 
+        (writer.Replace(iFile->FileSession(), defaultPath, 
                                           EFileWrite));
-        IF_DEBUG(Print(_L("*** file created  ")));        
+        OstTrace0( TRACE_NORMAL, DUP1_CDPSTRANSACTION_CREATEREQUESTREPLYL, "*** file created  " );
         iXmlGen->CreateReplyScriptL(EDpsOpGetFileID, writer, aResult, arg);   
-	    User::LeaveIfError(iOperator->ScriptSender()->SendScript(ETrue));
+	    (iOperator->ScriptSender()->SendScript(ETrue));
 	    writer.CommitL();
         writer.Pop();
         writer.Release();    
         } 
-    IF_DEBUG(Print(_L("<<<CDpsTransaction::CreateRequestReply")));
+    OstTraceFunctionExit0( CDPSTRANSACTION_CREATEREQUESTREPLYL_EXIT );
     }
     
 // ---------------------------------------------------------------------------
@@ -438,7 +457,9 @@ void CDpsTransaction::CreateRequestReplyL(const TDpsArgArray& aArgs,
 //        
 void CDpsTransaction::SubstitutePath(TDes8& aPath)
     {
-    IF_DEBUG(Print(_L(">>>CDpsTransaction::SubstitutePath %S"), &aPath));
+    OstTraceFunctionEntry0( CDPSTRANSACTION_SUBSTITUTEPATH_ENTRY );
+    OstTraceExt1( TRACE_NORMAL, CDPSTRANSACTION_SUBSTITUTEPATH, "path %s", aPath );
+
     TInt size = aPath.Size();
     for (TInt i = 0; i < size; i++)
         {
@@ -451,5 +472,6 @@ void CDpsTransaction::SubstitutePath(TDes8& aPath)
     TBuf8<KPathLength> driveENarrow;
     driveENarrow.Copy(driveEWide);    
     aPath.Replace(0, KPathLength - 1, driveENarrow);
-    IF_DEBUG(Print(_L("<<<CDpsTransaction::SubstitutePath %S"), &aPath));
+    OstTraceExt1( TRACE_NORMAL, DUP1_CDPSTRANSACTION_SUBSTITUTEPATH, "path %s", aPath );        
+    OstTraceFunctionExit0( CDPSTRANSACTION_SUBSTITUTEPATH_EXIT );
     }

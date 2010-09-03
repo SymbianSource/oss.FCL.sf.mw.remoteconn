@@ -25,8 +25,6 @@
 #include <e32base.h>
 #include <d32usbc.h>
 
-#include "mtpdebug.h"
-
 class CMTPUsbConnection;
 
 /**
@@ -61,11 +59,7 @@ protected:
 
     CMTPUsbEpBase(TUint aId, TPriority aPriority, CMTPUsbConnection& aConnection);
     
-#ifdef __FLOG_ACTIVE    
-    virtual void ConstructL(const TDesC8& aComponentName);
-#else
     virtual void ConstructL();
-#endif  
 
     CMTPUsbConnection& Connection() const;
     
@@ -96,14 +90,7 @@ private:
     TBool ValidateUSBHeaderL();
     void InitiateFirstChunkReceiveL();
     void ProcessFirstReceivedChunkL();
-    
-protected: // Owned
 
-    /**
-    FLOGGER debug trace member variable.
-    */
-    __FLOG_DECLARATION_MEMBER_MUTABLE;
-    
 private: // Owned
 
     /**

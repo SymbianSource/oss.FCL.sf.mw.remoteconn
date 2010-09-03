@@ -27,15 +27,20 @@
 #include <mtp/tmtptyperesponse.h>
 
 // Plugin includes
+#include "mtpdebug.h"
 #include "cptpipcommandhandler.h"
 #include "cptpipeventhandler.h"
 #include "cptpipconnection.h"
-#include "ptpipsocketpublish.h" 
+#include "ptpipsocketpublish.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cptpipconnectionTraces.h"
+#endif
+ 
 
 // File type constants.
 const TInt KMTPNullChunkSize(0x00020000); // 100KB
 const TUint32 KPTPIPDataHeaderSize = 12;  // Size of len, type and tran id. 
-__FLOG_STMT(_LIT8(KComponent,"PTPIPConnection");)
 #define UNUSED_VAR(a) (a) = (a)
 
 /**
@@ -46,10 +51,12 @@ __FLOG_STMT(_LIT8(KComponent,"PTPIPConnection");)
  */
 CPTPIPConnection* CPTPIPConnection::NewL(MMTPConnectionMgr& aConnectionMgr )
 	{
+	OstTraceFunctionEntry0( CPTPIPCONNECTION_NEWL_ENTRY );
 	CPTPIPConnection* self = new(ELeave) CPTPIPConnection(aConnectionMgr);
 	CleanupStack::PushL (self );
 	self->ConstructL ( );
 	CleanupStack::Pop (self );
+	OstTraceFunctionExit0( CPTPIPCONNECTION_NEWL_EXIT );
 	return self;
 	}
 
@@ -58,7 +65,7 @@ CPTPIPConnection* CPTPIPConnection::NewL(MMTPConnectionMgr& aConnectionMgr )
  */
 CPTPIPConnection::~CPTPIPConnection( )
 	{
-	__FLOG(_L8("Destructor - Entry"));
+	OstTraceFunctionEntry0( CPTPIPCONNECTION_CPTPIPCONNECTION_ENTRY );
 	StopConnection ( );
 
 	// Delete all the handlers which will close the sockets.
@@ -75,9 +82,7 @@ CPTPIPConnection::~CPTPIPConnection( )
            }
 	
 	iNullBuffer.Close();
-
-	__FLOG(_L8("Destructor - Exit"));
-	__FLOG_CLOSE;
+	OstTraceFunctionExit0( CPTPIPCONNECTION_CPTPIPCONNECTION_EXIT );
 	}
 
 /**
@@ -86,8 +91,7 @@ CPTPIPConnection::~CPTPIPConnection( )
  */
 void CPTPIPConnection::ConstructL( )
 	{
-	__FLOG_OPEN(KMTPSubsystem, KComponent);
-	__FLOG(_L8("ConstructL - Entry"));
+	OstTraceFunctionEntry0( CPTPIPCONNECTION_CONSTRUCTL_ENTRY );
 
 	// Construct the Command and event handlers
 	iCommandHandler = CPTPIPCommandHandler::NewL (*this );
@@ -103,7 +107,7 @@ void CPTPIPConnection::ConstructL( )
 	SetConnectionState (EInitialising );
 	CompleteSelf (KErrNone );
 
-	__FLOG(_L8("ConstructL - Exit"));
+	OstTraceFunctionExit0( CPTPIPCONNECTION_CONSTRUCTL_EXIT );
 	}
 
 /**
@@ -113,7 +117,9 @@ CPTPIPConnection::CPTPIPConnection(MMTPConnectionMgr& aConnectionMgr ) :
 									CActive(EPriorityStandard), 
 									iConnectionMgr(&aConnectionMgr)
 	{
+	OstTraceFunctionEntry0( DUP1_CPTPIPCONNECTION_CPTPIPCONNECTION_ENTRY );
 	CActiveScheduler::Add (this );
+	OstTraceFunctionExit0( DUP1_CPTPIPCONNECTION_CPTPIPCONNECTION_EXIT );
 	}
 
 //
@@ -127,9 +133,9 @@ CPTPIPConnection::CPTPIPConnection(MMTPConnectionMgr& aConnectionMgr ) :
  */
 void CPTPIPConnection::BindL(MMTPConnectionProtocol& aProtocol )
 	{
-	__FLOG(_L8("BindL - Entry"));
+	OstTraceFunctionEntry0( CPTPIPCONNECTION_BINDL_ENTRY );
 	iProtocolLayer = &aProtocol;
-	__FLOG(_L8("BindL - Exit"));
+	OstTraceFunctionExit0( CPTPIPCONNECTION_BINDL_EXIT );
 	}
 
 /**
@@ -138,9 +144,9 @@ void CPTPIPConnection::BindL(MMTPConnectionProtocol& aProtocol )
  */
 MMTPConnectionProtocol& CPTPIPConnection::BoundProtocolLayer( )
 	{
-	__FLOG(_L8("BoundProtocolLayer - Entry"));
+	OstTraceFunctionEntry0( CPTPIPCONNECTION_BOUNDPROTOCOLLAYER_ENTRY );
 	__ASSERT_ALWAYS(iProtocolLayer, Panic(EPTPIPBadState));
-	__FLOG(_L8("BoundProtocolLayer - Exit"));
+	OstTraceFunctionExit0( CPTPIPCONNECTION_BOUNDPROTOCOLLAYER_EXIT );
 	return *iProtocolLayer;
 	}
 
@@ -150,9 +156,9 @@ MMTPConnectionProtocol& CPTPIPConnection::BoundProtocolLayer( )
  */
 void CPTPIPConnection::CloseConnection( )
 	{
-	__FLOG(_L8("CloseConnection - Entry"));
+	OstTraceFunctionEntry0( CPTPIPCONNECTION_CLOSECONNECTION_ENTRY );
 	StopConnection ( );
-	__FLOG(_L8("CloseConnection - Exit"));
+	OstTraceFunctionExit0( CPTPIPCONNECTION_CLOSECONNECTION_EXIT );
 	}
 
 /**
@@ -161,8 +167,9 @@ void CPTPIPConnection::CloseConnection( )
  */
 void CPTPIPConnection::TransactionCompleteL(const TMTPTypeRequest& /*aRequest*/)
 	{
-	__FLOG(_L8("TransactionCompleteL - Entry"));
-	__FLOG(_L8("******** Transaction Complete **************"));
+	OstTraceFunctionEntry0( CPTPIPCONNECTION_TRANSACTIONCOMPLETEL_ENTRY );
+	OstTrace0( TRACE_NORMAL, CPTPIPCONNECTION_TRANSACTIONCOMPLETEL, "******** Transaction Complete **************" );
+
 	SetTransactionPhase (EIdlePhase );
 
 	// Clear the cancel flag.
@@ -172,7 +179,7 @@ void CPTPIPConnection::TransactionCompleteL(const TMTPTypeRequest& /*aRequest*/)
 	// Again start listening for the command request. 
 	InitiateCommandRequestPhaseL( );
 
-	__FLOG(_L8("TransactionCompleteL - Exit"));
+	OstTraceFunctionExit0( CPTPIPCONNECTION_TRANSACTIONCOMPLETEL_EXIT );
 	}
 
 /**
@@ -181,11 +188,11 @@ void CPTPIPConnection::TransactionCompleteL(const TMTPTypeRequest& /*aRequest*/)
  */
 void CPTPIPConnection::Unbind(MMTPConnectionProtocol& /*aProtocol*/)
 	{
-	__FLOG(_L8("Unbind - Entry"));
+	OstTraceFunctionEntry0( CPTPIPCONNECTION_UNBIND_ENTRY );
 	__ASSERT_DEBUG(iProtocolLayer, Panic(EPTPIPBadState));
 	// Protocol will no longer be bound to the transport
 	iProtocolLayer = NULL;
-	__FLOG(_L8("Unbind - Exit"));
+	OstTraceFunctionExit0( CPTPIPCONNECTION_UNBIND_EXIT );
 	}
 
 /**
@@ -193,6 +200,8 @@ void CPTPIPConnection::Unbind(MMTPConnectionProtocol& /*aProtocol*/)
  */
 TAny* CPTPIPConnection::GetExtendedInterface(TUid /*aInterfaceUid*/)
 	{
+	OstTraceFunctionEntry0( CPTPIPCONNECTION_GETEXTENDEDINTERFACE_ENTRY );
+	OstTraceFunctionExit0( CPTPIPCONNECTION_GETEXTENDEDINTERFACE_EXIT );
 	return NULL;
 	}
 
@@ -201,6 +210,8 @@ TAny* CPTPIPConnection::GetExtendedInterface(TUid /*aInterfaceUid*/)
  */
 TUint CPTPIPConnection::GetImplementationUid()
     {
+    OstTraceFunctionEntry0( CPTPIPCONNECTION_GETIMPLEMENTATIONUID_ENTRY );
+    OstTraceFunctionExit0( CPTPIPCONNECTION_GETIMPLEMENTATIONUID_EXIT );
     return KMTPPTPIPTransportImplementationUid;
     }
 
@@ -213,14 +224,14 @@ TUint CPTPIPConnection::GetImplementationUid()
  */
 void CPTPIPConnection::DoCancel( )
 	{
-	__FLOG(_L8("DoCancel - Entry"));
+	OstTraceFunctionEntry0( CPTPIPCONNECTION_DOCANCEL_ENTRY );
 
 	iCommandHandler->Cancel( );
 	iEventHandler->Cancel( );
 
 	SetConnectionState(ECancelled );
 
-	__FLOG(_L8("DoCancel - Exit"));
+	OstTraceFunctionExit0( CPTPIPCONNECTION_DOCANCEL_EXIT );
 	}
 
 /**
@@ -232,8 +243,9 @@ Thus the runl is not hit after the initial connection establishment.
  */
 void CPTPIPConnection::RunL( )
 	{
-	__FLOG(_L8("RunL - Entry"));
-	__FLOG_VA((_L8("Current State is %d, and status is %d"), iState, iStatus.Int()));
+	OstTraceFunctionEntry0( CPTPIPCONNECTION_RUNL_ENTRY );
+	OstTraceExt2( TRACE_NORMAL, CPTPIPCONNECTION_RUNL, "Current State is %d, and status is %d", iState, iStatus.Int() );
+	
 
 	if(iStatus != KErrNone )
 		{
@@ -263,26 +275,25 @@ void CPTPIPConnection::RunL( )
 			break;
 
 		default:
-			__FLOG(_L8("PTPIP ERROR: Invalid  connection state"));
+			OstTrace0( TRACE_NORMAL, DUP1_CPTPIPCONNECTION_RUNL, "PTPIP ERROR: Invalid  connection state" );
+			
 			Panic(EPTPIPBadState );
 			break;
 		}
 		}
 
-	__FLOG(_L8("RunL - Exit"));
+	OstTraceFunctionExit0( CPTPIPCONNECTION_RUNL_EXIT );
 	}
 
 /**
  Called when an error occurs in the RunL 
  */
-#ifdef __FLOG_ACTIVE
 TInt CPTPIPConnection::RunError(TInt aError )
-#else
-TInt CPTPIPConnection::RunError(TInt /*aError*/ )
-#endif
 	{
-	__FLOG(_L8("RunError - Entry"));
-	__FLOG_VA((_L8("PTPIP ERROR: Error received is %d"), aError));
+	OstTraceFunctionEntry0( CPTPIPCONNECTION_RUNERROR_ENTRY );
+	
+	OstTrace1( TRACE_NORMAL, CPTPIPCONNECTION_RUNERROR, "PTPIP ERROR: Error received is %d", aError );
+	
 
 	// Cancel all the outstanding requests.
 	Cancel( );
@@ -290,7 +301,7 @@ TInt CPTPIPConnection::RunError(TInt /*aError*/ )
 	// Stop the connection, if necessary.
 	StopConnection( );
 
-	__FLOG(_L8("RunError - Exit"));
+	OstTraceFunctionExit0( CPTPIPCONNECTION_RUNERROR_EXIT );
 	return KErrNone;
 	}
 
@@ -305,8 +316,9 @@ TInt CPTPIPConnection::RunError(TInt /*aError*/ )
  */
 void CPTPIPConnection::InitiateCommandRequestPhaseL( )
 	{
-	__FLOG(_L8("InitiateCommandRequestPhaseL - Entry"));
-	__FLOG(_L8("******** Phase 1 - Request **************"));
+	OstTraceFunctionEntry0( CPTPIPCONNECTION_INITIATECOMMANDREQUESTPHASEL_ENTRY );
+	OstTrace0( TRACE_NORMAL, CPTPIPCONNECTION_INITIATECOMMANDREQUESTPHASEL, "******** Phase 1 - Request **************" );
+	
 	// Set current state to request phase
 	SetTransactionPhase(ERequestPhase );
 
@@ -318,7 +330,7 @@ void CPTPIPConnection::InitiateCommandRequestPhaseL( )
 	// Call the CommandHandler to get the request in the container
 	iCommandHandler->ReceiveCommandRequestL(*iPTPIPCommandContainer );
 
-	__FLOG(_L8("InitiateCommandRequestPhaseL - Exit"));
+	OstTraceFunctionExit0( CPTPIPCONNECTION_INITIATECOMMANDREQUESTPHASEL_EXIT );
 	}
 
 /** 
@@ -329,11 +341,12 @@ void CPTPIPConnection::InitiateCommandRequestPhaseL( )
  */
 void CPTPIPConnection::ReceiveCommandCompleteL(TInt aError )
 	{
-	__FLOG(_L8("ReceiveCommandCompleteL - Entry"));
+	OstTraceFunctionEntry0( CPTPIPCONNECTION_RECEIVECOMMANDCOMPLETEL_ENTRY );
 
 	if(KErrNone != aError )
 		{
-		__FLOG_VA((_L8("PTPIP Error: Received error=%d in request phase, closing  connection"), aError));
+		OstTrace1( TRACE_NORMAL, CPTPIPCONNECTION_RECEIVECOMMANDCOMPLETEL, "PTPIP Error: Received error=%d in request phase, closing  connection", aError );
+		
 		CloseConnection( );
 		}
 	else if(ValidateTransactionPhase(ERequestPhase ) )
@@ -344,8 +357,8 @@ void CPTPIPConnection::ReceiveCommandCompleteL(TInt aError )
 		TUint16 op(pRequest->Uint16(TPTPIPTypeRequestPayload::EOpCode ));
 		TUint32	tran(pRequest->Uint32(TPTPIPTypeRequestPayload::ETransactionId ));
 		TUint32 sessionId = KMTPSessionNone;
-		__FLOG_VA((_L8("Command block received with op = 0x%04X ,transId = %d"), op, tran));
-
+		OstTraceExt2( TRACE_NORMAL, DUP1_CPTPIPCONNECTION_RECEIVECOMMANDCOMPLETEL, "Command block received with op = 0x%04X ,transId = %d", static_cast<TUint32>(op), tran );
+		
 		// Reset the iMTPRequest.
 		iMTPRequest.Reset( );
 
@@ -356,11 +369,13 @@ void CPTPIPConnection::ReceiveCommandCompleteL(TInt aError )
 		// Set SessionID.
 		if(op == EMTPOpCodeOpenSession )
 			{
-			__FLOG(_L8("Processing OpenSession request"));
+			OstTrace0( TRACE_NORMAL, DUP2_CPTPIPCONNECTION_RECEIVECOMMANDCOMPLETEL, "Processing OpenSession request" );
+			
 			}
 		else if(op == EMTPOpCodeCloseSession || op == EMTPOpCodeResetDevice )
 			{
-			__FLOG(_L8("Processing CloseSession or the ResetDevice request"));
+			OstTrace0( TRACE_NORMAL, DUP3_CPTPIPCONNECTION_RECEIVECOMMANDCOMPLETEL, "Processing CloseSession or the ResetDevice request" );
+			
 			// Force CloseSession requests to be processed outside an active session. 
 			// ResetDevice currently behaves the same way as CloseSession. 
 			iMTPRequest.SetUint32(TMTPTypeRequest::ERequestParameter1,
@@ -369,7 +384,8 @@ void CPTPIPConnection::ReceiveCommandCompleteL(TInt aError )
 		else
 			{
 			sessionId = iMTPSessionId;
-			__FLOG_VA((_L8("Processing general request on session %d"), sessionId));
+			OstTrace1( TRACE_NORMAL, DUP4_CPTPIPCONNECTION_RECEIVECOMMANDCOMPLETEL, "Processing general request on session %d", sessionId );
+			
 			}
 		
 		iMTPRequest.SetUint32(TMTPTypeRequest::ERequestSessionID,sessionId );
@@ -383,7 +399,7 @@ void CPTPIPConnection::ReceiveCommandCompleteL(TInt aError )
 		BoundProtocolLayer().ReceivedRequestL(iMTPRequest );
 
 		}
-	__FLOG(_L8("ReceiveCommandCompleteL - Exit"));
+	OstTraceFunctionExit0( CPTPIPCONNECTION_RECEIVECOMMANDCOMPLETEL_EXIT );
 	}
 
 /**
@@ -392,7 +408,7 @@ void CPTPIPConnection::ReceiveCommandCompleteL(TInt aError )
  */
 void CPTPIPConnection::ReceiveCommandDataL(MMTPType& aData )
 	{
-	__FLOG(_L8("ReceiveCommandDataL - Entry"));
+	OstTraceFunctionEntry0( CPTPIPCONNECTION_RECEIVECOMMANDDATAL_ENTRY );
 
 	iRecvData = 0;
 	iTotalRecvData = 0;
@@ -405,7 +421,7 @@ void CPTPIPConnection::ReceiveCommandDataL(MMTPType& aData )
 	iPTPIPDataContainer->SetPayloadL(&aData );
 	iCommandHandler->ReceiveCommandDataL(*iPTPIPCommandContainer );
 
-	__FLOG(_L8("ReceiveCommandDataL - Exit"));
+	OstTraceFunctionExit0( CPTPIPCONNECTION_RECEIVECOMMANDDATAL_EXIT );
 	}
 
 /**
@@ -414,14 +430,14 @@ void CPTPIPConnection::ReceiveCommandDataL(MMTPType& aData )
  */
 void CPTPIPConnection::ReceiveCommandDataCompleteL(TInt aError )
 	{
-	__FLOG(_L8("ReceiveCommandDataCompleteL - Entry"));
+	OstTraceFunctionEntry0( CPTPIPCONNECTION_RECEIVECOMMANDDATACOMPLETEL_ENTRY );
 	if(ValidateTransactionPhase(EDataIToRPhase ) )
 		{
 		// Data block received, notify the protocol layer.
 		iPTPIPDataContainer->SetUint32L(CPTPIPDataContainer::EPacketType, 0 );
 		BoundProtocolLayer().ReceiveDataCompleteL(aError, *iPTPIPDataContainer->Payload(), iMTPRequest );
 		}
-	__FLOG(_L8("ReceiveCommandDataCompleteL - Exit"));
+	OstTraceFunctionExit0( CPTPIPCONNECTION_RECEIVECOMMANDDATACOMPLETEL_EXIT );
 	}
 
 /**
@@ -431,12 +447,14 @@ void CPTPIPConnection::ReceiveCommandDataCompleteL(TInt aError )
 
 void CPTPIPConnection::ReceiveCommandChannelCompleteL(TInt aError, MMTPType& /*aSource*/)
 	{
-	__FLOG(_L8("ReceiveCommandChannelCompleteL - Entry"));
-	__FLOG(_L8("******** Receiving 1 ptpip packet on command/data channel complete **************"));
+	OstTraceFunctionEntry0( CPTPIPCONNECTION_RECEIVECOMMANDCHANNELCOMPLETEL_ENTRY );
+	OstTrace0( TRACE_NORMAL, CPTPIPCONNECTION_RECEIVECOMMANDCHANNELCOMPLETEL, "******** Receiving 1 ptpip packet on command/data channel complete **************" );
+	
 	HandleTCPError(aError );
 	TUint32	typeCommand = iPTPIPCommandContainer->Uint32L(CPTPIPGenericContainer::EPacketType );
 	TUint32	typeData = iPTPIPDataContainer->Uint32L(CPTPIPGenericContainer::EPacketType );
-	__FLOG_VA((_L8("type on the command buffer is %d and type on the data buffer is %d"), typeCommand, typeData ) );
+	OstTraceExt2( TRACE_NORMAL, DUP1_CPTPIPCONNECTION_RECEIVECOMMANDCHANNELCOMPLETEL, "type on the command buffer is %d and type on the data buffer is %d", typeCommand, typeData );
+	
 
 
 	switch (typeCommand)
@@ -454,7 +472,8 @@ void CPTPIPConnection::ReceiveCommandChannelCompleteL(TInt aError, MMTPType& /*a
 			{
 			// Save the total data expected. 
 			iTotalRecvData =(static_cast<TPTPIPTypeStartDataPayload*>(iPTPIPCommandContainer->Payload()))->Uint64(TPTPIPTypeStartDataPayload::ETotalSize );
-			__FLOG_VA((_L8("Total data to receive in data phase is %ld"), iTotalRecvData));						
+			OstTrace1( TRACE_NORMAL, DUP2_CPTPIPCONNECTION_RECEIVECOMMANDCHANNELCOMPLETEL, "Total data to receive in data phase is %ld", iTotalRecvData );
+			
 			
 			//reset the command container 
 			iPTPIPCommandContainer->SetUint32L(CPTPIPGenericContainer::EPacketType, 0 );
@@ -489,15 +508,21 @@ void CPTPIPConnection::ReceiveCommandChannelCompleteL(TInt aError, MMTPType& /*a
 				
 			}
 			
+			OstTrace1( TRACE_NORMAL, DUP3_CPTPIPCONNECTION_RECEIVECOMMANDCHANNELCOMPLETEL, "Data received so far in data phase is %ld", iRecvData );
 			
-			__FLOG_VA((_L8("Data received so far in data phase is %ld"), iRecvData));
 			if(iRecvData <= iTotalRecvData )
 				{
 				iCommandHandler->ReceiveCommandDataL(*iPTPIPDataContainer );
 				}
 			else
 				{
-				__FLOG_VA((_L8("PTPIP ERROR: The data received so far= %ld is more than expected data = %ld "), iRecvData, iTotalRecvData));
+                TBuf<8> recvData;
+                recvData.Num( iRecvData, EDecimal );
+                TBuf<8> totalRecvData;
+                totalRecvData.Num( iTotalRecvData, EDecimal );
+				OstTraceExt2( TRACE_NORMAL, DUP5_CPTPIPCONNECTION_RECEIVECOMMANDCHANNELCOMPLETEL, "PTPIP ERROR: The data received so far= %S is more than expected data = %S",
+				        recvData, totalRecvData );
+				
 				CloseConnection( );
 				}			
 			break;
@@ -508,14 +533,20 @@ void CPTPIPConnection::ReceiveCommandChannelCompleteL(TInt aError, MMTPType& /*a
 			
 			iCommandHandler->iUseOffset = EFalse;
 			
-			__FLOG_VA((_L8("Data received so far in data phase is %ld"), iRecvData));
+			OstTrace1( TRACE_NORMAL, DUP6_CPTPIPCONNECTION_RECEIVECOMMANDCHANNELCOMPLETEL, "Data received so far in data phase is %ld", iRecvData );
+			
 			if(iTotalRecvData == iRecvData )
 				{
 				ReceiveCommandDataCompleteL(aError );
 				}
 			else
 				{
-				__FLOG_VA((_L8("PTPIP ERROR: The data received so far= %ld is not equal to expected data = %ld "), iRecvData, iTotalRecvData));
+                TBuf<8> recvData;
+                recvData.Num( iRecvData, EDecimal );
+                TBuf<8> totalRecvData;
+                totalRecvData.Num( iTotalRecvData, EDecimal );
+				OstTraceExt2( TRACE_NORMAL, DUP4_CPTPIPCONNECTION_RECEIVECOMMANDCHANNELCOMPLETEL, "PTPIP ERROR: The data received so far= %S is not equal to expected data = %S", recvData, totalRecvData );
+				
 				CloseConnection( );
 				}
 			break;
@@ -530,13 +561,13 @@ void CPTPIPConnection::ReceiveCommandChannelCompleteL(TInt aError, MMTPType& /*a
 			break;
 		
 		default:
-			__FLOG_VA((_L8("PTPIP ERROR: Unexpected type received,  data container = %d, command container =%d "), typeData, typeCommand));
+			OstTraceExt2( TRACE_NORMAL, DUP7_CPTPIPCONNECTION_RECEIVECOMMANDCHANNELCOMPLETEL, "PTPIP ERROR: Unexpected type received,  data container = %d, command container =%d ", typeData, typeCommand );
 			CloseConnection( );
 			break;
 		} // switch data
 	} // switch command
 
-	__FLOG(_L8("ReceiveCommandChannelCompleteL - Exit"));
+	OstTraceFunctionExit0( CPTPIPCONNECTION_RECEIVECOMMANDCHANNELCOMPLETEL_EXIT );
 	}
 
 /**
@@ -544,11 +575,12 @@ void CPTPIPConnection::ReceiveCommandChannelCompleteL(TInt aError, MMTPType& /*a
  */
 void CPTPIPConnection::ReceiveDataL(MMTPType& aData, const TMTPTypeRequest& /*aRequest*/)
 	{
-	__FLOG(_L8("ReceiveDataL - Entry"));
-	__FLOG(_L8("******** Phase 2 - Data I to R **************"));
+	OstTraceFunctionEntry0( CPTPIPCONNECTION_RECEIVEDATAL_ENTRY );
+	OstTrace0( TRACE_NORMAL, CPTPIPCONNECTION_RECEIVEDATAL, "******** Phase 2 - Data I to R **************" );
+	
 	SetTransactionPhase(EDataIToRPhase );
 	ReceiveCommandDataL(aData );
-	__FLOG(_L8("ReceiveDataL - Exit"));
+	OstTraceFunctionExit0( CPTPIPCONNECTION_RECEIVEDATAL_EXIT );
 	}
 
 /**
@@ -556,10 +588,10 @@ void CPTPIPConnection::ReceiveDataL(MMTPType& aData, const TMTPTypeRequest& /*aR
  */
 void CPTPIPConnection::ReceiveDataCancelL(const TMTPTypeRequest& /*aRequest*/)
 	{
-	__FLOG(_L8("ReceiveDataCancelL - Entry"));
+	OstTraceFunctionEntry0( CPTPIPCONNECTION_RECEIVEDATACANCELL_ENTRY );
 
 	iCommandHandler->CancelReceiveL(KErrCancel );
-	__FLOG(_L8("ReceiveDataCancelL - Exit"));
+	OstTraceFunctionExit0( CPTPIPCONNECTION_RECEIVEDATACANCELL_EXIT );
 	}
 
 /**
@@ -568,7 +600,7 @@ void CPTPIPConnection::ReceiveDataCancelL(const TMTPTypeRequest& /*aRequest*/)
  */
 void CPTPIPConnection::InitiateEventRequestPhaseL( )
 	{
-	__FLOG(_L8("InitiateEventRequestPhaseL - Entry"));
+	OstTraceFunctionEntry0( CPTPIPCONNECTION_INITIATEEVENTREQUESTPHASEL_ENTRY );
 
 	// Initialise the PTP buffers to get the data. 
 	iPTPIPEventPayload.Reset( );
@@ -578,7 +610,7 @@ void CPTPIPConnection::InitiateEventRequestPhaseL( )
 
 	// Call the EventHandler
 	iEventHandler->ReceiveEventL(*iPTPIPEventContainer );
-	__FLOG(_L8("InitiateEventRequestPhaseL - Exit"));
+	OstTraceFunctionExit0( CPTPIPCONNECTION_INITIATEEVENTREQUESTPHASEL_EXIT );
 	}
 
 /**
@@ -586,14 +618,16 @@ void CPTPIPConnection::InitiateEventRequestPhaseL( )
  */
 void CPTPIPConnection::ReceiveEventCompleteL(TInt aError, MMTPType& /*aSource*/)
 	{
-	__FLOG(_L8("ReceiveEventCompleteL - Entry"));
+	OstTraceFunctionEntry0( CPTPIPCONNECTION_RECEIVEEVENTCOMPLETEL_ENTRY );
 
 	TUint32	type = iPTPIPEventContainer->Uint32L(CPTPIPGenericContainer::EPacketType );
-	__FLOG_VA((_L8("Error value is %d and type is %d"), aError, type));
+	OstTraceExt2( TRACE_NORMAL, CPTPIPCONNECTION_RECEIVEEVENTCOMPLETEL, "Error value is %d and type is %d", static_cast<TInt32>(aError), static_cast<TInt32>(type));
+	
 
 	if(KErrNone != aError )
 		{
-		__FLOG_VA((_L8("PTPIP Error: Received error=%d in request phase, closing  connection"), aError));
+		OstTrace1( TRACE_NORMAL, DUP1_CPTPIPCONNECTION_RECEIVEEVENTCOMPLETEL, "PTPIP Error: Received error=%d in request phase, closing  connection", aError );
+		
 		CloseConnection( );
 		}
 	else
@@ -601,7 +635,8 @@ void CPTPIPConnection::ReceiveEventCompleteL(TInt aError, MMTPType& /*aSource*/)
 		// For a probe request, we just send a probe response and don't notify the MTP f/w. 
 		if( type == EPTPIPPacketTypeProbeRequest )
 			{
-			__FLOG(_L8("Received a probe request, sending back a probe response"));
+			OstTrace0( TRACE_NORMAL, DUP2_CPTPIPCONNECTION_RECEIVEEVENTCOMPLETEL, "Received a probe request, sending back a probe response" );
+			
 			// Send the response, 
 			iPTPIPEventContainer->SetPayloadL(NULL );
 			iPTPIPEventContainer->SetUint32L(CPTPIPGenericContainer::EPacketLength, iPTPIPEventContainer->Size( ) );
@@ -620,7 +655,9 @@ void CPTPIPConnection::ReceiveEventCompleteL(TInt aError, MMTPType& /*aSource*/)
 			// Request block received.
 			TPTPIPTypeResponsePayload* pEvent = static_cast<TPTPIPTypeResponsePayload*>(iPTPIPEventContainer->Payload());
 			TUint16	op(pEvent->Uint16(TPTPIPTypeResponsePayload::EResponseCode ));
-			__FLOG_VA((_L8("Event block 0x%04X received"), op));
+			OstTrace1( TRACE_NORMAL, DUP3_CPTPIPCONNECTION_RECEIVEEVENTCOMPLETEL, "Event block 0x%04X received", op );
+			
+			
 
 			// Reset the iMTPRequest.
 			iMTPEvent.Reset( );
@@ -640,11 +677,12 @@ void CPTPIPConnection::ReceiveEventCompleteL(TInt aError, MMTPType& /*aSource*/)
 		// If unexpected data is received , its ignored in the release mode. 
 		else
 			{
-			__FLOG(_L8("PTPIP ERROR : Unknown event type received, ignoring it."));
+			OstTrace0( TRACE_NORMAL, DUP4_CPTPIPCONNECTION_RECEIVEEVENTCOMPLETEL, "PTPIP ERROR : Unknown event type received, ignoring it." );
+			
 			__ASSERT_DEBUG(type, Panic(EPTPIPBadState));
 			}
 		}
-	__FLOG(_L8("ReceiveEventCompleteL - Exit"));
+	OstTraceFunctionExit0( CPTPIPCONNECTION_RECEIVEEVENTCOMPLETEL_EXIT );
 	}
 
 //
@@ -656,15 +694,16 @@ void CPTPIPConnection::ReceiveEventCompleteL(TInt aError, MMTPType& /*aSource*/)
  */
 void CPTPIPConnection::SendResponseL(const TMTPTypeResponse& aResponse,	const TMTPTypeRequest& aRequest )
 	{
-	__FLOG(_L8("SendResponseL - Entry"));
+	OstTraceFunctionEntry0( CPTPIPCONNECTION_SENDRESPONSEL_ENTRY );
 
 	// Update the transaction state.
 	SetTransactionPhase(EResponsePhase );
-	__FLOG(_L8("******** Phase 3 - Response **************"));
+	OstTrace0( TRACE_NORMAL, CPTPIPCONNECTION_SENDRESPONSEL, "******** Phase 3 - Response **************" );
+	
 	
 	if(iCancelOnCommandState  )
 		{
-		__FLOG(_L8("Cancel has been received from initiator, so send own response"));
+		OstTrace0( TRACE_NORMAL, DUP1_CPTPIPCONNECTION_SENDRESPONSEL, "Cancel has been received from initiator, so send own response" );
 		
 		SendCancelResponseL(aRequest.Uint32(TMTPTypeRequest::ERequestTransactionID ));
 		}
@@ -672,19 +711,22 @@ void CPTPIPConnection::SendResponseL(const TMTPTypeResponse& aResponse,	const TM
 		{
 		TUint16	opCode(aRequest.Uint16(TMTPTypeRequest::ERequestOperationCode ));
 		TUint16 rspCode(aResponse.Uint16(TMTPTypeResponse::EResponseCode ));
-		__FLOG_VA((_L8("ResponseCode = 0x%04X, Operation Code = 0x%04X"), rspCode, opCode));
+		OstTraceExt2( TRACE_NORMAL, DUP2_CPTPIPCONNECTION_SENDRESPONSEL, "ResponseCode = 0x%04X, Operation Code = 0x%04X", rspCode, opCode );
+		
 
 		if((opCode == EMTPOpCodeOpenSession) &&(rspCode == EMTPRespCodeOK) )
 			{
 			// An session has been opened. Record the active SessionID.
 			iMTPSessionId = aRequest.Uint32(TMTPTypeRequest::ERequestParameter1 );
-			__FLOG_VA((_L8("Processing OpenSession response, SessionID = %d"), iMTPSessionId));
+			OstTrace1( TRACE_NORMAL, DUP3_CPTPIPCONNECTION_SENDRESPONSEL, "Processing OpenSession response, SessionID = %d", iMTPSessionId );
+			
 			}
 		else if(((opCode == EMTPOpCodeCloseSession) ||
 				(opCode == EMTPOpCodeResetDevice))&&(rspCode == EMTPRespCodeOK) )
 			{
 			// An session has been closed. Clear the active SessionID.        
-			__FLOG_VA((_L8("Processing CloseSession or ResetDevice response, SessionID = %d"), iMTPSessionId));
+			OstTrace1( TRACE_NORMAL, DUP4_CPTPIPCONNECTION_SENDRESPONSEL, "Processing CloseSession or ResetDevice response, SessionID = %d", iMTPSessionId );
+			
 			iMTPSessionId = KMTPSessionNone;
 			}
 
@@ -707,13 +749,14 @@ void CPTPIPConnection::SendResponseL(const TMTPTypeResponse& aResponse,	const TM
 		iPTPIPCommandContainer->SetUint32L(	CPTPIPGenericContainer::EPacketType, EPTPIPPacketTypeOperationResponse );
 
 		// Initiate the command send sequence.
-		__FLOG_VA((_L8("Sending response 0x%04X(%d bytes)"),
-						iPTPIPResponsePayload.Uint16(TPTPIPTypeResponsePayload::EResponseCode),
-						iPTPIPCommandContainer->Uint32L(CPTPIPGenericContainer::EPacketLength)));
+		OstTraceExt2( TRACE_NORMAL, DUP5_CPTPIPCONNECTION_SENDRESPONSEL, "Sending response 0x%04X(%d bytes)",
+		        static_cast<TUint32>(iPTPIPResponsePayload.Uint16(TPTPIPTypeResponsePayload::EResponseCode)),
+		        iPTPIPCommandContainer->Uint32L(CPTPIPGenericContainer::EPacketLength));
+		
 		iCommandHandler->SendCommandL(*iPTPIPCommandContainer );
 		}
 
-	__FLOG(_L8("SendResponseL - Exit"));
+	OstTraceFunctionExit0( CPTPIPCONNECTION_SENDRESPONSEL_EXIT );
 	}
 
 /**
@@ -721,8 +764,8 @@ void CPTPIPConnection::SendResponseL(const TMTPTypeResponse& aResponse,	const TM
  */
 void CPTPIPConnection::SendCommandCompleteL(TInt aError )
 	{
+    OstTraceFunctionEntry0( CPTPIPCONNECTION_SENDCOMMANDCOMPLETEL_ENTRY );
 
-	__FLOG(_L8("SendCommandCompleteL - Entry"));
 
 	if(ValidateTransactionPhase(EResponsePhase ) )
 		{
@@ -730,7 +773,7 @@ void CPTPIPConnection::SendCommandCompleteL(TInt aError )
 		                                            *static_cast<TMTPTypeResponse*>(iPTPIPCommandContainer->Payload()), 
 		                                            iMTPRequest );
 		}
-	__FLOG(_L8("SendCommandCompleteL - Exit"));
+	OstTraceFunctionExit0( CPTPIPCONNECTION_SENDCOMMANDCOMPLETEL_EXIT );
 	}
 
 /**
@@ -738,7 +781,7 @@ void CPTPIPConnection::SendCommandCompleteL(TInt aError )
  */
 void CPTPIPConnection::SendCommandDataCompleteL(TInt aError )
 	{
-	__FLOG(_L8("SendCommandDataCompleteL - Entry"));
+	OstTraceFunctionEntry0( CPTPIPCONNECTION_SENDCOMMANDDATACOMPLETEL_ENTRY );
 
 	if(ValidateTransactionPhase(EDataRToIPhase ) )
 		{
@@ -747,7 +790,7 @@ void CPTPIPConnection::SendCommandDataCompleteL(TInt aError )
 	SetConnectionState(EDataSendFinished);
 	iPTPIPDataContainer->SetPayloadL(NULL );
 
-	__FLOG(_L8("SendCommandDataCompleteL - Exit"));
+	OstTraceFunctionExit0( CPTPIPCONNECTION_SENDCOMMANDDATACOMPLETEL_EXIT );
 	}
 
 /**
@@ -756,12 +799,13 @@ void CPTPIPConnection::SendCommandDataCompleteL(TInt aError )
  */
 void CPTPIPConnection::SendCommandChannelCompleteL(TInt aError, const MMTPType& /*aSource*/)
 	{
-	__FLOG(_L8("SendCommandChannelCompleteL - Entry"));
+	OstTraceFunctionEntry0( CPTPIPCONNECTION_SENDCOMMANDCHANNELCOMPLETEL_ENTRY );
 
 	// Now see whether we have completed getting data or commands, and call the appropriate function.
 	TUint typeCommand = iPTPIPCommandContainer->Uint32L(CPTPIPGenericContainer::EPacketType );
 	TUint typeData = iPTPIPDataContainer->Uint32L(CPTPIPGenericContainer::EPacketType );
-	__FLOG_VA((_L8("type on the command buffer is %d and type on the data buffer is %d"), typeCommand, typeData ) );
+	OstTraceExt2( TRACE_NORMAL, CPTPIPCONNECTION_SENDCOMMANDCHANNELCOMPLETEL, "type on the command buffer is %d and type on the data buffer is %d", typeCommand, typeData );
+	
 	
 	
 	// if we have received a cancel on the event channel then terminate the current sending
@@ -806,11 +850,12 @@ void CPTPIPConnection::SendCommandChannelCompleteL(TInt aError, const MMTPType& 
 	// Any other type indicates a programming error, and a panic is raised. 
 	else
 		{
-		__FLOG_VA((_L8("PTPIP ERROR: Unexpected type in sent data, type = = %d, command =%d "), typeData, typeCommand));
+		OstTraceExt2( TRACE_NORMAL, DUP1_CPTPIPCONNECTION_SENDCOMMANDCHANNELCOMPLETEL, "PTPIP ERROR: Unexpected type in sent data, type = = %d, command =%d", typeData, typeCommand );
+		
 		Panic(EPTPIPBadState );
 		}
 
-	__FLOG(_L8("SendCommandChannelCompleteL - Exit"));
+	OstTraceFunctionExit0( CPTPIPCONNECTION_SENDCOMMANDCHANNELCOMPLETEL_EXIT );
 	}
 
 /**
@@ -818,9 +863,10 @@ void CPTPIPConnection::SendCommandChannelCompleteL(TInt aError, const MMTPType& 
  */
 void CPTPIPConnection::SendDataL(const MMTPType& aData,	const TMTPTypeRequest& aRequest )
 	{
-	__FLOG(_L8("SendDataL - Entry"));
+	OstTraceFunctionEntry0( CPTPIPCONNECTION_SENDDATAL_ENTRY );
 
-	__FLOG(_L8("******** Phase 2 - Data R to I **************"));
+	OstTrace0( TRACE_NORMAL, CPTPIPCONNECTION_SENDDATAL, "******** Phase 2 - Data R to I **************" );
+	
 	SetTransactionPhase(EDataRToIPhase );
 	SetConnectionState(EDataSendInProgress );
 
@@ -845,7 +891,7 @@ void CPTPIPConnection::SendDataL(const MMTPType& aData,	const TMTPTypeRequest& a
 	// actual data in the next packet, which has been saved in the dataContainer. 
 	SendStartDataPacketL( );
 
-	__FLOG(_L8("SendDataL - Exit"));
+	OstTraceFunctionExit0( CPTPIPCONNECTION_SENDDATAL_EXIT );
 	}
 
 /**
@@ -855,11 +901,11 @@ void CPTPIPConnection::SendDataL(const MMTPType& aData,	const TMTPTypeRequest& a
  */
 void CPTPIPConnection::SendStartDataPacketL( )
 	{
-	__FLOG(_L8("SendStartDataPacketL - Entry"));
+	OstTraceFunctionEntry0( CPTPIPCONNECTION_SENDSTARTDATAPACKETL_ENTRY );
 
 	SetConnectionState(EDataSendInProgress );
 	iCommandHandler->SendCommandL(*iPTPIPCommandContainer );
-	__FLOG(_L8("SendStartDataPacketL - Exit"));
+	OstTraceFunctionExit0( CPTPIPCONNECTION_SENDSTARTDATAPACKETL_EXIT );
 	}
 
 /**
@@ -867,7 +913,7 @@ void CPTPIPConnection::SendStartDataPacketL( )
  */
 void CPTPIPConnection::SendDataPacketL( )
 	{
-	__FLOG(_L8("SendDataPacketL - Entry"));
+	OstTraceFunctionEntry0( CPTPIPCONNECTION_SENDDATAPACKETL_ENTRY );
 	
 	MMTPType* payLoad = iPTPIPDataContainer->Payload();
 	
@@ -896,7 +942,7 @@ void CPTPIPConnection::SendDataPacketL( )
 	    iCommandHandler->SendCommandDataL(*iPTPIPDataContainer,	iPTPIPDataContainer->Uint32L(TMTPTypeRequest::ERequestTransactionID ) );
 	    }
 
-	__FLOG(_L8("SendDataPacketL - Exit"));
+	OstTraceFunctionExit0( CPTPIPCONNECTION_SENDDATAPACKETL_EXIT );
 	}
 
 /**
@@ -904,9 +950,9 @@ void CPTPIPConnection::SendDataPacketL( )
  */
 void CPTPIPConnection::SendDataCancelL(const TMTPTypeRequest& /*aRequest*/)
 	{
-	__FLOG(_L8("SendDataCancelL - Entry"));
+	OstTraceFunctionEntry0( CPTPIPCONNECTION_SENDDATACANCELL_ENTRY );
 	iCommandHandler->CancelSendL(KErrCancel );
-	__FLOG(_L8("SendDataCancelL - Exit"));
+	OstTraceFunctionExit0( CPTPIPCONNECTION_SENDDATACANCELL_EXIT );
 	}
 
 /**
@@ -914,7 +960,7 @@ void CPTPIPConnection::SendDataCancelL(const TMTPTypeRequest& /*aRequest*/)
  */
 void CPTPIPConnection::SendEventL(const TMTPTypeEvent& aEvent )
 	{
-	__FLOG(_L8("SendEventL - Entry"));
+	OstTraceFunctionEntry0( CPTPIPCONNECTION_SENDEVENTL_ENTRY );
 
     // Reset the event.
     iMTPEvent.Reset(); 
@@ -922,7 +968,8 @@ void CPTPIPConnection::SendEventL(const TMTPTypeEvent& aEvent )
     
 	TUint16 opCode(aEvent.Uint16(TMTPTypeEvent::EEventCode ));
 	TUint32 tran(aEvent.Uint32(TMTPTypeEvent::EEventTransactionID ));
-	__FLOG_VA((_L8(" Sending event with Operation Code = 0x%04X and tran id = %d"), opCode, tran ));
+	OstTraceExt2( TRACE_NORMAL, CPTPIPCONNECTION_SENDEVENTL, "Sending event with Operation Code = 0x%04X and tran id = %d", static_cast<TUint32>(opCode), tran );
+	
 
 	TBool isNullParamValid = EFalse;
 	TUint numberOfNullParam = 0;
@@ -941,12 +988,13 @@ void CPTPIPConnection::SendEventL(const TMTPTypeEvent& aEvent )
 	iPTPIPEventContainer->SetUint32L(CPTPIPGenericContainer::EPacketType, EPTPIPPacketTypeEvent );
 
 	// Initiate the event send sequence.
-	__FLOG_VA((_L8("Sending response 0x%04X(%d bytes)"),
-					iPTPIPEventPayload.Uint16(TPTPIPTypeResponsePayload::EResponseCode),
-					iPTPIPEventContainer->Uint32L(CPTPIPGenericContainer::EPacketLength)));
+	OstTraceExt2( TRACE_NORMAL, DUP1_CPTPIPCONNECTION_SENDEVENTL, "Sending response 0x%04X(%d bytes)",
+	        static_cast<TUint32>(iPTPIPEventPayload.Uint16(TPTPIPTypeResponsePayload::EResponseCode)),
+	        iPTPIPEventContainer->Uint32L(CPTPIPGenericContainer::EPacketLength));
+	
 
 	iEventHandler->SendEventL(*iPTPIPEventContainer );
-	__FLOG(_L8("SendEventL - Exit"));
+	OstTraceFunctionExit0( CPTPIPCONNECTION_SENDEVENTL_EXIT );
 	}
 
 /**
@@ -954,7 +1002,7 @@ void CPTPIPConnection::SendEventL(const TMTPTypeEvent& aEvent )
  */
 void CPTPIPConnection::SendEventCompleteL(TInt aError, const MMTPType& /*aSource*/)
 	{
-	__FLOG(_L8("SendEventCompleteL - Entry"));
+	OstTraceFunctionEntry0( CPTPIPCONNECTION_SENDEVENTCOMPLETEL_ENTRY );
 	TUint type = iPTPIPEventContainer->Uint32L(CPTPIPGenericContainer::EPacketType );
 
 	// Notify the fw that event was sent. 
@@ -969,19 +1017,20 @@ void CPTPIPConnection::SendEventCompleteL(TInt aError, const MMTPType& /*aSource
 	else
 		if(type == EPTPIPPacketTypeProbeResponse )
 			{
-			__FLOG(_L8("Probe response was sent successfully"));
+			OstTrace0( TRACE_NORMAL, CPTPIPCONNECTION_SENDEVENTCOMPLETEL, "Probe response was sent successfully" );
 			}
 		else
 			{
 			// If unexpected data was sent , it is ignored in the release mode. 
-			__FLOG(_L8("PTPIP ERROR: An invalid send event completion signalled"));
+			OstTrace0( TRACE_NORMAL, DUP1_CPTPIPCONNECTION_SENDEVENTCOMPLETEL, "PTPIP ERROR: An invalid send event completion signalled" );
+			
 			__ASSERT_DEBUG(type, Panic(EPTPIPBadState));
 			}
 #endif
 	
 	// Restart listening for events
 	InitiateEventRequestPhaseL( );
-	__FLOG(_L8("SendEventCompleteL - Exit"));
+	OstTraceFunctionExit0( CPTPIPCONNECTION_SENDEVENTCOMPLETEL_EXIT );
 	}
 
 //
@@ -995,8 +1044,9 @@ void CPTPIPConnection::SendEventCompleteL(TInt aError, const MMTPType& /*aSource
  */
 void CPTPIPConnection::HandleEventCancelL( )
 	{
-	__FLOG(_L8("HandleEventCancelL - Entry"));
-	__FLOG_VA((_L8("iCancelOnCommandState = 0x%04X, and  iCancelOnEventState = 0x%04X"), iCancelOnCommandState, iCancelOnEventState));
+	OstTraceFunctionEntry0( CPTPIPCONNECTION_HANDLEEVENTCANCELL_ENTRY );
+	OstTraceExt2( TRACE_NORMAL, CPTPIPCONNECTION_HANDLEEVENTCANCELL, "iCancelOnCommandState = 0x%04X, and  iCancelOnEventState = 0x%04X", iCancelOnCommandState, iCancelOnEventState );
+	
 
 	// Check whether the cancel has already been received on the command channel. 
 	// If so then we can simply ignore this on the event channel. 
@@ -1041,7 +1091,8 @@ void CPTPIPConnection::HandleEventCancelL( )
 				case EResponsePhase:
 				case ERequestPhase:
 				default:
-					__FLOG(_L8(" Cancel received on event channel during a non data phase, ignoring, as this will be handled when its received on command channel."));
+					OstTrace0( TRACE_NORMAL, DUP1_CPTPIPCONNECTION_HANDLEEVENTCANCELL, "Cancel received on event channel during a non data phase, ignoring, as this will be handled when its received on command channel." );
+					
 					iCancelOnEventState = ECancelEvtHandled;
 					break;
 				}// end of switch for transaction phase.
@@ -1050,7 +1101,7 @@ void CPTPIPConnection::HandleEventCancelL( )
 		default:
 			break;
 		}
-	__FLOG(_L8("HandleEventCancelL - Exit"));
+	OstTraceFunctionExit0( CPTPIPCONNECTION_HANDLEEVENTCANCELL_EXIT );
 	}
 
 /** 
@@ -1060,17 +1111,18 @@ void CPTPIPConnection::HandleEventCancelL( )
  */
 void CPTPIPConnection::HandleCommandCancelL(TUint32 aTransId )
 	{
-	__FLOG(_L8("HandleCommandCancelL - Entry"));
+	OstTraceFunctionEntry0( CPTPIPCONNECTION_HANDLECOMMANDCANCELL_ENTRY );
 
 	switch(iTransactionState )
 		{
 		case ERequestPhase:
-			__FLOG(_L8(" Cancel received during the request phase before the request packet, ignoring."));
+			OstTrace0( TRACE_NORMAL, CPTPIPCONNECTION_HANDLECOMMANDCANCELL, "Cancel received during the request phase before the request packet, ignoring." );
+			
 			iCancelOnCommandState = ECancelCmdHandled;
 			if (iCancelOnEventState == ECancelNotReceived)
 				{
 				// Wait for it to be received on event
-				__FLOG(_L8("Awaiting cancel on the event channel."));
+				OstTrace0( TRACE_NORMAL, DUP1_CPTPIPCONNECTION_HANDLECOMMANDCANCELL, "Awaiting cancel on the event channel." );
 				}
 			else
 				{
@@ -1096,7 +1148,7 @@ void CPTPIPConnection::HandleCommandCancelL(TUint32 aTransId )
 			if (iCancelOnEventState == ECancelNotReceived)
 				{
 				// Wait for it to be received on event
-				__FLOG(_L8("Awaiting cancel on the event channel."));
+				OstTrace0( TRACE_NORMAL, DUP2_CPTPIPCONNECTION_HANDLECOMMANDCANCELL, "Awaiting cancel on the event channel." );
 				}
 			else
 				{
@@ -1106,13 +1158,13 @@ void CPTPIPConnection::HandleCommandCancelL(TUint32 aTransId )
 			break;
 		}// switch
 
-	__FLOG(_L8("HandleCommandCancelL - Exit"));
+	OstTraceFunctionExit0( CPTPIPCONNECTION_HANDLECOMMANDCANCELL_EXIT );
 	}
 	
 	
 void CPTPIPConnection::HandleCancelDuringSendL()
 	{
-	__FLOG(_L8("HandleCancelDuringSendL - Entry"));	
+	OstTraceFunctionEntry0( CPTPIPCONNECTION_HANDLECANCELDURINGSENDL_ENTRY );
 	iCommandHandler->Cancel( );
 	// Now start listening for the cancel on command channel.
 	iPTPIPDataContainer->SetUint32L(CPTPIPDataContainer::EPacketType, 0 );
@@ -1120,7 +1172,7 @@ void CPTPIPConnection::HandleCancelDuringSendL()
 	iPTPIPCommandCancelPayload.Set(0 );
 	iPTPIPCommandContainer->SetPayloadL(&iPTPIPCommandCancelPayload );
 	iCommandHandler->ReceiveCommandRequestL(*iPTPIPCommandContainer );	
-	__FLOG(_L8("HandleCancelDuringSendL - Exit"));
+	OstTraceFunctionExit0( CPTPIPCONNECTION_HANDLECANCELDURINGSENDL_EXIT );
 	}
 
 /**
@@ -1128,12 +1180,13 @@ void CPTPIPConnection::HandleCancelDuringSendL()
  */
 void CPTPIPConnection::HandleCommandCancelCompleteL( )
 	{
-	__FLOG(_L8("HandleCommandCancelCompleteL - Entry"));	
+	OstTraceFunctionEntry0( CPTPIPCONNECTION_HANDLECOMMANDCANCELCOMPLETEL_ENTRY );	
 	//now cancel handling is complete.
 
 	if((ECancelCmdHandled == iCancelOnCommandState) &&(ECancelEvtHandled == iCancelOnEventState) )
 		{
-		__FLOG(_L8("Completed handling cancel on both channels. "));
+		OstTrace0( TRACE_NORMAL, CPTPIPCONNECTION_HANDLECOMMANDCANCELCOMPLETEL, "Completed handling cancel on both channels." );
+		
 		// Cancel has already been received and handled on the command channel
 		// ignore the cancel on event channel and reset the state to none, 
 		// and start listening for the next transaction.
@@ -1145,9 +1198,10 @@ void CPTPIPConnection::HandleCommandCancelCompleteL( )
 	// if the cancel has not been received yet on event, we wait for it. 
 	else if(ECancelEvtHandled != iCancelOnEventState )
 		{
-		__FLOG(_L8("Waiting for the cancel on the event channel. "));
+		OstTrace0( TRACE_NORMAL, DUP1_CPTPIPCONNECTION_HANDLECOMMANDCANCELCOMPLETEL, "Waiting for the cancel on the event channel. " );
+		
 		}
-	__FLOG(_L8("HandleCommandCancelCompleteL - Exit"));
+	OstTraceFunctionExit0( CPTPIPCONNECTION_HANDLECOMMANDCANCELCOMPLETEL_EXIT );
 	}
 
 /**
@@ -1155,7 +1209,7 @@ void CPTPIPConnection::HandleCommandCancelCompleteL( )
  */
 void CPTPIPConnection::SendCancelToFrameworkL(TUint32 aTransId )
 	{
-	__FLOG(_L8("SendCancelToFramework - Entry"));
+	OstTraceFunctionEntry0( CPTPIPCONNECTION_SENDCANCELTOFRAMEWORKL_ENTRY );
 
 	// Setup the MTP request dataset buffer. Set Operation Code and TransactionID
 	iMTPEvent.Reset( );
@@ -1164,7 +1218,7 @@ void CPTPIPConnection::SendCancelToFrameworkL(TUint32 aTransId )
 	iMTPEvent.SetUint32(TMTPTypeEvent::EEventTransactionID, aTransId );
 
 	BoundProtocolLayer().ReceivedEventL(iMTPEvent );
-	__FLOG(_L8("SendCancelToFramework - Exit"));
+	OstTraceFunctionExit0( CPTPIPCONNECTION_SENDCANCELTOFRAMEWORKL_EXIT );
 	}
 
 /**
@@ -1172,7 +1226,7 @@ void CPTPIPConnection::SendCancelToFrameworkL(TUint32 aTransId )
  */
 void CPTPIPConnection::SendCancelResponseL(TUint32 aTransId )
 	{
-	__FLOG(_L8("SendCancelResponse - Entry"));
+	OstTraceFunctionEntry0( CPTPIPCONNECTION_SENDCANCELRESPONSEL_ENTRY );
 	iPTPIPResponsePayload.Reset( );
 	iPTPIPResponsePayload.SetUint16(TPTPIPTypeResponsePayload::EResponseCode, EMTPRespCodeTransactionCancelled );
 	iPTPIPResponsePayload.SetUint32(TPTPIPTypeResponsePayload::ETransactionId, aTransId );
@@ -1183,11 +1237,12 @@ void CPTPIPConnection::SendCancelResponseL(TUint32 aTransId )
 	iPTPIPCommandContainer->SetUint32L(CPTPIPGenericContainer::EPacketType,	EPTPIPPacketTypeOperationResponse );
 
 	// Initiate the command send sequence.
-	__FLOG_VA((_L8("Sending response 0x%04X(%d bytes)"),
-					iPTPIPResponsePayload.Uint16(TPTPIPTypeResponsePayload::EResponseCode),
-					iPTPIPCommandContainer->Uint32L(CPTPIPGenericContainer::EPacketLength)));
+	OstTraceExt2( TRACE_NORMAL, CPTPIPCONNECTION_SENDCANCELRESPONSEL, "Sending response 0x%04X(%d bytes)", 
+                static_cast<TUint32>(iPTPIPResponsePayload.Uint16(TPTPIPTypeResponsePayload::EResponseCode)),
+                iPTPIPCommandContainer->Uint32L(CPTPIPGenericContainer::EPacketLength));
+	
 	iCommandHandler->SendCommandL(*iPTPIPCommandContainer );
-	__FLOG(_L8("SendCancelResponse - Exit"));
+	OstTraceFunctionExit0( CPTPIPCONNECTION_SENDCANCELRESPONSEL_EXIT );
 	}
 
 /**
@@ -1197,14 +1252,14 @@ void CPTPIPConnection::SendCancelResponseL(TUint32 aTransId )
  */
 void CPTPIPConnection::SetNULLPacketL()
 	{
-	__FLOG(_L8("SetNULLPacketL - Entry"));
+	OstTraceFunctionEntry0( CPTPIPCONNECTION_SETNULLPACKETL_ENTRY );
     // Setup the bulk container and initiate the bulk data receive sequence.
     iNullBuffer.Close();
     iNullBuffer.CreateL(KMTPNullChunkSize);
     iNullBuffer.SetLength(KMTPNullChunkSize);
     iNull.SetBuffer(iNullBuffer);
 	iPTPIPDataContainer->SetPayloadL(&iNull);
-	__FLOG(_L8("SetNULLPacketL - Exit"));
+	OstTraceFunctionExit0( CPTPIPCONNECTION_SETNULLPACKETL_EXIT );
 	}
 
 //
@@ -1220,31 +1275,44 @@ void CPTPIPConnection::SetNULLPacketL()
  */
 void CPTPIPConnection::TransferSocketsL( )
 	{
+OstTraceFunctionEntry0( CPTPIPCONNECTION_TRANSFERSOCKETSL_ENTRY );
 
-	__FLOG(_L8("TransferSocketsL - Entry"));
 
 	TName evtsockname, cmdsockname;
 	TUid propertyUid=iConnectionMgr->ClientSId();
-	User::LeaveIfError(RProperty::Get(propertyUid, ECommandSocketName,	cmdsockname ));
-	User::LeaveIfError(RProperty::Get(propertyUid, EEventSocketName, evtsockname ));
+	TInt err = RProperty::Get(propertyUid, ECommandSocketName, cmdsockname );
+	LEAVEIFERROR(err, 
+	                        OstTrace1( TRACE_ERROR, DUP1_CPTPIPCONNECTION_TRANSFERSOCKETSL, "error code is %d", err ));
+
+	err = RProperty::Get(propertyUid, EEventSocketName, evtsockname );
+	LEAVEIFERROR(err, 
+	                        OstTrace1( TRACE_ERROR, DUP2_CPTPIPCONNECTION_TRANSFERSOCKETSL, "error code is %d", err ));
 
 	RSocketServ serversocket;
-	TInt err=serversocket.Connect( );
-	__FLOG_VA((_L8("Connected to socketServer with %d code"), err) );
+	err=serversocket.Connect( );
+	OstTrace1( TRACE_NORMAL, CPTPIPCONNECTION_TRANSFERSOCKETSL, "Connected to socketServer with %d code", err );
+	
 	
 	if (KErrNone == err)
 		{			
-		User::LeaveIfError(iCommandHandler->Socket().Open(serversocket ));
-		User::LeaveIfError(iEventHandler->Socket().Open(serversocket ));
-	
-		User::LeaveIfError(err=iCommandHandler->Socket().Transfer(serversocket, cmdsockname ));
-		User::LeaveIfError(err=iEventHandler->Socket().Transfer(serversocket, evtsockname ));
+		err = iCommandHandler->Socket().Open(serversocket );
+		LEAVEIFERROR(err, 
+		        OstTrace1( TRACE_ERROR, DUP3_CPTPIPCONNECTION_TRANSFERSOCKETSL, "error code is %d", err ));
+		err = iEventHandler->Socket().Open(serversocket );
+	    LEAVEIFERROR(err, 
+	            OstTrace1( TRACE_ERROR, DUP4_CPTPIPCONNECTION_TRANSFERSOCKETSL, "error code is %d", err ));
+	    err=iCommandHandler->Socket().Transfer(serversocket, cmdsockname );
+	    LEAVEIFERROR(err, 
+	            OstTrace1( TRACE_ERROR, DUP5_CPTPIPCONNECTION_TRANSFERSOCKETSL, "error code is %d", err ));
+	    err=iEventHandler->Socket().Transfer(serversocket, evtsockname );
+	    LEAVEIFERROR(err, 
+	            OstTrace1( TRACE_ERROR, DUP6_CPTPIPCONNECTION_TRANSFERSOCKETSL, "error code is %d", err ));
 		}
 	
 	iCommandHandler->SetSocketOptions();
 	iEventHandler->SetSocketOptions();
 
-	__FLOG(_L8("TransferSocketsL - Exit"));
+	OstTraceFunctionExit0( CPTPIPCONNECTION_TRANSFERSOCKETSL_EXIT );
 	}
 
 
@@ -1263,8 +1331,7 @@ void CPTPIPConnection::TransferSocketsL( )
  */
 void CPTPIPConnection::SendInitAckL( )
 	{
-
-	__FLOG(_L8("SendInitAckL - Entry"));
+OstTraceFunctionEntry0( CPTPIPCONNECTION_SENDINITACKL_ENTRY );
 
 	iPTPIPEventContainer->SetPayloadL(NULL );
 	iPTPIPEventContainer->SetUint32L(TPTPIPInitEvtAck::ELength,	iPTPIPEventContainer->Size( ) );
@@ -1273,7 +1340,7 @@ void CPTPIPConnection::SendInitAckL( )
 	// Send the packet
 	iEventHandler->SendInitAck(iPTPIPEventContainer );
 
-	__FLOG(_L8("SendInitAckL - Exit"));
+	OstTraceFunctionExit0( CPTPIPCONNECTION_SENDINITACKL_EXIT );
 	}
 
 /**
@@ -1287,47 +1354,48 @@ void CPTPIPConnection::SendInitAckL( )
  */
 void CPTPIPConnection::StopConnection( )
 	{
-	__FLOG(_L8("StopConnection - Entry"));
+	OstTraceFunctionEntry0( CPTPIPCONNECTION_STOPCONNECTION_ENTRY );
 
 	if(ConnectionOpen( ) )
 		{
-		__FLOG(_L8("Stopping socket handlers"));
+		OstTrace0( TRACE_NORMAL, CPTPIPCONNECTION_STOPCONNECTION, "Stopping socket handlers" );
+		
 		iEventHandler->Cancel( );
 		iCommandHandler->Cancel( );
 		if(iTransactionState == EDataIToRPhase )
 			{
-			__FLOG(_L8("Aborting active I to R data phase"));
+			OstTrace0( TRACE_NORMAL, DUP1_CPTPIPCONNECTION_STOPCONNECTION, "Aborting active I to R data phase" );
+			
 			TRAPD(err, BoundProtocolLayer().ReceiveDataCompleteL(KErrAbort, *iPTPIPDataContainer->Payload(), iMTPRequest));
 			UNUSED_VAR(err);
 			}
 		else
 			if(iTransactionState == EDataRToIPhase )
 				{
-				__FLOG(_L8("Aborting active R to I data phase"));
+				OstTrace0( TRACE_NORMAL, DUP2_CPTPIPCONNECTION_STOPCONNECTION, "Aborting active R to I data phase" );
+				
 				TRAPD(err, BoundProtocolLayer().SendDataCompleteL(KErrAbort, *iPTPIPDataContainer->Payload(), iMTPRequest))	;
 				UNUSED_VAR(err);
 				}
-
-		__FLOG(_L8("Notifying protocol layer connection closed"));
+		OstTrace0( TRACE_NORMAL, DUP3_CPTPIPCONNECTION_STOPCONNECTION, "Notifying protocol layer connection closed" );
+		
 		iConnectionMgr->ConnectionClosed(*this );
 		SetTransactionPhase(EUndefined );
 		SetConnectionState(EIdle );
 		}
-
-	__FLOG(_L8("StopConnection - Exit"));
+	OstTraceFunctionExit0( CPTPIPCONNECTION_STOPCONNECTION_EXIT );
 	}
 
 /**
  * Invoked by the SocketHandler when there is an error.
  */
-#ifdef __FLOG_ACTIVE
 void CPTPIPConnection::HandleError(TInt aError)
-#else
-void CPTPIPConnection::HandleError(TInt /*aError*/)
-#endif
 	{
-	__FLOG_VA((_L8("SocketHandler received an error=%d, stopping connection.)"),aError));
+	OstTraceFunctionEntry0( CPTPIPCONNECTION_HANDLEERROR_ENTRY );
+	OstTrace1( TRACE_NORMAL, CPTPIPCONNECTION_HANDLEERROR, "SocketHandler received an error=%d, stopping connection.", aError );
+	
 	StopConnection();
+	OstTraceFunctionExit0( CPTPIPCONNECTION_HANDLEERROR_EXIT );
 	}
 
 /**
@@ -1337,12 +1405,14 @@ void CPTPIPConnection::HandleError(TInt /*aError*/)
  */
 void CPTPIPConnection::CompleteSelf(TInt aCompletionCode )
 	{
+	OstTraceFunctionEntry0( CPTPIPCONNECTION_COMPLETESELF_ENTRY );
 	// Setting ourselves active to wait to be done by ASP.
 	SetActive( );
 
 	// Simulating a fake ASP which completes us.
 	TRequestStatus* stat = &iStatus;
 	User::RequestComplete(stat, aCompletionCode );
+	OstTraceFunctionExit0( CPTPIPCONNECTION_COMPLETESELF_EXIT );
 	}
 
 /**
@@ -1350,10 +1420,11 @@ void CPTPIPConnection::CompleteSelf(TInt aCompletionCode )
  */
 void CPTPIPConnection::SetTransactionPhase(TMTPTransactionPhase aPhase )
 	{
-	__FLOG(_L8("SetTransactionPhase - Entry"));
+	OstTraceFunctionEntry0( CPTPIPCONNECTION_SETTRANSACTIONPHASE_ENTRY );
 	iTransactionState = aPhase;
-	__FLOG_VA((_L8("Transaction Phase set to 0x%08X"), iTransactionState));
-	__FLOG(_L8("SetTransactionPhase - Exit"));
+	OstTrace1( TRACE_NORMAL, CPTPIPCONNECTION_SETTRANSACTIONPHASE, "Transaction Phase set to 0x%08X", iTransactionState );
+	
+	OstTraceFunctionExit0( CPTPIPCONNECTION_SETTRANSACTIONPHASE_EXIT );
 	}
 
 /**
@@ -1361,10 +1432,11 @@ void CPTPIPConnection::SetTransactionPhase(TMTPTransactionPhase aPhase )
  */
 void CPTPIPConnection::SetConnectionState(TConnectionState aState )
 	{
-	__FLOG(_L8("SetConnectionState - Entry"));
+	OstTraceFunctionEntry0( CPTPIPCONNECTION_SETCONNECTIONSTATE_ENTRY );
 	iState = aState;
-	__FLOG_VA((_L8("Connection state set to 0x%08X"), iState));
-	__FLOG(_L8("SetConnectionState - Exit"));
+	OstTrace1( TRACE_NORMAL, CPTPIPCONNECTION_SETCONNECTIONSTATE, "Connection state set to 0x%08X", iState );
+	
+	OstTraceFunctionExit0( CPTPIPCONNECTION_SETCONNECTIONSTATE_EXIT );
 	}
 
 /**
@@ -1372,6 +1444,8 @@ void CPTPIPConnection::SetConnectionState(TConnectionState aState )
  */
 TBool CPTPIPConnection::ConnectionOpen( ) const
 	{
+	OstTraceFunctionEntry0( CPTPIPCONNECTION_CONNECTIONOPEN_ENTRY );
+	OstTraceFunctionExit0( CPTPIPCONNECTION_CONNECTIONOPEN_EXIT );
 	return((iState >= EInitialising) && (iState <= EDataSendFinished));
 	}
 
@@ -1380,6 +1454,8 @@ TBool CPTPIPConnection::ConnectionOpen( ) const
  */
 CPTPIPGenericContainer* CPTPIPConnection::CommandContainer( )
 	{
+	OstTraceFunctionEntry0( CPTPIPCONNECTION_COMMANDCONTAINER_ENTRY );
+	OstTraceFunctionExit0( CPTPIPCONNECTION_COMMANDCONTAINER_EXIT );
 	return iPTPIPCommandContainer;
 	}
 
@@ -1388,6 +1464,8 @@ CPTPIPGenericContainer* CPTPIPConnection::CommandContainer( )
  */
 CPTPIPGenericContainer* CPTPIPConnection::EventContainer( )
 	{
+	OstTraceFunctionEntry0( CPTPIPCONNECTION_EVENTCONTAINER_ENTRY );
+	OstTraceFunctionExit0( CPTPIPCONNECTION_EVENTCONTAINER_EXIT );
 	return iPTPIPEventContainer;
 	}
 
@@ -1396,6 +1474,8 @@ CPTPIPGenericContainer* CPTPIPConnection::EventContainer( )
  */
 CPTPIPDataContainer* CPTPIPConnection::DataContainer( )
 	{
+	OstTraceFunctionEntry0( CPTPIPCONNECTION_DATACONTAINER_ENTRY );
+	OstTraceFunctionExit0( CPTPIPCONNECTION_DATACONTAINER_EXIT );
 	return iPTPIPDataContainer;
 	}
 
@@ -1404,6 +1484,8 @@ CPTPIPDataContainer* CPTPIPConnection::DataContainer( )
  */
 TMTPTransactionPhase CPTPIPConnection::TransactionPhase( ) const
 	{
+	OstTraceFunctionEntry0( CPTPIPCONNECTION_TRANSACTIONPHASE_ENTRY );
+	OstTraceFunctionExit0( CPTPIPCONNECTION_TRANSACTIONPHASE_EXIT );
 	return iTransactionState;
 	}
 
@@ -1417,18 +1499,20 @@ TMTPTransactionPhase CPTPIPConnection::TransactionPhase( ) const
  */
 TUint32 CPTPIPConnection::ValidateAndSetCommandPayloadL( )
 	{
-	__FLOG(_L8("ValidateAndSetCommandPayload - Entry"));
+	OstTraceFunctionEntry0( CPTPIPCONNECTION_VALIDATEANDSETCOMMANDPAYLOADL_ENTRY );
 
 	TUint32 containerType = CommandContainer()->Uint32L(CPTPIPGenericContainer::EPacketType );
 	
-	__FLOG_VA((_L8("PTP packet type  = %d, adjust payload accordingly"), containerType));
+	OstTrace1( TRACE_NORMAL, CPTPIPCONNECTION_VALIDATEANDSETCOMMANDPAYLOADL, "PTP packet type  = %d, adjust payload accordingly", containerType );
+	
 
 	switch(containerType )
 		{
 		case EPTPIPPacketTypeOperationRequest:
 			if (!ValidateTransactionPhase(ERequestPhase ))
 				{
-				__FLOG(_L8("PTPIP ERROR: Request data unexpected in this phase, setting type to undefined"));
+				OstTrace0( TRACE_NORMAL, DUP1_CPTPIPCONNECTION_VALIDATEANDSETCOMMANDPAYLOADL, "PTPIP ERROR: Request data unexpected in this phase, setting type to undefined" );
+				
 				containerType = EPTPIPPacketTypeUndefined;
 				}
 			// Nothing to do , the payload is already set.  In case this is unexpected, 
@@ -1438,7 +1522,8 @@ TUint32 CPTPIPConnection::ValidateAndSetCommandPayloadL( )
 		case EPTPIPPacketTypeStartData:
 			if (!ValidateTransactionPhase(EDataIToRPhase ))
 				{
-				__FLOG(_L8("PTPIP ERROR: Start data unexpected in this phase, setting type to undefined"));
+				OstTrace0( TRACE_NORMAL, DUP2_CPTPIPCONNECTION_VALIDATEANDSETCOMMANDPAYLOADL, "PTPIP ERROR: Start data unexpected in this phase, setting type to undefined" );
+				
 				containerType = EPTPIPPacketTypeUndefined;
 				}
 			// Nothing to do , the payload is already set.  In case this is unexpected, 
@@ -1460,7 +1545,8 @@ TUint32 CPTPIPConnection::ValidateAndSetCommandPayloadL( )
 			break;
 			
 		case EPTPIPPacketTypeOperationResponse:
-			__FLOG(_L8("PTPIP ERROR: Response not expected from the initiator, setting type to undefined"));
+			OstTrace0( TRACE_NORMAL, DUP3_CPTPIPCONNECTION_VALIDATEANDSETCOMMANDPAYLOADL, "PTPIP ERROR: Response not expected from the initiator, setting type to undefined" );
+			
 			containerType = EPTPIPPacketTypeUndefined;			
 			// As per the protocol, the initiator cannot send a response, 
 			// only the responder( here device)  will create a response, 
@@ -1469,12 +1555,13 @@ TUint32 CPTPIPConnection::ValidateAndSetCommandPayloadL( )
 			
 
 		default:
-			__FLOG_VA((_L8("PTPIP ERROR: Invalid packet type received %d )"), containerType));
+			OstTrace1( TRACE_NORMAL, DUP4_CPTPIPCONNECTION_VALIDATEANDSETCOMMANDPAYLOADL, "PTPIP ERROR: Invalid packet type received %d", containerType );
+			
 			containerType = EPTPIPPacketTypeUndefined;
 			break;
 		}
 
-	__FLOG(_L8("ValidateAndSetCommandPayload - Exit"));
+	OstTraceFunctionExit0( CPTPIPCONNECTION_VALIDATEANDSETCOMMANDPAYLOADL_EXIT );
 	return containerType;
 	}
 
@@ -1488,10 +1575,11 @@ TUint32 CPTPIPConnection::ValidateAndSetCommandPayloadL( )
  */
 TUint32 CPTPIPConnection::ValidateDataPacketL( )
 	{
-	__FLOG(_L8("ValidateDataPacketL - Entry"));
+	OstTraceFunctionEntry0( CPTPIPCONNECTION_VALIDATEDATAPACKETL_ENTRY );
 
 	TUint32 containerType = DataContainer()->Uint32L(CPTPIPDataContainer::EPacketType );
-	__FLOG_VA((_L8("PTP data packet type  = %d, "), containerType));
+	OstTrace1( TRACE_NORMAL, CPTPIPCONNECTION_VALIDATEDATAPACKETL, "PTP data packet type  = %d", containerType );
+	
 
 	switch(containerType )
 		{
@@ -1499,18 +1587,20 @@ TUint32 CPTPIPConnection::ValidateDataPacketL( )
 		case EPTPIPPacketTypeEndData:
 			if (!ValidateTransactionPhase(EDataIToRPhase ))
 				{
-				__FLOG(_L8("PTPIP ERROR: Receiving data unexpected in this phase, setting type to undefined"));
+				OstTrace0( TRACE_NORMAL, DUP1_CPTPIPCONNECTION_VALIDATEDATAPACKETL, "PTPIP ERROR: Receiving data unexpected in this phase, setting type to undefined" );
+				
 				containerType = EPTPIPPacketTypeUndefined;
 				}
 			break;
 
 		default:
-			__FLOG_VA((_L8("PTPIP ERROR: Unexpected or Invalid packet type received while expecting data packet%d )"), containerType));
+			OstTrace1( TRACE_NORMAL, DUP2_CPTPIPCONNECTION_VALIDATEDATAPACKETL, "PTPIP ERROR: Unexpected or Invalid packet type received while expecting data packet%d ", containerType );
+			
 			containerType = EPTPIPPacketTypeUndefined;
 			break;
 		}
 
-	__FLOG(_L8("ValidateDataPacket - Exit"));
+	OstTraceFunctionExit0( CPTPIPCONNECTION_VALIDATEDATAPACKETL_EXIT );
 	return containerType;
 	}
 
@@ -1524,10 +1614,11 @@ TUint32 CPTPIPConnection::ValidateDataPacketL( )
  */
 TUint32 CPTPIPConnection::ValidateAndSetEventPayloadL( )
 	{
-	__FLOG(_L8("ValidateAndSetEventPayload - Entry"));
+	OstTraceFunctionEntry0( CPTPIPCONNECTION_VALIDATEANDSETEVENTPAYLOADL_ENTRY );
 
 	TUint32 containerType = EventContainer()->Uint32L(CPTPIPGenericContainer::EPacketType );
-	__FLOG_VA((_L8("PTP event packet type  = %d, adjust payload accordingly"), containerType));
+	OstTrace1( TRACE_NORMAL, CPTPIPCONNECTION_VALIDATEANDSETEVENTPAYLOADL, "PTP event packet type  = %d, adjust payload accordingly", containerType );
+	
 
 	switch(containerType )
 		{
@@ -1544,12 +1635,13 @@ TUint32 CPTPIPConnection::ValidateAndSetEventPayloadL( )
 			break;
 
 		default:
-			__FLOG_VA((_L8("PTPIP ERROR: Invalid packet type received %d )"), containerType));
+			OstTrace1( TRACE_NORMAL, DUP1_CPTPIPCONNECTION_VALIDATEANDSETEVENTPAYLOADL, "PTPIP ERROR: Invalid packet type received %d", containerType );
+			
 			containerType = EPTPIPPacketTypeUndefined;
 			break;
 		}
 
-	__FLOG(_L8("ValidateAndSetEventPayload - Exit"));
+	OstTraceFunctionExit0( CPTPIPCONNECTION_VALIDATEANDSETEVENTPAYLOADL_EXIT );
 	return containerType;
 	}
 
@@ -1562,16 +1654,18 @@ TUint32 CPTPIPConnection::ValidateAndSetEventPayloadL( )
 TBool CPTPIPConnection::ValidateTransactionPhase(
 		TMTPTransactionPhase aExpectedTransactionState )
 	{
-	__FLOG(_L8("ValidateTransactionPhase - Entry"));
-	__FLOG_VA((_L8("transaction state = %d"), iTransactionState));
+	OstTraceFunctionEntry0( CPTPIPCONNECTION_VALIDATETRANSACTIONPHASE_ENTRY );
+	OstTrace1( TRACE_NORMAL, CPTPIPCONNECTION_VALIDATETRANSACTIONPHASE, "transaction state = %d", iTransactionState );
+	
 	TBool valid(iTransactionState == aExpectedTransactionState);
 	if(!valid )
 		{
 		// Invalid transaction state, close the connection.
-		__FLOG_VA((_L8("PTPIP ERROR: invalid transaction state, current = %d, expected = %d"), iTransactionState, aExpectedTransactionState));
+		OstTraceExt2( TRACE_NORMAL, DUP1_CPTPIPCONNECTION_VALIDATETRANSACTIONPHASE, "PTPIP ERROR: invalid transaction state, current = %d, expected = %d", iTransactionState, aExpectedTransactionState );
+		
 		CloseConnection( );
 		}
-	__FLOG(_L8("ValidateTransactionPhase - Exit"));
+	OstTraceFunctionExit0( CPTPIPCONNECTION_VALIDATETRANSACTIONPHASE_EXIT );
 	return valid;
 	}
 
@@ -1581,7 +1675,7 @@ TBool CPTPIPConnection::ValidateTransactionPhase(
  */
 TBool CPTPIPConnection::HandleTCPError(TInt& aError )
 	{
-	__FLOG(_L8("TCPErrorHandled - Entry"));
+	OstTraceFunctionEntry0( CPTPIPCONNECTION_HANDLETCPERROR_ENTRY );
 	TInt ret(EFalse);
 	if(aError == KErrDisconnected || aError == KErrEof)
 		{
@@ -1589,13 +1683,15 @@ TBool CPTPIPConnection::HandleTCPError(TInt& aError )
 		CloseConnection( );
 		ret = ETrue;
 		}
-	__FLOG(_L8("TCPErrorHandled - Exit"));
+	OstTraceFunctionExit0( CPTPIPCONNECTION_HANDLETCPERROR_EXIT );
 	return ret;
 	}
 
 void CPTPIPConnection::SetDataTypeInDataContainerL(TPTPIPPacketTypeCode aType )
 	{
+	OstTraceFunctionEntry0( CPTPIPCONNECTION_SETDATATYPEINDATACONTAINERL_ENTRY );
 	iPTPIPDataContainer->SetUint32L(CPTPIPDataContainer::EPacketType, aType );
+	OstTraceFunctionExit0( CPTPIPCONNECTION_SETDATATYPEINDATACONTAINERL_EXIT );
 	}
 
 

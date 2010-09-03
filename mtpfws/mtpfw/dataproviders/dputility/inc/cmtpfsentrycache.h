@@ -22,7 +22,6 @@
 #define CMTPFSENTRYCACHE_H
 
 #include <f32file.h> 
-#include "mtpdebug.h"
 
 /** 
 This class is used to cache the fs entry information of the big file (>1G) which is being
@@ -65,10 +64,6 @@ private:
   used to return to getobjectproplist and getobjectinfo operations
   */
   TEntry            iFileEntry;	
-	/**
-    FLOGGER debug trace member variable.
-  */
-  __FLOG_DECLARATION_MEMBER_MUTABLE;
 	};
 	
 #endif // CMTPFSENTRYCACHE_H

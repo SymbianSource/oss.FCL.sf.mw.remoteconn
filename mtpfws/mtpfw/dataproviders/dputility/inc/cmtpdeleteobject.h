@@ -26,7 +26,6 @@
 
 #include "rmtpframework.h"
 #include "cmtprequestprocessor.h"
-#include "mtpdebug.h"
 
 class MMTPObjectMgr;
 
@@ -58,11 +57,6 @@ private:
 	
 private:    
 
-    /**
-    FLOGGER debug trace member variable.
-    */
-    __FLOG_DECLARATION_MEMBER_MUTABLE;
-	
 	/**
     True if any deletion succeeded
 	*/

@@ -32,8 +32,11 @@
 #include "mtpimagedppanic.h"
 #include "cmtpimagedp.h"
 #include "mtpimagedputilits.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpimagedpgetobjectinfoTraces.h"
+#endif
 
-__FLOG_STMT(_LIT8(KComponent,"CMTPImageDpGetObjectInfo");)
 
 /**
 Two-phase construction method
@@ -56,11 +59,10 @@ Destructor
 */	
 CMTPImageDpGetObjectInfo::~CMTPImageDpGetObjectInfo()
     {
-    __FLOG(_L8(">> ~CMTPImageDpGetObjectInfo"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPGETOBJECTINFO_CMTPIMAGEDPGETOBJECTINFO_DES_ENTRY );
     delete iObjectInfoToBuild;
     delete iObjectMeta;
-    __FLOG(_L8("<< ~CMTPImageDpGetObjectInfo"));
-    __FLOG_CLOSE;
+    OstTraceFunctionExit0( CMTPIMAGEDPGETOBJECTINFO_CMTPIMAGEDPGETOBJECTINFO_DES_EXIT );
     }
 
 /**
@@ -71,15 +73,13 @@ CMTPImageDpGetObjectInfo::CMTPImageDpGetObjectInfo(MMTPDataProviderFramework& aF
     CMTPRequestProcessor(aFramework, aConnection, 0, NULL),
     iObjectPropertyMgr(aDataProvider.PropertyMgr())
     {
-    __FLOG_OPEN(KMTPSubsystem, KComponent);
-    __FLOG(_L8("CMTPImageDpGetObjectInfo::CMTPImageDpGetObjectInfo"));
     }
 
 TMTPResponseCode CMTPImageDpGetObjectInfo::CheckRequestL()
     {
-    __FLOG(_L8(">> CMTPImageDpGetObject::CheckRequestL"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPGETOBJECTINFO_CHECKREQUESTL_ENTRY );
     TMTPResponseCode result = MTPImageDpUtilits::VerifyObjectHandleL(iFramework, Request().Uint32(TMTPTypeRequest::ERequestParameter1), *iObjectMeta);
-    __FLOG(_L8("<< CMTPImageDpGetObject::CheckRequestL"));
+    OstTraceFunctionExit0( CMTPIMAGEDPGETOBJECTINFO_CHECKREQUESTL_EXIT );
     return result;
     }
     
@@ -88,10 +88,10 @@ GetObjectInfo request handler
 */		
 void CMTPImageDpGetObjectInfo::ServiceL()
     {
-    __FLOG(_L8(">> CMTPImageDpGetObjectInfo::ServiceL"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPGETOBJECTINFO_SERVICEL_ENTRY );
     BuildObjectInfoL();
     SendDataL(*iObjectInfoToBuild);	
-    __FLOG(_L8("<< CMTPImageDpGetObjectInfo::ServiceL"));
+    OstTraceFunctionExit0( CMTPIMAGEDPGETOBJECTINFO_SERVICEL_EXIT );
     }
     
 /**
@@ -99,10 +99,10 @@ Second-phase construction
 */		
 void CMTPImageDpGetObjectInfo::ConstructL()
     {
-    __FLOG(_L8(">> CMTPImageDpGetObjectInfo::ConstructL"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPGETOBJECTINFO_CONSTRUCTL_ENTRY );
     iObjectInfoToBuild = CMTPTypeObjectInfo::NewL();
     iObjectMeta = CMTPObjectMetaData::NewL();
-    __FLOG(_L8("<< CMTPImageDpGetObjectInfo::ConstructL"));
+    OstTraceFunctionExit0( CMTPIMAGEDPGETOBJECTINFO_CONSTRUCTL_EXIT );
     }
     
 /**
@@ -110,7 +110,7 @@ Populate the object info dataset
 */		
 void CMTPImageDpGetObjectInfo::BuildObjectInfoL()	
     {
-    __FLOG(_L8(">> CMTPImageDpGetObjectInfo::BuildObjectInfoL"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPGETOBJECTINFO_BUILDOBJECTINFOL_ENTRY );
     iObjectPropertyMgr.SetCurrentObjectL(*iObjectMeta, EFalse);
     
     //1. storage id
@@ -182,7 +182,7 @@ void CMTPImageDpGetObjectInfo::BuildObjectInfoL()
     
     //18. keyword
     SetKeywordL();
-    __FLOG(_L8("<< CMTPImageDpGetObjectInfo::BuildObjectInfoL"));
+    OstTraceFunctionExit0( CMTPIMAGEDPGETOBJECTINFO_BUILDOBJECTINFOL_EXIT );
     }
 /**
 Set the file name of the current object in the data set
@@ -190,13 +190,13 @@ Set the file name of the current object in the data set
 */	
 void CMTPImageDpGetObjectInfo::SetFileNameL()
     {
+    OstTraceFunctionEntry0( CMTPIMAGEDPGETOBJECTINFO_SETFILENAMEL_ENTRY );
     //use the name without full path specification
-    __FLOG(_L8(">> CMTPImageDpGetObjectInfo::SetFileNameL"));
     CMTPTypeString* fileName = CMTPTypeString::NewLC();
     iObjectPropertyMgr.GetPropertyL(EMTPObjectPropCodeObjectFileName, *fileName);
     iObjectInfoToBuild->SetStringL(CMTPTypeObjectInfo::EFilename, fileName->StringChars());
     CleanupStack::PopAndDestroy(fileName);
-    __FLOG(_L8("<< CMTPImageDpGetObjectInfo::SetFileNameL"));
+    OstTraceFunctionExit0( CMTPIMAGEDPGETOBJECTINFO_SETFILENAMEL_EXIT );
     }
     
 /**
@@ -205,8 +205,8 @@ Set the file size and modified/created date in the data set
 */	
 void CMTPImageDpGetObjectInfo::SetFileSizeDateL()
     {
+    OstTraceFunctionEntry0( CMTPIMAGEDPGETOBJECTINFO_SETFILESIZEDATEL_ENTRY );
     //file size
-    __FLOG(_L8(">> CMTPImageDpGetObjectInfo::SetFileSizeDateL"));
     TUint64 fileSize;
     iObjectPropertyMgr.GetPropertyL(EMTPObjectPropCodeObjectSize, fileSize);
     TUint32 shortFileSize = (fileSize > KMaxTUint32) ? KMaxTUint32 : static_cast<TUint32>(fileSize);
@@ -222,7 +222,7 @@ void CMTPImageDpGetObjectInfo::SetFileSizeDateL()
     iObjectInfoToBuild->SetStringL(CMTPTypeObjectInfo::EDateCreated, createdString->StringChars());	
     
     CleanupStack::PopAndDestroy(2); // createdString, dateString
-    __FLOG(_L8("<< CMTPImageDpGetObjectInfo::SetFileSizeDateL"));
+    OstTraceFunctionExit0( CMTPIMAGEDPGETOBJECTINFO_SETFILESIZEDATEL_EXIT );
     }
     
 /**
@@ -231,8 +231,8 @@ Set the keyword of the current object in the data set
 */	
 void CMTPImageDpGetObjectInfo::SetKeywordL()
     {
+    OstTraceFunctionEntry0( CMTPIMAGEDPGETOBJECTINFO_SETKEYWORDL_ENTRY );
     //empty keyword
-    __FLOG(_L8(">> CMTPImageDpGetObjectInfo::SetKeywordL"));
     iObjectInfoToBuild->SetStringL(CMTPTypeObjectInfo::EKeywords, KNullDesC);
-    __FLOG(_L8("<< CMTPImageDpGetObjectInfo::SetKeywordL"));
+    OstTraceFunctionExit0( CMTPIMAGEDPGETOBJECTINFO_SETKEYWORDL_EXIT );
     }

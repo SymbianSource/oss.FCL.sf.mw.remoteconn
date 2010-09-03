@@ -27,7 +27,11 @@
 #include "sbedataowner.h"
 #include <connect/sbtypes.h>
 #include "sbepanic.h"
-#include "sblog.h"
+#include "OstTraceDefinitions.h"
+#include "sbtrace.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "absessionTraces.h"
+#endif
 
 namespace conn
 	{
@@ -38,10 +42,12 @@ namespace conn
 	@param aSecureId The SID of the client that's connecting to this session
 	*/
 		{
+		OstTraceFunctionEntry0( CABSESSION_NEWL_ENTRY );
 		CABSession* self = new (ELeave) CABSession(aSecureId);
 		CleanupStack::PushL(self);
 		self->ConstructL();
 		CleanupStack::Pop(self);
+		OstTraceFunctionExit0( CABSESSION_NEWL_EXIT );
 		return self;
 		}
 		
@@ -50,8 +56,10 @@ namespace conn
 	Symbian second phase constructor. Initialise some more of the data members
 	*/
 		{
+		OstTraceFunctionEntry0( CABSESSION_CONSTRUCTL_ENTRY );
 		iActiveSchedulerWait = new (ELeave) CActiveSchedulerWait;
-		__LOG1("CABSession::ConstructL() [0x%08x]", iClientSID.iId);
+		OstTrace1(TRACE_NORMAL, CABSESSION_CONSTRUCTL , "[0x%08x]", iClientSID.iId);
+		OstTraceFunctionExit0( CABSESSION_CONSTRUCTL_EXIT );
 		}
 		
 	CABSession::CABSession(TSecureId aSecureId) : iClientSID(aSecureId), 
@@ -65,6 +73,8 @@ namespace conn
 	@param aSecureId The SID of the client that's connecting to this session
     */
 		{
+		OstTraceFunctionEntry0( CABSESSION_CABSESSION_CONS_ENTRY );
+		OstTraceFunctionExit0( CABSESSION_CABSESSION_CONS_EXIT );
 		}
 		
 	CDataOwner& CABSession::DataOwnerL() const
@@ -99,7 +109,8 @@ namespace conn
 	@return An error code
 	*/
 		{
-		__LOG1("CABSession::WatchdogExpired() - [0x%08x] Watchdog expired on session", iClientSID.iId);
+		OstTraceFunctionEntry0( CABSESSION_WATCHDOGEXPIRED_ENTRY );
+		OstTrace1(TRACE_NORMAL, CABSESSION_WATCHDOGEXPIRED, "[0x%08x] Watchdog expired on session", iClientSID.iId);
 		
 		iMisbehavingClient = ETrue;			// Flag the client as having not responded
 		
@@ -117,6 +128,7 @@ namespace conn
 			Panic(KErrTimedOut);
 			}
 			
+		OstTraceFunctionExit0( CABSESSION_WATCHDOGEXPIRED_EXIT );
 		return KErrTimedOut;
 		}
 
@@ -143,7 +155,8 @@ namespace conn
     Class destructor
     */
 		{
-		__LOG1("~CABSession for sid:0x%08x", iClientSID.iId);
+		OstTraceFunctionEntry0( CABSESSION_CABSESSION_DES_ENTRY );
+		OstTrace1(TRACE_NORMAL, CABSESSION_CABSESSION, "~CABSession for sid:0x%08x", iClientSID.iId);
 		delete iCallbackWatchdog;
 		iCallbackWatchdog = NULL;
 		
@@ -159,6 +172,7 @@ namespace conn
 		HandleIPCClosingDownCallback();
 		
 		delete iActiveSchedulerWait;
+		iActiveSchedulerWait = NULL;
 
 		//
 		// If the client has detached properly, they should
@@ -168,6 +182,7 @@ namespace conn
 			{
 			pServer->DropSession();
 			}
+		OstTraceFunctionExit0( CABSESSION_CABSESSION_DES_EXIT );
 		}
 		
 	void CABSession::CreateL()
@@ -176,9 +191,11 @@ namespace conn
 	Increments the server's session count
 	*/
 		{
+		OstTraceFunctionEntry0( CABSESSION_CREATEL_ENTRY );
 		//
 		// Increase the servers session count.
 		Server().AddSession();
+		OstTraceFunctionExit0( CABSESSION_CREATEL_EXIT );
 		}
 
 	void CABSession::RestoreCompleteL(TDriveNumber aDriveNumber)
@@ -188,7 +205,9 @@ namespace conn
 	@param aDriveNumber The drive that has finished being backed up
 	*/
 		{
+		OstTraceFunctionEntry0( CABSESSION_RESTORECOMPLETEL_ENTRY );
 		MakeCallbackRestoreCompleteL(aDriveNumber);
+		OstTraceFunctionExit0( CABSESSION_RESTORECOMPLETEL_EXIT );
 		}
 
 	void CABSession::AllSnapshotsSuppliedL()
@@ -197,7 +216,9 @@ namespace conn
 	
 	*/
 		{
+		OstTraceFunctionEntry0( CABSESSION_ALLSNAPSHOTSSUPPLIEDL_ENTRY );
 		MakeCallbackAllSnapshotsSuppliedL();
+		OstTraceFunctionExit0( CABSESSION_ALLSNAPSHOTSSUPPLIEDL_EXIT );
 		}
 
 	void CABSession::GetExpectedDataSizeL(TDriveNumber aDriveNumber, TUint& aSize)
@@ -208,7 +229,9 @@ namespace conn
 	@param aSize Upon exit, this parameter will indicate the expected data size
 	*/
 		{
+		OstTraceFunctionEntry0( CABSESSION_GETEXPECTEDDATASIZEL_ENTRY );
 		aSize = MakeCallbackGetExpectedDataSizeL(aDriveNumber);
+		OstTraceFunctionExit0( CABSESSION_GETEXPECTEDDATASIZEL_EXIT );
 		}
 		
 	void CABSession::SupplyDataL(TDriveNumber aDriveNumber, TTransferDataType aTransferType, TDesC8& aBuffer,
@@ -224,6 +247,7 @@ namespace conn
 	@param aProxySID The secure ID of the proxy
 	*/
 		{
+		OstTraceFunctionEntry0( CABSESSION_SUPPLYDATAL_ENTRY );
 		TInt dataSizeTransferred = 0;
 		TInt remainingBlockSize = 0;
 		TBool lastSection;
@@ -259,7 +283,7 @@ namespace conn
 				lastSection = aLastSection;
 				}
 			
-			__LOG2("CABSession::SupplyDataL() - [0x%08x] Supplying data to ABClient, %d bytes transferred", iClientSID.iId, dataSizeTransferred);
+			OstTraceExt2(TRACE_NORMAL, CABSESSION_SUPPLYDATAL, "[0x%08x] Supplying data to ABClient, %d bytes transferred", iClientSID.iId, static_cast<TInt32>(dataSizeTransferred));
 	
 			switch(aTransferType)
 				{
@@ -292,6 +316,7 @@ namespace conn
 					} break;
 				default:
 					{
+					OstTrace0(TRACE_ERROR, DUP1_CABSESSION_SUPPLYDATAL, "Leave: KErrNotSupported");
 					User::Leave(KErrNotSupported);
 					}
 				}
@@ -300,6 +325,7 @@ namespace conn
 			// shouldn't be sent again
 			aSuppressInitDataOwner = ETrue;
 			}
+		OstTraceFunctionExit0( CABSESSION_SUPPLYDATAL_EXIT );
 		}
 			
 	void CABSession::RequestDataL(TDriveNumber aDriveNumber, TTransferDataType aTransferType, TPtr8& aBuffer,
@@ -315,8 +341,9 @@ namespace conn
 	@param aProxySID The secure ID of the proxy
 	*/
 		{
-        __LOG5("CABSession::RequestDataL() - START - aDrive: %c, aTType: %d, aBuffer.Ptr(): 0x%08x, aBuffer.Length(): %d, aProxySID: 0x%08x", 
-            aDriveNumber + 'A', aTransferType, aBuffer.Ptr(), aBuffer.Length(), aProxySID.iId );
+        OstTraceFunctionEntry0( CABSESSION_REQUESTDATAL_ENTRY );
+        OstTraceExt5(TRACE_NORMAL, CABSESSION_REQUESTDATAL, "aDrive: %c, aTType: %d, aBuffer.Ptr(): 0x%08x, aBuffer.Length(): %d, aProxySID: 0x%08x", 
+            static_cast<TInt8>(aDriveNumber + 'A'), static_cast<TInt32>(aTransferType), reinterpret_cast<TInt32>(aBuffer.Ptr()), static_cast<TInt32>(aBuffer.Length()), aProxySID.iId );
 
         TInt dataSizeTransferred = 0;
 		TInt remainingBlockSize = 0;
@@ -330,7 +357,7 @@ namespace conn
 			aBuffer.SetMax();
 
 			remainingBlockSize = aBuffer.MaxSize() - dataSizeTransferred;
-			__LOG2("CABSession::RequestDataL() - dataSizeTransferred: %d, remainingBlockSize: %d", dataSizeTransferred, remainingBlockSize);
+			OstTraceExt2(TRACE_NORMAL, DUP1_CABSESSION_REQUESTDATAL, "dataSizeTransferred: %d, remainingBlockSize: %d", dataSizeTransferred, remainingBlockSize);
 
 			if (remainingBlockSize > KIPCMessageSize)
 				{
@@ -338,7 +365,7 @@ namespace conn
 				}
 				
 			transferBlock.Set(aBuffer.MidTPtr(dataSizeTransferred, remainingBlockSize));
-			__LOG2("CABSession::RequestDataL() - transferBlock: 0x%08x (%d)", transferBlock.Ptr(), transferBlock.Length());
+			OstTraceExt2(TRACE_NORMAL, DUP2_CABSESSION_REQUESTDATAL, "transferBlock: 0x%08x (%d)", reinterpret_cast<TInt32>(transferBlock.Ptr()), static_cast<TInt32>(transferBlock.Length()));
 
 			switch(aTransferType)
 				{
@@ -364,6 +391,7 @@ namespace conn
 					} break;
 				default:
 					{
+					OstTrace0(TRACE_ERROR, DUP5_CABSESSION_REQUESTDATAL, "Leave: KErrNotSupported");
 					User::Leave(KErrNotSupported);
 					}
 				}
@@ -375,15 +403,15 @@ namespace conn
 			// update our count to reflect the new data supplied by the client
 			dataSizeTransferred += transferBlock.Size();
 
-            __LOG2("CABSession::RequestDataL() - received data so far: %d, buffer start address: 0x%08x", dataSizeTransferred, aBuffer.Ptr());
-            //__LOGDATA("CABSession::RequestDataL() - total received data - %S", aBuffer.Ptr(), dataSizeTransferred);
+			OstTraceExt2(TRACE_NORMAL, DUP3_CABSESSION_REQUESTDATAL, "received data so far: %d, buffer start address: 0x%08x", static_cast<TInt32>(dataSizeTransferred), reinterpret_cast<TInt32>(aBuffer.Ptr()));
 
-			__LOG2("CABSession::RequestDataL() - [0x%08x] Requesting data from ABClient %d bytes so far)", iClientSID.iId, dataSizeTransferred);
+			OstTraceExt2(TRACE_NORMAL, DUP4_CABSESSION_REQUESTDATAL, "[0x%08x] Requesting data from ABClient %d bytes so far)", iClientSID.iId, static_cast<TInt32>(dataSizeTransferred));
 			
 			aBuffer.SetLength(dataSizeTransferred);
 			} while (!lastSection && (dataSizeTransferred < aBuffer.MaxSize()));
 		
 		aLastSection = lastSection;
+		OstTraceFunctionExit0( CABSESSION_REQUESTDATAL_EXIT );
 		}
 		
 	void CABSession::TerminateMultiStageOperationL()
@@ -391,7 +419,9 @@ namespace conn
 	Instruct the client that copying of data has been aborted and it should clean up
 	*/
 		{
+		OstTraceFunctionEntry0( CABSESSION_TERMINATEMULTISTAGEOPERATIONL_ENTRY );
 		MakeCallbackTerminateMultiStageOperationL();
+		OstTraceFunctionExit0( CABSESSION_TERMINATEMULTISTAGEOPERATIONL_EXIT );
 		}
 		
 	TUint CABSession::GetDataChecksumL(TDriveNumber aDrive)
@@ -423,6 +453,7 @@ namespace conn
 	@see CDataOwner::ReturnFromActiveCall()
 	*/
 		{
+		OstTraceFunctionEntry0( CABSESSION_MADECALLBACK_ENTRY );
 		// Reset the leave flag
 		iABClientLeaveCode = KErrNone;
 		
@@ -440,10 +471,11 @@ namespace conn
 		// Send the message back to the callback handler
 		iMessage.Complete(KErrNone);
 		
-		__LOG1("CABSession::MadeCallback() - [0x%08x] Calling ABClient to process callback", iClientSID.iId);
+		OstTrace1(TRACE_NORMAL, CABSESSION_MADECALLBACK, "[0x%08x] Calling ABClient to process callback", iClientSID.iId);
 
 		// Set the timeout for the callback
 		iActiveSchedulerWait->Start();
+		OstTraceFunctionExit0( CABSESSION_MADECALLBACK_EXIT );
 		}
 		
 	void CABSession::ReturnFromCallback()
@@ -452,6 +484,7 @@ namespace conn
 	so that the Data Owner appears to have made a synchronous call into the ABServer
 	*/
 		{
+		OstTraceFunctionEntry0( CABSESSION_RETURNFROMCALLBACK_ENTRY );
 		if (iCallbackWatchdog)
 			{
 			if (iCallbackWatchdog->IsActive())
@@ -465,9 +498,10 @@ namespace conn
 
 		if (iActiveSchedulerWait->IsStarted())
 			{
-			__LOG1("CABSession::MadeCallback() - [0x%08x] has returned from callback - CASW::AsyncStop()", iClientSID.iId);
+		    OstTrace1(TRACE_NORMAL, CABSESSION_RETURNFROMCALLBACK, "[0x%08x] has returned from callback - CASW::AsyncStop()", iClientSID.iId);
 			iActiveSchedulerWait->AsyncStop();
 			}
+		OstTraceFunctionExit0( CABSESSION_RETURNFROMCALLBACK_EXIT );
 		}
 
 	void CABSession::TakeOwnershipOfIPCMessage(const RMessage2& aMessage)
@@ -487,7 +521,8 @@ namespace conn
 	@param aMessage The IPC message
 	*/
 		{
-		__LOG1("CABSession::HandleIPCBURModeInfoL() - [0x%08x] Received IPC IPCBURModeInfo", iClientSID.iId);
+		OstTraceFunctionEntry0( CABSESSION_HANDLEIPCBURMODEINFOL_ENTRY );
+		OstTrace1(TRACE_NORMAL, CABSESSION_HANDLEIPCBURMODEINFOL, "[0x%08x] Received IPC IPCBURModeInfo", iClientSID.iId);
 
 		TPckgC<TBURPartType> partType(Server().DataOwnerManager().BURType());
 		TPckgC<TBackupIncType> incType(Server().DataOwnerManager().IncType());
@@ -496,6 +531,7 @@ namespace conn
 		aMessage.WriteL(0, Server().DataOwnerManager().DriveList());
 		aMessage.WriteL(1, partType);
 		aMessage.WriteL(2, incType);
+		OstTraceFunctionExit0( CABSESSION_HANDLEIPCBURMODEINFOL_EXIT );
 		}
 		
 	void CABSession::HandleIPCDoesPartialBURAffectMeL(const RMessage2& aMessage)
@@ -505,10 +541,12 @@ namespace conn
 	@param aMessage The IPC message
 	*/
 		{
-		__LOG1("CABSession::HandleIPCDoesPartialBURAffectMeL() - [0x%08x] Received IPC DoesPartialBURAffectMe", iClientSID.iId);
+		OstTraceFunctionEntry0( CABSESSION_HANDLEIPCDOESPARTIALBURAFFECTMEL_ENTRY );
+		OstTrace1(TRACE_NORMAL, CABSESSION_HANDLEIPCDOESPARTIALBURAFFECTMEL, "[0x%08x] Received IPC DoesPartialBURAffectMe", iClientSID.iId);
 
 		TPckgC<TBool> resultPkg(Server().DataOwnerManager().IsSetForPartialL(iClientSID));
 		aMessage.WriteL(0, resultPkg);
+		OstTraceFunctionExit0( CABSESSION_HANDLEIPCDOESPARTIALBURAFFECTMEL_EXIT );
 		}
 
 	void CABSession::HandleIPCConfirmReadyForBURL(const RMessage2& aMessage)
@@ -518,8 +556,9 @@ namespace conn
 	@param aMessage The IPC message
 	*/
 		{
+		OstTraceFunctionEntry0( CABSESSION_HANDLEIPCCONFIRMREADYFORBURL_ENTRY );
 		TInt errorCode = aMessage.Int0();
-		__LOG2("CABSession::HandleIPCConfirmReadyForBURL() - [0x%08x] Received IPC ConfirmReadyForBUR, errorCode: %d", iClientSID.iId, errorCode);
+		OstTraceExt2(TRACE_NORMAL, CABSESSION_HANDLEIPCCONFIRMREADYFORBURL, "[0x%08x] Received IPC ConfirmReadyForBUR, errorCode: %d", iClientSID.iId, static_cast<TInt32>(errorCode));
 		
 		// Set our internal state to indicate that the client has confirmed ready for BUR
 		iConfirmedReadyForBUR = ETrue;
@@ -544,6 +583,7 @@ namespace conn
 		
 		// Inform the Data Owner of the new status
 		TRAP_IGNORE(DataOwnerL().SetReadyState(status));
+		OstTraceFunctionExit0( CABSESSION_HANDLEIPCCONFIRMREADYFORBURL_EXIT );
 		}
 
 	void CABSession::HandleIPCPropagateLeaveL(const RMessage2& aMessage)
@@ -552,12 +592,14 @@ namespace conn
 	@param aMessage The IPC message
 	*/
 		{
+		OstTraceFunctionEntry0( CABSESSION_HANDLEIPCPROPAGATELEAVEL_ENTRY );
 		// Leave with the propagated leave code, but not inside this ServiceL, it'll leave to the client again 
 		// We need to ensure that it leaves through SBEngine back to SBEClient. Leave code will be checked 
 		// after the callback has been made and leave will be made then if necessary
 		iABClientLeaveCode = aMessage.Int0();
 
-		__LOG2("CABSession::HandleIPCPropagateLeaveL() - [0x%08x] Received IPC Leave(%d)", iClientSID.iId, iABClientLeaveCode);
+		OstTraceExt2(TRACE_NORMAL, CABSESSION_HANDLEIPCPROPAGATELEAVEL, "[0x%08x] Received IPC Leave(%d)", iClientSID.iId, static_cast<TInt32>(iABClientLeaveCode));
+		OstTraceFunctionExit0( CABSESSION_HANDLEIPCPROPAGATELEAVEL_EXIT );
 		}
 
 	TInt CABSession::HandleIPCGetDataSyncL(const RMessage2& aMessage)
@@ -568,7 +610,8 @@ namespace conn
 	@return KErrNone if OK, standard error code otherwise
 	*/
 		{
-		__LOG1("CABSession::HandleIPCGetDataSyncL() - [0x%08x] has requested data over IPC", iClientSID.iId);
+		OstTraceFunctionEntry0( CABSESSION_HANDLEIPCGETDATASYNCL_ENTRY );
+		OstTrace1(TRACE_NORMAL, CABSESSION_HANDLEIPCGETDATASYNCL, "[0x%08x] has requested data over IPC", iClientSID.iId);
 
 		TInt completionCode = KErrNone;
 		
@@ -582,7 +625,8 @@ namespace conn
 			completionCode = KErrCorrupt;
 			}
 			
-		__LOG2("CABSession::HandleIPCGetDataSyncL() - [0x%08x] completion code: %d", iClientSID.iId, completionCode);
+		OstTraceExt2(TRACE_NORMAL, DUP1_CABSESSION_HANDLEIPCGETDATASYNCL, "[0x%08x] completion code: %d", iClientSID.iId, static_cast<TInt32>(completionCode));
+		OstTraceFunctionExit0( CABSESSION_HANDLEIPCGETDATASYNCL_EXIT );
 		return completionCode;
 		}
 
@@ -594,7 +638,8 @@ namespace conn
 	@return KErrNone if OK, standard error code otherwise
 	*/
 		{
-		__LOG1("CABSession::HandleIPCSendDataLengthL() - [0x%08x] is informing server of the data length coming back", iClientSID.iId);
+		OstTraceFunctionEntry0( CABSESSION_HANDLEIPCSENDDATALENGTHL_ENTRY );
+		OstTrace1(TRACE_NORMAL, CABSESSION_HANDLEIPCSENDDATALENGTHL, "[0x%08x] is informing server of the data length coming back", iClientSID.iId);
 
 		TInt completionCode = KErrNone;
 
@@ -610,6 +655,7 @@ namespace conn
 			completionCode = KErrCorrupt;
 			}
 			
+		OstTraceFunctionExit0( CABSESSION_HANDLEIPCSENDDATALENGTHL_EXIT );
 		return completionCode;
 		}
 
@@ -620,14 +666,16 @@ namespace conn
 	@return KErrNone if OK, standard error code otherwise
 	*/
 		{
+		OstTraceFunctionEntry0( CABSESSION_HANDLEIPCCLOSINGDOWNCALLBACK_ENTRY );
 		TInt completionCode = KErrNotFound;
-		__LOG1("CABSession::HandleIPCClosingDownCallback() - [0x%08x] is closing down the callback interface", iClientSID.iId);
+		OstTrace1(TRACE_NORMAL, CABSESSION_HANDLEIPCCLOSINGDOWNCALLBACK, "[0x%08x] is closing down the callback interface", iClientSID.iId);
 		if (!iMessage.IsNull())
 			{
 			completionCode = KErrNone;
 			iMessage.Complete(KErrCancel);
 			}
 
+		OstTraceFunctionExit0( CABSESSION_HANDLEIPCCLOSINGDOWNCALLBACK_EXIT );
 		return completionCode;
 		}
 
@@ -639,33 +687,32 @@ namespace conn
     @param aMessage  Reference to a RMessage2 object
 	*/
 		{
+ 		OstTraceFunctionEntry0( CABSESSION_SERVICEL_ENTRY );
  		const TInt ipcMessageFn = aMessage.Function();
  		TInt completionCode = KErrNone;			// Complete the aMessage with this code
 
-	#if defined(SBE_LOGGING_ENABLED)
 		RThread client;
 		aMessage.Client(client);
 		const TFullName name(client.FullName());
 		client.Close();
-		__LOG5("CABSession::ServiceL() - START - [0x%08x] function: %d from client: %S, iMisbehavingClient: %d, iConfirmedReadyForBUR: %d", iClientSID.iId, ipcMessageFn, &name, iMisbehavingClient, iConfirmedReadyForBUR);
-	#endif
+		OstTraceExt5(TRACE_NORMAL, CABSESSION_SERVICEL, "[0x%08x] function: %d from client: %S, iMisbehavingClient: %d, iConfirmedReadyForBUR: %d", iClientSID.iId, static_cast<TInt32>(ipcMessageFn), name, static_cast<TInt32>(iMisbehavingClient), static_cast<TInt32>(iConfirmedReadyForBUR));
 		
 		switch(ipcMessageFn)
 			{
 			case EABMsgBURModeInfo:
-	            __LOG("CABSession::ServiceL() - EABMsgBURModeInfo");
+			    OstTrace0(TRACE_NORMAL, DUP1_CABSESSION_SERVICEL, "EABMsgBURModeInfo");
 				{
 				HandleIPCBURModeInfoL(aMessage);
 				break;
 				}
 			case EABMsgDoesPartialAffectMe:
-	            __LOG("CABSession::ServiceL() - EABMsgDoesPartialAffectMe");
+			    OstTrace0(TRACE_NORMAL, DUP2_CABSESSION_SERVICEL, "EABMsgDoesPartialAffectMe");
 				{
 				HandleIPCDoesPartialBURAffectMeL(aMessage);
 				break;
 				}
 			case EABMsgConfirmReadyForBUR:
-	            __LOG("CABSession::ServiceL() - EABMsgConfirmReadyForBUR");
+			    OstTrace0(TRACE_NORMAL, DUP3_CABSESSION_SERVICEL, "EABMsgConfirmReadyForBUR");
 				{
 				if (iMisbehavingClient)
 					{
@@ -681,7 +728,7 @@ namespace conn
 			case EABMsgPrimeForCallback:
 			case EABMsgPrimeForCallbackAndResponse:
 			case EABMsgPrimeForCallbackAndResponseDes:
-	            __LOG("CABSession::ServiceL() - EABMsgPrimeForCallback/EABMsgPrimeForCallbackAndResponse/EABMsgPrimeForCallbackAndResponseDes");
+			    OstTrace0(TRACE_NORMAL, DUP4_CABSESSION_SERVICEL, "EABMsgPrimeForCallback/EABMsgPrimeForCallbackAndResponse/EABMsgPrimeForCallbackAndResponseDes");
 				{
 				CDataOwner* dataOwner = NULL;
 				TRAPD(err, dataOwner = &DataOwnerL());
@@ -697,6 +744,7 @@ namespace conn
 						{
 						if (err != KErrNotFound)
 							{
+						    OstTrace1(TRACE_ERROR, DUP12_CABSESSION_SERVICEL, "Leave: %d", err);
 							User::Leave(err);
 							}
 						}
@@ -715,6 +763,7 @@ namespace conn
 						{
 						if (err != KErrNotFound)
 							{
+						    OstTrace1(TRACE_ERROR, DUP13_CABSESSION_SERVICEL, "Leave: %d", err);
 							User::Leave(err);
 							}
 						}
@@ -726,7 +775,7 @@ namespace conn
 				break;
 				}
 			case EABMsgPropagateLeave:
-	            __LOG("CABSession::ServiceL() - EABMsgPropagateLeave");
+			    OstTrace0(TRACE_NORMAL, DUP5_CABSESSION_SERVICEL, "EABMsgPropagateLeave");
 				{
 				if (iMisbehavingClient)
 					{
@@ -739,7 +788,7 @@ namespace conn
 				break;
 				}
 			case EABMsgGetDataSync:
-	            __LOG("CABSession::ServiceL() - EABMsgGetDataSync");
+			    OstTrace0(TRACE_NORMAL, DUP6_CABSESSION_SERVICEL, "EABMsgGetDataSync");
 				{
 				if (iMisbehavingClient)
 					{
@@ -752,7 +801,7 @@ namespace conn
 				break;
 				}
 			case EABMsgSendDataLength:
-	            __LOG("CABSession::ServiceL() - EABMsgSendDataLength");
+			    OstTrace0(TRACE_NORMAL, DUP7_CABSESSION_SERVICEL, "EABMsgSendDataLength");
 				{
 				if (iMisbehavingClient)
 					{
@@ -765,7 +814,7 @@ namespace conn
 				break;
 				}
 			case EABMsgClosingDownCallback:
-	            __LOG("CABSession::ServiceL() - EABMsgClosingDownCallback");
+			    OstTrace0(TRACE_NORMAL, DUP8_CABSESSION_SERVICEL, "EABMsgClosingDownCallback");
 				{
 				completionCode = HandleIPCClosingDownCallback();
 
@@ -778,7 +827,7 @@ namespace conn
 				break;
 				}
 			case EABMsgGetDriveNumForSuppliedSnapshot:
-	            __LOG("CABSession::ServiceL() - EABMsgGetDriveNumForSuppliedSnapshot");
+			    OstTrace0(TRACE_NORMAL, DUP9_CABSESSION_SERVICEL, "EABMsgGetDriveNumForSuppliedSnapshot");
 				{
 				// Return the drive number to the client
 				completionCode = static_cast<TInt>(iSuppliedSnapshotDriveNum);
@@ -801,16 +850,16 @@ namespace conn
 			if (!aMessage.IsNull())
 				{
 				aMessage.Complete(completionCode);
-		        __LOG3("CABSession::ServiceL() - END - function: %d from client: %S - COMPLETED (%d)", aMessage.Function(), &name, completionCode);
+				OstTraceExt3(TRACE_NORMAL, DUP10_CABSESSION_SERVICEL, "function: %d from client: %S - COMPLETED (%d)", aMessage.Function(), name, completionCode);
 				}
 			}
 
-	#if defined(SBE_LOGGING_ENABLED)
 		if	(!aMessage.IsNull())
 			{
-			__LOG2("CABSession::ServiceL() - END - function: %d from client: %S - ASYNCH -> NOT COMPLETED", aMessage.Function(), &name);
+		    OstTraceExt2(TRACE_NORMAL, DUP11_CABSESSION_SERVICEL, "function: %d from client: %S - ASYNCH -> NOT COMPLETED", aMessage.Function(), name);
 			}
-	#endif
+
+		OstTraceFunctionExit0( CABSESSION_SERVICEL_EXIT );
 		}
 
 	inline CABServer& CABSession::Server() const
@@ -820,6 +869,7 @@ namespace conn
 	@return The non-const reference to this.
 	*/
 		{
+		OstTraceFunctionEntry0( CABSESSION_SERVER_ENTRY );
 		return *static_cast<CABServer*>(const_cast<CServer2*>(CSession2::Server()));
 		}
 
@@ -830,19 +880,23 @@ namespace conn
 	@leave KErrNotReady if the callback hasn't been primed
 	*/
 		{
+		OstTraceFunctionEntry0( CABSESSION_CHECKCALLBACKAVAILABLEL_ENTRY );
 		TBool primed = !iMessage.IsNull();
 		
-		__LOG2("CABSession::CheckCallbackAvailableL() - [0x%08x] primed: %d", iClientSID.iId, static_cast<TInt>(primed));
+		OstTraceExt2(TRACE_NORMAL, CABSESSION_CHECKCALLBACKAVAILABLEL, "[0x%08x] primed: %d", iClientSID.iId, static_cast<TInt32>(primed));
 		
 		if (iMisbehavingClient)
 			{
+		    OstTrace0(TRACE_ERROR, DUP1_CABSESSION_CHECKCALLBACKAVAILABLEL, "Leave: KErrAccessDenied");
 			User::Leave(KErrAccessDenied);
 			}
 
 		if (!primed)
 			{
+		    OstTrace0(TRACE_ERROR, DUP2_CABSESSION_CHECKCALLBACKAVAILABLEL, "Leave: KErrNotReady");
 			User::Leave(KErrNotReady);
 			}
+		OstTraceFunctionExit0( CABSESSION_CHECKCALLBACKAVAILABLEL_EXIT );
 		}
 		
 	void CABSession::MakeCallbackAllSnapshotsSuppliedL()
@@ -851,7 +905,8 @@ namespace conn
 	
 	*/
 		{
-		__LOG1("CABSession::MakeCallbackAllSnapshotsSuppliedL() - [0x%08x] Calling AllSnapshotsSuppliedL", iClientSID.iId);
+		OstTraceFunctionEntry0( CABSESSION_MAKECALLBACKALLSNAPSHOTSSUPPLIEDL_ENTRY );
+		OstTrace1(TRACE_NORMAL, CABSESSION_MAKECALLBACKALLSNAPSHOTSSUPPLIEDL, "[0x%08x] Calling AllSnapshotsSuppliedL", iClientSID.iId);
 
 		TPckgC<TABCallbackCommands> callbackPkg(EABCallbackAllSnapshotsSupplied);
 
@@ -860,6 +915,7 @@ namespace conn
 		// Make the callback
 		iMessage.WriteL(0, callbackPkg);
 		MadeCallback();
+		OstTraceFunctionExit0( CABSESSION_MAKECALLBACKALLSNAPSHOTSSUPPLIEDL_EXIT );
 		}
 	
 	void CABSession::MakeCallbackReceiveSnapshotDataL(TDriveNumber aDrive, TDesC8& aBuffer, 
@@ -872,7 +928,8 @@ namespace conn
 	@param aLastSection Flag to indicate to the client whether this is the last of a multipart snapshot
 	*/
 		{
-		__LOG1("CABSession::MakeCallbackReceiveSnapshotDataL() - [0x%08x] Calling ReceiveSnapshotData", iClientSID.iId);
+		OstTraceFunctionEntry0( CABSESSION_MAKECALLBACKRECEIVESNAPSHOTDATAL_ENTRY );
+		OstTrace1(TRACE_NORMAL, CABSESSION_MAKECALLBACKRECEIVESNAPSHOTDATAL, "[0x%08x] Calling ReceiveSnapshotData", iClientSID.iId);
 		
 		iSuppliedSnapshotDriveNum = aDrive;
 
@@ -890,7 +947,8 @@ namespace conn
 		iMessage.WriteL(2, lastSectionPkg);
 		MadeCallback();
 
-		User::LeaveIfError(iABClientLeaveCode);
+		LEAVEIFERROR(iABClientLeaveCode, OstTrace1(TRACE_ERROR, DUP1_CABSESSION_MAKECALLBACKRECEIVESNAPSHOTDATAL, "Leave: %d", iABClientLeaveCode));
+		OstTraceFunctionExit0( CABSESSION_MAKECALLBACKRECEIVESNAPSHOTDATAL_EXIT );
 		}
 
 	TUint CABSession::MakeCallbackGetExpectedDataSizeL(TDriveNumber aDrive)
@@ -901,7 +959,8 @@ namespace conn
 	@return The size of the data that will be transferred
 	*/
 		{
-		__LOG1("CABSession::MakeCallbackGetExpectedDataSizeL() - [0x%08x] Calling GetExpectedDataSize", iClientSID.iId);
+		OstTraceFunctionEntry0( CABSESSION_MAKECALLBACKGETEXPECTEDDATASIZEL_ENTRY );
+		OstTrace1(TRACE_NORMAL, CABSESSION_MAKECALLBACKGETEXPECTEDDATASIZEL, "[0x%08x] Calling GetExpectedDataSize", iClientSID.iId);
 
 		TPckgC<TABCallbackCommands> callbackPkg(EABCallbackGetExpectedDataSize);
 		TPckgC<TDriveNumber> drivePkg(aDrive);
@@ -918,6 +977,7 @@ namespace conn
 		CheckCallbackAvailableL();
 		returnedSize = iMessage.Int3();
 		
+		OstTraceFunctionExit0( CABSESSION_MAKECALLBACKGETEXPECTEDDATASIZEL_EXIT );
 		return returnedSize;
 		}
 
@@ -930,7 +990,8 @@ namespace conn
 	@param aFinished Flag to indicate to the client whether this is the last of a multipart snapshot
 	*/
 		{
-		__LOG1("CABSession::MakeCallbackGetSnapshotDataL() - [0x%08x] Calling GetSnapshotData", iClientSID.iId);
+		OstTraceFunctionEntry0( CABSESSION_MAKECALLBACKGETSNAPSHOTDATAL_ENTRY );
+		OstTrace1(TRACE_NORMAL, CABSESSION_MAKECALLBACKGETSNAPSHOTDATAL, "[0x%08x] Calling GetSnapshotData", iClientSID.iId);
 
 		TPckgC<TABCallbackCommands> callbackPkg(EABCallbackGetSnapshotData);
 		TPckgC<TDriveNumber> drivePkg(aDrive);
@@ -944,7 +1005,7 @@ namespace conn
 		iMessage.WriteL(2, drivePkg);
 		MadeCallback();
 
-		User::LeaveIfError(iABClientLeaveCode);
+		LEAVEIFERROR(iABClientLeaveCode, OstTrace1(TRACE_ERROR, DUP1_CABSESSION_MAKECALLBACKGETSNAPSHOTDATAL, "Leave: %d", iABClientLeaveCode));
 		
 		// Read the buffer from the client
 		CheckCallbackAvailableL();
@@ -954,6 +1015,7 @@ namespace conn
 
 		iMessage.ReadL(3, aBuffer);
 		aFinished = iReceiveFromClientFinished;
+		OstTraceFunctionExit0( CABSESSION_MAKECALLBACKGETSNAPSHOTDATAL_EXIT );
 		}
 
 	void CABSession::MakeCallbackInitialiseGetBackupDataL(TDriveNumber aDrive)
@@ -963,7 +1025,8 @@ namespace conn
 	@param aDrive the Drive Number
 	*/
 		{
-		__LOG1("CABSession::MakeCallbackInitialiseGetBackupDataL() - [0x%08x] Calling InitGetBackupData", iClientSID.iId);
+		OstTraceFunctionEntry0( CABSESSION_MAKECALLBACKINITIALISEGETBACKUPDATAL_ENTRY );
+		OstTrace1(TRACE_NORMAL, CABSESSION_MAKECALLBACKINITIALISEGETBACKUPDATAL, "[0x%08x] Calling InitGetBackupData", iClientSID.iId);
 
 		TPckgC<TABCallbackCommands> callbackPkg(EABCallbackInitialiseGetBackupData);
 		TPckgC<TDriveNumber> drivePkg(aDrive);
@@ -975,7 +1038,8 @@ namespace conn
 		iMessage.WriteL(1, drivePkg);
 		MadeCallback();
 
-		User::LeaveIfError(iABClientLeaveCode);
+		LEAVEIFERROR(iABClientLeaveCode, OstTrace1(TRACE_ERROR, DUP1_CABSESSION_MAKECALLBACKINITIALISEGETBACKUPDATAL, "Leave: %d", iABClientLeaveCode));
+		OstTraceFunctionExit0( CABSESSION_MAKECALLBACKINITIALISEGETBACKUPDATAL_EXIT );
 		}
 
 	void CABSession::MakeCallbackGetBackupDataSectionL(TPtr8& aBuffer, TBool& aFinished)
@@ -986,9 +1050,10 @@ namespace conn
 	@param aFinished Does the client have more data to send? 
 	*/
 		{
-        __LOG2("CABSession::MakeCallbackGetBackupDataSectionL() - START - aBuffer.Ptr(): 0x%08x, aBuffer.Length(): %d", aBuffer.Ptr(), aBuffer.Length());
+        OstTraceFunctionEntry0( CABSESSION_MAKECALLBACKGETBACKUPDATASECTIONL_ENTRY );
+        OstTraceExt2(TRACE_NORMAL, CABSESSION_MAKECALLBACKGETBACKUPDATASECTIONL, "aBuffer.Ptr(): 0x%08x, aBuffer.Length(): %d", reinterpret_cast<TInt32>(aBuffer.Ptr()), static_cast<TInt32>(aBuffer.Length()));
 
-        __LOG1("CABSession::MakeCallbackGetBackupDataSectionL() - [0x%08x] Calling GetBackupDataSection", iClientSID.iId);
+        OstTrace1(TRACE_NORMAL, DUP1_CABSESSION_MAKECALLBACKGETBACKUPDATASECTIONL, "[0x%08x] Calling GetBackupDataSection", iClientSID.iId);
 
 		TPckgC<TABCallbackCommands> callbackPkg(EABCallbackGetBackupDataSection);
 		TPckgC<TInt> sizePkg(aBuffer.Size());
@@ -1000,17 +1065,16 @@ namespace conn
 		iMessage.WriteL(1, sizePkg);
 		MadeCallback();
 
-		User::LeaveIfError(iABClientLeaveCode);
+		LEAVEIFERROR(iABClientLeaveCode, OstTrace1(TRACE_ERROR, DUP3_CABSESSION_MAKECALLBACKGETBACKUPDATASECTIONL, "Leave: %d", iABClientLeaveCode));
 		CheckCallbackAvailableL();
 		
 		TInt bufLength = iMessage.GetDesLengthL(3);
 		aBuffer.SetLength(bufLength);
         iMessage.ReadL(3, aBuffer);
 		aFinished = iReceiveFromClientFinished;
- 
-        //__LOGDATA("CABSession::MakeCallbackGetBackupDataSectionL() - received %S", aBuffer.Ptr(), aBuffer.Length());
 
-        __LOG2("CABSession::MakeCallbackGetBackupDataSectionL() - END - aBuffer.Ptr(): 0x%08x, aBuffer.Length(): %d", aBuffer.Ptr(), aBuffer.Length());
+		OstTraceExt2(TRACE_NORMAL, DUP2_CABSESSION_MAKECALLBACKGETBACKUPDATASECTIONL, "aBuffer.Ptr(): 0x%08x, aBuffer.Length(): %d", reinterpret_cast<TInt32>(aBuffer.Ptr()), static_cast<TInt32>(aBuffer.Length()));
+        OstTraceFunctionExit0( CABSESSION_MAKECALLBACKGETBACKUPDATASECTIONL_EXIT );
         }
 
 	void CABSession::MakeCallbackInitialiseRestoreBaseDataL(TDriveNumber aDrive)
@@ -1020,7 +1084,8 @@ namespace conn
 	@param aDrive The drive that's affected by the operation
 	*/
 		{
-		__LOG1("CABSession::MakeCallbackInitialiseRestoreBaseDataL() - [0x%08x] Calling InitRestoreBaseData", iClientSID.iId);
+		OstTraceFunctionEntry0( CABSESSION_MAKECALLBACKINITIALISERESTOREBASEDATAL_ENTRY );
+		OstTrace1(TRACE_NORMAL, CABSESSION_MAKECALLBACKINITIALISERESTOREBASEDATAL, "[0x%08x] Calling InitRestoreBaseData", iClientSID.iId);
 
 		TPckgC<TABCallbackCommands> callbackPkg(EABCallbackInitialiseRestoreBaseDataSection);
 		TPckgC<TDriveNumber> drivePkg(aDrive);
@@ -1032,7 +1097,8 @@ namespace conn
 		iMessage.WriteL(1, drivePkg);
 		MadeCallback();
 
-		User::LeaveIfError(iABClientLeaveCode);
+		LEAVEIFERROR(iABClientLeaveCode, OstTrace1(TRACE_ERROR, DUP1_CABSESSION_MAKECALLBACKINITIALISERESTOREBASEDATAL, "Leave: %d", iABClientLeaveCode));
+		OstTraceFunctionExit0( CABSESSION_MAKECALLBACKINITIALISERESTOREBASEDATAL_EXIT );
 		}
 
 	void CABSession::MakeCallbackRestoreBaseDataSectionL(TDesC8& aBuffer, TBool aFinished)
@@ -1043,7 +1109,8 @@ namespace conn
 	@param aFinished Is this the last of a multi-part data call
 	*/
 		{
-		__LOG1("CABSession::MakeCallbackRestoreBaseDataSectionL() - [0x%08x] Calling RestoreBaseDataSection", iClientSID.iId);
+		OstTraceFunctionEntry0( CABSESSION_MAKECALLBACKRESTOREBASEDATASECTIONL_ENTRY );
+		OstTrace1(TRACE_NORMAL, CABSESSION_MAKECALLBACKRESTOREBASEDATASECTIONL, "[0x%08x] Calling RestoreBaseDataSection", iClientSID.iId);
 
 		TPckgC<TABCallbackCommands> callbackPkg(EABCallbackRestoreBaseDataSection);
 		TPckgC<TInt> sizePkg(aBuffer.Size());
@@ -1059,7 +1126,8 @@ namespace conn
 		iMessage.WriteL(2, lastSectionPkg);
 		MadeCallback();
 
-		User::LeaveIfError(iABClientLeaveCode);
+		LEAVEIFERROR(iABClientLeaveCode, OstTrace1(TRACE_ERROR, DUP1_CABSESSION_MAKECALLBACKRESTOREBASEDATASECTIONL, "Leave: %d", iABClientLeaveCode));
+		OstTraceFunctionExit0( CABSESSION_MAKECALLBACKRESTOREBASEDATASECTIONL_EXIT );
 		}
 
 	void CABSession::MakeCallbackInitialiseRestoreIncrementDataL(TDriveNumber aDrive)
@@ -1069,7 +1137,8 @@ namespace conn
 	@param aDrive The drive that's affected by the operation
 	*/
 		{
-		__LOG1("CABSession::MakeCallbackInitialiseRestoreIncrementDataL() - [0x%08x] Calling InitRestoreIncrementData", iClientSID.iId);
+		OstTraceFunctionEntry0( CABSESSION_MAKECALLBACKINITIALISERESTOREINCREMENTDATAL_ENTRY );
+		OstTrace1(TRACE_NORMAL, CABSESSION_MAKECALLBACKINITIALISERESTOREINCREMENTDATAL, "[0x%08x] Calling InitRestoreIncrementData", iClientSID.iId);
 
 		TPckgC<TABCallbackCommands> callbackPkg(EABCallbackInitialiseRestoreIncrementData);
 		TPckgC<TDriveNumber> drivePkg(aDrive);
@@ -1081,7 +1150,8 @@ namespace conn
 		iMessage.WriteL(1, drivePkg);
 		MadeCallback();
 
-		User::LeaveIfError(iABClientLeaveCode);
+		LEAVEIFERROR(iABClientLeaveCode, OstTrace1(TRACE_ERROR, DUP1_CABSESSION_MAKECALLBACKINITIALISERESTOREINCREMENTDATAL, "Leave: %d", iABClientLeaveCode));
+		OstTraceFunctionExit0( CABSESSION_MAKECALLBACKINITIALISERESTOREINCREMENTDATAL_EXIT );
 		}
 
 	void CABSession::MakeCallbackRestoreIncrementDataSectionL(TDesC8& aBuffer, TBool aFinished)
@@ -1092,7 +1162,8 @@ namespace conn
 	@param aFinished Is this the last of a multi-part data call
 	*/
 		{
-		__LOG1("CABSession::MakeCallbackRestoreIncrementDataSectionL() - [0x%08x] Calling RestoreIncrementData", iClientSID.iId);
+		OstTraceFunctionEntry0( CABSESSION_MAKECALLBACKRESTOREINCREMENTDATASECTIONL_ENTRY );
+		OstTrace1(TRACE_NORMAL, CABSESSION_MAKECALLBACKRESTOREINCREMENTDATASECTIONL, "[0x%08x] Calling RestoreIncrementData", iClientSID.iId);
 
 		TPckgC<TABCallbackCommands> callbackPkg(EABCallbackRestoreIncrementDataSection);
 		TPckgC<TInt> sizePkg(aBuffer.Size());
@@ -1108,7 +1179,8 @@ namespace conn
 		iMessage.WriteL(2, lastSectionPkg);
 		MadeCallback();
 
-		User::LeaveIfError(iABClientLeaveCode);
+		LEAVEIFERROR(iABClientLeaveCode, OstTrace1(TRACE_ERROR, DUP1_CABSESSION_MAKECALLBACKRESTOREINCREMENTDATASECTIONL, "Leave: %d", iABClientLeaveCode));
+		OstTraceFunctionExit0( CABSESSION_MAKECALLBACKRESTOREINCREMENTDATASECTIONL_EXIT );
 		}
 
 	void CABSession::MakeCallbackRestoreCompleteL(TDriveNumber aDrive)
@@ -1118,7 +1190,8 @@ namespace conn
 	@param aDrive The drive that's affected by the operation
 	*/
 		{
-		__LOG1("CABSession::MakeCallbackRestoreCompleteL() - [0x%08x] Calling RestoreComplete", iClientSID.iId);
+		OstTraceFunctionEntry0( CABSESSION_MAKECALLBACKRESTORECOMPLETEL_ENTRY );
+		OstTrace1(TRACE_NORMAL, CABSESSION_MAKECALLBACKRESTORECOMPLETEL, "[0x%08x] Calling RestoreComplete", iClientSID.iId);
 
 		TPckgC<TABCallbackCommands> callbackPkg(EABCallbackRestoreComplete);
 		TPckgC<TDriveNumber> drivePkg(aDrive);
@@ -1129,6 +1202,7 @@ namespace conn
 		iMessage.WriteL(0, callbackPkg);
 		iMessage.WriteL(1, drivePkg);
 		MadeCallback();
+		OstTraceFunctionExit0( CABSESSION_MAKECALLBACKRESTORECOMPLETEL_EXIT );
 		}
 
 	void CABSession::MakeCallbackInitialiseGetProxyBackupDataL(TSecureId aSID, TDriveNumber aDrive)
@@ -1139,7 +1213,8 @@ namespace conn
 	@param aDrive The drive that's affected by the operation
 	*/
 		{
-		__LOG1("CABSession::MakeCallbackInitialiseGetProxyBackupDataL() - [0x%08x] Calling InitGetProxyBackupData", iClientSID.iId);
+		OstTraceFunctionEntry0( CABSESSION_MAKECALLBACKINITIALISEGETPROXYBACKUPDATAL_ENTRY );
+		OstTrace1(TRACE_NORMAL, CABSESSION_MAKECALLBACKINITIALISEGETPROXYBACKUPDATAL, "[0x%08x] Calling InitGetProxyBackupData", iClientSID.iId);
 
 		TPckgC<TABCallbackCommands> callbackPkg(EABCallbackInitialiseGetProxyBackupData);
 		TPckgC<TSecureId> sidPkg(aSID);
@@ -1153,7 +1228,8 @@ namespace conn
 		iMessage.WriteL(2, drivePkg);
 		MadeCallback();
 
-		User::LeaveIfError(iABClientLeaveCode);
+		LEAVEIFERROR(iABClientLeaveCode, OstTrace1(TRACE_ERROR, DUP1_CABSESSION_MAKECALLBACKINITIALISEGETPROXYBACKUPDATAL, "Leave: %d", iABClientLeaveCode));
+		OstTraceFunctionExit0( CABSESSION_MAKECALLBACKINITIALISEGETPROXYBACKUPDATAL_EXIT );
 		}
 
 	void CABSession::MakeCallbackInitialiseRestoreProxyBaseDataL(TSecureId aSID, TDriveNumber aDrive)
@@ -1164,7 +1240,8 @@ namespace conn
 	@param aDrive The drive that's affected by the operation
 	*/
 		{
-		__LOG1("CABSession::MakeCallbackInitialiseRestoreProxyBaseDataL() - [0x%08x] Calling InitRestoreProxyBaseData", iClientSID.iId);
+		OstTraceFunctionEntry0( CABSESSION_MAKECALLBACKINITIALISERESTOREPROXYBASEDATAL_ENTRY );
+		OstTrace1(TRACE_NORMAL, CABSESSION_MAKECALLBACKINITIALISERESTOREPROXYBASEDATAL, "[0x%08x] Calling InitRestoreProxyBaseData", iClientSID.iId);
 
 		TPckgC<TABCallbackCommands> callbackPkg(EABCallbackInitialiseRestoreProxyBaseData);
 		TPckgC<TSecureId> sidPkg(aSID);
@@ -1178,7 +1255,8 @@ namespace conn
 		iMessage.WriteL(2, drivePkg);
 		MadeCallback();
 
-		User::LeaveIfError(iABClientLeaveCode);
+		LEAVEIFERROR(iABClientLeaveCode, OstTrace1(TRACE_ERROR, DUP1_CABSESSION_MAKECALLBACKINITIALISERESTOREPROXYBASEDATAL, "Leave: %d", iABClientLeaveCode));
+		OstTraceFunctionExit0( CABSESSION_MAKECALLBACKINITIALISERESTOREPROXYBASEDATAL_EXIT );
 		}
 
 	void CABSession::MakeCallbackTerminateMultiStageOperationL()
@@ -1187,7 +1265,8 @@ namespace conn
 	
 	*/
 		{
-		__LOG1("CABSession::MakeCallbackTerminateMultiStageOperationL() - [0x%08x] Calling TermiateMultiStageOp", iClientSID.iId);
+		OstTraceFunctionEntry0( CABSESSION_MAKECALLBACKTERMINATEMULTISTAGEOPERATIONL_ENTRY );
+		OstTrace1(TRACE_NORMAL, CABSESSION_MAKECALLBACKTERMINATEMULTISTAGEOPERATIONL, "[0x%08x] Calling TermiateMultiStageOp", iClientSID.iId);
 
 		TPckgC<TABCallbackCommands> callbackPkg(EABCallbackTerminateMultiStageOperation);
 
@@ -1196,6 +1275,7 @@ namespace conn
 		CheckCallbackAvailableL();
 		iMessage.WriteL(0, callbackPkg);
 		MadeCallback();
+		OstTraceFunctionExit0( CABSESSION_MAKECALLBACKTERMINATEMULTISTAGEOPERATIONL_EXIT );
 		}
 
 	TUint CABSession::MakeCallbackGetDataChecksumL(TDriveNumber aDrive)
@@ -1206,7 +1286,8 @@ namespace conn
 	@return The checksum of the data
 	*/
 		{
-		__LOG1("CABSession::MakeCallbackGetDataChecksumL() - [0x%08x] Calling GetDataChecksum", iClientSID.iId);
+		OstTraceFunctionEntry0( CABSESSION_MAKECALLBACKGETDATACHECKSUML_ENTRY );
+		OstTrace1(TRACE_NORMAL, CABSESSION_MAKECALLBACKGETDATACHECKSUML, "[0x%08x] Calling GetDataChecksum", iClientSID.iId);
 
 		TPckgC<TABCallbackCommands> callbackPkg(EABCallbackGetDataChecksum);
 		TPckgC<TDriveNumber> drivePkg(aDrive);
@@ -1221,7 +1302,9 @@ namespace conn
 		
 		iMessage.ReadL(3, returnPkg);
 		
-		return returnPkg();
+		TUint ret = returnPkg();
+		OstTraceFunctionExit0( CABSESSION_MAKECALLBACKGETDATACHECKSUML_EXIT );
+		return ret;
 		}
 	
 	void CABSession::SetInvalid()

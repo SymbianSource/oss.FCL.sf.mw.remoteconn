@@ -37,7 +37,6 @@
 #include "tptpipinitfailed.h"
 #include <mtp/cmtptypestring.h>
 #include "cptpiptimer.h"
-#include "mtpdebug.h"
 
 
   enum TInitFailReason
@@ -179,13 +178,7 @@ private:
 	RSocket iDummySocket;
 	TInt iCounter;
 	CPTPIPTimer* iTimer;
-	TUid iTransportId;			
-			
-	/**
-	FLOGGER debug trace member variable.
-	*/
-	__FLOG_DECLARATION_MEMBER;    
-			
+	TUid iTransportId;			    			
 };
 
 

@@ -31,6 +31,11 @@
 #include "cmtpdataprovidercontroller.h"
 #include <mtp/cmtptypefile.h>
 #include <pathinfo.h>
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtppictbridgeenumeratorTraces.h"
+#endif
+
 
 //==================================================================
 // 
@@ -57,10 +62,9 @@ CMTPPictBridgeEnumerator::CMTPPictBridgeEnumerator(MMTPDataProviderFramework& aF
 //==================================================================  
 void CMTPPictBridgeEnumerator::ConstructL()
     {
-    __FLOG_OPEN(KMTPSubsystem, KComponent);
-    __FLOG(_L8(">> CMTPPictBridgeEnumerator::ConstructL"));
+    OstTraceFunctionEntry0( CMTPPICTBRIDGEENUMERATOR_CONSTRUCTL_ENTRY );
     iSingletons.OpenL();
-    __FLOG(_L8("<< CMTPPictBridgeEnumerator::ConstructL"));
+    OstTraceFunctionExit0( CMTPPICTBRIDGEENUMERATOR_CONSTRUCTL_EXIT );
     }
 
 /**
@@ -68,11 +72,10 @@ destructor
 */    
 CMTPPictBridgeEnumerator::~CMTPPictBridgeEnumerator()
     {
-    __FLOG(_L8(">> CMTPPictBridgeEnumerator::~CMTPPictBridgeEnumerator"));
+    OstTraceFunctionEntry0( CMTPPICTBRIDGEENUMERATOR_CMTPPICTBRIDGEENUMERATOR_DES_ENTRY );
     // we keep the persistent handle
     iSingletons.Close();
-    __FLOG(_L8("<< CMTPPictBridgeEnumerator::~CMTPPictBridgeEnumerator"));
-	__FLOG_CLOSE;
+    OstTraceFunctionExit0( CMTPPICTBRIDGEENUMERATOR_CMTPPICTBRIDGEENUMERATOR_DES_EXIT );
     }
 
 // --------------------------------------------------------------------------
@@ -97,7 +100,7 @@ TUint32 CMTPPictBridgeEnumerator::DeviceDiscoveryHandle() const
 // --------------------------------------------------------------------------
 void CMTPPictBridgeEnumerator::EnumerateObjectsL(TUint32 aStorageId)
     {
-    __FLOG(_L8(">> CMTPPictBridgeEnumerator::EnumerateObjectsL"));
+    OstTraceFunctionEntry0( CMTPPICTBRIDGEENUMERATOR_ENUMERATEOBJECTSL_ENTRY );
     const TUint storageId(iFramework.StorageMgr().DefaultStorageId());
 
     if ((aStorageId==KMTPStorageAll) || (aStorageId==storageId))
@@ -108,19 +111,19 @@ void CMTPPictBridgeEnumerator::EnumerateObjectsL(TUint32 aStorageId)
         TFileName        fullPath;        
 		fullPath = PathInfo::PhoneMemoryRootPath();
 		fullPath.Append(KHostDiscovery);
-		__FLOG_VA((_L16("full path is %S "), &fullPath));
+		OstTraceExt1( TRACE_NORMAL, CMTPPICTBRIDGEENUMERATOR_ENUMERATEOBJECTSL, "full path is %S ", fullPath );
 		iFramework.Fs().SetAtt(fullPath, KEntryAttNormal, KEntryAttReadOnly);
 		iFramework.Fs().Delete(fullPath);
 		
 		fullPath = PathInfo::PhoneMemoryRootPath();
 		fullPath.Append(KHostRequest);
-		__FLOG_VA((_L16("full path is %S "), &fullPath));
+	    OstTraceExt1( TRACE_NORMAL, DUP1_CMTPPICTBRIDGEENUMERATOR_ENUMERATEOBJECTSL, "full path is %S ", fullPath );
 		iFramework.Fs().SetAtt(fullPath, KEntryAttNormal, KEntryAttReadOnly);
 		iFramework.Fs().Delete(fullPath);
 		
 		fullPath = PathInfo::PhoneMemoryRootPath();
 		fullPath.Append(KHostResponse);
-		__FLOG_VA((_L16("full path is %S "), &fullPath));
+        OstTraceExt1( TRACE_NORMAL, DUP2_CMTPPICTBRIDGEENUMERATOR_ENUMERATEOBJECTSL, "full path is %S ", fullPath );		
 		iFramework.Fs().SetAtt(fullPath, KEntryAttNormal, KEntryAttReadOnly);
 		iFramework.Fs().Delete(fullPath);
 		
@@ -130,7 +133,7 @@ void CMTPPictBridgeEnumerator::EnumerateObjectsL(TUint32 aStorageId)
         CleanupClosePushL(rf);
         fullPath = PathInfo::PhoneMemoryRootPath();
         fullPath.Append(KDeviceDiscovery);
-        __FLOG_VA((_L16("full path is %S "), &fullPath));
+        OstTraceExt1( TRACE_NORMAL, DUP3_CMTPPICTBRIDGEENUMERATOR_ENUMERATEOBJECTSL, "full path is %S ", fullPath );                
         iFramework.Fs().SetAtt(fullPath, KEntryAttNormal, KEntryAttReadOnly);
         iFramework.Fs().Delete(fullPath);
         
@@ -145,12 +148,13 @@ void CMTPPictBridgeEnumerator::EnumerateObjectsL(TUint32 aStorageId)
         objectP->SetUint(CMTPObjectMetaData::EParentHandle, KMTPHandleNoParent);
 	    objectMgr.InsertObjectL(*objectP);
 	    iDpsDiscoveryHandle = objectP->Uint( CMTPObjectMetaData::EHandle );
-	    __FLOG_VA((_L8("added discovery file iDpsDiscoveryHandle is 0x%08X"), iDpsDiscoveryHandle));
+	    OstTrace1( TRACE_NORMAL, DUP4_CMTPPICTBRIDGEENUMERATOR_ENUMERATEOBJECTSL, 
+	            "added discovery file iDpsDiscoveryHandle is 0x%08X", iDpsDiscoveryHandle );
 
         CleanupStack::PopAndDestroy(objectP);
         }
 		iCallback.NotifyEnumerationCompleteL(aStorageId, KErrNone);
 
-    __FLOG(_L8("<< CMTPPictBridgeEnumerator::EnumerateObjectsL"));
+    OstTraceFunctionExit0( CMTPPICTBRIDGEENUMERATOR_ENUMERATEOBJECTSL_EXIT );
     }
 

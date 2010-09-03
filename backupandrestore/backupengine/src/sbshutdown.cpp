@@ -22,10 +22,14 @@
 #include <e32std.h>
 #include <e32base.h>
 #include "sbshutdown.h"
+#include "OstTraceDefinitions.h"
+#include "sbtrace.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "sbshutdownTraces.h"
+#endif
 
 namespace conn
 	{
-
 	/** Shutdown delay, in microseconds.
 	 @internalComponent */
 	const TUint KShutdownDelay = 0x200000;
@@ -36,6 +40,8 @@ namespace conn
     Class Constructor
     */
 		{
+		OstTraceFunctionEntry0( CSBSHUTDOWN_CSBSHUTDOWN_CONS_ENTRY );
+		OstTraceFunctionExit0( CSBSHUTDOWN_CSBSHUTDOWN_CONS_EXIT );
 		}
 
 	void CSBShutdown::ConstructL()
@@ -43,14 +49,18 @@ namespace conn
 	Construct this instance of CSBShutdown.
 	*/
 		{
+		OstTraceFunctionEntry0( CSBSHUTDOWN_CONSTRUCTL_ENTRY );
 		CTimer::ConstructL();
 		CActiveScheduler::Add(this);
+		OstTraceFunctionExit0( CSBSHUTDOWN_CONSTRUCTL_EXIT );
 		}
 
 	void CSBShutdown::Start()
 	/** Starts the timer. */
 		{
+		OstTraceFunctionEntry0( CSBSHUTDOWN_START_ENTRY );
 		After(KShutdownDelay);
+		OstTraceFunctionExit0( CSBSHUTDOWN_START_EXIT );
 		}
 
 	void CSBShutdown::RunL()
@@ -59,6 +69,8 @@ namespace conn
 	Stop the active scheduler and shutdown the server.
 	*/
 		{
+		OstTraceFunctionEntry0( CSBSHUTDOWN_RUNL_ENTRY );
 		CActiveScheduler::Stop();
+		OstTraceFunctionExit0( CSBSHUTDOWN_RUNL_EXIT );
 		}
 	}

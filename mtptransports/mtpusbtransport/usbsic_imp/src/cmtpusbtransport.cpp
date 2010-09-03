@@ -24,8 +24,11 @@
 #include "cmtpusbtransport.h"
 #include "mmtpconnectionmgr.h"
 #include "mtpusbpanic.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpusbtransportTraces.h"
+#endif
 
-__FLOG_STMT(_LIT8(KComponent,"UsbTransport");)
 
 /**
 USB MTP device class transport plug-in factory method.
@@ -37,6 +40,7 @@ TAny* CMTPUsbTransport::NewL(TAny* aParameter)
     {
     if ( aParameter != NULL )
     	{
+        OstTrace0( TRACE_ERROR, CMTPUSBTRANSPORT_NEWL, "Parameter should be NULL!" );
     	User::Leave(KErrArgument);
     	}
     CMTPUsbTransport* self = new (ELeave) CMTPUsbTransport;
@@ -51,10 +55,9 @@ Destructor.
 */
 CMTPUsbTransport::~CMTPUsbTransport()
     {
-    __FLOG(_L8("~CMTPUsbTransport - Entry"));
+    OstTraceFunctionEntry0( CMTPUSBTRANSPORT_CMTPUSBTRANSPORT_DES_ENTRY );
     delete iConnection;
-    __FLOG(_L8("~CMTPUsbTransport - Exit"));
-    __FLOG_CLOSE;
+    OstTraceFunctionExit0( CMTPUSBTRANSPORT_CMTPUSBTRANSPORT_DES_EXIT );
     }
     
 /**
@@ -68,27 +71,27 @@ const CMTPUsbConnection& CMTPUsbTransport::MTPUsbConnection()
 
 void CMTPUsbTransport::ModeChanged(TMTPOperationalMode /*aMode*/)
     {
-    __FLOG(_L8("ModeChanged - Entry"));
-    __FLOG(_L8("ModeChanged - Exit"));
+    OstTraceFunctionEntry0( CMTPUSBTRANSPORT_MODECHANGED_ENTRY );
+    OstTraceFunctionExit0( CMTPUSBTRANSPORT_MODECHANGED_EXIT );
     }
     
 void CMTPUsbTransport::StartL(MMTPConnectionMgr& aConnectionMgr)
     {
-    __FLOG(_L8("StartL - Entry"));
+    OstTraceFunctionEntry0( CMTPUSBTRANSPORT_STARTL_ENTRY );
     __ASSERT_ALWAYS(!iConnection, Panic(EMTPUsbConnectionAlreadyExist));
     iConnection = CMTPUsbConnection::NewL(aConnectionMgr);
-    __FLOG(_L8("StartL - Exit"));
+    OstTraceFunctionExit0( CMTPUSBTRANSPORT_STARTL_EXIT );
     }
 
 void CMTPUsbTransport::Stop(MMTPConnectionMgr& /*aConnectionMgr*/)
     {
-    __FLOG(_L8("Stop - Entry"));
+    OstTraceFunctionEntry0( CMTPUSBTRANSPORT_STOP_ENTRY );
     if(iConnection)
 	    {
 	    delete iConnection;
 	    iConnection = NULL;
 	    }
-    __FLOG(_L8("Stop - Exit")); 
+    OstTraceFunctionExit0( CMTPUSBTRANSPORT_STOP_EXIT );
     }
 
 TAny* CMTPUsbTransport::GetExtendedInterface(TUid /*aInterfaceUid*/)
@@ -109,10 +112,9 @@ Second phase constructor.
 */
 void CMTPUsbTransport::ConstructL()
     {
-    __FLOG_OPEN(KMTPSubsystem, KComponent);
-    __FLOG(_L8("ConstructL - Entry"));
-    __FLOG(_L8("USB MTP Device class plug-in loaded."));    
-    __FLOG(_L8("ConstructL - Exit"));
+    OstTraceFunctionEntry0( CMTPUSBTRANSPORT_CONSTRUCTL_ENTRY );
+    OstTrace0( TRACE_NORMAL, CMTPUSBTRANSPORT_CONSTRUCTL, "USB MTP Device class plug-in loaded." );
+    OstTraceFunctionExit0( CMTPUSBTRANSPORT_CONSTRUCTL_EXIT );
     }
 
 // Define the implementation UID of MTP USB transport implementation.

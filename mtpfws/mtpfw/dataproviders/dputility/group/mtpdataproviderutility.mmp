@@ -12,8 +12,7 @@
 //
 // Description:
 //
- 
-#include <comms-infras/commsdebugutility.mmh> 
+
 TARGET              mtpdataproviderutility.dll
 TARGETTYPE          DLL
 UID                 0x1000008D 0x10282FC9
@@ -25,7 +24,8 @@ MW_LAYER_SYSTEMINCLUDE_SYMBIAN
 USERINCLUDE         ../inc 
 USERINCLUDE         ../../../common/inc
 USERINCLUDE         ../../../inc
-USERINCLUDE         ../../../transports/transportapi/inc
+USERINCLUDE         ../../../transports/transportapi/inc 
+USERINCLUDE					../traces
 
 SOURCEPATH          ../src
 SOURCE              cmtpcopyobject.cpp

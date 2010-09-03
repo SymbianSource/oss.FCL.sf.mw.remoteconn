@@ -47,9 +47,11 @@
 #include "mtpimagedputilits.h"
 #include "mtpimagedpconst.h"
 #include "mtpdebug.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpimagedpobjectpropertymgrTraces.h"
+#endif
 
-// Class constants.
-__FLOG_STMT(_LIT8(KComponent,"MTPImageDpPropertyMgr");)
 
 // Indicate how many cache can be stored
 const TUint KCacheThreshold = 16;
@@ -169,19 +171,16 @@ CMTPImageDpObjectPropertyMgr::CMTPImageDpObjectPropertyMgr(MMTPDataProviderFrame
     iFs(aFramework.Fs()),
     iObjectMgr(aFramework.ObjectMgr())    
     {
-    __FLOG_OPEN(KMTPSubsystem, KComponent);
     }
 
 void CMTPImageDpObjectPropertyMgr::ConstructL(MMTPDataProviderFramework& /*aFramework*/)
     {
-    __FLOG(_L8("CMTPImageDpObjectPropertyMgr::ConstructL - Entry"));
     iMetaDataSession = CMdESession::NewL(*this);
-    __FLOG(_L8("CMTPImageDpObjectPropertyMgr::ConstructL - Exit"));
     }
     
 CMTPImageDpObjectPropertyMgr::~CMTPImageDpObjectPropertyMgr()
     {
-    __FLOG(_L8("CMTPImageDpObjectPropertyMgr::~CMTPImageDpObjectPropertyMgr - Entry"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPOBJECTPROPERTYMGR_CMTPIMAGEDPOBJECTPROPERTYMGR_DES_ENTRY );
     delete iObject;
     delete iMetaDataSession;
     delete iThumbnailCache.iThumbnailData;
@@ -189,13 +188,12 @@ CMTPImageDpObjectPropertyMgr::~CMTPImageDpObjectPropertyMgr()
     //Clear propreties cache map
     ClearAllCache();
     iPropretiesCacheMap.Close();
-    __FLOG(_L8("CMTPImageDpObjectPropertyMgr::~CMTPImageDpObjectPropertyMgr - Exit"));
-    __FLOG_CLOSE;
+    OstTraceFunctionExit0( CMTPIMAGEDPOBJECTPROPERTYMGR_CMTPIMAGEDPOBJECTPROPERTYMGR_DES_EXIT );
     }
 
 void CMTPImageDpObjectPropertyMgr::SetCurrentObjectL(CMTPObjectMetaData& aObjectInfo, TBool aRequireForModify, TBool aSaveToCache)
     {
-    __FLOG(_L8(">> CMTPImageDpObjectPropertyMgr::SetCurrentObjectL"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPOBJECTPROPERTYMGR_SETCURRENTOBJECTL_ENTRY );
     iObjectInfo = &aObjectInfo;
 
     /**
@@ -225,7 +223,8 @@ void CMTPImageDpObjectPropertyMgr::SetCurrentObjectL(CMTPObjectMetaData& aObject
             TUint objectHandle = iObjectInfo->Uint(CMTPObjectMetaData::EHandle);
             if (FindPropertiesCache(objectHandle))
                 {
-                __FLOG_VA((_L16("SetCurrentObjectL - find object in cache:%u"), objectHandle));
+                OstTrace1( TRACE_NORMAL, CMTPIMAGEDPOBJECTPROPERTYMGR_SETCURRENTOBJECTL, 
+                        "SetCurrentObjectL - find object in cache:%u", objectHandle );
                 iCurrentPropertiesCache->ResetL();
                 }
             else
@@ -235,22 +234,24 @@ void CMTPImageDpObjectPropertyMgr::SetCurrentObjectL(CMTPObjectMetaData& aObject
                     // Find the first object handle from cache map and then destory it
                     RHashMap<TUint, CMTPImagePropertiesCache*>::TIter iter(iPropretiesCacheMap);
                     DestroyPropertiesCahce(*iter.NextKey());
-                    __FLOG_VA((_L16("SetCurrentObjectL - destory object:%u"), objectHandle));
+                    OstTrace1( TRACE_NORMAL, DUP1_CMTPIMAGEDPOBJECTPROPERTYMGR_SETCURRENTOBJECTL, 
+                            "SetCurrentObjectL - destory object:%u", objectHandle ); 
                     }                
                 
                 iCurrentPropertiesCache = CMTPImagePropertiesCache::NewL();
                 iPropretiesCacheMap.Insert(objectHandle, iCurrentPropertiesCache);
-                __FLOG_VA((_L16("SetCurrentObjectL - create new object:%u"), objectHandle));
+                OstTrace1( TRACE_NORMAL, DUP2_CMTPIMAGEDPOBJECTPROPERTYMGR_SETCURRENTOBJECTL, 
+                        "SetCurrentObjectL - create new object:%u", objectHandle );
                 }
             }
         }
-    
-    __FLOG(_L8("<< CMTPImageDpObjectPropertyMgr::SetCurrentObjectL"));
+
+    OstTraceFunctionExit0( CMTPIMAGEDPOBJECTPROPERTYMGR_SETCURRENTOBJECTL_EXIT );
     }
 
 void CMTPImageDpObjectPropertyMgr::SetPropertyL(TMTPObjectPropertyCode aProperty, const TUint8 aValue)
     {
-    __FLOG(_L8(">> CMTPImageDpObjectPropertyMgr::SetPropertyL"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPOBJECTPROPERTYMGR_SETPROPERTYL_TUINT8_ENTRY );
     __ASSERT_DEBUG(iObjectInfo, Panic(EMTPImageDpObjectNull));
     
     if (aProperty == EMTPObjectPropCodeNonConsumable) 
@@ -259,14 +260,16 @@ void CMTPImageDpObjectPropertyMgr::SetPropertyL(TMTPObjectPropertyCode aProperty
         }
     else
         {
+        OstTrace1( TRACE_ERROR, CMTPIMAGEDPOBJECTPROPERTYMGR_SETPROPERTYL, 
+                "property code %d not equal to EMTPObjectPropCodeNonConsumable", aProperty );
         User::Leave(EMTPRespCodeObjectPropNotSupported);
         }
-    __FLOG(_L8("<< CMTPImageDpObjectPropertyMgr::SetPropertyL"));
+    OstTraceFunctionExit0( CMTPIMAGEDPOBJECTPROPERTYMGR_SETPROPERTYL_TUINT8_EXIT );
     }
 
 void CMTPImageDpObjectPropertyMgr::SetPropertyL(TMTPObjectPropertyCode aProperty, const TUint16 aValue)
     {
-    __FLOG(_L8(">> CMTPImageDpObjectPropertyMgr::SetPropertyL"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPOBJECTPROPERTYMGR_SETPROPERTYL_TUINT16_ENTRY );
     __ASSERT_DEBUG(iObjectInfo, Panic(EMTPImageDpObjectNull));
     
     switch(aProperty)
@@ -277,16 +280,34 @@ void CMTPImageDpObjectPropertyMgr::SetPropertyL(TMTPObjectPropertyCode aProperty
     case EMTPObjectPropCodeProtectionStatus://this property does not supported by image dp
         //nothing to do
         break;
+    case EMTPObjectPropCodeHidden:
+        {
+		__ASSERT_ALWAYS(( EMTPHidden == aValue )||( EMTPVisible == aValue ), User::Leave(KErrArgument));
+        TEntry entry;
+		User::LeaveIfError(iFramework.Fs().Entry(iObjectInfo->DesC(CMTPObjectMetaData::ESuid), entry));
+        if (( EMTPHidden == aValue ) && ( !entry.IsHidden()))
+            {
+            entry.iAtt &= ~KEntryAttHidden;
+            entry.iAtt |= KEntryAttHidden;
+            User::LeaveIfError(iFramework.Fs().SetAtt(iObjectInfo->DesC(CMTPObjectMetaData::ESuid), entry.iAtt, ~entry.iAtt));
+            }
+        else if (( EMTPVisible == aValue )&&( entry.IsHidden()))
+            {
+            entry.iAtt &= ~KEntryAttHidden;
+            User::LeaveIfError(iFramework.Fs().SetAtt(iObjectInfo->DesC(CMTPObjectMetaData::ESuid), entry.iAtt, ~entry.iAtt));
+            }
+        } 
+        break;
     default:
         //nothing to do
         break;
         }
-    __FLOG(_L8("<< CMTPImageDpObjectPropertyMgr::SetPropertyL"));
+    OstTraceFunctionExit0( CMTPIMAGEDPOBJECTPROPERTYMGR_SETPROPERTYL_TUINT16_EXIT );
     }
 
 void CMTPImageDpObjectPropertyMgr::SetPropertyL(TMTPObjectPropertyCode aProperty, const TUint32 aValue)
     {
-    __FLOG(_L8(">> CMTPImageDpObjectPropertyMgr::SetPropertyL"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPOBJECTPROPERTYMGR_SETPROPERTYL_TUINT32_ENTRY );
     __ASSERT_DEBUG(iObjectInfo, Panic(EMTPImageDpObjectNull));
     
     switch(aProperty)
@@ -319,12 +340,12 @@ void CMTPImageDpObjectPropertyMgr::SetPropertyL(TMTPObjectPropertyCode aProperty
         //nothing to do
         break;
         }
-    __FLOG(_L8("<< CMTPImageDpObjectPropertyMgr::SetPropertyL"));
+    OstTraceFunctionExit0( CMTPIMAGEDPOBJECTPROPERTYMGR_SETPROPERTYL_TUINT32_EXIT );
     }
 
 void CMTPImageDpObjectPropertyMgr::SetPropertyL(TMTPObjectPropertyCode aProperty, const TDesC& aValue)
     {
-    __FLOG(_L8(">> CMTPImageDpObjectPropertyMgr::SetPropertyL"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPOBJECTPROPERTYMGR_SETPROPERTYL_TDESC_ENTRY );
     __ASSERT_DEBUG(iObjectInfo, Panic(EMTPImageDpObjectNull));
     
     switch(aProperty)
@@ -347,7 +368,9 @@ void CMTPImageDpObjectPropertyMgr::SetPropertyL(TMTPObjectPropertyCode aProperty
         newUri.Trim();
         
         //ask fs to rename file, leave if err returned from fs
-        User::LeaveIfError(iFs.Rename(oldUri.FullName(), newUri));
+        LEAVEIFERROR(iFs.Rename(oldUri.FullName(), newUri),
+                OstTraceExt3( TRACE_ERROR, CMTPIMAGEDPOBJECTPROPERTYMGR_TDESC_SETPROPERTYL, 
+                        "Rename %S to %S failed! error code %d", oldUri.FullName(), newUri, munged_err ));
         iObjectInfo->SetDesCL(CMTPObjectMetaData::ESuid, newUri);
         CleanupStack::PopAndDestroy(&newUri);        
         }
@@ -376,12 +399,12 @@ void CMTPImageDpObjectPropertyMgr::SetPropertyL(TMTPObjectPropertyCode aProperty
         //nothing to do
         break;
         }
-    __FLOG(_L8("<< CMTPImageDpObjectPropertyMgr::SetPropertyL"));
+    OstTraceFunctionExit0( CMTPIMAGEDPOBJECTPROPERTYMGR_SETPROPERTYL_TDESC_EXIT );
     }
 
 void CMTPImageDpObjectPropertyMgr::GetPropertyL(TMTPObjectPropertyCode aProperty, TUint8 &aValue)
     {
-    __FLOG(_L8(">> CMTPImageDpObjectPropertyMgr::GetPropertyL"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPOBJECTPROPERTYMGR_GETPROPERTYL_TUINT8_ENTRY );
     __ASSERT_DEBUG(iObjectInfo, Panic(EMTPImageDpObjectNull));
     
     if (aProperty == EMTPObjectPropCodeNonConsumable) 
@@ -390,14 +413,16 @@ void CMTPImageDpObjectPropertyMgr::GetPropertyL(TMTPObjectPropertyCode aProperty
         }
     else
         {
+        OstTrace1( TRACE_ERROR, CMTPIMAGEDPOBJECTPROPERTYMGR_TUINT8_GETPROPERTYL, 
+                "property code %d not equal to EMTPObjectPropCodeNonConsumable", aProperty );
         User::Leave(EMTPRespCodeObjectPropNotSupported);
         }     
-    __FLOG(_L8("<< CMTPImageDpObjectPropertyMgr::GetPropertyL"));
+    OstTraceFunctionExit0( CMTPIMAGEDPOBJECTPROPERTYMGR_GETPROPERTYL_TUINT8_EXIT );
     }
 
 void CMTPImageDpObjectPropertyMgr::GetPropertyL(TMTPObjectPropertyCode aProperty, TUint16 &aValue)
     {
-    __FLOG(_L8(">> CMTPImageDpObjectPropertyMgr::GetPropertyL"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPOBJECTPROPERTYMGR_GETPROPERTYL_TUINT16_ENTRY );
     __ASSERT_DEBUG(iObjectInfo, Panic(EMTPImageDpObjectNull));
     TEntry entry;
     switch(aProperty)
@@ -420,19 +445,32 @@ void CMTPImageDpObjectPropertyMgr::GetPropertyL(TMTPObjectPropertyCode aProperty
             aValue = EMTPProtectionNoProtection;
             }        
         }    
-        break;    
+        break;
+    case EMTPObjectPropCodeHidden:
+        {
+        TInt err = iFs.Entry(iObjectInfo->DesC(CMTPObjectMetaData::ESuid), entry);        
+        if ( err == KErrNone && entry.IsHidden())
+            {
+            aValue = EMTPHidden;
+            }
+        else
+            {
+            aValue = EMTPVisible;
+            }        
+        } 
+        break;
     default:
         aValue = 0;//initialization
         //ingore the failure if we can't get properties form MdS
         TRAP_IGNORE(GetPropertyFromMdsL(aProperty, &aValue));
         break;
         }
-    __FLOG(_L8("<< CMTPImageDpObjectPropertyMgr::GetPropertyL"));
+    OstTraceFunctionExit0( CMTPIMAGEDPOBJECTPROPERTYMGR_GETPROPERTYL_TUINT16_EXIT );
     }
 
 void CMTPImageDpObjectPropertyMgr::GetPropertyL(TMTPObjectPropertyCode aProperty, TUint32 &aValue, TBool alwaysCreate/* = ETrue*/)
     {
-    __FLOG(_L8(">> CMTPImageDpObjectPropertyMgr::GetPropertyL"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPOBJECTPROPERTYMGR_GETPROPERTYL_TUINT32_ENTRY );
     __ASSERT_DEBUG(iObjectInfo, Panic(EMTPImageDpObjectNull));
     
     switch(aProperty)
@@ -447,7 +485,8 @@ void CMTPImageDpObjectPropertyMgr::GetPropertyL(TMTPObjectPropertyCode aProperty
        
     case EMTPObjectPropCodeRepresentativeSampleSize:
         {
-        __FLOG_VA((_L16("Query smaple size from MdS - URI:%S"), &iObjectInfo->DesC(CMTPObjectMetaData::ESuid)));
+        OstTraceExt1( TRACE_NORMAL, CMTPIMAGEDPOBJECTPROPERTYMGR_GETPROPERTYL_TUINT32, 
+                "Query smaple size from MdS - URI:%S", iObjectInfo->DesC(CMTPObjectMetaData::ESuid) );
         ClearThumnailCache();                                
         /**
          * try to query thumbnail from TNM, and then store thumbnail to cache
@@ -507,12 +546,12 @@ void CMTPImageDpObjectPropertyMgr::GetPropertyL(TMTPObjectPropertyCode aProperty
         TRAP_IGNORE(GetPropertyFromMdsL(aProperty, &aValue));
         break;  
         }
-    __FLOG(_L8("<< CMTPImageDpObjectPropertyMgr::GetPropertyL"));
+    OstTraceFunctionExit0( CMTPIMAGEDPOBJECTPROPERTYMGR_GETPROPERTYL_TUINT32_EXIT );
     }
     
 void CMTPImageDpObjectPropertyMgr::GetPropertyL(TMTPObjectPropertyCode aProperty, TUint64& aValue)
     {
-    __FLOG(_L8(">> CMTPImageDpObjectPropertyMgr::GetPropertyL"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPOBJECTPROPERTYMGR_GETPROPERTYL_TUINT64_ENTRY );
     __ASSERT_DEBUG(iObjectInfo, Panic(EMTPImageDpObjectNull));
 
     if (aProperty == EMTPObjectPropCodeObjectSize) 
@@ -523,14 +562,16 @@ void CMTPImageDpObjectPropertyMgr::GetPropertyL(TMTPObjectPropertyCode aProperty
         }
     else
         {
+        OstTrace1( TRACE_ERROR, CMTPIMAGEDPOBJECTPROPERTYMGR_GETPROPERTYL_TUINT64, 
+                "property code %d not equal to EMTPObjectPropCodeObjectSize", aProperty );
         User::Leave(EMTPRespCodeObjectPropNotSupported);
         }    
-    __FLOG(_L8("<< CMTPImageDpObjectPropertyMgr::GetPropertyL"));
+    OstTraceFunctionExit0( CMTPIMAGEDPOBJECTPROPERTYMGR_GETPROPERTYL_TUINT64_EXIT );
     }
 
 void CMTPImageDpObjectPropertyMgr::GetPropertyL(TMTPObjectPropertyCode aProperty, TMTPTypeUint128& aValue)
     {
-    __FLOG(_L8(">> CMTPImageDpObjectPropertyMgr::GetPropertyL"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPOBJECTPROPERTYMGR_GETPROPERTYL_TMTPTYPEUINT128_ENTRY );
     __ASSERT_DEBUG(iObjectInfo, Panic(EMTPImageDpObjectNull));
     
     if (aProperty == EMTPObjectPropCodePersistentUniqueObjectIdentifier) 
@@ -540,14 +581,16 @@ void CMTPImageDpObjectPropertyMgr::GetPropertyL(TMTPObjectPropertyCode aProperty
         }
     else
         {
+        OstTrace1( TRACE_ERROR, CMTPIMAGEDPOBJECTPROPERTYMGR_GETPROPERTYL_TMTPTYPEUINT128, 
+                "property code %d not equal to EMTPObjectPropCodeObjectSize", aProperty );
         User::Leave(EMTPRespCodeObjectPropNotSupported);
         }
-    __FLOG(_L8("<< CMTPImageDpObjectPropertyMgr::GetPropertyL"));
+    OstTraceFunctionExit0( CMTPIMAGEDPOBJECTPROPERTYMGR_GETPROPERTYL_TMTPTYPEUINT128_EXIT );
     }
     
 void CMTPImageDpObjectPropertyMgr::GetPropertyL(TMTPObjectPropertyCode aProperty, CMTPTypeString& aValue)
     {
-    __FLOG(_L8(">> CMTPImageDpObjectPropertyMgr::GetPropertyL"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPOBJECTPROPERTYMGR_GETPROPERTYL_CMTPTYPESTRING_ENTRY );
     __ASSERT_DEBUG(iObjectInfo, Panic(EMTPImageDpObjectNull));
 
     switch(aProperty)
@@ -555,7 +598,10 @@ void CMTPImageDpObjectPropertyMgr::GetPropertyL(TMTPObjectPropertyCode aProperty
     case EMTPObjectPropCodeObjectFileName:
         {
         TFileName name;
-        User::LeaveIfError(BaflUtils::MostSignificantPartOfFullName(iObjectInfo->DesC(CMTPObjectMetaData::ESuid), name));     
+        LEAVEIFERROR(BaflUtils::MostSignificantPartOfFullName(iObjectInfo->DesC(CMTPObjectMetaData::ESuid), name),
+                OstTraceExt2( TRACE_ERROR, DUP1_CMTPIMAGEDPOBJECTPROPERTYMGR_GETPROPERTYL, 
+                        "Can't get most significant part of %S! error code %d", iObjectInfo->DesC(CMTPObjectMetaData::ESuid), munged_err));
+                
         aValue.SetL(name);
         }
         break;
@@ -583,12 +629,12 @@ void CMTPImageDpObjectPropertyMgr::GetPropertyL(TMTPObjectPropertyCode aProperty
         TRAP_IGNORE(GetPropertyFromMdsL(aProperty, &aValue));
         break;
         }
-    __FLOG(_L8("<< CMTPImageDpObjectPropertyMgr::GetPropertyL"));
+    OstTraceFunctionExit0( CMTPIMAGEDPOBJECTPROPERTYMGR_GETPROPERTYL_CMTPTYPESTRING_EXIT );
     }
 
 void CMTPImageDpObjectPropertyMgr::GetPropertyL(TMTPObjectPropertyCode aProperty, CMTPTypeArray& aValue, TBool alwaysCreate /*= ETrue*/)
     {
-    __FLOG(_L8(">> CMTPImageDpObjectPropertyMgr::GetPropertyL -- SmapleData"));       
+    OstTraceFunctionEntry0( CMTPIMAGEDPOBJECTPROPERTYMGR_GETPROPERTYL_CMTPTYPEARRAY_ENTRY );    
     
     if (aProperty == EMTPObjectPropCodeRepresentativeSampleData)
         {
@@ -635,13 +681,16 @@ void CMTPImageDpObjectPropertyMgr::GetPropertyL(TMTPObjectPropertyCode aProperty
         }
     else
         {
+        OstTrace1( TRACE_ERROR, CMTPIMAGEDPOBJECTPROPERTYMGR_GETPROPERTYL_CMTPTYPEARRAY, 
+                "property code %d not equal to EMTPObjectPropCodeRepresentativeSampleData", aProperty );
         User::Leave(EMTPRespCodeObjectPropNotSupported);
         }
+    OstTraceFunctionExit0( CMTPIMAGEDPOBJECTPROPERTYMGR_GETPROPERTYL_CMTPTYPEARRAY_EXIT );
     }
 
 void CMTPImageDpObjectPropertyMgr::GetPropertyFromMdsL(TMTPObjectPropertyCode aProperty, TAny* aValue)
     {
-    __FLOG(_L8(">> CMTPImageDpObjectPropertyMgr::GetPropertyFromMdsL"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPOBJECTPROPERTYMGR_GETPROPERTYFROMMDSL_ENTRY );
     
     TInt err = KErrNone;
       
@@ -700,7 +749,9 @@ void CMTPImageDpObjectPropertyMgr::GetPropertyFromMdsL(TMTPObjectPropertyCode aP
                     mdeProperty->TimeValueL().FormatL(timeValue, KTimeFormat);
                     (*(static_cast<CMTPTypeString*>(aValue))).SetL(timeValue);
                     
-                    __FLOG_VA((_L16("GetPropertyFromMdsL - from MdS: URI:%S, DateCreated:%S"), &iObjectInfo->DesC(CMTPObjectMetaData::ESuid), &timeValue));
+                    OstTraceExt2( TRACE_NORMAL, CMTPIMAGEDPOBJECTPROPERTYMGR_GETPROPERTYFROMMDSL, 
+                            "GetPropertyFromMdsL - from MdS: URI:%S, DateCreated:%S", 
+                            iObjectInfo->DesC(CMTPObjectMetaData::ESuid), timeValue );
                     }
                 }
             }
@@ -777,21 +828,21 @@ void CMTPImageDpObjectPropertyMgr::GetPropertyFromMdsL(TMTPObjectPropertyCode aP
             break;
             }
         }
-    __FLOG(_L8("<< CMTPImageDpObjectPropertyMgr::GetPropertyFromMdsL"));
+    OstTraceFunctionExit0( CMTPIMAGEDPOBJECTPROPERTYMGR_GETPROPERTYFROMMDSL_EXIT );
     }
 
 TBool CMTPImageDpObjectPropertyMgr::GetYear(const TDesC& aDateString, TInt& aYear) const
     {
-  __FLOG(_L8(">> CMTPImageDpObjectPropertyMgr::GetYear"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPOBJECTPROPERTYMGR_GETYEAR_ENTRY );
     aYear = 0;
     TLex dateBuf(aDateString.Left(4));
-  __FLOG(_L8("<< CMTPImageDpObjectPropertyMgr::GetYear"));
+	OstTraceFunctionExit0( CMTPIMAGEDPOBJECTPROPERTYMGR_GETYEAR_EXIT );
     return dateBuf.Val(aYear) == KErrNone;
     }
 
 TBool CMTPImageDpObjectPropertyMgr::GetMonth(const TDesC& aDateString, TMonth& aMonth) const
     {
-      __FLOG(_L8(">> CMTPImageDpObjectPropertyMgr::GetMonth"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPOBJECTPROPERTYMGR_GETMONTH_ENTRY );
     TBool result = EFalse;
     aMonth = EJanuary;
     TInt month = 0;
@@ -802,13 +853,13 @@ TBool CMTPImageDpObjectPropertyMgr::GetMonth(const TDesC& aDateString, TMonth& a
         aMonth = (TMonth)month;
         result = ETrue;
         }
-    __FLOG(_L8("<< CMTPImageDpObjectPropertyMgr::GetMonth"));
+    OstTraceFunctionExit0( CMTPIMAGEDPOBJECTPROPERTYMGR_GETMONTH_EXIT );
     return result;
     }
 
 TBool CMTPImageDpObjectPropertyMgr::GetDay(const TDesC& aDateString, TInt& aDay) const
     {
-    __FLOG(_L8(">> CMTPImageDpObjectPropertyMgr::GetDay"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPOBJECTPROPERTYMGR_GETDAY_ENTRY );
     TBool result = EFalse;
     aDay = 0;
     TLex dateBuf(aDateString.Mid(6, 2));
@@ -817,40 +868,40 @@ TBool CMTPImageDpObjectPropertyMgr::GetDay(const TDesC& aDateString, TInt& aDay)
         aDay--;
         result = ETrue;
         }
-    __FLOG(_L8("<< CMTPImageDpObjectPropertyMgr::GetDay"));
+    OstTraceFunctionExit0( CMTPIMAGEDPOBJECTPROPERTYMGR_GETDAY_EXIT );
     return result;	
     }
 
 TBool CMTPImageDpObjectPropertyMgr::GetHour(const TDesC& aDateString, TInt& aHour) const
     {
-    __FLOG(_L8(">> CMTPImageDpObjectPropertyMgr::GetHour"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPOBJECTPROPERTYMGR_GETHOUR_ENTRY );
     aHour = 0;
     TLex dateBuf(aDateString.Mid(9, 2));
-    __FLOG(_L8("<< CMTPImageDpObjectPropertyMgr::GetHour"));
+	OstTraceFunctionExit0( CMTPIMAGEDPOBJECTPROPERTYMGR_GETHOUR_EXIT );
     return (dateBuf.Val(aHour) == KErrNone && aHour >=0 && aHour < 60);
     }
                 
 TBool CMTPImageDpObjectPropertyMgr::GetMinute(const TDesC& aDateString, TInt& aMinute) const
     {
-    __FLOG(_L8(">> CMTPImageDpObjectPropertyMgr::GetMinute"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPOBJECTPROPERTYMGR_GETMINUTE_ENTRY );
     aMinute = 0;
     TLex dateBuf(aDateString.Mid(11, 2));
-    __FLOG(_L8("<< CMTPImageDpObjectPropertyMgr::GetMinute"));
+	OstTraceFunctionExit0( CMTPIMAGEDPOBJECTPROPERTYMGR_GETMINUTE_EXIT );
     return (dateBuf.Val(aMinute) == KErrNone && aMinute >=0 && aMinute < 60);
     }
 
 TBool CMTPImageDpObjectPropertyMgr::GetSecond(const TDesC& aDateString, TInt& aSecond) const
     {
-    __FLOG(_L8(">> CMTPImageDpObjectPropertyMgr::GetSecond"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPOBJECTPROPERTYMGR_GETSECOND_ENTRY );
     aSecond = 0;
     TLex dateBuf(aDateString.Mid(13, 2));
-    __FLOG(_L8("<< CMTPImageDpObjectPropertyMgr::GetSecond"));
+	OstTraceFunctionExit0( CMTPIMAGEDPOBJECTPROPERTYMGR_GETSECOND_EXIT );
     return (dateBuf.Val(aSecond) == KErrNone && aSecond >= 0 && aSecond < 60);
     }
 
 TBool CMTPImageDpObjectPropertyMgr::GetTenthSecond(const TDesC& aDateString, TInt& aTenthSecond) const
     {
-    __FLOG(_L8(">> CMTPImageDpObjectPropertyMgr::GetTenthSecond"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPOBJECTPROPERTYMGR_GETTENTHSECOND_ENTRY );
     TBool result = EFalse;
     aTenthSecond = 0;
     TInt dotPos = aDateString.Find(_L("."));
@@ -863,7 +914,7 @@ TBool CMTPImageDpObjectPropertyMgr::GetTenthSecond(const TDesC& aDateString, TIn
         {
         result = ETrue;
         }
-    __FLOG(_L8("<< CMTPImageDpObjectPropertyMgr::GetTenthSecond"));
+    OstTraceFunctionExit0( CMTPIMAGEDPOBJECTPROPERTYMGR_GETTENTHSECOND_EXIT );
     return result;	
     }
 
@@ -893,6 +944,7 @@ void CMTPImageDpObjectPropertyMgr::ConvertMTPTimeStr2TTimeL(const TDesC& aTimeSt
            ||!GetSecond(aTimeString,second)
            ||!GetTenthSecond(aTimeString,tenthSecond))
         {        
+        OstTrace0( TRACE_ERROR, CMTPIMAGEDPOBJECTPROPERTYMGR_CONVERTMTPTIMESTR2TTIMEL, "Failed to extract date/time details!");
         User::Leave(KErrArgument);
         }
     else
@@ -904,7 +956,7 @@ void CMTPImageDpObjectPropertyMgr::ConvertMTPTimeStr2TTimeL(const TDesC& aTimeSt
 
 void CMTPImageDpObjectPropertyMgr::RemoveProperty(CMdEObject& aObject, CMdEPropertyDef& aPropDef)
     {
-    __FLOG(_L8("CMTPImageDpObjectPropertyMgr::RemoveProperty"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPOBJECTPROPERTYMGR_REMOVEPROPERTY_ENTRY );
     TInt index;
     CMdEProperty* property;
     index = aObject.Property(aPropDef, property);
@@ -912,6 +964,7 @@ void CMTPImageDpObjectPropertyMgr::RemoveProperty(CMdEObject& aObject, CMdEPrope
         {
         aObject.RemoveProperty(index);
         }
+    OstTraceFunctionExit0( CMTPIMAGEDPOBJECTPROPERTYMGR_REMOVEPROPERTY_EXIT );
     }
 
 /**
@@ -989,7 +1042,8 @@ void CMTPImageDpObjectPropertyMgr::OpenMdeObjectL()
     {
     if (iObject == NULL)
         {
-        __FLOG_VA((_L16("OpenMdeObjectL - URI = %S"), &iObjectInfo->DesC(CMTPObjectMetaData::ESuid)));
+		OstTraceExt1( TRACE_NORMAL, CMTPIMAGEDPOBJECTPROPERTYMGR_OPENMDEOBJECTL, 
+		        "OpenMdeObjectL - URI = %S", iObjectInfo->DesC(CMTPObjectMetaData::ESuid) );
 		
         CMdENamespaceDef& defaultNamespace = iMetaDataSession->GetDefaultNamespaceDefL();
         CMdEObjectDef& imageObjDef = defaultNamespace.GetObjectDefL( MdeConstants::Image::KImageObject );

@@ -22,7 +22,13 @@
 #include "cmtppictbridgeprinter.h"
 #include "cptptimer.h"
 #include "mtppictbridgedpconst.h"
-#include "ptpdef.h" 
+#include "ptpdef.h"
+#include "mtpdebug.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cptpsessionTraces.h"
+#endif
+ 
 
 // --------------------------------------------------------------------------
 // 
@@ -56,7 +62,6 @@ CPtpSession::CPtpSession(CPtpServer* aServer) : iServerP(aServer)
 //
 void CPtpSession::ConstructL()
     {
-    __FLOG_OPEN(KMTPSubsystem, KPtpServerLog);
     iTimerP=CPtpTimer::NewL(*this);
     }
 // --------------------------------------------------------------------------
@@ -66,7 +71,7 @@ void CPtpSession::ConstructL()
 //
 CPtpSession::~CPtpSession()
     {
-    __FLOG(_L8(">>>CPtpSession::~"));
+    OstTraceFunctionEntry0( CPTPSESSION_CPTPSESSION_DES_ENTRY );
     delete iTimerP;
     CancelOutstandingRequest();
     TRAP_IGNORE(CleanupL()); // there is not much we can do at this phase if the removal fails, so just ignore
@@ -74,8 +79,7 @@ CPtpSession::~CPtpSession()
         {
         iServerP->DecrementSessionCount();
         }
-    __FLOG(_L8("<<<CPtpSession::~"));
-    __FLOG_CLOSE;
+    OstTraceFunctionExit0( CPTPSESSION_CPTPSESSION_DES_EXIT );
     }
 
 // --------------------------------------------------------------------------
@@ -85,9 +89,9 @@ CPtpSession::~CPtpSession()
 //
 void CPtpSession::ServiceL( const RMessage2& aMessage )
     {
-    __FLOG(_L8(">>>CPtpSession::ServiceL"));
+    OstTraceFunctionEntry0( CPTPSESSION_SERVICEL_ENTRY );
     DispatchMessageL(aMessage);
-    __FLOG(_L8("<<<CPtpSession::ServiceL"));
+    OstTraceFunctionExit0( CPTPSESSION_SERVICEL_EXIT );
     }
 
 // --------------------------------------------------------------------------
@@ -97,16 +101,17 @@ void CPtpSession::ServiceL( const RMessage2& aMessage )
 //
 void CPtpSession::CleanupL()
     {
-    __FLOG(_L8(">>>CPtpSession::Cleanup"));
+    OstTraceFunctionEntry0( CPTPSESSION_CLEANUPL_ENTRY );
     if(iReceivedFile.Size())
         {
-        __FLOG_VA((_L16("   deleting file %S"), &iReceivedFile));
-        User::LeaveIfError(iServerP->Framework().Fs().Delete(iReceivedFile));
-        __FLOG(_L8("   removing from DB"));
+        OstTraceExt1( TRACE_NORMAL, CPTPSESSION_CLEANUPL, "   deleting file %S", iReceivedFile );
+        LEAVEIFERROR(iServerP->Framework().Fs().Delete(iReceivedFile),
+                OstTrace1( TRACE_ERROR, DUP2_CPTPSESSION_CLEANUPL, "Delete file failed! error code %d", munged_err));
+        OstTrace0( TRACE_NORMAL, DUP1_CPTPSESSION_CLEANUPL, "   removing from DB" );
         iServerP->RemoveObjectL(iReceivedFile);
         iReceivedFile.Zero();
         }
-    __FLOG(_L8("<<<CPtpSession::Cleanup"));
+    OstTraceFunctionExit0( CPTPSESSION_CLEANUPL_EXIT );
     }
 
 // --------------------------------------------------------------------------
@@ -115,7 +120,9 @@ void CPtpSession::CleanupL()
 //
 void CPtpSession::DispatchMessageL( const RMessage2& aMessage )
     {
-    __FLOG_VA((_L8(">>>CPtpSession::DispatchMessageL %d"), aMessage.Function()));
+    OstTraceFunctionEntry0( CPTPSESSION_DISPATCHMESSAGEL_ENTRY );
+    OstTrace1( TRACE_NORMAL, CPTPSESSION_DISPATCHMESSAGEL, "aMessage.Function() %d", aMessage.Function());
+
     TInt ret = KErrNone;
     TBool complete = ETrue;        
     CleanupL(); // calling this here assumes that the client never makes a new call 
@@ -159,7 +166,7 @@ void CPtpSession::DispatchMessageL( const RMessage2& aMessage )
             break;
 
         default:
-            __FLOG(_L8("!!!Error: ---Wrong param from client!!!"));
+            OstTrace0( TRACE_FATAL, DUP2_CPTPSESSION_DISPATCHMESSAGEL, "!!!Error: ---Wrong param from client!!!" );
             aMessage.Panic(KPTPClientPanicCategory, EBadRequest);
             break;
         }
@@ -168,7 +175,8 @@ void CPtpSession::DispatchMessageL( const RMessage2& aMessage )
         {
         aMessage.Complete(ret);
         }
-    __FLOG_VA((_L8("<<<PtpSession::DispatchMessageL ret=%d"), ret));
+    OstTrace1( TRACE_NORMAL, DUP1_CPTPSESSION_DISPATCHMESSAGEL, "ret=%d", ret );    
+    OstTraceFunctionExit0( CPTPSESSION_DISPATCHMESSAGEL_EXIT );
     }
 
 // --------------------------------------------------------------------------
@@ -178,7 +186,7 @@ void CPtpSession::DispatchMessageL( const RMessage2& aMessage )
 //
 void CPtpSession::CancelIsDpsPrinter()
     {
-    __FLOG(_L8(">>>CPtpSession::CancelIsDpsPrinter"));
+    OstTraceFunctionEntry0( CPTPSESSION_CANCELISDPSPRINTER_ENTRY );
     if (iDpsPrinterMsg.Handle())
         {
         iDpsPrinterMsg.Complete(KErrCancel);
@@ -186,7 +194,7 @@ void CPtpSession::CancelIsDpsPrinter()
         iTimerP->Cancel();
         iServerP->CancelNotifyOnMtpSessionOpen(this);
         } 
-    __FLOG(_L8("<<<CPtpSession::CancelIsDpsPrinter"));
+    OstTraceFunctionExit0( CPTPSESSION_CANCELISDPSPRINTER_EXIT );
     }
     
 // --------------------------------------------------------------------------
@@ -196,14 +204,14 @@ void CPtpSession::CancelIsDpsPrinter()
 //
 void CPtpSession::CancelSendObject()
     {
-    __FLOG(_L8(">>>CancelSendObject"));
+    OstTraceFunctionEntry0( CPTPSESSION_CANCELSENDOBJECT_ENTRY );
     if (iSendObjectMsg.Handle())
         {
         iServerP->Printer()->CancelSendDpsFile();
         iSendObjectMsg.Complete(KErrCancel);
         iTimerP->Cancel();
         }
-    __FLOG(_L8("<<<CancelSendObject"));    
+    OstTraceFunctionExit0( CPTPSESSION_CANCELSENDOBJECT_EXIT );
     }
     
 // --------------------------------------------------------------------------
@@ -213,14 +221,15 @@ void CPtpSession::CancelSendObject()
 //
 void CPtpSession::CancelObjectReceivedNotify()
     {
-    __FLOG(_L8(">>>CancelObjectReceivedNotify"));       
+    OstTraceFunctionEntry0( CPTPSESSION_CANCELOBJECTRECEIVEDNOTIFY_ENTRY );    
     if (iObjectReceivedNotifyMsg.Handle())
         {
-        __FLOG_VA((_L8("the handle is 0x%x"), iObjectReceivedNotifyMsg.Handle()));
+        OstTrace1( TRACE_NORMAL, CPTPSESSION_CANCELOBJECTRECEIVEDNOTIFY, 
+                "the handle is 0x%x", iObjectReceivedNotifyMsg.Handle());
         iServerP->Printer()->MsgHandlerP()->DeRegisterReceiveObjectNotify();
         iObjectReceivedNotifyMsg.Complete(KErrCancel);                    
         }
-    __FLOG(_L8("<<<CancelObjectReceivedNotifiy"));
+    OstTraceFunctionExit0( CPTPSESSION_CANCELOBJECTRECEIVEDNOTIFY_EXIT );
     }
     
 // --------------------------------------------------------------------------
@@ -229,7 +238,7 @@ void CPtpSession::CancelObjectReceivedNotify()
 //    
 TInt CPtpSession::IsDpsPrinter(const RMessage2& aMessage, TBool& aComplete)
     {
-    __FLOG(_L8(">>>IsDpsPrinter"));
+    OstTraceFunctionEntry0( CPTPSESSION_ISDPSPRINTER_ENTRY );
     TInt ret=EPrinterNotAvailable;
     if (!iDpsPrinterMsg.Handle()) // not already pending
         {
@@ -251,19 +260,19 @@ TInt CPtpSession::IsDpsPrinter(const RMessage2& aMessage, TBool& aComplete)
                     iServerP->NotifyOnMtpSessionOpen(this);
                     }                    
                 // we do not set ret since the  value does not really matter, we will be waiting for the discovery to complete
-                __FLOG(_L8(" waiting"));
+                OstTrace0( TRACE_NORMAL, CPTPSESSION_ISDPSPRINTER, " waiting" );
                 break;
                 
             case CMTPPictBridgePrinter::EConnected:
                 ret=EPrinterAvailable;
                 aComplete = ETrue;
-                __FLOG(_L8(" connected"));
+                OstTrace0( TRACE_NORMAL, DUP1_CPTPSESSION_ISDPSPRINTER, " connected" );
                 break;
 
             case CMTPPictBridgePrinter::ENotPrinter:
                 ret=EPrinterNotAvailable;
                 aComplete = ETrue;
-                __FLOG(_L8(" not connected"));
+                OstTrace0( TRACE_NORMAL, DUP2_CPTPSESSION_ISDPSPRINTER, " not connected" );
                 break;
 
             default:
@@ -271,12 +280,12 @@ TInt CPtpSession::IsDpsPrinter(const RMessage2& aMessage, TBool& aComplete)
             }
         }
     else
-        {
-        __FLOG(_L8("!!!Error: client message error, duplicated IsDpsPrinter"));                        
+        { 
+        OstTrace0( TRACE_FATAL, DUP3_CPTPSESSION_ISDPSPRINTER, "!!!Error: client message error, duplicated IsDpsPrinter" );
         aMessage.Panic(KPTPClientPanicCategory, ERequestPending);
         aComplete = EFalse;
         }
-    __FLOG(_L8("<<<IsDpsPrinter"));
+    OstTraceFunctionExit0( CPTPSESSION_ISDPSPRINTER_EXIT );
     return ret;
     }
 
@@ -286,13 +295,13 @@ TInt CPtpSession::IsDpsPrinter(const RMessage2& aMessage, TBool& aComplete)
 // --------------------------------------------------------------------------
 void CPtpSession::MTPSessionOpened()
     {
-    __FLOG(_L8(">>>CPtpSession::MTPSessionOpened"));
+    OstTraceFunctionEntry0( CPTPSESSION_MTPSESSIONOPENED_ENTRY );
     if (!iTimerP->IsActive() && iDpsPrinterMsg.Handle()) 
         {
-        __FLOG(_L8("   CPtpSession::MTPSessionOpened timer started"));
+        OstTrace0( TRACE_NORMAL, CPTPSESSION_MTPSESSIONOPENED, "timer started" );
         iTimerP->After(KDiscoveryTime);
         }        
-    __FLOG(_L8("<<<CPtpSession::MTPSessionOpened"));
+    OstTraceFunctionExit0( CPTPSESSION_MTPSESSIONOPENED_EXIT );
     }
     
 // --------------------------------------------------------------------------
@@ -302,15 +311,18 @@ void CPtpSession::MTPSessionOpened()
 //
 void CPtpSession::GetObjectHandleByNameL(const RMessage2& aMessage)
     {
-    __FLOG(_L8(">>>CPtpSession::GetObjectHandleByNameL"));
+    OstTraceFunctionEntry0( CPTPSESSION_GETOBJECTHANDLEBYNAMEL_ENTRY );
     TFileName file;
-    User::LeaveIfError(aMessage.Read(0, file));
-    __FLOG_VA((_L16("--the file is %S"), &file));
+    LEAVEIFERROR(aMessage.Read(0, file),
+            OstTrace1( TRACE_ERROR, DUP2_CPTPSESSION_GETOBJECTHANDLEBYNAMEL, 
+                    "Read file name from message failed! error code %d", munged_err ));
+    OstTraceExt1( TRACE_NORMAL, DUP1_CPTPSESSION_GETOBJECTHANDLEBYNAMEL, "--the file is %S", file );
     TUint32 handle=0;
     TRAP_IGNORE(iServerP->GetObjectHandleByNameL(file, handle));
     TPckgBuf<TUint32> handlePckg(handle);
     aMessage.WriteL(1, handlePckg);     
-    __FLOG_VA((_L16("<<<CPtpSession::GetObjectHandleByNameL handle=%d"), handle));
+    OstTrace1( TRACE_NORMAL, CPTPSESSION_GETOBJECTHANDLEBYNAMEL, "handle=%d", handle );    
+    OstTraceFunctionExit0( CPTPSESSION_GETOBJECTHANDLEBYNAMEL_EXIT );
     }
     
 // --------------------------------------------------------------------------
@@ -320,18 +332,20 @@ void CPtpSession::GetObjectHandleByNameL(const RMessage2& aMessage)
 //
 void CPtpSession::GetNameByObjectHandleL(const RMessage2& aMessage)
     {
-    __FLOG(_L8(">>>CPtpSession::GetNameByObjectHandle"));               
+    OstTraceFunctionEntry0( CPTPSESSION_GETNAMEBYOBJECTHANDLEL_ENTRY );            
     TUint32 handle = 0;
     TPckgBuf<TUint32> pckgHandle(handle);
-    User::LeaveIfError(aMessage.Read(1, pckgHandle));
+    LEAVEIFERROR(aMessage.Read(1, pckgHandle),
+            OstTrace1( TRACE_ERROR, CPTPSESSION_GETNAMEBYOBJECTHANDLEL, 
+                    "Read handle from message failed! error code %d", munged_err ));
     TFileName file; 
     handle = pckgHandle();
-    __FLOG_VA((_L8("---handle is %x"), handle));
+    OstTrace1( TRACE_NORMAL, DUP1_CPTPSESSION_GETNAMEBYOBJECTHANDLEL, "---handle is %x", handle );
     TRAP_IGNORE(iServerP->GetObjectNameByHandleL(file, handle));
-    __FLOG_VA((_L16("the file is %S"), &file));
+    OstTraceExt1( TRACE_NORMAL, DUP2_CPTPSESSION_GETNAMEBYOBJECTHANDLEL, "the file is %S", file );
     aMessage.WriteL(0, file);
-    
-    __FLOG(_L8("<<<CPtpSession::GetNameByObjectHandle"));               
+          
+    OstTraceFunctionExit0( CPTPSESSION_GETNAMEBYOBJECTHANDLEL_EXIT );
     }
               
 // --------------------------------------------------------------------------
@@ -341,14 +355,15 @@ void CPtpSession::GetNameByObjectHandleL(const RMessage2& aMessage)
 //
 TInt CPtpSession::SendObject(const RMessage2& aMessage, TBool& aComplete)
     {
-    __FLOG(_L8(">>>CPtpSession::SendObject"));                      
+    OstTraceFunctionEntry0( CPTPSESSION_SENDOBJECT_ENTRY );               
     TInt err(KErrNone);
     
     if (iSendObjectMsg.Handle())
         {
-        __FLOG(_L8("!!!!Error: client message error, duplicated SendObject"));
+        OstTrace0( TRACE_FATAL, DUP1_CPTPSESSION_SENDOBJECT, "!!!!Error: client message error, duplicated SendObject" );
         aMessage.Panic(KPTPClientPanicCategory, ERequestPending);
         aComplete = EFalse;
+        OstTraceFunctionExit0( CPTPSESSION_SENDOBJECT_EXIT );
         return KErrNone;
         }
     else
@@ -358,15 +373,16 @@ TInt CPtpSession::SendObject(const RMessage2& aMessage, TBool& aComplete)
         //
         // Sending ObjectAdded Event is not mandatory ( See Appendix B page 78. DPS Usage of USB and PTP in CIPA DC-001-2003)
 
-        TBool timeout = aMessage.Int2();    
-        __FLOG_VA((_L8("---timeout is %d"), timeout));    
+        TBool timeout = aMessage.Int2();       
+        OstTrace1( TRACE_NORMAL, DUP2_CPTPSESSION_SENDOBJECT, "---timeout is %d", timeout );
         TFileName file; 
         err = aMessage.Read(0, file);
         if (err == KErrNone)
             {
-            __FLOG_VA((_L16("---the file is %S"), &file));
+            OstTraceExt1( TRACE_NORMAL, DUP3_CPTPSESSION_SENDOBJECT, "---the file is %S", file );
             TInt size = aMessage.Int3();
-            __FLOG_VA((_L8("---the file size is %d"), size)); // size is deprecated and not used anymore
+            // size is deprecated and not used anymore
+            OstTrace1( TRACE_NORMAL, DUP4_CPTPSESSION_SENDOBJECT, "---the file size is %d", size );
             TRAP(err, iServerP->Printer()->SendDpsFileL(file, timeout, size));
             if (err == KErrNone)
                 {
@@ -378,7 +394,8 @@ TInt CPtpSession::SendObject(const RMessage2& aMessage, TBool& aComplete)
             {
             iTimerP->After(KSendTimeout);
             }
-        __FLOG_VA((_L8("<<<CPtpSession::SendObject err=%d"), err));
+        OstTrace1( TRACE_NORMAL, CPTPSESSION_SENDOBJECT, "err=%d", err );        
+        OstTraceFunctionExit0( DUP1_CPTPSESSION_SENDOBJECT_EXIT );
         return err;    
         }    
     }             
@@ -391,30 +408,30 @@ TInt CPtpSession::SendObject(const RMessage2& aMessage, TBool& aComplete)
 TInt CPtpSession::ObjectReceivedNotify(const RMessage2& aMessage, 
                                        TBool& aComplete)
     {
-    __FLOG(_L8(">>>CPtpSession::ObjectReceivedNotify"));                        
+    OstTraceFunctionEntry0( CPTPSESSION_OBJECTRECEIVEDNOTIFY_ENTRY );                      
     if (iObjectReceivedNotifyMsg.Handle())
         {
-        __FLOG(_L8("!!!!Error: client message error, duplicated ObjectReceivedNotify"));
+        OstTrace0( TRACE_FATAL, CPTPSESSION_OBJECTRECEIVEDNOTIFY, "!!!!Error: client message error, duplicated ObjectReceivedNotify" );
         aMessage.Panic(KPTPClientPanicCategory, ERequestPending);
         aComplete = EFalse;
+        OstTraceFunctionExit0( CPTPSESSION_OBJECTRECEIVEDNOTIFY_EXIT );
         return KErrNone;
         }
     else
         {
-        //TBool del = aMessage.Int2();
-        //__FLOG_VA((_L8("---the del is %d"), del));    
+        //TBool del = aMessage.Int2(); 
 
         TBuf<KFileExtLength> ext; 
         TInt err = aMessage.Read(0, ext);
         if (err == KErrNone)
             {
-            __FLOG_VA((_L16("the extension is %S"), &ext));
-            
+            OstTraceExt1( TRACE_NORMAL, DUP1_CPTPSESSION_OBJECTRECEIVEDNOTIFY, "the extension is %S", ext);
+
             iObjectReceivedNotifyMsg = aMessage; 
             aComplete = EFalse;
             iServerP->Printer()->MsgHandlerP()->RegisterReceiveObjectNotify(ext);
-            }
-        __FLOG(_L8("<<<CPtpSession::ObjectReceivedNotify"));                            
+            }                          
+        OstTraceFunctionExit0( DUP1_CPTPSESSION_OBJECTRECEIVEDNOTIFY_EXIT );
         return err;
         }
     }
@@ -426,11 +443,12 @@ TInt CPtpSession::ObjectReceivedNotify(const RMessage2& aMessage,
 //    
 TInt CPtpSession::PtpFolder(const RMessage2& aMessage)
     {
-    __FLOG(_L8(">>>CPtpSession::PtpFolder"));
+    OstTraceFunctionEntry0( CPTPSESSION_PTPFOLDER_ENTRY );
     TInt err(KErrNotReady);
     TFileName folder = iServerP->PtpFolder();
     err = aMessage.Write(0,folder);
-    __FLOG_VA((_L16("<<<CPtpSession::PtpFolder %S err(%d)"), &folder, err));
+    OstTraceExt2( TRACE_NORMAL, CPTPSESSION_PTPFOLDER, "Folder %S err(%d)", folder, err);    
+    OstTraceFunctionExit0( CPTPSESSION_PTPFOLDER_EXIT );
     return err;
     }
     
@@ -441,7 +459,8 @@ TInt CPtpSession::PtpFolder(const RMessage2& aMessage)
 //    
 void CPtpSession::SendObjectCompleted(TInt aStatus)
     {
-    __FLOG_VA((_L16(">>>CPtpSession::SendObjectCompleted status(%d)"), aStatus));
+    OstTraceFunctionEntry0( CPTPSESSION_SENDOBJECTCOMPLETED_ENTRY );
+    OstTrace1( TRACE_NORMAL, CPTPSESSION_SENDOBJECTCOMPLETED, "status(%d)", aStatus );
     if (iSendObjectMsg.Handle())
         {
         iSendObjectMsg.Complete(aStatus);    
@@ -449,9 +468,9 @@ void CPtpSession::SendObjectCompleted(TInt aStatus)
         }
     else
         {
-        __FLOG(_L8("!!!Warning: CPtpSession::SendObjectCompleted: UNEXPECTED CALL"));
+        OstTrace0( TRACE_WARNING, DUP1_CPTPSESSION_SENDOBJECTCOMPLETED, "!!!Warning: UNEXPECTED CALL" );
         }
-    __FLOG(_L8("<<<CPtpSession::SendObjectCompleted")); 
+    OstTraceFunctionExit0( CPTPSESSION_SENDOBJECTCOMPLETED_EXIT );
     }
 
 // --------------------------------------------------------------------------
@@ -461,7 +480,7 @@ void CPtpSession::SendObjectCompleted(TInt aStatus)
 //
 void CPtpSession::IsDpsPrinterCompleted(TDpsPrinterState aState)
     {
-    __FLOG(_L8(">>>CPtpSession::IsDpsPrinterCompleted"));    
+    OstTraceFunctionEntry0( CPTPSESSION_ISDPSPRINTERCOMPLETED_ENTRY );  
     if (iDpsPrinterMsg.Handle())
         {
         iDpsPrinterMsg.Complete(aState);
@@ -470,9 +489,9 @@ void CPtpSession::IsDpsPrinterCompleted(TDpsPrinterState aState)
         }
     else
         {
-        __FLOG(_L8("!!!Warning: CPtpSession::IsDpsPrinterCompleted: UNEXPECTED CALL"));
-        }
-    __FLOG(_L8("<<<CPtpSession::IsDpsPrinterCompleted"));    
+        OstTrace0( TRACE_WARNING, CPTPSESSION_ISDPSPRINTERCOMPLETED, "!!!Warning:  UNEXPECTED CALL" );
+        } 
+    OstTraceFunctionExit0( CPTPSESSION_ISDPSPRINTERCOMPLETED_EXIT );
     }
 
 // --------------------------------------------------------------------------
@@ -482,19 +501,19 @@ void CPtpSession::IsDpsPrinterCompleted(TDpsPrinterState aState)
 //
 void CPtpSession::ReceivedObjectCompleted(TDes& aFile)
     {
-    __FLOG(_L8(">>>CPtpSession::ReceivedObjectCompleted"));
+    OstTraceFunctionEntry0( CPTPSESSION_RECEIVEDOBJECTCOMPLETED_ENTRY );
     if (iObjectReceivedNotifyMsg.Handle())
         {
         TInt err = iObjectReceivedNotifyMsg.Write(1, aFile);
         iReceivedFile.Copy(aFile);
-        __FLOG_VA((_L8("***CPtpSession::ReceivedObjectCompleted err=%d"), err));
+        OstTrace1( TRACE_NORMAL, CPTPSESSION_RECEIVEDOBJECTCOMPLETED, "*** err=%d", err );
         iObjectReceivedNotifyMsg.Complete(err);
         }
     else
         {
-        __FLOG(_L8("!!!Warning: Strange Happened!!!"));    
+        OstTrace0( TRACE_WARNING, DUP1_CPTPSESSION_RECEIVEDOBJECTCOMPLETED, "!!!Warning: Strange Happened!!!" );
         }
-    __FLOG(_L8("<<<CPtpSession::ReceivedObjectCompleted"));
+    OstTraceFunctionExit0( CPTPSESSION_RECEIVEDOBJECTCOMPLETED_EXIT );
     }
 
 // --------------------------------------------------------------------------
@@ -504,7 +523,7 @@ void CPtpSession::ReceivedObjectCompleted(TDes& aFile)
 //
 void CPtpSession::CancelOutstandingRequest()
     {
-    __FLOG(_L8(">>>CPtpSession::CancelOutstandingRequest"));
+    OstTraceFunctionEntry0( CPTPSESSION_CANCELOUTSTANDINGREQUEST_ENTRY );
     if (iSendObjectMsg.Handle())
         {
         iSendObjectMsg.Complete(KErrCancel);
@@ -517,7 +536,7 @@ void CPtpSession::CancelOutstandingRequest()
         {
         iDpsPrinterMsg.Complete(KErrCancel);
         }
-    __FLOG(_L8("<<<CPtpSession::CancelOutstandingRequest"));    
+    OstTraceFunctionExit0( CPTPSESSION_CANCELOUTSTANDINGREQUEST_EXIT );
     }
 // --------------------------------------------------------------------------
 // 

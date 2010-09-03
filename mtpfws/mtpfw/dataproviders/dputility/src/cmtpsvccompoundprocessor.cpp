@@ -32,9 +32,13 @@
 #include "cmtpconnection.h"
 #include "cmtpconnectionmgr.h"
 #include "mtpsvcdpconst.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpsvccompoundprocessorTraces.h"
+#endif
+
 
 // Class constants.
-__FLOG_STMT(_LIT8(KComponent,"SvcCompound");)
 
 EXPORT_C MMTPRequestProcessor* CMTPSvcCompoundProcessor::NewL(MMTPDataProviderFramework& aFramework, MMTPConnection& aConnection, MMTPServiceDataProvider& aDataProvider)
 	{
@@ -47,12 +51,11 @@ EXPORT_C MMTPRequestProcessor* CMTPSvcCompoundProcessor::NewL(MMTPDataProviderFr
 
 EXPORT_C CMTPSvcCompoundProcessor::~CMTPSvcCompoundProcessor()
 	{
-	__FLOG(_L8("~CMTPSvcCompoundProcessor - Entry"));
+	OstTraceFunctionEntry0( CMTPSVCCOMPOUNDPROCESSOR_CMTPSVCCOMPOUNDPROCESSOR_DES_ENTRY );
 	delete iReceivedObjectMetaData;
 	delete iObjectInfo;
 	delete iObjectPropList;
-	__FLOG(_L8("~CMTPSvcCompoundProcessor - Exit"));
-	__FLOG_CLOSE; 
+	OstTraceFunctionExit0( CMTPSVCCOMPOUNDPROCESSOR_CMTPSVCCOMPOUNDPROCESSOR_DES_EXIT );
 	}
 
 CMTPSvcCompoundProcessor::CMTPSvcCompoundProcessor(MMTPDataProviderFramework& aFramework, MMTPConnection& aConnection, MMTPServiceDataProvider& aDataProvider) :
@@ -63,12 +66,11 @@ CMTPSvcCompoundProcessor::CMTPSvcCompoundProcessor(MMTPDataProviderFramework& aF
 
 void CMTPSvcCompoundProcessor::ConstructL()
 	{
-	__FLOG_OPEN(KMTPSubsystem, KComponent);
-	__FLOG(_L8("ConstructL - Entry"));
+	OstTraceFunctionEntry0( CMTPSVCCOMPOUNDPROCESSOR_CONSTRUCTL_ENTRY );
 	iExpectedSendObjectRequest.SetUint16(TMTPTypeRequest::ERequestOperationCode, EMTPOpCodeSendObject);
 	iReceivedObjectMetaData = CMTPObjectMetaData::NewL();
 	iReceivedObjectMetaData->SetUint(CMTPObjectMetaData::EDataProviderId, iFramework.DataProviderId());
-	__FLOG(_L8("ConstructL - Exit"));
+	OstTraceFunctionExit0( CMTPSVCCOMPOUNDPROCESSOR_CONSTRUCTL_EXIT );
 	}
 
 /**
@@ -79,7 +81,7 @@ Override to match both the SendObjectInfo/SendObjectPropList/UpdateObjectPropLis
 */
 TBool CMTPSvcCompoundProcessor::Match(const TMTPTypeRequest& aRequest, MMTPConnection& aConnection) const
 	{
-	__FLOG(_L8("Match - Entry"));
+	OstTraceFunctionEntry0( CMTPSVCCOMPOUNDPROCESSOR_MATCH_ENTRY );
 	TBool result = EFalse;
 	TUint16 operationCode = aRequest.Uint16(TMTPTypeRequest::ERequestOperationCode);
 	if ((&iConnection == &aConnection) && 
@@ -90,7 +92,7 @@ TBool CMTPSvcCompoundProcessor::Match(const TMTPTypeRequest& aRequest, MMTPConne
 		{
 		result = ETrue;
 		}
-	__FLOG(_L8("Match - Exit"));
+	OstTraceFunctionExit0( CMTPSVCCOMPOUNDPROCESSOR_MATCH_EXIT );
 	return result;
 	}
 
@@ -105,7 +107,7 @@ Verify the request
 */
 TMTPResponseCode CMTPSvcCompoundProcessor::CheckRequestL()
 	{
-	__FLOG(_L8("CheckRequestL - Entry"));
+	OstTraceFunctionEntry0( CMTPSVCCOMPOUNDPROCESSOR_CHECKREQUESTL_ENTRY );
 	TMTPResponseCode responseCode = CMTPRequestProcessor::CheckRequestL();
 	if (EMTPRespCodeOK == responseCode)
 		{
@@ -115,7 +117,9 @@ TMTPResponseCode CMTPSvcCompoundProcessor::CheckRequestL()
 			responseCode = CheckRequestParametersL();
 			}
 		}
-	__FLOG_VA((_L8("CheckRequestL - Exit with code: 0x%04X"), responseCode));
+
+	OstTrace1( TRACE_NORMAL, CMTPSVCCOMPOUNDPROCESSOR_CHECKREQUESTL, "Exit with code: 0x%04X", responseCode);
+	OstTraceFunctionExit0( CMTPSVCCOMPOUNDPROCESSOR_CHECKREQUESTL_EXIT );
 	return responseCode;
 	}
 
@@ -126,7 +130,7 @@ EMTPRespCodeNoValidObjectInfo
 */
 TMTPResponseCode CMTPSvcCompoundProcessor::CheckSendingStateL()
 	{
-	__FLOG(_L8("CheckSendingStateL - Entry"));
+	OstTraceFunctionEntry0( CMTPSVCCOMPOUNDPROCESSOR_CHECKSENDINGSTATEL_ENTRY );
 	TMTPResponseCode responseCode = EMTPRespCodeOK;
 	iOperationCode = Request().Uint16(TMTPTypeRequest::ERequestOperationCode);
 	
@@ -146,7 +150,7 @@ TMTPResponseCode CMTPSvcCompoundProcessor::CheckSendingStateL()
 			if (iOperationCode == EMTPOpCodeSendObject)
 				{
 				responseCode = EMTPRespCodeNoValidObjectInfo;
-				__FLOG(_L8("EIdle: Received an orphan SendObject request"));
+				OstTrace0( TRACE_NORMAL, DUP1_CMTPSVCCOMPOUNDPROCESSOR_CHECKSENDINGSTATEL, "EIdle: Received an orphan SendObject request" );
 				}
 			break;
 		case EObjectInfoSucceed:
@@ -181,13 +185,16 @@ TMTPResponseCode CMTPSvcCompoundProcessor::CheckSendingStateL()
 				iState = EIdle;
 				// Reset commit state to false
 				iIsCommited = EFalse;
-				__FLOG(_L8("EObjectInfoSucceed: Receive send obj info request again, return to EIdle"));
+				OstTrace0( TRACE_NORMAL, DUP2_CMTPSVCCOMPOUNDPROCESSOR_CHECKSENDINGSTATEL, 
+				        "EObjectInfoSucceed: Receive send obj info request again, return to EIdle" );
 				}
 			break;
 		default:
+		    OstTrace1( TRACE_ERROR, DUP3_CMTPSVCCOMPOUNDPROCESSOR_CHECKSENDINGSTATEL, "wrong iState %d", iState);
 			User::Leave(KErrGeneral);
 		}
-	__FLOG_VA((_L8("CheckSendingStateL - Exit with code: 0x%04X, state: %u"), responseCode, iState));
+	OstTraceExt2( TRACE_NORMAL, CMTPSVCCOMPOUNDPROCESSOR_CHECKSENDINGSTATEL, "Exit with code: 0x%04X, state: %u", (TUint32)responseCode, iState );
+	OstTraceFunctionExit0( CMTPSVCCOMPOUNDPROCESSOR_CHECKSENDINGSTATEL_EXIT );
 	return responseCode;
 	}
 
@@ -197,14 +204,15 @@ Validates the data type for a given property code.
 */
 TMTPResponseCode CMTPSvcCompoundProcessor::CheckRequestParametersL()
 	{
-	__FLOG(_L8("CheckRequestParametersL - Entry"));
+	OstTraceFunctionEntry0( CMTPSVCCOMPOUNDPROCESSOR_CHECKREQUESTPARAMETERSL_ENTRY );
 	TMTPResponseCode responseCode = EMTPRespCodeOK;
 	
 	switch (iOperationCode)
 		{
 		case EMTPOpCodeSendObject:
 			{
-			__FLOG(_L8("Check SendObject request parameters"));
+			OstTrace0( TRACE_NORMAL, DUP1_CMTPSVCCOMPOUNDPROCESSOR_CHECKREQUESTPARAMETERSL, 
+			        "Check SendObject request parameters" );
 			// Check SendObject's session ID
 			if (iSessionId != iLastSessionID)
 				{
@@ -220,14 +228,16 @@ TMTPResponseCode CMTPSvcCompoundProcessor::CheckRequestParametersL()
 
 		case EMTPOpCodeSendObjectInfo:
 			{
-			__FLOG(_L8("Check SendObjectInfo request parameters"));
+			OstTrace0( TRACE_NORMAL, DUP2_CMTPSVCCOMPOUNDPROCESSOR_CHECKREQUESTPARAMETERSL, 
+			        "Check SendObjectInfo request parameters" );
 			responseCode = CheckStoreAndParent();
 			break;
 			}
 			
 		case EMTPOpCodeSendObjectPropList:
 			{
-			__FLOG(_L8("Check SendObjectPropList request parameters"));
+			OstTrace0( TRACE_NORMAL, DUP3_CMTPSVCCOMPOUNDPROCESSOR_CHECKREQUESTPARAMETERSL, 
+			        "Check SendObjectPropList request parameters" );
 			responseCode = CheckStoreAndParent();
 			if (EMTPRespCodeOK == responseCode)
 				{
@@ -245,7 +255,8 @@ TMTPResponseCode CMTPSvcCompoundProcessor::CheckRequestParametersL()
 
 		case EMTPOpCodeUpdateObjectPropList:
 			{
-			__FLOG(_L8("Check UpdateObjectPropList request parameters"));
+			OstTrace0( TRACE_NORMAL, DUP4_CMTPSVCCOMPOUNDPROCESSOR_CHECKREQUESTPARAMETERSL, 
+			        "Check UpdateObjectPropList request parameters" );
 			TUint32 objectHandle = Request().Uint32(TMTPTypeRequest::ERequestParameter1);
 			if (objectHandle != KMTPHandleNone)
 				{
@@ -280,7 +291,8 @@ TMTPResponseCode CMTPSvcCompoundProcessor::CheckRequestParametersL()
 			responseCode = EMTPRespCodeOperationNotSupported;
 			break;
 		}
-	__FLOG_VA((_L8("CheckRequestParametersL exit with code: 0x%x"), responseCode));
+	OstTrace1( TRACE_NORMAL, CMTPSVCCOMPOUNDPROCESSOR_CHECKREQUESTPARAMETERSL, "exit with code: 0x%x", responseCode );
+	OstTraceFunctionExit0( CMTPSVCCOMPOUNDPROCESSOR_CHECKREQUESTPARAMETERSL_EXIT );
 	return responseCode;
 	}
 
@@ -290,7 +302,7 @@ Validates the data type for a given property code.
 */
 TMTPResponseCode CMTPSvcCompoundProcessor::CheckStoreAndParent()
 	{
-	__FLOG(_L8("CheckStoreAndParent - Entry"));
+	OstTraceFunctionEntry0( CMTPSVCCOMPOUNDPROCESSOR_CHECKSTOREANDPARENT_ENTRY );
 	TMTPResponseCode responseCode = EMTPRespCodeOK;
 	iStorageId = Request().Uint32(TMTPTypeRequest::ERequestParameter1);
 	iParentHandle = Request().Uint32(TMTPTypeRequest::ERequestParameter2);
@@ -320,7 +332,8 @@ TMTPResponseCode CMTPSvcCompoundProcessor::CheckStoreAndParent()
 			}
 		}
 	
-	__FLOG_VA((_L8("CheckStoreAndParent - Exit with code: 0x%x"), responseCode));
+	OstTrace1( TRACE_NORMAL, CMTPSVCCOMPOUNDPROCESSOR_CHECKSTOREANDPARENT, "Exit with code: 0x%x", responseCode );
+	OstTraceFunctionExit0( CMTPSVCCOMPOUNDPROCESSOR_CHECKSTOREANDPARENT_EXIT );
 	return responseCode;
 	}
 
@@ -331,7 +344,7 @@ combined together in one request processor.
 */
 void CMTPSvcCompoundProcessor::ServiceL()
 	{
-	__FLOG(_L8("ServiceL - Entry"));
+	OstTraceFunctionEntry0( CMTPSVCCOMPOUNDPROCESSOR_SERVICEL_ENTRY );
 	switch (iState)
 		{
 		case EIdle:
@@ -341,15 +354,15 @@ void CMTPSvcCompoundProcessor::ServiceL()
 			ServiceSendObjectL();
 			break;
 		default:
-			__FLOG(_L8("Wrong state in ServiceL"));
+			OstTrace0( TRACE_WARNING, CMTPSVCCOMPOUNDPROCESSOR_SERVICEL, "Wrong state in ServiceL" );
 			break;
 		}
-	__FLOG(_L8("ServiceL - Exit"));
+	OstTraceFunctionExit0( CMTPSVCCOMPOUNDPROCESSOR_SERVICEL_EXIT );
 	}
 
 void CMTPSvcCompoundProcessor::ServiceObjectPropertiesL()
 	{
-	__FLOG(_L8("ServiceObjectPropertiesL - Entry"));
+	OstTraceFunctionEntry0( CMTPSVCCOMPOUNDPROCESSOR_SERVICEOBJECTPROPERTIESL_ENTRY );
 	switch (iOperationCode)
 		{
 		case EMTPOpCodeSendObjectInfo:
@@ -363,7 +376,7 @@ void CMTPSvcCompoundProcessor::ServiceObjectPropertiesL()
 		default:
 			break;
 		}
-	__FLOG(_L8("ServiceObjectPropertiesL - Exit"));
+	OstTraceFunctionExit0( CMTPSVCCOMPOUNDPROCESSOR_SERVICEOBJECTPROPERTIESL_EXIT );
 	}
 
 /**
@@ -371,7 +384,7 @@ SendObject request handler
 */
 void CMTPSvcCompoundProcessor::ServiceSendObjectL()
 	{
-	__FLOG(_L8("ServiceSendObjectL - Entry"));
+	OstTraceFunctionEntry0( CMTPSVCCOMPOUNDPROCESSOR_SERVICESENDOBJECTL_ENTRY );
 	MMTPSvcObjectHandler* pHandler = iDataProvider.ObjectHandler(iFormatCode);
 	if (pHandler)
 		{
@@ -379,11 +392,13 @@ void CMTPSvcCompoundProcessor::ServiceSendObjectL()
 		}
 	else
 		{
+        OstTrace1( TRACE_ERROR, CMTPSVCCOMPOUNDPROCESSOR_SERVICESENDOBJECTL, 
+                "can't get object handler for format code %d", iFormatCode);
 		User::Leave(KErrGeneral);
 		}
 	ReceiveDataL(*iObjectContent);
 	iState = EObjectSendProcessing;
-	__FLOG(_L8("ServiceSendObjectL - Exit"));
+	OstTraceFunctionExit0( CMTPSVCCOMPOUNDPROCESSOR_SERVICESENDOBJECTL_EXIT );
 	}
 
 /**
@@ -391,13 +406,13 @@ SendObjectInfo request handler
 */
 void CMTPSvcCompoundProcessor::ServiceSendObjectInfoL()
 	{
-	__FLOG(_L8("ServiceSendObjectInfoL - Entry"));
+	OstTraceFunctionEntry0( CMTPSVCCOMPOUNDPROCESSOR_SERVICESENDOBJECTINFOL_ENTRY );
 	delete iObjectInfo;
 	iObjectInfo = NULL;
 	iObjectInfo = CMTPTypeObjectInfo::NewL();
 	ReceiveDataL(*iObjectInfo);
 	iState = EObjectInfoProcessing;
-	__FLOG(_L8("ServiceSendObjectInfoL - Exit"));
+	OstTraceFunctionExit0( CMTPSVCCOMPOUNDPROCESSOR_SERVICESENDOBJECTINFOL_EXIT );
 	}
 
 /**
@@ -405,13 +420,13 @@ SendObjectPropList request handler
 */
 void CMTPSvcCompoundProcessor::ServiceSendObjectPropListL()
 	{
-	__FLOG(_L8("ServiceSendObjectPropListL - Entry"));
+	OstTraceFunctionEntry0( CMTPSVCCOMPOUNDPROCESSOR_SERVICESENDOBJECTPROPLISTL_ENTRY );
 	delete iObjectPropList;
 	iObjectPropList = NULL;
 	iObjectPropList = CMTPTypeObjectPropList::NewL();
 	ReceiveDataL(*iObjectPropList);
 	iState = EObjectInfoProcessing;
-	__FLOG(_L8("ServiceSendObjectPropListL - Exit"));
+	OstTraceFunctionExit0( CMTPSVCCOMPOUNDPROCESSOR_SERVICESENDOBJECTPROPLISTL_EXIT );
 	}
 
 /**
@@ -420,7 +435,7 @@ Override to handle the response phase of SendObjectInfo/SendObjectPropList and S
 */
 TBool CMTPSvcCompoundProcessor::DoHandleResponsePhaseL()
 	{
-	__FLOG(_L8("DoHandleResponsePhaseL - Entry"));
+	OstTraceFunctionEntry0( CMTPSVCCOMPOUNDPROCESSOR_DOHANDLERESPONSEPHASEL_ENTRY );
 	TBool successful = !iCancelled;
 	switch (iState)
 		{
@@ -449,10 +464,11 @@ TBool CMTPSvcCompoundProcessor::DoHandleResponsePhaseL()
 			}
 		default:
 			// Wrong State value.
-			__FLOG_VA((_L8("DoHandleResponsePhaseL enter an abnormal state %d"), iState));
+			OstTrace1( TRACE_WARNING, CMTPSVCCOMPOUNDPROCESSOR_DOHANDLERESPONSEPHASEL, 
+			        "DoHandleResponsePhaseL enter an abnormal state %d", iState );
 			break;
 		}
-	__FLOG(_L8("DoHandleResponsePhaseL - Exit"));
+	OstTraceFunctionExit0( CMTPSVCCOMPOUNDPROCESSOR_DOHANDLERESPONSEPHASEL_EXIT );
 	return EFalse;
 	}
 
@@ -462,11 +478,12 @@ Override to handle the completing phase of SendObjectInfo/SendObjectPropList and
 */
 TBool CMTPSvcCompoundProcessor::DoHandleCompletingPhaseL()
 	{
-	__FLOG(_L8("DoHandleCompletingPhaseL - Entry"));
+	OstTraceFunctionEntry0( CMTPSVCCOMPOUNDPROCESSOR_DOHANDLECOMPLETINGPHASEL_ENTRY );
 	TBool result = ETrue;
 	CMTPRequestProcessor::DoHandleCompletingPhaseL();
-	
-	__FLOG_VA((_L8("DoHandleCompletingPhaseL - Progress State: %u"), iState));
+
+	OstTrace1( TRACE_WARNING, CMTPSVCCOMPOUNDPROCESSOR_DOHANDLECOMPLETINGPHASEL, 
+	        "DoHandleCompletingPhaseL - Progress State: %u", iState );
 	switch (iState)
 		{
 		case EObjectInfoSucceed:
@@ -485,7 +502,9 @@ TBool CMTPSvcCompoundProcessor::DoHandleCompletingPhaseL()
 				iLastInfoOperationCode = iOperationCode;
 				}
 			result = EFalse;
-			__FLOG_VA((_L8("EObjectInfoSucceed: Save send info transaction id: %u, operation: 0x%x"), iLastTransactionID, iOperationCode));
+			OstTraceExt2( TRACE_NORMAL, DUP1_CMTPSVCCOMPOUNDPROCESSOR_DOHANDLECOMPLETINGPHASEL, 
+			        "EObjectInfoSucceed: Save send info transaction id: %u, operation: 0x%x", iLastTransactionID, iOperationCode );
+			
 			break;
 			}
 		case EObjectSendFail:
@@ -504,7 +523,7 @@ TBool CMTPSvcCompoundProcessor::DoHandleCompletingPhaseL()
 			// 4. First request is orphan SendObject, state is Idle
 			break;
 		}
-	__FLOG(_L8("DoHandleCompletingPhaseL - Exit"));
+	OstTraceFunctionExit0( CMTPSVCCOMPOUNDPROCESSOR_DOHANDLECOMPLETINGPHASEL_EXIT );
 	return result;
 	}
 
@@ -514,7 +533,7 @@ Handling the completing phase of SendObjectInfo request
 */
 TBool CMTPSvcCompoundProcessor::DoHandleResponseSendObjectInfoL()
 	{
-	__FLOG(_L8("DoHandleResponseSendObjectInfoL - Entry"));
+	OstTraceFunctionEntry0( CMTPSVCCOMPOUNDPROCESSOR_DOHANDLERESPONSESENDOBJECTINFOL_ENTRY );
 	TMTPResponseCode responseCode = EMTPRespCodeOK;
 	TBool result(ETrue);
 	iFormatCode = iObjectInfo->Uint16L(CMTPTypeObjectInfo::EObjectFormat);
@@ -541,7 +560,8 @@ TBool CMTPSvcCompoundProcessor::DoHandleResponseSendObjectInfoL()
 			//if object size is zero, then directly store object without waiting for sendobject operation.
 			if (iObjectSize == 0)
 				{
-				__FLOG(_L8("CommitReservedObject because object size is 0 and register for SendObject"));
+				OstTrace0( TRACE_NORMAL, DUP1_CMTPSVCCOMPOUNDPROCESSOR_DOHANDLERESPONSESENDOBJECTINFOL, 
+				        "CommitReservedObject because object size is 0 and register for SendObject" );
 				// Commit new temp object to object mgr, if leave, CleanupStack will rollback new temp object. 
 				TCleanupItem rollBackTempObject(RollBackObject, this);
 				CleanupStack::PushL(rollBackTempObject);
@@ -576,7 +596,8 @@ TBool CMTPSvcCompoundProcessor::DoHandleResponseSendObjectInfoL()
 			}
 		}
 	result = (responseCode == EMTPRespCodeOK) ? ETrue : EFalse;
-	__FLOG_VA((_L8("DoHandleResponseSendObjectInfoL exit with code: 0x%x"), responseCode));
+	OstTrace1( TRACE_NORMAL, CMTPSVCCOMPOUNDPROCESSOR_DOHANDLERESPONSESENDOBJECTINFOL, "exit with code: 0x%x", responseCode);
+	OstTraceFunctionExit0( CMTPSVCCOMPOUNDPROCESSOR_DOHANDLERESPONSESENDOBJECTINFOL_EXIT );
 	return result;
 	}
 
@@ -586,7 +607,7 @@ Handling the completing phase of SendObjectPropList request
 */
 TBool CMTPSvcCompoundProcessor::DoHandleResponseSendObjectPropListL()
 	{
-	__FLOG(_L8("DoHandleResponseSendObjectPropListL - Entry"));
+	OstTraceFunctionEntry0( CMTPSVCCOMPOUNDPROCESSOR_DOHANDLERESPONSESENDOBJECTPROPLISTL_ENTRY );
 	TBool result = ETrue;
 	TMTPResponseCode responseCode = EMTPRespCodeOK;
 	
@@ -602,7 +623,8 @@ TBool CMTPSvcCompoundProcessor::DoHandleResponseSendObjectPropListL()
 		//if object size is zero, then directly store object without waiting for sendobject operation.
 		if (iObjectSize == 0)
 			{
-			__FLOG(_L8("CommitReservedObject because object size is 0 and register for SendObject"));
+			OstTrace0( TRACE_NORMAL, DUP1_CMTPSVCCOMPOUNDPROCESSOR_DOHANDLERESPONSESENDOBJECTPROPLISTL, 
+			        "CommitReservedObject because object size is 0 and register for SendObject" );
 			// Commit new temp object to object mgr, if leave, CleanupStack will rollback new temp object. 
 			TCleanupItem rollBackTempObject(RollBackObject, this);
 			CleanupStack::PushL(rollBackTempObject);
@@ -637,7 +659,8 @@ TBool CMTPSvcCompoundProcessor::DoHandleResponseSendObjectPropListL()
 		}
 
 	result = (responseCode == EMTPRespCodeOK) ? ETrue : EFalse;
-	__FLOG_VA((_L8("DoHandleResponseSendObjectPropListL exit with code = 0x%x"), responseCode));
+	OstTrace1( TRACE_NORMAL, CMTPSVCCOMPOUNDPROCESSOR_DOHANDLERESPONSESENDOBJECTPROPLISTL, "exit with code = 0x%x", responseCode );
+	OstTraceFunctionExit0( CMTPSVCCOMPOUNDPROCESSOR_DOHANDLERESPONSESENDOBJECTPROPLISTL_EXIT );
 	return result;
 	}
 
@@ -647,7 +670,7 @@ Handling the completing phase of UpdateObjectPropList request
 */
 TBool CMTPSvcCompoundProcessor::DoHandleResponseUpdateObjectPropListL()
 	{
-	__FLOG(_L8("DoHandleResponseUpdateObjectPropListL - Entry"));
+	OstTraceFunctionEntry0( CMTPSVCCOMPOUNDPROCESSOR_DOHANDLERESPONSEUPDATEOBJECTPROPLISTL_ENTRY );
 	TBool result = ETrue;
 	TUint32 parameter = 0;
 	TMTPResponseCode responseCode = EMTPRespCodeOK;
@@ -682,7 +705,8 @@ TBool CMTPSvcCompoundProcessor::DoHandleResponseUpdateObjectPropListL()
 		}
 	SendResponseL(responseCode, 1, &parameter);
 	result = (responseCode == EMTPRespCodeOK) ? ETrue: EFalse;
-	__FLOG_VA((_L8("DoHandleResponseUpdateObjectPropListL exit with code: 0x%x"), responseCode));
+	OstTrace1( TRACE_NORMAL, CMTPSVCCOMPOUNDPROCESSOR_DOHANDLERESPONSEUPDATEOBJECTPROPLISTL, "exit with code: 0x%x", responseCode );
+	OstTraceFunctionExit0( CMTPSVCCOMPOUNDPROCESSOR_DOHANDLERESPONSEUPDATEOBJECTPROPLISTL_EXIT );
 	return result;
 	}
 
@@ -692,7 +716,7 @@ Handling the completing phase of SendObject request
 */
 TBool CMTPSvcCompoundProcessor::DoHandleResponseSendObjectL()
 	{
-	__FLOG(_L8("DoHandleResponseSendObjectL - Entry"));
+	OstTraceFunctionEntry0( CMTPSVCCOMPOUNDPROCESSOR_DOHANDLERESPONSESENDOBJECTL_ENTRY );
 	TMTPResponseCode responseCode = EMTPRespCodeOK;
 	TBool result = ETrue;
 
@@ -767,13 +791,15 @@ TBool CMTPSvcCompoundProcessor::DoHandleResponseSendObjectL()
 		{
 		iFramework.RouteRequestUnregisterL(iExpectedSendObjectRequest, iConnection);
 		}
-	__FLOG_VA((_L8("DoHandleResponseSendObjectL exit with code = 0x%x"), responseCode));
+	OstTrace1( TRACE_NORMAL, CMTPSVCCOMPOUNDPROCESSOR_DOHANDLERESPONSESENDOBJECTL, "exit with code = 0x%x", responseCode );
+	OstTraceFunctionExit0( CMTPSVCCOMPOUNDPROCESSOR_DOHANDLERESPONSESENDOBJECTL_EXIT );
+	
 	return result;
 	}
 
 TMTPResponseCode CMTPSvcCompoundProcessor::ExtractObjectSizeL()
 	{
-	__FLOG(_L8("ExtractObjectSizeL - Entry"));
+	OstTraceFunctionEntry0( CMTPSVCCOMPOUNDPROCESSOR_EXTRACTOBJECTSIZEL_ENTRY );
 	TMTPResponseCode responseCode = EMTPRespCodeOK;
 	TBool foundSizeProp  = EFalse;
 	const TUint KCount(iObjectPropList->NumberOfElements());
@@ -800,7 +826,7 @@ TMTPResponseCode CMTPSvcCompoundProcessor::ExtractObjectSizeL()
 			}
 		}
 
-	__FLOG(_L8("ExtractObjectSizeL - Exit"));
+	OstTraceFunctionExit0( CMTPSVCCOMPOUNDPROCESSOR_EXTRACTOBJECTSIZEL_EXIT );
 	return responseCode;
 	}
 
@@ -810,17 +836,18 @@ sends a success response.
 */
 void CMTPSvcCompoundProcessor::ReserveObjectL()
 	{
-	__FLOG(_L8("ReserveObjectL - Entry"));
+	OstTraceFunctionEntry0( CMTPSVCCOMPOUNDPROCESSOR_RESERVEOBJECTL_ENTRY );
 	iReceivedObjectMetaData->SetUint(CMTPObjectMetaData::EStorageId, iStorageId);
 	iReceivedObjectMetaData->SetUint(CMTPObjectMetaData::EParentHandle, iParentHandle);
 	iReceivedObjectMetaData->SetUint(CMTPObjectMetaData::EFormatCode, iFormatCode);
 	iFramework.ObjectMgr().ReserveObjectHandleL(*iReceivedObjectMetaData, iObjectSize);
-	__FLOG_VA((_L8("ReserveObjectL Exit Storage:%u, ParentHandle:%u, FormatCode:%u, Size:%u "), iStorageId, iParentHandle, iFormatCode, iObjectSize));
+	OstTraceExt4( TRACE_NORMAL, CMTPSVCCOMPOUNDPROCESSOR_RESERVEOBJECTL, "Exit Storage:%u, ParentHandle:%u, FormatCode:%u, Size:%u", iStorageId, iParentHandle, iFormatCode, iObjectSize );
+	OstTraceFunctionExit0( CMTPSVCCOMPOUNDPROCESSOR_RESERVEOBJECTL_EXIT );
 	}
 
 void CMTPSvcCompoundProcessor::RegisterRequestAndSendResponseL(TMTPResponseCode aResponseCode)
 	{
-	__FLOG(_L8("RegisterRequestAndSendResponseL - Entry"));
+	OstTraceFunctionEntry0( CMTPSVCCOMPOUNDPROCESSOR_REGISTERREQUESTANDSENDRESPONSEL_ENTRY );
 	// Register to framework for handle the next sendobj request
 	iExpectedSendObjectRequest.SetUint32(TMTPTypeRequest::ERequestSessionID, iSessionId);
 	iFramework.RouteRequestRegisterL(iExpectedSendObjectRequest, iConnection);
@@ -830,7 +857,7 @@ void CMTPSvcCompoundProcessor::RegisterRequestAndSendResponseL(TMTPResponseCode 
 	// Responder’s reserved ObjectHandle for the incoming object
 	parameters[2] = iReceivedObjectMetaData->Uint(CMTPObjectMetaData::EHandle);
 	SendResponseL(aResponseCode, 3, parameters);
-	__FLOG(_L8("RegisterRequestAndSendResponseL - Exit"));
+	OstTraceFunctionExit0( CMTPSVCCOMPOUNDPROCESSOR_REGISTERREQUESTANDSENDRESPONSEL_EXIT );
 	}
 
 void CMTPSvcCompoundProcessor::RollBackObject(TAny* aObject)
@@ -850,21 +877,21 @@ void CMTPSvcCompoundProcessor::RollBack()
 
 TMTPResponseCode CMTPSvcCompoundProcessor::CheckFmtAndSetHandler(TUint32 aFormatCode)
 	{
-	__FLOG(_L8("CheckFmtAndSetHandler - Entry")); 
+	OstTraceFunctionEntry0( CMTPSVCCOMPOUNDPROCESSOR_CHECKFMTANDSETHANDLER_ENTRY );
 	TMTPResponseCode responseCode = EMTPRespCodeOK;
 	iObjectHandler = iDataProvider.ObjectHandler(aFormatCode);
 	if (!iObjectHandler)
 		{
 		responseCode = EMTPRespCodeInvalidObjectFormatCode;
 		}
-	__FLOG(_L8("CheckFmtAndSetHandler - Exit"));
+	OstTraceFunctionExit0( CMTPSVCCOMPOUNDPROCESSOR_CHECKFMTANDSETHANDLER_EXIT );
 	return responseCode;
 	}
 
 TMTPResponseCode CMTPSvcCompoundProcessor::SendObjectPropListL(const CMTPTypeObjectPropList& aObjectPropList, TUint32& aParentHandle, 
 														TUint32& aParameter, TDes& aSuid, TUint64 aObjectSize)
 	{
-	__FLOG(_L8("SendObjectPropListL - Entry"));
+	OstTraceFunctionEntry0( CMTPSVCCOMPOUNDPROCESSOR_SENDOBJECTPROPLISTL_ENTRY );
 	TMTPResponseCode responseCode = EMTPRespCodeOK;
 	aParameter = 0;
 
@@ -905,7 +932,8 @@ TMTPResponseCode CMTPSvcCompoundProcessor::SendObjectPropListL(const CMTPTypeObj
 			iObjectHandler->RollBack();
 			}
 		}
-	__FLOG_VA((_L8("SendObjectPropListL - Exit with responseCode = 0x%04X"), responseCode));
+	OstTrace1( TRACE_NORMAL, CMTPSVCCOMPOUNDPROCESSOR_SENDOBJECTPROPLISTL, "Exit with responseCode = 0x%04X", responseCode );
+	OstTraceFunctionExit0( CMTPSVCCOMPOUNDPROCESSOR_SENDOBJECTPROPLISTL_EXIT );
 	return responseCode;
 	}
 
@@ -915,7 +943,7 @@ TMTPResponseCode CMTPSvcCompoundProcessor::UpdateObjectPropListL(CMTPObjectMetaD
 														const CMTPTypeObjectPropList& aObjectPropList, 
 														TUint32& /*aParameter*/)
 	{
-	__FLOG(_L8("UpdateObjectPropList - Entry")); 
+	OstTraceFunctionEntry0( CMTPSVCCOMPOUNDPROCESSOR_UPDATEOBJECTPROPLISTL_ENTRY );
 	TMTPResponseCode responseCode = EMTPRespCodeOK;
 	const TUint count = aObjectPropList.NumberOfElements();
 	aObjectPropList.ResetCursor();
@@ -940,6 +968,7 @@ TMTPResponseCode CMTPSvcCompoundProcessor::UpdateObjectPropListL(CMTPObjectMetaD
 			break;
 			}
 		}
-	__FLOG_VA((_L8("UpdateObjectPropListL - Exit with responseCode = 0x%04X"), responseCode));
+	OstTrace1( TRACE_NORMAL, CMTPSVCCOMPOUNDPROCESSOR_UPDATEOBJECTPROPLISTL, "Exit with responseCode = 0x%04X", responseCode );
+	OstTraceFunctionExit0( CMTPSVCCOMPOUNDPROCESSOR_UPDATEOBJECTPROPLISTL_EXIT );
 	return responseCode;
 	}

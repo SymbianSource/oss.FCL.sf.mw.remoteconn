@@ -44,7 +44,6 @@ SOURCE                  hidconnectioninfo.cpp
 MW_LAYER_SYSTEMINCLUDE
 
 USERINCLUDE             ../inc
-USERINCLUDE             ../../../inc
 
 LIBRARY       euser.lib
 LIBRARY       ecom.lib

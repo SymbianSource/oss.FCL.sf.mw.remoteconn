@@ -27,10 +27,14 @@
 #include "cmtpdeleteobject.h"
 #include "mtpdpconst.h"
 #include "mtpdppanic.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpdeleteobjectTraces.h"
+#endif
+
 
 
 // Class constants.
-__FLOG_STMT(_LIT8(KComponent,"DeleteObject");)
 
 /**
 Verification data for the DeleteObject request
@@ -68,10 +72,9 @@ EXPORT_C MMTPRequestProcessor* CMTPDeleteObject::NewL(MMTPDataProviderFramework&
 
 void CMTPDeleteObject::ConstructL()
 	{
-	__FLOG_OPEN(KMTPSubsystem, KComponent);
-    __FLOG(_L8("ConstructL - Entry"));
+	OstTraceFunctionEntry0( CMTPDELETEOBJECT_CONSTRUCTL_ENTRY );
     iSingletons.OpenL();
-    __FLOG(_L8("ConstructL - Exit"));
+	OstTraceFunctionExit0( CMTPDELETEOBJECT_CONSTRUCTL_EXIT );
 	}
 
 /**
@@ -79,10 +82,9 @@ Destructor
 */    
 EXPORT_C CMTPDeleteObject::~CMTPDeleteObject()
     {
-    __FLOG(_L8("~CMTPDeleteObject - Entry"));
+    OstTraceFunctionEntry0( CMTPDELETEOBJECT_CMTPDELETEOBJECT_DES_ENTRY );
     iSingletons.Close();
-    __FLOG(_L8("~CMTPDeleteObject - Exit"));
-    __FLOG_CLOSE;
+    OstTraceFunctionExit0( CMTPDELETEOBJECT_CMTPDELETEOBJECT_DES_EXIT );
     }
 
 /**
@@ -93,7 +95,7 @@ Verify the request
  
 TMTPResponseCode CMTPDeleteObject::CheckRequestL()
 	{
-    __FLOG(_L8("CheckRequestL - Entry"));
+    OstTraceFunctionEntry0( CMTPDELETEOBJECT_CHECKREQUESTL_ENTRY );
 	TMTPResponseCode result = CMTPRequestProcessor::CheckRequestL();
 	const TUint32 KObjectHandle = Request().Uint32(TMTPTypeRequest::ERequestParameter1);
 	if ((EMTPRespCodeOK == result) && (IsStoreReadOnlyL(KObjectHandle)) )
@@ -101,7 +103,7 @@ TMTPResponseCode CMTPDeleteObject::CheckRequestL()
 		result = EMTPRespCodeStoreReadOnly;
 		}
 		
-    __FLOG(_L8("CheckRequestL - Exit"));
+	OstTraceFunctionExit0( CMTPDELETEOBJECT_CHECKREQUESTL_EXIT );
 	return result;	
 	} 
 	
@@ -110,12 +112,12 @@ void CMTPDeleteObject::DeleteFolderOrFileL(CMTPObjectMetaData* aMeta)
     __ASSERT_DEBUG(aMeta, Panic(EMTPDpObjectNull));
     if (IsFolderObject(*aMeta))
         {
-        __FLOG( _L8("Delete the folder itself which is empty ") );
+        OstTrace0( TRACE_NORMAL, CMTPDELETEOBJECT_DELETEFOLDERORFILEL, "Delete the folder itself which is empty " );
         DeleteFolderL(aMeta);
         }
     else
         {
-        __FLOG(_L8("Going to delete a file.")); 
+        OstTrace0( TRACE_NORMAL, DUP1_CMTPDELETEOBJECT_DELETEFOLDERORFILEL, "Going to delete a file." );        
         DeleteFileL(aMeta);
         }
     ProcessFinalPhaseL();
@@ -176,7 +178,7 @@ DeleteObject request handler
 */    
 void CMTPDeleteObject::ServiceL()
     {
-    __FLOG(_L8("ServiceL - Entry")); 
+    OstTraceFunctionEntry0( CMTPDELETEOBJECT_SERVICEL_ENTRY );
 	const TUint32 KHandle(Request().Uint32(TMTPTypeRequest::ERequestParameter1));
 	iObjectWritePotected = EFalse;
 	iSuccessDeletion = EFalse;
@@ -184,9 +186,10 @@ void CMTPDeleteObject::ServiceL()
 	CMTPObjectMetaData* meta = NULL;
 	meta = iRequestChecker->GetObjectInfo(KHandle);
 	__ASSERT_DEBUG(meta, Panic(EMTPDpObjectNull));
-	__FLOG_VA((_L8("meta->Uint(CMTPObjectMetaData::EDataProviderId) is %d"), meta->Uint(CMTPObjectMetaData::EDataProviderId))); 
-	__FLOG_VA((_L8("iFramework.DataProviderId() is %d"), iFramework.DataProviderId())); 
-	
+	OstTrace1( TRACE_NORMAL, CMTPDELETEOBJECT_SERVICEL, 
+	        "meta->Uint(CMTPObjectMetaData::EDataProviderId) is %d",  meta->Uint(CMTPObjectMetaData::EDataProviderId));
+	OstTrace1( TRACE_NORMAL, DUP1_CMTPDELETEOBJECT_SERVICEL, "iFramework.DataProviderId() is %d", iFramework.DataProviderId() );
+		
 	if ( meta != NULL && meta->Uint(CMTPObjectMetaData::EDataProviderId) == iFramework.DataProviderId())
 	    {
 	    DeleteFolderOrFileL(meta);
@@ -195,8 +198,8 @@ void CMTPDeleteObject::ServiceL()
 	    {
 	    SendResponseL(EMTPRespCodeInvalidObjectHandle);
 	    }
-	
-    __FLOG(_L8("ServiceL - Exit")); 
+
+    OstTraceFunctionExit0( CMTPDELETEOBJECT_SERVICEL_EXIT );
     }
 
 /**
@@ -204,7 +207,7 @@ Signal to the initiator that the deletion operation has finished with or without
 */
 void CMTPDeleteObject::ProcessFinalPhaseL()
 	{
-    __FLOG(_L8("ProcessFinalPhaseL - Entry"));
+    OstTraceFunctionEntry0( CMTPDELETEOBJECT_PROCESSFINALPHASEL_ENTRY );
 	TMTPResponseCode rsp = EMTPRespCodeOK;
 	if ( iObjectWritePotected )
 	    {
@@ -215,7 +218,7 @@ void CMTPDeleteObject::ProcessFinalPhaseL()
 	    rsp = EMTPRespCodeAccessDenied;
 	    }
 	SendResponseL(rsp);
-    __FLOG(_L8("ProcessFinalPhaseL - Exit"));	
+	OstTraceFunctionExit0( CMTPDELETEOBJECT_PROCESSFINALPHASEL_EXIT );
 	}
 	
 /**
@@ -236,7 +239,7 @@ Check whether the store on which the object resides is read only.
 */
 TBool CMTPDeleteObject::IsStoreReadOnlyL(TUint32 aObjectHandle)
 	{
-    __FLOG(_L8("IsStoreReadOnlyL - Entry"));
+    OstTraceFunctionEntry0( CMTPDELETEOBJECT_ISSTOREREADONLYL_ENTRY );
 	TBool result(EFalse);
 	CMTPObjectMetaData *info(CMTPObjectMetaData::NewLC());
     if (iFramework.ObjectMgr().ObjectL(aObjectHandle, *info))
@@ -244,7 +247,7 @@ TBool CMTPDeleteObject::IsStoreReadOnlyL(TUint32 aObjectHandle)
 		result = !iSingletons.StorageMgr().IsReadWriteStorage(info->Uint(CMTPObjectMetaData::EStorageId));
         }
 	CleanupStack::PopAndDestroy(info);
-    __FLOG(_L8("IsStoreReadOnlyL - Exit"));
+	OstTraceFunctionExit0( CMTPDELETEOBJECT_ISSTOREREADONLYL_EXIT );
 	return result;	
 	}
 

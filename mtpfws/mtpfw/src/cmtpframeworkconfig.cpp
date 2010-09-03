@@ -16,6 +16,12 @@
 #include <centralrepository.h>
 
 #include "cmtpframeworkconfig.h"
+#include "mtpdebug.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpframeworkconfigTraces.h"
+#endif
+
 
 /**
 CMTPFrameworkConfig factory method. 
@@ -52,6 +58,7 @@ EXPORT_C void CMTPFrameworkConfig::GetValueL(TParameter aParam, TDes& aValue) co
         }
     else if (KErrNone != err)
         {
+        OstTraceExt2( TRACE_ERROR, CMTPFRAMEWORKCONFIG_GETVALUEL_TPARAMETER_TDES, "can't get parameter(%d)  value from iRepository, error code %d", aParam, err );
         User::Leave(err);
         }
     }
@@ -76,11 +83,13 @@ EXPORT_C HBufC* CMTPFrameworkConfig::ValueL(TParameter aParam) const
         
         // Get the value
         ptr.Set(buf->Des());
-        User::LeaveIfError(iRepository->Get(aParam, ptr));
+        LEAVEIFERROR(iRepository->Get(aParam, ptr),
+                OstTrace1( TRACE_ERROR, CMTPFRAMEWORKCONFIG_VALUEL, "get parameter(%d) value from iRespository error!", aParam));   
             }
         }
     else if (KErrNotFound != err)
         {
+        OstTraceExt2( TRACE_ERROR, DUP1_CMTPFRAMEWORKCONFIG_VALUEL, "can't get parameter(%d)  value from iRepository, error code %d", aParam, err );
         User::Leave(err);
         }
     CleanupStack::Pop(buf);
@@ -95,6 +104,8 @@ EXPORT_C void CMTPFrameworkConfig::GetValueL(TParameter aParam, TUint& aValue) c
     if ((KErrNone != err ) &&
         (KErrNotFound != err))
         {
+        OstTraceExt2( TRACE_ERROR, CMTPFRAMEWORKCONFIG_GETVALUEL_TPARAMETER_TUINT, 
+                "can't get parameter(%d)value from iRepository, error code %d",aParam, err);
         User::Leave(err);
         }
     aValue = static_cast<TUint>(value);
@@ -113,6 +124,7 @@ EXPORT_C void CMTPFrameworkConfig::GetValueL(TParameter aParam, TBool& aValue) c
         if ((KErrNone != err ) &&
             (KErrNotFound != err))
             {
+            OstTraceExt2( TRACE_ERROR, CMTPFRAMEWORKCONFIG_GETVALUEL_TPARAMETER_TBOOL, "can't get parameter(%d)value from iRepository, error code %d", aParam, err );
             User::Leave(err);
             };
     	}
@@ -124,6 +136,7 @@ EXPORT_C void CMTPFrameworkConfig::GetValueL(TParameter aParam, RArray<TUint>& a
     aArray.Reset();
     if (CMTPFrameworkConfig::EExcludedStorageDrives != aParam)
         {
+        OstTrace1( TRACE_ERROR, CMTPFRAMEWORKCONFIG_GETVALUEL_TPARAMETER_RARRAY, "parameter %d not EExcludedStorageDrives", aParam);
         User::Leave(KErrArgument);
         }
         
@@ -143,12 +156,15 @@ EXPORT_C void CMTPFrameworkConfig::GetValueL(TParameter aParam, RArray<TUint>& a
         for (TInt index = 0; index < count; index++)
             {        
             TInt value;
-            User::LeaveIfError(iRepository->Get(keys[index], value));    
+            LEAVEIFERROR(iRepository->Get(keys[index], value),
+                    OstTrace1( TRACE_ERROR, DUP1_CMTPFRAMEWORKCONFIG_GETVALUEL_TPARAMETER_RARRAY, "can't get value from iRepository for key %d", keys[index]));
             aArray.AppendL(static_cast<TUint>(value));
             }                 
         }
     else if (KErrNotFound != err)
         {
+        OstTraceExt2(TRACE_ERROR, DUP2_CMTPFRAMEWORKCONFIG_GETVALUEL_TPARAMETER_RARRAY, 
+                "can't get parameter(%d) value from iRepository, error code %d", aParam, err );
         User::Leave(err);    
         }
     
@@ -176,6 +192,8 @@ void CMTPFrameworkConfig::ConstructL()
     TInt err(iRepository->Get(EAbnormalDown, iAbnormalDownValue));
     if ((KErrNone != err ) && (KErrNotFound != err))
 		{
+        OstTrace1(TRACE_ERROR, CMTPFRAMEWORKCONFIG_CONSTRUCTL, 
+                "can't get parameter(EAbnormalDown) value from iRepository, error code %d",err );
 		User::Leave(err);
 		}
     

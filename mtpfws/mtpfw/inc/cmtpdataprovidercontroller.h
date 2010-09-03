@@ -26,7 +26,6 @@
 #include <mtp/mtpdataproviderapitypes.h>
 
 #include "rmtpframework.h"
-#include "mtpdebug.h"
 #include <swi/sisregistrysession.h> 
 #include <swi/sisregistryentry.h>
 #include <swi/sisregistrypackage.h>
@@ -151,15 +150,9 @@ private: // Owned
         void ConstructL();
         
     private:
-        __FLOG_DECLARATION_MEMBER_MUTABLE;
         
         CMTPDataProviderController* iDPController;
         };
-    
-    /**
-    FLOGGER debug trace member variable.
-    */
-    __FLOG_DECLARATION_MEMBER_MUTABLE;
 
     /**
     The active data provider set container, ordered bit implementation 

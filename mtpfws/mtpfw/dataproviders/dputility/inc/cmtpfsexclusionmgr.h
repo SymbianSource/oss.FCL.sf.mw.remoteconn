@@ -23,7 +23,6 @@
 
 #include <e32base.h>
 #include <mtp/mtpprotocolconstants.h>
-#include "mtpdebug.h"
 #include <mtp/mmtpstoragemgr.h>
 #include <mtp/cmtpstoragemetadata.h>
 #include <mtp/cmtpmetadata.h>
@@ -54,11 +53,7 @@ protected:
 protected:
 	MMTPDataProviderFramework& iFramework;
 	TLinearOrder<CMTPMetaData::TPathHash> iOrder;
-	
-	/**
-    FLOGGER debug trace member variable.
-    */
-    __FLOG_DECLARATION_MEMBER_MUTABLE;
+
 	
 	};
 	

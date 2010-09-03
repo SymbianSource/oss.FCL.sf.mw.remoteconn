@@ -37,10 +37,13 @@
 #include "cmtpdataprovidercontroller.h"
 #include "cmtpdataprovider.h"
 #include "cmtpstoragemgr.h"
+#include "mtpdebug.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpsendobjectinfoTraces.h"
+#endif
 
 
-// Class constants.
-__FLOG_STMT(_LIT8(KComponent,"SendObjectInfo");)
 
 /**
 Verification data for the SendObjectInfo request
@@ -72,8 +75,9 @@ Destructor
 */    
 EXPORT_C CMTPSendObjectInfo::~CMTPSendObjectInfo()
     {
-    __FLOG(_L8("~CMTPSendObjectInfo - Entry"));
-    __FLOG_2(_L8("iProgress:%d NoRollback:%d"),iProgress,iNoRollback);
+    OstTraceFunctionEntry0( CMTPSENDOBJECTINFO_CMTPSENDOBJECTINFO_DES_ENTRY );
+    OstTraceExt2( TRACE_NORMAL, CMTPSENDOBJECTINFO_CMTPSENDOBJECTINFO, 
+            "iProgress:%d NoRollback:%d", iProgress,iNoRollback );
     if ((iProgress == EObjectInfoSucceed ||
         iProgress == EObjectInfoFail || 
         iProgress == EObjectInfoInProgress) && !iNoRollback)
@@ -90,8 +94,7 @@ EXPORT_C CMTPSendObjectInfo::~CMTPSendObjectInfo()
     delete iObjectInfo;
     delete iObjectPropList;
     iSingletons.Close();
-    __FLOG(_L8("~CMTPSendObjectInfo - Exit"));
-    __FLOG_CLOSE; 
+    OstTraceFunctionExit0( CMTPSENDOBJECTINFO_CMTPSENDOBJECTINFO_DES_EXIT );
     }
 
 /**
@@ -100,7 +103,8 @@ Standard c++ constructor
 @param aConnection    The connection from which the request comes
 */    
 CMTPSendObjectInfo::CMTPSendObjectInfo(MMTPDataProviderFramework& aFramework, MMTPConnection& aConnection) :
-    CMTPRequestProcessor(aFramework, aConnection, 0, NULL)
+    CMTPRequestProcessor(aFramework, aConnection, 0, NULL),
+    iHiddenStatus( EMTPVisible )
     {
     }
 
@@ -110,11 +114,12 @@ Verify the request
 */    
 TMTPResponseCode CMTPSendObjectInfo::CheckRequestL()
     {
-    __FLOG(_L8("CheckRequestL - Entry"));
+    OstTraceFunctionEntry0( CMTPSENDOBJECTINFO_CHECKREQUESTL_ENTRY );
     TMTPResponseCode result = CheckSendingStateL();
     
     if (result != EMTPRespCodeOK) 
         {
+        OstTraceFunctionExit0( CMTPSENDOBJECTINFO_CHECKREQUESTL_EXIT );
         return result;
         }
     
@@ -170,8 +175,8 @@ TMTPResponseCode CMTPSendObjectInfo::CheckRequestL()
             }
         }
         
-    __FLOG_VA((_L8("Result = 0x%04X"), result));
-    __FLOG(_L8("CheckRequestL - Exit"));
+    OstTrace1( TRACE_NORMAL, CMTPSENDOBJECTINFO_CHECKREQUESTL, "Result = 0x%04X", result );
+    OstTraceFunctionExit0( DUP1_CMTPSENDOBJECTINFO_CHECKREQUESTL_EXIT );
     return result;    
     }
     
@@ -187,7 +192,7 @@ between the two requests, the two requests are combined together in one request 
 */    
 void CMTPSendObjectInfo::ServiceL()
     {
-    __FLOG(_L8("ServiceL - Entry"));
+    OstTraceFunctionEntry0( CMTPSENDOBJECTINFO_SERVICEL_ENTRY );
     if (iProgress == EObjectNone)
         {
         iIsFolder = EFalse;
@@ -204,7 +209,7 @@ void CMTPSendObjectInfo::ServiceL()
         {
         ServiceSendObjectL();
         }    
-    __FLOG(_L8("ServiceL - Exit"));
+    OstTraceFunctionExit0( CMTPSENDOBJECTINFO_SERVICEL_EXIT );
     }
 
 /**
@@ -212,8 +217,7 @@ Second-phase construction
 */        
 void CMTPSendObjectInfo::ConstructL()
     {
-    __FLOG_OPEN(KMTPSubsystem, KComponent);
-    __FLOG(_L8("ConstructL - Entry")); 
+    OstTraceFunctionEntry0( CMTPSENDOBJECTINFO_CONSTRUCTL_ENTRY );
     iExpectedSendObjectRequest.SetUint16(TMTPTypeRequest::ERequestOperationCode, EMTPOpCodeSendObject);
     iReceivedObject = CMTPObjectMetaData::NewL();
     iReceivedObject->SetUint(CMTPObjectMetaData::EDataProviderId, iFramework.DataProviderId());
@@ -224,7 +228,7 @@ void CMTPSendObjectInfo::ConstructL()
     _LIT(KODF, ".odf");
     iExceptionList.AppendL(KM4A());
     iExceptionList.AppendL(KODF());
-    __FLOG(_L8("ConstructL - Exit"));
+    OstTraceFunctionExit0( CMTPSENDOBJECTINFO_CONSTRUCTL_EXIT );
     }
 
 /**
@@ -235,7 +239,7 @@ Override to match both the SendObjectInfo and SendObject requests
 */        
 TBool CMTPSendObjectInfo::Match(const TMTPTypeRequest& aRequest, MMTPConnection& aConnection) const
     {
-    __FLOG(_L8("Match - Entry"));
+    OstTraceFunctionEntry0( CMTPSENDOBJECTINFO_MATCH_ENTRY );
     TBool result = EFalse;
     TUint16 operationCode = aRequest.Uint16(TMTPTypeRequest::ERequestOperationCode);
     if ((operationCode == EMTPOpCodeSendObjectInfo || 
@@ -245,7 +249,7 @@ TBool CMTPSendObjectInfo::Match(const TMTPTypeRequest& aRequest, MMTPConnection&
         {
         result = ETrue;
         }
-    __FLOG(_L8("Match - Exit"));
+    OstTraceFunctionExit0( CMTPSENDOBJECTINFO_MATCH_EXIT );
     return result;    
     }
 
@@ -255,7 +259,7 @@ Override to handle the response phase of SendObjectInfo and SendObject requests
 */
 TBool CMTPSendObjectInfo::DoHandleResponsePhaseL()
     {
-    __FLOG(_L8("DoHandleResponsePhaseL - Entry"));
+    OstTraceFunctionEntry0( CMTPSENDOBJECTINFO_DOHANDLERESPONSEPHASEL_ENTRY );
     //to check if the sending/receiving data is successful
     TBool successful = !iCancelled;
     if (iProgress == EObjectInfoInProgress)
@@ -280,7 +284,7 @@ TBool CMTPSendObjectInfo::DoHandleResponsePhaseL()
         iProgress = (successful ? ESendObjectSucceed : ESendObjectFail);
         }
         
-    __FLOG(_L8("DoHandleResponsePhaseL - Exit"));
+    OstTraceFunctionExit0( CMTPSENDOBJECTINFO_DOHANDLERESPONSEPHASEL_EXIT );
     return EFalse;
     }
 
@@ -290,7 +294,7 @@ Override to handle the completing phase of SendObjectInfo and SendObject request
 */    
 TBool CMTPSendObjectInfo::DoHandleCompletingPhaseL()
     {
-    __FLOG(_L8("DoHandleCompletingPhaseL - Entry"));
+    OstTraceFunctionEntry0( CMTPSENDOBJECTINFO_DOHANDLECOMPLETINGPHASEL_ENTRY );
     TBool result = ETrue;
     CMTPRequestProcessor::DoHandleCompletingPhaseL();
     if (iProgress == EObjectInfoSucceed)
@@ -310,8 +314,10 @@ TBool CMTPSendObjectInfo::DoHandleCompletingPhaseL()
         iProgress = EObjectInfoSucceed;
         result = EFalse;
         }
-    
-    __FLOG_2(_L8("DoHandleCompletingPhaseL - Exit result:%d progress:%d"),result,iProgress);
+
+    OstTraceExt2( TRACE_NORMAL, CMTPSENDOBJECTINFO_DOHANDLECOMPLETINGPHASEL, 
+            "Exit result:%d progress:%d",result,iProgress );
+    OstTraceFunctionExit0( CMTPSENDOBJECTINFO_DOHANDLECOMPLETINGPHASEL_EXIT );
     return result;    
     }
 
@@ -323,7 +329,7 @@ EMTPRespCodeNoValidObjectInfo
 */
 TMTPResponseCode CMTPSendObjectInfo::CheckSendingStateL()
     {
-    __FLOG(_L8("CheckSendingState - Entry"));
+    OstTraceFunctionEntry0( CMTPSENDOBJECTINFO_CHECKSENDINGSTATEL_ENTRY );
     TMTPResponseCode result = EMTPRespCodeOK;
     iOperationCode = Request().Uint16(TMTPTypeRequest::ERequestOperationCode);
 
@@ -364,9 +370,11 @@ TMTPResponseCode CMTPSendObjectInfo::CheckSendingStateL()
         }
     else 
         {
+        OstTrace1( TRACE_ERROR, CMTPSENDOBJECTINFO_CHECKSENDINGSTATEL, 
+                "The progress state is not right.  Current state is %d", iProgress );
         User::Leave( KErrGeneral );
         }
-    __FLOG(_L8("CheckSendingState - Exit"));
+    OstTraceFunctionExit0( CMTPSENDOBJECTINFO_CHECKSENDINGSTATEL_EXIT );
     return result;    
     }
 
@@ -375,14 +383,14 @@ SendObjectInfo request handler
 */
 void CMTPSendObjectInfo::ServiceSendObjectInfoL()
     {
-    __FLOG(_L8("ServiceSendObjectInfoL - Entry"));
+    OstTraceFunctionEntry0( CMTPSENDOBJECTINFO_SERVICESENDOBJECTINFOL_ENTRY );
     delete iObjectInfo;
     iObjectInfo = NULL;
     iObjectInfo = CMTPTypeObjectInfo::NewL();
     iCancelled = EFalse;
     ReceiveDataL(*iObjectInfo);
     iProgress = EObjectInfoInProgress;
-    __FLOG(_L8("ServiceSendObjectInfoL - Exit"));
+    OstTraceFunctionExit0( CMTPSENDOBJECTINFO_SERVICESENDOBJECTINFOL_EXIT );
     }
 
 /**
@@ -390,7 +398,7 @@ SendObjectPropList request handler
 */
 void CMTPSendObjectInfo::ServiceSendObjectPropListL()
     {
-    __FLOG(_L8("ServiceSendObjectPropListL - Entry"));
+    OstTraceFunctionEntry0( CMTPSENDOBJECTINFO_SERVICESENDOBJECTPROPLISTL_ENTRY );
     delete iObjectPropList;
     iObjectPropList = NULL;
     iObjectPropList = CMTPTypeObjectPropList::NewL();
@@ -398,7 +406,7 @@ void CMTPSendObjectInfo::ServiceSendObjectPropListL()
     iReceivedObject->SetUint(CMTPObjectMetaData::EFormatCode, iRequest->Uint32(TMTPTypeRequest::ERequestParameter3));
     ReceiveDataL(*iObjectPropList);
     iProgress = EObjectInfoInProgress;
-    __FLOG(_L8("ServiceSendObjectPropListL - Exit"));
+    OstTraceFunctionExit0( CMTPSENDOBJECTINFO_SERVICESENDOBJECTPROPLISTL_EXIT );
     }
     
 /**
@@ -406,7 +414,7 @@ SendObject request handler
 */    
 void CMTPSendObjectInfo::ServiceSendObjectL()
     {
-    __FLOG(_L8("ServiceSendObjectL - Entry"));
+    OstTraceFunctionEntry0( CMTPSENDOBJECTINFO_SERVICESENDOBJECTL_ENTRY );
     if (iIsFolder)
         {
         // A generic folder doesn't have anything interesting during its data phase
@@ -418,7 +426,7 @@ void CMTPSendObjectInfo::ServiceSendObjectL()
         }
     
     iProgress = ESendObjectInProgress;
-    __FLOG(_L8("ServiceSendObjectL - Exit"));
+    OstTraceFunctionExit0( CMTPSENDOBJECTINFO_SERVICESENDOBJECTL_EXIT );
     }
 
 /**
@@ -426,13 +434,14 @@ Get a default parent object, if the request does not specify a parent object.
 */
 void CMTPSendObjectInfo::GetDefaultParentObjectL()
     {    
-    __FLOG(_L8("GetDefaultParentObjectL - Entry"));
+    OstTraceFunctionEntry0( CMTPSENDOBJECTINFO_GETDEFAULTPARENTOBJECTL_ENTRY );
     if (iStorageId == KMTPStorageDefault)
         {
         iStorageId = iFramework.StorageMgr().DefaultStorageId();
         }
     TInt drive(iFramework.StorageMgr().DriveNumber(iStorageId));
-    User::LeaveIfError(drive);
+    LEAVEIFERROR(drive,
+            OstTrace1( TRACE_ERROR, CMTPSENDOBJECTINFO_GETDEFAULTPARENTOBJECTL, "can't get driver number for storage %d", iStorageId));
 
     // Obtain the root of the drive.  Logical storages can sometimes have a filesystem root
     // other than <drive>:\ .  For example an MP3 DP might have a root of c:\media\music\
@@ -441,8 +450,8 @@ void CMTPSendObjectInfo::GetDefaultParentObjectL()
     delete iParentSuid;
     iParentSuid = NULL;
     iParentSuid=(iFramework.StorageMgr().StorageL(iStorageId).DesC(CMTPStorageMetaData::EStorageSuid)).AllocL();
-    iReceivedObject->SetUint(CMTPObjectMetaData::EParentHandle, KMTPHandleNoParent);
-    __FLOG(_L8("GetDefaultParentObjectL - Exit"));        
+    iReceivedObject->SetUint(CMTPObjectMetaData::EParentHandle, KMTPHandleNoParent);     
+    OstTraceFunctionExit0( CMTPSENDOBJECTINFO_GETDEFAULTPARENTOBJECTL_EXIT );
     }
 
 /**
@@ -451,7 +460,7 @@ Get parent object and storage id
 */
 TMTPResponseCode CMTPSendObjectInfo::GetParentObjectAndStorageIdL()
     {
-    __FLOG(_L8("GetParentObjectAndStorageIdL - Entry"));    
+    OstTraceFunctionEntry0( CMTPSENDOBJECTINFO_GETPARENTOBJECTANDSTORAGEIDL_ENTRY );    
     __ASSERT_DEBUG(iRequestChecker, Panic(EMTPDpRequestCheckNull));
 
     iStorageId = Request().Uint32(TMTPTypeRequest::ERequestParameter1);
@@ -471,8 +480,8 @@ TMTPResponseCode CMTPSendObjectInfo::GetParentObjectAndStorageIdL()
         iReceivedObject->SetUint(CMTPObjectMetaData::EParentHandle, iParentHandle);
         }
 
-    __FLOG_VA((_L8("iParentSuid = %S"), iParentSuid));
-    __FLOG(_L8("GetParentObjectAndStorageIdL - Exit"));    
+    OstTraceExt1( TRACE_NORMAL, CMTPSENDOBJECTINFO_GETPARENTOBJECTANDSTORAGEIDL, "iParentSuid = %S", *iParentSuid );
+    OstTraceFunctionExit0( CMTPSENDOBJECTINFO_GETPARENTOBJECTANDSTORAGEIDL_EXIT );
     return EMTPRespCodeOK;
     }
 
@@ -482,16 +491,18 @@ Handling the completing phase of SendObjectInfo request
 */    
 TBool CMTPSendObjectInfo::DoHandleSendObjectInfoCompleteL()
     {
-    __FLOG(_L8("DoHandleSendObjectInfoCompleteL - Entry"));    
+    OstTraceFunctionEntry0( CMTPSENDOBJECTINFO_DOHANDLESENDOBJECTINFOCOMPLETEL_ENTRY ); 
     TBool result(ETrue);
     TUint16 format(iObjectInfo->Uint16L(CMTPTypeObjectInfo::EObjectFormat));
     
     result = iDpSingletons.ExclusionMgrL().IsFormatValid(TMTPFormatCode(format));
     
     if (result)
-        {
-        __FLOG_VA((_L8("ASSOCIATION TYPE IS: %X"), iObjectInfo->Uint16L(CMTPTypeObjectInfo::EAssociationType)));        
-		if(format == EMTPFormatCodeAssociation)
+        {     
+		OstTrace1( TRACE_NORMAL, CMTPSENDOBJECTINFO_DOHANDLESENDOBJECTINFOCOMPLETEL, 
+		        "ASSOCIATION TYPE IS: %X", iObjectInfo->Uint16L(CMTPTypeObjectInfo::EAssociationType));
+		
+        if(format == EMTPFormatCodeAssociation)
 			{
 			if((iObjectInfo->Uint16L(CMTPTypeObjectInfo::EAssociationType) == EMTPAssociationTypeGenericFolder) ||
         		      (iObjectInfo->Uint16L(CMTPTypeObjectInfo::EAssociationType) == EMTPAssociationTypeUndefined))
@@ -564,7 +575,7 @@ TBool CMTPSendObjectInfo::DoHandleSendObjectInfoCompleteL()
         
         if (err != KErrNone)
             {
-            __FLOG_1(_L8("Fail to create fs object %d"),err);
+            OstTrace1( TRACE_ERROR, DUP1_CMTPSENDOBJECTINFO_DOHANDLESENDOBJECTINFOCOMPLETEL, "Fail to create fs object %d", err );
             SendResponseL(ErrorToMTPError(err));
             result = EFalse;
             }
@@ -573,7 +584,7 @@ TBool CMTPSendObjectInfo::DoHandleSendObjectInfoCompleteL()
             ReserveObjectL();
             }
         }
-    __FLOG(_L8("DoHandleSendObjectInfoCompleteL - Exit"));
+    OstTraceFunctionExit0( CMTPSENDOBJECTINFO_DOHANDLESENDOBJECTINFOCOMPLETEL_EXIT );
     return result;    
     }
 
@@ -583,7 +594,7 @@ Handling the completing phase of SendObjectPropList request
 */    
 TBool CMTPSendObjectInfo::DoHandleSendObjectPropListCompleteL()
     {
-    __FLOG(_L8("DoHandleSendObjectPropListCompleteL - Entry"));
+    OstTraceFunctionEntry0( CMTPSENDOBJECTINFO_DOHANDLESENDOBJECTPROPLISTCOMPLETEL_ENTRY );
     TBool result(ETrue);
     
     TMTPResponseCode responseCode(GetParentObjectAndStorageIdL());
@@ -635,7 +646,7 @@ TBool CMTPSendObjectInfo::DoHandleSendObjectPropListCompleteL()
         
         if (err != KErrNone)
             {
-            __FLOG_1(_L8("Fail to create fs object %d"),err);
+            OstTrace1( TRACE_ERROR, CMTPSENDOBJECTINFO_DOHANDLESENDOBJECTPROPLISTCOMPLETEL, "Fail to create fs object %d", err );
             SendResponseL(ErrorToMTPError(err));
             result = EFalse;
             }
@@ -644,8 +655,8 @@ TBool CMTPSendObjectInfo::DoHandleSendObjectPropListCompleteL()
             ReserveObjectL();
             }
         }
-        
-    __FLOG(_L8("DoHandleSendObjectPropListCompleteL - Exit"));
+
+    OstTraceFunctionExit0( CMTPSENDOBJECTINFO_DOHANDLESENDOBJECTPROPLISTCOMPLETEL_EXIT );
     return result;    
     }
     
@@ -655,7 +666,7 @@ Handling the completing phase of SendObject request
 */    
 TBool CMTPSendObjectInfo::DoHandleSendObjectCompleteL()
     {
-    __FLOG(_L8("DoHandleSendObjectCompleteL - Entry"));
+    OstTraceFunctionEntry0( CMTPSENDOBJECTINFO_DOHANDLESENDOBJECTCOMPLETEL_ENTRY );
     TBool result(ETrue);
         
     if (!iIsFolder)
@@ -664,10 +675,12 @@ TBool CMTPSendObjectInfo::DoHandleSendObjectCompleteL()
         iFileReceived = NULL;
         
         TEntry fileEntry;
-        User::LeaveIfError(iFramework.Fs().Entry(iFullPath, fileEntry));
-
+        LEAVEIFERROR(iFramework.Fs().Entry(iFullPath, fileEntry),
+                OstTraceExt1( TRACE_ERROR, CMTPSENDOBJECTINFO_DOHANDLESENDOBJECTCOMPLETEL, "Gets the entry details for %S failed!", iFullPath));
         if (fileEntry.FileSize() != iObjectSize)
             {
+			delete iFileReceived;
+        	iFileReceived = NULL;
             iFramework.RouteRequestUnregisterL(iExpectedSendObjectRequest, iConnection);
             
             iFramework.Fs().Delete(iFullPath);
@@ -694,7 +707,7 @@ TBool CMTPSendObjectInfo::DoHandleSendObjectCompleteL()
      // SendObject is cancelled or connection is dropped.
     if(result && (iCancelled || (ret == KErrAbort)))
         {
-        __FLOG(_L8("It is a cancel for sendObject."));
+        OstTrace0( TRACE_NORMAL, DUP1_CMTPSENDOBJECTINFO_DOHANDLESENDOBJECTCOMPLETEL, "It is a cancel for sendObject." );
         iFramework.RouteRequestUnregisterL(iExpectedSendObjectRequest, iConnection);
         Rollback();
         SendResponseL(EMTPRespCodeTransactionCancelled);        
@@ -713,9 +726,11 @@ TBool CMTPSendObjectInfo::DoHandleSendObjectCompleteL()
         if(!iIsFolder)
             {
             SetPropertiesL();    
+            delete iFileReceived;
+            iFileReceived = NULL;
             iFramework.ObjectMgr().CommitReservedObjectHandleL(*iReceivedObject);
             iFullPath.LowerCase();
-            __FLOG_VA((_L8("File Name %S"), &iFullPath));
+            OstTraceExt1( TRACE_NORMAL, DUP2_CMTPSENDOBJECTINFO_DOHANDLESENDOBJECTCOMPLETEL, "File Name %S", iFullPath);
             TParsePtrC file( iFullPath );
             if ( file.ExtPresent() && file.Ext().Length()<=KExtensionLength && iExceptionList.Find(file.Ext()) != KErrNotFound)
                 {
@@ -756,7 +771,7 @@ TBool CMTPSendObjectInfo::DoHandleSendObjectCompleteL()
         
         SendResponseL(EMTPRespCodeOK);
 	    }
-    __FLOG(_L8("DoHandleSendObjectCompleteL - Exit"));
+    OstTraceFunctionExit0( CMTPSENDOBJECTINFO_DOHANDLESENDOBJECTCOMPLETEL_EXIT );
     return result;
     }
 
@@ -769,7 +784,7 @@ on return, contains the full path name of the object to be saved
 */
 TBool CMTPSendObjectInfo::GetFullPathNameL(const TDesC& aFileName)
     {
-    __FLOG(_L8("GetFullPathNameL - Entry"));
+    OstTraceFunctionEntry0( CMTPSENDOBJECTINFO_GETFULLPATHNAMEL_ENTRY );
     TBool result(EFalse);
     if (aFileName.Length() > 0)
         {
@@ -794,13 +809,13 @@ TBool CMTPSendObjectInfo::GetFullPathNameL(const TDesC& aFileName)
             }
         }
 
-#ifdef __FLOG_ACTIVE
+#ifdef OST_TRACE_COMPILER_IN_USE
     TFileName tempName;
     tempName.Copy(iFullPath);
     tempName.Collapse();
-    __FLOG_VA((_L8("iFullPath = %S, Result = %d"), &tempName, result));
-    __FLOG(_L8("GetFullPathNameL - Exit"));
+    OstTraceExt2( TRACE_NORMAL, CMTPSENDOBJECTINFO_GETFULLPATHNAMEL, "iFullPath = %S, Result = %d", tempName, result);
 #endif
+    OstTraceFunctionExit0( CMTPSENDOBJECTINFO_GETFULLPATHNAMEL_EXIT );
     return result;
     }
 
@@ -810,7 +825,7 @@ Check if the object is too large
 */
 TBool CMTPSendObjectInfo::IsTooLarge(TUint64 aObjectSize) const
     {
-    __FLOG(_L8("IsTooLarge - Entry"));
+    OstTraceFunctionEntry0( CMTPSENDOBJECTINFO_ISTOOLARGE_ENTRY );
     TBool ret(aObjectSize > KMaxTInt64);
     
     if(!ret)
@@ -822,7 +837,8 @@ TBool CMTPSendObjectInfo::IsTooLarge(TUint64 aObjectSize) const
             storageId = iFramework.StorageMgr().DefaultStorageId();
             }
         TInt drive( iFramework.StorageMgr().DriveNumber(storageId) );
-        User::LeaveIfError(drive);
+        LEAVEIFERROR(drive,
+                OstTrace1( TRACE_ERROR, CMTPSENDOBJECTINFO_ISTOOLARGE, "can't get driver number for storage %d", storageId));
         iFramework.Fs().FileSystemSubType(drive, fsname);        
         
         const TUint64 KMaxFatFileSize = 0xFFFFFFFF; //Maximal file size supported by all FAT filesystems (4GB-1)
@@ -834,8 +850,8 @@ TBool CMTPSendObjectInfo::IsTooLarge(TUint64 aObjectSize) const
             ret = ETrue;
             }
         }
-    __FLOG_VA((_L8("Result = %d"), ret));
-    __FLOG(_L8("IsTooLarge - Exit"));
+    OstTrace1( TRACE_NORMAL, DUP1_CMTPSENDOBJECTINFO_ISTOOLARGE, "Result = %d", ret );
+    OstTraceFunctionExit0( CMTPSENDOBJECTINFO_ISTOOLARGE_EXIT );
     return ret;
     }
     
@@ -845,12 +861,12 @@ Check if the file already exists on the storage.
 */
 TBool CMTPSendObjectInfo::Exists(const TDesC& aName) const
     {
-    __FLOG(_L8("Exists - Entry"));
+    OstTraceFunctionEntry0( CMTPSENDOBJECTINFO_EXISTS_ENTRY );
     // This detects both files and folders
     TBool ret(EFalse); 
     ret = BaflUtils::FileExists(iFramework.Fs(), aName);
-    __FLOG_VA((_L8("Result = %d"), ret));
-    __FLOG(_L8("Exists - Exit"));
+    OstTrace1( TRACE_NORMAL, CMTPSENDOBJECTINFO_EXISTS, "Result = %d", ret );
+    OstTraceFunctionExit0( CMTPSENDOBJECTINFO_EXISTS_EXIT );
     return ret;
     }
 
@@ -861,7 +877,7 @@ Check if the property list is valid and extract properties (file name)
 */
 TMTPResponseCode CMTPSendObjectInfo::VerifyObjectPropListL(TInt& aInvalidParameterIndex)
     {
-    __FLOG(_L8("VerifyObjectPropListL - Entry"));
+    OstTraceFunctionEntry0( CMTPSENDOBJECTINFO_VERIFYOBJECTPROPLISTL_ENTRY );
     TMTPResponseCode responseCode(EMTPRespCodeOK);
     const TUint KCount(iObjectPropList->NumberOfElements());
 	iObjectPropList->ResetCursor();
@@ -887,8 +903,8 @@ TMTPResponseCode CMTPSendObjectInfo::VerifyObjectPropListL(TInt& aInvalidParamet
             break;
             }        
         }
-    __FLOG_VA((_L8("Result = 0x%04X"), responseCode));
-    __FLOG(_L8("VerifyObjectPropListL - Exit"));
+    OstTrace1( TRACE_NORMAL, CMTPSENDOBJECTINFO_VERIFYOBJECTPROPLISTL, "Result = 0x%04X", responseCode);
+    OstTraceFunctionExit0( CMTPSENDOBJECTINFO_VERIFYOBJECTPROPLISTL_EXIT );
     return responseCode;        
     }
 
@@ -900,7 +916,7 @@ Extracts the file information from the object property list element
 */
 TMTPResponseCode CMTPSendObjectInfo::ExtractPropertyL(const CMTPTypeObjectPropListElement& aElement)
     {
-    __FLOG(_L8("ExtractPropertyL - Entry"));
+    OstTraceFunctionEntry0( CMTPSENDOBJECTINFO_EXTRACTPROPERTYL_ENTRY );
     TMTPResponseCode responseCode(EMTPRespCodeOK);
     switch (aElement.Uint16L(CMTPTypeObjectPropListElement::EPropertyCode))
         {
@@ -939,11 +955,14 @@ TMTPResponseCode CMTPSendObjectInfo::ExtractPropertyL(const CMTPTypeObjectPropLi
     case EMTPObjectPropCodeName:
     	iName = aElement.StringL(CMTPTypeObjectPropListElement::EValue);
     	break;
+    case EMTPObjectPropCodeHidden:
+        iHiddenStatus = aElement.Uint16L(CMTPTypeObjectPropListElement::EValue);
+        break;
     default:
         break;
         }
-    __FLOG_VA((_L8("Result = 0x%04X"), responseCode));
-    __FLOG(_L8("ExtractPropertyL - Exit"));
+    OstTrace1( TRACE_NORMAL, CMTPSENDOBJECTINFO_EXTRACTPROPERTYL, "Result = 0x%04X", responseCode);
+    OstTraceFunctionExit0( CMTPSENDOBJECTINFO_EXTRACTPROPERTYL_EXIT );
     return responseCode;    
     }
 
@@ -955,7 +974,7 @@ Validates the data type for a given property code.
 */
 TMTPResponseCode CMTPSendObjectInfo::CheckPropCodeL(const CMTPTypeObjectPropListElement& aElement) const
     {
-    __FLOG(_L8("CheckPropCode - Entry"));
+    OstTraceFunctionEntry0( CMTPSENDOBJECTINFO_CHECKPROPCODEL_ENTRY );
     TMTPResponseCode responseCode(EMTPRespCodeOK);
     switch(aElement.Uint16L(CMTPTypeObjectPropListElement::EPropertyCode))
         {
@@ -1031,6 +1050,7 @@ TMTPResponseCode CMTPSendObjectInfo::CheckPropCodeL(const CMTPTypeObjectPropList
         break;
         
     case EMTPObjectPropCodeAssociationType:
+    case EMTPObjectPropCodeHidden:
         if (aElement.Uint16L(CMTPTypeObjectPropListElement::EDatatype) != EMTPTypeUINT16)
              {
              responseCode = EMTPRespCodeInvalidObjectPropFormat;
@@ -1048,8 +1068,8 @@ TMTPResponseCode CMTPSendObjectInfo::CheckPropCodeL(const CMTPTypeObjectPropList
         responseCode = EMTPRespCodeInvalidObjectPropCode;
         break;
         }
-    __FLOG_VA((_L8("Result = 0x%04X"), responseCode));
-    __FLOG(_L8("CheckPropCode - Exit"));
+    OstTrace1( TRACE_NORMAL, CMTPSENDOBJECTINFO_CHECKPROPCODEL, "Result = 0x%04X", responseCode);
+    OstTraceFunctionExit0( CMTPSENDOBJECTINFO_CHECKPROPCODEL_EXIT );
     return responseCode;    
     }
 
@@ -1086,7 +1106,7 @@ TMTPResponseCode CMTPSendObjectInfo::MatchStoreAndParentL() const
 				}
 			}
     	}
-    
+
     return ret;
     }
 
@@ -1096,7 +1116,7 @@ sends a success response.
 */
 void CMTPSendObjectInfo::ReserveObjectL()
     {
-    __FLOG(_L8("ReserveObjectL - Entry"));    
+    OstTraceFunctionEntry0( CMTPSENDOBJECTINFO_RESERVEOBJECTL_ENTRY );
     iReceivedObject->SetUint(CMTPObjectMetaData::EStorageId, iStorageId);
     iReceivedObject->SetDesCL(CMTPObjectMetaData::ESuid, iFullPath);
     
@@ -1127,7 +1147,7 @@ void CMTPSendObjectInfo::ReserveObjectL()
     parameters[1] = iParentHandle;
     parameters[2] = iReceivedObject->Uint(CMTPObjectMetaData::EHandle);
     SendResponseL(EMTPRespCodeOK, (sizeof(parameters) / sizeof(parameters[0])), parameters);
-    __FLOG(_L8("ReserveObjectL - Exit"));    
+    OstTraceFunctionExit0( CMTPSENDOBJECTINFO_RESERVEOBJECTL_EXIT );
     }
     
 void CMTPSendObjectInfo::CreateFsObjectL()
@@ -1136,7 +1156,8 @@ void CMTPSendObjectInfo::CreateFsObjectL()
         {
         if (!Exists(iFullPath))
             {
-            User::LeaveIfError(iFramework.Fs().MkDirAll(iFullPath));
+            LEAVEIFERROR(iFramework.Fs().MkDirAll(iFullPath),
+                    OstTraceExt1( TRACE_ERROR, CMTPSENDOBJECTINFO_CREATEFSOBJECTL, "Makes directories failed for %S", iFullPath));      
             }
         }
     else
@@ -1152,14 +1173,14 @@ void CMTPSendObjectInfo::Rollback()
     {
     if(iIsFolder)
         {
-        __FLOG(_L8("Rollback the dir created."));
+        OstTrace0( TRACE_NORMAL, CMTPSENDOBJECTINFO_ROLLBACK, "Rollback the dir created." );
         iFramework.Fs().RmDir(iFullPath);
         // If it is folder, delete it from MTP database, i.e ObjectStore.
         TRAP_IGNORE(iFramework.ObjectMgr().RemoveObjectL(iFullPath));
         }
     else
         {
-        __FLOG(_L8("Rollback the file created."));
+        OstTrace0( TRACE_NORMAL, DUP1_CMTPSENDOBJECTINFO_ROLLBACK, "Rollback the file created." );
         delete iFileReceived;
         iFileReceived = NULL;
         // Delete this object from file system.
@@ -1189,7 +1210,7 @@ TMTPResponseCode CMTPSendObjectInfo::ErrorToMTPError(TInt aError) const
     default:
         break;
         }
-        
+
     return resp;
     }
 
@@ -1198,9 +1219,10 @@ Sets the read only status on the current file to match the sent object.
 */
 void CMTPSendObjectInfo::SetPropertiesL()
     {
-    __FLOG(_L8("SetPropertiesL - Entry"));
+    OstTraceFunctionEntry0( CMTPSENDOBJECTINFO_SETPROPERTIESL_ENTRY );
     TEntry entry;
-    User::LeaveIfError(iFramework.Fs().Entry(iFullPath, entry));  
+    LEAVEIFERROR(iFramework.Fs().Entry(iFullPath, entry),
+            OstTraceExt1( TRACE_ERROR, CMTPSENDOBJECTINFO_SETPROPERTIESL, "can't get entry details from %S", iFullPath));
     
     TUint16 assoc(EMTPAssociationTypeUndefined);
 	if (entry.IsDir())
@@ -1235,18 +1257,47 @@ void CMTPSendObjectInfo::SetPropertiesL()
             {
             entry.iAtt |= KEntryAttReadOnly;
             }
-        User::LeaveIfError(iFramework.Fs().SetAtt(iFullPath, entry.iAtt, ~entry.iAtt));
+        if ( iFileReceived )
+            {
+            User::LeaveIfError(iFileReceived->File().SetAtt(entry.iAtt, ~entry.iAtt));
+            }
+        else
+            {
+        LEAVEIFERROR(iFramework.Fs().SetAtt(iFullPath, entry.iAtt, ~entry.iAtt),
+                OstTraceExt2( TRACE_ERROR, DUP1_CMTPSENDOBJECTINFO_SETPROPERTIESL, "set attribute %d for %S failed!", (TInt32)entry.iAtt, iFullPath));      
+            }
         }
-
+    
+    if ( EMTPHidden == iHiddenStatus )
+        {
+		entry.iAtt &= ~KEntryAttHidden;
+        entry.iAtt |= KEntryAttHidden;
+        if ( iFileReceived )
+            {
+            User::LeaveIfError(iFileReceived->File().SetAtt(entry.iAtt, ~entry.iAtt));
+            }
+        else
+            {
+            User::LeaveIfError(iFramework.Fs().SetAtt(iFullPath, entry.iAtt, ~entry.iAtt));
+            }
+        }
+    
     if(iDateMod != NULL && iDateMod->Length())
        {
        TTime modifiedTime;
        iDpSingletons.MTPUtility().MTPTimeStr2TTime(*iDateMod, modifiedTime);
-       User::LeaveIfError(iFramework.Fs().SetModified(iFullPath, modifiedTime));
+       if ( iFileReceived )
+           { 
+           User::LeaveIfError(iFileReceived->File().SetModified( modifiedTime ));
+           }
+       else
+           {
+           User::LeaveIfError(iFramework.Fs().SetModified(iFullPath, modifiedTime));
+           }
        }  
     
     iReceivedObject->SetDesCL(CMTPObjectMetaData::EName, iName);
     
-    __FLOG(_L8("SetPropertiesL - Exit"));
+    OstTraceFunctionExit0( CMTPSENDOBJECTINFO_SETPROPERTIESL_EXIT );
     }
 

@@ -40,7 +40,8 @@ static const TUint16 KMTPDpSupportedProperties[] =
 	EMTPObjectPropCodeParentObject,
 	EMTPObjectPropCodePersistentUniqueObjectIdentifier,
 	EMTPObjectPropCodeName,
-	EMTPObjectPropCodeNonConsumable	
+	EMTPObjectPropCodeNonConsumable,
+	EMTPObjectPropCodeHidden
 	};
 
 /**
@@ -64,7 +65,7 @@ Define the properties groups supported.
 static const TUint16 KMTPDpPropertyGroups[KMTPDpPropertyGroupNumber+1][KMTPDpPropertyNumber] =
     {
       	{}, // group 0 is not used.
-      	//               group 1 contains 10 proeprties
+      	//               group 1 contains 11 proeprties
       	{	EMTPObjectPropCodeStorageID,
 			EMTPObjectPropCodeObjectFormat,
 			EMTPObjectPropCodeProtectionStatus,
@@ -74,7 +75,8 @@ static const TUint16 KMTPDpPropertyGroups[KMTPDpPropertyGroupNumber+1][KMTPDpPro
 			EMTPObjectPropCodeParentObject,
 			EMTPObjectPropCodePersistentUniqueObjectIdentifier,
 			EMTPObjectPropCodeName,
-			EMTPObjectPropCodeNonConsumable	}  
+			EMTPObjectPropCodeNonConsumable,
+			EMTPObjectPropCodeHidden}  
     };
 
 

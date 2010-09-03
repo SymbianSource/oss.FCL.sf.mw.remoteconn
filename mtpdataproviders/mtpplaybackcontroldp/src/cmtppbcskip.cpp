@@ -29,10 +29,11 @@
 #include "cmtpplaybackproperty.h"
 #include "cmtpplaybackcommand.h"
 #include "mtpplaybackcontrolpanic.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtppbcskipTraces.h"
+#endif
 
-
-// Class constants.
-__FLOG_STMT(_LIT8(KComponent,"Skip");)
 
 /**
 Two-phase constructor.
@@ -45,7 +46,9 @@ MMTPRequestProcessor* CMTPPbcSkip::NewL(MMTPDataProviderFramework& aFramework,
                                      MMTPConnection& aConnection,
                                      CMTPPlaybackControlDataProvider& aDataProvider)
     {
+    OstTraceFunctionEntry0( CMTPPBCSKIP_NEWL_ENTRY );
     CMTPPbcSkip* self = new (ELeave) CMTPPbcSkip(aFramework, aConnection, aDataProvider);
+    OstTraceFunctionExit0( CMTPPBCSKIP_NEWL_EXIT );
     return self;
     }
 
@@ -54,10 +57,9 @@ Destructor.
 */    
 CMTPPbcSkip::~CMTPPbcSkip()
     {
-    __FLOG(_L8("CMTPPbcSkip - Entry"));
+    OstTraceFunctionEntry0( CMTPPBCSKIP_CMTPPBCSKIP_ENTRY );
     delete iPbCmd;
-    __FLOG(_L8("CMTPPbcSkip - Exit"));
-    __FLOG_CLOSE;
+    OstTraceFunctionExit0( CMTPPBCSKIP_CMTPPBCSKIP_EXIT );
     }
 
 /**
@@ -69,8 +71,8 @@ CMTPPbcSkip::CMTPPbcSkip(MMTPDataProviderFramework& aFramework,
                    CMTPRequestProcessor(aFramework, aConnection, 0, NULL),
                    iPlaybackControlDp(aDataProvider)
     {
-    //Open the log system
-    __FLOG_OPEN(KMTPSubsystem, KComponent);
+    OstTraceFunctionEntry0( DUP1_CMTPPBCSKIP_CMTPPBCSKIP_ENTRY );
+    OstTraceFunctionExit0( DUP1_CMTPPBCSKIP_CMTPPBCSKIP_EXIT );
     }
 
 /**
@@ -78,7 +80,7 @@ CheckRequestL
 */
 TMTPResponseCode CMTPPbcSkip::CheckRequestL()
     {
-    __FLOG(_L8("CheckRequestL - Entry"));
+    OstTraceFunctionEntry0( CMTPPBCSKIP_CHECKREQUESTL_ENTRY );
     TMTPResponseCode respCode = CMTPRequestProcessor::CheckRequestL();
     if(respCode == EMTPRespCodeOK)
         {
@@ -89,7 +91,7 @@ TMTPResponseCode CMTPPbcSkip::CheckRequestL()
             respCode = EMTPRespCodeOK;
             }
         }
-    __FLOG(_L8("CheckRequestL - Exit"));
+    OstTraceFunctionExit0( CMTPPBCSKIP_CHECKREQUESTL_EXIT );
     return respCode;
     }
 
@@ -98,7 +100,7 @@ CMTPPbcSkip request handler.
 */   
 void CMTPPbcSkip::ServiceL()
     {
-    __FLOG(_L8("ServiceL - Entry"));
+    OstTraceFunctionEntry0( CMTPPBCSKIP_SERVICEL_ENTRY );
     CMTPPlaybackMap& map(iPlaybackControlDp.GetPlaybackMap());
     MMTPPlaybackControl& control(iPlaybackControlDp.GetPlaybackControlL());
 
@@ -117,14 +119,14 @@ void CMTPPbcSkip::ServiceL()
         {
         SendResponseL(EMTPRespCodeInvalidParameter);
         }
-    __FLOG(_L8("ServiceL - Exit"));
+    OstTraceFunctionExit0( CMTPPBCSKIP_SERVICEL_EXIT );
     }
 
 void CMTPPbcSkip::HandlePlaybackCommandCompleteL(CMTPPlaybackCommand* aCmd, TInt aErr)
     {
-    __FLOG(_L8("HandlePlaybackCommandCompleteL - Entry"));
-    __FLOG_1(_L8("aErr %d"), aErr);
-
+    OstTraceFunctionEntry0( CMTPPBCSKIP_HANDLEPLAYBACKCOMMANDCOMPLETEL_ENTRY );
+    OstTrace1( TRACE_NORMAL, CMTPPBCSKIP_HANDLEPLAYBACKCOMMANDCOMPLETEL, "aErr %d", aErr );
+    
     //Handle error response.
     TMTPResponseCode response;
     switch(aErr)
@@ -157,8 +159,8 @@ void CMTPPbcSkip::HandlePlaybackCommandCompleteL(CMTPPlaybackCommand* aCmd, TInt
     if(aCmd != NULL)
         {
         __ASSERT_DEBUG((aCmd->PlaybackCommand() == iPbCmd->PlaybackCommand()), Panic(EMTPPBArgumentErr));
-        __FLOG_1(_L8("aCmd %d"), aCmd->PlaybackCommand());
+        OstTrace1( TRACE_NORMAL, DUP1_CMTPPBCSKIP_HANDLEPLAYBACKCOMMANDCOMPLETEL, "aCmd %d", aCmd->PlaybackCommand() );
         }
 
-    __FLOG(_L8("HandlePlaybackCommandCompleteL - Exit"));
+    OstTraceFunctionExit0( CMTPPBCSKIP_HANDLEPLAYBACKCOMMANDCOMPLETEL_EXIT );
     }

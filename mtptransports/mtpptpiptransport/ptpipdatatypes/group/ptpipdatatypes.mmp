@@ -31,7 +31,8 @@ VENDORID		0x70000001
 
 CAPABILITY		All -Tcb
 MW_LAYER_SYSTEMINCLUDE_SYMBIAN
-USERINCLUDE		../inc/ 
+USERINCLUDE		../inc/
+USERINCLUDE		../traces/ 
 
 SOURCEPATH		../src/
 SOURCE			cptpipgenericcontainer.cpp

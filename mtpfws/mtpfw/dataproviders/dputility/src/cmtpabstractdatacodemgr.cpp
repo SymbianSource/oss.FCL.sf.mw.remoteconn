@@ -18,8 +18,12 @@
 #include <mtp/mmtpdatacodegenerator.h>
 
 #include "cmtpabstractdatacodemgr.h"
+#include "mtpdebug.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpabstractdatacodemgrTraces.h"
+#endif
 
-__FLOG_STMT(_LIT8(KComponent, "FullEnumDataCodeMgr");)
 
 EXPORT_C RMTPServiceFormat::~RMTPServiceFormat()
 	{
@@ -53,11 +57,10 @@ EXPORT_C CMTPFullEnumDataCodeMgr* CMTPFullEnumDataCodeMgr::NewL(MMTPDataProvider
 
 EXPORT_C CMTPFullEnumDataCodeMgr::~CMTPFullEnumDataCodeMgr()
 	{
-	__FLOG(_L8("~CMTPFullEnumDataCodeMgr - Entry"));
+	OstTraceFunctionEntry0( CMTPFULLENUMDATACODEMGR_CMTPFULLENUMDATACODEMGR_DES_ENTRY );
 	delete iKnowledgeFormat;
 	iServiceProperties.Close();
-	__FLOG(_L8("~CMTPFullEnumDataCodeMgr - Exit"));
-	__FLOG_CLOSE;
+	OstTraceFunctionExit0( CMTPFULLENUMDATACODEMGR_CMTPFULLENUMDATACODEMGR_DES_EXIT );
 	}
 
 CMTPFullEnumDataCodeMgr::CMTPFullEnumDataCodeMgr(MMTPDataProviderFramework& aFramework) :
@@ -71,12 +74,11 @@ CMTPFullEnumDataCodeMgr::CMTPFullEnumDataCodeMgr(MMTPDataProviderFramework& aFra
 
 void CMTPFullEnumDataCodeMgr::ConstructL()
 	{
-	__FLOG_OPEN(KMTPSubsystem, KComponent);
-	__FLOG(_L8("ConstructL - Entry"));
+	OstTraceFunctionEntry0( CMTPFULLENUMDATACODEMGR_CONSTRUCTL_ENTRY );
 	BuildServiceIDL();
 	BuildFormatL();
 	BuildServicePropertyL();
-	__FLOG(_L8("ConstructL - Exit"));
+	OstTraceFunctionExit0( CMTPFULLENUMDATACODEMGR_CONSTRUCTL_EXIT );
 	}
 
 EXPORT_C TUint CMTPFullEnumDataCodeMgr::ServiceID() const
@@ -91,18 +93,21 @@ EXPORT_C const TMTPTypeGuid& CMTPFullEnumDataCodeMgr::ServiceGUID() const
 
 void CMTPFullEnumDataCodeMgr::BuildServiceIDL()
 	{
-	__FLOG(_L8("BuildServiceIDL - Entry"));
+	OstTraceFunctionEntry0( CMTPFULLENUMDATACODEMGR_BUILDSERVICEIDL_ENTRY );
 	//Allocate abstract service ID
-	User::LeaveIfError(iFramework.DataCodeGenerator().AllocateServiceID(
+	LEAVEIFERROR(iFramework.DataCodeGenerator().AllocateServiceID(
 						   iPersistentServiceGUID,
 						   EMTPServiceTypeAbstract,
-						   iServiceID));
-	__FLOG(_L8("BuildServiceIDL - Exit"));
+						   iServiceID),
+                           OstTrace0( TRACE_ERROR, CMTPFULLENUMDATACODEMGR_BUILDSERVICEIDL, 
+                                   "allocate abstract service ID faled!" ));
+						   
+	OstTraceFunctionExit0( CMTPFULLENUMDATACODEMGR_BUILDSERVICEIDL_EXIT );
 	}
 
 void CMTPFullEnumDataCodeMgr::BuildFormatL()
 	{
-	__FLOG(_L8("BuildFormatL - Entry"));
+	OstTraceFunctionEntry0( CMTPFULLENUMDATACODEMGR_BUILDFORMATL_ENTRY );
 
 
 	iKnowledgeFormat = new(ELeave) RMTPServiceFormat;
@@ -115,22 +120,25 @@ void CMTPFullEnumDataCodeMgr::BuildFormatL()
 	iKnowledgeFormat->iBaseFormatCode = KBaseFormatCode;
 	iKnowledgeFormat->iFormatName.Set(KNameFullEnumSyncKnowledege());
 	iKnowledgeFormat->iMIMEType.Set(KNameFullEnumSyncKnowledegeMIMEType());
-	User::LeaveIfError(iFramework.DataCodeGenerator().AllocateServiceFormatCode(
+	LEAVEIFERROR(iFramework.DataCodeGenerator().AllocateServiceFormatCode(
 						   iPersistentServiceGUID,
 						   iKnowledgeFormat->iFormatGUID,
-						   iKnowledgeFormat->iFormatCode));
+						   iKnowledgeFormat->iFormatCode),
+						   OstTrace0( TRACE_ERROR, CMTPFULLENUMDATACODEMGR_BUILDFORMATL, 
+						           "allocate service format code failed!" ));
+						   
 	TUint propertyCount = sizeof(KMTPFullEnumSyncKnowledgeObjectProperties) / sizeof(KMTPFullEnumSyncKnowledgeObjectProperties[0]);
 	for (TUint j = 0; j < propertyCount; j++)
 		{
 		iKnowledgeFormat->iProps.AppendL(KMTPFullEnumSyncKnowledgeObjectProperties[j]);
 		}
 
-	__FLOG(_L8("BuildFormatL - Exit"));
+	OstTraceFunctionExit0( CMTPFULLENUMDATACODEMGR_BUILDFORMATL_EXIT );
 	}
 
 void CMTPFullEnumDataCodeMgr::BuildServicePropertyL()
 	{
-	__FLOG(_L8("BuildServicePropertyL - Entry"));
+	OstTraceFunctionEntry0( CMTPFULLENUMDATACODEMGR_BUILDSERVICEPROPERTYL_ENTRY );
 
 	const TMTPTypeGuid KMTPFullEnumSyncServiceNamespace(
 		MAKE_TUINT64(KMTPFullEnumSyncServiceNSGUID[0], KMTPFullEnumSyncServiceNSGUID[1]),
@@ -159,23 +167,24 @@ void CMTPFullEnumDataCodeMgr::BuildServicePropertyL()
 	for (TUint i = 0; i < propCount; i++)
 		{
 		TMTPServicePropertyInfo servicePropertyInfo = KMTPFullEnumSyncServiceProperties[i];
-		User::LeaveIfError(iFramework.DataCodeGenerator().AllocateServicePropertyCode(iPersistentServiceGUID,
-						   servicePropertyInfo.iServicePropPKeyNamespace, servicePropertyInfo.iServicePropPKeyID, servicePropertyInfo.iServicePropCode));
+		LEAVEIFERROR(iFramework.DataCodeGenerator().AllocateServicePropertyCode(iPersistentServiceGUID,
+						   servicePropertyInfo.iServicePropPKeyNamespace, servicePropertyInfo.iServicePropPKeyID, servicePropertyInfo.iServicePropCode),
+						   OstTrace0( TRACE_ERROR, CMTPFULLENUMDATACODEMGR_BUILDSERVICEPROPERTYL, "allocate service property code failed!" ));
 		iServiceProperties.InsertInOrder(servicePropertyInfo, TMTPServicePropertyInfo::LinearOrderServicePropOrder);
 		}
 
-	__FLOG(_L8("BuildServicePropertyL - Exit"));
+	OstTraceFunctionExit0( CMTPFULLENUMDATACODEMGR_BUILDSERVICEPROPERTYL_EXIT );
 	}
 
 EXPORT_C void CMTPFullEnumDataCodeMgr::GetSevicePropCodesL(RArray<TUint32>& aArray) const
 	{
-	__FLOG(_L8("GetSevicePropCodesL - Entry"));
+	OstTraceFunctionEntry0( CMTPFULLENUMDATACODEMGR_GETSEVICEPROPCODESL_ENTRY );
 	TInt count = iServiceProperties.Count();
 	for (TInt i = 0; i < count; i++)
 		{
 		aArray.AppendL(iServiceProperties[i].iServicePropCode);
 		}
-	__FLOG(_L8("GetSevicePropCodesL - Exit"));
+	OstTraceFunctionExit0( CMTPFULLENUMDATACODEMGR_GETSEVICEPROPCODESL_EXIT );
 	}
 
 EXPORT_C const RMTPServiceFormat& CMTPFullEnumDataCodeMgr::KnowledgeFormat() const
@@ -190,14 +199,14 @@ The property code must be valid to call this func
 */
 EXPORT_C const TMTPServicePropertyInfo* CMTPFullEnumDataCodeMgr::ServicePropertyInfo(TUint16 aPropCode) const
 	{
-	__FLOG(_L8("ServicePropertyInfo - Entry"));
+	OstTraceFunctionEntry0( CMTPFULLENUMDATACODEMGR_SERVICEPROPERTYINFO_ENTRY );
 	const TMTPServicePropertyInfo* pPropInfo = NULL;
 	TInt index = iServiceProperties.FindInOrder(aPropCode, TMTPServicePropertyInfo::LinearOrderServicePropOrder);
 	if (KErrNotFound != index)
 		{
 		pPropInfo = &(iServiceProperties[index]);
 		}
-	__FLOG(_L8("ServicePropertyInfo - Exit"));
+	OstTraceFunctionExit0( CMTPFULLENUMDATACODEMGR_SERVICEPROPERTYINFO_EXIT );
 	return pPropInfo;
 	}
 

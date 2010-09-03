@@ -30,6 +30,7 @@ SOURCE        cptpiphostfilterinterface.cpp
 
 
 USERINCLUDE   ../interface
+USERINCLUDE   ../traces
 
 MW_LAYER_SYSTEMINCLUDE_SYMBIAN
 

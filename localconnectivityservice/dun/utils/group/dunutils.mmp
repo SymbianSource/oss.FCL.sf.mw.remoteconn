@@ -57,7 +57,6 @@ SOURCE                  DunUtils.cpp
 MW_LAYER_SYSTEMINCLUDE
 
 USERINCLUDE             ../inc ../../atext/inc
-USERINCLUDE             ../../../inc
 
 LIBRARY                 bafl.lib
 #ifdef PRJ_USE_NETWORK_STUBS

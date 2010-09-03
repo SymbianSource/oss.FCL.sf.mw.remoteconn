@@ -26,7 +26,6 @@
 #include <mtp/tmtptypeuint32.h>
 #include <mtp/cmtptypearray.h>
 
-#include "mtpdebug.h"
 #include "rmtpframework.h"
 #include "mmtpdevdpextn.h"
 #include"cmtpextndevdp.h"
@@ -132,11 +131,6 @@ private: // Owned
         };
     
 private: // Owned
-
-    /**
-    FLOGGER debug trace member variable.
-    */
-    __FLOG_DECLARATION_MEMBER_MUTABLE;
 
     CTelephony::TBatteryInfoV1 		iBatteryInfoV1;
     CTelephony::TBatteryInfoV1Pckg  iBatteryInfoV1Pckg;  

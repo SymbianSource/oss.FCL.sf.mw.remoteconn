@@ -70,15 +70,11 @@ private:
     void ServiceRepresentativeSampleWidthL();
     void ServiceRepresentativeSampleDataL();
     void ServiceNonConsumableL();
+    void ServiceHiddenL();
     TUint16 GetPropertyGroupNumber(const TUint16 aPropCode) const;
     
 private:
     CMTPTypeObjectPropDesc*	iObjectProperty;
-    
-    /**
-    FLOGGER debug trace member variable.
-    */
-    __FLOG_DECLARATION_MEMBER_MUTABLE;
     };
     
 #endif //CMTPIMAGEDPGETOBJECTPROPDESC_H

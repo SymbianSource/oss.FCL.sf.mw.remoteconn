@@ -20,22 +20,23 @@
 #include <mtp/cmtpstoragemetadata.h>
 #include <mtp/cmtpmetadata.h>
 #include <e32hashtab.h>
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpfsexclusionmgrTraces.h"
+#endif
+
 
 //[SP-Format-0x3002]
 //The full path of DDISCVRY.DPS of PictBridge DP.
 _LIT(KFullNameOfPictBridgeDiscovery, "C:\\DATA\\DDISCVRY.DPS");
 
-__FLOG_STMT(_LIT8(KComponent,"CMTPFSExclusionMgr");)
-
 EXPORT_C CMTPFSExclusionMgr::CMTPFSExclusionMgr(MMTPDataProviderFramework& aFramework) :
 	iFramework(aFramework), iOrder(CMTPMetaData::CompareTPathHash)
 	{
-	__FLOG_OPEN(KMTPSubsystem, KComponent);
 	}
 
 EXPORT_C CMTPFSExclusionMgr::~CMTPFSExclusionMgr()
 	{
-	__FLOG_CLOSE;
 	}
 	
 EXPORT_C TBool CMTPFSExclusionMgr::IsFolderAcceptedL(const TDesC& aPath, TUint32 aStorageId) const
@@ -45,7 +46,7 @@ EXPORT_C TBool CMTPFSExclusionMgr::IsFolderAcceptedL(const TDesC& aPath, TUint32
 	
 EXPORT_C TBool CMTPFSExclusionMgr::IsFileAcceptedL(const TDesC& aPath, TUint32 /*aStorageId*/) const
 	{
-	__FLOG(_L8("IsFileAcceptedL - Entry"));	
+	OstTraceFunctionEntry0( CMTPFSEXCLUSIONMGR_ISFILEACCEPTEDL_ENTRY );
 	
 	TBool accepted = ETrue;
 	TParsePtrC parse(aPath);
@@ -53,7 +54,7 @@ EXPORT_C TBool CMTPFSExclusionMgr::IsFileAcceptedL(const TDesC& aPath, TUint32 /
 	if (parse.ExtPresent())
 		{
 		accepted = IsExtensionValid(parse.Ext().Mid(1));
-		__FLOG_VA((_L8("IsExtensionValid = %d"), accepted));
+		OstTrace1( TRACE_NORMAL, DUP1_CMTPFSEXCLUSIONMGR_ISFILEACCEPTEDL, "IsExtensionValid = %d", accepted );
 		}
 	
     //[SP-Format-0x3002]
@@ -67,12 +68,14 @@ EXPORT_C TBool CMTPFSExclusionMgr::IsFileAcceptedL(const TDesC& aPath, TUint32 /
 			accepted = EFalse;
 			}
 		}
-	__FLOG_VA((_L8("Exit IsFileAcceptedL = %d"), accepted));
+	OstTrace1( TRACE_NORMAL, CMTPFSEXCLUSIONMGR_ISFILEACCEPTEDL, "IsFileAcceptedL = %d", accepted);
+	OstTraceFunctionExit0( CMTPFSEXCLUSIONMGR_ISFILEACCEPTEDL_EXIT );
 	return accepted;
 	}
 	
 EXPORT_C TBool CMTPFSExclusionMgr::IsPathAcceptedL(const TDesC& aPath, TUint32 aStorageId) const
 	{
+    OstTraceFunctionEntry0( CMTPFSEXCLUSIONMGR_ISPATHACCEPTEDL_ENTRY );
 
 	CMTPStorageMetaData* storageMetaData = (CMTPStorageMetaData *)& iFramework.StorageMgr().StorageL(aStorageId);
 	TBool accepted = EFalse;	
@@ -105,5 +108,7 @@ EXPORT_C TBool CMTPFSExclusionMgr::IsPathAcceptedL(const TDesC& aPath, TUint32 a
 			}
 		}
 		
+	OstTrace1( TRACE_NORMAL, CMTPFSEXCLUSIONMGR_ISPATHACCEPTEDL, "IsPathAcceptedL = %d", accepted);
+	OstTraceFunctionExit0( CMTPFSEXCLUSIONMGR_ISPATHACCEPTEDL_EXIT );
 	return accepted;
 	}

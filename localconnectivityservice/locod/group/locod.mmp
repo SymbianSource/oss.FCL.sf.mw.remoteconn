@@ -34,7 +34,6 @@ SOURCE        locodserviceman.cpp
 SOURCE        locodservice.cpp
 
 USERINCLUDE   ../inc
-USERINCLUDE   ../../inc ../../../inc 
 
 MW_LAYER_SYSTEMINCLUDE
 

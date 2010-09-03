@@ -23,10 +23,14 @@
 #include "cmtpobjectmgr.h"
 #include "cmtpdataprovider.h"
 #include "cmtpparserrouter.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpgetformatcapabilitiesTraces.h"
+#endif
+
 
 
 // Class constants.
-__FLOG_STMT(_LIT8(KComponent,"GetFormatCapabilityList");)
 
 
 /**
@@ -49,14 +53,13 @@ Destructor
 */ 
 CMTPGetFormatCapabilities::~CMTPGetFormatCapabilities()
     {
-    __FLOG(_L8("~CMTPGetFormatCapabilities - Entry"));
+    OstTraceFunctionEntry0( CMTPGETFORMATCAPABILITIES_CMTPGETFORMATCAPABILITIES_DES_ENTRY );
     
     iSingletons.Close();
     delete iCapabilityList;
     iTargetDps.Close();
-    
-    __FLOG(_L8("~CMTPGetFormatCapabilities - Exit"));
-    __FLOG_CLOSE;
+
+    OstTraceFunctionExit0( CMTPGETFORMATCAPABILITIES_CMTPGETFORMATCAPABILITIES_DES_EXIT );
     }
 
 CMTPGetFormatCapabilities::CMTPGetFormatCapabilities(MMTPDataProviderFramework& aFramework, MMTPConnection& aConnection):
@@ -67,18 +70,17 @@ CMTPRequestProcessor( aFramework, aConnection, 0, NULL )
 
 void CMTPGetFormatCapabilities::ConstructL()
     {
-    __FLOG_OPEN(KMTPSubsystem, KComponent);
-    __FLOG(_L8("ConstructL - Entry"));
+    OstTraceFunctionEntry0( CMTPGETFORMATCAPABILITIES_CONSTRUCTL_ENTRY );
     
     iSingletons.OpenL();
-    
-    __FLOG(_L8("ConstructL - Exit"));
+
+    OstTraceFunctionExit0( CMTPGETFORMATCAPABILITIES_CONSTRUCTL_EXIT );
     }
 
 
 void CMTPGetFormatCapabilities::ServiceL()
     {
-    __FLOG(_L8("ServiceL - Entry"));
+    OstTraceFunctionEntry0( CMTPGETFORMATCAPABILITIES_SERVICEL_ENTRY );
     
     delete iCapabilityList;
     iCapabilityList = CMTPTypeFormatCapabilityList::NewL();
@@ -90,17 +92,17 @@ void CMTPGetFormatCapabilities::ServiceL()
     router.RouteOperationRequestL(params, iTargetDps);
     iCurrentTarget = 0;
     Schedule(KErrNone);
-        
-    __FLOG(_L8("ServiceL - Exit"));
+    
+    OstTraceFunctionExit0( CMTPGETFORMATCAPABILITIES_SERVICEL_EXIT );
     }
 
 void CMTPGetFormatCapabilities::ProxyReceiveDataL(MMTPType& /*aData*/, const TMTPTypeRequest& /*aRequest*/, MMTPConnection& /*aConnection*/, TRequestStatus& /*aStatus*/)
     {
-    __FLOG(_L8("ProxyReceiveDataL - Entry"));
-    
+    OstTraceFunctionEntry0( CMTPGETFORMATCAPABILITIES_PROXYRECEIVEDATAL_ENTRY );
+
     Panic(EMTPWrongRequestPhase);
-    
-    __FLOG(_L8("ProxyReceiveDataL - Exit"));
+
+    OstTraceFunctionExit0( CMTPGETFORMATCAPABILITIES_PROXYRECEIVEDATAL_EXIT );
     }
 
 
@@ -110,8 +112,8 @@ void CMTPGetFormatCapabilities::ProxySendDataL(const MMTPType& aData, const TMTP
 void CMTPGetFormatCapabilities::ProxySendDataL(const MMTPType& aData, const TMTPTypeRequest& /*aRequest*/, MMTPConnection& /*aConnection*/, TRequestStatus& aStatus)
 #endif
     {
-    __FLOG(_L8("ProxySendDataL - Entry"));
-    
+    OstTraceFunctionEntry0( CMTPGETFORMATCAPABILITIES_PROXYSENDDATAL_ENTRY );
+
     __ASSERT_DEBUG(((iRequest == &aRequest) && (&iConnection == &aConnection)), Panic(EMTPNotSameRequestProxy));
     __ASSERT_DEBUG(aData.Type() == EMTPTypeFormatCapabilityListDataset, Panic(EMTPInvalidDataType));
     
@@ -130,7 +132,7 @@ void CMTPGetFormatCapabilities::ProxySendDataL(const MMTPType& aData, const TMTP
     TRequestStatus* status = &aStatus;
     User::RequestComplete(status, KErrNone);
     
-    __FLOG(_L8("ProxySendDataL - Exit"));
+    OstTraceFunctionExit0( CMTPGETFORMATCAPABILITIES_PROXYSENDDATAL_EXIT );
     }
 
 /**
@@ -148,14 +150,14 @@ void CMTPGetFormatCapabilities::ProxySendResponseL(const TMTPTypeResponse& aResp
 void CMTPGetFormatCapabilities::ProxySendResponseL(const TMTPTypeResponse& aResponse, const TMTPTypeRequest& /*aRequest*/, MMTPConnection& /*aConnection*/, TRequestStatus& aStatus)
 #endif
     {
-    __FLOG(_L8("ProxySendResponseL - Entry"));
+    OstTraceFunctionEntry0( CMTPGETFORMATCAPABILITIES_PROXYSENDRESPONSEL_ENTRY );
     
     __ASSERT_DEBUG(((iRequest == &aRequest) && (&iConnection == &aConnection)), Panic(EMTPNotSameRequestProxy));
     MMTPType::CopyL(aResponse, iResponse);
     TRequestStatus* status(&aStatus);
     User::RequestComplete(status, KErrNone);
     
-    __FLOG(_L8("ProxySendResponseL - Exit"));
+    OstTraceFunctionExit0( CMTPGETFORMATCAPABILITIES_PROXYSENDRESPONSEL_EXIT );
     }
 
 
@@ -171,8 +173,8 @@ void CMTPGetFormatCapabilities::ProxyTransactionCompleteL(const TMTPTypeRequest&
 void CMTPGetFormatCapabilities::ProxyTransactionCompleteL(const TMTPTypeRequest& /*aRequest*/, MMTPConnection& /*aConnection*/)
 #endif
     {
-    __FLOG(_L8("ProxyTransactionCompleteL - Entry"));
-        
+    OstTraceFunctionEntry0( CMTPGETFORMATCAPABILITIES_PROXYTRANSACTIONCOMPLETEL_ENTRY );
+     
     __ASSERT_DEBUG(((iRequest == &aRequest) && (&iConnection == &aConnection)), Panic(EMTPNotSameRequestProxy));
     TInt err((iResponse.Uint16(TMTPTypeResponse::EResponseCode) == EMTPRespCodeOK) ? KErrNone : KErrGeneral);    
     if (err == KErrNone)
@@ -181,27 +183,27 @@ void CMTPGetFormatCapabilities::ProxyTransactionCompleteL(const TMTPTypeRequest&
         }
     Schedule(err);
         
-    __FLOG(_L8("ProxyTransactionCompleteL - Exit"));
+    OstTraceFunctionExit0( CMTPGETFORMATCAPABILITIES_PROXYTRANSACTIONCOMPLETEL_EXIT );
     }
 
 
 void CMTPGetFormatCapabilities::SendResponseL(TUint16 aCode)
     {
-    __FLOG(_L8("SendResponseL - Entry"));
+    OstTraceFunctionEntry0( CMTPGETFORMATCAPABILITIES_SENDRESPONSEL_ENTRY );
         
     const TMTPTypeRequest& req(Request());
     iResponse.SetUint16(TMTPTypeResponse::EResponseCode, aCode);
     iResponse.SetUint32(TMTPTypeResponse::EResponseSessionID, req.Uint32(TMTPTypeRequest::ERequestSessionID));
     iResponse.SetUint32(TMTPTypeResponse::EResponseTransactionID, req.Uint32(TMTPTypeRequest::ERequestTransactionID));
     iFramework.SendResponseL(iResponse, req, Connection());
-        
-    __FLOG(_L8("SendResponseL - Exit"));
+
+    OstTraceFunctionExit0( CMTPGETFORMATCAPABILITIES_SENDRESPONSEL_EXIT );
     }
 
 void CMTPGetFormatCapabilities::RunL()
     {
-    __FLOG(_L8("RunL - Entry"));
-       
+    OstTraceFunctionEntry0( CMTPGETFORMATCAPABILITIES_RUNL_ENTRY );
+
     if (iStatus == KErrNone)
        {
        if (iCurrentTarget < iTargetDps.Count())   
@@ -219,17 +221,17 @@ void CMTPGetFormatCapabilities::RunL()
        {
        SendResponseL(iResponse.Uint16(TMTPTypeResponse::EResponseCode));
        }   
-        
-    __FLOG(_L8("RunL - Exit"));
+
+    OstTraceFunctionExit0( CMTPGETFORMATCAPABILITIES_RUNL_EXIT );
     }
         
 TInt CMTPGetFormatCapabilities::RunError(TInt /*aError*/)
     {
-    __FLOG(_L8("RunError - Entry"));
-    
+    OstTraceFunctionEntry0( CMTPGETFORMATCAPABILITIES_RUNERROR_ENTRY );
+
     TRAP_IGNORE(SendResponseL(EMTPRespCodeGeneralError));
-    
-    __FLOG(_L8("RunError - Exit"));
+
+    OstTraceFunctionExit0( CMTPGETFORMATCAPABILITIES_RUNERROR_EXIT );
     return KErrNone;
     }
             
@@ -240,12 +242,12 @@ completion code.
 */
 void CMTPGetFormatCapabilities::Schedule(TInt aError)
     {
-    __FLOG(_L8("Schedule - Entry"));
-    
+    OstTraceFunctionEntry0( CMTPGETFORMATCAPABILITIES_SCHEDULE_ENTRY );
+
     TRequestStatus* status = &iStatus;
     User::RequestComplete(status, aError);
     SetActive();
-    
-    __FLOG(_L8("Schedule - Exit"));
+
+    OstTraceFunctionExit0( CMTPGETFORMATCAPABILITIES_SCHEDULE_EXIT );
     }
 

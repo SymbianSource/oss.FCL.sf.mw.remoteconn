@@ -22,7 +22,6 @@
 #define CMTPPLAYBACKCOMMANDCHECKER_H_
 
 #include "cmtpplaybackcommand.h"
-#include "mtpdebug.h"
 
 class CMTPPlaybackControlImpl;
 
@@ -71,11 +70,6 @@ private:
     The handle of the owner
     */
     CMTPPlaybackControlImpl&     iMTPPlaybackControl;
-    
-    /**
-    FLOGGER debug trace member variable.
-     */
-    __FLOG_DECLARATION_MEMBER;
     };
     
 #endif /* CMTPPLAYBACKCOMMANDCHECKER_H_ */

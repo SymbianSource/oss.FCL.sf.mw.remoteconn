@@ -33,6 +33,12 @@
 #include "cmtpdeltadatamgr.h"
 #include <e32hashtab.h>
 #include "cmtpstoragemgr.h"
+#include "mtpdebug.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpobjectstoreTraces.h"
+#endif
+
 
 _LIT(KMTPDbDriveLocation, "c:");
 _LIT(KMTPBackSlash, "\\");
@@ -47,7 +53,6 @@ _LIT(KSQLCreateSuidIndexText,"CREATE INDEX SuidIndex on HandleStore (SuidHash)")
 _LIT(KSQLParentHandle, "ParentHandleIndex");
 _LIT(KSQLCreateParentHandleText,"CREATE INDEX ParentHandleIndex on HandleStore (ParentHandle)");
 _LIT(KMTPFormat, "MTP");
-__FLOG_STMT(_LIT8(KComponent,"MTPObjectStore");)
 const TInt KMaxLimitCommitInEnumeration = 1024;
 const TInt KMaxLimitCommitAfterEnumeration = 256;
 const TInt KMaxLimitCompactInEnumeration = 2048;
@@ -70,6 +75,10 @@ CMTPObjectStore::CSnapshotWorker* CMTPObjectStore::CSnapshotWorker::NewL(CMTPObj
 
     }
 
+CMTPObjectStore::CSnapshotWorker::~CSnapshotWorker()
+    {
+    Cancel();
+    }
 void CMTPObjectStore::CSnapshotWorker::RunL()
     {
     iObjectStore->CleanDBSnapshotL(iOnlyRoot);
@@ -139,7 +148,6 @@ CMTPObjectStore::~CMTPObjectStore()
 	iSingletons.Close();
 	iNonPersistentDPList.Close();
 	iEnumeratingCacheObjList.ResetAndDestroy();
-	__FLOG_CLOSE;
 	}
 
 /**
@@ -192,20 +200,23 @@ void CMTPObjectStore::MarkNonPersistentObjectsL(TUint aDataProviderId, TUint32)
 	TInt result = iNonPersistentDPList.InsertInOrder(aDataProviderId);
 	if(result != KErrAlreadyExists)
 		{
-		User::LeaveIfError(result);
+		LEAVEIFERROR(result,
+		        OstTrace1( TRACE_ERROR, CMTPOBJECTSTORE_MARKNONPERSISTENTOBJECTSL, "insert DpId %d into iNonPersistentDPList error!", aDataProviderId ));
 		}
 	}
 
 void CMTPObjectStore::MarkDPLoadedL(TUint aDataProviderId, TBool aFlag)
 	{
-	__FLOG(_L8("MarkDPFlafFalseL - Entry"));
+    OstTraceFunctionEntry0( CMTPOBJECTSTORE_MARKDPLOADEDL_ENTRY );
 	if (!aFlag)
 		{
 		_LIT(KSQLMarkfalgDPFalse, "UPDATE HandleStore SET DPFlag = %u WHERE DataProviderId = %u");
 		iSqlStatement.Format(KSQLMarkfalgDPFalse, aFlag, aDataProviderId);
-		User::LeaveIfError(iDatabase.Execute(iSqlStatement));
+		LEAVEIFERROR(iDatabase.Execute(iSqlStatement),
+		        OstTrace0( TRACE_ERROR, CMTPOBJECTSTORE_MARKDPLOADEDL, "UPDATE HandleStore SET DPFlag error!" ));
+		        
 		}
-	__FLOG(_L8("MarkNonPersistentObjectsL - Exit"));
+	OstTraceFunctionExit0( CMTPOBJECTSTORE_MARKDPLOADEDL_EXIT );
 	}
 
 TBool CMTPObjectStore::FilterObject(const RDbTable& aCurrRow,const TUint32 aStorageID,const TUint32 aFormatCode,const TUint32 aDpID) const
@@ -337,7 +348,8 @@ void CMTPObjectStore::CommitReservedObjectHandleL(CMTPObjectMetaData& aObject)
 	TUint32 handle = HandleL(suid);
 	if (handle != KMTPHandleNone)
 	    {
-	    __FLOG(_L8("CommitReserverd leave for duplicate suid."));
+	    OstTrace0(TRACE_ERROR, CMTPOBJECTSTORE_COMMITRESERVEDOBJECTHANDLEL,
+	            "CommitReserverd leave for duplicate suid.");
 	    User::Leave(KErrAlreadyExists);
 	    }
 	TUint32 suidHash = DefaultHash::Des16(suid);
@@ -435,7 +447,8 @@ void CMTPObjectStore::DBUpdateFailRecover(TAny* aTable)
 
 void CMTPObjectStore::InsertObjectL(CMTPObjectMetaData& aObject)
 	{
-	__FLOG(_L8("InsertObjectL - Entry"));
+    OstTraceFunctionEntry0( CMTPOBJECTSTORE_INSERTOBJECTL_ENTRY );
+
 	iCachedHandle = 0;
 	iCachedSuidHash = 0;
 	TBool needToInsert = EFalse;
@@ -445,6 +458,7 @@ void CMTPObjectStore::InsertObjectL(CMTPObjectMetaData& aObject)
 	if ((aObject.DesC(CMTPObjectMetaData::ESuid)).Length() > KMaxFileName)
 	{
 	// The length of object uid should not excceeds KMaxFileName
+	OstTrace0( TRACE_ERROR, DUP4_CMTPOBJECTSTORE_INSERTOBJECTL, "The length of object uid excceeds KMaxFileName" );
 	User::Leave( KErrBadName );
 	}
 
@@ -492,7 +506,7 @@ void CMTPObjectStore::InsertObjectL(CMTPObjectMetaData& aObject)
 				delete iEnumeratingCacheObjList[found];
 				iEnumeratingCacheObjList.Remove(found);
 				}
-			__FLOG_VA(_L8("Found in Snapshot"));
+			OstTrace0(TRACE_NORMAL, CMTPOBJECTSTORE_INSERTOBJECTL, "Found in Snapshot");
 			}
 		else
 			{//This is a totally new object. insert it after check the db to prevent user wrong operation
@@ -514,9 +528,10 @@ void CMTPObjectStore::InsertObjectL(CMTPObjectMetaData& aObject)
 					}
 				CleanupStack::PopAndDestroy(object);
 				}
-			__FLOG_VA(_L8("Not Found in Snapshot"));
+			OstTrace0(TRACE_NORMAL, DUP1_CMTPOBJECTSTORE_INSERTOBJECTL, "Not Found in Snapshot");
 			}
-		__FLOG_VA((_L8("InsertObjectL Under enmueration, needUpdateOwner %d needToInsert %d"), needUpdateOwner, needToInsert));
+		OstTraceExt2(TRACE_NORMAL, DUP2_CMTPOBJECTSTORE_INSERTOBJECTL, 
+		        "InsertObjectL Under enmueration, needUpdateOwner %d needToInsert %d", needUpdateOwner, needToInsert);
 		}
 	else
 		{
@@ -524,11 +539,13 @@ void CMTPObjectStore::InsertObjectL(CMTPObjectMetaData& aObject)
 		if (handle != KMTPHandleNone)
 			{
 				//Leaves if id already exists in suid map table 
+            OstTrace1( TRACE_ERROR, DUP5_CMTPOBJECTSTORE_INSERTOBJECTL, "id %d already exists in suid map table", handle );
 			User::Leave(KErrAlreadyExists);
 			}
 		// dp is not enumerating, do a plain insert
 		needToInsert = ETrue;
-		__FLOG_VA((_L8("InsertObjectL After enmueration, needUpdateOwner %d needToInsert %d"), needUpdateOwner, needToInsert));
+        OstTraceExt2(TRACE_NORMAL, DUP3_CMTPOBJECTSTORE_INSERTOBJECTL, 
+                "InsertObjectL After enmueration, needUpdateOwner %d needToInsert %d", needUpdateOwner, needToInsert);		
 		}
 		
 	if (needToInsert)//needToInsert and needUpdateOwner can't be true at same time
@@ -584,7 +601,7 @@ void CMTPObjectStore::InsertObjectL(CMTPObjectMetaData& aObject)
 			}
 		}
 
-	__FLOG(_L8("InsertObjectL - Exit"));
+	OstTraceFunctionExit0( CMTPOBJECTSTORE_INSERTOBJECTL_EXIT );
 	}
 
 void CMTPObjectStore::IncTranOpsNumL()
@@ -595,7 +612,8 @@ void CMTPObjectStore::IncTranOpsNumL()
 		CommitTransactionL();
 		if (iTransactionOps % iMaxCompactLimit == 0)
 			{
-			User::LeaveIfError(iDatabase.Compact());
+			LEAVEIFERROR(iDatabase.Compact(),
+			        OstTrace0( TRACE_ERROR, CMTPOBJECTSTORE_INCTRANOPSNUML, "database compact error!" ));    
 			}
 		BeginTransactionL();
 		}
@@ -605,18 +623,21 @@ void CMTPObjectStore::BeginTransactionL()
 	{
 	if (!iDatabase.InTransaction())
 		{
-		User::LeaveIfError(iDatabase.Begin());
+		LEAVEIFERROR(iDatabase.Begin(),
+		        OstTrace0( TRACE_ERROR, CMTPOBJECTSTORE_BEGINTRANSACTIONL, "database begin error!" ));
 		}
 	}
 
 void CMTPObjectStore::CommitTransactionL()
 	{
-	__FLOG(_L8("CommitTransactionL Entry"));
+	OstTraceFunctionEntry0( CMTPOBJECTSTORE_COMMITTRANSACTIONL_ENTRY );
 	if (iDatabase.InTransaction())
 		{
-		User::LeaveIfError(iDatabase.Commit());
+		LEAVEIFERROR(iDatabase.Commit(),
+		        OstTrace0( TRACE_ERROR, CMTPOBJECTSTORE_COMMITTRANSACTIONL, "database commit error!" ));
+		        
 		}
-	__FLOG(_L8("CommitTransactionL Exit"));
+	OstTraceFunctionExit0( CMTPOBJECTSTORE_COMMITTRANSACTIONL_EXIT );
 	}
 
 void CMTPObjectStore::InsertObjectsL(RPointerArray<CMTPObjectMetaData>& aObjects)
@@ -641,7 +662,7 @@ void CMTPObjectStore::ModifyObjectL(const CMTPObjectMetaData& aObject)
 		TUint32 handle2 = HandleL(suid);
 		if (handle2 != KMTPHandleNone && handle2 != handle)
 		    {
-		    __FLOG(_L8("ModifyObjectL leave for duplicate suid."));
+		    OstTrace0(TRACE_ERROR, CMTPOBJECTSTORE_MODIFYOBJECTL, "ModifyObjectL leave for duplicate suid.");
 		    User::Leave(KErrAlreadyExists); 
 		    }
 		
@@ -684,6 +705,7 @@ void CMTPObjectStore::ModifyObjectL(const CMTPObjectMetaData& aObject)
 		}
 	else
 		{
+        OstTrace1( TRACE_ERROR, DUP1_CMTPOBJECTSTORE_MODIFYOBJECTL, "LocateByHandleL failed for handle %d", handle );
 		User::Leave(KErrNotFound);
 		}
 	}
@@ -735,6 +757,7 @@ const TPtrC CMTPObjectStore::ObjectSuidL(TUint32 aHandle) const
 	//iBatched owns the memory of Suid ?
 	if (!LocateByHandleL(aHandle))
 		{
+        OstTrace1( TRACE_ERROR, CMTPOBJECTSTORE_OBJECTSUIDL, "LocateByHandleL failed for handle %d", aHandle );
 		User::Leave(KErrNotFound);
 		}
     DbColReadStreamL(iBatched, EObjectStoreSUID, iSuidBuf);
@@ -745,6 +768,7 @@ TMTPTypeUint128 CMTPObjectStore::PuidL(TUint32 aHandle)
 	{
 	if (!LocateByHandleL(aHandle))
 		{
+        OstTrace1( TRACE_ERROR, CMTPOBJECTSTORE_PUIDL_TUINT32, "LocateByHandleL failed for handle %d", aHandle );
 		User::Leave(KErrNotFound);
 		}
 	TUint64 highHalfPOUID = static_cast<TUint64> (iBatched.ColInt64(EObjectStorePOUID));
@@ -760,6 +784,7 @@ TMTPTypeUint128 CMTPObjectStore::PuidL(const TDesC& aSuid)
 	{
 	if (!LocateBySuidL(aSuid))
 		{
+        OstTraceExt1( TRACE_ERROR, CMTPOBJECTSTORE_PUIDL_TDESC, "LocateByHandleL failed for suid %S", aSuid );
 		User::Leave(KErrNotFound);
 		}
 	TUint64 highHalfPOUID = static_cast<TUint64> (iBatched_SuidHashID.ColInt64(EObjectStorePOUID));
@@ -773,7 +798,9 @@ TMTPTypeUint128 CMTPObjectStore::PuidL(const TDesC& aSuid)
 
 void CMTPObjectStore::RemoveObjectL(const TMTPTypeUint32& aHandle)
     {
-    __FLOG_VA((_L8("RemoveObjectL Entry Handle = 0x%x"), aHandle.Value()));
+    OstTraceFunctionEntry0( CMTPOBJECTSTORE_REMOVEOBJECTL_ENTRY );
+    OstTrace1(TRACE_NORMAL, CMTPOBJECTSTORE_REMOVEOBJECTL, 
+            "Handle = 0x%x", aHandle.Value());
     if (LocateByHandleL(aHandle.Value()))
         {
         if (iSingletons.DpController().EnumerateState() != CMTPDataProviderController::EEnumeratedFulllyCompleted &&
@@ -786,10 +813,10 @@ void CMTPObjectStore::RemoveObjectL(const TMTPTypeUint32& aHandle)
         iCachedHandle = 0;
         iReferenceMgr->RemoveReferencesL(aHandle.Value());
         iBatched.DeleteL();
-        __FLOG(_L8("RemoveObjectL From iBacthed"));
+        OstTrace0(TRACE_NORMAL, DUP1_CMTPOBJECTSTORE_REMOVEOBJECTL, "RemoveObjectL From iBacthed");
         IncTranOpsNumL();
         }
-    __FLOG(_L8("RemoveObjectL Exit"));
+    OstTraceFunctionExit0( CMTPOBJECTSTORE_REMOVEOBJECTL_EXIT );
     }
 
 void CMTPObjectStore::RemoveObjectL(const TDesC& aSuid)
@@ -854,11 +881,12 @@ void CMTPObjectStore::UnreserveObjectHandleL(const CMTPObjectMetaData& /*aObject
  */
 void CMTPObjectStore::CleanL()
 	{
-	__FLOG(_L8("CleanL - Entry"));
+	OstTraceFunctionEntry0( CMTPOBJECTSTORE_CLEANL_ENTRY );
 	
 	RemoveUndefinedObjectsL();
 	Swi::RSisRegistrySession sisSession;
-	User::LeaveIfError(sisSession.Connect());
+	LEAVEIFERROR(sisSession.Connect(),
+	        OstTrace0( TRACE_ERROR, DUP1_CMTPOBJECTSTORE_CLEANL, "can't connect to sisSession!" ));
 	CleanupClosePushL(sisSession);
 
 	const RArray<TUint>& loadedDPIDs = iPkgIDStore->DPIDL();
@@ -871,7 +899,7 @@ void CMTPObjectStore::CleanL()
 			{
 			//DP is uninstalled, remove DP related data from database.
 			TUint thisID = loadedDPIDs[idx];
-			__FLOG_1(_L("Data provider[%d] is removed from device!"),thisID);
+			OstTrace1(TRACE_NORMAL, CMTPOBJECTSTORE_CLEANL, "Data provider[%d] is removed from device!", thisID);
 			unInstalledDpIDs.AppendL(thisID);
 			}
 		}
@@ -882,7 +910,7 @@ void CMTPObjectStore::CleanL()
 		}
 	CleanupStack::PopAndDestroy(&unInstalledDpIDs);
 	CleanupStack::PopAndDestroy(&sisSession);
-	__FLOG(_L8("CleanL - Exit"));
+	OstTraceFunctionExit0( CMTPOBJECTSTORE_CLEANL_EXIT );
 	}
 
 TUint CMTPObjectStore::ObjectOwnerId(const TMTPTypeUint32& aHandle) const
@@ -905,7 +933,6 @@ CMTPObjectStore::CMTPObjectStore()
  */
 void CMTPObjectStore::ConstructL()
 	{
-	__FLOG_OPEN(KMTPSubsystem, KComponent);
 	iMaxCommitLimit = KMaxLimitCommitInEnumeration;
 	iMaxCompactLimit = KMaxLimitCompactInEnumeration;
 	iSingletons.OpenL();
@@ -915,10 +942,15 @@ void CMTPObjectStore::ConstructL()
 	iReferenceMgr = CMTPReferenceMgr::NewL(*this);
 	iDPIDStore = CMTPDPIDStore::NewL(iDatabase);
 	iPkgIDStore = CMTPPkgIDStore::NewL(iDatabase);
-	User::LeaveIfError(iBatched.Open(iDatabase, KSQLHandleTableName, RDbRowSet::EUpdatable));
-	User::LeaveIfError(iBatched.SetIndex(KSQLHandleId));
-	User::LeaveIfError(iBatched_SuidHashID.Open(iDatabase, KSQLHandleTableName, RDbRowSet::EUpdatable));
-	User::LeaveIfError(iBatched_SuidHashID.SetIndex(KSQLSuidHash));
+	LEAVEIFERROR(iBatched.Open(iDatabase, KSQLHandleTableName, RDbRowSet::EUpdatable),
+	        OstTrace0( TRACE_ERROR, CMTPOBJECTSTORE_CONSTRUCTL, "iBatched open error!" ));  
+	LEAVEIFERROR(iBatched.SetIndex(KSQLHandleId),
+	        OstTrace0( TRACE_ERROR, DUP1_CMTPOBJECTSTORE_CONSTRUCTL, "set index for iBatched error!" ));
+	LEAVEIFERROR(iBatched_SuidHashID.Open(iDatabase, KSQLHandleTableName, RDbRowSet::EUpdatable),
+	        OstTrace0( TRACE_ERROR, DUP2_CMTPOBJECTSTORE_CONSTRUCTL, "iBatched_SuidHashID open error!" ));
+	LEAVEIFERROR(iBatched_SuidHashID.SetIndex(KSQLSuidHash),
+	        OstTrace0( TRACE_ERROR, DUP3_CMTPOBJECTSTORE_CONSTRUCTL, "set index for iBatched_SuidHashID error!"));
+
 	iHandleAllocator = CMTPHandleAllocator::NewL(*this);
 	iSentinal = CEnumertingCacheItem::NewL(0, 0, 0, 0, 0, 0);
 	BeginTransactionL();
@@ -972,7 +1004,9 @@ void CMTPObjectStore::CreateDbL(const TDesC& aFileName)
 	{
 	BaflUtils::EnsurePathExistsL(iSingletons.Fs(), aFileName);
 
-	User::LeaveIfError(iDatabase.Replace(iSingletons.Fs(), aFileName, KMTPFormat));
+	LEAVEIFERROR(iDatabase.Replace(iSingletons.Fs(), aFileName, KMTPFormat),
+	        OstTrace0( TRACE_ERROR, CMTPOBJECTSTORE_CREATEDBL, " a new non-secure database create error!" ));
+	        
 	// Create table and index
 	CreateHandleTableL();
 	CreateHandleIndexL();
@@ -1012,7 +1046,8 @@ void CMTPObjectStore::CreateHandleTableL()
 	{
 	if (!DBUtility::IsTableExistsL(iDatabase, KSQLHandleTableName))
 		{
-		User::LeaveIfError(iDatabase.Execute(KSQLCreateHandleTableText));
+		LEAVEIFERROR(iDatabase.Execute(KSQLCreateHandleTableText),
+		        OstTrace0( TRACE_ERROR, CMTPOBJECTSTORE_CREATEHANDLETABLEL, "TABLE HandleStore create failed!" ));
 		}
 	}
 
@@ -1025,21 +1060,25 @@ void CMTPObjectStore::CreateHandleIndexL()
 		{
 		if (!DBUtility::IsIndexExistsL(iDatabase, KSQLHandleTableName, KSQLHandleId))
 			{
-			User::LeaveIfError(iDatabase.Execute(KSQLCreateHandleIndexText));
+			LEAVEIFERROR(iDatabase.Execute(KSQLCreateHandleIndexText),
+			        OstTrace0( TRACE_ERROR, CMTPOBJECTSTORE_CREATEHANDLEINDEXL, "INDEX HandleIndex on HandleStore create failed!" ));
 			}
 
 		if (!DBUtility::IsIndexExistsL(iDatabase, KSQLHandleTableName, KSQLSuidHash))
 			{
-			User::LeaveIfError(iDatabase.Execute(KSQLCreateSuidIndexText));
+			LEAVEIFERROR(iDatabase.Execute(KSQLCreateSuidIndexText),
+			        OstTrace0( TRACE_ERROR, DUP1_CMTPOBJECTSTORE_CREATEHANDLEINDEXL, "INDEX SuidIndex on HandleStore create failed!" ));
 			}
 
 		if (!DBUtility::IsIndexExistsL(iDatabase, KSQLHandleTableName, KSQLParentHandle))
 			{
-			User::LeaveIfError(iDatabase.Execute(KSQLCreateParentHandleText));
+			LEAVEIFERROR(iDatabase.Execute(KSQLCreateParentHandleText),
+			        OstTrace0( TRACE_ERROR, DUP2_CMTPOBJECTSTORE_CREATEHANDLEINDEXL, "INDEX ParentHandleIndex on HandleStore create failed!" ));
 			}
 		}
 	else
 		{
+        OstTrace0( TRACE_ERROR, DUP3_CMTPOBJECTSTORE_CREATEHANDLEINDEXL, "HandleStore table doesn't exist" );
 		User::Leave(KErrNotFound);
 		}
 	}
@@ -1068,17 +1107,18 @@ void CMTPObjectStore::RestorePersistentObjectsL(TUint)
 
 TBool CMTPObjectStore::LocateByHandleL(const TUint aHandle, const TBool aReadTable /*default = ETrue*/) const
 	{
-	__FLOG_VA((_L8("LocateByHandleL - Entry aHandle 0x%x"), aHandle));
+    OstTraceFunctionEntry1( CMTPOBJECTSTORE_LOCATEBYHANDLEL_ENTRY, this );    
+	OstTrace1(TRACE_NORMAL, CMTPOBJECTSTORE_LOCATEBYHANDLEL, "aHandle 0x%x", aHandle);
 	TBool result = EFalse;
 	if(IsInvalidHandle(aHandle))
 		{
-		__FLOG_VA((_L8("LocateByHandleL - Exit result 0x%x"), result));
+		OstTraceFunctionExitExt( CMTPOBJECTSTORE_LOCATEBYHANDLEL_EXIT, this, result );
 		return result;
 		}
 	
 	if (iCachedHandle == aHandle)
 		{
-		__FLOG(_L8("CacheHit"));
+		OstTrace0(TRACE_NORMAL, DUP1_CMTPOBJECTSTORE_LOCATEBYHANDLEL, "CacheHit");
 		result = ETrue;
 		}
 	else
@@ -1097,7 +1137,7 @@ TBool CMTPObjectStore::LocateByHandleL(const TUint aHandle, const TBool aReadTab
 		{
 		iBatched.GetL();
 		}
-	__FLOG_VA((_L8("LocateByHandleL - Exit result 0x%x"), result));
+	OstTraceFunctionExitExt( DUP1_CMTPOBJECTSTORE_LOCATEBYHANDLEL_EXIT, this, result );
 	return result;
 	}
 
@@ -1271,10 +1311,12 @@ void CMTPObjectStore::EstablishDBSnapshotL(TUint32 aStorageId)
     //2. FileDP will san the whole file system, and will try to enumerate all of the objects(might on behalf of another DP) if the objects is still not
     // in the object store after all other DP finish its enumeration.
     //3. Then notify the related DP about the newly added objects by notification API;
-    __FLOG(_L8("EstablishDBSnapshotL - Entry"));
+    OstTraceFunctionEntry0( CMTPOBJECTSTORE_ESTABLISHDBSNAPSHOTL_ENTRY );
+    
     RDbTable temp;
     CleanupClosePushL(temp);
-    User::LeaveIfError(temp.Open(iDatabase, KSQLHandleTableName, RDbRowSet::EUpdatable));
+    LEAVEIFERROR(temp.Open(iDatabase, KSQLHandleTableName, RDbRowSet::EUpdatable),
+            OstTrace0( TRACE_ERROR, DUP1_CMTPOBJECTSTORE_ESTABLISHDBSNAPSHOTL, "HandleStore table open failed!" ));
     if(!iCacheExist)
         {
         TInt32 count = temp.CountL(RDbRowSet::EQuick);
@@ -1321,7 +1363,8 @@ void CMTPObjectStore::EstablishDBSnapshotL(TUint32 aStorageId)
             
             if(result != KErrAlreadyExists)
                 {
-                User::LeaveIfError(result);
+                LEAVEIFERROR(result,
+                        OstTrace1( TRACE_ERROR, DUP2_CMTPOBJECTSTORE_ESTABLISHDBSNAPSHOTL, "insert into iEnumeratingCacheObjList failed, error code %d", result));
                 CleanupStack::Pop(item);
                 }
             else
@@ -1335,7 +1378,9 @@ void CMTPObjectStore::EstablishDBSnapshotL(TUint32 aStorageId)
 
     CleanupStack::PopAndDestroy(&temp);
     iCacheExist = ETrue;
-    __FLOG_VA((_L8("EstablishDBSnapshotL - Exit build %d items"), iEnumeratingCacheObjList.Count()));
+    OstTrace1(TRACE_NORMAL, CMTPOBJECTSTORE_ESTABLISHDBSNAPSHOTL, 
+            "EstablishDBSnapshotL - Exit build %d items", iEnumeratingCacheObjList.Count());   
+    OstTraceFunctionExit0( CMTPOBJECTSTORE_ESTABLISHDBSNAPSHOTL_EXIT );
     }
 /*
  * All Objects enumeration complete
@@ -1352,7 +1397,8 @@ void CMTPObjectStore::ObjectsEnumComplete()
     iMaxCommitLimit = KMaxLimitCommitAfterEnumeration;
     iMaxCompactLimit = KMaxLimitCompactAfterEnumeration;
     CommitTransactionL();
-    User::LeaveIfError(iDatabase.Compact());
+    LEAVEIFERROR(iDatabase.Compact(),
+            OstTrace0( TRACE_ERROR, CMTPOBJECTSTORE_OBJECTSENUMCOMPLETE, "database compact failed!" ));  
     BeginTransactionL();
     }
 
@@ -1364,7 +1410,7 @@ void CMTPObjectStore::CleanDBSnapshotL(TBool aOnlyRoot/* = EFalse*/)
     //and then close the iEnumeratingCacheObjList to release the memory.
     //_LIT(KInsert, "CMTPObjectStore::CleanDBSnapshot");
     //volatile TTimer t(KInsert);
-    __FLOG(_L8("CleanDBSnapshotL Entry"));
+    OstTraceFunctionEntry0( CMTPOBJECTSTORE_CLEANDBSNAPSHOTL_ENTRY );
     if (iSnapshotWorker == NULL)
         {
         iSnapshotCleanPos = iEnumeratingCacheObjList.Count() - 1;
@@ -1380,7 +1426,8 @@ void CMTPObjectStore::CleanDBSnapshotL(TBool aOnlyRoot/* = EFalse*/)
             TInt rc = iNonPersistentDPList.FindInOrder(iEnumeratingCacheObjList[iSnapshotCleanPos]->iDpID);
             if (rc != KErrNotFound)
                 {//This is a non persistent DP.
-                __FLOG_VA((_L8("Remove Object 0x%x"), iEnumeratingCacheObjList[iSnapshotCleanPos]->iObjHandleId));
+                OstTrace1(TRACE_NORMAL, CMTPOBJECTSTORE_CLEANDBSNAPSHOTL, 
+                        "Remove Object 0x%x", iEnumeratingCacheObjList[iSnapshotCleanPos]->iObjHandleId);
                 RemoveObjectL(iEnumeratingCacheObjList[iSnapshotCleanPos]->iObjHandleId);
                 }
             }
@@ -1400,25 +1447,28 @@ void CMTPObjectStore::CleanDBSnapshotL(TBool aOnlyRoot/* = EFalse*/)
         iSnapshotWorker = NULL;
         }
     
-    __FLOG(_L8("CleanDBSnapshotL Exit"));
+    OstTraceFunctionExit0( CMTPOBJECTSTORE_CLEANDBSNAPSHOTL_EXIT );
     }
 
 void CMTPObjectStore::RemoveUndefinedObjectsL()
     {
-    __FLOG(_L8("CompactDBSnapshotL Entry"));
+    OstTraceFunctionEntry0( CMTPOBJECTSTORE_REMOVEUNDEFINEDOBJECTSL_ENTRY );
     
     if (iCleanUndefined)
         {
+        OstTraceFunctionExit0( CMTPOBJECTSTORE_REMOVEUNDEFINEDOBJECTSL_EXIT );
         return;
         }
     
     TInt32 count = 0;
     RDbTable temp;
     CleanupClosePushL(temp);
-    User::LeaveIfError(temp.Open(iDatabase, KSQLHandleTableName, RDbRowSet::EUpdatable));
+    LEAVEIFERROR(temp.Open(iDatabase, KSQLHandleTableName, RDbRowSet::EUpdatable),
+            OstTrace0( TRACE_ERROR, DUP1_CMTPOBJECTSTORE_REMOVEUNDEFINEDOBJECTSL, "HandleStore Table open error!" ));        
     count = temp.CountL(RDbRowSet::EQuick);
 
-    __FLOG_VA((_L8("Count before deletion %d "), count));
+    OstTrace1(TRACE_NORMAL, CMTPOBJECTSTORE_REMOVEUNDEFINEDOBJECTSL, 
+            "Count before deletion %d ", count);
     CleanupStack::PopAndDestroy(&temp);
     
     if (count > KMaxLimitSnapshotSize)
@@ -1426,13 +1476,14 @@ void CMTPObjectStore::RemoveUndefinedObjectsL()
         // Delete all object with undefined format
         _LIT(KSQLDeleteObjectText, "DELETE FROM HandleStore WHERE FormatCode = %u");
         iSqlStatement.Format(KSQLDeleteObjectText, EMTPFormatCodeUndefined);
-        User::LeaveIfError(iDatabase.Execute(iSqlStatement));    
+        LEAVEIFERROR(iDatabase.Execute(iSqlStatement),
+                OstTrace0( TRACE_ERROR, DUP2_CMTPOBJECTSTORE_REMOVEUNDEFINEDOBJECTSL, "DELETE FROM HandleStore failed!")); 
         }
     
     iCleanUndefined = ETrue;
 
     
-    __FLOG(_L8("CompactDBSnapshotL Exit"));    
+    OstTraceFunctionExit0( DUP1_CMTPOBJECTSTORE_REMOVEUNDEFINEDOBJECTSL_EXIT );
     }
 
 

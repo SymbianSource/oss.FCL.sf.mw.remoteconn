@@ -23,7 +23,6 @@
 
 #include "mtpplaybackcontrolconst.h"
 #include "mmtpplaybackinterface.h"
-#include "mtpdebug.h"
 
 class CMTPPlaybackControlImpl;
 
@@ -115,11 +114,6 @@ private:
     CMTPPlaybackControlImpl&     iMTPPlaybackControl;
     
     TBool                        iIfParepareArray;
-    
-    /**
-    FLOGGER debug trace member variable.
-     */
-    __FLOG_DECLARATION_MEMBER;
     };
 
 #endif /* CMTPPLAYBACKRESUMEHELPER_H_ */

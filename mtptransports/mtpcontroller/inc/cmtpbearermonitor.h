@@ -24,7 +24,6 @@
 #define CMTPBEARERMONITOR_H
 
 #include "locodserviceplugin.h"
-#include "mtpdebug.h"
 
 class CMTPControllerBase;
 
@@ -46,10 +45,6 @@ private:
     void ConstructL();
     
 private:
-    /**
-     * FLOGGER debug trace member variable.
-     */
-    __FLOG_DECLARATION_MEMBER_MUTABLE;
     
     RPointerArray< CMTPControllerBase > iMTPControllers;
     };

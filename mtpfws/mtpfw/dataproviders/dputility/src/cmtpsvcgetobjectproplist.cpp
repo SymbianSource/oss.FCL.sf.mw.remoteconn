@@ -23,9 +23,12 @@
 #include "mtpsvcdpconst.h"
 #include "mmtpservicedataprovider.h"
 #include "mmtpsvcobjecthandler.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpsvcgetobjectproplistTraces.h"
+#endif
 
-// Class constants.
-__FLOG_STMT(_LIT8(KComponent,"SvcGetObjPL");)
+
 
 EXPORT_C MMTPRequestProcessor* CMTPSvcGetObjectPropList::NewL(MMTPDataProviderFramework& aFramework, MMTPConnection& aConnection, MMTPServiceDataProvider& aDataProvider)
 	{
@@ -38,12 +41,11 @@ EXPORT_C MMTPRequestProcessor* CMTPSvcGetObjectPropList::NewL(MMTPDataProviderFr
 
 EXPORT_C CMTPSvcGetObjectPropList::~CMTPSvcGetObjectPropList()
 	{
-	__FLOG(_L8("~CMTPSvcGetObjectPropList - Entry"));
+	OstTraceFunctionEntry0( CMTPSVCGETOBJECTPROPLIST_CMTPSVCGETOBJECTPROPLIST_DES_ENTRY );
 	delete iPropertyList;
 	delete iReceivedObjectMetaData;
 	iObjectHandles.Close();
-	__FLOG(_L8("~CMTPSvcGetObjectPropList - Exit"));
-	__FLOG_CLOSE; 
+	OstTraceFunctionExit0( CMTPSVCGETOBJECTPROPLIST_CMTPSVCGETOBJECTPROPLIST_DES_EXIT );
 	}
 
 CMTPSvcGetObjectPropList::CMTPSvcGetObjectPropList(MMTPDataProviderFramework& aFramework, MMTPConnection& aConnection, MMTPServiceDataProvider& aDataProvider) :
@@ -56,15 +58,14 @@ CMTPSvcGetObjectPropList::CMTPSvcGetObjectPropList(MMTPDataProviderFramework& aF
 
 void CMTPSvcGetObjectPropList::ConstructL()
 	{
-	__FLOG_OPEN(KMTPSubsystem, KComponent);
-	__FLOG(_L8("ConstructL - Entry"));
+	OstTraceFunctionEntry0( CMTPSVCGETOBJECTPROPLIST_CONSTRUCTL_ENTRY );
 	iPropertyList = CMTPTypeObjectPropList::NewL();
-	__FLOG(_L8("ConstructL - Exit"));
+	OstTraceFunctionExit0( CMTPSVCGETOBJECTPROPLIST_CONSTRUCTL_EXIT );
 	}
 
 TMTPResponseCode CMTPSvcGetObjectPropList::CheckRequestL()
 	{
-	__FLOG(_L8("CheckRequestL - Entry"));
+	OstTraceFunctionEntry0( CMTPSVCGETOBJECTPROPLIST_CHECKREQUESTL_ENTRY );
 	TMTPResponseCode responseCode = CMTPRequestProcessor::CheckRequestL();
 	if (EMTPRespCodeOK == responseCode)
 		{
@@ -76,13 +77,15 @@ TMTPResponseCode CMTPSvcGetObjectPropList::CheckRequestL()
 		responseCode = CheckDepth();
 		}
 	
-	__FLOG_VA((_L8("CheckRequestL - Exit with responseCode = 0x%04X"), responseCode));
+    OstTrace1( TRACE_NORMAL, CMTPSVCGETOBJECTPROPLIST_CHECKREQUESTL, "Exit with responseCode = 0x%04X", responseCode );
+	OstTraceFunctionExit0( CMTPSVCGETOBJECTPROPLIST_CHECKREQUESTL_EXIT );
+
 	return responseCode;
 	}
 
 TMTPResponseCode CMTPSvcGetObjectPropList::CheckObjectHandleAndFormatL()
 	{
-	__FLOG(_L8("CheckObjectHandleAndFormatL - Entry"));
+	OstTraceFunctionEntry0( CMTPSVCGETOBJECTPROPLIST_CHECKOBJECTHANDLEANDFORMATL_ENTRY );
 	TMTPResponseCode responseCode = EMTPRespCodeOK; 
 	
 	TUint32 objectHandle = Request().Uint32(TMTPTypeRequest::ERequestParameter1);
@@ -99,7 +102,7 @@ TMTPResponseCode CMTPSvcGetObjectPropList::CheckObjectHandleAndFormatL()
 			if (iReceivedObjectMetaData->Uint(CMTPObjectMetaData::EDataProviderId) != iFramework.DataProviderId())
 				{
 				responseCode = EMTPRespCodeInvalidObjectHandle;
-				__FLOG(_L8("CheckRequestL - DataProviderId dismatch"));
+				OstTrace0( TRACE_WARNING, DUP1_CMTPSVCGETOBJECTPROPLIST_CHECKOBJECTHANDLEANDFORMATL, "CheckRequestL - DataProviderId dismatch" );
 				}
 			else
 				{
@@ -139,13 +142,15 @@ TMTPResponseCode CMTPSvcGetObjectPropList::CheckObjectHandleAndFormatL()
 				}
 			}
 		}
-	__FLOG_VA((_L8("CheckObjectHandleAndFormatL - Exit with response code = 0x%04X"), responseCode));
+    OstTrace1( TRACE_NORMAL, CMTPSVCGETOBJECTPROPLIST_CHECKOBJECTHANDLEANDFORMATL, "Exit with responseCode = 0x%04X", responseCode );
+	OstTraceFunctionExit0( CMTPSVCGETOBJECTPROPLIST_CHECKOBJECTHANDLEANDFORMATL_EXIT );
+
 	return responseCode;
 	}
 
 TMTPResponseCode CMTPSvcGetObjectPropList::CheckPropertyCodeForFormatL(TUint32 aFormatCode) const
 	{
-	__FLOG(_L8("CheckPropertyCodeForFormatL - Entry"));
+	OstTraceFunctionEntry0( CMTPSVCGETOBJECTPROPLIST_CHECKPROPERTYCODEFORFORMATL_ENTRY );
 	TMTPResponseCode responseCode = EMTPRespCodeOK;
 	if (iPropCode != KMTPObjectPropCodeAll && iPropCode != KMTPNotSpecified32)
 		{
@@ -154,7 +159,8 @@ TMTPResponseCode CMTPSvcGetObjectPropList::CheckPropertyCodeForFormatL(TUint32 a
 			responseCode = EMTPRespCodeInvalidObjectPropCode;
 			}
 		}
-	__FLOG_VA((_L8("CheckPropertyCodeForFormatL - Exit with response code = 0x%04X"), responseCode));
+    OstTrace1( TRACE_NORMAL, CMTPSVCGETOBJECTPROPLIST_CHECKPROPERTYCODEFORFORMATL, "Exit with responseCode = 0x%04X", responseCode );
+	OstTraceFunctionExit0( CMTPSVCGETOBJECTPROPLIST_CHECKPROPERTYCODEFORFORMATL_EXIT );
 	return responseCode;
 	}
 
@@ -164,7 +170,7 @@ Ensures that the requested object depth is one we support.
 */
 TMTPResponseCode CMTPSvcGetObjectPropList::CheckDepth() const
 	{
-	__FLOG(_L8("CheckDepth - Entry"));
+	OstTraceFunctionEntry0( CMTPSVCGETOBJECTPROPLIST_CHECKDEPTH_ENTRY );
 	TMTPResponseCode responseCode = EMTPRespCodeSpecificationByDepthUnsupported;
 	// Support  depth 0 or 1 or 0xFFFFFFFF
 	TUint32 handle = Request().Uint32(TMTPTypeRequest::ERequestParameter1);
@@ -173,13 +179,14 @@ TMTPResponseCode CMTPSvcGetObjectPropList::CheckDepth() const
 		{
 		responseCode = EMTPRespCodeOK; 
 		}
-	__FLOG_VA((_L8("CheckDepth - Exit with response code = 0x%04X"), responseCode));
+    OstTrace1( TRACE_NORMAL, CMTPSVCGETOBJECTPROPLIST_CHECKDEPTH, "Exit with responseCode = 0x%04X", responseCode );
+	OstTraceFunctionExit0( CMTPSVCGETOBJECTPROPLIST_CHECKDEPTH_EXIT );
 	return responseCode;
 	}
 
 void CMTPSvcGetObjectPropList::ServiceL()
 	{
-	__FLOG(_L8("ServiceL - Entry"));
+	OstTraceFunctionEntry0( CMTPSVCGETOBJECTPROPLIST_SERVICEL_ENTRY );
 	TUint32 handle(Request().Uint32(TMTPTypeRequest::ERequestParameter1));
 	TUint32 formatCode(Request().Uint32(TMTPTypeRequest::ERequestParameter2));
 	TUint32 depth(Request().Uint32(TMTPTypeRequest::ERequestParameter5));
@@ -206,7 +213,7 @@ void CMTPSvcGetObjectPropList::ServiceL()
 		GetObjectPropertyHelperL();
 		SendDataL(*iPropertyList);
 		}
-	__FLOG(_L8("ServiceL - Exit"));
+	OstTraceFunctionExit0( CMTPSVCGETOBJECTPROPLIST_SERVICEL_EXIT );
 	}
 
 /**
@@ -215,17 +222,19 @@ Handle the response phase of the current request
 */		
 TBool CMTPSvcGetObjectPropList::DoHandleResponsePhaseL()
 	{
-	__FLOG(_L8("DoHandleResponsePhaseL - Entry"));
+	OstTraceFunctionEntry0( CMTPSVCGETOBJECTPROPLIST_DOHANDLERESPONSEPHASEL_ENTRY );
 	TMTPResponseCode responseCode = (iCancelled ? EMTPRespCodeIncompleteTransfer : iResponseCode);
 	SendResponseL(responseCode);
-	__FLOG_VA((_L8("DoHandleResponsePhaseL - Exit with response code = 0x%04X"), responseCode));
+    OstTrace1( TRACE_NORMAL, CMTPSVCGETOBJECTPROPLIST_DOHANDLERESPONSEPHASEL, "Exit with responseCode = 0x%04X", responseCode );	
+	OstTraceFunctionExit0( CMTPSVCGETOBJECTPROPLIST_DOHANDLERESPONSEPHASEL_EXIT );
 	return EFalse;
 	}
 
 void CMTPSvcGetObjectPropList::RunL()
 	{
-	__FLOG(_L8("RunL - Entry"));
-	__FLOG_VA((_L8("the number of objects to be queried is %d, iHandleIndex is %d"), iObjectHandles.Count(), iHandleIndex));
+	OstTraceFunctionEntry0( CMTPSVCGETOBJECTPROPLIST_RUNL_ENTRY );
+	OstTraceExt2( TRACE_NORMAL, CMTPSVCGETOBJECTPROPLIST_RUNL, 
+	        "the number of objects to be queried is %d, iHandleIndex is %d", iObjectHandles.Count(), iHandleIndex);
 	
 	TInt count = iObjectHandles.Count();
 	const TUint32 granularity = iDataProvider.OperationGranularity();
@@ -245,7 +254,8 @@ void CMTPSvcGetObjectPropList::RunL()
 			// An unsupport object got from object mgr.
 			iResponseCode = EMTPRespCodeInvalidObjectHandle;
 			}
-		__FLOG_VA((_L8("Get a object property list, SUID:%S, response code: 0x%4x"), &(iReceivedObjectMetaData->DesC(CMTPObjectMetaData::ESuid)), iResponseCode));
+		OstTraceExt2( TRACE_NORMAL, DUP1_CMTPSVCGETOBJECTPROPLIST_RUNL, 
+		        "Get a object property list, SUID:%S, response code: 0x%4x",iReceivedObjectMetaData->DesC(CMTPObjectMetaData::ESuid), (TUint32)iResponseCode );
 		}
 	
 	if (iHandleIndex >= count)
@@ -256,14 +266,14 @@ void CMTPSvcGetObjectPropList::RunL()
 		{
 		CompleteSelf(KErrNone);
 		}
-	__FLOG(_L8("RunL - Exit")); 
+	OstTraceFunctionExit0( CMTPSVCGETOBJECTPROPLIST_RUNL_EXIT );
 	}
 
 TInt CMTPSvcGetObjectPropList::RunError(TInt aError)
 	{
-	__FLOG(_L8("RunError - Entry"));
+	OstTraceFunctionEntry0( CMTPSVCGETOBJECTPROPLIST_RUNERROR_ENTRY );
 	CompleteSelf(aError);
-	__FLOG(_L8("RunError - Exit")); 
+	OstTraceFunctionExit0( CMTPSVCGETOBJECTPROPLIST_RUNERROR_EXIT );
 	return KErrNone;
 	}
 
@@ -272,12 +282,12 @@ Complete myself
 */
 void CMTPSvcGetObjectPropList::CompleteSelf(TInt aError)
 	{
-	__FLOG(_L8("CompleteSelf - Entry"));
+	OstTraceFunctionEntry0( CMTPSVCGETOBJECTPROPLIST_COMPLETESELF_ENTRY );
 	SetActive();
 	TRequestStatus* status = &iStatus;
 	*status = KRequestPending;
 	User::RequestComplete(status, aError);
-	__FLOG(_L8("CompleteSelf - Exit"));
+	OstTraceFunctionExit0( CMTPSVCGETOBJECTPROPLIST_COMPLETESELF_EXIT );
 	}
 
 /**
@@ -285,9 +295,9 @@ Signal to the initiator that the deletion operation has finished with or without
 */
 void CMTPSvcGetObjectPropList::ProcessFinalPhaseL()
 	{
-	__FLOG(_L8("ProcessFinalPhaseL - Entry"));
+	OstTraceFunctionEntry0( CMTPSVCGETOBJECTPROPLIST_PROCESSFINALPHASEL_ENTRY );
 	SendDataL(*iPropertyList);
-	__FLOG(_L8("ProcessFinalPhaseL - Exit"));
+	OstTraceFunctionExit0( CMTPSVCGETOBJECTPROPLIST_PROCESSFINALPHASEL_EXIT );
 	}
 
 void CMTPSvcGetObjectPropList::GetObjectPropertyHelperL()

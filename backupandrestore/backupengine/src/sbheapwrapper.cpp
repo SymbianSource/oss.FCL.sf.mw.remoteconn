@@ -22,6 +22,11 @@
 
 #include "sbheapwrapper.h"
 #include "sbepanic.h"
+#include "OstTraceDefinitions.h"
+#include "sbtrace.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "sbheapwrapperTraces.h"
+#endif
 
 namespace conn
 	{
@@ -32,8 +37,10 @@ namespace conn
 	@return pointer to a newly created CHeapWrapper object
 	*/
 		{
+		OstTraceFunctionEntry0( CHEAPWRAPPER_NEWL_ENTRY );
 		CHeapWrapper* self = new (ELeave) CHeapWrapper();
 		
+		OstTraceFunctionExit0( CHEAPWRAPPER_NEWL_EXIT );
 		return self;
 		}
 	
@@ -45,8 +52,10 @@ namespace conn
 	@return reference to the descriptor stored on the global shared heap
 	*/
 		{
+		OstTraceFunctionEntry0( CHEAPWRAPPER_READBUFFERL_ENTRY );
 		if (Header(aChunk).LockedFlag())
 			{
+		    OstTrace0(TRACE_ERROR, CHEAPWRAPPER_READBUFFERL, "Leave: KErrInUse");
 			User::Leave(KErrInUse);
 			}
 
@@ -54,6 +63,7 @@ namespace conn
 			
 		iReadBuf = new (ELeave) TPtrC8(Buffer(aChunk));
 
+		OstTraceFunctionExit0( CHEAPWRAPPER_READBUFFERL_EXIT );
 		return *iReadBuf;
 		}
 		
@@ -65,8 +75,10 @@ namespace conn
 	@return reference to the descriptor stored on the global shared heap
 	*/
 		{
+		OstTraceFunctionEntry0( CHEAPWRAPPER_WRITEBUFFERL_ENTRY );
 		if (Header(aChunk).LockedFlag())
 			{
+		    OstTrace0(TRACE_ERROR, CHEAPWRAPPER_WRITEBUFFERL, "Leave: KErrInUse");
 			User::Leave(KErrInUse);
 			}
 
@@ -77,6 +89,7 @@ namespace conn
 		// Blank the descriptor as it's a write buffer
 		des.Zero();
 		
+		OstTraceFunctionExit0( CHEAPWRAPPER_WRITEBUFFERL_EXIT );
 		return des;
 		}
 		
@@ -99,6 +112,7 @@ namespace conn
 	@return KErrNone always.
 	*/
 		{
+		OstTraceFunctionEntry0( CHEAPWRAPPER_RESETHEAP_ENTRY );
 		TInt err = KErrNone;
 		TUint8* heapPtr = aChunk.Base();
 		
@@ -111,6 +125,7 @@ namespace conn
 		// placement new a new descriptor on the heap to initialise it
 		new (heapPtr + KDescriptorOffset) TPtr8(heapPtr + KDataOffset, 0, aChunk.Size() - KDataOffset);
 
+		OstTraceFunctionExit0( CHEAPWRAPPER_RESETHEAP_EXIT );
 		return err;
 		}
 
@@ -120,6 +135,7 @@ namespace conn
  	@return reference to the descriptor stored on the global shared heap
  	*/
   		{
+  		OstTraceFunctionEntry0( CHEAPWRAPPER_BUFFER_ENTRY );
   		TUint8* heapPtr = aChunk.Base();
 		
 		// Set the descriptor
@@ -128,6 +144,7 @@ namespace conn
 		const TInt maxLength = descriptor->MaxLength();
 		descriptor->Set(heapPtr + KDataOffset, length, maxLength);
 
+		OstTraceFunctionExit0( CHEAPWRAPPER_BUFFER_EXIT );
 		return *descriptor;
 		}
 		
@@ -136,12 +153,16 @@ namespace conn
 	Delete and NULL the read buffer if necessary
 	*/
 		{
+		OstTraceFunctionEntry0( CHEAPWRAPPER_CLEANREADBUFFER_ENTRY );
 		delete iReadBuf;
 		iReadBuf = NULL;
+		OstTraceFunctionExit0( CHEAPWRAPPER_CLEANREADBUFFER_EXIT );
 		}
 		
 	CHeapWrapper::~CHeapWrapper()
 		{
+		OstTraceFunctionEntry0( CHEAPWRAPPER_CHEAPWRAPPER_DES_ENTRY );
 		CleanReadBuffer();
+		OstTraceFunctionExit0( CHEAPWRAPPER_CHEAPWRAPPER_DES_EXIT );
 		}
 	}

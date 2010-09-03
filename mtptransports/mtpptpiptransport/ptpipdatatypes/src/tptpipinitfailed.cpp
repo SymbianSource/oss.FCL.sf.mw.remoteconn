@@ -19,7 +19,12 @@
 
 
 #include "tptpipinitfailed.h"
-#include "ptpipdatatypes.h"    
+#include "ptpipdatatypes.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "tptpipinitfailedTraces.h"
+#endif
+    
 // Dataset element metadata.
 const TPTPIPInitFailed::TElementInfo TPTPIPInitFailed::iElementMetaData[ENumElements] = 
     {
@@ -35,17 +40,23 @@ EXPORT_C TPTPIPInitFailed::TPTPIPInitFailed() :
     iElementInfo(iElementMetaData, ENumElements),
     iBuffer(KSize)
     {
+    OstTraceFunctionEntry0( TPTPIPINITFAILED_TPTPIPINITFAILED_ENTRY );
     SetBuffer(iBuffer);
+    OstTraceFunctionExit0( TPTPIPINITFAILED_TPTPIPINITFAILED_EXIT );
     }     
 
 EXPORT_C TUint TPTPIPInitFailed::Type() const
 	{
+	OstTraceFunctionEntry0( TPTPIPINITFAILED_TYPE_ENTRY );
+	OstTraceFunctionExit0( TPTPIPINITFAILED_TYPE_EXIT );
 	return EPTPIPTypeInitFail;
 	}
     
 EXPORT_C const TMTPTypeFlatBase::TElementInfo& TPTPIPInitFailed::ElementInfo(TInt aElementId) const
     {
+    OstTraceFunctionEntry0( TPTPIPINITFAILED_ELEMENTINFO_ENTRY );
     __ASSERT_DEBUG((aElementId < ENumElements), User::Invariant());
+    OstTraceFunctionExit0( TPTPIPINITFAILED_ELEMENTINFO_EXIT );
     return iElementInfo[aElementId];
     }
 

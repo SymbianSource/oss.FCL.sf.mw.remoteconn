@@ -18,9 +18,13 @@
 #include "cmtpsvcgetservicecapabilities.h"
 #include "mmtpservicedataprovider.h"
 #include "mmtpservicehandler.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpsvcgetservicecapabilitiesTraces.h"
+#endif
+
 
 // Class constants.
-__FLOG_STMT(_LIT8(KComponent,"SvcGetSvcCap");)
 
 EXPORT_C MMTPRequestProcessor* CMTPSvcGetServiceCapabilities::NewL(MMTPDataProviderFramework& aFramework, 
 													MMTPConnection& aConnection, 
@@ -35,10 +39,9 @@ EXPORT_C MMTPRequestProcessor* CMTPSvcGetServiceCapabilities::NewL(MMTPDataProvi
 
 EXPORT_C CMTPSvcGetServiceCapabilities::~CMTPSvcGetServiceCapabilities()
 	{
-	__FLOG(_L8("~CMTPSvcGetServiceCapabilities - Entry"));
+	OstTraceFunctionEntry0( CMTPSVCGETSERVICECAPABILITIES_CMTPSVCGETSERVICECAPABILITIES_ENTRY );
 	delete iServiceCapabilityList;
-	__FLOG(_L8("~CMTPSvcGetServiceCapabilities - Exit"));
-	__FLOG_CLOSE;
+	OstTraceFunctionExit0( CMTPSVCGETSERVICECAPABILITIES_CMTPSVCGETSERVICECAPABILITIES_EXIT );
 	}
 
 CMTPSvcGetServiceCapabilities::CMTPSvcGetServiceCapabilities(MMTPDataProviderFramework& aFramework, 
@@ -50,15 +53,14 @@ CMTPSvcGetServiceCapabilities::CMTPSvcGetServiceCapabilities(MMTPDataProviderFra
 
 void CMTPSvcGetServiceCapabilities::ConstructL()
 	{
-	__FLOG_OPEN(KMTPSubsystem, KComponent);
-	__FLOG(_L8("ConstructL - Entry")); 
+	OstTraceFunctionEntry0( CMTPSVCGETSERVICECAPABILITIES_CONSTRUCTL_ENTRY );
 	iServiceCapabilityList = CMTPTypeServiceCapabilityList::NewL();
-	__FLOG(_L8("ConstructL - Exit")); 
+	OstTraceFunctionExit0( CMTPSVCGETSERVICECAPABILITIES_CONSTRUCTL_EXIT );
 	}
 
 TMTPResponseCode CMTPSvcGetServiceCapabilities::CheckRequestL()
 {
-	__FLOG(_L8("CheckRequestL - Entry"));
+	OstTraceFunctionEntry0( CMTPSVCGETSERVICECAPABILITIES_CHECKREQUESTL_ENTRY );
 	TMTPResponseCode responseCode = CMTPRequestProcessor::CheckRequestL();
 	if (EMTPRespCodeOK == responseCode)
 		{
@@ -78,13 +80,14 @@ TMTPResponseCode CMTPSvcGetServiceCapabilities::CheckRequestL()
 				}
 			}
 		}
-	__FLOG_VA((_L8("CheckRequestL - Exit with response code = 0x%04X"), responseCode));
+    OstTrace1(TRACE_NORMAL, CMTPSVCGETSERVICECAPABILITIES_CHECKREQUESTL, "Exit with response code = 0x%04X", responseCode );	
+	OstTraceFunctionExit0( CMTPSVCGETSERVICECAPABILITIES_CHECKREQUESTL_EXIT );
 	return responseCode;
 }
 
 void CMTPSvcGetServiceCapabilities::ServiceL()
 	{
-	__FLOG(_L8("ServiceL - Entry"));
+	OstTraceFunctionEntry0( CMTPSVCGETSERVICECAPABILITIES_SERVICEL_ENTRY );
 	TUint32 formatCode = Request().Uint32(TMTPTypeRequest::ERequestParameter2);
 	if (KMTPFormatsAll == formatCode)
 		{
@@ -103,14 +106,15 @@ void CMTPSvcGetServiceCapabilities::ServiceL()
 		iResponseCode = (iDataProvider.ServiceHandler())->GetServiceCapabilityL(formatCode, *iServiceCapabilityList);
 		}
 	SendDataL(*iServiceCapabilityList);
-	__FLOG(_L8("ServiceL - Exit"));
+	OstTraceFunctionExit0( CMTPSVCGETSERVICECAPABILITIES_SERVICEL_EXIT );
 	}
 
 TBool CMTPSvcGetServiceCapabilities::DoHandleResponsePhaseL()
 	{
-	__FLOG(_L8("DoHandleResponsePhaseL - Entry"));
+	OstTraceFunctionEntry0( CMTPSVCGETSERVICECAPABILITIES_DOHANDLERESPONSEPHASEL_ENTRY );
 	TMTPResponseCode responseCode = (iCancelled ? EMTPRespCodeIncompleteTransfer : iResponseCode);
 	SendResponseL(responseCode);
-	__FLOG_VA((_L8("DoHandleResponsePhaseL - Exit with Response Code: 0x%x"), iResponseCode));
+    OstTrace1(TRACE_NORMAL, CMTPSVCGETSERVICECAPABILITIES_DOHANDLERESPONSEPHASEL, "Exit with response code = 0x%04X", responseCode );	
+	OstTraceFunctionExit0( CMTPSVCGETSERVICECAPABILITIES_DOHANDLERESPONSEPHASEL_EXIT );
 	return EFalse;
 	}

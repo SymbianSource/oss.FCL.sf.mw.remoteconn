@@ -20,10 +20,14 @@
 
 #include "mtpservicecommon.h"
 #include "cmtpserviceconfig.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpserviceconfigTraces.h"
+#endif
+
 
 
 // Class constants.
-__FLOG_STMT(_LIT8(KComponent,"ServiceConfigMgr");)
 _LIT(KMTPServiceCofigfile, "z:\\resource\\mtp\\services.rsc");
 
 
@@ -54,12 +58,11 @@ Destructor
 */    
 CMTPServiceConfig::~CMTPServiceConfig()
     {
-    __FLOG(_L8("CMTPServiceConfig::~CMTPServiceConfig() - Entry"));
+    OstTraceFunctionEntry0( CMTPSERVICECONFIG_CMTPSERVICECONFIG_DES_ENTRY );
         
     iSupportedServices.Close();
     iServiceInfos.ResetAndDestroy();
-    __FLOG(_L8("CMTPServiceConfig::~CMTPServiceConfig() - Exit"));
-    __FLOG_CLOSE;
+    OstTraceFunctionExit0( CMTPSERVICECONFIG_CMTPSERVICECONFIG_DES_EXIT );
     }
 
 TInt CMTPServiceConfig::SupportedServiceOrderFromAscending( const TSupportedService& aL, const TSupportedService& aR)
@@ -80,10 +83,8 @@ CMTPServiceConfig::CMTPServiceConfig( RFs& aRFs ):
 
 void CMTPServiceConfig::ConstructL( const TDesC& aResourceFilename )
     {
-    __FLOG_OPEN(KMTPSubsystem, KComponent);
-    __FLOG(_L8("CMTPServiceConfig::ConstructL - Entry"));
+    OstTraceFunctionEntry0( CMTPSERVICECONFIG_CONSTRUCTL_ENTRY );
     
-
     
     RResourceFile file;
     file.OpenL( iRFs, aResourceFilename );
@@ -101,13 +102,13 @@ void CMTPServiceConfig::ConstructL( const TDesC& aResourceFilename )
     CleanupStack::PopAndDestroy(buffer);
     CleanupStack::PopAndDestroy(&file);
     
-    __FLOG(_L8("CMTPServiceConfig::ConstructL - Exit"));
+    OstTraceFunctionExit0( CMTPSERVICECONFIG_CONSTRUCTL_EXIT );
     }
 
 
 void CMTPServiceConfig::InitializeL( TResourceReader& aReader )
     {
-    __FLOG(_L8("CMTPServiceConfig::InitializeL - Entry"));
+    OstTraceFunctionEntry0( CMTPSERVICECONFIG_INITIALIZEL_ENTRY );
     
     //read the supported services
     TUint serviceCount = aReader.ReadInt16();
@@ -122,18 +123,20 @@ void CMTPServiceConfig::InitializeL( TResourceReader& aReader )
         iSupportedServices.InsertInOrderL( TSupportedService( svcGUID, type, resID ), TLinearOrder<TSupportedService>(SupportedServiceOrderFromAscending) );      
         }
     
-    
-    __FLOG(_L8("CMTPServiceConfig::InitializeL - Exit"));
+
+    OstTraceFunctionExit0( CMTPSERVICECONFIG_INITIALIZEL_EXIT );
     }
 
 TBool CMTPServiceConfig::IsSupportedService( const TMTPTypeGuid& aServiceGUID ) const
     {   
+    OstTraceFunctionEntry0( CMTPSERVICECONFIG_ISSUPPORTEDSERVICE_ENTRY );
+    OstTraceFunctionExit0( CMTPSERVICECONFIG_ISSUPPORTEDSERVICE_EXIT );
     return !( KErrNotFound == iSupportedServices.FindInOrder( aServiceGUID, SupportedServiceOrderFromKeyAscending  ) );
     }
 
 void CMTPServiceConfig::LoadServiceDataL( const TMTPTypeGuid& aServiceGUID )
     {
-    __FLOG(_L8("CMTPServiceConfig::LoadServiceDataL - Entry"));
+    OstTraceFunctionEntry0( CMTPSERVICECONFIG_LOADSERVICEDATAL_ENTRY );
     
     RResourceFile file;
     file.OpenL( iRFs, KMTPServiceCofigfile );
@@ -199,13 +202,13 @@ void CMTPServiceConfig::LoadServiceDataL( const TMTPTypeGuid& aServiceGUID )
     CleanupStack::Pop(serviceInfo);
     CleanupStack::PopAndDestroy(buffer);
     CleanupStack::PopAndDestroy(&file);
-    
-    __FLOG(_L8("CMTPServiceConfig::LoadServiceDataL - Exit"));
+
+    OstTraceFunctionExit0( CMTPSERVICECONFIG_LOADSERVICEDATAL_EXIT );
     }
 
 void CMTPServiceConfig::StartReadUseServicesL(  RResourceFile& aResFile, const TUint aResID, CMTPServiceInfo& aServiceInfo )
     {
-    __FLOG(_L8("CMTPServiceConfig::StartReadUseServices - Entry"));
+    OstTraceFunctionEntry0( CMTPSERVICECONFIG_STARTREADUSESERVICESL_ENTRY );
     
     // Create the resource reader.
     HBufC8* buffer(aResFile.AllocReadLC( aResID ));
@@ -220,13 +223,13 @@ void CMTPServiceConfig::StartReadUseServicesL(  RResourceFile& aResFile, const T
         }
     
     CleanupStack::PopAndDestroy(buffer);
-    
-    __FLOG(_L8("CMTPServiceConfig::StartReadUseServices - Exit"));
+
+    OstTraceFunctionExit0( CMTPSERVICECONFIG_STARTREADUSESERVICESL_EXIT );
     }
 
 void CMTPServiceConfig::StartReadServicePropertyNamespacesL(  RResourceFile& aResFile, const TUint aResID, RArray<TMTPTypeGuid>& aNamespaces )
     {
-    __FLOG(_L8("CMTPServiceConfig::StartReadServicePropertyNamespacesL - Entry"));
+    OstTraceFunctionEntry0( CMTPSERVICECONFIG_STARTREADSERVICEPROPERTYNAMESPACESL_ENTRY );
         
     // Create the resource reader.
     HBufC8* buffer(aResFile.AllocReadLC( aResID ));
@@ -241,12 +244,12 @@ void CMTPServiceConfig::StartReadServicePropertyNamespacesL(  RResourceFile& aRe
         }
     
     CleanupStack::PopAndDestroy(buffer);
-    __FLOG(_L8("CMTPServiceConfig::StartReadServicePropertyNamespacesL - Exit"));
+    OstTraceFunctionExit0( CMTPSERVICECONFIG_STARTREADSERVICEPROPERTYNAMESPACESL_EXIT );
     }
 
 void CMTPServiceConfig::StartReadServicePropertiesL(  RResourceFile& aResFile, const TUint aNamespaceResID, const TUint aPropertiesResID, CMTPServiceInfo& aServiceInfo )
     {
-    __FLOG(_L8("CMTPServiceConfig::StartReadServicePropertyL - Entry"));
+    OstTraceFunctionEntry0( CMTPSERVICECONFIG_STARTREADSERVICEPROPERTIESL_ENTRY );
     
     //read namespaces
     RArray<TMTPTypeGuid> namespaces;
@@ -284,12 +287,12 @@ void CMTPServiceConfig::StartReadServicePropertiesL(  RResourceFile& aResFile, c
     CleanupStack::PopAndDestroy(buffer);
     CleanupStack::PopAndDestroy(&namespaces);
     
-    __FLOG(_L8("CMTPServiceConfig::StartReadServicePropertyL - Exit"));
+    OstTraceFunctionExit0( CMTPSERVICECONFIG_STARTREADSERVICEPROPERTIESL_EXIT );
     }
 
 void CMTPServiceConfig::StartReadServiceFormatsL(  RResourceFile& aResFile, const TUint aResID, CMTPServiceInfo& aServiceInfo )
     {
-    __FLOG(_L8("CMTPServiceConfig::StartReadServiceFormatL - Entry"));
+    OstTraceFunctionEntry0( CMTPSERVICECONFIG_STARTREADSERVICEFORMATSL_ENTRY );
     
     // Create the resource reader.
     HBufC8* buffer(aResFile.AllocReadLC( aResID ));
@@ -325,13 +328,13 @@ void CMTPServiceConfig::StartReadServiceFormatsL(  RResourceFile& aResFile, cons
     
     CleanupStack::PopAndDestroy(buffer);
     
-    __FLOG(_L8("CMTPServiceConfig::StartReadServiceFormatL - Exit"));
+    OstTraceFunctionExit0( CMTPSERVICECONFIG_STARTREADSERVICEFORMATSL_EXIT );
     }
 
 
 void CMTPServiceConfig::StartReadServiceMethodsL(  RResourceFile& aResFile, const TUint aResID,  CMTPServiceInfo& aServiceInfo )
     {
-    __FLOG(_L8("CMTPServiceConfig::StartReadServiceMethodL - Entry"));
+    OstTraceFunctionEntry0( CMTPSERVICECONFIG_STARTREADSERVICEMETHODSL_ENTRY );
     
     // Create the resource reader.
     HBufC8* buffer(aResFile.AllocReadLC( aResID ));
@@ -353,12 +356,12 @@ void CMTPServiceConfig::StartReadServiceMethodsL(  RResourceFile& aResFile, cons
     
     CleanupStack::PopAndDestroy(buffer);
     
-    __FLOG(_L8("CMTPServiceConfig::StartReadServiceMethodL - Exit"));
+    OstTraceFunctionExit0( CMTPSERVICECONFIG_STARTREADSERVICEMETHODSL_EXIT );
     }
 
 void CMTPServiceConfig::StartReadServiceEventsL(  RResourceFile& aResFile, const TUint aResID, CMTPServiceInfo& aServiceInfo )
     {
-    __FLOG(_L8("CMTPServiceConfig::StartReadServiceEventsL - Entry"));
+    OstTraceFunctionEntry0( CMTPSERVICECONFIG_STARTREADSERVICEEVENTSL_ENTRY );
       
     // Create the resource reader.
     HBufC8* buffer(aResFile.AllocReadLC( aResID ));
@@ -379,13 +382,13 @@ void CMTPServiceConfig::StartReadServiceEventsL(  RResourceFile& aResFile, const
         }
       
     CleanupStack::PopAndDestroy(buffer);
-    
-      __FLOG(_L8("CMTPServiceConfig::StartReadServiceEventsL - Exit"));
+
+    OstTraceFunctionExit0( CMTPSERVICECONFIG_STARTREADSERVICEEVENTSL_EXIT );
     }
 
 void CMTPServiceConfig::StartReadServiceDataBlockL(  RResourceFile& aResFile, const TUint aResID, CMTPServiceInfo& aServiceInfo )
     {
-    __FLOG(_L8("CMTPServiceConfig::StartReadServiceDataBlockL - Entry"));
+    OstTraceFunctionEntry0( CMTPSERVICECONFIG_STARTREADSERVICEDATABLOCKL_ENTRY );
     
     // Create the resource reader.
     HBufC8* buffer(aResFile.AllocReadLC( aResID ));
@@ -401,7 +404,7 @@ void CMTPServiceConfig::StartReadServiceDataBlockL(  RResourceFile& aResFile, co
         }
     
     CleanupStack::PopAndDestroy(buffer);
-    __FLOG(_L8("CMTPServiceConfig::StartReadServiceDataBlockL - Exit"));
+    OstTraceFunctionExit0( CMTPSERVICECONFIG_STARTREADSERVICEDATABLOCKL_EXIT );
     }
 
 CMTPServiceInfo* CMTPServiceConfig::ServiceInfo(const TMTPTypeGuid& aServiceGUID ) const
@@ -418,7 +421,7 @@ CMTPServiceInfo* CMTPServiceConfig::ServiceInfo(const TMTPTypeGuid& aServiceGUID
 
 CMTPServiceInfo* CMTPServiceConfig::ServiceInfo(const TUint aServiceID) const
 	{
-	__FLOG(_L8("CMTPServiceConfig::ServiceInfo - Entry"));
+	OstTraceFunctionEntry0( CMTPSERVICECONFIG_SERVICEINFO_ENTRY );
 	
 	TInt count = iServiceInfos.Count();
     for(TInt i(0); i < count; i++ )
@@ -427,7 +430,7 @@ CMTPServiceInfo* CMTPServiceConfig::ServiceInfo(const TUint aServiceID) const
             return iServiceInfos[i] ;
         }
     
-    __FLOG(_L8("CMTPServiceConfig::ServiceInfo - Exit"));
+    OstTraceFunctionExit0( CMTPSERVICECONFIG_SERVICEINFO_EXIT );
     return NULL;
 	
 	}
@@ -445,7 +448,10 @@ TUint CMTPServiceConfig::ServiceResourceIDL( const TMTPTypeGuid& aServiceGUID ) 
     {
     TInt index = iSupportedServices.FindInOrder( aServiceGUID, SupportedServiceOrderFromKeyAscending ) ;
     if( KErrNotFound == index)
+        {
+        OstTrace0( TRACE_ERROR, CMTPSERVICECONFIG_SERVICERESOURCEIDL, "serviceGUID not supported" );
         User::Leave( KErrNotFound );
+        }
     
     return iSupportedServices[index].iResourceID;
     }

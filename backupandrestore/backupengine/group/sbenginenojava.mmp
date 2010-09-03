@@ -54,6 +54,7 @@ SOURCE	sbeparserproxy.cpp
 SOURCE  sbepanic.cpp
 
 USERINCLUDE . ../inc
+USERINCLUDE . ../traces
 
 MW_LAYER_SYSTEMINCLUDE_SYMBIAN
 
@@ -62,18 +63,6 @@ LIBRARY sisregistryclient.lib backuprestore.lib
 LIBRARY xmlframework.lib charconv.lib edbms.lib
 LIBRARY apgrfx.lib apmime.lib estor.lib 
 LIBRARY ezlib.lib sbencrypt.lib cryptography.lib
-
-#ifdef __SBE_DISABLE_RELEASE_LOGGING
-
-    // Flogger will not be linked do this binary in UREL builds
-    DEBUGLIBRARY flogger.lib
-
-#else
-
-    // Flogger always statically linked to this binary.
-    LIBRARY flogger.lib
-
-#endif
 
 CAPABILITY ProtServ AllFiles WriteDeviceData ReadUserData
 

@@ -20,6 +20,11 @@
 #include <mtp/mtpprotocolconstants.h>
 #include "ptpipdatatypes.h"
 #include "tptpiprequestpayload.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "tptpiprequestpayloadTraces.h"
+#endif
+
 
 // Dataset element metadata.
 const TPTPIPTypeRequestPayload::TElementInfo
@@ -44,7 +49,9 @@ iBuffer(KSize),
 //iNumParameters(0)
 iMaxSetParam(0)
 	{
+	OstTraceFunctionEntry0( TPTPIPTYPEREQUESTPAYLOAD_TPTPIPTYPEREQUESTPAYLOAD_ENTRY );
 	SetBuffer (iBuffer );
+	OstTraceFunctionExit0( TPTPIPTYPEREQUESTPAYLOAD_TPTPIPTYPEREQUESTPAYLOAD_EXIT );
 	}
 
 /**
@@ -53,6 +60,7 @@ iMaxSetParam(0)
  */
 EXPORT_C TUint TPTPIPTypeRequestPayload::NumParameters() const
 	{
+	OstTraceFunctionEntry0( TPTPIPTYPEREQUESTPAYLOAD_NUMPARAMETERS_ENTRY );
 	//return iNumParameters;
 	//return (iMaxSetParam - EParameter1 + 1);
 	return (iMaxSetParam > 0 )? (iMaxSetParam - EParameter1 + 1) : 0;
@@ -75,6 +83,7 @@ EXPORT_C void TPTPIPTypeRequestPayload::CopyIn( const TMTPTypeFlatBase& aFrom,
 		TBool aIsNullParamValid, TUint aNumOfNullParam )
 
 	{
+	OstTraceFunctionEntry0( TPTPIPTYPEREQUESTPAYLOAD_COPYIN_ENTRY );
 	__ASSERT_DEBUG((aParamEndOffset >= aParamStartOffset && (aParamEndOffset - aParamStartOffset + 1) <= ENumElements), User::Invariant());
 	TUint32 parameter = 0;
 	TUint numberOfNullParam = 0;
@@ -93,6 +102,7 @@ EXPORT_C void TPTPIPTypeRequestPayload::CopyIn( const TMTPTypeFlatBase& aFrom,
 			}
 		}
 
+	OstTraceFunctionExit0( TPTPIPTYPEREQUESTPAYLOAD_COPYIN_EXIT );
 	}
 
 /**
@@ -109,11 +119,13 @@ EXPORT_C void TPTPIPTypeRequestPayload::CopyIn( const TMTPTypeFlatBase& aFrom,
 EXPORT_C void TPTPIPTypeRequestPayload::CopyOut( TMTPTypeFlatBase& aTo,
 		TUint aParamStartOffset, TUint aParamEndOffset )
 	{
+	OstTraceFunctionEntry0( TPTPIPTYPEREQUESTPAYLOAD_COPYOUT_ENTRY );
 	__ASSERT_DEBUG((aParamEndOffset >= aParamStartOffset && (aParamEndOffset - aParamStartOffset + 1) <= ENumElements), User::Invariant());
 	for (TUint s(EParameter1), t(aParamStartOffset); (s <= iMaxSetParam && t <= aParamEndOffset); s++, t++)
 		{
 		aTo.SetUint32((t), Uint32(s));
 		}
+	OstTraceFunctionExit0( TPTPIPTYPEREQUESTPAYLOAD_COPYOUT_EXIT );
 	}
 
 /**
@@ -121,8 +133,10 @@ EXPORT_C void TPTPIPTypeRequestPayload::CopyOut( TMTPTypeFlatBase& aTo,
  */
 EXPORT_C void TPTPIPTypeRequestPayload::Reset( )
 	{
+	OstTraceFunctionEntry0( TPTPIPTYPEREQUESTPAYLOAD_RESET_ENTRY );
 	TMTPTypeFlatBase::Reset();
 	iMaxSetParam = 0;
+	OstTraceFunctionExit0( TPTPIPTYPEREQUESTPAYLOAD_RESET_EXIT );
 	}
 
 /**
@@ -130,8 +144,10 @@ EXPORT_C void TPTPIPTypeRequestPayload::Reset( )
  */
 EXPORT_C void TPTPIPTypeRequestPayload::SetUint16(TInt aElementId, TUint16 aData)
 	{
+	OstTraceFunctionEntry0( TPTPIPTYPEREQUESTPAYLOAD_SETUINT16_ENTRY );
 	__ASSERT_DEBUG((aElementId == EOpCode), User::Invariant());
 	TMTPTypeFlatBase::SetUint16(aElementId, aData);
+	OstTraceFunctionExit0( TPTPIPTYPEREQUESTPAYLOAD_SETUINT16_EXIT );
 	}
 
 /**
@@ -139,6 +155,7 @@ EXPORT_C void TPTPIPTypeRequestPayload::SetUint16(TInt aElementId, TUint16 aData
  */
 EXPORT_C TUint16 TPTPIPTypeRequestPayload::Uint16(TInt aElementId) const
 	{
+	OstTraceFunctionEntry0( TPTPIPTYPEREQUESTPAYLOAD_UINT16_ENTRY );
 	__ASSERT_DEBUG((aElementId == EOpCode), User::Invariant());
 	return TMTPTypeFlatBase::Uint16(aElementId);
 	}
@@ -148,6 +165,7 @@ EXPORT_C TUint16 TPTPIPTypeRequestPayload::Uint16(TInt aElementId) const
  */
 EXPORT_C void TPTPIPTypeRequestPayload::SetUint32(TInt aElementId, TUint32 aData )
 	{
+	OstTraceFunctionEntry0( TPTPIPTYPEREQUESTPAYLOAD_SETUINT32_ENTRY );
 	__ASSERT_DEBUG((aElementId != EOpCode), User::Invariant());
 	if (aElementId >= EParameter1)
 		{
@@ -166,6 +184,7 @@ EXPORT_C void TPTPIPTypeRequestPayload::SetUint32(TInt aElementId, TUint32 aData
 
 	//  Set the element value.
 	TMTPTypeFlatBase::SetUint32(aElementId, aData);
+	OstTraceFunctionExit0( TPTPIPTYPEREQUESTPAYLOAD_SETUINT32_EXIT );
 	}
 
 /**
@@ -173,6 +192,7 @@ EXPORT_C void TPTPIPTypeRequestPayload::SetUint32(TInt aElementId, TUint32 aData
  */
 EXPORT_C TUint32 TPTPIPTypeRequestPayload::Uint32(TInt aElementId) const
 	{
+OstTraceFunctionEntry0( TPTPIPTYPEREQUESTPAYLOAD_UINT32_ENTRY );
 //	__ASSERT_DEBUG((aElementId < iMaxSetParam ), User::Invariant());
 //	__ASSERT_DEBUG((aElementId != EOpCode), User::Invariant());
 	return TMTPTypeFlatBase::Uint32(aElementId);
@@ -183,6 +203,7 @@ EXPORT_C TUint32 TPTPIPTypeRequestPayload::Uint32(TInt aElementId) const
  */
 EXPORT_C TInt TPTPIPTypeRequestPayload::FirstReadChunk(TPtrC8& aChunk) const
 	{
+	OstTraceFunctionEntry0( TPTPIPTYPEREQUESTPAYLOAD_FIRSTREADCHUNK_ENTRY );
 	TInt ret(TMTPTypeFlatBase::FirstReadChunk(aChunk));
 	TUint64 size(Size());
 
@@ -192,21 +213,27 @@ EXPORT_C TInt TPTPIPTypeRequestPayload::FirstReadChunk(TPtrC8& aChunk) const
 		aChunk.Set(aChunk.Left(size));
 		}
 
+	OstTraceFunctionExit0( TPTPIPTYPEREQUESTPAYLOAD_FIRSTREADCHUNK_EXIT );
 	return ret;
 	}
 
 EXPORT_C TUint64 TPTPIPTypeRequestPayload::Size() const
 	{
+	OstTraceFunctionEntry0( TPTPIPTYPEREQUESTPAYLOAD_SIZE_ENTRY );
 	return (NumParameters() * KMTPTypeUINT32Size + KHeaderElementsSize);
 	}
 
 EXPORT_C TUint TPTPIPTypeRequestPayload::Type() const
 	{
+	OstTraceFunctionEntry0( TPTPIPTYPEREQUESTPAYLOAD_TYPE_ENTRY );
+	OstTraceFunctionExit0( TPTPIPTYPEREQUESTPAYLOAD_TYPE_EXIT );
 	return EPTPIPTypeRequestPayload;
 	}
 
 EXPORT_C TBool TPTPIPTypeRequestPayload::CommitRequired() const
 	{
+	OstTraceFunctionEntry0( TPTPIPTYPEREQUESTPAYLOAD_COMMITREQUIRED_ENTRY );
+	OstTraceFunctionExit0( TPTPIPTYPEREQUESTPAYLOAD_COMMITREQUIRED_EXIT );
 	return ETrue;
 	}
 
@@ -215,6 +242,7 @@ Reset the value of the max set param.
  */
 EXPORT_C MMTPType* TPTPIPTypeRequestPayload::CommitChunkL(TPtr8& /*aChunk*/)
 	{
+OstTraceFunctionEntry0( TPTPIPTYPEREQUESTPAYLOAD_COMMITCHUNKL_ENTRY );
 //	iNumParameters = 0;
 
 	// Recalculate iNumParameters.
@@ -226,11 +254,14 @@ EXPORT_C MMTPType* TPTPIPTypeRequestPayload::CommitChunkL(TPtr8& /*aChunk*/)
 			iMaxSetParam = i;
 			}
 		}
+	OstTraceFunctionExit0( TPTPIPTYPEREQUESTPAYLOAD_COMMITCHUNKL_EXIT );
 	return NULL;
 	}
 
 EXPORT_C const TMTPTypeFlatBase::TElementInfo& TPTPIPTypeRequestPayload::ElementInfo(TInt aElementId) const
 	{
+	OstTraceFunctionEntry0( TPTPIPTYPEREQUESTPAYLOAD_ELEMENTINFO_ENTRY );
+	OstTraceFunctionExit0( TPTPIPTYPEREQUESTPAYLOAD_ELEMENTINFO_EXIT );
 	return iElementInfo[aElementId];
 	}
 

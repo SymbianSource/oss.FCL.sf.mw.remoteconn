@@ -32,7 +32,6 @@ SOURCE                  DunBtListen.cpp
 MW_LAYER_SYSTEMINCLUDE
 
 USERINCLUDE             ../inc/bt ../../utils/inc
-USERINCLUDE             ../../../inc
 
 LIBRARY                 euser.lib
 LIBRARY                 esock.lib

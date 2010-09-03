@@ -21,7 +21,6 @@
 #define CPTPIPTRANSPORT_H_
 
 #include "cmtptransportplugin.h"
-#include "mtpdebug.h"
 
 class CPTPIPConnection;
 
@@ -65,11 +64,6 @@ private : //Owned
 	The PTPIP device class connection
 	*/
 	CPTPIPConnection* iConnection;
-
-    /**
-    FLOGGER debug trace member variable.
-    */
-    __FLOG_DECLARATION_MEMBER;
   
 	};   
   

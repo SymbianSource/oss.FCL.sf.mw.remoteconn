@@ -21,6 +21,11 @@
 
 #include <e32std.h>
 #include "sbepanic.h"
+#include "OstTraceDefinitions.h"
+#include "sbtrace.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "sbepanicTraces.h"
+#endif
 
 namespace conn
 	{	
@@ -34,7 +39,9 @@ namespace conn
 	@panic aPanicCode The panic code passed in
 	*/	
 		{
+		OstTraceFunctionEntry0( _CONN_PANIC_ENTRY );
 		_LIT(KPanicString,"SBE:");
 		User::Panic(KPanicString,aPanicCode);
+		OstTraceFunctionExit0( _CONN_PANIC_EXIT );
 		}
 	}

@@ -32,11 +32,12 @@ CAPABILITY          CommDD PowerMgmt ReadDeviceData WriteDeviceData TrustedUI Pr
 
 MW_LAYER_SYSTEMINCLUDE_SYMBIAN
 
-USERINCLUDE         ../inc/ 
+USERINCLUDE         ../inc/
+USERINCLUDE         ../traces/ 
 USERINCLUDE         ../../ptpipdatatypes/inc
 USERINCLUDE			../../common/inc/
 USERINCLUDE         ../../../../mtpfws/mtpfw/transports/transportapi/inc
-USERINCLUDE         ../../../../mtpfws/mtpfw/common/inc
+USERINCLUDE         ../../../../mtpfws/mtpfw/common/inc ../traces
 
 
 SOURCEPATH 			../src/

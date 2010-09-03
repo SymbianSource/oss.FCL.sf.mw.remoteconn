@@ -26,6 +26,11 @@
 #include "mtppictbridgedpprocessor.h"
 #include "cmtppictbridgeenumerator.h"
 #include "ptpdef.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtppictbridgedpTraces.h"
+#endif
+
 
 LOCAL_D const TInt KArrayGranularity = 3;
 
@@ -59,11 +64,10 @@ CMTPPictBridgeDataProvider::CMTPPictBridgeDataProvider(TAny* aParams):
 //
 void CMTPPictBridgeDataProvider::ConstructL()
     {
-    __FLOG_OPEN(KMTPSubsystem, KComponent);
-    __FLOG(_L8(">> CMTPPictBridgeDataProvider::ConstructL"));   
+    OstTraceFunctionEntry0( CMTPPICTBRIDGEDATAPROVIDER_CONSTRUCTL_ENTRY ); 
     iPictBridgeEnumeratorP = CMTPPictBridgeEnumerator::NewL(Framework(), *this);
     iServerP = CPtpServer::NewL(Framework(), *this);
-    __FLOG(_L8("<< CMTPPictBridgeDataProvider::ConstructL"));
+    OstTraceFunctionExit0( CMTPPICTBRIDGEDATAPROVIDER_CONSTRUCTL_EXIT );
     }
 // --------------------------------------------------------------------------
 // Destructor
@@ -71,7 +75,7 @@ void CMTPPictBridgeDataProvider::ConstructL()
 //
 CMTPPictBridgeDataProvider::~CMTPPictBridgeDataProvider()
     {
-    __FLOG(_L8(">> ~CMTPPictBridgeDataProvider"));
+    OstTraceFunctionEntry0( CMTPPICTBRIDGEDATAPROVIDER_CMTPPICTBRIDGEDATAPROVIDER_DES_ENTRY );
 
     TUint count(iActiveProcessors.Count());
     while (count--)
@@ -83,8 +87,7 @@ CMTPPictBridgeDataProvider::~CMTPPictBridgeDataProvider()
     delete iPictBridgeEnumeratorP;
     delete iServerP;
 
-    __FLOG(_L8("<< ~CMTPPictBridgeDataProvider"));
-    __FLOG_CLOSE;
+    OstTraceFunctionExit0( CMTPPICTBRIDGEDATAPROVIDER_CMTPPICTBRIDGEDATAPROVIDER_DES_EXIT );
     }
 
 // --------------------------------------------------------------------------
@@ -93,9 +96,9 @@ CMTPPictBridgeDataProvider::~CMTPPictBridgeDataProvider()
 //
 void CMTPPictBridgeDataProvider::Cancel()
     {
-    __FLOG(_L8(">> CMTPPictBridgeDataProvider::Cancel"));
+    OstTraceFunctionEntry0( CMTPPICTBRIDGEDATAPROVIDER_CANCEL_ENTRY );
     // nothing to cancel
-    __FLOG(_L8("<< CMTPPictBridgeDataProvider::Cancel"));
+    OstTraceFunctionExit0( CMTPPICTBRIDGEDATAPROVIDER_CANCEL_EXIT );
     }
 // --------------------------------------------------------------------------
 // 
@@ -103,7 +106,7 @@ void CMTPPictBridgeDataProvider::Cancel()
 //
 void CMTPPictBridgeDataProvider::ProcessEventL(const TMTPTypeEvent& aEvent, MMTPConnection& aConnection)
     {
-    __FLOG(_L8(">> CMTPPictBridgeDataProvider::ProcessEventL"));    
+    OstTraceFunctionEntry0( CMTPPICTBRIDGEDATAPROVIDER_PROCESSEVENTL_ENTRY );
 
     TInt idx = LocateRequestProcessorL(aEvent, aConnection);
 
@@ -112,7 +115,7 @@ void CMTPPictBridgeDataProvider::ProcessEventL(const TMTPTypeEvent& aEvent, MMTP
         iActiveProcessors[idx]->HandleEventL(aEvent);
         }
 
-    __FLOG(_L8("<< CMTPPictBridgeDataProvider::ProcessEventL"));    
+    OstTraceFunctionExit0( CMTPPICTBRIDGEDATAPROVIDER_PROCESSEVENTL_EXIT );
     }
 // --------------------------------------------------------------------------
 // Process notifications from the initiator
@@ -120,7 +123,7 @@ void CMTPPictBridgeDataProvider::ProcessEventL(const TMTPTypeEvent& aEvent, MMTP
 //
 void CMTPPictBridgeDataProvider::ProcessNotificationL(TMTPNotification aNotification, const TAny* aParams)
     {
-    __FLOG(_L8(">> CMTPPictBridgeDataProvider::ProcessNotificationL"));    
+    OstTraceFunctionEntry0( CMTPPICTBRIDGEDATAPROVIDER_PROCESSNOTIFICATIONL_ENTRY );
     
     switch (aNotification)
         {
@@ -136,8 +139,8 @@ void CMTPPictBridgeDataProvider::ProcessNotificationL(TMTPNotification aNotifica
         // Ignore all other notifications.
         break;
         }
-
-    __FLOG(_L8("<< CMTPPictBridgeDataProvider::ProcessNotificationL"));    
+  
+    OstTraceFunctionExit0( CMTPPICTBRIDGEDATAPROVIDER_PROCESSNOTIFICATIONL_EXIT );
     }
 // --------------------------------------------------------------------------
 // Process requests from the initiator
@@ -145,7 +148,7 @@ void CMTPPictBridgeDataProvider::ProcessNotificationL(TMTPNotification aNotifica
 //
 void CMTPPictBridgeDataProvider::ProcessRequestPhaseL(TMTPTransactionPhase aPhase, const TMTPTypeRequest& aRequest, MMTPConnection& aConnection)
     {    
-    __FLOG(_L8(">> CMTPPictBridgeDataProvider::ProcessRequestPhaseL"));    
+    OstTraceFunctionEntry0( CMTPPICTBRIDGEDATAPROVIDER_PROCESSREQUESTPHASEL_ENTRY );   
 
     TInt idx = LocateRequestProcessorL(aRequest, aConnection);
     __ASSERT_DEBUG((idx != KErrNotFound), Panic(EMTPPictBridgeDpNoMatchingProcessor));
@@ -157,7 +160,8 @@ void CMTPPictBridgeDataProvider::ProcessRequestPhaseL(TMTPTransactionPhase aPhas
         iActiveProcessors.Remove(idx);
         }
 
-    __FLOG_VA((_L8("<< CMTPPictBridgeDataProvider::ProcessRequestPhaseL result=%d"), result));    
+    OstTrace1( TRACE_NORMAL, CMTPPICTBRIDGEDATAPROVIDER_PROCESSREQUESTPHASEL, "result=%d", result );
+    OstTraceFunctionExit0( CMTPPICTBRIDGEDATAPROVIDER_PROCESSREQUESTPHASEL_EXIT );
     }
 
 // --------------------------------------------------------------------------
@@ -166,11 +170,11 @@ void CMTPPictBridgeDataProvider::ProcessRequestPhaseL(TMTPTransactionPhase aPhas
 //
 void CMTPPictBridgeDataProvider::StartObjectEnumerationL(TUint32 aStorageId, TBool /*aPersistentFullEnumeration*/)
     {
-    __FLOG(_L8(">> CMTPPictBridgeDataProvider::StartObjectEnumerationL"));
+    OstTraceFunctionEntry0( CMTPPICTBRIDGEDATAPROVIDER_STARTOBJECTENUMERATIONL_ENTRY );
     
     iPictBridgeEnumeratorP->EnumerateObjectsL(aStorageId);
 
-    __FLOG(_L8("<< CMTPPictBridgeDataProvider::StartObjectEnumerationL"));
+    OstTraceFunctionExit0( CMTPPICTBRIDGEDATAPROVIDER_STARTOBJECTENUMERATIONL_EXIT );
     }
 
 // --------------------------------------------------------------------------
@@ -179,9 +183,9 @@ void CMTPPictBridgeDataProvider::StartObjectEnumerationL(TUint32 aStorageId, TBo
 //
 void CMTPPictBridgeDataProvider::StartStorageEnumerationL()
     {
-    __FLOG(_L8(">> CMTPPictBridgeDataProvider::StartStorageEnumerationL"));        
+    OstTraceFunctionEntry0( CMTPPICTBRIDGEDATAPROVIDER_STARTSTORAGEENUMERATIONL_ENTRY );      
     iPictBridgeEnumeratorP->EnumerateStoragesL();
-    __FLOG(_L8("<< CMTPPictBridgeDataProvider::StartStorageEnumerationL"));
+    OstTraceFunctionExit0( CMTPPICTBRIDGEDATAPROVIDER_STARTSTORAGEENUMERATIONL_EXIT );
     }
 // --------------------------------------------------------------------------
 // 
@@ -189,7 +193,8 @@ void CMTPPictBridgeDataProvider::StartStorageEnumerationL()
 //
 void CMTPPictBridgeDataProvider::Supported(TMTPSupportCategory aCategory, RArray<TUint>& aArray) const
     {   
-    __FLOG_VA((_L8(">> CMTPPictBridgeDataProvider::Supported %d"), aCategory));
+    OstTraceFunctionEntry0( CMTPPICTBRIDGEDATAPROVIDER_SUPPORTED_ENTRY );
+    OstTrace1(TRACE_NORMAL, CMTPPICTBRIDGEDATAPROVIDER_SUPPORTED, "aCategory: %d", aCategory);
     switch (aCategory) 
         {        
     case EEvents:
@@ -226,7 +231,7 @@ void CMTPPictBridgeDataProvider::Supported(TMTPSupportCategory aCategory, RArray
         // Unrecognised category, leave aArray unmodified.
         break;
         }
-    __FLOG(_L8("<< CMTPPictBridgeDataProvider::Supported"));
+    OstTraceFunctionExit0( CMTPPICTBRIDGEDATAPROVIDER_SUPPORTED_EXIT );
     }
 
 void CMTPPictBridgeDataProvider::SupportedL(TMTPSupportCategory aCategory, CDesCArray& /*aStrings*/) const
@@ -249,24 +254,26 @@ void CMTPPictBridgeDataProvider::SupportedL(TMTPSupportCategory aCategory, CDesC
 //
 void CMTPPictBridgeDataProvider::NotifyStorageEnumerationCompleteL()
     {
-    __FLOG(_L8(">> CMTPPictBridgeDataProvider::NotifyStorageEnumerationCompleteL"));    
-    Framework().StorageEnumerationCompleteL();
-    __FLOG(_L8("<< CMTPPictBridgeDataProvider::NotifyStorageEnumerationCompleteL"));    
+    OstTraceFunctionEntry0( CMTPPICTBRIDGEDATAPROVIDER_NOTIFYSTORAGEENUMERATIONCOMPLETEL_ENTRY );  
+    Framework().StorageEnumerationCompleteL(); 
+    OstTraceFunctionExit0( CMTPPICTBRIDGEDATAPROVIDER_NOTIFYSTORAGEENUMERATIONCOMPLETEL_EXIT );
     }
 
 // --------------------------------------------------------------------------
 // 
 // --------------------------------------------------------------------------
 //
-#ifdef __FLOG_ACTIVE
+#ifdef OST_TRACE_COMPILER_IN_USE
 void CMTPPictBridgeDataProvider::NotifyEnumerationCompleteL(TUint32 aStorageId, TInt aErr )
 #else
 void CMTPPictBridgeDataProvider::NotifyEnumerationCompleteL(TUint32 aStorageId, TInt /* aErr*/ )
 #endif
     {
-    __FLOG_VA((_L8(">> CMTPPictBridgeDataProvider::NotifyEnumerationCompletedL storage 0x%08X status %d"), aStorageId, aErr ));
+    OstTraceFunctionEntry0( CMTPPICTBRIDGEDATAPROVIDER_NOTIFYENUMERATIONCOMPLETEL_ENTRY );
+    OstTraceExt2( TRACE_NORMAL, CMTPPICTBRIDGEDATAPROVIDER_NOTIFYENUMERATIONCOMPLETEL, 
+            " storage 0x%08X status %d", aStorageId, (TInt32)aErr);
     Framework().ObjectEnumerationCompleteL(aStorageId);
-    __FLOG(_L8("<< CMTPPictBridgeDataProvider::NotifyEnumerationCompletedL"));
+    OstTraceFunctionExit0( CMTPPICTBRIDGEDATAPROVIDER_NOTIFYENUMERATIONCOMPLETEL_EXIT );
     }
 
 
@@ -279,7 +286,7 @@ void CMTPPictBridgeDataProvider::NotifyEnumerationCompleteL(TUint32 aStorageId, 
 //
 TInt CMTPPictBridgeDataProvider::LocateRequestProcessorL(const TMTPTypeRequest& aRequest, MMTPConnection& aConnection)
     {
-    __FLOG(_L8(">> CMTPPictBridgeDataProvider::LocateRequestProcessorL"));        
+    OstTraceFunctionEntry0( CMTPPICTBRIDGEDATAPROVIDER_LOCATEREQUESTPROCESSORL_ENTRY );     
     
     TInt idx(KErrNotFound);
     TInt count(iActiveProcessors.Count());
@@ -300,8 +307,8 @@ TInt CMTPPictBridgeDataProvider::LocateRequestProcessorL(const TMTPTypeRequest& 
         CleanupStack::Pop();
         idx = count;
         }
-        
-    __FLOG(_L8("<< CMTPPictBridgeDataProvider::LocateRequestProcessorL")); 
+
+    OstTraceFunctionExit0( CMTPPICTBRIDGEDATAPROVIDER_LOCATEREQUESTPROCESSORL_EXIT );
     return idx;
     }
 
@@ -314,7 +321,7 @@ TInt CMTPPictBridgeDataProvider::LocateRequestProcessorL(const TMTPTypeRequest& 
 //
 TInt CMTPPictBridgeDataProvider::LocateRequestProcessorL(const TMTPTypeEvent& aEvent, MMTPConnection& aConnection)
     {
-    __FLOG(_L8(">> CMTPPictBridgeDataProvider::LocateRequestProcessorL (event)"));
+    OstTraceFunctionEntry0( DUP1_CMTPPICTBRIDGEDATAPROVIDER_LOCATEREQUESTPROCESSORL_ENTRY );
         
     TInt idx(KErrNotFound);
     TInt count(iActiveProcessors.Count());
@@ -326,7 +333,7 @@ TInt CMTPPictBridgeDataProvider::LocateRequestProcessorL(const TMTPTypeEvent& aE
             break;
             }
         }    
-    __FLOG(_L8("<< CMTPPictBridgeDataProvider::LocateRequestProcessorL (event)"));
+    OstTraceFunctionExit0( DUP1_CMTPPICTBRIDGEDATAPROVIDER_LOCATEREQUESTPROCESSORL_EXIT );
     return idx;
     }
 
@@ -337,7 +344,8 @@ TInt CMTPPictBridgeDataProvider::LocateRequestProcessorL(const TMTPTypeEvent& aE
 //
 void CMTPPictBridgeDataProvider::SessionClosedL(const TMTPNotificationParamsSessionChange& aSession)
     {
-    __FLOG_VA((_L8(">> CMTPPictBridgeDataProvider::SessionClosedL SessionID = %d"), aSession.iMTPId));
+    OstTraceFunctionEntry0( CMTPPICTBRIDGEDATAPROVIDER_SESSIONCLOSEDL_ENTRY );
+    OstTrace1( TRACE_NORMAL, CMTPPICTBRIDGEDATAPROVIDER_SESSIONCLOSEDL, "SessionID = %d", aSession.iMTPId );
     
     TInt count = iActiveProcessors.Count();
     while(count--)
@@ -352,7 +360,7 @@ void CMTPPictBridgeDataProvider::SessionClosedL(const TMTPNotificationParamsSess
         }
 
     iServerP->MtpSessionClosed();
-    __FLOG(_L8("<< CMTPPictBridgeDataProvider::SessionClosedL"));
+    OstTraceFunctionExit0( CMTPPICTBRIDGEDATAPROVIDER_SESSIONCLOSEDL_EXIT );
     }
 
 // --------------------------------------------------------------------------
@@ -360,13 +368,13 @@ void CMTPPictBridgeDataProvider::SessionClosedL(const TMTPNotificationParamsSess
 // @param aSession notification parameter block
 // --------------------------------------------------------------------------
 //
-#ifdef __FLOG_ACTIVE
+#ifdef OST_TRACE_COMPILER_IN_USE
 void CMTPPictBridgeDataProvider::SessionOpenedL(const TMTPNotificationParamsSessionChange& aSession )
 #else
 void CMTPPictBridgeDataProvider::SessionOpenedL(const TMTPNotificationParamsSessionChange& /*aSession*/ )
 #endif
     {
-    __FLOG_VA((_L8(" CMTPPictBridgeDataProvider::SessionOpenedL SessionID = %d"), aSession.iMTPId));
+    OstTrace1( TRACE_NORMAL, CMTPPICTBRIDGEDATAPROVIDER_SESSIONOPENEDL, "SessionID = %d", aSession.iMTPId );
     iServerP->MtpSessionOpened();
     }
 

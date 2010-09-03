@@ -24,10 +24,14 @@
 #include "cmtpdataprovidercontroller.h"
 #include "cmtpobjectmgr.h"
 #include "cmtpdataprovider.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpdeleteobjectproplistTraces.h"
+#endif
+
 
 
 // Class constants.
-__FLOG_STMT(_LIT8(KComponent,"DeleteObjectPropList");)
 
 
 /**
@@ -58,15 +62,14 @@ Destructor
 */ 
 CMTPDeleteObjectPropList::~CMTPDeleteObjectPropList()
     {
-    __FLOG(_L8("~CMTPDeleteObjectPropList - Entry"));
+    OstTraceFunctionEntry0( CMTPDELETEOBJECTPROPLIST_CMTPDELETEOBJECTPROPLIST_DES_ENTRY );
     
     delete iDeleteObjectPropList;
     iSingletons.Close();
     iTargetDps.Close();
     iSubDatasets.ResetAndDestroy();
-    
-    __FLOG(_L8("~CMTPDeleteObjectPropList - Exit"));
-    __FLOG_CLOSE;
+
+    OstTraceFunctionExit0( CMTPDELETEOBJECTPROPLIST_CMTPDELETEOBJECTPROPLIST_DES_EXIT );
     }
 
 CMTPDeleteObjectPropList::CMTPDeleteObjectPropList(MMTPDataProviderFramework& aFramework, MMTPConnection& aConnection):
@@ -77,17 +80,16 @@ CMTPRequestProcessor( aFramework, aConnection, (sizeof(KMTPDeleteObjectPropListP
 
 void CMTPDeleteObjectPropList::ConstructL()
     {
-    __FLOG_OPEN(KMTPSubsystem, KComponent);
-    __FLOG(_L8("ConstructL - Entry"));
+    OstTraceFunctionEntry0( CMTPDELETEOBJECTPROPLIST_CONSTRUCTL_ENTRY );
     
     iSingletons.OpenL();
     
-    __FLOG(_L8("ConstructL - Exit"));
+    OstTraceFunctionExit0( CMTPDELETEOBJECTPROPLIST_CONSTRUCTL_EXIT );
     }
 
 void CMTPDeleteObjectPropList::ServiceL()
     {
-    __FLOG(_L8("ServiceL - Entry"));
+    OstTraceFunctionEntry0( CMTPDELETEOBJECTPROPLIST_SERVICEL_ENTRY );
     
     delete iDeleteObjectPropList;
     iTargetDps.Reset();
@@ -97,12 +99,12 @@ void CMTPDeleteObjectPropList::ServiceL()
     iDeleteObjectPropList = CMTPTypeDeleteObjectPropList::NewL();
     ReceiveDataL(*iDeleteObjectPropList);
 
-    __FLOG(_L8("ServiceL - Exit"));
+    OstTraceFunctionExit0( CMTPDELETEOBJECTPROPLIST_SERVICEL_EXIT );
     }
 
 TBool CMTPDeleteObjectPropList::DoHandleResponsePhaseL()
     {
-    __FLOG(_L8("DoHandleResponsePhaseL - Entry"));
+    OstTraceFunctionEntry0( CMTPDELETEOBJECTPROPLIST_DOHANDLERESPONSEPHASEL_ENTRY );
       
     //if the ObjectHandle is 0x00000000, 
     //discard the received data and return Invalid_ObjectHandle error code
@@ -125,15 +127,14 @@ TBool CMTPDeleteObjectPropList::DoHandleResponsePhaseL()
 	     Schedule(KErrNone);
     	 }
      }
-    
-    __FLOG(_L8("DoHandleResponsePhaseL - Exit"));
-    
+
+    OstTraceFunctionExit0( CMTPDELETEOBJECTPROPLIST_DOHANDLERESPONSEPHASEL_EXIT );
     return EFalse;
     }
 
 void CMTPDeleteObjectPropList::BuildSubRequestsL()
     {
-    __FLOG(_L8("BuildSubRequests - Entry"));
+    OstTraceFunctionEntry0( CMTPDELETEOBJECTPROPLIST_BUILDSUBREQUESTSL_ENTRY );
 
     TInt count(iDeleteObjectPropList->NumberOfElements());
     TInt dpid(0);
@@ -164,18 +165,12 @@ void CMTPDeleteObjectPropList::BuildSubRequestsL()
         
         CleanupStack::Pop(element);
         }
-    
-    __FLOG(_L8("BuildSubRequests - Exit"));
+
+    OstTraceFunctionExit0( CMTPDELETEOBJECTPROPLIST_BUILDSUBREQUESTSL_EXIT );
     }
 
 TBool CMTPDeleteObjectPropList::HasDataphase() const
     {
-    __FLOG(_L8("HasDataphase - Entry"));
-        
-    
-        
-    __FLOG(_L8("HasDataphase - Exit"));
-    
     return ETrue;
     }
 
@@ -196,11 +191,11 @@ void CMTPDeleteObjectPropList::ProxyReceiveDataL(MMTPType& aData, const TMTPType
 
 void CMTPDeleteObjectPropList::ProxySendDataL(const MMTPType& /*aData*/, const TMTPTypeRequest&  /*aRequest*/, MMTPConnection& /* aConnection */, TRequestStatus& /*aStatus*/)
     {
-    __FLOG(_L8("ProxySendDataL - Entry"));
+    OstTraceFunctionEntry0( CMTPDELETEOBJECTPROPLIST_PROXYSENDDATAL_ENTRY );
         
     Panic(EMTPWrongRequestPhase);
-        
-    __FLOG(_L8("ProxySendDataL - Exit"));
+
+    OstTraceFunctionExit0( CMTPDELETEOBJECTPROPLIST_PROXYSENDDATAL_EXIT );
     }
 
 /**
@@ -218,14 +213,14 @@ void CMTPDeleteObjectPropList::ProxySendResponseL(const TMTPTypeResponse& aRespo
 void CMTPDeleteObjectPropList::ProxySendResponseL(const TMTPTypeResponse& aResponse, const TMTPTypeRequest& /*aRequest*/, MMTPConnection& /*aConnection*/, TRequestStatus& aStatus)
 #endif
     {
-    __FLOG(_L8("ProxySendResponseL - Entry"));
+    OstTraceFunctionEntry0( CMTPDELETEOBJECTPROPLIST_PROXYSENDRESPONSEL_ENTRY );
     
     __ASSERT_DEBUG(((iRequest == &aRequest) && (&iConnection == &aConnection)), Panic(EMTPNotSameRequestProxy));
     MMTPType::CopyL(aResponse, iResponse);
     TRequestStatus* status = &aStatus;
     User::RequestComplete(status, KErrNone);
-    
-    __FLOG(_L8("ProxySendResponseL - Exit"));
+
+    OstTraceFunctionExit0( CMTPDELETEOBJECTPROPLIST_PROXYSENDRESPONSEL_EXIT );
     }
 
 
@@ -241,7 +236,7 @@ void CMTPDeleteObjectPropList::ProxyTransactionCompleteL(const TMTPTypeRequest& 
 void CMTPDeleteObjectPropList::ProxyTransactionCompleteL(const TMTPTypeRequest& /*aRequest*/, MMTPConnection& /*aConnection*/)
 #endif
     {
-    __FLOG(_L8("ProxyTransactionCompleteL - Entry"));
+    OstTraceFunctionEntry0( CMTPDELETEOBJECTPROPLIST_PROXYTRANSACTIONCOMPLETEL_ENTRY );
         
     __ASSERT_DEBUG(((iRequest == &aRequest) && (&iConnection == &aConnection)), Panic(EMTPNotSameRequestProxy));
     const TUint16 KResponseCode(iResponse.Uint16(TMTPTypeResponse::EResponseCode)); 
@@ -267,28 +262,28 @@ void CMTPDeleteObjectPropList::ProxyTransactionCompleteL(const TMTPTypeRequest& 
         }
 
     Schedule(err);
-        
-    __FLOG(_L8("ProxyTransactionCompleteL - Exit"));
+
+    OstTraceFunctionExit0( CMTPDELETEOBJECTPROPLIST_PROXYTRANSACTIONCOMPLETEL_EXIT );
     }
 
 
     
 void CMTPDeleteObjectPropList::SendResponseL(TUint16 aCode)
     {
-    __FLOG(_L8("SendResponseL - Entry"));
+    OstTraceFunctionEntry0( CMTPDELETEOBJECTPROPLIST_SENDRESPONSEL_ENTRY );
         
     const TMTPTypeRequest& req(Request());
     iResponse.SetUint16(TMTPTypeResponse::EResponseCode, aCode);
     iResponse.SetUint32(TMTPTypeResponse::EResponseSessionID, req.Uint32(TMTPTypeRequest::ERequestSessionID));
     iResponse.SetUint32(TMTPTypeResponse::EResponseTransactionID, req.Uint32(TMTPTypeRequest::ERequestTransactionID));
     iFramework.SendResponseL(iResponse, req, Connection());
-        
-    __FLOG(_L8("SendResponseL - Exit"));
+
+    OstTraceFunctionExit0( CMTPDELETEOBJECTPROPLIST_SENDRESPONSEL_EXIT );
     }
 
 void CMTPDeleteObjectPropList::RunL()
     {
-    __FLOG(_L8("RunL - Entry"));
+    OstTraceFunctionEntry0( CMTPDELETEOBJECTPROPLIST_RUNL_ENTRY );
     
     if ( (iStatus == KErrNone) && (iCurrentTarget < iTargetDps.Count()) )    
         {
@@ -314,17 +309,17 @@ void CMTPDeleteObjectPropList::RunL()
         //Any error will stop the process, and send the corresponding response.
         SendResponseL(iResponse.Uint16(TMTPTypeResponse::EResponseCode));
         }  
-    
-    __FLOG(_L8("RunL - Exit"));
+
+    OstTraceFunctionExit0( CMTPDELETEOBJECTPROPLIST_RUNL_EXIT );
     }
         
 TInt CMTPDeleteObjectPropList::RunError(TInt /*aError*/)
     {
-    __FLOG(_L8("RunError - Entry"));
-    
+    OstTraceFunctionEntry0( CMTPDELETEOBJECTPROPLIST_RUNERROR_ENTRY );
+
     TRAP_IGNORE(SendResponseL(EMTPRespCodeGeneralError));
-    
-    __FLOG(_L8("RunError - Exit"));
+
+    OstTraceFunctionExit0( CMTPDELETEOBJECTPROPLIST_RUNERROR_EXIT );
     return KErrNone;
     }
             
@@ -335,13 +330,13 @@ completion code.
 */
 void CMTPDeleteObjectPropList::Schedule(TInt aError)
     {
-    __FLOG(_L8("Schedule - Entry"));
-    
+    OstTraceFunctionEntry0( CMTPDELETEOBJECTPROPLIST_SCHEDULE_ENTRY );
+
     TRequestStatus* status = &iStatus;
     User::RequestComplete(status, aError);
     SetActive();
-    
-    __FLOG(_L8("Schedule - Exit"));
+
+    OstTraceFunctionExit0( CMTPDELETEOBJECTPROPLIST_SCHEDULE_EXIT );
     }
 
 

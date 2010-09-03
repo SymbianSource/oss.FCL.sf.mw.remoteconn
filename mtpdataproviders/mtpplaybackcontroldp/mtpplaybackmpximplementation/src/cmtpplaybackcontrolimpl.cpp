@@ -34,9 +34,11 @@
 #include "mtpplaybackcontrolpanic.h"
 #include "cmtpplaybackcommand.h"
 #include "cmtpplaybackevent.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpplaybackcontrolimplTraces.h"
+#endif
 
-// Constants
-__FLOG_STMT(_LIT8(KComponent,"PlaybackControlImpl");)
 
 // ======== MEMBER FUNCTIONS ========
 
@@ -47,11 +49,13 @@ __FLOG_STMT(_LIT8(KComponent,"PlaybackControlImpl");)
 CMTPPlaybackControlImpl* CMTPPlaybackControlImpl::NewL( 
         MMTPPlaybackObserver& aObserver )
     {
+    OstTraceFunctionEntry0( CMTPPLAYBACKCONTROLIMPL_NEWL_ENTRY );
     CMTPPlaybackControlImpl* self = new ( ELeave ) 
                 CMTPPlaybackControlImpl( aObserver );
     CleanupStack::PushL( self );
     self->ConstructL();
     CleanupStack::Pop( self );
+    OstTraceFunctionExit0( CMTPPLAYBACKCONTROLIMPL_NEWL_EXIT );
     return self;
     }
 
@@ -61,7 +65,9 @@ CMTPPlaybackControlImpl* CMTPPlaybackControlImpl::NewL(
 //
 void CMTPPlaybackControlImpl::Close()
     {
+    OstTraceFunctionEntry0( CMTPPLAYBACKCONTROLIMPL_CLOSE_ENTRY );
     delete this;
+    OstTraceFunctionExit0( CMTPPLAYBACKCONTROLIMPL_CLOSE_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -70,7 +76,7 @@ void CMTPPlaybackControlImpl::Close()
 //
 CMTPPlaybackControlImpl::~CMTPPlaybackControlImpl()
     {
-    __FLOG(_L8("+CMTPPlaybackControlImpl::~CMTPPlaybackControlImpl"));
+    OstTraceFunctionEntry0( CMTPPLAYBACKCONTROLIMPL_CMTPPLAYBACKCONTROLIMPL_ENTRY );
     
     if ( iPlaybackUtility )
         {
@@ -95,8 +101,7 @@ CMTPPlaybackControlImpl::~CMTPPlaybackControlImpl()
     iResumeCmdArray.Close();
     delete iCmdParam;
     
-    __FLOG(_L8("-CMTPPlaybackControlImpl::~CMTPPlaybackControlImpl"));
-    __FLOG_CLOSE;
+    OstTraceFunctionExit0( CMTPPLAYBACKCONTROLIMPL_CMTPPLAYBACKCONTROLIMPL_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -105,8 +110,8 @@ CMTPPlaybackControlImpl::~CMTPPlaybackControlImpl()
 //
 void CMTPPlaybackControlImpl::CommandL( CMTPPlaybackCommand& aCmd, MMTPPlaybackCallback* aCallback )
     {
-    __FLOG(_L8("+CMTPPlaybackControlImpl::CommandL"));
-    __FLOG_1(_L8("The command code is 0x%X"), aCmd.PlaybackCommand() );
+    OstTraceFunctionEntry0( CMTPPLAYBACKCONTROLIMPL_COMMANDL_ENTRY );
+    OstTrace1( TRACE_NORMAL, CMTPPLAYBACKCONTROLIMPL_COMMANDL, "The command code is 0x%X", aCmd.PlaybackCommand());
     
     iCallback = aCallback;
 
@@ -122,7 +127,7 @@ void CMTPPlaybackControlImpl::CommandL( CMTPPlaybackCommand& aCmd, MMTPPlaybackC
         CompleteSelf( err );
         }
     
-    __FLOG(_L8("-CMTPPlaybackControlImpl::CommandL"));
+    OstTraceFunctionExit0( CMTPPLAYBACKCONTROLIMPL_COMMANDL_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -133,7 +138,8 @@ void CMTPPlaybackControlImpl::CommandL( CMTPPlaybackCommand& aCmd, MMTPPlaybackC
 void CMTPPlaybackControlImpl::HandlePlaybackMessage( CMPXMessage* aMessage, 
         TInt aError )
     {
-    __FLOG_1(_L8("+CMTPPlaybackControlImpl::HandlePlaybackMessage( %d ) "), aError );
+    OstTraceFunctionEntry0( CMTPPLAYBACKCONTROLIMPL_HANDLEPLAYBACKMESSAGE_ENTRY );
+    OstTrace1( TRACE_NORMAL, CMTPPLAYBACKCONTROLIMPL_HANDLEPLAYBACKMESSAGE, "CMTPPlaybackControlImpl::HandlePlaybackMessage( %d )", aError );
     
     if (( KErrNone == aError ) && aMessage )
         {
@@ -145,7 +151,7 @@ void CMTPPlaybackControlImpl::HandlePlaybackMessage( CMPXMessage* aMessage,
         DoHandleError( MapError( aError ));
         }
     
-    __FLOG(_L8("-CMTPPlaybackControlImpl::HandlePlaybackMessage"));
+    OstTraceFunctionExit0( CMTPPLAYBACKCONTROLIMPL_HANDLEPLAYBACKMESSAGE_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -156,7 +162,8 @@ void CMTPPlaybackControlImpl::HandlePlaybackMessage( CMPXMessage* aMessage,
 void CMTPPlaybackControlImpl::HandlePropertyL( TMPXPlaybackProperty aProperty, 
         TInt aValue, TInt aError )
     {
-    __FLOG_VA((_L8("+CMTPPlaybackControlImpl::HandlePropertyL( aProperty = 0x%X, aValue = 0x%X, aError = %d ) "), aProperty, aValue, aError ));
+    OstTraceFunctionEntry0( CMTPPLAYBACKCONTROLIMPL_HANDLEPROPERTYL_ENTRY );
+    OstTraceExt3( TRACE_NORMAL, CMTPPLAYBACKCONTROLIMPL_HANDLEPROPERTYL, "CMTPPlaybackControlImpl::HandlePropertyL( aProperty = 0x%X, aValue = 0x%X, aError = %d )", aProperty, aValue, aError );
     
     if ( KErrNone == aError )
         {
@@ -168,7 +175,7 @@ void CMTPPlaybackControlImpl::HandlePropertyL( TMPXPlaybackProperty aProperty,
         DoHandleError( MapError( aError ) );
         }
     
-    __FLOG(_L8("-CMTPPlaybackControlImpl::HandlePropertyL"));
+    OstTraceFunctionExit0( CMTPPLAYBACKCONTROLIMPL_HANDLEPROPERTYL_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -184,8 +191,8 @@ void CMTPPlaybackControlImpl::HandleSubPlayerNamesL(
     TBool /* aComplete */,
     TInt /* aError */ )
     {
-    __FLOG(_L8("+CMTPPlaybackControlImpl::HandleSubPlayerNamesL"));
-    __FLOG(_L8("-CMTPPlaybackControlImpl::HandleSubPlayerNamesL"));
+    OstTraceFunctionEntry0( CMTPPLAYBACKCONTROLIMPL_HANDLESUBPLAYERNAMESL_ENTRY );
+    OstTraceFunctionExit0( CMTPPLAYBACKCONTROLIMPL_HANDLESUBPLAYERNAMESL_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -196,7 +203,7 @@ void CMTPPlaybackControlImpl::HandleSubPlayerNamesL(
 void CMTPPlaybackControlImpl::HandleMediaL( const CMPXMedia& aMedia, 
         TInt aError )
     {
-    __FLOG(_L8("+CMTPPlaybackControlImpl::HandleMediaL"));
+    OstTraceFunctionEntry0( CMTPPLAYBACKCONTROLIMPL_HANDLEMEDIAL_ENTRY );
     
     if (( KErrNone == aError ) && ( aMedia.IsSupported( KMPXMediaGeneralUri )))
         {
@@ -208,7 +215,7 @@ void CMTPPlaybackControlImpl::HandleMediaL( const CMPXMedia& aMedia,
         DoHandleError( MapError( aError ));
         }
     
-    __FLOG(_L8("-CMTPPlaybackControlImpl::HandleMediaL"));
+    OstTraceFunctionExit0( CMTPPLAYBACKCONTROLIMPL_HANDLEMEDIAL_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -218,8 +225,8 @@ void CMTPPlaybackControlImpl::HandleMediaL( const CMPXMedia& aMedia,
 //
 void CMTPPlaybackControlImpl::DoCancel()
     {
-    __FLOG(_L8("+CMTPPlaybackControlImpl::DoCancel"));
-    __FLOG(_L8("-CMTPPlaybackControlImpl::DoCancel"));
+    OstTraceFunctionEntry0( CMTPPLAYBACKCONTROLIMPL_DOCANCEL_ENTRY );
+    OstTraceFunctionExit0( CMTPPLAYBACKCONTROLIMPL_DOCANCEL_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -229,7 +236,7 @@ void CMTPPlaybackControlImpl::DoCancel()
 //
 void CMTPPlaybackControlImpl::RunL()
     {
-    __FLOG(_L8("+CMTPBTConnection::RunL"));
+    OstTraceFunctionEntry0( CMTPPLAYBACKCONTROLIMPL_RUNL_ENTRY );
 
     if ( KPlaybackErrNone == iStatus.Int() )
         {
@@ -244,7 +251,7 @@ void CMTPPlaybackControlImpl::RunL()
         DoHandleError( iStatus.Int());
         }
  
-    __FLOG(_L8("-CMTPBTConnection::RunL"));
+    OstTraceFunctionExit0( CMTPPLAYBACKCONTROLIMPL_RUNL_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -256,7 +263,11 @@ CMTPPlaybackControlImpl::CMTPPlaybackControlImpl(
         : CActive( EPriorityStandard ),
           iObserver( &aObserver )
     {
+    OstTraceFunctionEntry0( DUP1_CMTPPLAYBACKCONTROLIMPL_CMTPPLAYBACKCONTROLIMPL_ENTRY );
+    
     CActiveScheduler::Add( this );
+    
+    OstTraceFunctionExit0( DUP1_CMTPPLAYBACKCONTROLIMPL_CMTPPLAYBACKCONTROLIMPL_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -265,8 +276,7 @@ CMTPPlaybackControlImpl::CMTPPlaybackControlImpl(
 //
 void CMTPPlaybackControlImpl::ConstructL()
     {
-    __FLOG_OPEN(KMTPSubsystem, KComponent);
-    __FLOG(_L8("+CMTPPlaybackControlImpl::ConstructL"));
+    OstTraceFunctionEntry0( CMTPPLAYBACKCONTROLIMPL_CONSTRUCTL_ENTRY );
     
     iPlaybackUtility = MMPXPlaybackUtility::NewL( KMTPPlaybackControlDpUid, this );
     iNowActivePlaybackUtility = MMPXPlaybackUtility::NewL( KPbModeActivePlayer );
@@ -275,7 +285,7 @@ void CMTPPlaybackControlImpl::ConstructL()
     iPlaybackPlaylistHelper = CMTPPlaybackPlaylistHelper::NewL( *this );
     iPlaybackResumeHelper = CMTPPlaybackResumeHelper::NewL( *this );
     
-    __FLOG(_L8("-CMTPPlaybackControlImpl::ConstructL"));
+    OstTraceFunctionExit0( CMTPPLAYBACKCONTROLIMPL_CONSTRUCTL_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -284,7 +294,7 @@ void CMTPPlaybackControlImpl::ConstructL()
 //
 void CMTPPlaybackControlImpl::GetPlaylistFromCollectionCompleteL( const CMPXCollectionPlaylist& aPlaylist )
     {
-    __FLOG(_L8("+CMTPPlaybackControlImpl::GetPlaylistFromCollectionCompleteL "));
+    OstTraceFunctionEntry0( CMTPPLAYBACKCONTROLIMPL_GETPLAYLISTFROMCOLLECTIONCOMPLETEL_ENTRY );
     
     CMPXCollectionPlaylist* tmp =
                                 CMPXCollectionPlaylist::NewL( aPlaylist );
@@ -295,7 +305,7 @@ void CMTPPlaybackControlImpl::GetPlaylistFromCollectionCompleteL( const CMPXColl
     iPlaybackUtility->InitL( *tmp, ETrue );
     CleanupStack::PopAndDestroy( tmp );
     
-    __FLOG(_L8("-CMTPPlaybackControlImpl::HandlePlaybackGetPlaylistCompleteL"));
+    OstTraceFunctionExit0( CMTPPLAYBACKCONTROLIMPL_GETPLAYLISTFROMCOLLECTIONCOMPLETEL_EXIT );
     }
 
 // ----------------------------------------------------
@@ -304,14 +314,14 @@ void CMTPPlaybackControlImpl::GetPlaylistFromCollectionCompleteL( const CMPXColl
 //
 void CMTPPlaybackControlImpl::DeActiveOtherPlayerL()
     {
-    __FLOG(_L8("+CMTPPlaybackControlImpl::DeActiveOtherPlayerL()"));
+    OstTraceFunctionEntry0( CMTPPLAYBACKCONTROLIMPL_DEACTIVEOTHERPLAYERL_ENTRY );
     
     if ( iNowActivePlaybackUtility->StateL() != iPlaybackUtility->StateL())
         {
         SendMPXPlaybackCommandL( EPbCmdPause, EFalse );
         }
     
-    __FLOG(_L8("-CMTPPlaybackControlImpl::DeActiveOtherPlayerL()"));
+    OstTraceFunctionExit0( CMTPPLAYBACKCONTROLIMPL_DEACTIVEOTHERPLAYERL_EXIT );
     }
 
 // ----------------------------------------------------
@@ -320,12 +330,12 @@ void CMTPPlaybackControlImpl::DeActiveOtherPlayerL()
 //
 void CMTPPlaybackControlImpl::CheckPlaybackCmdAndCacheL( CMTPPlaybackCommand& aCmd )
     {
-    __FLOG(_L8("+CMTPPlaybackControlImpl::CheckPlaybackCmdAndCacheL"));
+    OstTraceFunctionEntry0( CMTPPLAYBACKCONTROLIMPL_CHECKPLAYBACKCMDANDCACHEL_ENTRY );
     
     iPlaybackCommandChecker->CheckPlaybackCommandContextL( aCmd.PlaybackCommand());
     iPlaybackCommandChecker->CheckAndUpdatePlaybackParamL( aCmd, &iCmdParam );
     
-    __FLOG(_L8("-CMTPPlaybackControlImpl::CheckPlaybackCmdAndCacheL"));
+    OstTraceFunctionExit0( CMTPPLAYBACKCONTROLIMPL_CHECKPLAYBACKCMDANDCACHEL_EXIT );
     }
 
 // ----------------------------------------------------
@@ -334,12 +344,12 @@ void CMTPPlaybackControlImpl::CheckPlaybackCmdAndCacheL( CMTPPlaybackCommand& aC
 //
 void CMTPPlaybackControlImpl::UpdateCommandArray()
     {
-    __FLOG(_L8("+CMTPPlaybackControlImpl::UpdateCommandArrayL"));
+    OstTraceFunctionEntry0( CMTPPLAYBACKCONTROLIMPL_UPDATECOMMANDARRAY_ENTRY );
     
     iPlaybackResumeHelper->UpdatePrepareCmdArray( iMTPPBCmd, iPrepareCmdArray );
     iPlaybackResumeHelper->UpdateResumeCmdArray( iMTPPBCmd, iResumeCmdArray );
     
-    __FLOG(_L8("-CMTPPlaybackControlImpl::UpdateCommandArrayL"));
+    OstTraceFunctionExit0( CMTPPLAYBACKCONTROLIMPL_UPDATECOMMANDARRAY_EXIT );
     }
 
 // ----------------------------------------------------
@@ -348,7 +358,7 @@ void CMTPPlaybackControlImpl::UpdateCommandArray()
 //
 void CMTPPlaybackControlImpl::RequestMediaL()
     {
-    __FLOG(_L8("+CMTPPlaybackControlImpl::RequestMediaL"));
+    OstTraceFunctionEntry0( CMTPPLAYBACKCONTROLIMPL_REQUESTMEDIAL_ENTRY );
     
     if ( iPlayList )
         {
@@ -388,7 +398,7 @@ void CMTPPlaybackControlImpl::RequestMediaL()
         CompleteSelf( KPlaybackErrContextInvalid );
         }
     
-    __FLOG(_L8("-CMTPPlaybackControlImpl::RequestMediaL"));
+    OstTraceFunctionExit0( CMTPPLAYBACKCONTROLIMPL_REQUESTMEDIAL_EXIT );
     }
 
 // ----------------------------------------------------
@@ -397,11 +407,12 @@ void CMTPPlaybackControlImpl::RequestMediaL()
 //
 void CMTPPlaybackControlImpl::DoCommandL()
     {
-    __FLOG(_L8("+CMTPPlaybackControlImpl::DoCommandL"));
+    OstTraceFunctionEntry0( CMTPPLAYBACKCONTROLIMPL_DOCOMMANDL_ENTRY );
     
     if ( iPrepareCmdArray.Count() != 0 )
         {
         InitiateMPXPlaybackCommandL( iPrepareCmdArray[0].iMPXCommand, ETrue );
+        OstTraceFunctionExit0( CMTPPLAYBACKCONTROLIMPL_DOCOMMANDL_EXIT );
         return;
         }
     
@@ -495,7 +506,7 @@ void CMTPPlaybackControlImpl::DoCommandL()
             break;
         }
 
-    __FLOG(_L8("-CMTPPlaybackControlImpl::DoCommandL"));
+    OstTraceFunctionExit0( DUP1_CMTPPLAYBACKCONTROLIMPL_DOCOMMANDL_EXIT );
     }
 
 // ----------------------------------------------------
@@ -504,7 +515,7 @@ void CMTPPlaybackControlImpl::DoCommandL()
 //
 void CMTPPlaybackControlImpl::DoHandlePlaybackMessageL( const CMPXMessage& aMessage )
     {
-    __FLOG(_L8("+CMTPPlaybackControlImpl::DoHandlePlaybackMessageL"));
+    OstTraceFunctionEntry0( CMTPPLAYBACKCONTROLIMPL_DOHANDLEPLAYBACKMESSAGEL_ENTRY );
     
     TMPXMessageId id( 
                 aMessage.ValueTObjectL<TMPXMessageId>( KMPXMessageGeneralId ) );
@@ -541,12 +552,12 @@ void CMTPPlaybackControlImpl::DoHandlePlaybackMessageL( const CMPXMessage& aMess
                 }
                 break;
             default:
-                __FLOG_VA((_L8("DoHandlePlaybackMessageL( TMPXPlaybackMessage event = 0x%X ) "), event ));
+                OstTrace1( TRACE_NORMAL, CMTPPLAYBACKCONTROLIMPL_DOHANDLEPLAYBACKMESSAGEL, "DoHandlePlaybackMessageL( TMPXPlaybackMessage event = 0x%X )", event );
                 break;
             }
         }
     
-    __FLOG(_L8("-CMTPPlaybackControlImpl::DoHandlePlaybackMessageL"));
+    OstTraceFunctionExit0( CMTPPLAYBACKCONTROLIMPL_DOHANDLEPLAYBACKMESSAGEL_EXIT );
     }
 
 
@@ -556,7 +567,8 @@ void CMTPPlaybackControlImpl::DoHandlePlaybackMessageL( const CMPXMessage& aMess
 //
 void CMTPPlaybackControlImpl::DoHandlePropertyL( TInt aProperty, TInt aValue )
     {
-    __FLOG_VA((_L8("+CMTPPlaybackControlImpl::DoHandlePropertyL( aProperty = 0x%X, aValue = 0x%X ) "), aProperty, aValue ));
+    OstTraceFunctionEntry0( CMTPPLAYBACKCONTROLIMPL_DOHANDLEPROPERTYL_ENTRY );
+    OstTraceExt2( TRACE_NORMAL, CMTPPLAYBACKCONTROLIMPL_DOHANDLEPROPERTYL, "CMTPPlaybackControlImpl::DoHandlePropertyL( aProperty = 0x%X, aValue = 0x%X )", static_cast<TUint32>( aProperty ), aValue );
     
     switch ( aProperty  )
         {
@@ -640,7 +652,7 @@ void CMTPPlaybackControlImpl::DoHandlePropertyL( TInt aProperty, TInt aValue )
             break;
             }
     
-    __FLOG(_L8("-CMTPPlaybackControlImpl::DoHandlePropertyL"));
+    OstTraceFunctionExit0( CMTPPLAYBACKCONTROLIMPL_DOHANDLEPROPERTYL_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -649,7 +661,8 @@ void CMTPPlaybackControlImpl::DoHandlePropertyL( TInt aProperty, TInt aValue )
 //
 void CMTPPlaybackControlImpl::DoHandleStateChangedL( TMPXPlaybackState aState )
     {
-    __FLOG_VA((_L8("+CMTPPlaybackControlImpl::DoHandleStateChangedL( aState = 0x%X ) "), aState ));
+    OstTraceFunctionEntry0( CMTPPLAYBACKCONTROLIMPL_DOHANDLESTATECHANGEDL_ENTRY );
+    OstTrace1( TRACE_NORMAL, CMTPPLAYBACKCONTROLIMPL_DOHANDLESTATECHANGEDL, "CMTPPlaybackControlImpl::DoHandleStateChangedL( aState = 0x%X )", aState );
     
     if (( iPrepareCmdArray.Count() != 0 ) && ( iPrepareCmdArray[0].iMPXExpectState == aState ))
         {
@@ -672,7 +685,7 @@ void CMTPPlaybackControlImpl::DoHandleStateChangedL( TMPXPlaybackState aState )
         iState = aState;
         }
     
-    __FLOG(_L8("-CMTPPlaybackControlImpl::DoHandleStateChangedL"));
+    OstTraceFunctionExit0( CMTPPLAYBACKCONTROLIMPL_DOHANDLESTATECHANGEDL_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -681,7 +694,7 @@ void CMTPPlaybackControlImpl::DoHandleStateChangedL( TMPXPlaybackState aState )
 //
 void CMTPPlaybackControlImpl::DoHandleMediaL( const CMPXMedia& aMedia )
     {
-    __FLOG(_L8("+CMTPPlaybackControlImpl::DoHandleMediaL"));
+    OstTraceFunctionEntry0( CMTPPLAYBACKCONTROLIMPL_DOHANDLEMEDIAL_ENTRY );
     
     TFileName filePath(aMedia.ValueText(KMPXMediaGeneralUri) );
     delete iCmdParam;
@@ -689,7 +702,7 @@ void CMTPPlaybackControlImpl::DoHandleMediaL( const CMPXMedia& aMedia )
     iCmdParam = CMTPPbCmdParam::NewL( EMTPPbCatMusic, filePath );
     SendPlaybackCommandCompleteL();
     
-    __FLOG(_L8("-CMTPPlaybackControlImpl::DoHandleMediaL"));
+    OstTraceFunctionExit0( CMTPPLAYBACKCONTROLIMPL_DOHANDLEMEDIAL_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -698,7 +711,7 @@ void CMTPPlaybackControlImpl::DoHandleMediaL( const CMPXMedia& aMedia )
 //
 void CMTPPlaybackControlImpl::DoHandleMediaChangedL()
     {
-    __FLOG(_L8("+CMTPPlaybackControlImpl::DoHandleMediaChangedL"));
+    OstTraceFunctionEntry0( CMTPPLAYBACKCONTROLIMPL_DOHANDLEMEDIACHANGEDL_ENTRY );
     
     if (( EPbStateNotInitialised == iState ) || ( EPbStateInitialising == iState ))
         {
@@ -743,7 +756,7 @@ void CMTPPlaybackControlImpl::DoHandleMediaChangedL()
             }
         }
     
-    __FLOG(_L8("-CMTPPlaybackControlImpl::DoHandleMediaChangedL"));
+    OstTraceFunctionExit0( CMTPPLAYBACKCONTROLIMPL_DOHANDLEMEDIACHANGEDL_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -752,7 +765,7 @@ void CMTPPlaybackControlImpl::DoHandleMediaChangedL()
 //
 void CMTPPlaybackControlImpl::DoHandleInitializeCompleteL()
     {
-    __FLOG(_L8("+CMTPPlaybackControlImpl::DoHandleInitializeCompleteL"));
+    OstTraceFunctionEntry0( CMTPPLAYBACKCONTROLIMPL_DOHANDLEINITIALIZECOMPLETEL_ENTRY );
     
     if ( EPlaybackCmdInitObject == MTPPBCmdHandling() 
             || EPlaybackCmdInitIndex == MTPPBCmdHandling() 
@@ -769,7 +782,7 @@ void CMTPPlaybackControlImpl::DoHandleInitializeCompleteL()
             }
         }
     
-    __FLOG(_L8("-CMTPPlaybackControlImpl::DoHandleInitializeCompleteL"));
+    OstTraceFunctionExit0( CMTPPLAYBACKCONTROLIMPL_DOHANDLEINITIALIZECOMPLETEL_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -778,6 +791,8 @@ void CMTPPlaybackControlImpl::DoHandleInitializeCompleteL()
 //
 void CMTPPlaybackControlImpl::DoHandleError( TInt aErr )
     {    
+    OstTraceFunctionEntry0( CMTPPLAYBACKCONTROLIMPL_DOHANDLEERROR_ENTRY );
+    
     if ( aErr != KPlaybackErrNone )
         {
         if ( iCallback )
@@ -790,6 +805,8 @@ void CMTPPlaybackControlImpl::DoHandleError( TInt aErr )
             TRAP_IGNORE( iObserver->HandlePlaybackEventL( NULL, aErr ));
             }
         }
+    
+    OstTraceFunctionExit0( CMTPPLAYBACKCONTROLIMPL_DOHANDLEERROR_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -798,21 +815,23 @@ void CMTPPlaybackControlImpl::DoHandleError( TInt aErr )
 //
 TBool CMTPPlaybackControlImpl::IfEqual( const CMPXCollectionPath& aPathBase, const CMPXCollectionPath& aPathNew, TUint aLevel )
     {
-    __FLOG(_L8("+CMTPPlaybackControlImpl::IfEqual"));
+    OstTraceFunctionEntry0( CMTPPLAYBACKCONTROLIMPL_IFEQUAL_ENTRY );
     
     if (( aPathBase.Levels() < aLevel ) || ( aPathNew.Levels() < aLevel ))
         {
+        OstTraceFunctionExit0( CMTPPLAYBACKCONTROLIMPL_IFEQUAL_EXIT );
         return EFalse;
         }
     for ( TInt i = 0; i < aLevel; i++ )
         {
         if ( aPathBase.Index( i ) != aPathNew.Index( i ) )
             {
+            OstTraceFunctionExit0( DUP1_CMTPPLAYBACKCONTROLIMPL_IFEQUAL_EXIT );
             return EFalse;
             }
         }
     
-    __FLOG(_L8("-CMTPPlaybackControlImpl::IfEqual"));
+    OstTraceFunctionExit0( DUP2_CMTPPLAYBACKCONTROLIMPL_IFEQUAL_EXIT );
     return ETrue;
     }
 
@@ -822,7 +841,8 @@ TBool CMTPPlaybackControlImpl::IfEqual( const CMPXCollectionPath& aPathBase, con
 //
 TMTPPlaybackState CMTPPlaybackControlImpl::MapState( TMPXPlaybackState aState )
     {
-    __FLOG_VA((_L8("+CMTPPlaybackControlImpl::MapState( aState = 0x%X ) "), aState ));
+    OstTraceFunctionEntry0( CMTPPLAYBACKCONTROLIMPL_MAPSTATE_ENTRY );
+    OstTrace1( TRACE_NORMAL, CMTPPLAYBACKCONTROLIMPL_MAPSTATE, "CMTPPlaybackControlImpl::MapState( aState = 0x%X )", aState );
     
     TMTPPlaybackState state = EPlayStateError;
     
@@ -856,7 +876,7 @@ TMTPPlaybackState CMTPPlaybackControlImpl::MapState( TMPXPlaybackState aState )
             break;
         }
     
-    __FLOG(_L8("-CMTPPlaybackControlImpl::MapState"));
+    OstTraceFunctionExit0( CMTPPLAYBACKCONTROLIMPL_MAPSTATE_EXIT );
     return state;
     }
 
@@ -866,6 +886,8 @@ TMTPPlaybackState CMTPPlaybackControlImpl::MapState( TMPXPlaybackState aState )
 //
 TInt CMTPPlaybackControlImpl::MapError( TInt aError )
     {
+    OstTraceFunctionEntry0( CMTPPLAYBACKCONTROLIMPL_MAPERROR_ENTRY );
+    
     TInt err( KPlaybackErrNone );
 
     if ( KErrHardwareNotAvailable == aError )
@@ -880,6 +902,8 @@ TInt CMTPPlaybackControlImpl::MapError( TInt aError )
         {
         err = KPlaybackErrDeviceBusy;
         }
+    
+    OstTraceFunctionExit0( CMTPPLAYBACKCONTROLIMPL_MAPERROR_EXIT );
     return err;
     }
 
@@ -889,13 +913,15 @@ TInt CMTPPlaybackControlImpl::MapError( TInt aError )
 //
 void CMTPPlaybackControlImpl::CompleteSelf( TInt aCompletionCode )
     {
-    __FLOG_1(_L8("+CMTPPlaybackControlImpl::CompleteSelf( %d )"), aCompletionCode );
+    OstTraceFunctionEntry0( CMTPPLAYBACKCONTROLIMPL_COMPLETESELF_ENTRY );
+    
+    OstTrace1( TRACE_NORMAL, CMTPPLAYBACKCONTROLIMPL_COMPLETESELF, "CMTPPlaybackControlImpl::CompleteSelf( %d )", aCompletionCode );
     
     SetActive();
     TRequestStatus* status = &iStatus;
     User::RequestComplete( status, aCompletionCode );
     
-    __FLOG(_L8("-CMTPPlaybackControlImpl::CompleteSelf"));
+    OstTraceFunctionExit0( CMTPPLAYBACKCONTROLIMPL_COMPLETESELF_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -904,7 +930,7 @@ void CMTPPlaybackControlImpl::CompleteSelf( TInt aCompletionCode )
 //
 void CMTPPlaybackControlImpl::InitiateMPXPlaybackCommandL( TMPXPlaybackCommand aCommand, TBool aIsMTPPlaybackUtility )
     {
-    __FLOG(_L8("+CMTPPlaybackControlImpl::InitiateMPXPlaybackCommandL"));
+    OstTraceFunctionEntry0( CMTPPLAYBACKCONTROLIMPL_INITIATEMPXPLAYBACKCOMMANDL_ENTRY );
     
     switch ( aCommand )
             {
@@ -927,7 +953,7 @@ void CMTPPlaybackControlImpl::InitiateMPXPlaybackCommandL( TMPXPlaybackCommand a
                 break;
             }
     
-    __FLOG(_L8("-CMTPPlaybackControlImpl::InitiateMPXPlaybackCommandL"));
+    OstTraceFunctionExit0( CMTPPLAYBACKCONTROLIMPL_INITIATEMPXPLAYBACKCOMMANDL_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -936,7 +962,7 @@ void CMTPPlaybackControlImpl::InitiateMPXPlaybackCommandL( TMPXPlaybackCommand a
 //
 void CMTPPlaybackControlImpl::SendMPXPlaybackCommandL( TMPXPlaybackCommand aCommand, TBool aIsMTPPlaybackUtility )
     {
-    __FLOG(_L8("+CMTPPlaybackControlImpl::SendPlaybackCommandL"));
+    OstTraceFunctionEntry0( CMTPPLAYBACKCONTROLIMPL_SENDMPXPLAYBACKCOMMANDL_ENTRY );
     
     CMPXCommand* cmd( CMPXCommand::NewL() );
     CleanupStack::PushL( cmd );
@@ -956,7 +982,7 @@ void CMTPPlaybackControlImpl::SendMPXPlaybackCommandL( TMPXPlaybackCommand aComm
     
     CleanupStack::PopAndDestroy( cmd );
     
-    __FLOG(_L8("-CMTPPlaybackControlImpl::SendPlaybackCommandL"));
+    OstTraceFunctionExit0( CMTPPLAYBACKCONTROLIMPL_SENDMPXPLAYBACKCOMMANDL_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -965,7 +991,7 @@ void CMTPPlaybackControlImpl::SendMPXPlaybackCommandL( TMPXPlaybackCommand aComm
 //
 void CMTPPlaybackControlImpl::SendPlaybackCommandCompleteL()
     {
-    __FLOG(_L8("+CMTPPlaybackControlImpl::SendPlaybackCommandCompleteL"));
+    OstTraceFunctionEntry0( CMTPPLAYBACKCONTROLIMPL_SENDPLAYBACKCOMMANDCOMPLETEL_ENTRY );
     
     __ASSERT_DEBUG( iCallback, Panic( EMTPPBCallbackInvalid ));
     __ASSERT_DEBUG(( iMTPPBCmd > EPlaybackCmdNone ) && ( iMTPPBCmd < EPlaybackCmdEnd ), Panic( EMTPPBCallbackInvalid ));
@@ -985,7 +1011,7 @@ void CMTPPlaybackControlImpl::SendPlaybackCommandCompleteL()
         ResetPlaybackCommand();
         }
     
-    __FLOG(_L8("-CMTPPlaybackControlImpl::SendPlaybackCommandCompleteL"));
+    OstTraceFunctionExit0( CMTPPLAYBACKCONTROLIMPL_SENDPLAYBACKCOMMANDCOMPLETEL_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -994,14 +1020,14 @@ void CMTPPlaybackControlImpl::SendPlaybackCommandCompleteL()
 //
 void CMTPPlaybackControlImpl::SendPlaybackEventL( TMTPPlaybackEvent aEvt )
     {
-    __FLOG(_L8("+CMTPPlaybackControlImpl::SendPlaybackEventL"));
+    OstTraceFunctionEntry0( CMTPPLAYBACKCONTROLIMPL_SENDPLAYBACKEVENTL_ENTRY );
 
     CMTPPlaybackEvent* event = CMTPPlaybackEvent::NewL( aEvt, NULL );
     CleanupStack::PushL(event);
     iObserver->HandlePlaybackEventL( event );
     CleanupStack::PopAndDestroy(event);
     
-    __FLOG(_L8("-CMTPPlaybackControlImpl::SendPlaybackEventL"));
+    OstTraceFunctionExit0( CMTPPLAYBACKCONTROLIMPL_SENDPLAYBACKEVENTL_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -1010,7 +1036,7 @@ void CMTPPlaybackControlImpl::SendPlaybackEventL( TMTPPlaybackEvent aEvt )
 //
 void CMTPPlaybackControlImpl::ResetPlaybackCommand()
     {
-    __FLOG(_L8("+CMTPPlaybackControlImpl::ResetPlaybackCommand"));
+    OstTraceFunctionEntry0( CMTPPLAYBACKCONTROLIMPL_RESETPLAYBACKCOMMAND_ENTRY );
     
     iCallback = NULL;
     iMTPPBCmd = EPlaybackCmdNone;
@@ -1019,7 +1045,7 @@ void CMTPPlaybackControlImpl::ResetPlaybackCommand()
     delete iCmdParam;
     iCmdParam = NULL;
     
-    __FLOG(_L8("-CMTPPlaybackControlImpl::ResetPlaybackCommand"));
+    OstTraceFunctionExit0( CMTPPLAYBACKCONTROLIMPL_RESETPLAYBACKCOMMAND_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -1028,6 +1054,8 @@ void CMTPPlaybackControlImpl::ResetPlaybackCommand()
 //
 TMPXPlaybackState CMTPPlaybackControlImpl::CurrentState() const
     {
+    OstTraceFunctionEntry0( CMTPPLAYBACKCONTROLIMPL_CURRENTSTATE_ENTRY );
+    OstTraceFunctionExit0( CMTPPLAYBACKCONTROLIMPL_CURRENTSTATE_EXIT );
     return iState;
     }
 
@@ -1037,6 +1065,8 @@ TMPXPlaybackState CMTPPlaybackControlImpl::CurrentState() const
 //
 TMPXPlaybackState CMTPPlaybackControlImpl::PreviousState() const
     {
+    OstTraceFunctionEntry0( CMTPPLAYBACKCONTROLIMPL_PREVIOUSSTATE_ENTRY );
+    OstTraceFunctionExit0( CMTPPLAYBACKCONTROLIMPL_PREVIOUSSTATE_EXIT );
     return iPreState;
     }
 
@@ -1046,11 +1076,15 @@ TMPXPlaybackState CMTPPlaybackControlImpl::PreviousState() const
 //
 TInt32 CMTPPlaybackControlImpl::SongCount() const
     {
+    OstTraceFunctionEntry0( CMTPPLAYBACKCONTROLIMPL_SONGCOUNT_ENTRY );
+    
     TInt32 songCount = -1;
     if ( iPlayList )
         {
         songCount = iPlayList->Count();
         }
+    
+    OstTraceFunctionExit0( CMTPPLAYBACKCONTROLIMPL_SONGCOUNT_EXIT );
     return songCount;
     }
 
@@ -1060,12 +1094,16 @@ TInt32 CMTPPlaybackControlImpl::SongCount() const
 //
 TInt32 CMTPPlaybackControlImpl::SongIndex() const
     {
+    OstTraceFunctionEntry0( CMTPPLAYBACKCONTROLIMPL_SONGINDEX_ENTRY );
+    
     TInt32 songIndex = -1;
     if ( iPlayList )
         {
         TInt level = iPlayList->Path().Levels();
         songIndex = iPlayList->Path().Index( level-1 );
         }
+    
+    OstTraceFunctionExit0( CMTPPLAYBACKCONTROLIMPL_SONGINDEX_EXIT );
     return songIndex;
     }
 
@@ -1075,7 +1113,11 @@ TInt32 CMTPPlaybackControlImpl::SongIndex() const
 //
 void CMTPPlaybackControlImpl::SetMTPPBCmd( TMTPPlaybackCommand aMTPPBCmd )
     {
+    OstTraceFunctionEntry0( CMTPPLAYBACKCONTROLIMPL_SETMTPPBCMD_ENTRY );
+    
     iMTPPBCmd = aMTPPBCmd;
+    
+    OstTraceFunctionExit0( CMTPPLAYBACKCONTROLIMPL_SETMTPPBCMD_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -1084,14 +1126,17 @@ void CMTPPlaybackControlImpl::SetMTPPBCmd( TMTPPlaybackCommand aMTPPBCmd )
 //
 TMTPPlaybackCommand CMTPPlaybackControlImpl::MTPPBCmdHandling() const
     {
+    OstTraceFunctionEntry0( CMTPPLAYBACKCONTROLIMPL_MTPPBCMDHANDLING_ENTRY );
+    
     if ( iPrepareCmdArray.Count() == 0 )
         {
+        OstTraceFunctionExit0( CMTPPLAYBACKCONTROLIMPL_MTPPBCMDHANDLING_EXIT );
         return iMTPPBCmd;
         }
     else
         {
+        OstTraceFunctionExit0( DUP1_CMTPPLAYBACKCONTROLIMPL_MTPPBCMDHANDLING_EXIT );
         return EPlaybackCmdNone;
         }
-    
     }
 

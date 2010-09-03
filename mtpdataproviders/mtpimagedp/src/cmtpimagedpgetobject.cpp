@@ -34,9 +34,11 @@
 #include "cmtpimagedp.h"
 #include "mtpimagedpconst.h"
 #include "mtpimagedputilits.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpimagedpgetobjectTraces.h"
+#endif
 
-// Class constants.
-__FLOG_STMT(_LIT8(KComponent,"ImageDpGetObject");)
 
 /**
 Verification data for the GetNumObjects request
@@ -67,10 +69,9 @@ Destructor
 */	
 CMTPImageDpGetObject::~CMTPImageDpGetObject()
     {
-    __FLOG(_L8(">> ~CMTPImageDpGetObject"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPGETOBJECT_CMTPIMAGEDPGETOBJECT_ENTRY );
     delete iFileObject;
-    __FLOG(_L8("<< ~CMTPImageDpGetObject"));
-    __FLOG_CLOSE;
+    OstTraceFunctionExit0( CMTPIMAGEDPGETOBJECT_CMTPIMAGEDPGETOBJECT_EXIT );
     }
 	
 /**
@@ -89,13 +90,12 @@ Second-phase constructor.
 */        
 void CMTPImageDpGetObject::ConstructL()
     {
-    __FLOG_OPEN(KMTPSubsystem, KComponent);
-    __FLOG(_L8(">> CMTPImageDpGetObject::ConstructL"));   
-    __FLOG(_L8("<< CMTPImageDpGetObject::ConstructL"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPGETOBJECT_CONSTRUCTL_ENTRY );
+    OstTraceFunctionExit0( CMTPIMAGEDPGETOBJECT_CONSTRUCTL_EXIT );
     }
 TMTPResponseCode CMTPImageDpGetObject::CheckRequestL()
     {    
-    __FLOG(_L8(">> CMTPImageDpGetObject::CheckRequestL"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPGETOBJECT_CHECKREQUESTL_ENTRY );
     TMTPResponseCode responseCode = CMTPRequestProcessor::CheckRequestL();
     
     TUint32 handle(Request().Uint32(TMTPTypeRequest::ERequestParameter1));
@@ -106,7 +106,7 @@ TMTPResponseCode CMTPImageDpGetObject::CheckRequestL()
                 iFramework, handle, *ObjectMeta);
         delete ObjectMeta;
         }
-    __FLOG(_L8("<< CMTPImageDpGetObject::CheckRequestL"));
+    OstTraceFunctionExit0( CMTPIMAGEDPGETOBJECT_CHECKREQUESTL_EXIT );
     return responseCode;
     }
 /**
@@ -114,7 +114,7 @@ GetObject request handler
 */		
 void CMTPImageDpGetObject::ServiceL()
     {
-    __FLOG(_L8(">> CMTPImageDpGetObject::ServiceL"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPGETOBJECT_SERVICEL_ENTRY );
     
     TUint32 objectHandle = Request().Uint32(TMTPTypeRequest::ERequestParameter1);
     //does not take ownership    
@@ -123,7 +123,7 @@ void CMTPImageDpGetObject::ServiceL()
     
     BuildFileObjectL(objectInfo->DesC(CMTPObjectMetaData::ESuid));
     SendDataL(*iFileObject);    
-    __FLOG(_L8("<< CMTPImageDpGetObject::ServiceL"));
+    OstTraceFunctionExit0( CMTPIMAGEDPGETOBJECT_SERVICEL_EXIT );
     }
 		
 
@@ -133,16 +133,16 @@ Build the file object data set for the file requested
 */
 void CMTPImageDpGetObject::BuildFileObjectL(const TDesC& aFileName)
     {
-    __FLOG(_L8(">> CMTPImageDpGetObject::BuildFileObjectL"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPGETOBJECT_BUILDFILEOBJECTL_ENTRY );
     delete iFileObject;
     iFileObject = NULL;
     iFileObject = CMTPTypeFile::NewL(iFramework.Fs(), aFileName, EFileShareReadersOnly);
-    __FLOG(_L8("<< CMTPImageDpGetObject::BuildFileObjectL"));
+    OstTraceFunctionExit0( CMTPIMAGEDPGETOBJECT_BUILDFILEOBJECTL_EXIT );
     }
 
 TBool CMTPImageDpGetObject::DoHandleCompletingPhaseL()
     {
-    __FLOG(_L8(" CMTPImageDpGetObject::DoHandleResponsePhaseL - Entry"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPGETOBJECT_DOHANDLECOMPLETINGPHASEL_ENTRY );
     
     /**
      * end-user does not cancel the operation, we think the getobject operation is successful.
@@ -158,7 +158,6 @@ TBool CMTPImageDpGetObject::DoHandleCompletingPhaseL()
             iDataProvider.ResetNewPictures();
             }
         }
-    
-    __FLOG(_L8("CMTPImageDpGetObject::DoHandleResponsePhaseL - Exit"));
+
     return CMTPRequestProcessor::DoHandleCompletingPhaseL();
     }

@@ -24,8 +24,6 @@
 #include <e32base.h>
 #include <mtp/mmtpobjectmgr.h>
 
-#include "mtpdebug.h"
-
 #include "cmtpobjectstore.h"
 
 class CMTPObjectStore;
@@ -93,11 +91,6 @@ private:
     void ConstructL();
     
 private: // Owned
-
-    /**
-    FLOGGER debug trace member variable.
-    */
-    __FLOG_DECLARATION_MEMBER_MUTABLE;
 
     /**
     The object meta data store.

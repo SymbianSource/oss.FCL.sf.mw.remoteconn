@@ -25,7 +25,6 @@
 
 #include <e32base.h>
 #include <mtp/rmtpclient.h>
-#include "mtpdebug.h"
 
 class CMTPOperator;
 
@@ -48,7 +47,6 @@ private:
     void RunL();
 
 private:
-    __FLOG_DECLARATION_MEMBER_MUTABLE;
     
     RMTPClient& iMTPClient;
     CMTPOperator * iMTPOperator;

@@ -31,8 +31,13 @@
 #include "mtpimagedpconst.h"
 #include "mtpimagedputilits.h"
 #include "cmtpimagedp.h"
+#include "mtpdebug.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpimagedpthumbnailcreatorTraces.h"
+#endif
 
-__FLOG_STMT(_LIT8(KComponent,"CMTPImageDpThumbnailCreator");)
+
 // --------------------------------------------------------------------------
 // CMTPImageDpThumbnailCreator::NewL
 // 2-phased constructor.
@@ -54,7 +59,7 @@ CMTPImageDpThumbnailCreator* CMTPImageDpThumbnailCreator::NewL(CMTPImageDataProv
 //    
 CMTPImageDpThumbnailCreator::~CMTPImageDpThumbnailCreator()
     {
-    __FLOG(_L8(">> ~CMTPImageDpThumbnailCreator"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPTHUMBNAILCREATOR_CMTPIMAGEDPTHUMBNAILCREATOR_DES_ENTRY );
     Cancel();
     if(EGetting == iState)
         {
@@ -74,8 +79,7 @@ CMTPImageDpThumbnailCreator::~CMTPImageDpThumbnailCreator()
         iActiveSchedulerWait->AsyncStop();
         }
     delete iActiveSchedulerWait;
-    __FLOG(_L8("<< ~CMTPImageDpThumbnailCreator"));
-    __FLOG_CLOSE;
+    OstTraceFunctionExit0( CMTPIMAGEDPTHUMBNAILCREATOR_CMTPIMAGEDPTHUMBNAILCREATOR_DES_EXIT );
     }
  
 // --------------------------------------------------------------------------
@@ -87,10 +91,9 @@ CMTPImageDpThumbnailCreator::CMTPImageDpThumbnailCreator(CMTPImageDataProvider& 
     CActive(EPriorityStandard),
     iDataProvider(aDataProvider)
     {
-    __FLOG_OPEN(KMTPSubsystem, KComponent);
-    __FLOG(_L8("CMTPImageDpThumbnailCreator::CMTPImageDpThumbnailCreator(), begin"));
+    OstTraceFunctionEntry0( DUP1_CMTPIMAGEDPTHUMBNAILCREATOR_CMTPIMAGEDPTHUMBNAILCREATOR_CONS_ENTRY );
     CActiveScheduler::Add(this);  
-    __FLOG(_L8("CMTPImageDpThumbnailCreator::CMTPImageDpThumbnailCreator(), end"));
+    OstTraceFunctionExit0( DUP1_CMTPIMAGEDPTHUMBNAILCREATOR_CMTPIMAGEDPTHUMBNAILCREATOR_CONS_EXIT );
     }
 
 // --------------------------------------------------------------------------
@@ -100,14 +103,14 @@ CMTPImageDpThumbnailCreator::CMTPImageDpThumbnailCreator(CMTPImageDataProvider& 
 //
 void CMTPImageDpThumbnailCreator::ConstructL()
     {
-    __FLOG(_L8("CMTPImageDpThumbnailCreator::ConstructL(), begin"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPTHUMBNAILCREATOR_CONSTRUCTL_ENTRY );
     iThumbMgr = CThumbnailManager::NewL( *this ); 
     iThumbMgr->SetThumbnailSizeL( EGridThumbnailSize );
 #ifdef MTPTHUMBSCALING
     iScaler = CBitmapScaler::NewL();
 #endif    
     iActiveSchedulerWait = new (ELeave) CActiveSchedulerWait();
-    __FLOG(_L8("CMTPImageDpThumbnailCreator::ConstructL(), end"));
+    OstTraceFunctionExit0( CMTPIMAGEDPTHUMBNAILCREATOR_CONSTRUCTL_EXIT );
     }
 
 // --------------------------------------------------------------------------
@@ -117,7 +120,8 @@ void CMTPImageDpThumbnailCreator::ConstructL()
 //
 void CMTPImageDpThumbnailCreator::DoCancel()
     {
-    __FLOG_VA((_L8(">> CMTPImageDpThumbnailCreator::DoCancel() iState %d iStatus 0x%X"), iState, iStatus.Int()));
+    OstTraceFunctionEntry0( CMTPIMAGEDPTHUMBNAILCREATOR_DOCANCEL_ENTRY );
+    OstTraceExt2( TRACE_NORMAL, CMTPIMAGEDPTHUMBNAILCREATOR_DOCANCEL, "iState %d iStatus 0x%X", iState, iStatus.Int() );
     switch(iState)
         {
 #ifdef MTPTHUMBSCALING
@@ -137,7 +141,8 @@ void CMTPImageDpThumbnailCreator::DoCancel()
         iActiveSchedulerWait->AsyncStop();
         }
     // we will not continue creating thumbs.
-    __FLOG_VA((_L8("<< CMTPImageDpThumbnailCreator::DoCancel() iState %d"), iState));
+    OstTraceFunctionExit0( CMTPIMAGEDPTHUMBNAILCREATOR_DOCANCEL_EXIT );
+    OstTrace1( TRACE_NORMAL, DUP1_CMTPIMAGEDPTHUMBNAILCREATOR_DOCANCEL, "iState %d", iState);
     }
 
 // --------------------------------------------------------------------------
@@ -147,8 +152,12 @@ void CMTPImageDpThumbnailCreator::DoCancel()
 //    
 void CMTPImageDpThumbnailCreator::RunL()
     {
-    __FLOG_VA((_L8(">> CMTPImageDpThumbnailCreator::RunL() iState %d iStatus %d"), iState, iStatus.Int()));
-    User::LeaveIfError(iStatus.Int());
+    OstTraceFunctionEntry0( CMTPIMAGEDPTHUMBNAILCREATOR_RUNL_ENTRY );
+    OstTraceExt2( TRACE_NORMAL, CMTPIMAGEDPTHUMBNAILCREATOR_RUNL, "iState %d iStatus 0x%X", iState, iStatus.Int() );
+
+    LEAVEIFERROR(iStatus.Int(),
+            OstTrace1(TRACE_ERROR, DUP1_CMTPIMAGEDPTHUMBNAILCREATOR_RUNL, "iStatus %d is not correct!", iStatus.Int() ));
+            
     switch (iState)
         { 
 #ifdef MTPTHUMBSCALING
@@ -170,12 +179,14 @@ void CMTPImageDpThumbnailCreator::RunL()
             iState=EIdle;
             if (iThumbMgr->Flags() == CThumbnailManager::EDoNotCreate)
                 {
-                __FLOG_VA((_L8("CMTPImageDpThumbnailCreator::RunL(),EDoNotCreate; iState %d"), iState));
+                OstTrace1( TRACE_NORMAL, DUP2_CMTPIMAGEDPTHUMBNAILCREATOR_RUNL, 
+                        "CMTPImageDpThumbnailCreator::RunL(),EDoNotCreate; iState %d", iState );
+                
                 delete iData;
                 iData = HBufC8::NewL(1);
                 }
-            
-            __FLOG_VA((_L8("<< CMTPImageDpThumbnailCreator::RunL(),iBuffer->Write(*iData); iState %d"), iState));
+
+            OstTrace1( TRACE_NORMAL, DUP3_CMTPIMAGEDPTHUMBNAILCREATOR_RUNL, "iBuffer->Write(*iData); iState %d", iState );
             if(iActiveSchedulerWait->IsStarted())
                 {
                 iActiveSchedulerWait->AsyncStop();
@@ -184,11 +195,13 @@ void CMTPImageDpThumbnailCreator::RunL()
             }
         default:
             {
+            OstTrace1( TRACE_ERROR, DUP4_CMTPIMAGEDPTHUMBNAILCREATOR_RUNL, "Invalid iState %d", iState );
             User::Leave(KErrGeneral);
             break;
             }
         }
-    __FLOG_VA((_L8("<< CMTPImageDpThumbnailCreator::RunL() iState %d"), iState));
+    OstTrace1( TRACE_NORMAL, DUP5_CMTPIMAGEDPTHUMBNAILCREATOR_RUNL, "iState %d", iState );
+    OstTraceFunctionExit0( CMTPIMAGEDPTHUMBNAILCREATOR_RUNL_EXIT );
     }
 
 // --------------------------------------------------------------------------
@@ -197,7 +210,8 @@ void CMTPImageDpThumbnailCreator::RunL()
 //    
 TInt CMTPImageDpThumbnailCreator::RunError(TInt aErr)
     {
-    __FLOG_VA((_L8(">> CMTPImageDpThumbnailCreator::RunError() err 0x%X"), aErr));
+    OstTraceFunctionEntry0( CMTPIMAGEDPTHUMBNAILCREATOR_RUNERROR_ENTRY );
+    OstTraceDef1(OST_TRACE_CATEGORY_PRODUCTION, TRACE_IMPORTANT, CMTPIMAGEDPTHUMBNAILCREATOR_RUNERROR, "err 0x%X", aErr );
     iState=EIdle;
     if(iActiveSchedulerWait->IsStarted())
         {
@@ -205,7 +219,7 @@ TInt CMTPImageDpThumbnailCreator::RunError(TInt aErr)
         iActiveSchedulerWait->AsyncStop();
         }
     // no need to cancel iScalerP since only leave is issued if scaler creation fails
-    __FLOG(_L8("<< CMTPImageDpThumbnailCreator::RunError()"));
+    OstTraceFunctionExit0( CMTPIMAGEDPTHUMBNAILCREATOR_RUNERROR_EXIT );
     return KErrNone;
     }
 
@@ -215,11 +229,10 @@ TInt CMTPImageDpThumbnailCreator::RunError(TInt aErr)
 //
 void CMTPImageDpThumbnailCreator::GetThumbnailL(const TDesC& aFileName, HBufC8*& aDestinationData,  TInt& result)
     {
-    __FLOG(_L8(">> CMtpImageDphumbnailCreator::GetThumbnailL()"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPTHUMBNAILCREATOR_GETTHUMBNAILL_ENTRY );
     GetThumbL(aFileName);
     iCreationErr = &result;     //reset the err flag
     *iCreationErr = KErrNone;
-    __FLOG(_L8("<< CMTPImageDpThumbnailCreator::CreateThumbnailL()"));
     iActiveSchedulerWait->Start();
     
     /**
@@ -234,6 +247,7 @@ void CMTPImageDpThumbnailCreator::GetThumbnailL(const TDesC& aFileName, HBufC8*&
         {
         aDestinationData = NULL;
         }
+    OstTraceFunctionExit0( CMTPIMAGEDPTHUMBNAILCREATOR_GETTHUMBNAILL_EXIT );
     }
 
 // --------------------------------------------------------------------------
@@ -254,7 +268,7 @@ void CMTPImageDpThumbnailCreator::ClearThumbnailData()
 
 void CMTPImageDpThumbnailCreator::GetThumbL(const TDesC& aFileName)
     {
-    __FLOG(_L8(">> CMtpImageDphumbnailCreator::GetThumbL()"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPTHUMBNAILCREATOR_GETTHUMBL_ENTRY );
     // Create an object source representing a path to a file on local
     // file system.
     delete iObjectSource;
@@ -264,7 +278,8 @@ void CMTPImageDpThumbnailCreator::GetThumbL(const TDesC& aFileName)
     if (parse.Ext().Length() >= 1)
         {
         const TDesC& mimeType = iDataProvider.FindMimeType(parse.Ext().Mid(1));
-        __FLOG_VA((_L16("CMtpImageDphumbnailCreator::GetThumbL() - FileName:%S, MimeType:%S"), &aFileName, &mimeType));
+        OstTraceExt2( TRACE_NORMAL, CMTPIMAGEDPTHUMBNAILCREATOR_GETTHUMBL, 
+                "CMtpImageDphumbnailCreator::GetThumbL() - FileName:%S, MimeType:%S", aFileName, mimeType );
     
         iObjectSource = CThumbnailObjectSource::NewL(aFileName, mimeType);
         }
@@ -274,7 +289,7 @@ void CMTPImageDpThumbnailCreator::GetThumbL(const TDesC& aFileName)
         }
     iCurrentReq = iThumbMgr->GetThumbnailL( *iObjectSource );
     iState = EGetting;
-    __FLOG(_L8("<< CMtpImageDphumbnailCreator::GetThumbL()"));
+    OstTraceFunctionExit0( CMTPIMAGEDPTHUMBNAILCREATOR_GETTHUMBL_EXIT );
     }
 
 #ifdef MTPTHUMBSCALING
@@ -285,7 +300,7 @@ void CMTPImageDpThumbnailCreator::GetThumbL(const TDesC& aFileName)
 //
 void CMTPImageDpThumbnailCreator::ScaleBitmap()
     {
-    __FLOG(_L8("CMTPImageDpThumbnailCreator::ScaleBitmapL(), begin"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPTHUMBNAILCREATOR_SCALEBITMAP_ENTRY );
     TSize size( KThumbWidht, KThumbHeigth ); // size 160x120      
     // Resize image to thumbnail size 
 //    iScaler->Scale( &iStatus, *iBitmap, size );
@@ -299,7 +314,7 @@ void CMTPImageDpThumbnailCreator::ScaleBitmap()
     User::RequestComplete( status, KErrNone );
     
     SetActive();
-    __FLOG(_L8("CMTPImageDpThumbnailCreator::ScaleBitmapL(), end"));
+    OstTraceFunctionExit0( CMTPIMAGEDPTHUMBNAILCREATOR_SCALEBITMAP_EXIT );
     }
 #endif
 
@@ -310,7 +325,7 @@ void CMTPImageDpThumbnailCreator::ScaleBitmap()
 //
 void CMTPImageDpThumbnailCreator::EncodeImageL( )
     {
-    __FLOG(_L8(">> CMTPImageDpThumbnailCreator::EncodeImageL()"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPTHUMBNAILCREATOR_ENCODEIMAGEL_ENTRY );
 
     delete iData;
     iData = NULL;
@@ -322,18 +337,20 @@ void CMTPImageDpThumbnailCreator::EncodeImageL( )
     iImgEnc = CImageEncoder::DataNewL( iData, KPtpMimeJPEG, CImageEncoder::EPreferFastEncode );
     iImgEnc->Convert( &iStatus, *iBitmap );
     SetActive();
-    __FLOG(_L8("<< CMTPImageDpThumbnailCreator::EncodeImageL()"));
+    OstTraceFunctionExit0( CMTPIMAGEDPTHUMBNAILCREATOR_ENCODEIMAGEL_EXIT );
     }
 
 //
 //
 void CMTPImageDpThumbnailCreator::ThumbnailReady( TInt aError, MThumbnailData& aThumbnail, TThumbnailRequestId aId )
     {
+    OstTraceFunctionEntry0( CMTPIMAGEDPTHUMBNAILCREATOR_THUMBNAILREADY_ENTRY );
     // This function must not leave.
-    __FLOG(_L8(">> CMTPImageDpThumbnailCreator::ThumbnailReady()"));
     if(iCurrentReq != aId)
         {
-        __FLOG(_L8("CMTPImageDpThumbnailCreator::ThumbnailReady(),iCurrentReq != aId"));
+        OstTrace0( TRACE_NORMAL, DUP1_CMTPIMAGEDPTHUMBNAILCREATOR_THUMBNAILREADY, 
+                "CMTPImageDpThumbnailCreator::ThumbnailReady(),iCurrentReq != aId" );
+        OstTraceFunctionExit0( CMTPIMAGEDPTHUMBNAILCREATOR_THUMBNAILREADY_EXIT );
         return;
         }
     if (aError == KErrNone)
@@ -350,7 +367,8 @@ void CMTPImageDpThumbnailCreator::ThumbnailReady( TInt aError, MThumbnailData& a
         }
     else if ((iThumbMgr->Flags() == CThumbnailManager::EDoNotCreate) && (aError == KErrNotFound))
         {
-        __FLOG(_L8("CMTPImageDpThumbnailCreator::ThumbnailReady(),EDoNotCreate, KErrNotFound"));
+        OstTrace0( TRACE_NORMAL, CMTPIMAGEDPTHUMBNAILCREATOR_THUMBNAILREADY, 
+                "CMTPImageDpThumbnailCreator::ThumbnailReady(),EDoNotCreate, KErrNotFound" );
         iState = EEncoding;
         //don't trigger TNM to create thumbnail if image files are too big
         //iThumbMgr->CreateThumbnails(*iObjectSource);
@@ -360,7 +378,7 @@ void CMTPImageDpThumbnailCreator::ThumbnailReady( TInt aError, MThumbnailData& a
     TRequestStatus* status=&iStatus;
     User::RequestComplete(status, aError);
     SetActive();
-    __FLOG(_L8("<< CMTPImageDpThumbnailCreator::ThumbnailReady()"));
+    OstTraceFunctionExit0( DUP1_CMTPIMAGEDPTHUMBNAILCREATOR_THUMBNAILREADY_EXIT );
     }
 
 void CMTPImageDpThumbnailCreator::ThumbnailPreviewReady( MThumbnailData& /*aThumbnail*/, TThumbnailRequestId /*aId*/ )

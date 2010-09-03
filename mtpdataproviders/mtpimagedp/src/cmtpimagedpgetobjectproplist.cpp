@@ -35,8 +35,10 @@
 #include "mtpimagedppanic.h"
 #include "cmtpimagedp.h"
 #include "mtpimagedputilits.h"
-
-__FLOG_STMT(_LIT8(KComponent,"ImageDpGetObjectPropList");)
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpimagedpgetobjectproplistTraces.h"
+#endif
 
 
 MMTPRequestProcessor* CMTPImageDpGetObjectPropList::NewL(MMTPDataProviderFramework& aFramework, 
@@ -56,7 +58,6 @@ CMTPImageDpGetObjectPropList::CMTPImageDpGetObjectPropList(MMTPDataProviderFrame
     CMTPRequestProcessor(aFramework, aConnection, 0,NULL),
     iPropertyMgr(aDataProvider.PropertyMgr())
     {
-    __FLOG_OPEN(KMTPSubsystem, KComponent);
     }
     
 /*
@@ -64,12 +65,12 @@ CMTPImageDpGetObjectPropList::CMTPImageDpGetObjectPropList(MMTPDataProviderFrame
  */   
 void CMTPImageDpGetObjectPropList::ConstructL()
     {
-    __FLOG(_L8(">> CMTPImageDpGetObjectPropList::ConstructL"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPGETOBJECTPROPLIST_CONSTRUCTL_ENTRY );
     
     iPropertyList = CMTPTypeObjectPropList::NewL();
     iObjectMeta = CMTPObjectMetaData::NewL();
-    
-    __FLOG(_L8("<< CMTPImageDpGetObjectPropList::ConstructL"));
+
+    OstTraceFunctionExit0( CMTPIMAGEDPGETOBJECTPROPLIST_CONSTRUCTL_EXIT );
     }
 
 /*
@@ -77,13 +78,13 @@ void CMTPImageDpGetObjectPropList::ConstructL()
  */       
 CMTPImageDpGetObjectPropList::~CMTPImageDpGetObjectPropList()
     {
-    __FLOG(_L8("~CMTPImageDpGetObjectPropList"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPGETOBJECTPROPLIST_CMTPIMAGEDPGETOBJECTPROPLIST_DES_ENTRY );
     Cancel();
     
     iHandles.Close();
     delete iPropertyList;
     delete iObjectMeta;
-    __FLOG_CLOSE;
+    OstTraceFunctionExit0( CMTPIMAGEDPGETOBJECTPROPLIST_CMTPIMAGEDPGETOBJECTPROPLIST_DES_EXIT );
     }
 
 /*
@@ -91,7 +92,7 @@ CMTPImageDpGetObjectPropList::~CMTPImageDpGetObjectPropList()
  */ 
 void CMTPImageDpGetObjectPropList::ServiceL()
     {
-    __FLOG(_L8(">> CMTPImageDpGetObjectPropList::ServiceL"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPGETOBJECTPROPLIST_SERVICEL_ENTRY );
     
     //get all the handles
     GetObjectHandlesL();
@@ -103,8 +104,8 @@ void CMTPImageDpGetObjectPropList::ServiceL()
         }
     
     StartL();
-    
-    __FLOG(_L8("<< CMTPImageDpGetObjectPropList::ServiceL"));
+
+    OstTraceFunctionExit0( CMTPIMAGEDPGETOBJECTPROPLIST_SERVICEL_EXIT );
     }
     
 /*
@@ -112,7 +113,7 @@ void CMTPImageDpGetObjectPropList::ServiceL()
  */   
 TMTPResponseCode CMTPImageDpGetObjectPropList::CheckRequestL()
     {
-    __FLOG(_L8(">> CMTPImageDpGetObjectPropList::CheckRequestL"));        
+    OstTraceFunctionEntry0( CMTPIMAGEDPGETOBJECTPROPLIST_CHECKREQUESTL_ENTRY );      
 
     TMTPResponseCode result = EMTPRespCodeOK;
     TUint32 handle(Request().Uint32(TMTPTypeRequest::ERequestParameter1));
@@ -133,14 +134,16 @@ TMTPResponseCode CMTPImageDpGetObjectPropList::CheckRequestL()
         {
         result = CheckDepth();
         }    
+		
+	OstTrace1( TRACE_NORMAL, CMTPIMAGEDPGETOBJECTPROPLIST_CHECKREQUESTL, "result: %d", result );
+    OstTraceFunctionExit0( CMTPIMAGEDPGETOBJECTPROPLIST_CHECKREQUESTL_EXIT );
     
-    __FLOG_VA((_L8("<< CMTPImageDpGetObjectPropList::CheckRequestL result: %d"), result));
     return result;    
     }
 
 TMTPResponseCode CMTPImageDpGetObjectPropList::CheckPropCode() const
     {
-    __FLOG(_L8(">> CMTPImageDpGetObjectPropList::CheckPropCode"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPGETOBJECTPROPLIST_CHECKPROPCODE_ENTRY );
     
     TMTPResponseCode response = EMTPRespCodeOK; 
     TUint32 propCode = Request().Uint32(TMTPTypeRequest::ERequestParameter3);
@@ -164,13 +167,13 @@ TMTPResponseCode CMTPImageDpGetObjectPropList::CheckPropCode() const
             response = EMTPRespCodeInvalidObjectPropCode;
             }
         }
-    __FLOG(_L8("<< CMTPImageDpGetObjectPropList::CheckPropCode"));
+    OstTraceFunctionExit0( CMTPIMAGEDPGETOBJECTPROPLIST_CHECKPROPCODE_EXIT );
     return response;
     }
  
 TMTPResponseCode CMTPImageDpGetObjectPropList::CheckDepth() const
     {
-    __FLOG(_L8(">> CMTPImageDpGetObjectPropList::CheckDepth"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPGETOBJECTPROPLIST_CHECKDEPTH_ENTRY );
     
     TMTPResponseCode response = EMTPRespCodeSpecificationByDepthUnsupported;
     
@@ -183,13 +186,13 @@ TMTPResponseCode CMTPImageDpGetObjectPropList::CheckDepth() const
         response = EMTPRespCodeOK; 
         }
     
-    __FLOG(_L8("<< CMTPImageDpGetObjectPropList::CheckDepth"));
+    OstTraceFunctionExit0( CMTPIMAGEDPGETOBJECTPROPLIST_CHECKDEPTH_EXIT );
     return response;    
     }
 
 void CMTPImageDpGetObjectPropList::GetObjectHandlesL()
     {
-    __FLOG(_L8(">> CMTPImageDpGetObjectPropList::GetObjectHandlesL"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPGETOBJECTPROPLIST_GETOBJECTHANDLESL_ENTRY );
     
     TUint32 handle(Request().Uint32(TMTPTypeRequest::ERequestParameter1));
     TUint32 formatCode(Request().Uint32(TMTPTypeRequest::ERequestParameter2));
@@ -210,12 +213,12 @@ void CMTPImageDpGetObjectPropList::GetObjectHandlesL()
         iHandles.AppendL( handle );
         }
     
-    __FLOG(_L8("<< CMTPImageDpGetObjectPropList::GetObjectHandlesL"));
+    OstTraceFunctionExit0( CMTPIMAGEDPGETOBJECTPROPLIST_GETOBJECTHANDLESL_EXIT );
     }
 
 void CMTPImageDpGetObjectPropList::GetObjectHandlesL(TUint32 aStorageId, TUint32 aFormatCode, TUint32 aParentHandle)
     {
-    __FLOG(_L8(">> CMTPImageDpGetObjectPropList::GetObjectHandlesL"));
+    OstTraceFunctionEntry0( DUP1_CMTPIMAGEDPGETOBJECTPROPLIST_GETOBJECTHANDLESL_ENTRY );
     
     RMTPObjectMgrQueryContext   context;
     RArray<TUint>               handles;
@@ -237,13 +240,13 @@ void CMTPImageDpGetObjectPropList::GetObjectHandlesL(TUint32 aStorageId, TUint32
     
     CleanupStack::PopAndDestroy(&handles);
     CleanupStack::PopAndDestroy(&context);
-    
-    __FLOG(_L8("<< CMTPImageDpGetObjectPropList::GetObjectHandlesL"));
+
+    OstTraceFunctionExit0( DUP1_CMTPIMAGEDPGETOBJECTPROPLIST_GETOBJECTHANDLESL_EXIT );
     }
     
 void CMTPImageDpGetObjectPropList::GetRootObjectHandlesL(TUint32 aFormatCode, TUint32 aDepth)
     {
-    __FLOG(_L8(">> CMTPImageDpGetObjectPropList::GetRootObjectHandlesL"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPGETOBJECTPROPLIST_GETROOTOBJECTHANDLESL_ENTRY );
     
     if (aDepth == KMaxTUint)
         {
@@ -251,20 +254,20 @@ void CMTPImageDpGetObjectPropList::GetRootObjectHandlesL(TUint32 aFormatCode, TU
         }
     else if (aDepth == 0)
         {
-        __FLOG(_L8("depth is 0, iHandles is an empty array"));
+        OstTrace0( TRACE_NORMAL, CMTPIMAGEDPGETOBJECTPROPLIST_GETROOTOBJECTHANDLESL, "depth is 0, iHandles is an empty array" );
         iHandles.Reset();
         }
     else
         {
         GetObjectHandlesL(KMTPStorageAll, aFormatCode, KMTPHandleNoParent);
         }
-    
-    __FLOG(_L8("<< CMTPImageDpGetObjectPropList::GetRootObjectHandlesL"));
+
+    OstTraceFunctionExit0( CMTPIMAGEDPGETOBJECTPROPLIST_GETROOTOBJECTHANDLESL_EXIT );
     }
 
 void CMTPImageDpGetObjectPropList::ServicePropertiesL( TUint32 aHandle )
     {
-    __FLOG(_L8(">> CMTPImageDpGetObjectPropList::ServicePropertiesL"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPGETOBJECTPROPLIST_SERVICEPROPERTIESL_ENTRY );
     
     TUint32 propCode  = Request().Uint32(TMTPTypeRequest::ERequestParameter3);
     TUint32 groupCode = Request().Uint32(TMTPTypeRequest::ERequestParameter4);
@@ -284,12 +287,12 @@ void CMTPImageDpGetObjectPropList::ServicePropertiesL( TUint32 aHandle )
         {
         ServiceOneObjectPropertyL(aHandle, propCode);
         }
-    __FLOG(_L8("<< CMTPImageDpGetObjectPropList::ServicePropertiesL"));
+    OstTraceFunctionExit0( CMTPIMAGEDPGETOBJECTPROPLIST_SERVICEPROPERTIESL_EXIT );
     }
 
 void CMTPImageDpGetObjectPropList::ServiceAllPropertiesL(TUint32 aHandle)
     {
-    __FLOG(_L8(">> CMTPImageDpGetObjectPropList::ServiceAllPropertiesL"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPGETOBJECTPROPLIST_SERVICEALLPROPERTIESL_ENTRY );
     
     if (iFramework.ObjectMgr().ObjectOwnerId(aHandle) == iFramework.DataProviderId())
         {
@@ -298,12 +301,12 @@ void CMTPImageDpGetObjectPropList::ServiceAllPropertiesL(TUint32 aHandle)
             ServiceOneObjectPropertyL(aHandle, KMTPImageDpSupportedProperties[i]);
             }
         }
-    __FLOG(_L8("<< CMTPImageDpGetObjectPropList::ServiceAllPropertiesL"));
+    OstTraceFunctionExit0( CMTPIMAGEDPGETOBJECTPROPLIST_SERVICEALLPROPERTIESL_EXIT );
     }
     
 void CMTPImageDpGetObjectPropList::ServiceGroupPropertiesL(TUint32 aHandle,TUint16 /*aGroupCode*/)
     {
-    __FLOG(_L8(">> CMTPImageDpGetObjectPropList::ServiceGroupPropertiesL"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPGETOBJECTPROPLIST_SERVICEGROUPPROPERTIESL_ENTRY );
     TUint32 groupCode = Request().Uint32(TMTPTypeRequest::ERequestParameter4);
     if (KMTPImageDpPropertyGroupOneNumber == groupCode) //only return data for group one
         {
@@ -319,12 +322,12 @@ void CMTPImageDpGetObjectPropList::ServiceGroupPropertiesL(TUint32 aHandle,TUint
                 }
             }
         }
-    __FLOG(_L8("<< CMTPImageDpGetObjectPropList::ServiceGroupPropertiesL"));
+    OstTraceFunctionExit0( CMTPIMAGEDPGETOBJECTPROPLIST_SERVICEGROUPPROPERTIESL_EXIT );
     }
  
 void CMTPImageDpGetObjectPropList::ServiceOneObjectPropertyL(TUint32 aHandle, TUint32 aPropCode)
     {
-    __FLOG(_L8(">> CMTPImageDpGetObjectPropList::ServiceOneObjectPropertyL"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPGETOBJECTPROPLIST_SERVICEONEOBJECTPROPERTYL_ENTRY );
     
     if (iFramework.ObjectMgr().ObjectOwnerId(aHandle) == iFramework.DataProviderId())
         {
@@ -424,27 +427,45 @@ void CMTPImageDpGetObjectPropList::ServiceOneObjectPropertyL(TUint32 aHandle, TU
             propElem.SetUint8L(CMTPTypeObjectPropListElement::EValue, value);
             iPropertyList->CommitPropElemL(propElem);
             }        
-            break;               
+            break;
+        case EMTPObjectPropCodeHidden:
+            {
+            TEntry FileEntry;
+            User::LeaveIfError(iFramework.Fs().Entry(iObjectMeta->DesC(CMTPObjectMetaData::ESuid), FileEntry));
+            CMTPTypeObjectPropListElement& propElem = iPropertyList->ReservePropElemL(aHandle, aPropCode);
+            TBool isHidden = FileEntry.IsHidden();
+            if ( isHidden )
+                {
+                propElem.SetUint16L(CMTPTypeObjectPropListElement::EValue,EMTPHidden );
+                }
+            else
+                {
+                propElem.SetUint16L(CMTPTypeObjectPropListElement::EValue,EMTPVisible );
+                }
+            iPropertyList->CommitPropElemL(propElem); 
+            }
+            break;
         default:
             //Leave 
             {
+            OstTrace1( TRACE_ERROR, CMTPIMAGEDPGETOBJECTPROPLIST_SERVICEONEOBJECTPROPERTYL, "Invalid property code %d", aPropCode );
             User::Leave(KErrGeneral); 
             }
             break;
           }
         }
-    __FLOG(_L8("<< CMTPImageDpGetObjectPropList::ServiceOneObjectPropertyL"));
+    OstTraceFunctionExit0( CMTPIMAGEDPGETOBJECTPROPLIST_SERVICEONEOBJECTPROPERTYL_EXIT );
     }
 
 void CMTPImageDpGetObjectPropList::DoCancel()
     {
-    __FLOG(_L8(">> CMTPImageDpGetObjectPropList::DoCancel"));
-    __FLOG(_L8("<< CMTPImageDpGetObjectPropList::DoCancel"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPGETOBJECTPROPLIST_DOCANCEL_ENTRY );
+    OstTraceFunctionExit0( CMTPIMAGEDPGETOBJECTPROPLIST_DOCANCEL_EXIT );
     }
 
 void CMTPImageDpGetObjectPropList::RunL()
     {
-    __FLOG(_L8(">> CMTPImageDpGetObjectPropList::RunL"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPGETOBJECTPROPLIST_RUNL_ENTRY );
     
     if ( iHandles.Count() > 0 )
         {
@@ -452,22 +473,22 @@ void CMTPImageDpGetObjectPropList::RunL()
         iHandles.Remove( 0 );
         }
     StartL();
-    __FLOG(_L8("<< CMTPImageDpGetObjectPropList::RunL"));
+    OstTraceFunctionExit0( CMTPIMAGEDPGETOBJECTPROPLIST_RUNL_EXIT );
     }
 
 TInt CMTPImageDpGetObjectPropList::RunError( TInt aError )
     {
-    __FLOG(_L8(">> CMTPImageDpGetObjectPropList::RunError"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPGETOBJECTPROPLIST_RUNERROR_ENTRY );
     
     TRAP_IGNORE( SendResponseL( EMTPRespCodeGeneralError ) );
     
-    __FLOG(_L8("<< CMTPImageDpGetObjectPropList::RunError"));
+    OstTraceFunctionExit0( CMTPIMAGEDPGETOBJECTPROPLIST_RUNERROR_EXIT );
     return aError;
     }
 
 void CMTPImageDpGetObjectPropList::StartL()
     {
-    __FLOG(_L8(">> CMTPImageDpGetObjectPropList::StartL"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPGETOBJECTPROPLIST_STARTL_ENTRY );
     
     if ( iHandles.Count() > 0 )
         {
@@ -479,6 +500,6 @@ void CMTPImageDpGetObjectPropList::StartL()
         {
         SendDataL(*iPropertyList);
         }
-    
-    __FLOG(_L8("<< CMTPImageDpGetObjectPropList::StartL"));
+
+    OstTraceFunctionExit0( CMTPIMAGEDPGETOBJECTPROPLIST_STARTL_EXIT );
     }

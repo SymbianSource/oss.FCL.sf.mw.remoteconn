@@ -27,12 +27,14 @@
 #include "absessionmap.h"
 #include "sbedataownermanager.h"
 #include "sbepanic.h"
-#include "sblog.h"
+#include "OstTraceDefinitions.h"
+#include "sbtrace.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "abserverTraces.h"
+#endif
 
 namespace conn
 	{
-
-
 	/** Active Backup security request ranges
 	
 	This is a breakdown of the active backup requests into ranges
@@ -87,7 +89,9 @@ namespace conn
     Class constructor
     */
 		{
+		OstTraceFunctionEntry0( CABSERVER_CABSERVER_CONS_ENTRY );
 		__ASSERT_DEBUG(iDOM, Panic(KErrArgument));
+		OstTraceFunctionExit0( CABSERVER_CABSERVER_CONS_EXIT );
 		}
 
 	CABServer::~CABServer()
@@ -95,7 +99,9 @@ namespace conn
     Class destructor
     */
 		{
+		OstTraceFunctionEntry0( CABSERVER_CABSERVER_DES_ENTRY );
 		delete iSessionMap;
+		OstTraceFunctionExit0( CABSERVER_CABSERVER_DES_EXIT );
 		}
 		
 	CABServer* CABServer::NewLC(CDataOwnerManager* aDOM)
@@ -106,9 +112,11 @@ namespace conn
 	@return The new instance of CABServer.
 	*/
 		{
+		OstTraceFunctionEntry0( CABSERVER_NEWLC_ENTRY );
 		CABServer* pSelf = new (ELeave) CABServer(aDOM);
 		CleanupStack::PushL(pSelf);
 		pSelf->ConstructL();
+		OstTraceFunctionExit0( CABSERVER_NEWLC_EXIT );
 		return pSelf;
 		}
 
@@ -117,10 +125,12 @@ namespace conn
 	Construct this instance of CABServer.
 	*/
 		{
+		OstTraceFunctionEntry0( CABSERVER_CONSTRUCTL_ENTRY );
 		iSessionMap = CABSessionMap::NewL();
 		//
 		// Start the server 
 		StartL(KABServerName);
+		OstTraceFunctionExit0( CABSERVER_CONSTRUCTL_EXIT );
 		}
 
 	void CABServer::AddSession()
@@ -150,7 +160,9 @@ namespace conn
 	@param aSecureId The key of the element to be removed
 	*/
 		{
+		OstTraceFunctionEntry0( CABSERVER_REMOVEELEMENT_ENTRY );
 		iSessionMap->Delete(aSecureId);
+		OstTraceFunctionExit0( CABSERVER_REMOVEELEMENT_EXIT );
 		}
 
 	void CABServer::SupplyDataL(TSecureId aSID, TDriveNumber aDriveNumber, TTransferDataType aTransferType, 
@@ -167,9 +179,11 @@ namespace conn
 	@param aProxySID The secure ID of the proxy
 	*/
 		{
+		OstTraceFunctionEntry0( CABSERVER_SUPPLYDATAL_ENTRY );
 		CABSession& session = iSessionMap->SessionL(aSID);
 		
 		session.SupplyDataL(aDriveNumber, aTransferType, aBuffer, aLastSection, aSuppressInitDataOwner, aProxySID);
+		OstTraceFunctionExit0( CABSERVER_SUPPLYDATAL_EXIT );
 		}
 
 	void CABServer::RequestDataL(TSecureId aSID, TDriveNumber aDriveNumber, TTransferDataType aTransferType, 
@@ -186,9 +200,11 @@ namespace conn
 	@param aProxySID The secure ID of the proxy
 	*/
 		{
+		OstTraceFunctionEntry0( CABSERVER_REQUESTDATAL_ENTRY );
 		CABSession& session = iSessionMap->SessionL(aSID);
 		
 		session.RequestDataL(aDriveNumber, aTransferType, aBuffer, aLastSection, aSuppressInitDataOwner, aProxySID);
+		OstTraceFunctionExit0( CABSERVER_REQUESTDATAL_EXIT );
 		}
 
 	void CABServer::GetExpectedDataSizeL(TSecureId aSID, TDriveNumber aDriveNumber, TUint& aSize)
@@ -200,9 +216,11 @@ namespace conn
 	@param aSize The size of the data owner's data
 	*/
 		{
+		OstTraceFunctionEntry0( CABSERVER_GETEXPECTEDDATASIZEL_ENTRY );
 		CABSession& session = iSessionMap->SessionL(aSID);
 		
 		session.GetExpectedDataSizeL(aDriveNumber, aSize);
+		OstTraceFunctionExit0( CABSERVER_GETEXPECTEDDATASIZEL_EXIT );
 		}
 		
 	void CABServer::AllSnapshotsSuppliedL(TSecureId aSID)
@@ -211,9 +229,11 @@ namespace conn
 	@param aSID The secure ID of the data owner to signal
 	*/
 		{
+		OstTraceFunctionEntry0( CABSERVER_ALLSNAPSHOTSSUPPLIEDL_ENTRY );
 		CABSession& session = iSessionMap->SessionL(aSID);
 		
 		session.AllSnapshotsSuppliedL();
+		OstTraceFunctionExit0( CABSERVER_ALLSNAPSHOTSSUPPLIEDL_EXIT );
 		}
 
 	void CABServer::InvalidateABSessions()
@@ -223,7 +243,9 @@ namespace conn
 	 * this session can not be used for another backup/restore.
 	 */
 		{
+		OstTraceFunctionEntry0( CABSERVER_INVALIDATEABSESSIONS_ENTRY );
 		iSessionMap->InvalidateABSessions();
+		OstTraceFunctionExit0( CABSERVER_INVALIDATEABSESSIONS_EXIT );
 		}
 	
 	TDataOwnerStatus CABServer::SessionReadyStateL(TSecureId aSID)
@@ -234,21 +256,23 @@ namespace conn
 	@return Data owner status of the session
 	*/
 		{
+		OstTraceFunctionEntry0( CABSERVER_SESSIONREADYSTATEL_ENTRY );
 		CABSession& session = iSessionMap->SessionL(aSID);
 		
 		TDataOwnerStatus doStatus = EDataOwnerNotConnected;
 		if (session.Invalidated())
 			{
-			__LOG1("CABServer::SessionReadyStateL session for 0x%08x has been invalidated, return NotConnected",
-					aSID.iId);
+			OstTrace1(TRACE_NORMAL, CABSERVER_SESSIONREADYSTATEL, "session for 0x%08x has been invalidated, return NotConnected",
+                    aSID.iId);
 			
+			OstTraceFunctionExit0( CABSERVER_SESSIONREADYSTATEL_EXIT );
 			return doStatus;	
 			}
 		
 		if (session.CallbackInterfaceAvailable())
 			{
-			__LOG2("CABServer::SessionReadyStateL session for 0x%08x already have interface, confirmed:%d ",
-					aSID.iId, session.ConfirmedReadyForBUR());
+			OstTraceExt2(TRACE_NORMAL, DUP1_CABSERVER_SESSIONREADYSTATEL, "session for 0x%08x already have interface, confirmed:%d ",
+                    aSID.iId, static_cast<TInt32>(session.ConfirmedReadyForBUR()));
 			
 			doStatus = EDataOwnerNotReady;
 			
@@ -259,8 +283,8 @@ namespace conn
 			}
 		else 
 			{
-			__LOG2("CABServer::SessionReadyStateL session for 0x%08x does not have interface, confimed:%d",
-								aSID.iId, session.ConfirmedReadyForBUR());
+			OstTraceExt2(TRACE_NORMAL, DUP2_CABSERVER_SESSIONREADYSTATEL, "session for 0x%08x does not have interface, confimed:%d",
+                    aSID.iId, static_cast<TInt32>(session.ConfirmedReadyForBUR()));
 			
 			doStatus = EDataOwnerNotReady;
 			
@@ -270,6 +294,7 @@ namespace conn
 				}				
 			}
 			
+		OstTraceFunctionExit0( DUP1_CABSERVER_SESSIONREADYSTATEL_EXIT );
 		return doStatus;
 		}
 		
@@ -281,9 +306,11 @@ namespace conn
 	@param aDrive The drive number for which the restore has completed
 	*/
 		{
+		OstTraceFunctionEntry0( CABSERVER_RESTORECOMPLETEL_ENTRY );
 		CABSession& session = iSessionMap->SessionL(aSID);
 
 		session.RestoreCompleteL(aDrive);
+		OstTraceFunctionExit0( CABSERVER_RESTORECOMPLETEL_EXIT );
 		}
 		
 	CSession2* CABServer::NewSessionL(const TVersion& aVersion,
@@ -299,19 +326,23 @@ namespace conn
 	@leave KErrNotSupported if the version passed in aVersion is not the same as this one
 	*/
 		{
+		OstTraceFunctionEntry0( CABSERVER_NEWSESSIONL_ENTRY );
 		TVersion thisVersion(KABMajorVersionNumber, 
 								KABMinorVersionNumber,
 								KABBuildVersionNumber);
 		
 	    if (!User::QueryVersionSupported(thisVersion, aVersion))
 			{
+	        OstTrace0(TRACE_ERROR, CABSERVER_NEWSESSIONL, "Leave: KErrNotSupported");
 			User::Leave(KErrNotSupported);
 			}
 			
 		TSecureId sid = aMessage.SecureId();
 
 		// The map creates the session and a map entry, then session ownership is passed to the server
-		return &(iSessionMap->CreateL(sid));
+		CSession2* newSession = &(iSessionMap->CreateL(sid));
+		OstTraceFunctionExit0( CABSERVER_NEWSESSIONL_EXIT );
+		return newSession;
 		}
 
 	TInt CABServer::RunError(TInt aError)
@@ -325,6 +356,7 @@ namespace conn
 	@return The error code to be passed back to the active scheduler framework.
 	*/
 		{
+		OstTraceFunctionEntry0( CABSERVER_RUNERROR_ENTRY );
 		//
 		// A Bad descriptor is a bad client - panic it.
 		if(aError == KErrBadDescriptor)
@@ -336,6 +368,7 @@ namespace conn
 		// Complete the message and continue handling requests.
 		Message().Complete(aError);
 		ReStart();
+		OstTraceFunctionExit0( CABSERVER_RUNERROR_EXIT );
 		return KErrNone;
 		}
 
@@ -345,11 +378,13 @@ namespace conn
 	@param aPanic The panic code.
 	*/
 		{
+		OstTraceFunctionEntry0( CABSERVER_PANICCLIENT_ENTRY );
 		__DEBUGGER()
 		_LIT(KPanicCategory,"AB Server");
 		RThread client;
 		Message().Client(client);
 		client.Panic(KPanicCategory, aPanic);
+		OstTraceFunctionExit0( CABSERVER_PANICCLIENT_EXIT );
 		}
 
 	} // end namespace

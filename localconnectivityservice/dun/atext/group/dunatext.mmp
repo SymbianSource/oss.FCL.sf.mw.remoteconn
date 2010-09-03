@@ -39,7 +39,6 @@ SOURCE                  DunAtSpecialCmdHandler.cpp
 MW_LAYER_SYSTEMINCLUDE
 
 USERINCLUDE             ../inc ../../utils/inc
-USERINCLUDE             ../../../inc
 
 LIBRARY                 atextclient.lib
 LIBRARY                 atextcommon.lib

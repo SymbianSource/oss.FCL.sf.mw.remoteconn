@@ -29,6 +29,12 @@
 #include "mtppictbridgedppanic.h"
 #include "cmtprequestchecker.h"
 #include "cptpserver.h"
+#include "mtpdebug.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtppictbridgedpgetobjectinfoTraces.h"
+#endif
+
 
 /**
 Two-phase construction method
@@ -50,9 +56,9 @@ Destructor
 */  
 CMTPPictBridgeDpGetObjectInfo::~CMTPPictBridgeDpGetObjectInfo()
     {   
-    __FLOG(_L8("CMTPPictBridgeDpGetObjectInfo::~CMTPPictBridgeDpGetObjectInfo"));
+    OstTraceFunctionEntry0( CMTPPICTBRIDGEDPGETOBJECTINFO_CMTPPICTBRIDGEDPGETOBJECTINFO_DES_ENTRY );
     delete iObjectInfoToBuildP;
-    __FLOG_CLOSE;
+    OstTraceFunctionExit0( CMTPPICTBRIDGEDPGETOBJECTINFO_CMTPPICTBRIDGEDPGETOBJECTINFO_DES_EXIT );
     }
 
 /**
@@ -72,10 +78,10 @@ GetObjectInfo request handler
 */
 void CMTPPictBridgeDpGetObjectInfo::ServiceL()
     {
-    __FLOG(_L8(">> CMTPPictBridgeDpGetObjectInfo::ServiceL"));
+    OstTraceFunctionEntry0( CMTPPICTBRIDGEDPGETOBJECTINFO_SERVICEL_ENTRY );
     BuildObjectInfoL();
     SendDataL(*iObjectInfoToBuildP);    
-    __FLOG(_L8("<< CMTPPictBridgeDpGetObjectInfo::ServiceL"));
+    OstTraceFunctionExit0( CMTPPICTBRIDGEDPGETOBJECTINFO_SERVICEL_EXIT );
     }
 
 /**
@@ -83,8 +89,9 @@ Second-phase construction
 */      
 void CMTPPictBridgeDpGetObjectInfo::ConstructL()
     {
-	__FLOG_OPEN(KMTPSubsystem, KComponent);
+	OstTraceFunctionEntry0( CMTPPICTBRIDGEDPGETOBJECTINFO_CONSTRUCTL_ENTRY );
     iObjectInfoToBuildP = CMTPTypeObjectInfo::NewL();
+    OstTraceFunctionExit0( CMTPPICTBRIDGEDPGETOBJECTINFO_CONSTRUCTL_EXIT );
     }
 
 /**
@@ -92,13 +99,13 @@ Populate the object info dataset
 */      
 void CMTPPictBridgeDpGetObjectInfo::BuildObjectInfoL()  
     {
-    __FLOG(_L8(">> CMTPPictBridgeDpGetObjectInfo::BuildObjectInfoL"));
+    OstTraceFunctionEntry0( CMTPPICTBRIDGEDPGETOBJECTINFO_BUILDOBJECTINFOL_ENTRY );
     __ASSERT_DEBUG(iRequestChecker, Panic(EMTPPictBridgeDpRequestCheckNull));
 
     TUint32 objectHandle = Request().Uint32(TMTPTypeRequest::ERequestParameter1);
 
-    __FLOG_VA((_L8(" object handle 0x%x"), objectHandle));    
-
+    OstTrace1( TRACE_NORMAL, CMTPPICTBRIDGEDPGETOBJECTINFO_BUILDOBJECTINFOL, "object handle 0x%x", objectHandle );
+    
     //1. storage id
     TUint32 storageId(iFramework.StorageMgr().DefaultStorageId()); // we always use default storage for DPS
 
@@ -106,14 +113,14 @@ void CMTPPictBridgeDpGetObjectInfo::BuildObjectInfoL()
 
     //2. object format
     TUint16 format(EMTPFormatCodeScript); // we only handle DPS script
-    iObjectInfoToBuildP->SetUint16L(CMTPTypeObjectInfo::EObjectFormat, format);
-    __FLOG_VA((_L8(" format ok 0x%x"), format));   
+    iObjectInfoToBuildP->SetUint16L(CMTPTypeObjectInfo::EObjectFormat, format); 
+    OstTrace1( TRACE_NORMAL, DUP1_CMTPPICTBRIDGEDPGETOBJECTINFO_BUILDOBJECTINFOL, "format ok 0x%x", format );
 
     //3. protection status,
     TUint16 protection(EMTPProtectionNoProtection); // we do not care about protection
 
     iObjectInfoToBuildP->SetUint16L(CMTPTypeObjectInfo::EProtectionStatus, protection);
-    __FLOG_VA((_L8(" protection(%d) ok"), protection));   
+    OstTrace1( TRACE_NORMAL, DUP2_CMTPPICTBRIDGEDPGETOBJECTINFO_BUILDOBJECTINFOL, " protection(%d) ok", protection );
 
     //4. object compressed size
     // see SetFileSizeDateL
@@ -139,7 +146,12 @@ void CMTPPictBridgeDpGetObjectInfo::BuildObjectInfoL()
     iFramework.ObjectMgr().ObjectL(objectHandle, *objectP);
 
     //12. Parent object
-    TUint32 parent(objectP->Uint(CMTPObjectMetaData::EParentHandle)); 
+    TUint32 parent(objectP->Uint(CMTPObjectMetaData::EParentHandle));
+    // refer to 5.3.1.9 of MTP Spec 1.0 
+    if (parent == KMTPHandleNoParent)
+	{
+	parent = 0;
+	} 
     iObjectInfoToBuildP->SetUint32L(CMTPTypeObjectInfo::EParentObject, parent);
         
     //13 and 14. Association type and description
@@ -153,7 +165,9 @@ void CMTPPictBridgeDpGetObjectInfo::BuildObjectInfoL()
     //16. file name
     //use the name without full path specification
     TParse parse;
-    User::LeaveIfError( parse.Set(objectP->DesC(CMTPObjectMetaData::ESuid), NULL, NULL) );    
+    LEAVEIFERROR( parse.Set(objectP->DesC(CMTPObjectMetaData::ESuid), NULL, NULL),
+            OstTraceExt2( TRACE_ERROR, DUP3_CMTPPICTBRIDGEDPGETOBJECTINFO_BUILDOBJECTINFOL, 
+                    "Sets up TParse object for %S failed! error code %d", objectP->DesC(CMTPObjectMetaData::ESuid), munged_err));
     iObjectInfoToBuildP->SetStringL(CMTPTypeObjectInfo::EFilename, parse.NameAndExt());
     
     //4, compressed size, 17 Date created, and 18 Date modified
@@ -163,7 +177,7 @@ void CMTPPictBridgeDpGetObjectInfo::BuildObjectInfoL()
     //empty keyword
     iObjectInfoToBuildP->SetStringL(CMTPTypeObjectInfo::EKeywords, KNullDesC);
     CleanupStack::PopAndDestroy(objectP);
-    __FLOG(_L8("<< CMTPPictBridgeDpGetObjectInfo::BuildObjectInfoL"));
+    OstTraceFunctionExit0( CMTPPICTBRIDGEDPGETOBJECTINFO_BUILDOBJECTINFOL_EXIT );
     }
 
 
@@ -172,7 +186,9 @@ Set file properties
 */ 
 void CMTPPictBridgeDpGetObjectInfo::SetFileSizeDateL(const TDesC& aFileName, TBool aDiscoveryFile)
     {
-    __FLOG_VA((_L16(">> CMTPPictBridgeDpGetObjectInfo::SetFileSizeDateL aDiscoveryFile %d %S"), aDiscoveryFile, &aFileName));
+    OstTraceFunctionEntry0( CMTPPICTBRIDGEDPGETOBJECTINFO_SETFILESIZEDATEL_ENTRY );
+    OstTraceExt2( TRACE_NORMAL, CMTPPICTBRIDGEDPGETOBJECTINFO_SETFILESIZEDATEL, 
+            "aDiscoveryFile %d %S", aDiscoveryFile, aFileName );
 
     // open the file for retrieving information
     RFile file;
@@ -181,14 +197,20 @@ void CMTPPictBridgeDpGetObjectInfo::SetFileSizeDateL(const TDesC& aFileName, TBo
     
     if (!aDiscoveryFile)
         {
-        User::LeaveIfError(file.Open(iFramework.Fs(), aFileName, EFileShareReadersOnly));
+        LEAVEIFERROR(file.Open(iFramework.Fs(), aFileName, EFileShareReadersOnly),
+                OstTraceExt2( TRACE_ERROR, DUP3_CMTPPICTBRIDGEDPGETOBJECTINFO_SETFILESIZEDATEL, 
+                        "Open %S failed! error code %d", aFileName, munged_err ));
         CleanupClosePushL(file);
         
         //file size
-        User::LeaveIfError(file.Size(size));
-        
+        LEAVEIFERROR(file.Size(size),
+                OstTrace1( TRACE_ERROR, DUP4_CMTPPICTBRIDGEDPGETOBJECTINFO_SETFILESIZEDATEL, 
+                        "Get current file size failed! error code %d", munged_err));
+
         //file modified time
-        User::LeaveIfError(file.Modified(modifiedTime));
+        LEAVEIFERROR(file.Modified(modifiedTime),
+                OstTrace1( TRACE_ERROR, DUP5_CMTPPICTBRIDGEDPGETOBJECTINFO_SETFILESIZEDATEL, 
+                        "Gets local date and time the file was last modified failed! error code %d", munged_err));
         }
     else
         {
@@ -199,7 +221,7 @@ void CMTPPictBridgeDpGetObjectInfo::SetFileSizeDateL(const TDesC& aFileName, TBo
     //file size
     TUint32 fileSize=size;
     iObjectInfoToBuildP->SetUint32L(CMTPTypeObjectInfo::EObjectCompressedSize, fileSize);
-    __FLOG_VA((_L8(" file size %d"), fileSize));   
+    OstTrace1( TRACE_NORMAL, DUP2_CMTPPICTBRIDGEDPGETOBJECTINFO_SETFILESIZEDATEL, "file size %d", fileSize );
 
     //file modified time
     const TInt KTimeStringLen=0x0f;// YYYYMMDDThhmmss(.s), we exclude tenths of seconds and use length 15, (MTP 1.0 spec, section 3.2.5)
@@ -217,7 +239,8 @@ void CMTPPictBridgeDpGetObjectInfo::SetFileSizeDateL(const TDesC& aFileName, TBo
         {
         CleanupStack::PopAndDestroy(&file);
         }
-    
-    __FLOG_VA((_L16("<< CMTPPictBridgeDpGetObjectInfo::SetFileSizeDateL %S"),&modifiedTimeBuffer));
+
+    OstTraceExt1( TRACE_NORMAL, DUP1_CMTPPICTBRIDGEDPGETOBJECTINFO_SETFILESIZEDATEL, "%S", modifiedTimeBuffer );
+    OstTraceFunctionExit0( CMTPPICTBRIDGEDPGETOBJECTINFO_SETFILESIZEDATEL_EXIT );
     }
 

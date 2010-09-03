@@ -22,7 +22,6 @@
 #ifndef CMTPPICTBRIDGEPRINTER_H
 #define CMTPPICTBRIDGEPRINTER_H
 #include <mtp/tmtptypeevent.h>
-#include "mtpdebug.h"
 
 class CMTPTypeObjectInfo;
 class MMTPConnection;
@@ -76,9 +75,5 @@ class CMTPPictBridgePrinter : public CBase
         TUint32 iOutgoingObjectHandle;
         CMTPPictBridgeUsbConnection* iUsbConnectionP; // owned
         TMTPTypeEvent iEvent;
-        /**
-        FLOGGER debug trace member variable.
-        */
-        __FLOG_DECLARATION_MEMBER_MUTABLE;
     };
 #endif // CMTPPICTBRIDGEPRINTER_H

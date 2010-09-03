@@ -25,7 +25,6 @@
 #include <mtp/tmtptypeevent.h>
 
 #include "mtpplaybackcontroldpconst.h"
-#include "mtpdebug.h"
 #include "mmtpplaybackinterface.h"
 
 class MMTPRequestProcessor;
@@ -75,11 +74,6 @@ private:
     void SendEventL(TMTPDevicePropertyCode aPropCode);
     
 private: // Owned
-
-    /**
-    FLOGGER debug trace member variable.
-    */
-    __FLOG_DECLARATION_MEMBER_MUTABLE;
 
     /**
     The event dataset.

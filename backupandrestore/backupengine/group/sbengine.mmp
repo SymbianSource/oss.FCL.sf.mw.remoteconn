@@ -39,7 +39,6 @@ SOURCE	sbedataowner.cpp
 SOURCE	sbedataownermanager.cpp
 SOURCE  sbebufferhandler.cpp
 SOURCE  sbmain.cpp
-SOURCE  sblog.cpp
 SOURCE  abserver.cpp
 SOURCE  absession.cpp
 SOURCE	absessionmap.cpp
@@ -54,7 +53,7 @@ SOURCE  sbepanic.cpp
 
 USERINCLUDE . ../inc
 
-USERINCLUDE .
+USERINCLUDE ../traces
 MW_LAYER_SYSTEMINCLUDE_SYMBIAN
 
 LIBRARY euser.lib efsrv.lib ecom.lib bafl.lib estor.lib
@@ -62,18 +61,6 @@ LIBRARY sisregistryclient.lib backuprestore.lib
 LIBRARY xmlframework.lib charconv.lib edbms.lib
 LIBRARY apgrfx.lib apmime.lib
 LIBRARY ezlib.lib sbencrypt.lib cryptography.lib
-
-#ifdef __SBE_DISABLE_RELEASE_LOGGING
-
-    // Flogger will not be linked do this binary in UREL builds
-DEBUGLIBRARY flogger.lib
-
-#else
-
-    // Flogger always statically linked to this binary.
-LIBRARY flogger.lib
-
-#endif
 
 CAPABILITY ProtServ AllFiles WriteDeviceData ReadUserData TrustedUi
 

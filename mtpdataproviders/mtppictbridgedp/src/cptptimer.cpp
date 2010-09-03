@@ -20,6 +20,11 @@
 #include "cptpserver.h"
 #include "ptpdef.h"
 #include "mtppictbridgedpconst.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cptptimerTraces.h"
+#endif
+
 
 // --------------------------------------------------------------------------
 // 
@@ -53,9 +58,9 @@ CPtpTimer::CPtpTimer(CPtpSession& aSession) : CTimer(EPriorityStandard),
 //
 void CPtpTimer::ConstructL()    
     {
-    __FLOG_OPEN(KMTPSubsystem, KPtpServerLog);
-    __FLOG(_L8("CPtpTimer::ConstructL"));        
+    OstTraceFunctionEntry0( CPTPTIMER_CONSTRUCTL_ENTRY );   
     CTimer::ConstructL();
+    OstTraceFunctionExit0( CPTPTIMER_CONSTRUCTL_EXIT );
     }
 
 // --------------------------------------------------------------------------
@@ -65,9 +70,9 @@ void CPtpTimer::ConstructL()
 //
 CPtpTimer::~CPtpTimer()
     {
-    __FLOG(_L8("CPtpTimer::~"));        
+    OstTraceFunctionEntry0( CPTPTIMER_CPTPTIMER_DES_ENTRY );
     Cancel();
-    __FLOG_CLOSE;
+    OstTraceFunctionExit0( CPTPTIMER_CPTPTIMER_DES_EXIT );
     }
     
 // --------------------------------------------------------------------------
@@ -76,47 +81,50 @@ CPtpTimer::~CPtpTimer()
 //    
 void CPtpTimer::RunL()
     {
-    __FLOG(_L8(">>>CPtpTimer::RunL"));
+    OstTraceFunctionEntry0( CPTPTIMER_RUNL_ENTRY );
     if (iStatus.Int() == KErrNone)
         {
-        __FLOG(_L8("--- timer expired, because of:"));
+        OstTrace0( TRACE_NORMAL, CPTPTIMER_RUNL, "--- timer expired, because of:" );
 
         if (iSession.ServerP()->Printer()->Status() == CMTPPictBridgePrinter::ENotConnected) // must be DPS discovery, since no other service is supported
             {
-            __FLOG(_L8("--- Dps printer not available"));            
+            OstTrace0( TRACE_NORMAL, DUP1_CPTPTIMER_RUNL, "--- Dps printer not available" );
             iSession.ServerP()->Printer()->NoDpsDiscovery();
             iSession.IsDpsPrinterCompleted(EPrinterNotAvailable);
             }
         else if (iSession.ServerP()->Printer()->SendObjectPending())
             {
-            __FLOG(_L8("---SendObject timeout"));
+            OstTrace0( TRACE_NORMAL, DUP2_CPTPTIMER_RUNL, "---SendObject timeout" );
             iSession.ServerP()->Printer()->DpsFileSent(KErrTimedOut);
             }
         else 
             {
-            __FLOG(_L8("---something else, do not care"));
+            OstTrace0( TRACE_NORMAL, DUP3_CPTPTIMER_RUNL, "---something else, do not care" );
             }    
         }
     else if (iStatus.Int() == KErrCancel)
         {
-        __FLOG(_L8("--- RunL Cancelled."));
+        OstTrace0( TRACE_NORMAL, DUP4_CPTPTIMER_RUNL, "--- RunL Cancelled." );
         }
     else 
         {
-        __FLOG_VA((_L8("!!!Error: Err %d returned."), iStatus.Int()));
+        OstTrace1( TRACE_WARNING, DUP5_CPTPTIMER_RUNL, "!!!Error: Err %d returned.", iStatus.Int() );
         }
-    __FLOG(_L8("<<<CPtpTimer::RunL"));	
+    OstTraceFunctionExit0( CPTPTIMER_RUNL_EXIT );
     }
 
 // --------------------------------------------------------------------------
 // 
 // --------------------------------------------------------------------------
-#ifdef __FLOG_ACTIVE
+#ifdef OST_TRACE_COMPILER_IN_USE
 TInt CPtpTimer::RunError(TInt aErr)
 #else
 TInt CPtpTimer::RunError(TInt /*aErr*/)
 #endif
     {
-    __FLOG_VA((_L8(">>>CPtpTimer::RunError %d"), aErr));
+    OstTraceFunctionEntry0( CPTPTIMER_RUNERROR_ENTRY );
+    OstTraceDef1( OST_TRACE_CATEGORY_PRODUCTION, TRACE_IMPORTANT, CPTPTIMER_RUNERROR, 
+            "error code %d", aErr);
+    OstTraceFunctionExit0( CPTPTIMER_RUNERROR_EXIT );
     return KErrNone;
     }

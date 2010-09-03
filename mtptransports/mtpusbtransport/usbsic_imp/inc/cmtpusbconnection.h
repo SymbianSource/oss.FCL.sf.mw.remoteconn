@@ -30,7 +30,6 @@
 
 #include "mtpusbtransportconstants.h"
 #include "mmtptransportconnection.h"
-#include "mtpdebug.h"
 #include "tmtpusbcontrolrequestsetup.h"
 #include "tmtpusbcontrolrequestcanceldata.h"
 #include "tmtpusbcontrolrequestdevicestatus.h"
@@ -422,11 +421,6 @@ private: // Owned.
     is triggered.
     */
     TBool                                               iIsResetRequestSignaled;
-	
-    /**
-    FLOGGER debug trace member variable.
-    */
-    __FLOG_DECLARATION_MEMBER_MUTABLE;
 
 private: // Not owned.
     

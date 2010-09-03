@@ -31,8 +31,6 @@
 #include <mtp/tmtptyperequest.h>
 #include <mtp/tmtptyperesponse.h>
 
-#include "mtpdebug.h"
-
 class CMTPConnection;
 class CMTPDataProviderPlugin;
 class CMTPDataProviderConfig;
@@ -167,11 +165,6 @@ private:
         };
         
 private: // Owned
-
-    /**
-    FLOGGER debug trace member variable.
-    */
-    __FLOG_DECLARATION_MEMBER_MUTABLE;
     
     /**
     The data provider configurability parameter data.

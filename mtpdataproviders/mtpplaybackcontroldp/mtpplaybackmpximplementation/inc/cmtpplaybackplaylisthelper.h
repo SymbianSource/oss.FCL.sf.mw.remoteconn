@@ -24,7 +24,6 @@
 #include <mpxcollectionobserver.h>
 #include <mpxcollectionuihelperobserver.h>
 
-#include "mtpdebug.h"
 #include "cmtpplaybackparam.h"
 
 class MMPXCollectionUiHelper;
@@ -218,11 +217,6 @@ private:
     TMTPPbCategory                       iPlayCategory;
     TInt                                 iSongIndex;
     TInt                                 iPathIndex;
-
-    /**
-    FLOGGER debug trace member variable.
-     */
-    __FLOG_DECLARATION_MEMBER;
     };
 
 #endif /* CMTPPLAYBACKPLAYLISTHELPER_H_ */

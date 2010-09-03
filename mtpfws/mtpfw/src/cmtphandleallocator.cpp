@@ -19,6 +19,12 @@
 #include "tmtptypeobjecthandle.h"
 #include "dbutility.h"
 #include "cmtpobjectstore.h"
+#include "mtpdebug.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtphandleallocatorTraces.h"
+#endif
+
     
 static const TUint KMTPMinimumId = 0x00000000;
 static const TUint KMTPMaximumId = 0x00FFFFFE;
@@ -135,7 +141,8 @@ void CMTPHandleAllocator::ExtendArrayL(TUint aDataProviderId)
 	TInt increase = aDataProviderId - iNextIds.Count() + KMTPMaxDataProviderGranularity;
 	while (increase--)
 		{
-		User::LeaveIfError(iNextIds.Append(KMTPMinimumId));
+		LEAVEIFERROR(iNextIds.Append(KMTPMinimumId),
+		        OstTrace0( TRACE_ERROR, CMTPHANDLEALLOCATOR_EXTENDARRAYL, "add KMTPMinimumId to iNextIds error!" ));	        
 		}
 	}
 	
@@ -182,6 +189,7 @@ TUint32 CMTPHandleAllocator::NextIDFromPoolL( TUint aDataProviderId )
         index = iNextIDPool.FindInOrder( aDataProviderId, CDPHandleCache::HanldeCacheOrderFromKeyAscending );
         if( index == KErrNotFound )
             {
+            OstTrace1( TRACE_ERROR, CMTPHANDLEALLOCATOR_NEXTIDFROMPOOLL, "can't find DpId %d in iNextIDPool", aDataProviderId);
             User::Leave(KErrOverflow);
             }
         }
@@ -194,6 +202,8 @@ TUint32 CMTPHandleAllocator::NextIDFromPoolL( TUint aDataProviderId )
     
     if(ret > KMTPMaximumId )
         {
+        OstTrace1( TRACE_ERROR, DUP1_CMTPHANDLEALLOCATOR_NEXTIDFROMPOOLL, 
+                "next HandleID %d in NextIDPool exceeds KMTPMaximuId!", ret );
         User::Leave(KErrOverflow);
         }
     

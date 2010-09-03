@@ -23,9 +23,11 @@
 #include "cmtpusbconnection.h"
 #include "cmtpusbepbulkout.h"
 #include "mtpdebug.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpusbepbulkoutTraces.h"
+#endif
 
-// Class constants.
-__FLOG_STMT(_LIT8(KComponent,"UsbEpBulkOut");)
 
 /**
 USB MTP device class bulk-out endpoint data transfer controller factory method.
@@ -40,12 +42,8 @@ CMTPUsbEpBulkOut* CMTPUsbEpBulkOut::NewL(TUint aId, CMTPUsbConnection& aConnecti
     {
     CMTPUsbEpBulkOut* self = new(ELeave) CMTPUsbEpBulkOut(aId, aConnection);
     CleanupStack::PushL(self);
-    
-#ifdef __FLOG_ACTIVE    
-    self->ConstructL(KComponent);
-#else
+
     self->ConstructL();
-#endif
 
     CleanupStack::Pop(self);
     return self;    
@@ -56,8 +54,8 @@ Destructor.
 */
 CMTPUsbEpBulkOut::~CMTPUsbEpBulkOut()
     {
-    __FLOG(_L8("~CMTPUsbEpBulkOut - Entry"));
-    __FLOG(_L8("~CMTPUsbEpBulkOut - Exit"));
+    OstTraceFunctionEntry0( CMTPUSBEPBULKOUT_CMTPUSBEPBULKOUT_DES_ENTRY );
+    OstTraceFunctionExit0( CMTPUSBEPBULKOUT_CMTPUSBEPBULKOUT_DES_EXIT );
     }
 
 /**
@@ -67,17 +65,17 @@ Initiates an asynchronous generic bulk container dataset receive sequence.
 */
 void CMTPUsbEpBulkOut::ReceiveBulkDataL(MMTPType& aData)
     {
-    __FLOG(_L8("ReceiveBulkContainerL - Entry"));
+    OstTraceFunctionEntry0( CMTPUSBEPBULKOUT_RECEIVEBULKDATAL_ENTRY );
     // Pass the bulk data sink buffer to the base class for processing.
     ReceiveDataL(aData);
-    __FLOG(_L8("ReceiveBulkContainerL - Exit"));  
+    OstTraceFunctionExit0( CMTPUSBEPBULKOUT_RECEIVEBULKDATAL_EXIT );
     }
     
 void CMTPUsbEpBulkOut::ReceiveDataCompleteL(TInt aError, MMTPType& aSink)
     {
-    __FLOG(_L8("ReceiveDataCompleteL - Entry"));
+    OstTraceFunctionEntry0( CMTPUSBEPBULKOUT_RECEIVEDATACOMPLETEL_ENTRY );
     Connection().ReceiveBulkDataCompleteL(aError, aSink);
-    __FLOG(_L8("ReceiveDataCompleteL - Exit"));
+    OstTraceFunctionExit0( CMTPUSBEPBULKOUT_RECEIVEDATACOMPLETEL_EXIT );
     }
 
 /**

@@ -32,9 +32,13 @@
 #include "rmtpframework.h"
 #include "cdummydp.h"
 #include "cmtpdatacodegenerator.h"
+#include "mtpdebug.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpdataproviderTraces.h"
+#endif
 
-// Class constants.
-__FLOG_STMT(_LIT8(KComponent,"DataProvider");)
+
 
 const TInt KWaitForEnumeration = 1000000 * 3;
 
@@ -78,7 +82,10 @@ Destructor.
 */
 CMTPDataProvider::~CMTPDataProvider()
     {
-    __FLOG_VA((_L8("~CMTPDataProvider - Entry, data provider %d "), iId));
+    OstTraceFunctionEntry0( CMTPDATAPROVIDER_CMTPDATAPROVIDER_DES_ENTRY );
+    OstTrace1(TRACE_NORMAL, CMTPDATAPROVIDER_CMTPDATAPROVIDER_DES, 
+            "data provider %d ", iId);
+
     Cancel();
     iSupported.ResetAndDestroy();
     delete iImplementation;
@@ -91,13 +98,16 @@ CMTPDataProvider::~CMTPDataProvider()
         }
 	
 	iTimer.Close();  
-    __FLOG_VA((_L8("~CMTPDataProvider - Exit, data provider %d "), iId));
-    __FLOG_CLOSE;
+    OstTrace1(TRACE_NORMAL, DUP1_CMTPDATAPROVIDER_CMTPDATAPROVIDER_DES, 
+            "data provider %d ", iId);	
+    OstTraceFunctionExit0( CMTPDATAPROVIDER_CMTPDATAPROVIDER_EXIT );
     }
     
 void CMTPDataProvider::ExecuteEventL(const TMTPTypeEvent& aEvent, MMTPConnection& aConnection)
     {   
-    __FLOG_VA((_L8("ExecuteEventL - Entry, data provider %d "), iId));
+    OstTraceFunctionEntry0( CMTPDATAPROVIDER_EXECUTEEVENTL_ENTRY );
+    OstTrace1(TRACE_NORMAL, CMTPDATAPROVIDER_EXECUTEEVENTL, 
+            "data provider %d ", iId);
     __ASSERT_DEBUG(iImplementation, User::Invariant());
 	
     if (iTimerActive && aEvent.Uint16(TMTPTypeEvent::EEventCode) == EMTPEventCodeCancelTransaction)
@@ -108,12 +118,16 @@ void CMTPDataProvider::ExecuteEventL(const TMTPTypeEvent& aEvent, MMTPConnection
     // Pass this event notification directly to the plugin...
     // In reality we will only ever see one event canceltransaction.
     iImplementation->ProcessEventL(aEvent, aConnection);
-    __FLOG_VA((_L8("ExecuteEventL - Exit, data provider %d "), iId));
+    OstTrace1(TRACE_NORMAL, DUP1_CMTPDATAPROVIDER_EXECUTEEVENTL, 
+            "data provider %d ", iId);        
+    OstTraceFunctionExit0( CMTPDATAPROVIDER_EXECUTEEVENTL_EXIT );
     }
         
 void CMTPDataProvider::ExecuteRequestL(const TMTPTypeRequest& aRequest, MMTPConnection& aConnection)
     {
-    __FLOG_VA((_L8("ExecuteRequestL - Entry, data provider %d "), iId));
+    OstTraceFunctionEntry0( CMTPDATAPROVIDER_EXECUTEREQUESTL_ENTRY );
+    OstTrace1(TRACE_NORMAL, CMTPDATAPROVIDER_EXECUTEREQUESTL, 
+            "data provider %d ", iId);
     __ASSERT_DEBUG(iImplementation, User::Invariant());
                
     iCurrentRequest = &aRequest;
@@ -121,47 +135,61 @@ void CMTPDataProvider::ExecuteRequestL(const TMTPTypeRequest& aRequest, MMTPConn
     // Schedule data provider to process this request.  
     Schedule(); 
     
-    __FLOG_VA((_L8("ExecuteRequestL - Exit, data provider %d "), iId));
+    OstTrace1(TRACE_NORMAL, DUP1_CMTPDATAPROVIDER_EXECUTEREQUESTL, 
+            "data provider %d ", iId);    
+    OstTraceFunctionExit0( CMTPDATAPROVIDER_EXECUTEREQUESTL_EXIT );
     }
     
 EXPORT_C void CMTPDataProvider::ExecuteProxyRequestL(const TMTPTypeRequest& aRequest, MMTPConnection& aConnection, MMTPTransactionProxy& aProxy)
     {
-    __FLOG_VA((_L8("ExecuteProxyRequestL - Entry, data provider %d "), iId));
+    OstTraceFunctionEntry0( CMTPDATAPROVIDER_EXECUTEPROXYREQUESTL_ENTRY );
+    OstTrace1(TRACE_NORMAL, CMTPDATAPROVIDER_EXECUTEPROXYREQUESTL, 
+            "data provider %d ", iId);    
     iProxy = &aProxy;
     iCurrentRequest    = &aRequest;
     iCurrentConnection = static_cast<CMTPConnection*>(&aConnection);
     Schedule();
-    __FLOG_VA((_L8("ExecuteProxyRequestL - Exit, data provider %d "), iId));
+    OstTrace1(TRACE_NORMAL, DUP1_CMTPDATAPROVIDER_EXECUTEPROXYREQUESTL, 
+            "data provider %d ", iId);      
+    OstTraceFunctionExit0( CMTPDATAPROVIDER_EXECUTEPROXYREQUESTL_EXIT );      
     }
     
 void CMTPDataProvider::ExecutePendingRequestL()
     {
-    __FLOG_VA((_L8("SchedulePendingRequestL - Entry")));
+    OstTraceFunctionEntry0( CMTPDATAPROVIDER_EXECUTEPENDINGREQUESTL_ENTRY );
     
     if (iCurrentRequest != NULL && !IsActive())
         {
         Schedule();
         }
     
-    __FLOG_VA((_L8("SchedulePendingRequestL - Exit")));
+    OstTraceFunctionExit0( CMTPDATAPROVIDER_EXECUTEPENDINGREQUESTL_EXIT );
     }
 
 void CMTPDataProvider::EnumerateObjectsL(TUint32 aStorageId)
     {
-    __FLOG_VA((_L8("EnumerateObjectsL - Entry, data provider %d "), iId));
+    OstTraceFunctionEntry0( CMTPDATAPROVIDER_ENUMERATEOBJECTSL_ENTRY );
+    OstTrace1(TRACE_NORMAL, CMTPDATAPROVIDER_ENUMERATEOBJECTSL, 
+            "data provider %d ", iId);      
     iEnumerationState = ((iEnumerationState & ~EObjectsEnumerationState) | EObjectsEnumerating);
     TBool abnormaldown = EFalse;
     iSingletons.FrameworkConfig().GetValueL(CMTPFrameworkConfig::EAbnormalDown, abnormaldown);
     iImplementation->StartObjectEnumerationL(aStorageId, abnormaldown);
-    __FLOG_VA((_L8("EnumerateObjectsL - Exit, data provider %d "), iId));
+    OstTrace1(TRACE_NORMAL, DUP1_CMTPDATAPROVIDER_ENUMERATEOBJECTSL, 
+            "data provider %d ", iId);    
+    OstTraceFunctionExit0( CMTPDATAPROVIDER_ENUMERATEOBJECTSL_EXIT );
     }
 
 void CMTPDataProvider::EnumerateStoragesL()
     {
-    __FLOG_VA((_L8("EnumerateStoragesL - Entry, data provider %d "), iId));
+    OstTraceFunctionEntry0( CMTPDATAPROVIDER_ENUMERATESTORAGESL_ENTRY );
+    OstTrace1(TRACE_NORMAL, CMTPDATAPROVIDER_ENUMERATESTORAGESL, 
+            "data provider %d ", iId);    
     iEnumerationState = ((iEnumerationState & ~EStoragesEnumerationState) | EStoragesEnumerating);
     iImplementation->StartStorageEnumerationL();
-    __FLOG_VA((_L8("EnumerateStoragesL - Exit, data provider %d "), iId));
+    OstTrace1(TRACE_NORMAL, DUP1_CMTPDATAPROVIDER_ENUMERATESTORAGESL, 
+            "data provider %d ", iId);         
+    OstTraceFunctionExit0( CMTPDATAPROVIDER_ENUMERATESTORAGESL_EXIT );   
     }
 
 /**
@@ -207,9 +235,13 @@ Sets the
 */    
 void CMTPDataProvider::SetDataProviderId(TUint aId)
     {
-    __FLOG_VA((_L8("~CMTPDataProvider - Entry, data provider %d "), iId));
+    OstTraceFunctionEntry0( CMTPDATAPROVIDER_SETDATAPROVIDERID_ENTRY );
+    OstTrace1(TRACE_NORMAL, CMTPDATAPROVIDER_SETDATAPROVIDERID, 
+            "data provider %d ", iId);      
     iId = aId;
-    __FLOG_VA((_L8("~CMTPDataProvider - Entry, data provider %d "), iId));
+    OstTrace1(TRACE_NORMAL, DUP1_CMTPDATAPROVIDER_SETDATAPROVIDERID, 
+            "data provider %d ", iId);        
+    OstTraceFunctionExit0( CMTPDATAPROVIDER_SETDATAPROVIDERID_EXIT );
     }
 	
 /**
@@ -296,7 +328,9 @@ TMTPOperationalMode CMTPDataProvider::Mode() const
     
 void CMTPDataProvider::ReceiveDataL(MMTPType& aData, const TMTPTypeRequest& aRequest, MMTPConnection& aConnection)
     {
-    __FLOG_VA((_L8("ReceiveDataL - Entry, data provider %d "), iId));
+    OstTraceFunctionEntry0( CMTPDATAPROVIDER_RECEIVEDATAL_ENTRY );
+    OstTrace1(TRACE_NORMAL, CMTPDATAPROVIDER_RECEIVEDATAL, 
+            "data provider %d ", iId);       
     __ASSERT_DEBUG(iImplementation, User::Invariant());
     __ASSERT_DEBUG(!IsActive(), User::Invariant());
     
@@ -317,12 +351,16 @@ void CMTPDataProvider::ReceiveDataL(MMTPType& aData, const TMTPTypeRequest& aReq
         SetActive();
         // Async call so wait for object to be activated...
         }
-    __FLOG_VA((_L8("ReceiveDataL - Exit, data provider %d "), iId));
+    OstTrace1(TRACE_NORMAL, DUP1_CMTPDATAPROVIDER_RECEIVEDATAL, 
+            "data provider %d ", iId);     
+    OstTraceFunctionExit0( CMTPDATAPROVIDER_RECEIVEDATAL_EXIT );    
     }
 
 void CMTPDataProvider::SendDataL(const MMTPType& aData, const TMTPTypeRequest& aRequest, MMTPConnection& aConnection)
     {
-    __FLOG_VA((_L8("SendDataL - Entry, data provider %d "), iId));
+    OstTraceFunctionEntry0( CMTPDATAPROVIDER_SENDDATAL_ENTRY );
+    OstTrace1(TRACE_NORMAL, CMTPDATAPROVIDER_SENDDATAL, 
+            "data provider %d ", iId);       
     __ASSERT_DEBUG(iImplementation, User::Invariant());
     __ASSERT_DEBUG(!IsActive(), User::Invariant());
     
@@ -343,24 +381,33 @@ void CMTPDataProvider::SendDataL(const MMTPType& aData, const TMTPTypeRequest& a
         SetActive();
         // Async call so wait for object to be activated...
         }
-    __FLOG_VA((_L8("SendDataL - Exit, data provider %d "), iId));
+    OstTrace1(TRACE_NORMAL, DUP1_CMTPDATAPROVIDER_SENDDATAL, 
+            "data provider %d ", iId);       
+    OstTraceFunctionExit0( CMTPDATAPROVIDER_SENDDATAL_EXIT );
     }
 
 void CMTPDataProvider::SendEventL(const TMTPTypeEvent& aEvent, MMTPConnection& aConnection)
     {
-    __FLOG_VA((_L8("SendEventL - Entry, data provider %d "), iId));
+    OstTraceFunctionEntry0( CMTPDATAPROVIDER_SENDEVENTL_TMTPTYPEVENT_MMTPCONNECTION_ENTRY );
+    OstTrace1(TRACE_NORMAL, CMTPDATAPROVIDER_SENDEVENTL_TMTPTYPEVENT_MMTPCONNECTION, 
+            "data provider %d ", iId);       
     __ASSERT_DEBUG(iImplementation, User::Invariant());
     
     CMTPConnection& connection(iSingletons.ConnectionMgr().ConnectionL(aConnection.ConnectionId()));
     connection.SendEventL(aEvent);
-    __FLOG_VA((_L8("SendEventL - Exit, data provider %d "), iId));
+    OstTrace1(TRACE_NORMAL, DUP1_CMTPDATAPROVIDER_SENDEVENTL_TMTPTYPEVENT_MMTPCONNECTION, 
+            "data provider %d ", iId);     
+    OstTraceFunctionExit0( CMTPDATAPROVIDER_SENDEVENTL_TMTPTYPEVENT_MMTPCONNECTION_EXIT );        
     }
 
 void CMTPDataProvider::SendEventL(const TMTPTypeEvent& aEvent)
     {
-    __FLOG_VA((_L8("SendEventL - Entry, data provider %d "), iId));
+    OstTraceFunctionEntry0( CMTPDATAPROVIDER_SENDEVENTL_TMTPTYPEVENT_ENTRY );
+    OstTrace1(TRACE_NORMAL, CMTPDATAPROVIDER_SENDEVENTL_TMTPTYPEVENT, 
+            "data provider %d ", iId);         
     if (aEvent.Uint32(TMTPTypeEvent::EEventSessionID) != KMTPSessionAll)
         {
+        OstTrace0( TRACE_ERROR, CMTPDATAPROVIDER_SENDEVENTL, "event session id not KMTPSessionALL!" );
         User::Leave(KErrArgument);            
         }
     
@@ -370,12 +417,16 @@ void CMTPDataProvider::SendEventL(const TMTPTypeEvent& aEvent)
         {
         iSingletons.ConnectionMgr()[i].SendEventL(aEvent);       
         }
-    __FLOG_VA((_L8("SendEventL - Exit, data provider %d "), iId));
+    OstTrace1(TRACE_NORMAL, DUP1_CMTPDATAPROVIDER_SENDEVENTL_TMTPTYPEVENT, 
+            "data provider %d ", iId);    
+    OstTraceFunctionExit0( CMTPDATAPROVIDER_SENDEVENTL_TMTPTYPEVENT_EXIT );     
     }
 
 void CMTPDataProvider::SendResponseL(const TMTPTypeResponse& aResponse, const TMTPTypeRequest& aRequest, MMTPConnection& aConnection)
     {
-    __FLOG_VA((_L8("SendResponseL - Entry, data provider %d "), iId));
+    OstTraceFunctionEntry0( CMTPDATAPROVIDER_SENDRESPONSEL_ENTRY );
+    OstTrace1(TRACE_NORMAL, CMTPDATAPROVIDER_SENDRESPONSEL, 
+            "data provider %d ", iId);      
     __ASSERT_DEBUG(iImplementation, User::Invariant());
     __ASSERT_DEBUG(!IsActive(), User::Invariant());
     
@@ -394,12 +445,16 @@ void CMTPDataProvider::SendResponseL(const TMTPTypeResponse& aResponse, const TM
         connection.SendResponseL(aResponse, aRequest, iStatus);
         SetActive();
         }
-    __FLOG_VA((_L8("SendResponseL - Exit, data provider %d "), iId));
+    OstTrace1(TRACE_NORMAL, DUP1_CMTPDATAPROVIDER_SENDRESPONSEL, 
+            "data provider %d ", iId);      
+    OstTraceFunctionExit0( CMTPDATAPROVIDER_SENDRESPONSEL_EXIT );      
     }
 
 void CMTPDataProvider::TransactionCompleteL(const TMTPTypeRequest& aRequest, MMTPConnection& aConnection)
     {
-    __FLOG_VA((_L8("TransactionCompleteL - Entry, data provider %d "), iId));
+    OstTraceFunctionEntry0( CMTPDATAPROVIDER_TRANSACTIONCOMPLETEL_ENTRY );
+    OstTrace1(TRACE_NORMAL, CMTPDATAPROVIDER_TRANSACTIONCOMPLETEL, 
+            "data provider %d ", iId);      
     __ASSERT_DEBUG(iImplementation, User::Invariant());
     
     if (iProxy)
@@ -420,42 +475,58 @@ void CMTPDataProvider::TransactionCompleteL(const TMTPTypeRequest& aRequest, MMT
     iCurrentRequest = NULL;
     iCurrentConnection = NULL;
     
-    __FLOG_VA((_L8("TransactionCompleteL - Exit, data provider %d "), iId));
+    OstTrace1(TRACE_NORMAL, DUP1_CMTPDATAPROVIDER_TRANSACTIONCOMPLETEL, 
+            "data provider %d ", iId);      
+    OstTraceFunctionExit0( CMTPDATAPROVIDER_TRANSACTIONCOMPLETEL_EXIT );
     } 
     
 void CMTPDataProvider::RouteRequestRegisterL(const TMTPTypeRequest& aRequest, MMTPConnection& aConnection)
     {
-    __FLOG_VA((_L8("RouteRequestRegisterL - Entry, data provider %d "), iId));
+    OstTraceFunctionEntry0( CMTPDATAPROVIDER_ROUTEREQUESTREGISTERL_ENTRY );
+    OstTrace1(TRACE_NORMAL, CMTPDATAPROVIDER_ROUTEREQUESTREGISTERL, 
+            "data provider %d ", iId);    
     iSingletons.Router().RouteRequestRegisterL(aRequest, aConnection, iId);
-    __FLOG_VA((_L8("RouteRequestRegisterL - Exit, data provider %d "), iId));
+    OstTrace1(TRACE_NORMAL, DUP1_CMTPDATAPROVIDER_ROUTEREQUESTREGISTERL, 
+            "data provider %d ", iId);       
+    OstTraceFunctionExit0( CMTPDATAPROVIDER_ROUTEREQUESTREGISTERL_EXIT );     
     }
 
 void CMTPDataProvider::RouteRequestUnregisterL(const TMTPTypeRequest& aRequest, MMTPConnection& aConnection)
     {
-    __FLOG_VA((_L8("RouteRequestUnregister - Entry, data provider %d "), iId));
+    OstTraceFunctionEntry0( CMTPDATAPROVIDER_ROUTEREQUESTUNREGISTERL_ENTRY );
+    OstTrace1(TRACE_NORMAL, CMTPDATAPROVIDER_ROUTEREQUESTUNREGISTERL, 
+            "data provider %d ", iId);  
     iSingletons.Router().RouteRequestUnregisterL(aRequest, aConnection);
-    __FLOG_VA((_L8("RouteRequestUnregister - Exit, data provider %d "), iId));
+    OstTrace1(TRACE_NORMAL, DUP1_CMTPDATAPROVIDER_ROUTEREQUESTUNREGISTERL, 
+            "data provider %d ", iId);      
+    OstTraceFunctionExit0( CMTPDATAPROVIDER_ROUTEREQUESTUNREGISTERL_EXIT );    
     }
 
-#ifdef __FLOG_ACTIVE  	
+
 void CMTPDataProvider::ObjectEnumerationCompleteL(TUint32 aStorageId)
-#else
-void CMTPDataProvider::ObjectEnumerationCompleteL(TUint32 /*aStorageId*/)
-#endif // __FLOG_ACTIVE
     {
-    __FLOG_VA((_L8("ObjectEnumerationCompleteL - Entry, data provider %d "), iId));
-    __FLOG_VA((_L8("StorageId = 0x%08X "), aStorageId));
+    OstTraceFunctionEntry0( CMTPDATAPROVIDER_OBJECTENUMERATIONCOMPLETEL_ENTRY );
+    OstTrace1(TRACE_NORMAL, CMTPDATAPROVIDER_OBJECTENUMERATIONCOMPLETEL, 
+            "data provider %d ", iId);      
+    OstTrace1(TRACE_NORMAL, DUP1_CMTPDATAPROVIDER_OBJECTENUMERATIONCOMPLETEL, 
+            "StorageId = 0x%08X ", aStorageId);      
     iEnumerationState = ((iEnumerationState & ~EObjectsEnumerationState) | EObjectsEnumerated);
     iSingletons.DpController().EnumerationStateChangedL(*this);
-    __FLOG_VA((_L8("ObjectEnumerationCompleteL - Exit, data provider %d "), iId));
+    OstTrace1(TRACE_NORMAL, DUP2_CMTPDATAPROVIDER_OBJECTENUMERATIONCOMPLETEL, 
+            "data provider %d ", iId);      
+    OstTraceFunctionExit0( CMTPDATAPROVIDER_OBJECTENUMERATIONCOMPLETEL_EXIT );    
     }
     
 void CMTPDataProvider::StorageEnumerationCompleteL()
     {
-    __FLOG_VA((_L8("StorageEnumerationCompleteL - Entry, data provider %d "), iId));
+    OstTraceFunctionEntry0( CMTPDATAPROVIDER_STORAGEENUMERATIONCOMPLETEL_ENTRY );
+    OstTrace1(TRACE_NORMAL, CMTPDATAPROVIDER_STORAGEENUMERATIONCOMPLETEL, 
+            "data provider %d ", iId);          
     iEnumerationState = ((iEnumerationState & ~EStoragesEnumerationState) | EStoragesEnumerated);
     iSingletons.DpController().EnumerationStateChangedL(*this);
-    __FLOG_VA((_L8("StorageEnumerationCompleteL - Exit, data provider %d "), iId));
+    OstTrace1(TRACE_NORMAL, DUP1_CMTPDATAPROVIDER_STORAGEENUMERATIONCOMPLETEL, 
+            "data provider %d ", iId);    
+    OstTraceFunctionExit0( CMTPDATAPROVIDER_STORAGEENUMERATIONCOMPLETEL_EXIT );          
     }
 
 const MMTPDataProviderConfig& CMTPDataProvider::DataProviderConfig() const
@@ -495,7 +566,7 @@ MMTPDataCodeGenerator& CMTPDataProvider::DataCodeGenerator() const
 
 void CMTPDataProvider::NotifyFrameworkL( TMTPNotificationToFramework aNotification, const TAny* aParams )
     {
-    __FLOG(_L8("NotifyFrameworkL - Entry"));
+    OstTraceFunctionEntry0( CMTPDATAPROVIDER_NOTIFYFRAMEWORKL_ENTRY );
     
     __ASSERT_DEBUG( aParams, User::Invariant());
     
@@ -508,26 +579,27 @@ void CMTPDataProvider::NotifyFrameworkL( TMTPNotificationToFramework aNotificati
         }
         break;
     default:
-        __FLOG(_L8("Ignore other notification"));
+        OstTrace0(TRACE_NORMAL, CMTPDATAPROVIDER_NOTIFYFRAMEWORKL, "Ignore other notification");
         break;
         }
     
-    __FLOG(_L8("NotifyFrameworkL - Exit"));
+    OstTraceFunctionExit0( CMTPDATAPROVIDER_NOTIFYFRAMEWORKL_EXIT );
     }
 
 void CMTPDataProvider::RegisterPendingRequest(TUint aTimeOut)
     {
-    __FLOG(_L8("RegisterPendingRequestL - Entry"));
+    OstTraceFunctionEntry0( CMTPDATAPROVIDER_REGISTERPENDINGREQUEST_ENTRY );
     
     iSingletons.DpController().RegisterPendingRequestDP(iImplementationUid.iUid, aTimeOut);
     
-    __FLOG(_L8("RegisterPendingRequestL - Exit"));
+    OstTraceFunctionExit0( CMTPDATAPROVIDER_REGISTERPENDINGREQUEST_EXIT );
     }
 
 void CMTPDataProvider::DoCancel()
     {
-    __FLOG_VA((_L8("DoCancel - Entry, data provider %d "), iId));
-    __FLOG_VA((_L8("DoCancel - Exit, data provider %d "), iId)); 
+    OstTraceFunctionEntry0( CMTPDATAPROVIDER_DOCANCEL_ENTRY );
+    OstTrace1(TRACE_NORMAL, CMTPDATAPROVIDER_DOCANCEL, 
+            "data provider %d ", iId);      
 	
     if (iTimerActive)
 	    {
@@ -539,12 +611,19 @@ void CMTPDataProvider::DoCancel()
     	TRequestStatus* status = &iStatus;
 	    User::RequestComplete(status, KErrCancel);
 	    }  
+    OstTrace1(TRACE_NORMAL, DUP1_CMTPDATAPROVIDER_DOCANCEL, 
+            "data provider %d ", iId);       
+    OstTraceFunctionExit0( CMTPDATAPROVIDER_DOCANCEL_EXIT );
     }
     
 void CMTPDataProvider::RunL()
     {  
-    __FLOG_VA((_L8("RunL - Entry, data provider %d "), iId));
-    __MTP_HEAP_FLOG
+    OstTraceFunctionEntry0( CMTPDATAPROVIDER_RUNL_ENTRY );
+    OstTrace1(TRACE_NORMAL, CMTPDATAPROVIDER_RUNL, 
+            "data provider %d ", iId);   
+#ifdef OST_TRACE_COMPILER_IN_USE
+    __MTP_HEAP_OSTTRACE(OstTraceExt4(TRACE_NORMAL,DUP6_CMTPDATAPROVIDER_RUNL,"Heap: Size = %d, Allocated = %d, Available = %d, Largest block = %d", size, allocated, available, largest));
+#endif
     __ASSERT_DEBUG(iCurrentConnection, User::Invariant());
      
 	
@@ -561,7 +640,7 @@ void CMTPDataProvider::RunL()
             iCurrentTransactionPhase = iCurrentConnection->TransactionPhaseL(iCurrentRequest->Uint32(TMTPTypeRequest::ERequestSessionID));
             }
         }
-    __FLOG_VA((_L8("Current transaction phase = 0x%08X"), iCurrentTransactionPhase));
+    OstTrace1(TRACE_NORMAL, DUP1_CMTPDATAPROVIDER_RUNL, "Current transaction phase = 0x%08X", iCurrentTransactionPhase);
     
     TInt status(iStatus.Int());
     if ((status != KErrNone) &&
@@ -591,7 +670,7 @@ void CMTPDataProvider::RunL()
     
     if (iErrorRecovery != KErrNone)
         {
-        __FLOG(_L8("Error recovery in progress"));
+        OstTrace0(TRACE_NORMAL, DUP2_CMTPDATAPROVIDER_RUNL, "Error recovery in progress");
         switch (iCurrentTransactionPhase)
             {
         case ERequestPhase:
@@ -603,9 +682,12 @@ void CMTPDataProvider::RunL()
             
         case ECompletingPhase:
             TRAPD(err, iImplementation->ProcessRequestPhaseL(iCurrentTransactionPhase, *iCurrentRequest, *iCurrentConnection));
-            __FLOG_VA((_L8("iImplementation->ProcessRequestPhaseL error %d"), err));
+            OstTrace1(TRACE_NORMAL, DUP3_CMTPDATAPROVIDER_RUNL, 
+                    "iImplementation->ProcessRequestPhaseL error %d", err);
             if (err != KErrNone)
                 {
+                OstTraceDef1(OST_TRACE_CATEGORY_PRODUCTION, TRACE_IMPORTANT, DUP8_CMTPDATAPROVIDER_RUNL, 
+                        "iImplementation->ProcessRequestPhaseL error %d", err );
                 TransactionCompleteL(*iCurrentRequest, *iCurrentConnection);   
                 }
             iErrorRecovery = KErrNone;
@@ -618,7 +700,7 @@ void CMTPDataProvider::RunL()
     
 		else if (iSingletons.DpController().EnumerateState() < CMTPDataProviderController::EEnumeratingPhaseOneDone)
     	{
-        __FLOG(_L8("DP Enumeration is not complete"));
+        OstTrace0(TRACE_NORMAL, DUP4_CMTPDATAPROVIDER_RUNL, "DP Enumeration is not complete");
         if (iCurrentRequest != NULL)
         {
         TUint16 opCode = iCurrentRequest->Uint16(TMTPTypeRequest::ERequestOperationCode);
@@ -700,14 +782,20 @@ void CMTPDataProvider::RunL()
         
         }
     
-    __MTP_HEAP_FLOG
-    __FLOG_VA((_L8("RunL - Exit, data provider %d "), iId));
+#ifdef OST_TRACE_COMPILER_IN_USE
+    __MTP_HEAP_OSTTRACE(OstTraceExt4(TRACE_NORMAL,DUP7_CMTPSERVER_E32MAIN_HEAP,"Heap: Size = %d, Allocated = %d, Available = %d, Largest block = %d", size, allocated, available, largest));
+#endif
+    OstTrace1(TRACE_NORMAL, DUP5_CMTPDATAPROVIDER_RUNL, 
+            "data provider %d ", iId);      
+    OstTraceFunctionExit0( CMTPDATAPROVIDER_RUNL_EXIT );
     }
      
 TInt CMTPDataProvider::RunError(TInt aError)
 	{
-    __FLOG_VA((_L8("RunError - Entry, data provider %d "), iId));
-    __FLOG_VA((_L8("Error = %d"), aError));
+    OstTraceFunctionEntry0( CMTPDATAPROVIDER_RUNERROR_ENTRY );
+    OstTraceDef1(OST_TRACE_CATEGORY_PRODUCTION, TRACE_IMPORTANT, CMTPDATAPROVIDER_RUNERROR, 
+            "data provider %d ", iId);  
+    OstTraceDef1(OST_TRACE_CATEGORY_PRODUCTION, TRACE_IMPORTANT, DUP1_CMTPDATAPROVIDER_RUNERROR, "Error = %d", aError); 
     
     /* 
     CMTPDataProvider or iImplementation error, save the error state and 
@@ -716,7 +804,9 @@ TInt CMTPDataProvider::RunError(TInt aError)
     iErrorRecovery = aError;
     Schedule();
     
-    __FLOG_VA((_L8("RunError - Exit, data provider %d "), iId));
+    OstTrace1(TRACE_NORMAL, DUP2_CMTPDATAPROVIDER_RUNERROR, 
+            "data provider %d ", iId);     
+	OstTraceFunctionExit0( CMTPDATAPROVIDER_RUNERROR_EXIT ); 
 	return KErrNone;
 	}
 
@@ -743,8 +833,9 @@ Second phase constructor.
 */
 void CMTPDataProvider::ConstructL()
 	{
-    __FLOG_OPEN(KMTPSubsystem, KComponent);
-    __FLOG_VA((_L8("ConstructL - Entry, data provider %d "), iId));
+    OstTraceFunctionEntry0( CMTPDATAPROVIDER_CONSTRUCTL_ENTRY );
+    OstTrace1(TRACE_NORMAL, CMTPDATAPROVIDER_CONSTRUCTL, 
+            "data provider %d ", iId);  
     
     iSingletons.OpenL();
     TUint tDPType = iConfig->UintValue(MMTPDataProviderConfig::EDataProviderType);   
@@ -760,6 +851,7 @@ void CMTPDataProvider::ConstructL()
             
             if((i >= KExcludeCategoryStart) && (i <= KExcludeCategoryEnd) && (codes->Codes().Count() >0))
             	{
+                OstTrace1( TRACE_ERROR, DUP3_CMTPDATAPROVIDER_CONSTRUCTL, "Dp MTP feature(%d) contained in exclude category!", i );
             	User::Leave(KErrNotSupported);
             	}
             
@@ -778,21 +870,26 @@ void CMTPDataProvider::ConstructL()
         	
         	if((i >= KExcludeCategoryStart) && (i <= KExcludeCategoryEnd) && (codes->Codes().Count() >0))
             	{
+                OstTrace1( TRACE_ERROR, DUP4_CMTPDATAPROVIDER_CONSTRUCTL, "Dp MTP feature(%d) contained in exclude category!", i );
             	User::Leave(KErrNotSupported);
             	}
         	iSupported.AppendL(codes);
         	CleanupStack::Pop(codes);
         	}
 				
-    	User::LeaveIfError(iTimer.CreateLocal());
-
+    	LEAVEIFERROR(iTimer.CreateLocal(),
+    	        OstTrace0( TRACE_ERROR, DUP5_CMTPDATAPROVIDER_CONSTRUCTL, "thread-relative timer create error!" ));
+    	        
 		// Only assume ownership of passed objects on successful construction.
 		iConstructed = ETrue;
 	
-		__FLOG_VA((_L8("Data provider %d iImplementationUid 0x08%X "), iId, iImplementationUid));
-    	__FLOG_VA((_L8("ConstructL - Exit, data provider %d "), iId));	
+		OstTraceExt2(TRACE_NORMAL, DUP1_CMTPDATAPROVIDER_CONSTRUCTL,
+		        "Data provider %d iImplementationUid 0x%X ", iId, iImplementationUid.iUid);
     	}
 	 
+    OstTrace1(TRACE_NORMAL, DUP2_CMTPDATAPROVIDER_CONSTRUCTL, 
+            "data provider %d ", iId);      
+	OstTraceFunctionExit0( CMTPDATAPROVIDER_CONSTRUCTL_EXIT );
 	}
 
 /**
@@ -800,12 +897,16 @@ Schedules the next request phase or event.
 */
 void CMTPDataProvider::Schedule()
     {
-    __FLOG_VA((_L8("Schedule - Entry, data provider %d "), iId));
+    OstTraceFunctionEntry0( CMTPDATAPROVIDER_SCHEDULE_ENTRY );
+    OstTrace1(TRACE_NORMAL, CMTPDATAPROVIDER_SCHEDULE, 
+            "data provider %d ", iId);  
     iStatus = KRequestPending;
     TRequestStatus* status = &iStatus;
     SetActive();
     User::RequestComplete(status, KErrNone);
-    __FLOG_VA((_L8("Schedule - Exit, data provider %d "), iId));
+    OstTrace1(TRACE_NORMAL, DUP1_CMTPDATAPROVIDER_SCHEDULE, 
+            "data provider %d ", iId);         
+    OstTraceFunctionExit0( CMTPDATAPROVIDER_SCHEDULE_EXIT ); 
     }
 
 /**
@@ -815,7 +916,10 @@ Formats and sends an MTP response dataset from the specified error code.
 */
 void CMTPDataProvider::SendErrorResponseL(TInt aError)
 	{
-    __FLOG_VA((_L8("SendResponseL - Entry, data provider %d "), iId));
+    OstTraceFunctionEntry0( CMTPDATAPROVIDER_SENDERRORRESPONSEL_ENTRY );
+    OstTrace1(TRACE_NORMAL, CMTPDATAPROVIDER_SENDERRORRESPONSEL, 
+            "data provider %d ", iId);  
+    
 	__ASSERT_DEBUG(iCurrentRequest != NULL, User::Invariant());
 	
 	TMTPResponseCode code;
@@ -833,13 +937,16 @@ void CMTPDataProvider::SendErrorResponseL(TInt aError)
         break;
 	    }
 	    
-    __FLOG_VA((_L8("Sending response code  0x%04X"), code));
+    OstTrace1(TRACE_NORMAL, DUP2_CMTPDATAPROVIDER_SENDERRORRESPONSEL, 
+            "Sending response code  0x%04X", code);
 	iResponse.SetUint16(TMTPTypeResponse::EResponseCode, code);		    
     iResponse.SetUint32(TMTPTypeResponse::EResponseSessionID, iCurrentRequest->Uint32(TMTPTypeResponse::EResponseSessionID));	
 	iResponse.SetUint32(TMTPTypeResponse::EResponseTransactionID, iCurrentRequest->Uint32(TMTPTypeResponse::EResponseTransactionID));
 	SendResponseL(iResponse, *iCurrentRequest, *iCurrentConnection);
-	
-    __FLOG_VA((_L8("SendResponseL - Exit, data provider %d "), iId));	
+
+    OstTrace1(TRACE_NORMAL, DUP1_CMTPDATAPROVIDER_SENDERRORRESPONSEL, 
+            "data provider %d ", iId);  	
+	OstTraceFunctionExit0( CMTPDATAPROVIDER_SENDERRORRESPONSEL_EXIT );	
 	}
     
 CMTPDataProvider::CSupportedCodes* CMTPDataProvider::CSupportedCodes::NewLC(TMTPSupportCategory aCategory, MMTPDataProvider& aDp)

@@ -23,9 +23,11 @@
 #include "cmtpusbconnection.h"
 #include "cmtpusbepinterruptin.h"
 #include "mtpdebug.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpusbepinterruptinTraces.h"
+#endif
 
-// Class constants.
-__FLOG_STMT(_LIT8(KComponent,"UsbEpInterruptIn");)
 
 /**
 USB MTP device class interrupt endpoint data transfer controller factory 
@@ -41,12 +43,8 @@ CMTPUsbEpInterruptIn* CMTPUsbEpInterruptIn::NewL(TUint aId, CMTPUsbConnection& a
     {
     CMTPUsbEpInterruptIn* self = new(ELeave) CMTPUsbEpInterruptIn(aId, aConnection);
     CleanupStack::PushL(self);
-    
-#ifdef __FLOG_ACTIVE    
-    self->ConstructL(KComponent);
-#else
+
     self->ConstructL();
-#endif
 
     CleanupStack::Pop(self);
     return self;    
@@ -57,8 +55,8 @@ Destructor.
 */
 CMTPUsbEpInterruptIn::~CMTPUsbEpInterruptIn()
     {
-    __FLOG(_L8("~CMTPUsbEpInterruptIn - Entry"));
-    __FLOG(_L8("~CMTPUsbEpInterruptIn - Exit"));
+    OstTraceFunctionEntry0( CMTPUSBEPINTERRUPTIN_CMTPUSBEPINTERRUPTIN_DES_ENTRY );
+    OstTraceFunctionExit0( CMTPUSBEPINTERRUPTIN_CMTPUSBEPINTERRUPTIN_DES_EXIT );
     }
 
 /**
@@ -70,17 +68,17 @@ one data chunk.
 */
 void CMTPUsbEpInterruptIn::SendInterruptDataL(const MMTPType& aData)
     {
-    __FLOG(_L8("SendInterruptDataL - Entry"));
+    OstTraceFunctionEntry0( CMTPUSBEPINTERRUPTIN_SENDINTERRUPTDATAL_ENTRY );
     // Pass the bulk data source buffer to the base class for processing.
     SendDataL(aData);
-    __FLOG(_L8("SendInterruptDataL - Exit"));
+    OstTraceFunctionExit0( CMTPUSBEPINTERRUPTIN_SENDINTERRUPTDATAL_EXIT );
     }
     
 void CMTPUsbEpInterruptIn::SendDataCompleteL(TInt aError, const MMTPType& aData)
     {
-    __FLOG(_L8("SendDataCompleteL - Entry"));
+    OstTraceFunctionEntry0( CMTPUSBEPINTERRUPTIN_SENDDATACOMPLETEL_ENTRY );
     Connection().SendInterruptDataCompleteL(aError, aData);
-    __FLOG(_L8("SendDataCompleteL - Exit"));
+    OstTraceFunctionExit0( CMTPUSBEPINTERRUPTIN_SENDDATACOMPLETEL_EXIT );
     }    
 
 /**

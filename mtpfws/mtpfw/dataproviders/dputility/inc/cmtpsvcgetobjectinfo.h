@@ -50,10 +50,6 @@ private:
 	MMTPServiceDataProvider&    iDataProvider;
 	MMTPSvcObjectHandler*       iObjectHandler; // Not own
 	CMTPObjectMetaData*         iReceivedObjectMetaData;
-	/**
-	FLOGGER debug trace member variable.
-	*/
-	__FLOG_DECLARATION_MEMBER_MUTABLE;
 	};
 
 #endif // __CMTPSVCGETOBJECTINFO_H__

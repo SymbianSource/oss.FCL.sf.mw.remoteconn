@@ -20,9 +20,14 @@
 
 #include "cmtpdataprovidercontroller.h"
 #include "cmtpstoragemgr.h"
+#include "mtpdebug.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpstoragemgrTraces.h"
+#endif
+
 
 // Class constants.
-__FLOG_STMT(_LIT8(KComponent,"StorageMgr");)
 
 // StorageID bit manipulation patterns.
 static const TUint32    KLogicalIdMask(0x0000FFFF);
@@ -54,12 +59,11 @@ Destructor.
 */
 EXPORT_C CMTPStorageMgr::~CMTPStorageMgr()
     {
-    __FLOG(_L8("~CMTPStorageMgr - Entry"));
+    OstTraceFunctionEntry0( CMTPSTORAGEMGR_CMTPSTORAGEMGR_DES_ENTRY );
     iPhysicalStorageNumbers.Reset();
     iStorages.ResetAndDestroy();
     iSingletons.Close();
-    __FLOG(_L8("~CMTPStorageMgr - Exit"));
-    __FLOG_CLOSE;
+    OstTraceFunctionExit0( CMTPSTORAGEMGR_CMTPSTORAGEMGR_DES_EXIT );
     }
 
 /**
@@ -70,6 +74,8 @@ StorageID.
 */
 EXPORT_C TUint CMTPStorageMgr::LogicalStorageNumber(TUint32 aStorageId) 
     {
+    OstTraceFunctionEntry0( CMTPSTORAGEMGR_LOGICALSTORAGENUMBER_ENTRY );
+    OstTraceFunctionExit0( CMTPSTORAGEMGR_LOGICALSTORAGENUMBER_EXIT );
     return (aStorageId & KLogicalNumberMask);
     }
 
@@ -81,6 +87,7 @@ encoded in the specified StorageID.
 */    
 EXPORT_C TUint CMTPStorageMgr::LogicalStorageOwner(TUint32 aStorageId) 
     {
+    OstTraceFunctionEntry0( CMTPSTORAGEMGR_LOGICALSTORAGEOWNER_ENTRY );
     return ((aStorageId & KLogicalIdMask) >> KLogicalOwnerShift);
     }
 
@@ -92,6 +99,7 @@ StorageID.
 */
 EXPORT_C TUint CMTPStorageMgr::PhysicalStorageNumber(TUint32 aStorageId) 
     {
+    OstTraceFunctionEntry0( CMTPSTORAGEMGR_PHYSICALSTORAGENUMBER_ENTRY );
     return ((aStorageId & KPhysicalIdMask) >> KPhysicalNumberShift);
     }
     
@@ -103,6 +111,7 @@ encoded in the specified StorageID.
 */
 EXPORT_C TUint CMTPStorageMgr::PhysicalStorageOwner(TUint32 aStorageId) 
     {
+    OstTraceFunctionEntry0( CMTPSTORAGEMGR_PHYSICALSTORAGEOWNER_ENTRY );
     return ((aStorageId & KPhysicalIdMask) >> KPhysicalOwnerShift);
     }
 
@@ -115,10 +124,11 @@ once.
 */    
 EXPORT_C void CMTPStorageMgr::SetDefaultStorageId(TUint32 aStorageId)
     {
-    __FLOG(_L8("SetDefaultStorageId - Entry"));
+    OstTraceFunctionEntry0( CMTPSTORAGEMGR_SETDEFAULTSTORAGEID_ENTRY );
     iDefaultStorageId = aStorageId;
-    __FLOG_VA((_L8("Default StorageId = 0x%08X"), aStorageId));
-    __FLOG(_L8("SetDefaultStorageId - Exit"));
+    OstTrace1(TRACE_NORMAL, CMTPSTORAGEMGR_SETDEFAULTSTORAGEID, 
+            "Default StorageId = 0x%08X", aStorageId);
+    OstTraceFunctionExit0( CMTPSTORAGEMGR_SETDEFAULTSTORAGEID_EXIT );
     }
 
 /**
@@ -130,10 +140,11 @@ StorageID.
 */
 EXPORT_C void CMTPStorageMgr::SetDriveMappingL(TDriveNumber aDriveNumber, TUint32 aStorageId)
     {
-    __FLOG(_L8("DefineDriveNumberMapping - Entry"));
+    OstTraceFunctionEntry0( CMTPSTORAGEMGR_SETDRIVEMAPPINGL_ENTRY );
     iMapDriveToStorage[aDriveNumber] = aStorageId;
-    __FLOG_VA((_L8("Drive number %d = StorageID 0x%08X"), aDriveNumber, aStorageId));
-    __FLOG(_L8("DefineDriveNumberMapping - Exit"));
+    OstTraceExt2(TRACE_NORMAL, CMTPSTORAGEMGR_SETDRIVEMAPPINGL, 
+            "Drive number %d = StorageID 0x%08X", (int)aDriveNumber, (int)aStorageId);
+    OstTraceFunctionExit0( CMTPSTORAGEMGR_SETDRIVEMAPPINGL_EXIT );
     }
 
 /**
@@ -145,24 +156,25 @@ is set more than once.
 */    
 EXPORT_C void CMTPStorageMgr::SetFrameworkId(TUint aDataProviderId)
     {
-    __FLOG(_L8("SetFrameworkStoragesOwner - Entry"));
+    OstTraceFunctionEntry0( CMTPSTORAGEMGR_SETFRAMEWORKID_ENTRY );
     __ASSERT_DEBUG((iFrameworkId == KErrNotFound), User::Invariant());
     iFrameworkId = aDataProviderId;
-    __FLOG_VA((_L8("System storages owner DP Id = %d"), aDataProviderId));
-    __FLOG(_L8("SetFrameworkStoragesOwner - Exit"));
+    OstTrace1(TRACE_NORMAL, CMTPSTORAGEMGR_SETFRAMEWORKID, 
+                "System storages owner DP Id = %d", aDataProviderId);    
+    OstTraceFunctionExit0( CMTPSTORAGEMGR_SETFRAMEWORKID_EXIT );
     }    
     
 EXPORT_C TUint32 CMTPStorageMgr::AllocateLogicalStorageIdL(TUint aDataProviderId, TDriveNumber aDriveNumber, const CMTPStorageMetaData& aStorage)
     {
-    __FLOG(_L8("AllocateLogicalStorageIdL - Entry"));
+    OstTraceFunctionEntry0( CMTPSTORAGEMGR_ALLOCATELOGICALSTORAGEIDL_TDRIVERNUMBER_ENTRY );
     TUint id(AllocateLogicalStorageIdL(aDataProviderId, PhysicalStorageId(aDriveNumber), aStorage));
-    __FLOG(_L8("AllocateLogicalStorageIdL - Exit"));
+    OstTraceFunctionExit0( CMTPSTORAGEMGR_ALLOCATELOGICALSTORAGEIDL_EXIT );
     return id;
     }
 
 EXPORT_C TUint32 CMTPStorageMgr::AllocateLogicalStorageIdL(TUint aDataProviderId, TUint32 aPhysicalStorageId, const CMTPStorageMetaData& aStorage)
     {
-    __FLOG(_L8("AllocateLogicalStorageIdL - Entry"));
+    OstTraceFunctionEntry0( CMTPSTORAGEMGR_ALLOCATELOGICALSTORAGEIDL_TUINT32_ENTRY );
     //if support uninstall DP, comment the below assert.
     //__ASSERT_DEBUG((aDataProviderId < iSingletons.DpController().Count()), User::Invariant());
     
@@ -172,11 +184,13 @@ EXPORT_C TUint32 CMTPStorageMgr::AllocateLogicalStorageIdL(TUint aDataProviderId
     if (iStorages.Find(aStorage.DesC(CMTPStorageMetaData::EStorageSuid), StorageKeyMatchSuid) != KErrNotFound)
         {
         // SUID is not unique.
+        OstTrace0( TRACE_ERROR, CMTPSTORAGEMGR_ALLOCATELOGICALSTORAGEIDL, "SUID is not unique" );
         User::Leave(KErrAlreadyExists);
         }
     else if (aStorage.Uint(CMTPStorageMetaData::EStorageSystemType) != physical.Uint(CMTPStorageMetaData::EStorageSystemType))
         {
         // Physical/logical storage type mis-match.
+        OstTrace0( TRACE_ERROR, DUP2_CMTPSTORAGEMGR_ALLOCATELOGICALSTORAGEIDL, "Physical/logical storage type mis-match" );   
         User::Leave(KErrArgument);
         }
     else if (aStorage.Uint(CMTPStorageMetaData::EStorageSystemType) == CMTPStorageMetaData::ESystemTypeDefaultFileSystem)
@@ -184,26 +198,34 @@ EXPORT_C TUint32 CMTPStorageMgr::AllocateLogicalStorageIdL(TUint aDataProviderId
         // Validate that the SUID path exists.
         if (!BaflUtils::PathExists(iSingletons.Fs(), aStorage.DesC(CMTPStorageMetaData::EStorageSuid)))
             {
+            OstTrace0( TRACE_ERROR, DUP3_CMTPSTORAGEMGR_ALLOCATELOGICALSTORAGEIDL, "the SUID path doesn't exist" );
             User::Leave(KErrPathNotFound);
             }
      
         // Validate that the SUID path corresponds to the physical storage drive.
         TInt storageDrive(DriveNumber(aPhysicalStorageId));
         TParse p;
-        User::LeaveIfError(p.Set(aStorage.DesC(CMTPStorageMetaData::EStorageSuid), NULL, NULL));
+        LEAVEIFERROR(p.Set(aStorage.DesC(CMTPStorageMetaData::EStorageSuid), NULL, NULL),
+                OstTrace0( TRACE_ERROR, DUP4_CMTPSTORAGEMGR_ALLOCATELOGICALSTORAGEIDL, "storage can't be parsed!"));       
         TInt suidDrive(0);
-        User::LeaveIfError(iSingletons.Fs().CharToDrive(TChar(p.Drive()[0]), suidDrive));
+        LEAVEIFERROR(iSingletons.Fs().CharToDrive(TChar(p.Drive()[0]), suidDrive),
+                OstTrace0( TRACE_ERROR, DUP5_CMTPSTORAGEMGR_ALLOCATELOGICALSTORAGEIDL, "CharToDrive failed!" ));
+                
         if (suidDrive != storageDrive)
             {
             // SUID path/physical storage drive mis-match.
+            OstTraceExt2( TRACE_ERROR, DUP6_CMTPSTORAGEMGR_ALLOCATELOGICALSTORAGEIDL, 
+                    "SUID path %d /physical storage drive %d  mis-match", suidDrive, storageDrive);     
             User::Leave(KErrArgument);
             }
         }
     
     // Allocate a logical StorageId.
     TInt32 id(AllocateLogicalStorageId(aDataProviderId, aPhysicalStorageId));
-    User::LeaveIfError(id);
-    
+    LEAVEIFERROR(id,
+            OstTraceExt2( TRACE_ERROR, DUP7_CMTPSTORAGEMGR_ALLOCATELOGICALSTORAGEIDL, 
+                    "allocate logical storageId for Dp %d, Physical StorageId %d failed!", aDataProviderId, aPhysicalStorageId));
+
     // Create the logical storage meta-data.
     CMTPStorageMetaData* logical(CMTPStorageMetaData::NewLC(aStorage));
     logical->SetUint(CMTPStorageMetaData::EStorageId, id);
@@ -220,30 +242,34 @@ EXPORT_C TUint32 CMTPStorageMgr::AllocateLogicalStorageIdL(TUint aDataProviderId
     physical.SetUintArrayL(CMTPStorageMetaData::EStorageLogicalIds, logicals);
     CleanupStack::PopAndDestroy(&logicals);
     
-#ifdef __FLOG_ACTIVE
+#ifdef OST_TRACE_COMPILER_IN_USE
     HBufC8* buf(HBufC8::NewLC(aStorage.DesC(CMTPStorageMetaData::EStorageSuid).Length()));
     buf->Des().Copy(aStorage.DesC(CMTPStorageMetaData::EStorageSuid));
-    __FLOG_VA((_L8("Allocated logical StorageID 0x%08X for storage SUID %S"), id, buf));
+    OstTraceExt2(TRACE_NORMAL, DUP8_CMTPSTORAGEMGR_ALLOCATELOGICALSTORAGEIDL_TUINT32,
+            "Allocated logical StorageID 0x%08X for storage SUID %s", (TUint)id, *buf);
     CleanupStack::PopAndDestroy(buf);
-#endif // __FLOG_ACTIVE    
-    __FLOG(_L8("AllocateLogicalStorageIdL - Exit"));
+#endif // OST_TRACE_COMPILER_IN_USE    
+    OstTraceFunctionExit0( CMTPSTORAGEMGR_ALLOCATELOGICALSTORAGEIDL_TUINT32_EXIT );
     return id;
     }
 
 EXPORT_C TUint32 CMTPStorageMgr::AllocatePhysicalStorageIdL(TUint aDataProviderId, const CMTPStorageMetaData& aStorage)
     {
-    __FLOG(_L8("AllocatePhysicalStorageIdL - Entry"));
+    OstTraceFunctionEntry0( CMTPSTORAGEMGR_ALLOCATEPHYSICALSTORAGEIDL_ENTRY );
     
     // Validate the SUID.
     if (iStorages.Find(aStorage.DesC(CMTPStorageMetaData::EStorageSuid), StorageKeyMatchSuid) != KErrNotFound)
         {
         // SUID is not unique.
+        OstTrace0( TRACE_ERROR, DUP1_CMTPSTORAGEMGR_ALLOCATEPHYSICALSTORAGEIDL, "SUID is not unique" );
         User::Leave(KErrAlreadyExists);
         }
     
     // Allocate a physical StorageId.
     TInt32 id(AllocatePhysicalStorageId(aDataProviderId));
-    User::LeaveIfError(id);
+    LEAVEIFERROR(id,
+            OstTrace1( TRACE_ERROR, DUP2_CMTPSTORAGEMGR_ALLOCATEPHYSICALSTORAGEIDL, "Allocate Physical StorageId for Dp %d failed", aDataProviderId));
+            
     
     // Create the physical storage meta-data.
     CMTPStorageMetaData* physical(CMTPStorageMetaData::NewLC(aStorage));
@@ -255,14 +281,15 @@ EXPORT_C TUint32 CMTPStorageMgr::AllocatePhysicalStorageIdL(TUint aDataProviderI
     iStorages.InsertInOrderL(physical, StorageOrder);
     CleanupStack::Pop(physical);
     
-    __FLOG_VA((_L8("Allocated physical StorageID 0x%08X"), id));
-    __FLOG(_L8("AllocatePhysicalStorageIdL - Exit"));
+    OstTrace1(TRACE_NORMAL, CMTPSTORAGEMGR_ALLOCATEPHYSICALSTORAGEIDL,
+            "Allocated physical StorageID 0x%08X", id);
+    OstTraceFunctionExit0( CMTPSTORAGEMGR_ALLOCATEPHYSICALSTORAGEIDL_EXIT );
     return id;
     }
 
 EXPORT_C TInt CMTPStorageMgr::DeallocateLogicalStorageId(TUint aDataProviderId, TUint32 aLogicalStorageId)
     {
-    __FLOG(_L8("DeallocateLogicalStorageId - Entry"));
+    OstTraceFunctionEntry0( CMTPSTORAGEMGR_DEALLOCATELOGICALSTORAGEID_ENTRY );
     TInt ret(KErrArgument);
     
     // Validate the StorageID.
@@ -283,13 +310,13 @@ EXPORT_C TInt CMTPStorageMgr::DeallocateLogicalStorageId(TUint aDataProviderId, 
                 }
             }
         }
-    __FLOG(_L8("DeallocateLogicalStorageId - Exit"));
+    OstTraceFunctionExit0( CMTPSTORAGEMGR_DEALLOCATELOGICALSTORAGEID_EXIT );
     return ret;
     }
 
 EXPORT_C void CMTPStorageMgr::DeallocateLogicalStorageIds(TUint aDataProviderId, TUint32 aPhysicalStorageId)
     {
-    __FLOG(_L8("DeallocateLogicalStorageIds - Entry"));
+    OstTraceFunctionEntry0( CMTPSTORAGEMGR_DEALLOCATELOGICALSTORAGEIDS_ENTRY );
     TInt ret(iStorages.FindInOrder(aPhysicalStorageId, StorageOrder));
     if (ret != KErrNotFound)
         {
@@ -305,12 +332,12 @@ EXPORT_C void CMTPStorageMgr::DeallocateLogicalStorageIds(TUint aDataProviderId,
             count--;
             }
         }
-    __FLOG(_L8("DeallocateLogicalStorageIds - Exit"));
+    OstTraceFunctionExit0( CMTPSTORAGEMGR_DEALLOCATELOGICALSTORAGEIDS_EXIT );
     }
 
 EXPORT_C TInt CMTPStorageMgr::DeallocatePhysicalStorageId(TUint aDataProviderId, TUint32 aPhysicalStorageId)
     {
-    __FLOG(_L8("DeallocatePhysicalStorageId - Entry"));
+    OstTraceFunctionEntry0( CMTPSTORAGEMGR_DEALLOCATEPHYSICALSTORAGEID_ENTRY );
     TInt ret(KErrArgument);
     
     // Validate the StorageID.
@@ -341,20 +368,20 @@ EXPORT_C TInt CMTPStorageMgr::DeallocatePhysicalStorageId(TUint aDataProviderId,
                 }
             }
         }
-    __FLOG(_L8("DeallocatePhysicalStorageId - Exit"));
+    OstTraceFunctionExit0( CMTPSTORAGEMGR_DEALLOCATEPHYSICALSTORAGEID_EXIT );
     return ret;
     }
 
 EXPORT_C TUint32 CMTPStorageMgr::DefaultStorageId() const
     {
-    __FLOG(_L8("DefaultStorageId - Entry"));
-    __FLOG(_L8("DefaultStorageId - Exit"));
+    OstTraceFunctionEntry0( CMTPSTORAGEMGR_DEFAULTSTORAGEID_ENTRY );
+    OstTraceFunctionExit0( CMTPSTORAGEMGR_DEFAULTSTORAGEID_EXIT );
     return iDefaultStorageId;
     }
 
 EXPORT_C TInt CMTPStorageMgr::DriveNumber(TUint32 aStorageId) const
     {
-    __FLOG(_L8("DriveNumber - Entry"));
+    OstTraceFunctionEntry0( CMTPSTORAGEMGR_DRIVENUMBER_ENTRY );
     TInt drive(KErrNotFound);
     if (PhysicalStorageOwner(aStorageId) == iFrameworkId)
         {
@@ -368,26 +395,26 @@ EXPORT_C TInt CMTPStorageMgr::DriveNumber(TUint32 aStorageId) const
                 }
             }
         }
-    __FLOG(_L8("DriveNumber - Exit"));
+    OstTraceFunctionExit0( CMTPSTORAGEMGR_DRIVENUMBER_EXIT );
     return drive;
     }
 
 EXPORT_C TInt32 CMTPStorageMgr::FrameworkStorageId(TDriveNumber aDriveNumber) const
     {
-    __FLOG(_L8("FrameworkStorageId - Entry"));
+    OstTraceFunctionEntry0( CMTPSTORAGEMGR_FRAMEWORKSTORAGEID_ENTRY );
     TInt32 ret(KErrNotFound);
     TInt32 id(iMapDriveToStorage[aDriveNumber]);
     if ((id != KErrNotFound) && (LogicalStorageId(id)))
         {
         ret = id;
         }
-    __FLOG(_L8("FrameworkStorageId - Exit"));
+    OstTraceFunctionExit0( CMTPSTORAGEMGR_FRAMEWORKSTORAGEID_EXIT );
     return ret;
     }
 
 EXPORT_C void CMTPStorageMgr::GetAvailableDrivesL(RArray<TDriveNumber>& aDrives) const
     {
-    __FLOG(_L8("GetAvailableDrivesL - Entry"));
+    OstTraceFunctionEntry0( CMTPSTORAGEMGR_GETAVAILABLEDRIVESL_ENTRY );
     aDrives.Reset();
     for (TUint i(0); (i < iMapDriveToStorage.Count()); i++)
         {
@@ -396,12 +423,12 @@ EXPORT_C void CMTPStorageMgr::GetAvailableDrivesL(RArray<TDriveNumber>& aDrives)
             aDrives.AppendL(static_cast<TDriveNumber>(i));
             }
         }
-    __FLOG(_L8("GetAvailableDrivesL - Exit"));
+    OstTraceFunctionExit0( CMTPSTORAGEMGR_GETAVAILABLEDRIVESL_EXIT );
     }
 
 EXPORT_C void CMTPStorageMgr::GetLogicalStoragesL(const TMTPStorageMgrQueryParams& aParams, RPointerArray<const CMTPStorageMetaData>& aStorages) const
     {
-    __FLOG(_L8("GetLogicalStoragesL - Entry"));
+    OstTraceFunctionEntry0( CMTPSTORAGEMGR_GETLOGICALSTORAGESL_ENTRY );
     aStorages.Reset();
     const TBool KAllStorages(aParams.StorageSuid() == KNullDesC);
     const TBool KAllStorageSystemTypes(aParams.StorageSystemType() == CMTPStorageMetaData::ESystemTypeUndefined);
@@ -416,12 +443,12 @@ EXPORT_C void CMTPStorageMgr::GetLogicalStoragesL(const TMTPStorageMgrQueryParam
             aStorages.AppendL(iStorages[i]);
             }
         }
-    __FLOG(_L8("GetLogicalStoragesL - Exit"));
+    OstTraceFunctionExit0( CMTPSTORAGEMGR_GETLOGICALSTORAGESL_EXIT );
     }
 
 EXPORT_C void CMTPStorageMgr::GetPhysicalStoragesL(const TMTPStorageMgrQueryParams& aParams, RPointerArray<const CMTPStorageMetaData>& aStorages) const
     {
-    __FLOG(_L8("GetPhysicalStoragesL - Entry"));
+    OstTraceFunctionEntry0( CMTPSTORAGEMGR_GETPHYSICALSTORAGESL_ENTRY );
     aStorages.Reset();
     const TBool KAllStorages(aParams.StorageSuid() == KNullDesC);
     const TBool KAllStorageSystemTypes(aParams.StorageSystemType() == CMTPStorageMetaData::ESystemTypeUndefined);
@@ -436,19 +463,19 @@ EXPORT_C void CMTPStorageMgr::GetPhysicalStoragesL(const TMTPStorageMgrQueryPara
             aStorages.AppendL(iStorages[i]);
             }
         }
-    __FLOG(_L8("GetPhysicalStoragesL - Exit"));
+    OstTraceFunctionExit0( CMTPSTORAGEMGR_GETPHYSICALSTORAGESL_EXIT );
     }
 
 EXPORT_C TUint32 CMTPStorageMgr::LogicalStorageId(TUint32 aStorageId) const
     {
-    __FLOG(_L8("LogicalStorageId - Entry"));
-    __FLOG(_L8("LogicalStorageId - Exit"));
+    OstTraceFunctionEntry0( CMTPSTORAGEMGR_LOGICALSTORAGEID_TUINT32_ENTRY );
+    OstTraceFunctionExit0( CMTPSTORAGEMGR_LOGICALSTORAGEID_TUINT32_EXIT );
     return (aStorageId & KLogicalIdMask);
     }
 
 EXPORT_C TInt32 CMTPStorageMgr::LogicalStorageId(const TDesC& aStorageSuid) const
     {
-    __FLOG(_L8("LogicalStorageId - Entry"));
+    OstTraceFunctionEntry0( CMTPSTORAGEMGR_LOGICALSTORAGEID_TDESC_ENTRY );
     TInt32 id(KErrNotFound);
     TInt idx(iStorages.Find(aStorageSuid, StorageKeyMatchSuid));
     if (idx != KErrNotFound)
@@ -459,52 +486,53 @@ EXPORT_C TInt32 CMTPStorageMgr::LogicalStorageId(const TDesC& aStorageSuid) cons
             id = KErrNotFound;
             }
         }
-    __FLOG(_L8("LogicalStorageId - Exit"));
+    OstTraceFunctionExit0( CMTPSTORAGEMGR_LOGICALSTORAGEID_TDESC_EXIT );
     return id;
     }
 
 EXPORT_C TInt32 CMTPStorageMgr::PhysicalStorageId(TDriveNumber aDriveNumber) const
     {
-    __FLOG(_L8("PhysicalStorageId - Entry"));
+    OstTraceFunctionEntry0( CMTPSTORAGEMGR_PHYSICALSTORAGEID_TDRIVENUMBER_ENTRY );
     TInt32 storageId(iMapDriveToStorage[aDriveNumber]);
     if (storageId != KErrNotFound)
         {
         storageId = PhysicalStorageId(storageId);
         }
-    __FLOG(_L8("PhysicalStorageId - Exit"));
+    OstTraceFunctionExit0( CMTPSTORAGEMGR_PHYSICALSTORAGEID_TDRIVENUMBER_EXIT );
     return storageId;
     }
 
 EXPORT_C TUint32 CMTPStorageMgr::PhysicalStorageId(TUint32 aStorageId) const
     {
-    __FLOG(_L8("PhysicalStorageId - Entry"));
-    __FLOG(_L8("PhysicalStorageId - Exit"));
+    OstTraceFunctionEntry0( CMTPSTORAGEMGR_PHYSICALSTORAGEID_TUINT32_ENTRY );
+    OstTraceFunctionExit0( CMTPSTORAGEMGR_PHYSICALSTORAGEID_TUINT32_EXIT );
     return (aStorageId & KPhysicalIdMask);
     }
 
 EXPORT_C const CMTPStorageMetaData& CMTPStorageMgr::StorageL(TUint32 aStorageId) const
     {
-    __FLOG(_L8("StorageL - Entry"));
+    OstTraceFunctionEntry0( CMTPSTORAGEMGR_STORAGEL_ENTRY );
     TInt idx(iStorages.FindInOrder(aStorageId, StorageOrder));
-    User::LeaveIfError(idx);
-    __FLOG(_L8("StorageL - Exit"));
+    LEAVEIFERROR(idx,
+            OstTrace1( TRACE_ERROR, CMTPSTORAGEMGR_STORAGEL, "can't find storage with StorageId %d", idx ));
+    OstTraceFunctionExit0( CMTPSTORAGEMGR_STORAGEL_EXIT );
     return *iStorages[idx];
     }
 
 EXPORT_C TUint32 CMTPStorageMgr::StorageId(TUint32 aPhysicalStorageId, TUint32 aLogicalStorageId) const
     {
-    __FLOG(_L8("StorageId - Entry"));
-    __FLOG(_L8("StorageId - Exit"));
+    OstTraceFunctionEntry0( CMTPSTORAGEMGR_STORAGEID_ENTRY );
+    OstTraceFunctionExit0( CMTPSTORAGEMGR_STORAGEID_EXIT );
     return (aPhysicalStorageId | aLogicalStorageId);
     }
 
 EXPORT_C TBool CMTPStorageMgr::ValidStorageId(TUint32 aStorageId) const
     {
-    __FLOG(_L8("ValidStorageId - Entry"));
+    OstTraceFunctionEntry0( CMTPSTORAGEMGR_VALIDSTORAGEID_ENTRY );
     TInt idx(iStorages.FindInOrder(aStorageId, StorageOrder));
     if(KErrNotFound == idx)
     	{
-    	__FLOG(_L8("ValidStorageId - False Exit"));
+    	OstTraceFunctionExit0( CMTPSTORAGEMGR_VALIDSTORAGEID_EXIT );
     	return EFalse;
     	}
     
@@ -530,24 +558,25 @@ EXPORT_C TBool CMTPStorageMgr::ValidStorageId(TUint32 aStorageId) const
             ret = BaflUtils::PathExists(iSingletons.Fs(), buf);
 			}
 		}
-  
-    __FLOG(_L8("ValidStorageId - Exit"));
     
+    OstTraceFunctionExit0( DUP1_CMTPSTORAGEMGR_VALIDSTORAGEID_EXIT );
     return ret;
     }
     
 EXPORT_C CMTPTypeString* CMTPStorageMgr::VolumeIdL(TUint aDataProviderId, TUint32 aStorageId, const TDesC& aVolumeIdSuffix) const
     {
-    __FLOG(_L8("VolumeIdL - Entry"));
+    OstTraceFunctionEntry0( CMTPSTORAGEMGR_VOLUMEIDL_ENTRY );
 
     // Validate the StorageId.
     TUint owner(LogicalStorageId(aStorageId) ? LogicalStorageOwner(aStorageId) : PhysicalStorageOwner(aStorageId));
     if (!ValidStorageId(aStorageId))
         {
+        OstTrace1( TRACE_ERROR, CMTPSTORAGEMGR_VOLUMEIDL, "invalid storage id %d", aStorageId);
         User::Leave(KErrNotFound);
         }
     else if (aDataProviderId != owner)
         {
+        OstTrace1( TRACE_ERROR, DUP1_CMTPSTORAGEMGR_VOLUMEIDL, "Dp %d not owner", aDataProviderId);
         User::Leave(KErrAccessDenied);
         }
     
@@ -566,7 +595,7 @@ EXPORT_C CMTPTypeString* CMTPStorageMgr::VolumeIdL(TUint aDataProviderId, TUint3
 
     CMTPTypeString* volumeId = CMTPTypeString::NewL(buffer);
 	CleanupStack::PopAndDestroy(&buffer);  
-    __FLOG(_L8("VolumeIdL - Exit"));
+    OstTraceFunctionExit0( CMTPSTORAGEMGR_VOLUMEIDL_EXIT );
     return volumeId;
     }   
     
@@ -576,7 +605,6 @@ Constructor.
 CMTPStorageMgr::CMTPStorageMgr() :
     iFrameworkId(KErrNotFound)
     {
-
     }
     
 /**
@@ -585,14 +613,13 @@ Second phase constructor.
 */
 void CMTPStorageMgr::ConstructL()
     {
-    __FLOG_OPEN(KMTPSubsystem, KComponent);
-    __FLOG(_L8("ConstructL - Entry"));
+    OstTraceFunctionEntry0( CMTPSTORAGEMGR_CONSTRUCTL_ENTRY );
     iSingletons.OpenL();
     for (TUint i(0); (i < KMaxDrives); i++)
         {
         iMapDriveToStorage[i] = KErrNotFound;
         }
-    __FLOG(_L8("ConstructL - Exit"));
+    OstTraceFunctionExit0( CMTPSTORAGEMGR_CONSTRUCTL_EXIT );
     }
     
 /**
@@ -606,7 +633,7 @@ of the specified physical MTP StorageID.
 */
 TInt32 CMTPStorageMgr::AllocateLogicalStorageId(TUint aDataProviderId, TUint32 aPhysicalStorageId)
     {
-    __FLOG_STATIC(KMTPSubsystem, KComponent, _L8("AllocateLogicalStorageId - Entry"));
+    OstTraceFunctionEntry0( CMTPSTORAGEMGR_ALLOCATELOGICALSTORAGEID_ENTRY );
     TInt ret(iStorages.FindInOrder(aPhysicalStorageId, StorageOrder));
     if (ret != KErrNotFound)
         {
@@ -625,7 +652,7 @@ TInt32 CMTPStorageMgr::AllocateLogicalStorageId(TUint aDataProviderId, TUint32 a
             ret = KErrOverflow;
             }
         }
-    __FLOG_STATIC(KMTPSubsystem, KComponent, _L8("AllocateLogicalStorageId - Exit"));
+    OstTraceFunctionExit0( CMTPSTORAGEMGR_ALLOCATELOGICALSTORAGEID_EXIT );
     return ret;
     }
     
@@ -638,7 +665,7 @@ Allocates a new 32-bit physical StorageId for the storage owner.
 */
 TInt32 CMTPStorageMgr::AllocatePhysicalStorageId(TUint aDataProviderId)
     {
-    __FLOG_STATIC(KMTPSubsystem, KComponent, _L8("AllocatePhysicalStorageId - Entry"));
+    OstTraceFunctionEntry0( CMTPSTORAGEMGR_ALLOCATEPHYSICALSTORAGEID_ENTRY );
     TInt32 ret(KErrNone);
     while ((iPhysicalStorageNumbers.Count() < (aDataProviderId + 1)) && (ret == KErrNone))
         {
@@ -656,7 +683,7 @@ TInt32 CMTPStorageMgr::AllocatePhysicalStorageId(TUint aDataProviderId)
             ret = KErrOverflow;
             }
         }
-    __FLOG_STATIC(KMTPSubsystem, KComponent, _L8("AllocatePhysicalStorageId - Exit"));
+    OstTraceFunctionExit0( CMTPSTORAGEMGR_ALLOCATEPHYSICALSTORAGEID_EXIT );
     return ret;
     }
 	
@@ -736,7 +763,7 @@ Removes the logical storages table entry at the specified index.
 */
 void CMTPStorageMgr::RemoveLogicalStorageL(TUint aIdx)
     {
-    __FLOG(_L8("RemoveLogicalStorageL - Entry"));
+    OstTraceFunctionEntry0( CMTPSTORAGEMGR_REMOVELOGICALSTORAGEL_ENTRY );
     TUint32 id(iStorages[aIdx]->Uint(CMTPStorageMetaData::EStorageId));
     
     // Disassociate the logical and physical storages.
@@ -751,7 +778,7 @@ void CMTPStorageMgr::RemoveLogicalStorageL(TUint aIdx)
     // Delete the storage.
     delete iStorages[aIdx];
     iStorages.Remove(aIdx);
-    __FLOG(_L8("RemoveLogicalStorageL - Entry"));
+    OstTraceFunctionExit0( CMTPSTORAGEMGR_REMOVELOGICALSTORAGEL_EXIT );
     }
     
 /**
@@ -763,10 +790,11 @@ logical MTP StorageID.
 */
 CMTPStorageMetaData& CMTPStorageMgr::StorageMetaDataL(TUint32 aStorageId)
     {
-    __FLOG(_L8("StorageMetaDataL - Entry"));
+    OstTraceFunctionEntry0( CMTPSTORAGEMGR_STORAGEMETADATAL_ENTRY );
     TInt idx(iStorages.FindInOrder(aStorageId, StorageOrder));
-    User::LeaveIfError(idx);
-    __FLOG(_L8("StorageMetaDataL - Exit"));
+    LEAVEIFERROR(idx,
+            OstTrace1( TRACE_ERROR, CMTPSTORAGEMGR_STORAGEMETADATAL, "can't find storage with storageId %d", idx ));
+    OstTraceFunctionExit0( CMTPSTORAGEMGR_STORAGEMETADATAL_EXIT );
     return *iStorages[idx];
     }
    

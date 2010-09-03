@@ -31,8 +31,12 @@
 #include "rmtpframework.h"
 #include "cmtpobjectbrowser.h"
 #include "mtpdppanic.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpdeleteobjectTraces.h"
+#endif
 
-__FLOG_STMT( _LIT8( KComponent,"PrxyDelObj" ); )
+
 const TUint KInvalidDpId = 0xFF;
 
 /**
@@ -63,13 +67,12 @@ Destructor
 */    
 CMTPDeleteObject::~CMTPDeleteObject()
     {
+    OstTraceFunctionEntry0( CMTPDELETEOBJECT_CMTPDELETEOBJECT_DES_ENTRY );
     iSingletons.Close();
     iTargetDps.Close();
     iHandles.Close();
     delete iObjBrowser;
-    
-    __FLOG( _L8("+/-Dtor") );
-    __FLOG_CLOSE;
+    OstTraceFunctionExit0( CMTPDELETEOBJECT_CMTPDELETEOBJECT_DES_EXIT );
     }
 
 /**
@@ -79,8 +82,7 @@ CMTPDeleteObject::CMTPDeleteObject(MMTPDataProviderFramework& aFramework, MMTPCo
     CMTPRequestProcessor(aFramework, aConnection, sizeof(KMTPDeleteObjectPolicy)/sizeof(TMTPRequestElementInfo), KMTPDeleteObjectPolicy),
     iDeletedObjectsNumber(0)
     {
-    __FLOG_OPEN( KMTPSubsystem, KComponent );
-    __FLOG( _L8("+/-Ctor") );
+
     }
     
 /**
@@ -88,19 +90,19 @@ Second phase constructor.
 */
 void CMTPDeleteObject::ConstructL()
     {
-    __FLOG( _L8("+ConstructL") );
-    
+    OstTraceFunctionEntry0( CMTPDELETEOBJECT_CONSTRUCTL_ENTRY );    
     iSingletons.OpenL();
     iOwnerDp = KInvalidDpId;
-    __FLOG( _L8("-ConstructL") );
+    OstTraceFunctionExit0( CMTPDELETEOBJECT_CONSTRUCTL_EXIT );
     }
     
 TMTPResponseCode CMTPDeleteObject::CheckRequestL()
 	{
-    __FLOG(_L8("CheckRequestL - Entry"));
+    OstTraceFunctionEntry0( CMTPDELETEOBJECT_CHECKREQUESTL_ENTRY );
     TMTPResponseCode responseCode = CMTPRequestProcessor::CheckRequestL();   
-    
-	__FLOG_VA((_L8("CheckRequestL - Exit with responseCode = 0x%04X"), responseCode));
+
+    OstTrace1( TRACE_NORMAL, CMTPDELETEOBJECT_CHECKREQUESTL, "responseCode = 0x%04X", responseCode );
+    OstTraceFunctionExit0( CMTPDELETEOBJECT_CHECKREQUESTL_EXIT );
     return responseCode;
 	}
 
@@ -109,7 +111,7 @@ DeleteObject request handler
 */ 
 void CMTPDeleteObject::ServiceL()
     {
-    __FLOG( _L8("+ServiceL") );
+    OstTraceFunctionEntry0( CMTPDELETEOBJECT_SERVICEL_ENTRY );
     iTargetDps.Reset();
     CMTPParserRouter& router(iSingletons.Router());
     CMTPParserRouter::TRoutingParameters params(Request(), iConnection);
@@ -132,14 +134,14 @@ void CMTPDeleteObject::ServiceL()
 		if(hasBaseFileSystemDp)
 			{
 			SendResponseL(EMTPRespCodeDeviceBusy);
-			__FLOG( _L8("-ServiceL with Device_Busy") );
+			OstTraceFunctionExit0( CMTPDELETEOBJECT_SERVICEL_EXIT );
 			return;
 			}
         }
     
     BrowseHandlesL();
-    
-    __FLOG( _L8("-ServiceL") );
+
+    OstTraceFunctionExit0( DUP1_CMTPDELETEOBJECT_SERVICEL_EXIT );
     }
 
 void CMTPDeleteObject::ProxyReceiveDataL(MMTPType& /*aData*/, const TMTPTypeRequest& /*aRequest*/, MMTPConnection& /*aConnection*/, TRequestStatus& /*aStatus*/)
@@ -193,14 +195,14 @@ void CMTPDeleteObject::ProxyTransactionCompleteL(const TMTPTypeRequest& /*aReque
 
 void CMTPDeleteObject::RunL()
     {
-    __FLOG( _L8("+RunL") );
+    OstTraceFunctionEntry0( CMTPDELETEOBJECT_RUNL_ENTRY );
     
     if ( iStatus == KErrNone )
         {
         //First check if the operation has been cancelled or not
         if(iCancelled)
             {
-            __FLOG(_L8("Initiator cancell delete, send response with cancelled code "));
+            OstTrace0( TRACE_NORMAL, CMTPDELETEOBJECT_RUNL, "Initiator cancell delete, send response with cancelled code " );
             SendResponseL(EMTPRespCodeTransactionCancelled);
             iCancelled = EFalse;
             }
@@ -218,8 +220,8 @@ void CMTPDeleteObject::RunL()
         {
         SendResponseL( iResponse.Uint16( TMTPTypeResponse::EResponseCode ) );
         }
-   
-    __FLOG( _L8("-RunL") );
+
+    OstTraceFunctionExit0( CMTPDELETEOBJECT_RUNL_EXIT );
     }
     
 /**
@@ -249,7 +251,7 @@ void CMTPDeleteObject::SendResponseL(TUint16 aCode)
 
 void CMTPDeleteObject::BrowseHandlesL()
     {
-    __FLOG( _L8("+BrowseHandlesL") );
+    OstTraceFunctionEntry0( CMTPDELETEOBJECT_BROWSEHANDLESL_ENTRY );
     
     delete iObjBrowser;
     iObjBrowser = NULL;
@@ -279,12 +281,12 @@ void CMTPDeleteObject::BrowseHandlesL()
         Schedule( KErrNone );
         }
 
-    __FLOG( _L8("-BrowseHandlesL") );
+    OstTraceFunctionExit0( CMTPDELETEOBJECT_BROWSEHANDLESL_EXIT );
     }
 
 void CMTPDeleteObject::NextObjectHandleL()
     {
-    __FLOG( _L8("+NextObjectHandleL") );
+    OstTraceFunctionEntry0( CMTPDELETEOBJECT_NEXTOBJECTHANDLEL_ENTRY );
 
     iOwnerDp = KInvalidDpId;
     if ( iCurrentHandle < iHandles.Count() )
@@ -316,7 +318,7 @@ void CMTPDeleteObject::NextObjectHandleL()
             }
         }
 
-    __FLOG( _L8("-NextObjectHandleL") );
+    OstTraceFunctionExit0( CMTPDELETEOBJECT_NEXTOBJECTHANDLEL_EXIT );
     }
 
 void CMTPDeleteObject::OnBrowseObjectL( TAny* aSelf, TUint aHandle, TUint32 /*aCurDepth*/ )

@@ -23,6 +23,11 @@
 #include "cmtppictbridgeprinter.h"
 #include "cptpserver.h"
 #include "ptpdef.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cptpreceivedmsghandlerTraces.h"
+#endif
+
 
 // --------------------------------------------------------------------------
 // CPtpReceivedMsgHandler::NewL()
@@ -56,7 +61,6 @@ CPtpReceivedMsgHandler::CPtpReceivedMsgHandler(CPtpServer* aServerP) : iServerP(
 //    
 void CPtpReceivedMsgHandler::ConstructL()
     {
-    __FLOG_OPEN(KMTPSubsystem, KPtpServerLog);
     }
     
 // --------------------------------------------------------------------------
@@ -66,9 +70,9 @@ void CPtpReceivedMsgHandler::ConstructL()
 //
 CPtpReceivedMsgHandler::~CPtpReceivedMsgHandler()
     {
-    __FLOG(_L8("CPtpReceivedMsgHandler::~"));
+    OstTraceFunctionEntry0( CPTPRECEIVEDMSGHANDLER_CPTPRECEIVEDMSGHANDLER_DES_ENTRY );
     iReceiveQ.Close();
-    __FLOG_CLOSE;
+    OstTraceFunctionExit0( CPTPRECEIVEDMSGHANDLER_CPTPRECEIVEDMSGHANDLER_DES_EXIT );
     }
     
 // --------------------------------------------------------------------------
@@ -92,9 +96,10 @@ void CPtpReceivedMsgHandler::Initialize()
 //
 void CPtpReceivedMsgHandler::RegisterReceiveObjectNotify(const TDesC& aExtension)
     {
-    __FLOG(_L8(">>>PtpMsgHandler::RegisterReceiveObjectNotify"));
+    OstTraceFunctionEntry0( CPTPRECEIVEDMSGHANDLER_REGISTERRECEIVEOBJECTNOTIFY_ENTRY );
     iExtension.Copy(aExtension);
-    __FLOG_VA((_L8("***the Receiving Que msg count: %d"), iReceiveQ.Count()));
+    OstTrace1( TRACE_NORMAL, CPTPRECEIVEDMSGHANDLER_REGISTERRECEIVEOBJECTNOTIFY, 
+            "***the Receiving Que msg count: %d", iReceiveQ.Count());
     for ( TUint index = 0; index < iReceiveQ.Count(); ++index )
         {
         if ( ObjectReceived( iReceiveQ[index] ) )
@@ -103,8 +108,9 @@ void CPtpReceivedMsgHandler::RegisterReceiveObjectNotify(const TDesC& aExtension
             break;
             }
         }
-    __FLOG_VA((_L8("***the Receiving Que msg count:%d"), iReceiveQ.Count()));
-    __FLOG(_L8("<<<PtpMsgHandler::RegisterReceiveObjectNotify"));    
+    OstTrace1( TRACE_NORMAL, DUP1_CPTPRECEIVEDMSGHANDLER_REGISTERRECEIVEOBJECTNOTIFY, 
+            "***the Receiving Que msg count:%d", iReceiveQ.Count() );
+    OstTraceFunctionExit0( CPTPRECEIVEDMSGHANDLER_REGISTERRECEIVEOBJECTNOTIFY_EXIT );
     }
        
 // --------------------------------------------------------------------------
@@ -113,29 +119,36 @@ void CPtpReceivedMsgHandler::RegisterReceiveObjectNotify(const TDesC& aExtension
 //
 TBool CPtpReceivedMsgHandler::ObjectReceived(TUint32 aHandle)
     {
-    __FLOG_VA((_L8(">>>CPtpReceivedMsgHandler::ObjectReceived 0x%x"), aHandle));    
+    OstTraceFunctionEntry0( CPTPRECEIVEDMSGHANDLER_OBJECTRECEIVED_ENTRY );
+    OstTrace1( TRACE_NORMAL, CPTPRECEIVEDMSGHANDLER_OBJECTRECEIVED, "Handle 0x%x", aHandle );  
     TBuf<KFileNameAndPathLength> file;
     TInt err=KErrNone;
     TRAP( err, iServerP->GetObjectNameByHandleL(file, aHandle));
-    __FLOG_VA((_L16("---after GetObjectNameByHandleL err(%d) file is %S"), err, &file));    
+    OstTraceExt2( TRACE_NORMAL, DUP2_CPTPRECEIVEDMSGHANDLER_OBJECTRECEIVED, 
+            "---after GetObjectNameByHandleL err(%d) file is %S", err, file );
+
     if (err == KErrNone)
         {
         TFileName fileName; 
         TBuf<KFileExtLength> extension;
         TParse p;
         err = p.Set(file,NULL,NULL);
-        __FLOG_VA((_L8("---after Set err(%d)"), err));            
+        OstTrace1(TRACE_NORMAL, DUP3_CPTPRECEIVEDMSGHANDLER_OBJECTRECEIVED, "---after Set err(%d)", err );
+
         if (err == KErrNone)
             {
             fileName = p.FullName();
         
             extension = p.Ext();
-            __FLOG_VA((_L16("---after parse file is %S ext is %S comparing it to %S"), &fileName, &extension, &iExtension));
+            OstTraceExt3( TRACE_NORMAL, DUP4_CPTPRECEIVEDMSGHANDLER_OBJECTRECEIVED, 
+                    "---after parse file is %S ext is %S comparing it to %S", fileName, extension, iExtension );
+            
             if (!iExtension.CompareF(extension))
                 {
                 iServerP->Printer()->ObjectReceived(fileName);
                 // deregister notification
                 DeRegisterReceiveObjectNotify();
+                OstTraceFunctionExit0( CPTPRECEIVEDMSGHANDLER_OBJECTRECEIVED_EXIT );
                 return ETrue; 
                 }
             else
@@ -148,12 +161,14 @@ TBool CPtpReceivedMsgHandler::ObjectReceived(TUint32 aHandle)
                     iReceiveQ.Append(aHandle);
                     }
 
-                __FLOG_VA((_L8("*** Que length is %d err is %d"), iReceiveQ.Count(), err));
-                }
+                OstTraceExt2( TRACE_NORMAL, DUP5_CPTPRECEIVEDMSGHANDLER_OBJECTRECEIVED, 
+                        "*** Que length is %d err is %d", iReceiveQ.Count(), err);
+               }
             }   
         }
-        
-    __FLOG_VA((_L8("<<<CPtpReceivedMsgHandler::ObjectReceived %d"), err));
+
+    OstTrace1( TRACE_NORMAL, DUP1_CPTPRECEIVEDMSGHANDLER_OBJECTRECEIVED, "error code %d", err );    
+    OstTraceFunctionExit0( DUP1_CPTPRECEIVEDMSGHANDLER_OBJECTRECEIVED_EXIT );
     return EFalse;
     }
 
@@ -165,7 +180,8 @@ TBool CPtpReceivedMsgHandler::ObjectReceived(TUint32 aHandle)
 //    
 void CPtpReceivedMsgHandler::DeRegisterReceiveObjectNotify()       
     {
-    __FLOG(_L8("CPtpReceivedMsgHandler::DeRegisterReceivObjectNotify"));        
+    OstTraceFunctionEntry0( CPTPRECEIVEDMSGHANDLER_DEREGISTERRECEIVEOBJECTNOTIFY_ENTRY );       
     iExtension.Zero();
     iReceiveHandle = 0;
+    OstTraceFunctionExit0( CPTPRECEIVEDMSGHANDLER_DEREGISTERRECEIVEOBJECTNOTIFY_EXIT );
     }

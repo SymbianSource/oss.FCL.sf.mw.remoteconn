@@ -25,7 +25,6 @@
 #include <e32base.h>
 #include <f32file.h>
 
-#include "mtpdebug.h"
 #include "rmtpframework.h"
 
 class CMTPShutdown;
@@ -57,11 +56,6 @@ private:
 	void ConstructL();
 	
 private: // Owned
-
-    /**
-    FLOGGER debug trace member variable.
-    */
-    __FLOG_DECLARATION_MEMBER_MUTABLE;
     
     /**
     The MTP framework singletons.

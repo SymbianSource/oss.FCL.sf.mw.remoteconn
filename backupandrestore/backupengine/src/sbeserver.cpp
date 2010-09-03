@@ -26,13 +26,14 @@
 #include "sbesession.h"
 #include "sbepanic.h"
 #include "sbedataownermanager.h"
-#include "sblog.h"
-//#include <stdlib.h>
+#include "OstTraceDefinitions.h"
+#include "sbtrace.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "sbeserverTraces.h"
+#endif
 
 namespace conn
 	{
-
-
 	/** Secure Backup Engine security request ranges
 	
 	This is a breakdown of the SBE requests into ranges
@@ -90,7 +91,9 @@ namespace conn
     Class constructor
     */
 		{
+		OstTraceFunctionEntry0( CSBESERVER_CSBESERVER_CONS_ENTRY );
 		__ASSERT_DEBUG(aDOM, Panic(KErrArgument));
+		OstTraceFunctionExit0( CSBESERVER_CSBESERVER_CONS_EXIT );
 		}
 
 	CSBEServer::~CSBEServer()
@@ -98,8 +101,10 @@ namespace conn
     Class destructor
     */
 		{
+		OstTraceFunctionEntry0( CSBESERVER_CSBESERVER_DES_ENTRY );
 		iGlobalSharedHeap.Close();
 		delete iGSHInterface;
+		OstTraceFunctionExit0( CSBESERVER_CSBESERVER_DES_EXIT );
 		}
 		
 	CSBEServer* CSBEServer::NewLC(CDataOwnerManager* aDOM)
@@ -110,9 +115,11 @@ namespace conn
 	@return The new instance of CSBEServer.
 	*/
 		{
+		OstTraceFunctionEntry0( CSBESERVER_NEWLC_ENTRY );
 		CSBEServer* pSelf = new (ELeave) CSBEServer(aDOM);
 		CleanupStack::PushL(pSelf);
 		pSelf->ConstructL();
+		OstTraceFunctionExit0( CSBESERVER_NEWLC_EXIT );
 		return pSelf;
 		}
 
@@ -121,6 +128,7 @@ namespace conn
 	Construct this instance of CSBEServer.
 	*/
 		{
+		OstTraceFunctionEntry0( CSBESERVER_CONSTRUCTL_ENTRY );
 		AllocateGlobalSharedHeapL();
 
 		iGSHInterface = CHeapWrapper::NewL();
@@ -134,6 +142,7 @@ namespace conn
 		#ifndef _DEBUG
 			iShutdown.Start();
 		#endif
+		OstTraceFunctionExit0( CSBESERVER_CONSTRUCTL_EXIT );
 		}
 		
 	void CSBEServer::AllocateGlobalSharedHeapL()
@@ -142,6 +151,7 @@ namespace conn
 	progressively smaller chunk sizes
 	*/
 		{	
+		OstTraceFunctionEntry0( CSBESERVER_ALLOCATEGLOBALSHAREDHEAPL_ENTRY );
 		TInt attemptedSize;
 		TInt retryCount;
 		TInt redFactor;
@@ -165,7 +175,8 @@ namespace conn
 				}
 			}
 			
-		User::LeaveIfError(result);
+		LEAVEIFERROR(result, OstTrace1(TRACE_ERROR, CSBESERVER_ALLOCATEGLOBALSHAREDHEAPL, "error = %d", result));
+		OstTraceFunctionExit0( CSBESERVER_ALLOCATEGLOBALSHAREDHEAPL_EXIT );
 		}
 
 	void CSBEServer::AddSession()
@@ -175,8 +186,10 @@ namespace conn
 	session count drops to zero.
 	*/
 		{
+		OstTraceFunctionEntry0( CSBESERVER_ADDSESSION_ENTRY );
 		++iSessionCount;
 		iShutdown.Cancel();
+		OstTraceFunctionExit0( CSBESERVER_ADDSESSION_EXIT );
 		}
 
 	void CSBEServer::DropSession()
@@ -186,10 +199,12 @@ namespace conn
 	session count drops to zero.
 	*/
 		{		
+		OstTraceFunctionEntry0( CSBESERVER_DROPSESSION_ENTRY );
 		if(--iSessionCount == 0)
 			{
 			iShutdown.Start();
 			}
+		OstTraceFunctionExit0( CSBESERVER_DROPSESSION_EXIT );
 		}
 
 
@@ -206,16 +221,20 @@ namespace conn
 	@leave KErrNotSupported if the version passed in aVersion is not the same as this one
 	*/
 		{
+		OstTraceFunctionEntry0( CSBESERVER_NEWSESSIONL_ENTRY );
 		TVersion thisVersion(KSBEMajorVersionNumber, 
 								KSBEMinorVersionNumber,
 								KSBEBuildVersionNumber);
 		
 	    if (!User::QueryVersionSupported(thisVersion, aVersion))
 			{
+	        OstTrace0(TRACE_ERROR, CSBESERVER_NEWSESSIONL, "Leave: KErrNotSupported");
 			User::Leave(KErrNotSupported);
 			}
 
-		return new (ELeave) CSBESession();
+	    CSession2* session = new (ELeave) CSBESession();
+	    OstTraceFunctionExit0( CSBESERVER_NEWSESSIONL_EXIT );
+		return session;
 		}
 
 	TInt CSBEServer::RunError(TInt aError)
@@ -229,6 +248,7 @@ namespace conn
 	@return The error code to be passed back to the active scheduler framework.
 	*/
 		{
+		OstTraceFunctionEntry0( CSBESERVER_RUNERROR_ENTRY );
 		//
 		// A Bad descriptor is a bad client - panic it.
 		if(aError == KErrBadDescriptor)
@@ -240,6 +260,7 @@ namespace conn
 		// Complete the message and continue handling requests.
 		Message().Complete(aError);
 		ReStart();
+		OstTraceFunctionExit0( CSBESERVER_RUNERROR_EXIT );
 		return KErrNone;
 		}
 
@@ -250,11 +271,13 @@ namespace conn
 	@param aPanic The panic code.
 	*/
 		{
+		OstTraceFunctionEntry0( CSBESERVER_PANICCLIENT_ENTRY );
 		__DEBUGGER()
 		_LIT(KPanicCategory,"SBE Server");
 		RThread client;
 		Message().Client(client);
 		client.Panic(KPanicCategory, aPanic);
+		OstTraceFunctionExit0( CSBESERVER_PANICCLIENT_EXIT );
 		}
 
 	} // end namespace

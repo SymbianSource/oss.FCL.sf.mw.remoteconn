@@ -69,10 +69,6 @@ private:
 	TMTPResponseCode             iResponseCode;
 	CMTPObjectMetaData*          iReceivedObjectMetaData;
 	TUint32                      iGroupId;
-	/**
-	FLOGGER debug trace member variable.
-	*/
-	__FLOG_DECLARATION_MEMBER_MUTABLE;
 	};
 
 #endif // __CMTPSVCGETOBJECTPROPLIST_H__

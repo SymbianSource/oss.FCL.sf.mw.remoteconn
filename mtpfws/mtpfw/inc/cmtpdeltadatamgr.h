@@ -25,8 +25,6 @@
 #ifndef CMTPDELTADATAMGR_H
 #define CMTPDELTADATAMGR_H
 
-#include "mtpdebug.h"
-
 #include <e32base.h>
 #include <d32dbms.h>
 #include "dbutility.h"
@@ -88,10 +86,6 @@ private: // Not owned
     TInt iTotalRows;    
     RDbTable iDeltaTableBatched;
     RDbTable iAnchorTableBatched;
-   /**
-    FLOGGER debug trace member variable.
-    */
-    __FLOG_DECLARATION_MEMBER_MUTABLE;
 };
 
 #endif // CMTPDELTADATAMGR_H

@@ -15,12 +15,18 @@
 //
 
 #include "cptpiphostfilterinterface.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cptpiphostfilterinterfaceTraces.h"
+#endif
+
 
 /*
 Creates an implementation of an ECOM plugin with the specified UID
 */
 EXPORT_C CPTPIPHostFilterInterface* CPTPIPHostFilterInterface::NewL()
 	{		
+	OstTraceFunctionEntry0( CPTPIPHOSTFILTERINTERFACE_NEWL_ENTRY );
 	const TUid KFilterImplUid ={0xA0004A5F};
 	
 	TAny* defaultFilter=NULL;
@@ -32,6 +38,7 @@ EXPORT_C CPTPIPHostFilterInterface* CPTPIPHostFilterInterface::NewL()
 	}
 	else 
 		{
+		OstTraceFunctionExit0( CPTPIPHOSTFILTERINTERFACE_NEWL_EXIT );
 		return NULL;	
 		}
 	}
@@ -42,6 +49,7 @@ Lists all the implementations for that Interface identified by the Interface ID
 */
 EXPORT_C void CPTPIPHostFilterInterface::ListImplementations(RImplInfoPtrArray& aImplInfoArray)
 	{
+	OstTraceFunctionEntry0( CPTPIPHOSTFILTERINTERFACE_LISTIMPLEMENTATIONS_ENTRY );
 	const TUid KFilterInterfaceUid ={0xA0004A5E};
 	TRAPD(ret, REComSession::ListImplementationsL(KFilterInterfaceUid,aImplInfoArray));
 	if(ret != KErrNone)
@@ -49,6 +57,7 @@ EXPORT_C void CPTPIPHostFilterInterface::ListImplementations(RImplInfoPtrArray& 
 		RDebug::Print(_L("CPTPIPController::ListImplementations ERROR = %d\n") ,ret);
 	}
 
+	OstTraceFunctionExit0( CPTPIPHOSTFILTERINTERFACE_LISTIMPLEMENTATIONS_EXIT );
 	}
 
 
@@ -57,7 +66,8 @@ Destructor
 */
 EXPORT_C CPTPIPHostFilterInterface::~CPTPIPHostFilterInterface()
 {
-
+OstTraceFunctionEntry0( CPTPIPHOSTFILTERINTERFACE_CPTPIPHOSTFILTERINTERFACE_ENTRY );
+OstTraceFunctionExit0( CPTPIPHOSTFILTERINTERFACE_CPTPIPHOSTFILTERINTERFACE_EXIT );
 }
 
 

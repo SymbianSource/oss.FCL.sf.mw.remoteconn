@@ -13,8 +13,6 @@
 // Description:
 //
 
-#include <comms-infras/commsdebugutility.mmh> 
-
 TARGET          mtppictbridgedp.dll
 TARGETTYPE      PLUGIN
 UID             0x10009D8D 0x2001FE3B
@@ -54,6 +52,7 @@ TARGET              2001fe3c.rsc
 END
 
 USERINCLUDE     ../inc
+USERINCLUDE     ../traces
 USERINCLUDE     ../../../mtpfws/mtpfw/dataproviders/dputility/inc
 USERINCLUDE     ../../../mtpfws/mtpfw/common/inc
 USERINCLUDE     ../../../mtpfws/mtpfw/inc

@@ -19,8 +19,11 @@
 #include "cmtpsvcdeleteserviceproplist.h"
 #include "mmtpservicedataprovider.h"
 #include "mmtpservicehandler.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpsvcdeleteserviceproplistTraces.h"
+#endif
 
-__FLOG_STMT (_LIT8(KComponent, "SvcDelSvcPList");)
 
 EXPORT_C MMTPRequestProcessor* CMTPSvcDeleteServicePropList::NewL(MMTPDataProviderFramework& aFramework, 
 													MMTPConnection& aConnection, 
@@ -35,10 +38,9 @@ EXPORT_C MMTPRequestProcessor* CMTPSvcDeleteServicePropList::NewL(MMTPDataProvid
 
 EXPORT_C CMTPSvcDeleteServicePropList::~CMTPSvcDeleteServicePropList()
 	{    
-	__FLOG(_L8("~CMTPSvcDeleteServicePropList - Entry"));
+	OstTraceFunctionEntry0( CMTPSVCDELETESERVICEPROPLIST_CMTPSVCDELETESERVICEPROPLIST_DES_ENTRY );
 	delete iDeleteServicePropList;
-	__FLOG(_L8("~CMTPSvcDeleteServicePropList - Exit"));
-	__FLOG_CLOSE;
+	OstTraceFunctionExit0( CMTPSVCDELETESERVICEPROPLIST_CMTPSVCDELETESERVICEPROPLIST_DES_EXIT );
 	}
 
 CMTPSvcDeleteServicePropList::CMTPSvcDeleteServicePropList(MMTPDataProviderFramework& aFramework, 
@@ -50,15 +52,14 @@ CMTPSvcDeleteServicePropList::CMTPSvcDeleteServicePropList(MMTPDataProviderFrame
 
 void CMTPSvcDeleteServicePropList::ConstructL()
 	{
-	__FLOG_OPEN(KMTPSubsystem, KComponent);
-	__FLOG(_L8("ConstructL - Entry")); 
+	OstTraceFunctionEntry0( CMTPSVCDELETESERVICEPROPLIST_CONSTRUCTL_ENTRY );
 	iDeleteServicePropList = CMTPTypeDeleteServicePropList::NewL();
-	__FLOG(_L8("ConstructL - Exit")); 
+	OstTraceFunctionExit0( CMTPSVCDELETESERVICEPROPLIST_CONSTRUCTL_EXIT );
 	}
 
 TMTPResponseCode CMTPSvcDeleteServicePropList::CheckRequestL()
 	{
-	__FLOG(_L8("CheckRequestL - Entry"));
+	OstTraceFunctionEntry0( CMTPSVCDELETESERVICEPROPLIST_CHECKREQUESTL_ENTRY );
 	TMTPResponseCode responseCode = CMTPRequestProcessor::CheckRequestL();
 	if (EMTPRespCodeOK == responseCode)
 		{
@@ -68,21 +69,23 @@ TMTPResponseCode CMTPSvcDeleteServicePropList::CheckRequestL()
 			responseCode = EMTPRespCodeInvalidServiceID;
 			}
 		}
-	__FLOG_VA((_L8("CheckRequestL - Exit with responseCode = 0x%04X"), responseCode));
+	
+    OstTrace1( TRACE_NORMAL, CMTPSVCDELETESERVICEPROPLIST_CHECKREQUESTL, "Exit with responseCode = 0x%04X", responseCode );
+	OstTraceFunctionExit0( CMTPSVCDELETESERVICEPROPLIST_CHECKREQUESTL_EXIT );
 	return responseCode;
 	}
 
 void CMTPSvcDeleteServicePropList::ServiceL()
 	{
-	__FLOG(_L8("ServiceL - Entry"));
+	OstTraceFunctionEntry0( CMTPSVCDELETESERVICEPROPLIST_SERVICEL_ENTRY );
 	//Recieve the data from the property list
 	ReceiveDataL(*iDeleteServicePropList);
-	__FLOG(_L8("ServiceL - Exit"));
+	OstTraceFunctionExit0( CMTPSVCDELETESERVICEPROPLIST_SERVICEL_EXIT );
 	}
 
 TBool CMTPSvcDeleteServicePropList::DoHandleResponsePhaseL()
 	{
-	__FLOG(_L8("DoHandleResponsePhaseL - Entry"));
+	OstTraceFunctionEntry0( CMTPSVCDELETESERVICEPROPLIST_DOHANDLERESPONSEPHASEL_ENTRY );
 	TMTPResponseCode responseCode = EMTPRespCodeOK;
 	TUint32 parameter = 0;
 	const TUint count = iDeleteServicePropList->NumberOfElements();
@@ -106,7 +109,9 @@ TBool CMTPSvcDeleteServicePropList::DoHandleResponsePhaseL()
 			}
 		}
 	SendResponseL(responseCode, 1, &parameter);
-	__FLOG_VA((_L8("DoHandleResponsePhaseL - Exit responseCode = 0x%04X, failed index = %u"), responseCode, parameter));
+    OstTraceExt2( TRACE_NORMAL, CMTPSVCDELETESERVICEPROPLIST_DOHANDLERESPONSEPHASEL, 
+            "Exit responseCode = 0x%04X, failed index = %u", responseCode, parameter );
+	OstTraceFunctionExit0( CMTPSVCDELETESERVICEPROPLIST_DOHANDLERESPONSEPHASEL_EXIT );
 	return EFalse;
 	}
 

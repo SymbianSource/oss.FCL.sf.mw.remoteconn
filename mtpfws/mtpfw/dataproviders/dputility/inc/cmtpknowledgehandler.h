@@ -24,7 +24,6 @@
 #include <mtp/cmtptypeserviceproplist.h>
 #include <mtp/mtpprotocolconstants.h>
 
-#include "mtpdebug.h"
 #include "mtpsvcdpconst.h"
 #include "mmtpsvcobjecthandler.h"
 
@@ -110,12 +109,6 @@ private:
 	RBuf             	iDateModified;
 	RBuf             	iName;
 	TMTPTypeUint128  	iLastAuthorProxyID;
-	
-	/**
-	FLOGGER debug trace member variable.
-	*/
-	__FLOG_DECLARATION_MEMBER_MUTABLE;
-	
 	};
 
 /** 
@@ -180,10 +173,6 @@ private:
 	// Knowledge object swap file
 	CMTPTypeFile*               iKnowledgeSwpBuffer;
 	const TDesC&               iSuid;
-	/**
-	FLOGGER debug trace member variable.
-	*/
-	__FLOG_DECLARATION_MEMBER_MUTABLE;
 	};
 
 #endif // __CMTPKNOWLEDGEHANDLER_H__

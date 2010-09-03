@@ -60,11 +60,6 @@ private: // From CMTPGetDevicePropDesc
 
 private: // Owned
 
-    /**
-    FLOGGER debug trace member variable.
-    */
-    __FLOG_DECLARATION_MEMBER_MUTABLE;
-
     TMTPTypeUint8   iBatteryLevel;
     TMTPTypeUint32 iUint32;	
     CMTPTypeString* iString;

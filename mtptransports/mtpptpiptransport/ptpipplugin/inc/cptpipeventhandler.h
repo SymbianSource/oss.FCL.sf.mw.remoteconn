@@ -52,12 +52,6 @@ private:
 	
 	TInt ParsePTPIPHeaderL();
 	TBool HandleInitAck();
-	
-    /**
-    FLOGGER debug trace member variable.
-    */
-    __FLOG_DECLARATION_MEMBER;    
-	
 	};
 
 #endif /*CEVENTHANDLER_H_*/

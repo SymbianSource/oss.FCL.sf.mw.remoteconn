@@ -25,9 +25,13 @@
 #include "cmtpgetobjecthandles.h"
 #include "mtpdevicedpconst.h"
 #include "mtpdevdppanic.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpgetobjecthandlesTraces.h"
+#endif
+
 
 // Class constants.
-__FLOG_STMT(_LIT8(KComponent,"GetObjectHandles");)
 
 static const TInt KMTPGetObjectHandlesTimeOut(1);
 
@@ -53,7 +57,6 @@ GetObjectHandles request handler
 CMTPGetObjectHandles::~CMTPGetObjectHandles()
 	{
 	delete iHandles;
-    __FLOG_CLOSE;
 	}
 
 /**
@@ -70,7 +73,6 @@ Second phase constructor.
 */
 void CMTPGetObjectHandles::ConstructL()
     {
-	__FLOG_OPEN(KMTPSubsystem, KComponent);    
     CMTPGetNumObjects::ConstructL();
     }
 
@@ -79,7 +81,7 @@ GetObjectHandles request handler
 */	
 void CMTPGetObjectHandles::ServiceL()
 	{
-    __FLOG(_L8("ServiceL - Entry"));
+    OstTraceFunctionEntry0( CMTPGETOBJECTHANDLES_SERVICEL_ENTRY );
     
     if(iSingletons.DpController().EnumerateState() != CMTPDataProviderController::EEnumeratedFulllyCompleted)
         {
@@ -91,15 +93,19 @@ void CMTPGetObjectHandles::ServiceL()
             {
             if (iTimeoutCount++ >= KMTPGetObjectHandlesTimeOut)
                 {
-                __FLOG(_L8("Wait for enumeration time out, return busy."));
+                OstTrace0( TRACE_NORMAL, CMTPGETOBJECTHANDLES_SERVICEL, 
+                        "Wait for enumeration time out, return busy." );
                 SendResponseL(EMTPRespCodeDeviceBusy);
                 iTimeoutCount = 0;
+                OstTraceFunctionExit0( CMTPGETOBJECTHANDLES_SERVICEL_EXIT );
                 return;
                 }
             else
                 {
-                __FLOG(_L8("Enumeration not completed, suspend request."));
+                OstTrace0( TRACE_NORMAL, DUP1_CMTPGETOBJECTHANDLES_SERVICEL, 
+                        "Enumeration not completed, suspend request." );
                 RegisterPendingRequest(20);
+                OstTraceFunctionExit0( DUP1_CMTPGETOBJECTHANDLES_SERVICEL_EXIT );
                 return; 
                 }
             }
@@ -110,11 +116,12 @@ void CMTPGetObjectHandles::ServiceL()
 	delete iHandles;
 	iHandles = CMTPTypeArray::NewL(EMTPTypeAUINT32);
 
-    __FLOG_VA((_L8("IsConnectMac = %d; ERequestParameter2 = %d" ), iDevDpSingletons.DeviceDataStore().IsConnectMac(), Request().Uint32(TMTPTypeRequest::ERequestParameter2)));
-	if(iDevDpSingletons.DeviceDataStore().IsConnectMac()
+	OstTraceExt2( TRACE_NORMAL, DUP2_CMTPGETOBJECTHANDLES_SERVICEL, 
+	        "IsConnectMac = %d; ERequestParameter2 = %d", iDevDpSingletons.DeviceDataStore().IsConnectMac(), Request().Uint32(TMTPTypeRequest::ERequestParameter2));	
+    if(iDevDpSingletons.DeviceDataStore().IsConnectMac()
        &&(KMTPFormatsAll == Request().Uint32(TMTPTypeRequest::ERequestParameter2)))
         {
-        __FLOG(_L8("ConnectMac and Fetch all."));
+        OstTrace0( TRACE_NORMAL, DUP3_CMTPGETOBJECTHANDLES_SERVICEL, "ConnectMac and Fetch all." );
         HandleObjectHandlesUnderMacL(*iHandles);
         }
     else
@@ -163,6 +170,6 @@ void CMTPGetObjectHandles::ServiceL()
         }        
     						
 	SendDataL(*iHandles);
-    __FLOG(_L8("ServiceL - Exit"));	    
+	OstTraceFunctionExit0( DUP2_CMTPGETOBJECTHANDLES_SERVICEL_EXIT );
 	}
 	

@@ -73,6 +73,7 @@ private:
     void ServiceRepresentativeSampleWidthL();
     void ServiceRepresentativeSampleDataL();
     void ServiceNonConsumableL();
+    void ServiceHiddenL();
 
 private:
     CMTPImageDpObjectPropertyMgr&	iObjectPropertyMgr;
@@ -84,11 +85,7 @@ private:
     CMTPTypeString*			iMTPTypeString;
     CMTPTypeArray*          iMTPTypeArray;
     CMTPObjectMetaData*     iObjectMeta;
-    
-    /**
-    FLOGGER debug trace member variable.
-    */
-    __FLOG_DECLARATION_MEMBER_MUTABLE;    
+
     };
     
 #endif  //CMTPIMAGEDPGETOBJECTPROPVALUE_H

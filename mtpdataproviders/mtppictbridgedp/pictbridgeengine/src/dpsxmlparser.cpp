@@ -16,20 +16,15 @@
 */
 
 
-#include <e32debug.h>
 #include "dpsxmlparser.h"
 #include "dpsconst.h"
 #include "pictbridge.h"
 #include "dpsxmlstring.h"
-
-#ifdef _DEBUG
-#	define IF_DEBUG(t) {RDebug::t;}
-#   define PRINT_DES(t)\
- {TBuf<KMaxArgLen> _buf; _buf.Copy(t);RDebug::Print(_L("---%S"), &_buf);}
-#else
-#	define IF_DEBUG(t)
-#   define PRINT_DES(t)
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "dpsxmlparserTraces.h"
 #endif
+
 
 // ---------------------------------------------------------------------------
 // 
@@ -37,7 +32,6 @@
 //
 CDpsXmlParser* CDpsXmlParser::NewL(CDpsEngine* aEngine)
 	{
-    IF_DEBUG(Print(_L("CDpsXmlParser::NewL")));
     CDpsXmlParser* self = new (ELeave) CDpsXmlParser(aEngine);
     return self;
     }
@@ -48,9 +42,9 @@ CDpsXmlParser* CDpsXmlParser::NewL(CDpsEngine* aEngine)
 //	
 CDpsXmlParser::~CDpsXmlParser()
     {
-    IF_DEBUG(Print(_L(">>>~CDpsXmlParser")));
+    OstTraceFunctionEntry0( CDPSXMLPARSER_CDPSXMLPARSER_DES_ENTRY );
     iDpsArgs.Close();
-    __IF_DEBUG(Print(_L("<<<~CDpsXmlParser")));
+    OstTraceFunctionExit0( CDPSXMLPARSER_CDPSXMLPARSER_DES_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -59,9 +53,9 @@ CDpsXmlParser::~CDpsXmlParser()
 //	
 CDpsXmlParser::CDpsXmlParser(CDpsEngine* aEngine) : iEngine(aEngine)
     {
-    IF_DEBUG(Print(_L(">>>CDpsXmlParser::Ctor")));
+    OstTraceFunctionEntry0( DUP1_CDPSXMLPARSER_CDPSXMLPARSER_CONS_ENTRY );
 	Reset();
-    IF_DEBUG(Print(_L("<<<CDpsXmlParser::Ctor")));
+	OstTraceFunctionExit0( DUP1_CDPSXMLPARSER_CDPSXMLPARSER_CONS_EXIT );
 	}
 
 // ---------------------------------------------------------------------------
@@ -71,13 +65,13 @@ CDpsXmlParser::CDpsXmlParser(CDpsEngine* aEngine) : iEngine(aEngine)
 void CDpsXmlParser::OnStartDocumentL(
 		const RDocumentParameters& /*aDocParam*/, TInt aErrorCode)
     {
-    IF_DEBUG(Print(_L(">>>CDpsXmlParser::OnStartDocumentL")));
+    OstTraceFunctionEntry0( CDPSXMLPARSER_ONSTARTDOCUMENTL_ENTRY );
     if (aErrorCode != KErrNone)
         {
-        IF_DEBUG(Print(_L("---, error code is %d"), aErrorCode));
+        OstTrace1( TRACE_ERROR, CDPSXMLPARSER_ONSTARTDOCUMENTL, "---, error code is %d", aErrorCode );
         User::Leave(aErrorCode);
         }
-    IF_DEBUG(Print(_L("<<<CDpsXmlParser::OnStartDocumentL")));
+	OstTraceFunctionExit0( CDPSXMLPARSER_ONSTARTDOCUMENTL_EXIT );
 	}
 
 // ---------------------------------------------------------------------------
@@ -86,14 +80,14 @@ void CDpsXmlParser::OnStartDocumentL(
 //
 void CDpsXmlParser::OnEndDocumentL(TInt aErrorCode)
 	{
-    IF_DEBUG(Print(_L(">>>CDpsXmlParser::OnEndDocumentL")));
+    OstTraceFunctionEntry0( CDPSXMLPARSER_ONENDDOCUMENTL_ENTRY );
     if (aErrorCode != KErrNone)
         {
-        IF_DEBUG(Print(_L("---, error code is %d"), aErrorCode));
+        OstTrace1( TRACE_ERROR, CDPSXMLPARSER_ONENDDOCUMENTL, "---, error code is %d", aErrorCode );
         User::Leave(aErrorCode);
         }
     
-    IF_DEBUG(Print(_L("<<<CDpsXmlParser::OnEndDocumentL")));
+    OstTraceFunctionExit0( CDPSXMLPARSER_ONENDDOCUMENTL_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -104,24 +98,23 @@ void CDpsXmlParser::OnStartElementL(const RTagInfo& aElement,
 									const RAttributeArray& aAttributes, 
 									TInt aErrCode)
     {
-    IF_DEBUG(Print(_L(">>>CDpsXmlParser::OnStartElementL")));
+    OstTraceFunctionEntry0( CDPSXMLPARSER_ONSTARTELEMENTL_ENTRY );
     
     if (aErrCode != KErrNone)
         {
-        IF_DEBUG(Print(_L("---, error code is %d"), aErrCode));
+        OstTrace1( TRACE_ERROR, CDPSXMLPARSER_ONSTARTELEMENTL, "---, error code is %d", aErrCode );
         User::Leave(aErrCode);
         }
     if (aAttributes.Count() > 1)
         {
-        IF_DEBUG(Print(_L("---cannot have more than one attribute!")));
+        OstTrace0( TRACE_ERROR, DUP1_CDPSXMLPARSER_ONSTARTELEMENTL, "---cannot have more than one attribute!" );
         User::Leave(KErrArgument);
         }
     	
     // Gets the name of the tag
     const TDesC8& name = aElement.LocalName().DesC();
     
-    IF_DEBUG(Print(_L("---Start"))); PRINT_DES(name);
-	
+    OstTraceExt1( TRACE_NORMAL, DUP2_CDPSXMLPARSER_ONSTARTELEMENTL, "---Start---%s", name );
     //Checks the element
     // this is the first layer <dps>
     if (!name.Compare(KDpsXml))
@@ -165,8 +158,7 @@ void CDpsXmlParser::OnStartElementL(const RTagInfo& aElement,
             {
             if (!name.Compare(iEngine->DpsParameters()->iDpsOperationStrings[i]))
                 {
-                IF_DEBUG(Print(_L("---found the operation")));
-                PRINT_DES(name);
+                OstTraceExt1( TRACE_NORMAL, DUP3_CDPSXMLPARSER_ONSTARTELEMENTL, "---found the operation---%s", name );
                 iDpsOperation = (TDpsOperation)(i+1);// i+1 to by pass first operation EDpsOpEmpty in enum which is not added to array
                 break;
                 }
@@ -180,8 +172,7 @@ void CDpsXmlParser::OnStartElementL(const RTagInfo& aElement,
         // only element in output is capability
         if (!name.Compare(iEngine->DpsParameters()->iDpsElementStrings[0]))
             {
-            IF_DEBUG(Print(_L("---the element is")));
-            PRINT_DES(name);
+            OstTraceExt1( TRACE_NORMAL, DUP4_CDPSXMLPARSER_ONSTARTELEMENTL, "---the element is %s", name );
             iElement = EDpsCapability;
             }
         else
@@ -190,8 +181,7 @@ void CDpsXmlParser::OnStartElementL(const RTagInfo& aElement,
                 {
                 if (!name.Compare(iEngine->DpsParameters()->iDpsArgStrings[i]))
                     {
-                    IF_DEBUG(Print(_L("---the argument is ")));
-                    PRINT_DES(name);	
+                    OstTraceExt1( TRACE_NORMAL, DUP5_CDPSXMLPARSER_ONSTARTELEMENTL, "---the argument is %s", name );
                     TDpsArg arg;
                     arg.iElement = (TDpsArgument)i;
                     arg.iContent.Copy(_L(""));
@@ -205,14 +195,14 @@ void CDpsXmlParser::OnStartElementL(const RTagInfo& aElement,
     else
         {
         // something wrong
-        IF_DEBUG(Print(_L("--- non-PB element! %S"), &name));
+        OstTraceExt1( TRACE_ERROR, DUP6_CDPSXMLPARSER_ONSTARTELEMENTL, "--- non-PB element! %S", name );
         User::Leave(KErrNotSupported);
         }
     if (aAttributes.Count() == 1)
         {
         ParseAttributesL(aAttributes, name);
         }
-    IF_DEBUG(Print(_L("<<<CDpsXmlParser::OnStartElementL")));
+    OstTraceFunctionExit0( CDPSXMLPARSER_ONSTARTELEMENTL_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -222,22 +212,21 @@ void CDpsXmlParser::OnStartElementL(const RTagInfo& aElement,
 void CDpsXmlParser::ParseAttributesL(const RAttributeArray& aAttributes, 
                                      const TDesC8& tag)
     {
+    OstTraceFunctionEntry0( CDPSXMLPARSER_PARSEATTRIBUTESL_ENTRY );
     // element
     const TDesC8& name = aAttributes[0].Attribute().LocalName().DesC();
     // only "layouts" and "paperTypes" have attributes
     if (tag.Compare(KDpsXmlPaperTypes) && tag.Compare(KDpsXmlLayouts))
         {
         // error
-        IF_DEBUG(Print(_L("--- this tag have no attribute")));
-        PRINT_DES(name);
+        OstTraceExt1( TRACE_ERROR, CDPSXMLPARSER_PARSEATTRIBUTESL, "--- this tag %s have no attribute", name );
         User::Leave(KErrArgument);
         }
     // the element of the attributes must be "paperSize"	
     if (name.Compare(KDpsXmlPaperSize))
         {
         // error
-        IF_DEBUG(Print(_L("--- wrong attribute")))
-        PRINT_DES(name);
+        OstTraceExt1( TRACE_ERROR, DUP1_CDPSXMLPARSER_PARSEATTRIBUTESL, "--- wrong attribute--- %s", name );
         User::Leave(KErrArgument);
         }
     // value
@@ -247,13 +236,14 @@ void CDpsXmlParser::ParseAttributesL(const RAttributeArray& aAttributes,
     TInt error = converter.Val(result, EHex);
     if (error != KErrNone)
         {
-        IF_DEBUG(Print(_L("--- convert error %d"), error));
+        OstTrace1( TRACE_ERROR, DUP2_CDPSXMLPARSER_PARSEATTRIBUTESL, "--- convert error %d", error );
         User::Leave(error);
         }
     iAttrib = result >> KShiftLength; 
     CleanupStack::PopAndDestroy(value);
-    IF_DEBUG(Print(_L("--- attribte value %x"), result));
-     
+    OstTrace1( TRACE_NORMAL, DUP3_CDPSXMLPARSER_PARSEATTRIBUTESL, "--- attribte value %x", result );
+  
+    OstTraceFunctionExit0( CDPSXMLPARSER_PARSEATTRIBUTESL_EXIT );
     }
     
 // ---------------------------------------------------------------------------
@@ -263,18 +253,18 @@ void CDpsXmlParser::ParseAttributesL(const RAttributeArray& aAttributes,
 void CDpsXmlParser::OnEndElementL(const RTagInfo& aElement, 
 								  TInt aErrorCode)
     {
-    IF_DEBUG(Print(_L(">>>CDpsXmlParser::OnEndElementL")));
+    OstTraceFunctionEntry0( CDPSXMLPARSER_ONENDELEMENTL_ENTRY );
     
     if (aErrorCode != KErrNone)
         {
-        IF_DEBUG(Print(_L("--- error code is %d"), aErrorCode));
+        OstTrace1( TRACE_ERROR, CDPSXMLPARSER_ONENDELEMENTL, "--- error code is %d", aErrorCode );
         User::Leave(aErrorCode);
         }
         
     // Get the name of the tag
     const TDesC8& name = aElement.LocalName().DesC();
-    PRINT_DES(name);
-    IF_DEBUG(Print(_L("<<<CDpsXmlParser::OnEndElementL")));	
+    OstTraceExt1( TRACE_NORMAL, DUP1_CDPSXMLPARSER_ONENDELEMENTL, "%s", name );    
+    OstTraceFunctionExit0( CDPSXMLPARSER_ONENDELEMENTL_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -283,17 +273,18 @@ void CDpsXmlParser::OnEndElementL(const RTagInfo& aElement,
 //
 void CDpsXmlParser::OnContentL(const TDesC8& aBytes, TInt aErrorCode)
 	{
-    IF_DEBUG(Print(_L(">>>CDpsXmlParser::OnContentL content is")));
-    PRINT_DES(aBytes);
+    OstTraceFunctionEntry0( CDPSXMLPARSER_ONCONTENTL_ENTRY );
+    OstTraceExt1( TRACE_NORMAL, CDPSXMLPARSER_ONCONTENTL, "content is %s", aBytes );
     
     if (aErrorCode != KErrNone)
    	    {
-        IF_DEBUG(Print(_L("--- error code %d"), aErrorCode));
+        OstTrace1( TRACE_ERROR, DUP1_CDPSXMLPARSER_ONCONTENTL, "--- error code %d", aErrorCode );
         User::Leave(aErrorCode);
         }	
     if (aBytes[0] >= KSOH && aBytes[0] <= KSpace)
         {
-        IF_DEBUG(Print(_L("the unprintable char %d"), aBytes[0]));
+        OstTrace1( TRACE_NORMAl, DUP2_CDPSXMLPARSER_ONCONTENTL, "the unprintable char %d", aBytes[0] );
+        OstTraceFunctionExit0( CDPSXMLPARSER_ONCONTENTL_EXIT );
         return; 
         }
     // parses the result	
@@ -304,10 +295,11 @@ void CDpsXmlParser::OnContentL(const TDesC8& aBytes, TInt aErrorCode)
         TInt error = converter.Val(value, EHex);
         if (error != KErrNone)
             {
-            IF_DEBUG(Print(_L("--- convert error %d"), error));
+            OstTrace1( TRACE_ERROR, DUP3_CDPSXMLPARSER_ONCONTENTL, "--- convert error %d", error );
             User::Leave(error);
             }
-        IF_DEBUG(Print(_L("--- result %x"), value));
+        OstTrace1( TRACE_NORMAL, DUP4_CDPSXMLPARSER_ONCONTENTL, "--- result %x", value);
+        
         // we have got the result
         iDpsResult.iMajorCode = 
             static_cast<TDpsResultMajorCode>(value >> KShiftLength);
@@ -319,7 +311,7 @@ void CDpsXmlParser::OnContentL(const TDesC8& aBytes, TInt aErrorCode)
         {
         iDpsArgs[iDpsArgs.Count() - 1].iContent.Copy(aBytes);
         }
-    IF_DEBUG(Print(_L("<<<CDpsXmlParser::OnContentL")));
+    OstTraceFunctionExit0( DUP1_CDPSXMLPARSER_ONCONTENTL_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -330,13 +322,13 @@ void CDpsXmlParser::OnStartPrefixMappingL(const RString& /*aPrefix*/,
 										  const RString& /*aUri*/, 
 										  TInt aErrorCode)
     {
-    IF_DEBUG(Print(_L(">>>CDpsXmlParser::OnStartPrefixMappingL")));
+    OstTraceFunctionEntry0( CDPSXMLPARSER_ONSTARTPREFIXMAPPINGL_ENTRY );
     if (aErrorCode != KErrNone)
         {
-        IF_DEBUG(Print(_L("--- error code %d"), aErrorCode));
+        OstTrace1( TRACE_ERROR, CDPSXMLPARSER_ONSTARTPREFIXMAPPINGL, "--- error code %d", aErrorCode );
         User::Leave(aErrorCode);
         }
-    IF_DEBUG(Print(_L("<<<CDpsXmlParser::OnStartPrefixMappingL")));	
+    OstTraceFunctionExit0( CDPSXMLPARSER_ONSTARTPREFIXMAPPINGL_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -346,13 +338,13 @@ void CDpsXmlParser::OnStartPrefixMappingL(const RString& /*aPrefix*/,
 void CDpsXmlParser::OnEndPrefixMappingL(const RString& /*aPrefix*/, 
 									    TInt aErrorCode)
     {
-    IF_DEBUG(Print(_L(">>>CDpsXmlParser::OnEndPrefixMappingL")));
+    OstTraceFunctionEntry0( CDPSXMLPARSER_ONENDPREFIXMAPPINGL_ENTRY );
     if (aErrorCode != KErrNone)
         {
-        IF_DEBUG(Print(_L("--- error code %d"), aErrorCode));
+        OstTrace1( TRACE_ERROR, CDPSXMLPARSER_ONENDPREFIXMAPPINGL, "--- error code %d", aErrorCode );
         User::Leave(aErrorCode);
         }
-    IF_DEBUG(Print(_L("<<<CDpsXmlParser::OnEndPrefixMappingL")));	
+    OstTraceFunctionExit0( CDPSXMLPARSER_ONENDPREFIXMAPPINGL_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -362,13 +354,13 @@ void CDpsXmlParser::OnEndPrefixMappingL(const RString& /*aPrefix*/,
 void CDpsXmlParser::OnIgnorableWhiteSpaceL(const TDesC8& /*aBytes*/, 
                                            TInt aErrorCode)
     {
-    IF_DEBUG(Print(_L(">>>CDpsXmlParser::OnIgnorableWhiteSpaceL")));
+    OstTraceFunctionEntry0( CDPSXMLPARSER_ONIGNORABLEWHITESPACEL_ENTRY );
     if (aErrorCode != KErrNone)
         {
-        IF_DEBUG(Print(_L("---error code %d"), aErrorCode));
+        OstTrace1( TRACE_ERROR, CDPSXMLPARSER_ONIGNORABLEWHITESPACEL, "--- error code %d", aErrorCode );
         User::Leave(aErrorCode);
         }
-    IF_DEBUG(Print(_L("<<<CDpsXmlParser::OnIgnorableWhiteSpaceL")));	
+    OstTraceFunctionExit0( CDPSXMLPARSER_ONIGNORABLEWHITESPACEL_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -378,13 +370,13 @@ void CDpsXmlParser::OnIgnorableWhiteSpaceL(const TDesC8& /*aBytes*/,
 void CDpsXmlParser::OnSkippedEntityL(const RString& /*aName*/, 
 								     TInt aErrorCode)
 	{
-    IF_DEBUG(Print(_L(">>>CDpsXmlParser::OnSkippedEntityL")));
+    OstTraceFunctionEntry0( CDPSXMLPARSER_ONSKIPPEDENTITYL_ENTRY );
     if (aErrorCode != KErrNone)
         {
-        IF_DEBUG(Print(_L("--- error code %d"), aErrorCode));
+        OstTrace1( TRACE_ERROR, CDPSXMLPARSER_ONSKIPPEDENTITYL, "--- error code %d", aErrorCode );
         User::Leave(aErrorCode);
         }
-    IF_DEBUG(Print(_L("<<<CDpsXmlParser::OnSkippedEntityL")));	
+    OstTraceFunctionExit0( CDPSXMLPARSER_ONSKIPPEDENTITYL_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -395,13 +387,13 @@ void CDpsXmlParser::OnProcessingInstructionL(const TDesC8& /*aTarget*/,
 											 const TDesC8& /*aData*/, 
 											 TInt aErrorCode)
     {
-    IF_DEBUG(Print(_L(">>>CDpsXmlParser::OnProcessingInstructionL")));
+    OstTraceFunctionEntry0( CDPSXMLPARSER_ONPROCESSINGINSTRUCTIONL_ENTRY );
     if (aErrorCode != KErrNone)
         {
-        IF_DEBUG(Print(_L("--- error code %d"), aErrorCode));
+        OstTrace1( TRACE_ERROR, CDPSXMLPARSER_ONPROCESSINGINSTRUCTIONL, "--- error code %d", aErrorCode );
         User::Leave(aErrorCode);
         }
-    IF_DEBUG(Print(_L("<<<CDpsXmlParser::OnProcessingInstructionL")));	
+    OstTraceFunctionExit0( CDPSXMLPARSER_ONPROCESSINGINSTRUCTIONL_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -410,12 +402,12 @@ void CDpsXmlParser::OnProcessingInstructionL(const TDesC8& /*aTarget*/,
 //	
 void CDpsXmlParser::OnError(TInt aErrorCode)
     {
-    IF_DEBUG(Print(_L(">>>CDpsXmlParser::OnError()")));
+    OstTraceFunctionEntry0( CDPSXMLPARSER_ONERROR_ENTRY );
     if (aErrorCode != KErrNone)
         {
-        IF_DEBUG(Print(_L("---error code %d"), aErrorCode));
+        OstTrace1( TRACE_NORMAL, CDPSXMLPARSER_ONERROR, "---error code %d", aErrorCode );
         }
-    IF_DEBUG(Print(_L("<<<CDpsXmlParser::OnError()")));	
+    OstTraceFunctionExit0( CDPSXMLPARSER_ONERROR_EXIT );
     }
 
 // ---------------------------------------------------------------------------

@@ -22,7 +22,6 @@
 #define CMTPPBCGETPBDEVICEPROPDESC_H
 
 #include "cmtprequestprocessor.h"
-#include "mtpdebug.h"
 #include "cmtpplaybackmap.h"
 
 class CMTPTypeDevicePropDesc;
@@ -59,7 +58,6 @@ private:
 
 private: // Owned.
 
-    __FLOG_DECLARATION_MEMBER_MUTABLE;
     CMTPPlaybackControlDataProvider& iPlaybackControlDp;
     
     CMTPTypeDevicePropDesc* iPropDesc;

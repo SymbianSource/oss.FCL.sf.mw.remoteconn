@@ -21,7 +21,6 @@
  @file
 */
 #include <platform_paths.hrh>
-#include <comms-infras/commsdebugutility.mmh>
 
 TARGETTYPE      PLUGIN
 TARGET          mtpcontroller.dll
@@ -35,7 +34,8 @@ SYSTEMINCLUDE   ../locodinc
 MW_LAYER_SYSTEMINCLUDE_SYMBIAN
 
 USERINCLUDE     ../inc
-USERINCLUDE     ../../../mtpfws/mtpfw/common/inc
+USERINCLUDE     ../../../mtpfws/mtpfw/common/inc 
+USERINCLUDE     ../traces
 
 SOURCEPATH      ../src
 SOURCE          cmtpbearermonitor.cpp

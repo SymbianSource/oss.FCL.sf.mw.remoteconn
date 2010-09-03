@@ -23,8 +23,11 @@
 #include "cmtpsvcgetobjectinfo.h"
 #include "mmtpservicedataprovider.h"
 #include "mmtpsvcobjecthandler.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpsvcgetobjectinfoTraces.h"
+#endif
 
-__FLOG_STMT(_LIT8(KComponent,"SvcGetObjInfo");)
 
 EXPORT_C MMTPRequestProcessor* CMTPSvcGetObjectInfo::NewL(MMTPDataProviderFramework& aFramework, 
 														MMTPConnection& aConnection, 
@@ -39,10 +42,10 @@ EXPORT_C MMTPRequestProcessor* CMTPSvcGetObjectInfo::NewL(MMTPDataProviderFramew
 
 EXPORT_C CMTPSvcGetObjectInfo::~CMTPSvcGetObjectInfo()
 	{
-	__FLOG(_L8("~CMTPSvcGetObjectInfo - Destructed"));
+	OstTraceFunctionEntry0( CMTPSVCGETOBJECTINFO_CMTPSVCGETOBJECTINFO_ENTRY );
 	delete iReceivedObjectMetaData;
 	delete iObjectInfo;
-	__FLOG_CLOSE;
+	OstTraceFunctionExit0( CMTPSVCGETOBJECTINFO_CMTPSVCGETOBJECTINFO_EXIT );
 	}
 
 CMTPSvcGetObjectInfo::CMTPSvcGetObjectInfo(MMTPDataProviderFramework& aFramework,
@@ -53,17 +56,16 @@ CMTPSvcGetObjectInfo::CMTPSvcGetObjectInfo(MMTPDataProviderFramework& aFramework
 	
 void CMTPSvcGetObjectInfo::ConstructL()
 	{
-	__FLOG_OPEN(KMTPSubsystem, KComponent);
-	__FLOG(_L8("ConstructL -  - Entry"));
+	OstTraceFunctionEntry0( CMTPSVCGETOBJECTINFO_CONSTRUCTL_ENTRY );
 	
     iObjectInfo = CMTPTypeObjectInfo::NewL();
-    
-    __FLOG(_L8("ConstructL -  - Exit"));
+
+	OstTraceFunctionExit0( CMTPSVCGETOBJECTINFO_CONSTRUCTL_EXIT );
 	}
 
 TMTPResponseCode CMTPSvcGetObjectInfo::CheckRequestL()
 	{
-	__FLOG(_L8("CheckRequestL - Entry"));
+	OstTraceFunctionEntry0( CMTPSVCGETOBJECTINFO_CHECKREQUESTL_ENTRY );
 	TMTPResponseCode responseCode = CMTPRequestProcessor::CheckRequestL();
 	if (EMTPRespCodeOK == responseCode)
 		{
@@ -76,7 +78,7 @@ TMTPResponseCode CMTPSvcGetObjectInfo::CheckRequestL()
 			if (iReceivedObjectMetaData->Uint(CMTPObjectMetaData::EDataProviderId) != iFramework.DataProviderId())
 				{
 				responseCode = EMTPRespCodeInvalidObjectHandle;
-				__FLOG(_L8("CheckRequestL - DataProviderId dismatch"));
+				OstTrace0( TRACE_WARNING, DUP1_CMTPSVCGETOBJECTINFO_CHECKREQUESTL, "CheckRequestL - DataProviderId dismatch" );
 				}
 			else
 				{
@@ -94,16 +96,18 @@ TMTPResponseCode CMTPSvcGetObjectInfo::CheckRequestL()
 			responseCode = EMTPRespCodeInvalidObjectHandle;
 			}
 		}
-	__FLOG_VA((_L8("CheckRequestL - Exit with response code = 0x%04X"), responseCode));
+    OstTrace1( TRACE_NORMAL, CMTPSVCGETOBJECTINFO_CHECKREQUESTL, "Exit with response code = 0x%04X", responseCode );
+	OstTraceFunctionExit0( CMTPSVCGETOBJECTINFO_CHECKREQUESTL_EXIT );
+	
 	return responseCode;
 	}
 	
 void CMTPSvcGetObjectInfo::ServiceL()
 	{
-	__FLOG(_L8("ServiceL - Entry"));
+	OstTraceFunctionEntry0( CMTPSVCGETOBJECTINFO_SERVICEL_ENTRY );
 	__ASSERT_DEBUG(iObjectHandler, User::Invariant());
 	TUint32 objectHandle = Request().Uint32(TMTPTypeRequest::ERequestParameter1);
 	iObjectHandler->GetObjectInfoL(*iReceivedObjectMetaData, *iObjectInfo);
 	SendDataL(*iObjectInfo);
-	__FLOG(_L8("ServiceL - Exit"));
+	OstTraceFunctionExit0( CMTPSVCGETOBJECTINFO_SERVICEL_EXIT );
 	}

@@ -21,7 +21,6 @@
 #define CMTPUSBTRANSPORT_H
 
 #include "cmtptransportplugin.h"
-#include "mtpdebug.h"
 
 class CMTPUsbConnection;
 
@@ -59,11 +58,6 @@ private: // Owned
     The USB MTP device class connection
     */
     CMTPUsbConnection* iConnection;
-
-    /**
-    FLOGGER debug trace member variable.
-    */
-    __FLOG_DECLARATION_MEMBER;
     };
     
 #endif // CMTPUSBTRANSPORT_H

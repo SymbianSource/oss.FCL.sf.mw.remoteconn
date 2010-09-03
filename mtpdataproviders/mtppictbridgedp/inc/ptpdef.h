@@ -23,13 +23,9 @@
 #define PTPDEF_H
 
 #include <e32std.h>
-#include <comms-infras/commsdebugutility.h> // for __FLOG debugging
 
 _LIT( KPTPServer, "PtpServer" );
 _LIT( KPTPClientPanicCategory, "PTPServ-Client");
-
-__FLOG_STMT(_LIT8(KComponent,    "PictBridgeDp");)
-__FLOG_STMT(_LIT8(KPtpServerLog, "PTPServer");)
 
 const TInt KPtpServerVersionMinor = 1;
 const TInt KPtpServerVersionMajor = 1;

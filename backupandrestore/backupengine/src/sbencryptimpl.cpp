@@ -19,6 +19,11 @@
  @file
 */
 #include "sbencryptimpl.h"
+#include "OstTraceDefinitions.h"
+#include "sbtrace.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "sbencryptimplTraces.h"
+#endif
 
 // If you want this code to actually test encryption then uncomment the next line
 //#define __TEST_ENCRYPTION__
@@ -30,7 +35,9 @@ namespace conn
 	*/
     CSecureBURKeySourceImpl* CSecureBURKeySourceImpl::NewL()
     	{
+    	OstTraceFunctionEntry0( CSECUREBURKEYSOURCEIMPL_NEWL_ENTRY );
     	CSecureBURKeySourceImpl* pSelf = new(ELeave) CSecureBURKeySourceImpl();
+    	OstTraceFunctionExit0( CSECUREBURKEYSOURCEIMPL_NEWL_EXIT );
     	return pSelf;
     	}
     
@@ -39,6 +46,8 @@ namespace conn
     */
     CSecureBURKeySourceImpl::CSecureBURKeySourceImpl()
     	{
+    	OstTraceFunctionEntry0( CSECUREBURKEYSOURCEIMPL_CSECUREBURKEYSOURCEIMPL_CONS_ENTRY );
+    	OstTraceFunctionExit0( CSECUREBURKEYSOURCEIMPL_CSECUREBURKEYSOURCEIMPL_CONS_EXIT );
     	}
     
     /**
@@ -46,6 +55,8 @@ namespace conn
     */
     CSecureBURKeySourceImpl::~CSecureBURKeySourceImpl()
     	{
+    	OstTraceFunctionEntry0( CSECUREBURKEYSOURCEIMPL_CSECUREBURKEYSOURCEIMPL_DES_ENTRY );
+    	OstTraceFunctionExit0( CSECUREBURKEYSOURCEIMPL_CSECUREBURKEYSOURCEIMPL_DES_EXIT );
     	}
 
 	/**
@@ -55,6 +66,7 @@ namespace conn
     														 TBool& aGotBuffer, 
     														 TDes& /*aBuffer*/)
     	{
+    	OstTraceFunctionEntry0( CSECUREBURKEYSOURCEIMPL_GETDEFAULTBUFFERFORBACKUPL_ENTRY );
     	#ifdef __TEST_ENCRYPTION__
     		_LIT(KTestBuffer, "TEST_BUFFER");
     		
@@ -63,6 +75,7 @@ namespace conn
     	#else
     		aGotBuffer = EFalse;
     	#endif
+    	OstTraceFunctionExit0( CSECUREBURKEYSOURCEIMPL_GETDEFAULTBUFFERFORBACKUPL_EXIT );
     	}
     	
 	/**
@@ -72,6 +85,7 @@ namespace conn
                        							TBool& aDoEncrypt, TDes8& /*aKey*/,
                        							TBool& aGotBuffer, TDes& /*aBuffer*/)
     	{
+    	OstTraceFunctionEntry0( CSECUREBURKEYSOURCEIMPL_GETBACKUPKEYL_ENTRY );
     	#ifdef __TEST_ENCRYPTION__
     		_LIT(KTestBuffer, "TEST_BUFFER");
     		
@@ -83,6 +97,7 @@ namespace conn
     		aDoEncrypt = EFalse;
     		aGotBuffer = EFalse;
     	#endif
+    	OstTraceFunctionExit0( CSECUREBURKEYSOURCEIMPL_GETBACKUPKEYL_EXIT );
     	}
     	
 	/**
@@ -92,12 +107,14 @@ namespace conn
                         						 TBool /*aGotBuffer*/, TDes& /*aBuffer*/,
                         						 TBool &aGotKey, TDes8& /*aKey*/)
     	{
+    	OstTraceFunctionEntry0( CSECUREBURKEYSOURCEIMPL_GETRESTOREKEYL_ENTRY );
     	#ifdef __TEST_ENCRYPTION__
     		aGotKey = ETrue;
     		aKey.AppendNum(aSID);
     	#else
     		aGotKey = EFalse;
     	#endif
+    	OstTraceFunctionExit0( CSECUREBURKEYSOURCEIMPL_GETRESTOREKEYL_EXIT );
     	}
 
 	}

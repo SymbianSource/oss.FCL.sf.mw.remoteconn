@@ -28,6 +28,11 @@
 #include "mtppictbridgedppanic.h"
 #include "cmtprequestchecker.h"
 #include "cptpserver.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtppictbridgedpgetobjectTraces.h"
+#endif
+
 
 /**
 Verification data for the GetNumObjects request
@@ -57,9 +62,9 @@ Destructor
 */  
 CMTPPictBridgeDpGetObject::~CMTPPictBridgeDpGetObject()
     {   
-    __FLOG(_L8("~CMTPPictBridgeDpGetObject"));          
+    OstTraceFunctionEntry0( CMTPPICTBRIDGEDPGETOBJECT_CMTPPICTBRIDGEDPGETOBJECT_DES_ENTRY );    
     delete iFileObject;
-    __FLOG_CLOSE;
+    OstTraceFunctionExit0( CMTPPICTBRIDGEDPGETOBJECT_CMTPPICTBRIDGEDPGETOBJECT_DES_EXIT );
     }
     
 /**
@@ -80,7 +85,8 @@ Second-phase constructor.
 */        
 void CMTPPictBridgeDpGetObject::ConstructL()
     {
-    __FLOG_OPEN(KMTPSubsystem, KComponent);
+    OstTraceFunctionEntry0( CMTPPICTBRIDGEDPGETOBJECT_CONSTRUCTL_ENTRY );
+    OstTraceFunctionExit0( CMTPPICTBRIDGEDPGETOBJECT_CONSTRUCTL_EXIT );
     }
 
 /**
@@ -88,14 +94,14 @@ GetObject request handler
 */      
 void CMTPPictBridgeDpGetObject::ServiceL()
     {
-    __FLOG(_L8(">> CMTPPictBridgeDpGetObject::ServiceL"));        
+    OstTraceFunctionEntry0( CMTPPICTBRIDGEDPGETOBJECT_SERVICEL_ENTRY );     
     __ASSERT_DEBUG(iRequestChecker, Panic(EMTPPictBridgeDpRequestCheckNull));
     TUint32 objectHandle = Request().Uint32(TMTPTypeRequest::ERequestParameter1);
     //does not take ownership
     CMTPObjectMetaData* objectInfo = iRequestChecker->GetObjectInfo(objectHandle);
     if (!objectInfo)
         {
-        __FLOG_VA((_L8(">> CMTPPictBridgeDpGetObject::ServiceL no object info for objectHandle %d"), objectHandle));
+        OstTrace1( TRACE_WARNING, CMTPPICTBRIDGEDPGETOBJECT_SERVICEL, "no object info for objectHandle %d", objectHandle );
         // The object handle has already been checked, so an invalid handle can
         // only occur if it was invalidated during a context switch between
         // the validation time and now.
@@ -108,7 +114,7 @@ void CMTPPictBridgeDpGetObject::ServiceL()
         SendDataL(*iFileObject);
         iPictBridgeDP.PtpServer()->Printer()->DpsFileSent(KErrNone);
         }
-    __FLOG(_L8("<< CMTPPictBridgeDpGetObject::ServiceL"));
+    OstTraceFunctionExit0( CMTPPICTBRIDGEDPGETOBJECT_SERVICEL_EXIT );
     }
 
 //=============================================================================
@@ -116,11 +122,11 @@ void CMTPPictBridgeDpGetObject::ServiceL()
 //=============================================================================
 void CMTPPictBridgeDpGetObject::BuildFileObjectL(const TDesC& aFileName)
     {
-    __FLOG(_L8(">> CMTPPictBridgeDpGetObject::BuildFileObjectL"));            
+    OstTraceFunctionEntry0( CMTPPICTBRIDGEDPGETOBJECT_BUILDFILEOBJECTL_ENTRY );        
     delete iFileObject;
     iFileObject = NULL;
-    iFileObject = CMTPTypeFile::NewL(iFramework.Fs(), aFileName, EFileRead);
-    __FLOG(_L8("<< CMTPPictBridgeDpGetObject::BuildFileObjectL"));            
+    iFileObject = CMTPTypeFile::NewL(iFramework.Fs(), aFileName, EFileRead);           
+    OstTraceFunctionExit0( CMTPPICTBRIDGEDPGETOBJECT_BUILDFILEOBJECTL_EXIT );
     }
     
 
@@ -129,10 +135,10 @@ void CMTPPictBridgeDpGetObject::BuildFileObjectL(const TDesC& aFileName)
 //=============================================================================
 TBool CMTPPictBridgeDpGetObject::DoHandleResponsePhaseL()
     {
-    __FLOG(_L8(">> CMTPPictBridgeDpGetObject::DoHandleResponsePhaseL"));            
+    OstTraceFunctionEntry0( CMTPPICTBRIDGEDPGETOBJECT_DOHANDLERESPONSEPHASEL_ENTRY );          
     TMTPResponseCode responseCode = (iCancelled ? EMTPRespCodeIncompleteTransfer : iError);
     SendResponseL(responseCode);
-    __FLOG(_L8("<< CMTPPictBridgeDpGetObject::DoHandleResponsePhaseL"));
+    OstTraceFunctionExit0( CMTPPICTBRIDGEDPGETOBJECT_DOHANDLERESPONSEPHASEL_EXIT );
     return EFalse;
     }
 

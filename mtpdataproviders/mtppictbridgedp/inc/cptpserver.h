@@ -97,10 +97,6 @@ private:
     TBool iMtpSessionOpen;
     CPtpSession* iSessionOpenNotifyClientP;
     CFileMan*          iFileMan;
-    /**
-    FLOGGER debug trace member variable.
-    */
-    __FLOG_DECLARATION_MEMBER_MUTABLE;
     };
 #endif // PTPSERVER_H
 

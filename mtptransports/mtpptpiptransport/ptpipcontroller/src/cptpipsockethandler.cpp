@@ -13,16 +13,24 @@
 // Description:
 //
 
+#include "mtpdebug.h"
 
-#include "cptpipsockethandler.h"	//CPTPIPSockethandler
+#include "cptpipsockethandler.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cptpipsockethandlerTraces.h"
+#endif
+	//CPTPIPSockethandler
 
 
 
 CPTPIPSocketHandler* CPTPIPSocketHandler::NewLC()
 	{
+	OstTraceFunctionEntry0( CPTPIPSOCKETHANDLER_NEWLC_ENTRY );
 	CPTPIPSocketHandler* self = new (ELeave) CPTPIPSocketHandler;
 	CleanupStack::PushL(self);
 	self->ConstructL();
+	OstTraceFunctionExit0( CPTPIPSOCKETHANDLER_NEWLC_EXIT );
 	return self;
 	}
 
@@ -31,8 +39,10 @@ CPTPIPSocketHandler* CPTPIPSocketHandler::NewLC()
 */
 CPTPIPSocketHandler* CPTPIPSocketHandler::NewL()
 	{
+	OstTraceFunctionEntry0( CPTPIPSOCKETHANDLER_NEWL_ENTRY );
 	CPTPIPSocketHandler* self = CPTPIPSocketHandler::NewLC();
 	CleanupStack::Pop(self);
+	OstTraceFunctionExit0( CPTPIPSOCKETHANDLER_NEWL_EXIT );
 	return self;
 	}
 
@@ -40,24 +50,32 @@ CPTPIPSocketHandler* CPTPIPSocketHandler::NewL()
 CPTPIPSocketHandler::CPTPIPSocketHandler():
 		CActive(EPriorityStandard),iReceiveChunk(NULL,0),iWriteChunk(NULL,0)
 	{
+	OstTraceFunctionEntry0( CPTPIPSOCKETHANDLER_CPTPIPSOCKETHANDLER_ENTRY );
 	CActiveScheduler::Add(this);
 	iState=EReadState;
+	OstTraceFunctionExit0( CPTPIPSOCKETHANDLER_CPTPIPSOCKETHANDLER_EXIT );
 	}
 
 void CPTPIPSocketHandler::ConstructL()
 	{
+	OstTraceFunctionEntry0( CPTPIPSOCKETHANDLER_CONSTRUCTL_ENTRY );
 	
 			
+	OstTraceFunctionExit0( CPTPIPSOCKETHANDLER_CONSTRUCTL_EXIT );
 	}
 	
 	
 RSocket& CPTPIPSocketHandler::Socket()
 	{			
+	OstTraceFunctionEntry0( CPTPIPSOCKETHANDLER_SOCKET_ENTRY );
+	OstTraceFunctionExit0( CPTPIPSOCKETHANDLER_SOCKET_EXIT );
 	return	iSocket;	
 	}
 	
 TSocketHandlerState& CPTPIPSocketHandler::State()
 {
+	OstTraceFunctionEntry0( CPTPIPSOCKETHANDLER_STATE_ENTRY );
+	OstTraceFunctionExit0( CPTPIPSOCKETHANDLER_STATE_EXIT );
 	return iState;
 }
 	
@@ -65,7 +83,9 @@ TSocketHandlerState& CPTPIPSocketHandler::State()
 	
 CPTPIPSocketHandler::~CPTPIPSocketHandler()
 	{
+	OstTraceFunctionEntry0( DUP1_CPTPIPSOCKETHANDLER_CPTPIPSOCKETHANDLER_ENTRY );
 	Socket().Close();
+	OstTraceFunctionExit0( DUP1_CPTPIPSOCKETHANDLER_CPTPIPSOCKETHANDLER_EXIT );
 	}
 
 /*
@@ -74,6 +94,7 @@ CPTPIPSocketHandler::~CPTPIPSocketHandler()
  */
 void CPTPIPSocketHandler::ReadFromSocket(MMTPType& aData,TRequestStatus& aCallerStatus)
 	{
+    OstTraceFunctionEntry0( CPTPIPSOCKETHANDLER_READFROMSOCKET_ENTRY );
     iReadData = &aData;
 	iChunkStatus = aData.FirstWriteChunk(iReceiveChunk);
 	//ToDo check this works or not
@@ -85,6 +106,7 @@ void CPTPIPSocketHandler::ReadFromSocket(MMTPType& aData,TRequestStatus& aCaller
 	
 	//start timer	
     SetActive();
+	OstTraceFunctionExit0( CPTPIPSOCKETHANDLER_READFROMSOCKET_EXIT );
 	}
 
 /*Writes to the current socket
@@ -92,6 +114,7 @@ void CPTPIPSocketHandler::ReadFromSocket(MMTPType& aData,TRequestStatus& aCaller
 */
 void CPTPIPSocketHandler::WriteToSocket(MMTPType& aData,TRequestStatus& aCallerStatus)
 	{
+	OstTraceFunctionEntry0( CPTPIPSOCKETHANDLER_WRITETOSOCKET_ENTRY );
 	iWriteData=&aData;
 	iChunkStatus = aData.FirstReadChunk(iWriteChunk);
 
@@ -99,14 +122,17 @@ void CPTPIPSocketHandler::WriteToSocket(MMTPType& aData,TRequestStatus& aCallerS
 	Socket().Write(iWriteChunk,iStatus);	
 	SetActive();	
     
+	OstTraceFunctionExit0( CPTPIPSOCKETHANDLER_WRITETOSOCKET_EXIT );
 	}
 
 
 	
 void CPTPIPSocketHandler::RunL()
 	{
+	OstTraceFunctionEntry0( CPTPIPSOCKETHANDLER_RUNL_ENTRY );
 	TInt err = iStatus.Int();
-	User::LeaveIfError(err);
+	LEAVEIFERROR( err, 
+	        OstTrace1( TRACE_ERROR, CPTPIPSOCKETHANDLER_RUNL, "error code is %d", err ));
 	
 	switch(iState)
 	{
@@ -149,11 +175,14 @@ void CPTPIPSocketHandler::RunL()
 			}
 			break;
 	}
+OstTraceFunctionExit0( CPTPIPSOCKETHANDLER_RUNL_EXIT );
 }
 
 TInt CPTPIPSocketHandler::RunError(TInt aErr)
 	{
+	OstTraceFunctionEntry0( CPTPIPSOCKETHANDLER_RUNERROR_ENTRY );
 	User ::RequestComplete(iCallerStatus,aErr);
+	OstTraceFunctionExit0( CPTPIPSOCKETHANDLER_RUNERROR_EXIT );
 	return KErrNone;
 	}
 
@@ -161,10 +190,12 @@ TInt CPTPIPSocketHandler::RunError(TInt aErr)
 
 void CPTPIPSocketHandler::DoCancel()
 	{
+	OstTraceFunctionEntry0( CPTPIPSOCKETHANDLER_DOCANCEL_ENTRY );
 	if(iState==EReadState)	
 	Socket().CancelRecv();
 	else if(iState==EWriteState)
 	Socket().CancelWrite();	
+	OstTraceFunctionExit0( CPTPIPSOCKETHANDLER_DOCANCEL_EXIT );
 	}
 
 

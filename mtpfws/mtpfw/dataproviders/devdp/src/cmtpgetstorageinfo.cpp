@@ -27,9 +27,14 @@
 #include "cmtpdevicedpconfigmgr.h"
 #include "mtpframeworkconst.h"
 #include "mtpcommonconst.h"
+#include "mtpdebug.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpgetstorageinfoTraces.h"
+#endif
+
 
 // Class constants.
-__FLOG_STMT(_LIT8(KComponent,"GetStorageInfo");)
 
 /**
 Verification data for GetStorageInfo request
@@ -64,7 +69,6 @@ CMTPGetStorageInfo::~CMTPGetStorageInfo()
 	{	
 	delete iStorageInfo;
 	iSingletons.Close();
-	__FLOG_CLOSE;
 	}
 	
 /**
@@ -121,7 +125,6 @@ Second-phase construction
 */		
 void CMTPGetStorageInfo::ConstructL()
 	{
-	__FLOG_OPEN(KMTPSubsystem, KComponent);
 	iStorageInfo = CMTPTypeStorageInfo::NewL();
 	iSingletons.OpenL();
 	}
@@ -150,10 +153,13 @@ void CMTPGetStorageInfo::SetupDriveVolumeInfoL()
 	{
 	TUint32 storageId = Request().Uint32(TMTPTypeRequest::ERequestParameter1);	
 	TInt driveNo(iFramework.StorageMgr().DriveNumber(storageId));
-	User::LeaveIfError(driveNo);
+	LEAVEIFERROR(driveNo,
+	        OstTrace1( TRACE_ERROR, CMTPGETSTORAGEINFO_SETUPDRIVEVOLUMEINFOL, "can't get driver number for storageId %d", storageId));	        
 	RFs& fs = iFramework.Fs();
-	User::LeaveIfError(fs.Drive(iDriveInfo, driveNo));
-	User::LeaveIfError(fs.Volume(iVolumeInfo, driveNo));
+	LEAVEIFERROR(fs.Drive(iDriveInfo, driveNo),
+	        OstTrace1( TRACE_ERROR, DUP1_CMTPGETSTORAGEINFO_SETUPDRIVEVOLUMEINFOL, "can't get drive info for driver number %d", driveNo));     
+	LEAVEIFERROR(fs.Volume(iVolumeInfo, driveNo),
+            OstTrace1( TRACE_ERROR, DUP2_CMTPGETSTORAGEINFO_SETUPDRIVEVOLUMEINFOL, "can't get volume info for driver no %d", driveNo ));	        
 	
 	const TInt KCDriveNo = 2;
 	if(KCDriveNo == driveNo)
@@ -173,6 +179,7 @@ void CMTPGetStorageInfo::SetStorageTypeL()
 	switch(iDriveInfo.iType)
 		{
 		case EMediaNotPresent:
+		    OstTrace0( TRACE_ERROR, DUP3_CMTPGETSTORAGEINFO_SETSTORAGETYPEL, "drive media not present!" );
 			User::Leave(KErrDisMounted);
 			break;
 		case EMediaUnknown:		
@@ -198,18 +205,21 @@ void CMTPGetStorageInfo::SetStorageTypeL()
 		        //So here we need to deal with this case to set it as FixedRam
 		        if(iDriveInfo.iDriveAtt & KDriveAttLogicallyRemovable)
 		            {
-		            __FLOG(_L8("removable but internal drive, set as Fixed RAM"));
+		            OstTrace0( TRACE_NORMAL, CMTPGETSTORAGEINFO_SETSTORAGETYPEL, 
+		                    "removable but internal drive, set as Fixed RAM" );
 		            storageType = EMTPStorageFixedRAM;
 		            }
 		        else
 		            {
-		            __FLOG(_L8("non internal,set as removable RAM"));
+		            OstTrace0( TRACE_NORMAL, DUP1_CMTPGETSTORAGEINFO_SETSTORAGETYPEL, 
+		                    "non internal,set as removable RAM" );
 		            storageType = EMTPStorageRemovableRAM;
 		            }
 		        }
 		    else
 		        {
-		        __FLOG(_L8("Non removable, set as Fixed RAM"));
+		        OstTrace0( TRACE_NORMAL, DUP2_CMTPGETSTORAGEINFO_SETSTORAGETYPEL, 
+		                "Non removable, set as Fixed RAM" );        
 		        storageType = EMTPStorageFixedRAM;
 		        }
 			break;
@@ -276,7 +286,9 @@ void CMTPGetStorageInfo::SetFreeSpaceInBytesL()
 	        err = repository->Get(KUikOODDiskFreeSpaceWarningNoteLevelMassMemory,thresholdValue);
 	        if (err == KErrNone)
 	            {
-	            __FLOG_1(_L8("Read from central repo:%d"),thresholdValue);
+	            OstTrace1( TRACE_NORMAL, CMTPGETSTORAGEINFO_SETFREESPACEINBYTESL, 
+	                    "Read from central repo:%d",  thresholdValue);
+	            
 	            thresholdValue += KFreeSpaceExtraReserved;
 	            }	  
 	        delete repository;
@@ -284,20 +296,23 @@ void CMTPGetStorageInfo::SetFreeSpaceInBytesL()
 	    
 	    if (err != KErrNone)
 	        {
-	        __FLOG(_L8("Fail in read ,use default"));
+	        OstTrace0( TRACE_WARNING, DUP1_CMTPGETSTORAGEINFO_SETFREESPACEINBYTESL, "Fail in read ,use default" );
 	        thresholdValue = KFreeSpaceThreshHoldDefaultValue + KFreeSpaceExtraReserved;
 	        }
 	    
-	    __FLOG_2(_L8("threshold:%d free space:%ld"),thresholdValue,iVolumeInfo.iFree);
+	    OstTraceExt2( TRACE_NORMAL, DUP2_CMTPGETSTORAGEINFO_SETFREESPACEINBYTESL, 
+	            "threshold:%d free space:%Ld",thresholdValue,iVolumeInfo.iFree );
+	    
 	    //Exclude the reserved disk space when reporting free space
 	    TInt64 free = (iVolumeInfo.iFree > thresholdValue) ?
 	        (iVolumeInfo.iFree - thresholdValue) : 0;
 	    mtpFreeSpace.Set(free);
-	    __FLOG_1(_L8("set free:%ld"),free);
+	    OstTrace1( TRACE_NORMAL, DUP3_CMTPGETSTORAGEINFO_SETFREESPACEINBYTESL, "set free:%ld", free);  
 	    }
 	
-	__FLOG_2(_L8("SetFreeSpaceInBytesL volume free:%ld report:%ld"),
-	        iVolumeInfo.iFree,mtpFreeSpace.Value());
+	OstTraceExt2( TRACE_NORMAL, DUP4_CMTPGETSTORAGEINFO_SETFREESPACEINBYTESL, 
+	        "SetFreeSpaceInBytesL volume free:%Ld report:%Ld", iVolumeInfo.iFree,mtpFreeSpace.Value());
+	
 	iStorageInfo->SetL(CMTPTypeStorageInfo::EFreeSpaceInBytes, mtpFreeSpace);	
 	}
 	
@@ -315,31 +330,34 @@ Set the storage description (volume name) of the drive in the storage info data 
 */
 void CMTPGetStorageInfo::SetStorageDescriptionL()
 	{
-	__FLOG(_L8("SetStorageDescriptionL - Entry"));
+	OstTraceFunctionEntry0( CMTPGETSTORAGEINFO_SETSTORAGEDESCRIPTIONL_ENTRY );
     TUint32 storage(Request().Uint32(TMTPTypeRequest::ERequestParameter1));
     TInt driveNumber = iFramework.StorageMgr().DriveNumber(storage);
-	__FLOG_1(_L8("driveNumber:%d"),driveNumber);
+	OstTrace1( TRACE_NORMAL, CMTPGETSTORAGEINFO_SETSTORAGEDESCRIPTIONL, "driveNumber:%d", driveNumber);	
 	
 	CMTPTypeString* mtpDescription = CMTPTypeString::NewLC();
 	            
 	//Firstly, read name from VolumeInfo
 	if (0 < iVolumeInfo.iName.Length())
 	    {
-	        __FLOG_1(_L8("Using standard volume name:%S"),&iVolumeInfo.iName);
+	        OstTraceExt1( TRACE_NORMAL, DUP1_CMTPGETSTORAGEINFO_SETSTORAGEDESCRIPTIONL, 
+	                "Using standard volume name:%S", iVolumeInfo.iName);        
 	        mtpDescription->SetL(iVolumeInfo.iName);	        
 	    }
 	else //If name not set, set name according to type
 	    {
 	    TMTPTypeUint16 storageType(EMTPStorageUndefined);
 	    iStorageInfo->GetL(CMTPTypeStorageInfo::EStorageType,storageType);
-	    __FLOG_1(_L8("Set name according to storage type: %d"),storageType.Value());
+	    OstTrace1( TRACE_NORMAL, DUP2_CMTPGETSTORAGEINFO_SETSTORAGEDESCRIPTIONL, 
+	            "Set name according to storage type: %d",storageType.Value() );
+    
 	    
 	    switch (storageType.Value())
 	        {
 	        case EMTPStorageFixedROM:
 	            if (driveNumber == EDriveC)//Phone Memory
 	                {
-	                __FLOG(_L8("drive c"));
+	                OstTrace0( TRACE_NORMAL, DUP3_CMTPGETSTORAGEINFO_SETSTORAGEDESCRIPTIONL, "drive c" );
 	                mtpDescription->SetL(KPhoneMemory);
 	                }
 	            break;
@@ -362,7 +380,8 @@ void CMTPGetStorageInfo::SetStorageDescriptionL()
 	        {
 	        TChar driveChar;
 	        TInt err = iFramework.Fs().DriveToChar(driveNumber,driveChar);
-	        __FLOG_2(_L8("Use default name,driveNumber:%d err:%d"),driveNumber,err);
+	        OstTraceExt2( TRACE_NORMAL, DUP4_CMTPGETSTORAGEINFO_SETSTORAGEDESCRIPTIONL, 
+	                "Use default name,driveNumber:%d err:%d",driveNumber,err  );	        
 	        if (err == KErrNone)
 	            {
 	            TBuf<sizeof(KDefaultName) + 1> driveName;
@@ -379,8 +398,8 @@ void CMTPGetStorageInfo::SetStorageDescriptionL()
 	
 	iStorageInfo->SetL(CMTPTypeStorageInfo::EStorageDescription,*mtpDescription);
 	CleanupStack::PopAndDestroy(mtpDescription);	
-	
-	__FLOG(_L8("SetStorageDescriptionL - Exit"));
+
+	OstTraceFunctionExit0( CMTPGETSTORAGEINFO_SETSTORAGEDESCRIPTIONL_EXIT );
 	}
 	
 /**

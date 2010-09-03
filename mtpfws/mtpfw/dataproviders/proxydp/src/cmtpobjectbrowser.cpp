@@ -23,8 +23,11 @@
 
 #include "cmtprequestchecker.h"
 #include "mtpdppanic.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpobjectbrowserTraces.h"
+#endif
 
-__FLOG_STMT(_LIT8(KComponent,"ObjectBrowser");)
 
 
 CMTPObjectBrowser* CMTPObjectBrowser::NewL( MMTPDataProviderFramework& aDpFw )
@@ -43,14 +46,16 @@ TBool CMTPObjectBrowser::IsFolderFormat( TUint aFmtCode, TUint aFmtSubCode )
 
 CMTPObjectBrowser::~CMTPObjectBrowser()
     {
+    OstTraceFunctionEntry0( CMTPOBJECTBROWSER_CMTPOBJECTBROWSER_ENTRY );
     delete iObjMetaCache;
-    __FLOG( _L8("+/-Dtor") );
-    __FLOG_CLOSE;
+    OstTraceFunctionExit0( CMTPOBJECTBROWSER_CMTPOBJECTBROWSER_EXIT );
     }
 
 void CMTPObjectBrowser::GoL( TUint32 aFormatCode, TUint32 aHandle, TUint32 aDepth, const TBrowseCallback& aBrowseCallback ) const
     {
-    __FLOG_VA( ( _L8("+GoL( 0x%08X, 0x%08X, %d )"), aFormatCode, aHandle, aDepth ) );
+    OstTraceFunctionEntry0( CMTPOBJECTBROWSER_GOL_ENTRY );
+    OstTraceExt3(TRACE_NORMAL, CMTPOBJECTBROWSER_GOL, "0x%08X, 0x%08X, %d",
+            aFormatCode, aHandle, aDepth);
     
     switch ( aHandle )
         {
@@ -66,26 +71,28 @@ void CMTPObjectBrowser::GoL( TUint32 aFormatCode, TUint32 aHandle, TUint32 aDept
             break;
         }
     
-    __FLOG( _L8("-GoL") );
+    OstTraceFunctionExit0( CMTPOBJECTBROWSER_GOL_EXIT );
     }
 
 CMTPObjectBrowser::CMTPObjectBrowser( MMTPDataProviderFramework& aDpFw ):
     iDpFw( aDpFw )
     {
-    __FLOG_OPEN( KMTPSubsystem, KComponent );
-    __FLOG( _L8("+/-Ctor") );
+    OstTraceFunctionEntry0( DUP1_CMTPOBJECTBROWSER_CMTPOBJECTBROWSER_ENTRY );
+    OstTraceFunctionExit0( DUP1_CMTPOBJECTBROWSER_CMTPOBJECTBROWSER_EXIT );
     }
 
 void CMTPObjectBrowser::ConstructL()
     {
-    __FLOG( _L8("+ConstructL") );
+    OstTraceFunctionEntry0( CMTPOBJECTBROWSER_CONSTRUCTL_ENTRY );
     iObjMetaCache = CMTPObjectMetaData::NewL();
-    __FLOG( _L8("-ConstructL") );
+    OstTraceFunctionExit0( CMTPOBJECTBROWSER_CONSTRUCTL_EXIT );
     }
 
 void CMTPObjectBrowser::GetObjectHandlesL( TUint32 aCurDepth, TUint32 aStorageId, TUint32 aFormatCode, TUint32 aDepth, TUint32 aParentHandle, const TBrowseCallback& aBrowseCallback ) const
     {
-    __FLOG_VA( ( _L8("+GetObjectHandlesL( %d, 0x%08X, 0x%08X, %d, 0x%08X )"), aCurDepth, aStorageId, aFormatCode, aDepth, aParentHandle ) );
+    OstTraceFunctionEntry0( CMTPOBJECTBROWSER_GETOBJECTHANDLESL_ENTRY );
+    OstTraceExt5(TRACE_NORMAL, CMTPOBJECTBROWSER_GETOBJECTHANDLESL, "%d, 0x%08X, 0x%08X, %d, 0x%08X",
+            aCurDepth, aStorageId, aFormatCode, aDepth, aParentHandle);
     
     RMTPObjectMgrQueryContext   context;
     RArray< TUint >             handles;
@@ -131,13 +138,15 @@ void CMTPObjectBrowser::GetObjectHandlesL( TUint32 aCurDepth, TUint32 aStorageId
     
     CleanupStack::PopAndDestroy( &handles );
     CleanupStack::PopAndDestroy( &context );
-    
-    __FLOG( _L8("-GetObjectHandlesL") );
+
+    OstTraceFunctionExit0( CMTPOBJECTBROWSER_GETOBJECTHANDLESL_EXIT );
     }
 
 void CMTPObjectBrowser::GetFolderObjectHandlesL( TUint32 aCurDepth, TUint32 aFormatCode, TUint32 aDepth, TUint32 aParentHandle, const TBrowseCallback& aBrowseCallback ) const
     {
-    __FLOG_VA( ( _L8("+GetFolderObjectHandlesL( %d, 0x%08X, %d, 0x%08X )"), aCurDepth, aFormatCode, aDepth, aParentHandle ) );
+    OstTraceFunctionEntry0( CMTPOBJECTBROWSER_GETFOLDEROBJECTHANDLESL_ENTRY );
+    OstTraceExt4(TRACE_NORMAL, CMTPOBJECTBROWSER_GETFOLDEROBJECTHANDLESL, 
+            "%d, 0x%08X, %d, 0x%08X", aCurDepth, aFormatCode, aDepth, aParentHandle);
     
     if (  aDepth > 0)
         {
@@ -150,13 +159,15 @@ void CMTPObjectBrowser::GetFolderObjectHandlesL( TUint32 aCurDepth, TUint32 aFor
        {
        aBrowseCallback.iCallback( aBrowseCallback.iContext, aParentHandle, aCurDepth );
        }
-            
-    __FLOG( _L8("-GetFolderObjectHandlesL") );
+
+    OstTraceFunctionExit0( CMTPOBJECTBROWSER_GETFOLDEROBJECTHANDLESL_EXIT );
     }
 
 void CMTPObjectBrowser::GetRootObjectHandlesL( TUint32 aCurDepth, TUint32 aFormatCode, TUint32 aDepth, const TBrowseCallback& aBrowseCallback ) const
     {
-    __FLOG_VA( ( _L8("+GetRootObjectHandlesL( %d, 0x%08X, %d )"), aCurDepth, aFormatCode, aDepth ) );
+    OstTraceFunctionEntry0( CMTPOBJECTBROWSER_GETROOTOBJECTHANDLESL_ENTRY );
+    OstTraceExt3(TRACE_NORMAL, CMTPOBJECTBROWSER_GETROOTOBJECTHANDLESL, 
+            "%d, 0x%08X, %d", aCurDepth, aFormatCode, aDepth);
     
     if( aDepth > 0)
         {        
@@ -165,18 +176,20 @@ void CMTPObjectBrowser::GetRootObjectHandlesL( TUint32 aCurDepth, TUint32 aForma
         }
     
     // if aDepth == 0, no handles should be returned.
-    
-    __FLOG( _L8("-GetRootObjectHandlesL") );
+
+    OstTraceFunctionExit0( CMTPOBJECTBROWSER_GETROOTOBJECTHANDLESL_EXIT );
     }
 
 void CMTPObjectBrowser::GetObjectHandlesTreeL( TUint32 aCurDepth, TUint32 aFormatCode, TUint32 aDepth, TUint32 aParentHandle, const TBrowseCallback& aBrowseCallback ) const
     {
-    __FLOG_VA( ( _L8("+GetObjectHandlesTreeL( %d, 0x%08X, %d, 0x%08X )"), aCurDepth, aFormatCode, aDepth, aParentHandle ) );
-    
+    OstTraceFunctionEntry0( CMTPOBJECTBROWSER_GETOBJECTHANDLESTREEL_ENTRY );
+    OstTraceExt4(TRACE_NORMAL, CMTPOBJECTBROWSER_GETOBJECTHANDLESTREEL, 
+            "%d, 0x%08X, %d, 0x%08X", aCurDepth, aFormatCode, aDepth, aParentHandle);
+
     iDpFw.ObjectMgr().ObjectL( aParentHandle, *iObjMetaCache );
-#ifdef __FLOG_ACTIVE
+#ifdef OST_TRACE_COMPILER_IN_USE
     RBuf suid;
-    suid.Create( iObjMetaCache->DesC( CMTPObjectMetaData::ESuid ) );
+    suid.CreateL( iObjMetaCache->DesC( CMTPObjectMetaData::ESuid ) );
 #endif
     if ( IsFolderFormat( iObjMetaCache->Uint( CMTPObjectMetaData::EFormatCode ), iObjMetaCache->Uint( CMTPObjectMetaData::EFormatSubCode ) ) )
         {
@@ -190,12 +203,12 @@ void CMTPObjectBrowser::GetObjectHandlesTreeL( TUint32 aCurDepth, TUint32 aForma
         {
           // format doesn't match, do nothing
         }
-#ifdef __FLOG_ACTIVE
-    __FLOG_1( _L8("recursion_depth: %d"), aCurDepth );
-    __FLOG_1( _L("recursion_suid: %S"), &suid );
+#ifdef OST_TRACE_COMPILER_IN_USE
+    OstTrace1( TRACE_NORMAL, DUP1_CMTPOBJECTBROWSER_GETOBJECTHANDLESTREEL, "recursion_depth: %d", aCurDepth );
+    OstTraceExt1( TRACE_NORMAL, DUP2_CMTPOBJECTBROWSER_GETOBJECTHANDLESTREEL, "recursion_suid: %S", suid );
     suid.Close();
 #endif
-    __FLOG( _L8("-GetObjectHandlesTreeL") );
+    OstTraceFunctionExit0( CMTPOBJECTBROWSER_GETOBJECTHANDLESTREEL_EXIT );
     }
 
 /**
@@ -208,7 +221,7 @@ void CMTPObjectBrowser::GetObjectHandlesTreeL( TUint32 aCurDepth, TUint32 aForma
 
 void CMTPObjectBrowser::GetAllObjectHandlesL(TUint32 aFormatCode,const TBrowseCallback& aBrowseCallback ) const
     {
-    __FLOG( _L8("CMTPObjectBrowser::GetAllObjectHandles-----entry") );
+    OstTraceFunctionEntry0( CMTPOBJECTBROWSER_GETALLOBJECTHANDLESL_ENTRY );
 
     RMTPObjectMgrQueryContext   context;
     RArray< TUint >             handles;
@@ -237,6 +250,6 @@ void CMTPObjectBrowser::GetAllObjectHandlesL(TUint32 aFormatCode,const TBrowseCa
     CleanupStack::PopAndDestroy( &handles );
     CleanupStack::PopAndDestroy( &context );
     
-    __FLOG( _L8("CMTPObjectBrowser::GetAllObjectHandles------exit") );
+    OstTraceFunctionExit0( CMTPOBJECTBROWSER_GETALLOBJECTHANDLESL_EXIT );
     }
 

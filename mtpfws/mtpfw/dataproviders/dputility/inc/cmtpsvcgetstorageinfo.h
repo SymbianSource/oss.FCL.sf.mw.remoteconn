@@ -22,7 +22,6 @@
 #define __CMTPSVCGETSTORAGEINFO_H__
 
 #include "cmtprequestprocessor.h"
-#include "mtpdebug.h"
 
 class MMTPServiceDataProvider;
 class CMTPTypeStorageInfo;
@@ -59,10 +58,6 @@ private:
 private:
 	CMTPTypeStorageInfo*         iStorageInfo;
 	MMTPServiceDataProvider&     iDataProvider;
-	/**
-	FLOGGER debug trace member variable.
-	*/
-	__FLOG_DECLARATION_MEMBER_MUTABLE;
 	};
 
 #endif // __CMTPSVCGETSTORAGEINFO_H__

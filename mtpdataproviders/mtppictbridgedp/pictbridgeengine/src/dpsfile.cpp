@@ -19,11 +19,10 @@
 #include "dpsfile.h"
 #include "dpsdefs.h"
 #include "dpsconst.h"
-
-#ifdef _DEBUG
-#	define IF_DEBUG(t) {RDebug::t;}
-#else
-#	define IF_DEBUG(t)
+#include "mtpdebug.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "dpsfileTraces.h"
 #endif
 
     
@@ -33,7 +32,6 @@
 //
 CDpsFile* CDpsFile::NewL()
 	{
-	IF_DEBUG(Print(_L("CDpsFile::NewL")));
 	CDpsFile* self = new (ELeave) CDpsFile();
 	CleanupStack::PushL(self);
     self->ConstructL();
@@ -47,9 +45,11 @@ CDpsFile* CDpsFile::NewL()
 //
 void CDpsFile::ConstructL()
     {
-    IF_DEBUG(Print(_L(">>>CDpsFile::ConstructL")));    
-	User::LeaveIfError(iFs.Connect());
-    IF_DEBUG(Print(_L("<<<CDpsFile::ConstructL")));    
+    OstTraceFunctionEntry0( CDPSFILE_CONSTRUCTL_ENTRY );  
+	LEAVEIFERROR(iFs.Connect(),
+	        OstTrace1( TRACE_ERROR, CDPSFILE_CONSTRUCTL, 
+	                "Connect to file server failed! error code %d", munged_err));
+    OstTraceFunctionExit0( CDPSFILE_CONSTRUCTL_EXIT );
     }
     
 // --------------------------------------------------------------------------
@@ -58,9 +58,9 @@ void CDpsFile::ConstructL()
 //
 CDpsFile::~CDpsFile()
 	{
-	IF_DEBUG(Print(_L(">>>CDpsFile::~")));        
+	OstTraceFunctionEntry0( CDPSFILE_CDPSFILE_DES_ENTRY );
 	iFs.Close();
-	IF_DEBUG(Print(_L("<<<CDpsFile::~")));        
+    OstTraceFunctionExit0( CDPSFILE_CDPSFILE_DES_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -70,12 +70,14 @@ CDpsFile::~CDpsFile()
 TInt CDpsFile::CreateScriptFile(const TDesC& aFileName, const TDesC8& aScript,
 								const TInt aFileSize)
     {
-    IF_DEBUG(Print(_L(">>>CDpsFile::CreateScriptFile size %d"), aFileSize));            
+    OstTraceFunctionEntry0( CDPSFILE_CREATESCRIPTFILE_ENTRY );
+    OstTrace1( TRACE_NORMAL, CDPSFILE_CREATESCRIPTFILE, "File size %d", aFileSize );          
     RFile file;
     TInt err = file.Replace(iFs, aFileName, EFileShareExclusive);
-    IF_DEBUG(Print(_L("---the error is %d"), err));
+    OstTrace1( TRACE_NORMAL, DUP1_CDPSFILE_CREATESCRIPTFILE, "---the error is %d", err );
     if (err != KErrNone)
         {
+        OstTraceFunctionExit0( CDPSFILE_CREATESCRIPTFILE_EXIT );
         return err;
         }
         
@@ -93,8 +95,9 @@ TInt CDpsFile::CreateScriptFile(const TDesC& aFileName, const TDesC8& aScript,
         err = file.Write(aScript, aFileSize);
         }
         
-    file.Close();
-    IF_DEBUG(Print(_L("<<<CDpsFile::CreateScriptFile %d"), err));            
+    file.Close();     
+    OstTrace1( TRACE_NORMAL, DUP2_CDPSFILE_CREATESCRIPTFILE, "return value %d", err );        
+    OstTraceFunctionExit0( DUP1_CDPSFILE_CREATESCRIPTFILE_EXIT );
     return err;   
     }
 
@@ -104,13 +107,18 @@ TInt CDpsFile::CreateScriptFile(const TDesC& aFileName, const TDesC8& aScript,
 //
 void CDpsFile::GetContentL(const TDesC& aFileName, TDes8& aScript)
     {
-    IF_DEBUG(Print(_L(">>>CDpsFile::GetContent %S"), &aFileName));                
+    OstTraceFunctionEntry0( CDPSFILE_GETCONTENTL_ENTRY );
+    OstTraceExt1( TRACE_NORMAL, CDPSFILE_GETCONTENTL, "File name %S", aFileName );              
     RFile file;
     CleanupClosePushL(file);
-    User::LeaveIfError(file.Open(iFs, aFileName, EFileRead));
-    User::LeaveIfError(file.Read(aScript));
-    CleanupStack::PopAndDestroy();
-    IF_DEBUG(Print(_L("<<<CDpsFile::GetContent")));                       
+    LEAVEIFERROR(file.Open(iFs, aFileName, EFileRead),
+            OstTraceExt2( TRACE_ERROR, DUP1_CDPSFILE_GETCONTENTL, 
+                    "Open %S failed! error code %d", aFileName, munged_err));
+    LEAVEIFERROR(file.Read(aScript),
+            OstTrace1( TRACE_ERROR, DUP2_CDPSFILE_GETCONTENTL, 
+                    "Read from file failed! error code %d", munged_err ));
+    CleanupStack::PopAndDestroy();                      
+    OstTraceFunctionExit0( CDPSFILE_GETCONTENTL_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -119,13 +127,19 @@ void CDpsFile::GetContentL(const TDesC& aFileName, TDes8& aScript)
 //    
 void CDpsFile::FileSizeL(const TDesC& aFileName, TInt& aSize)
     {
-    IF_DEBUG(Print(_L(">>>CDpsFile::FileSize %S"), &aFileName));       
+    OstTraceFunctionEntry0( CDPSFILE_FILESIZEL_ENTRY );
+    OstTraceExt1( TRACE_NORMAL, CDPSFILE_FILESIZEL, "File name %S", aFileName );       
     RFile file;
     CleanupClosePushL(file);
-    User::LeaveIfError(file.Open(iFs, aFileName, EFileRead)); 
-    User::LeaveIfError(file.Size(aSize));    
-    CleanupStack::PopAndDestroy();
-    IF_DEBUG(Print(_L("<<<CDpsFile::FileSize %d"), aSize));                
+    LEAVEIFERROR(file.Open(iFs, aFileName, EFileRead),
+            OstTraceExt2( TRACE_ERROR, DUP1_CDPSFILE_FILESIZEL, 
+                    "Open %S failed! error code %d", aFileName, munged_err));
+    LEAVEIFERROR(file.Size(aSize),
+            OstTrace1( TRACE_ERROR, DUP2_CDPSFILE_FILESIZEL, 
+                    "Gets file size failed! error code %d", munged_err));
+    CleanupStack::PopAndDestroy();    
+    OstTrace1( TRACE_NORMAL, DUP3_CDPSFILE_FILESIZEL, "File size %d", aSize );    
+    OstTraceFunctionExit0( CDPSFILE_FILESIZEL_EXIT );
     }
     
 // ---------------------------------------------------------------------------
@@ -134,6 +148,7 @@ void CDpsFile::FileSizeL(const TDesC& aFileName, TInt& aSize)
 //    
 TInt CDpsFile::Delete(const TDesC& aFileName)
     {
-    IF_DEBUG(Print(_L("CDpsFile::Delete")));                    
+    OstTraceFunctionEntry0( CDPSFILE_DELETE_ENTRY );
+    OstTraceFunctionExit0( CDPSFILE_DELETE_EXIT );                  
     return iFs.Delete(aFileName);
     }

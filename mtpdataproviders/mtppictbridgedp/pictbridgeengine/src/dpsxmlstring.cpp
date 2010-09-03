@@ -19,12 +19,9 @@
 #include "dpsxmlstring.h"
 #include "dpsdefs.h"
 #include "dpsconst.h"
-#include <e32debug.h>
-
-#ifdef _DEBUG
-#	define IF_DEBUG(t) {RDebug::t;}
-#else
-#	define IF_DEBUG(t)
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "dpsxmlstringTraces.h"
 #endif
 
 // ---------------------------------------------------------------------------
@@ -119,7 +116,7 @@ void TDpsXmlString::ConstructL()
             break;
             
             default:
-                IF_DEBUG(Print(_L("wrong in OperationString")));
+                OstTrace0( TRACE_ERROR, TDPSXMLSTRING_CONSTRUCTL, "wrong in OperationString" );
                 User::Leave(KErrArgument);
             break;                        
             }
@@ -143,7 +140,7 @@ void TDpsXmlString::ConstructL()
             break;
                 
             default:
-                IF_DEBUG(Print(_L("wrong in ElementString")));
+                OstTrace0( TRACE_ERROR, DUP1_TDPSXMLSTRING_CONSTRUCTL, "wrong in ElementString" );
                 User::Leave(KErrArgument);
             break;    
             }
@@ -164,7 +161,7 @@ void TDpsXmlString::ConstructL()
             break;
                
             default:
-                IF_DEBUG(Print(_L("wrong in Event String")));
+                OstTrace0( TRACE_ERROR, DUP2_TDPSXMLSTRING_CONSTRUCTL, "wrong in Event String" );
                 User::Leave(KErrArgument);
             break;    
             }
@@ -399,7 +396,7 @@ void TDpsXmlString::ConstructL()
             break;
         
             default:
-                IF_DEBUG(Print(_L("wrong in ArgString")));
+                OstTrace0( TRACE_ERROR, DUP3_TDPSXMLSTRING_CONSTRUCTL, "wrong in ArgString" );
                 User::Leave(KErrArgument);
             break;
             }

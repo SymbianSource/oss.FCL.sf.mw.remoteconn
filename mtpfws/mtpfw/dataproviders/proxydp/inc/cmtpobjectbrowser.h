@@ -23,7 +23,6 @@
 
 #include <e32base.h>
 #include <mtp/mmtpdataproviderframework.h>
-#include "mtpdebug.h"
 
 class CMTPTypeArray;
 class CMTPRequestChecker;
@@ -68,8 +67,7 @@ private:
     void GetAllObjectHandlesL( TUint32 aFormatCode,const TBrowseCallback& aBrowseCallback ) const;
     
 private:
-    __FLOG_DECLARATION_MEMBER_MUTABLE;
-    
+
     MMTPDataProviderFramework& iDpFw;
     CMTPObjectMetaData* iObjMetaCache;
     };

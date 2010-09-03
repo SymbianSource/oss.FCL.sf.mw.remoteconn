@@ -20,8 +20,6 @@
 #ifndef CMTPUSBENDPOINTWATCHER_H
 #define CMTPUSBENDPOINTWATCHER_H
 
-#include "mtpdebug.h"
-
 class CMTPUsbConnection;
 
 /**
@@ -54,12 +52,6 @@ private:
     void RequestIssue();
       
 private: // Owned
-
-    /**
-    FLOGGER debug trace member variable.
-    */
-    __FLOG_DECLARATION_MEMBER;
-
     /**
     The endpoint stall status flags.
     */

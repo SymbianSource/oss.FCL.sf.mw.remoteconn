@@ -22,7 +22,6 @@
 #define CMTPSETDEVICEPROPVALUE_H
 
 #include "cmtpgetdevicepropdesc.h"
-#include "mtpdebug.h"
 
 class CMTPTypeString;
 
@@ -76,11 +75,6 @@ private: // From CMTPGetDevicePropDesc
     void HandleExtnServiceL(TInt aPropCode, MExtnDevicePropDp* aExtnDevplugin);
 
 private: // Owned
-
-    /**
-    FLOGGER debug trace member variable.
-    */
-    __FLOG_DECLARATION_MEMBER_MUTABLE;
 
     CMTPTypeString* iString;
     TMTPTypeUint32 iUint32;	

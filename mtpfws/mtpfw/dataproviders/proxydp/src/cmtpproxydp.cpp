@@ -21,11 +21,14 @@
 #include "cmtpproxydp.h"
 #include "cmtprequestprocessor.h"
 #include "mtpproxydppanic.h"
-#include "mtpproxydpprocessor.h" 
+#include "mtpproxydpprocessor.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpproxydpTraces.h"
+#endif
+ 
 
 static const TInt KMTPProxyDpSessionGranularity = 3;	
-
-__FLOG_STMT(_LIT8(KComponent,"CMTPProxyDataProvider");)
 
 /**
 Standard NewL method
@@ -43,11 +46,10 @@ TAny* CMTPProxyDataProvider::NewL(TAny* aParams)
 	
 void CMTPProxyDataProvider::ConstructL()
 	{  
-	__FLOG_OPEN(KMTPSubsystem, KComponent);  
-	__FLOG(_L8("ConstructL - Entry"));
+	OstTraceFunctionEntry0( CMTPPROXYDATAPROVIDER_CONSTRUCTL_ENTRY );
 	iDpSingletons.OpenL(Framework());
 	iSingletons.OpenL(Framework());
-	__FLOG(_L8("ConstructL - Exit"));
+	OstTraceFunctionExit0( CMTPPROXYDATAPROVIDER_CONSTRUCTL_EXIT );
 	}
 
 /**
@@ -55,6 +57,7 @@ Destructor
 */	
 CMTPProxyDataProvider::~CMTPProxyDataProvider()
 	{
+	OstTraceFunctionEntry0( CMTPPROXYDATAPROVIDER_CMTPPROXYDATAPROVIDER_DES_ENTRY );
 	TInt count = iActiveProcessors.Count();
 	while(count--)
 		{
@@ -63,7 +66,7 @@ CMTPProxyDataProvider::~CMTPProxyDataProvider()
 	iActiveProcessors.Close();	
 	iDpSingletons.Close();
 	iSingletons.Close();
-    __FLOG_CLOSE; 
+	OstTraceFunctionExit0( CMTPPROXYDATAPROVIDER_CMTPPROXYDATAPROVIDER_DES_EXIT );
 	}
     
 void CMTPProxyDataProvider::Cancel()
@@ -150,8 +153,7 @@ the operations array.
 */
 void CMTPProxyDataProvider::Supported(TMTPSupportCategory aCategory, RArray<TUint>& /*aArray*/) const
     {
-
-    __FLOG(_L8("Supported - Entry"));
+    OstTraceFunctionEntry0( CMTPPROXYDATAPROVIDER_SUPPORTED_ENTRY );
     switch (aCategory) 
         {        
     case EEvents:
@@ -176,27 +178,18 @@ void CMTPProxyDataProvider::Supported(TMTPSupportCategory aCategory, RArray<TUin
         // Unrecognised category, leave aArray unmodified.
         break;
         }
-    __FLOG(_L8("Supported - Exit"));
 
+    OstTraceFunctionExit0( CMTPPROXYDATAPROVIDER_SUPPORTED_EXIT );
     }
     
 
 void CMTPProxyDataProvider::SupportedL(TMTPSupportCategory /*aCategory*/, CDesCArray& /*aStrings*/) const
 	{
-	__FLOG(_L8("SupportedL - Entry"));
-	__FLOG(_L8("SupportedL - Exit"));
+	OstTraceFunctionEntry0( CMTPPROXYDATAPROVIDER_SUPPORTEDL_ENTRY );
+	OstTraceFunctionExit0( CMTPPROXYDATAPROVIDER_SUPPORTEDL_EXIT );
 	}
   
     
-/**
-Get the pointer to the extended interface
-@param aInterfaceUid	The uid of the extended interface
-@return the pointer to the extended interface
-*/
-TAny* CMTPProxyDataProvider::GetExtendedInterface(TUid /*aInterfaceUid*/)
-    {
-    return NULL;
-    }
 
 /**
 Standard c++ constructor
@@ -262,6 +255,7 @@ TInt CMTPProxyDataProvider::LocateRequestProcessorL(const TMTPTypeEvent& aEvent,
        
 void CMTPProxyDataProvider::SessionClosedL(const TMTPNotificationParamsSessionChange& aSession)
     {
+    OstTraceFunctionEntry0( CMTPPROXYDATAPROVIDER_SESSIONCLOSEDL_ENTRY );
     TInt count = iActiveProcessors.Count();
     while(count--)
         {
@@ -280,19 +274,20 @@ void CMTPProxyDataProvider::SessionClosedL(const TMTPNotificationParamsSessionCh
     			} 
             }
         }  
+    OstTraceFunctionExit0( CMTPPROXYDATAPROVIDER_SESSIONCLOSEDL_EXIT );
     }
 
 /**
 Prepares for a newly-opened session.
 @param aSession notification parameter block
 */
-#ifdef __FLOG_ACTIVE
+#ifdef OST_TRACE_COMPILER_IN_USE
 void CMTPProxyDataProvider::SessionOpenedL(const TMTPNotificationParamsSessionChange& /*aSession*/)
 #else
 void CMTPProxyDataProvider::SessionOpenedL(const TMTPNotificationParamsSessionChange& /*aSession*/)
 #endif
     {
-    __FLOG(_L8("SessionOpenedL - Entry"));
-    __FLOG(_L8("SessionOpenedL - Exit"));
+    OstTraceFunctionEntry0( CMTPPROXYDATAPROVIDER_SESSIONOPENEDL_ENTRY );
+    OstTraceFunctionExit0( CMTPPROXYDATAPROVIDER_SESSIONOPENEDL_EXIT );
     }
 

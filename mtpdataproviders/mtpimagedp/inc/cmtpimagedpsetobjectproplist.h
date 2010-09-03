@@ -53,11 +53,6 @@ private:
     TMTPResponseCode CheckPropCode(TUint16 aPropertyCode, TUint16 aDataType) const;
 
 private:
-
-    /**
-    FLOGGER debug trace member variable.
-    **/
-    __FLOG_DECLARATION_MEMBER_MUTABLE;
     
     CMTPImageDataProvider&         iDataProvider;
     CMTPImageDpObjectPropertyMgr&  iPropertyMgr;

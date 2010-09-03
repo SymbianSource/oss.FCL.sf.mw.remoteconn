@@ -22,7 +22,6 @@
 
 #include "cmtpserver.h"
 #include "mtpclientserver.h"
-#include "mtpdebug.h"
 #include "rmtpframework.h"
 
 /**
@@ -51,11 +50,6 @@ private:
     TBool CheckIsBlueToothTransport(TUid aNewUid);
     
 private:
-
-    /**
-    FLOGGER debug trace member variable.
-    */
-    __FLOG_DECLARATION_MEMBER_MUTABLE;
     
     /**
     The MTP framework singletons.

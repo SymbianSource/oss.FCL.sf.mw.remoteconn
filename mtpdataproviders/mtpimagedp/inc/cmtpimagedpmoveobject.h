@@ -65,10 +65,6 @@ private:
 	TUint32					iStorageId;
 	TTime					iPreviousModifiedTime;
 	CMTPImageDataProvider& iDataProvider;
-	/**
-    FLOGGER debug trace member variable.
-    */
-    __FLOG_DECLARATION_MEMBER_MUTABLE;
 	};
 	
 #endif  //CMTPIMAGEDPMOVEOBJECT_H

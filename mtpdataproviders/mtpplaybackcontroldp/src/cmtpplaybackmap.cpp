@@ -26,10 +26,11 @@
 #include "cmtpplaybackcommand.h"
 #include "cmtpplaybackcontroldp.h"
 #include "mtpplaybackcontrolpanic.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpplaybackmapTraces.h"
+#endif
 
-
-// Class constants.
-__FLOG_STMT(_LIT8(KComponent,"MTPPlaybackMap");)
 
 const TInt KPlaybackRatePlay = 1000;
 const TInt KPlaybackRatePause = 0;
@@ -43,10 +44,12 @@ Two-phase constructor.
 CMTPPlaybackMap* CMTPPlaybackMap::NewL(MMTPDataProviderFramework& aFramework,
                                        CMTPPlaybackProperty& aProperty)
     {
+    OstTraceFunctionEntry0( CMTPPLAYBACKMAP_NEWL_ENTRY );
     CMTPPlaybackMap* self = new (ELeave) CMTPPlaybackMap(aFramework, aProperty);
     CleanupStack::PushL(self);
     self->ConstructL();
     CleanupStack::Pop(self);
+    OstTraceFunctionExit0( CMTPPLAYBACKMAP_NEWL_EXIT );
     return self;
     }
 
@@ -55,9 +58,8 @@ Destructor.
 */    
 CMTPPlaybackMap::~CMTPPlaybackMap()
     {    
-    __FLOG(_L8("~CMTPPlaybackMap - Entry"));
-    __FLOG(_L8("~CMTPPlaybackMap - Exit"));
-    __FLOG_CLOSE;
+    OstTraceFunctionEntry0( CMTPPLAYBACKMAP_CMTPPLAYBACKMAP_ENTRY );
+    OstTraceFunctionExit0( CMTPPLAYBACKMAP_CMTPPLAYBACKMAP_EXIT );
     }
 
 /**
@@ -67,6 +69,8 @@ CMTPPlaybackMap::CMTPPlaybackMap(MMTPDataProviderFramework& aFramework,
                                  CMTPPlaybackProperty& aProperty):
     iFramework(aFramework),iProperty(aProperty)
     {    
+    OstTraceFunctionEntry0( DUP1_CMTPPLAYBACKMAP_CMTPPLAYBACKMAP_ENTRY );
+    OstTraceFunctionExit0( DUP1_CMTPPLAYBACKMAP_CMTPPLAYBACKMAP_EXIT );
     }
     
 /**
@@ -74,15 +78,14 @@ Second-phase constructor.
 */        
 void CMTPPlaybackMap::ConstructL()
     {
-    __FLOG_OPEN(KMTPSubsystem, KComponent);
-    __FLOG(_L8("CMTPPlaybackMap: ConstructL - Entry")); 
-    __FLOG(_L8("CMTPPlaybackMap: ConstructL - Exit")); 
+    OstTraceFunctionEntry0( CMTPPLAYBACKMAP_CONSTRUCTL_ENTRY );
+    OstTraceFunctionExit0( CMTPPLAYBACKMAP_CONSTRUCTL_EXIT );
     }
 
 TInt CMTPPlaybackMap::GetPlaybackControlCommand(const TMTPPbCtrlData& aData, 
                                                 CMTPPlaybackCommand** aCmd)
     {
-    __FLOG(_L8("GetPlaybackControlCommand - Entry"));
+    OstTraceFunctionEntry0( CMTPPLAYBACKMAP_GETPLAYBACKCONTROLCOMMAND_ENTRY );
     TInt result = KErrNotSupported;
     switch(aData.iOptCode)
         {
@@ -106,21 +109,23 @@ TInt CMTPPlaybackMap::GetPlaybackControlCommand(const TMTPPbCtrlData& aData,
         default:
             break;
         }
-    __FLOG(_L8("GetPlaybackControlCommand - Exit"));
+    OstTraceFunctionExit0( CMTPPLAYBACKMAP_GETPLAYBACKCONTROLCOMMAND_EXIT );
     return result;
     }
 
 TInt CMTPPlaybackMap::HandleSetDevicePropValue(const TMTPPbCtrlData& aData, 
                                                CMTPPlaybackCommand** aCmd)
     {
+    OstTraceFunctionEntry0( CMTPPLAYBACKMAP_HANDLESETDEVICEPROPVALUE_ENTRY );
     TRAPD(err, HandleSetDevicePropValueL(aData, aCmd));
+    OstTraceFunctionExit0( CMTPPLAYBACKMAP_HANDLESETDEVICEPROPVALUE_EXIT );
     return err;
     }
 
 void CMTPPlaybackMap::HandleSetDevicePropValueL(const TMTPPbCtrlData& aData, 
                                                CMTPPlaybackCommand** aCmd)
     {
-    __FLOG(_L8("HandleSetDevicePropValueL - Entry"));
+    OstTraceFunctionEntry0( CMTPPLAYBACKMAP_HANDLESETDEVICEPROPVALUEL_ENTRY );
     __ASSERT_DEBUG((aData.iOptCode == EMTPOpCodeSetDevicePropValue) ||
                     (aData.iOptCode == EMTPOpCodeResetDevicePropValue),
                     Panic(EMTPPBArgumentErr));
@@ -156,7 +161,8 @@ void CMTPPlaybackMap::HandleSetDevicePropValueL(const TMTPPbCtrlData& aData,
                     cmd = EPlaybackCmdSeekBackward;
                     break;
                 default:
-                    User::Leave(KErrArgument);
+                    LEAVEIFERROR( KErrArgument, 
+                            OstTrace0( TRACE_ERROR, CMTPPLAYBACKMAP_HANDLESETDEVICEPROPVALUEL, "Error argument" ));
                     break;
                 }
             if(cmd != EPlaybackCmdNone)
@@ -199,7 +205,8 @@ void CMTPPlaybackMap::HandleSetDevicePropValueL(const TMTPPbCtrlData& aData,
                         cat = EMTPPbCatMusic;
                         break;
                     default:
-                        User::Leave(KErrArgument);
+                        LEAVEIFERROR(KErrArgument, 
+                                OstTrace0( TRACE_ERROR, DUP1_CMTPPLAYBACKMAP_HANDLESETDEVICEPROPVALUEL, "Error argument" ));
                         break;
                     }
                 if(cat != EMTPPbCatNone)
@@ -238,22 +245,25 @@ void CMTPPlaybackMap::HandleSetDevicePropValueL(const TMTPPbCtrlData& aData,
             break;
             
         default:
-            User::Leave(KErrArgument);
+            LEAVEIFERROR(KErrArgument, 
+                    OstTrace0( TRACE_ERROR, DUP2_CMTPPLAYBACKMAP_HANDLESETDEVICEPROPVALUEL, "Error argument" ));
             break;
         }
-    __FLOG(_L8("HandleSetDevicePropValueL - Exit"));
+    OstTraceFunctionExit0( CMTPPLAYBACKMAP_HANDLESETDEVICEPROPVALUEL_EXIT );
     }
 
 TInt CMTPPlaybackMap::HandleGetDevicePropValue(const TMTPPbCtrlData& aData, 
                                                CMTPPlaybackCommand** aCmd)
     {
+    OstTraceFunctionEntry0( CMTPPLAYBACKMAP_HANDLEGETDEVICEPROPVALUE_ENTRY );
     TRAPD(err, HandleGetDevicePropValueL(aData, aCmd));
+    OstTraceFunctionExit0( CMTPPLAYBACKMAP_HANDLEGETDEVICEPROPVALUE_EXIT );
     return err;
     }
 void CMTPPlaybackMap::HandleGetDevicePropValueL(const TMTPPbCtrlData& aData, 
                                                CMTPPlaybackCommand** aCmd)
     {
-    __FLOG(_L8("HandleGetDevicePropValueL - Entry"));
+    OstTraceFunctionEntry0( CMTPPLAYBACKMAP_HANDLEGETDEVICEPROPVALUEL_ENTRY );
     __ASSERT_DEBUG((aData.iOptCode == EMTPOpCodeGetDevicePropValue) ||
                     (aData.iOptCode == EMTPOpCodeGetDevicePropDesc),
                     Panic(EMTPPBArgumentErr));
@@ -296,34 +306,37 @@ void CMTPPlaybackMap::HandleGetDevicePropValueL(const TMTPPbCtrlData& aData,
             break;
             
         default:
-            User::Leave(KErrArgument);
+            LEAVEIFERROR(KErrArgument, 
+                                    OstTrace0( TRACE_ERROR, CMTPPLAYBACKMAP_HANDLEGETDEVICEPROPVALUEL, "Error argument" ));
             break;
         }
-    __FLOG(_L8("HandleGetDevicePropValueL - Exit"));
+    OstTraceFunctionExit0( CMTPPLAYBACKMAP_HANDLEGETDEVICEPROPVALUEL_EXIT );
     }
 
 TInt CMTPPlaybackMap::HandleSkip(const TMTPPbCtrlData& aData, 
                                  CMTPPlaybackCommand** aCmd)
     {
+    OstTraceFunctionEntry0( CMTPPLAYBACKMAP_HANDLESKIP_ENTRY );
     TRAPD(err, HandleSkipL(aData, aCmd));
+    OstTraceFunctionExit0( CMTPPLAYBACKMAP_HANDLESKIP_EXIT );
     return err;
     }
 
 void CMTPPlaybackMap::HandleSkipL(const TMTPPbCtrlData& aData, 
                                  CMTPPlaybackCommand** aCmd)
     {
-    __FLOG(_L8("HandleSkipL - Entry"));
+    OstTraceFunctionEntry0( CMTPPLAYBACKMAP_HANDLESKIPL_ENTRY );
     TInt32 step = aData.iPropValInt32.Value();
     CMTPPbCmdParam* param = CMTPPbCmdParam::NewL(step);
     CleanupStack::PushL(param);
     *aCmd = CMTPPlaybackCommand::NewL(EPlaybackCmdSkip, param);
     CleanupStack::Pop(param);
-    __FLOG(_L8("HandleSkipL - Exit"));
+    OstTraceFunctionExit0( CMTPPLAYBACKMAP_HANDLESKIPL_EXIT );
     }
 
 TInt32 CMTPPlaybackMap::PlaybackRateL(TMTPPlaybackState aState)
     {
-    __FLOG(_L8("PlaybackRate - Entry"));
+    OstTraceFunctionEntry0( CMTPPLAYBACKMAP_PLAYBACKRATEL_ENTRY );
     TInt32 rate = KPlaybackRatePause;
     switch(aState)
         {
@@ -344,35 +357,36 @@ TInt32 CMTPPlaybackMap::PlaybackRateL(TMTPPlaybackState aState)
             break;
             
         default:
-            User::Leave(KErrArgument);
+            LEAVEIFERROR(KErrArgument, 
+                                    OstTrace0( TRACE_ERROR, CMTPPLAYBACKMAP_PLAYBACKRATEL, "Error argument" ));
             break;
         }
-    __FLOG(_L8("PlaybackRate - Exit"));
+    OstTraceFunctionExit0( CMTPPLAYBACKMAP_PLAYBACKRATEL_EXIT );
     return rate;
     }
 
 TUint32 CMTPPlaybackMap::ObjectHandleL(const TDesC& aSuid)
     {
-    __FLOG(_L8("ObjectHandleL - Entry"));
+    OstTraceFunctionEntry0( CMTPPLAYBACKMAP_OBJECTHANDLEL_ENTRY );
     CMTPObjectMetaData* meta(CMTPObjectMetaData::NewLC());
     TBool result = iFramework.ObjectMgr().ObjectL(aSuid, *meta);
-    __ASSERT_ALWAYS(result, User::Leave(KErrBadHandle));
+    __ASSERT_ALWAYS_OST(result,OstTrace0( TRACE_ERROR, CMTPPLAYBACKMAP_OBJECTHANDLEL, "bad handle" ), User::Leave(KErrBadHandle));
     __ASSERT_DEBUG(meta, Panic(EMTPPBDataNullErr));
     TUint32 handle = meta->Uint(CMTPObjectMetaData::EHandle);
     CleanupStack::PopAndDestroy(meta);
-    __FLOG(_L8("ObjectHandleL - Exit"));
+    OstTraceFunctionExit0( CMTPPLAYBACKMAP_OBJECTHANDLEL_EXIT );
     return handle;
     }
 
 void CMTPPlaybackMap::GetObjecInfoFromHandleL(TUint32 aHandle, TDes& aSuid, TUint& aFormat) const
     {
-    __FLOG(_L8("GetObjecInfoFromHandleL - Entry"));
+    OstTraceFunctionEntry0( CMTPPLAYBACKMAP_GETOBJECINFOFROMHANDLEL_ENTRY );
     CMTPObjectMetaData* meta(CMTPObjectMetaData::NewLC());
     TBool result = iFramework.ObjectMgr().ObjectL(aHandle, *meta);
-    __ASSERT_ALWAYS(result, User::Leave(KErrBadHandle));
+    __ASSERT_ALWAYS_OST(result, OstTrace0( TRACE_ERROR, CMTPPLAYBACKMAP_GETOBJECINFOFROMHANDLEL, "bad handle" ), User::Leave(KErrBadHandle));
     __ASSERT_DEBUG(meta, Panic(EMTPPBDataNullErr));
     aSuid = meta->DesC(CMTPObjectMetaData::ESuid);
     aFormat = meta->Uint(CMTPObjectMetaData::EFormatCode);
     CleanupStack::PopAndDestroy(meta);
-    __FLOG(_L8("GetObjecInfoFromHandleL - Exit"));
+    OstTraceFunctionExit0( CMTPPLAYBACKMAP_GETOBJECINFOFROMHANDLEL_EXIT );
     }

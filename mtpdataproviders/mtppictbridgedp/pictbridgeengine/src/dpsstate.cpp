@@ -15,18 +15,16 @@
 *
 */
 
-#include <e32debug.h>
 #include "dpsstate.h"
 #include "dpsstatemachine.h"
 #include "dpstransaction.h"
 #include "dpsscriptreceiver.h"
 #include <pictbridge.h>
- 
-#ifdef _DEBUG
-#	define IF_DEBUG(t) {RDebug::t;}
-#else
-#	define IF_DEBUG(t)
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "dpsstateTraces.h"
 #endif
+
   
 // ---------------------------------------------------------------------------
 // 
@@ -41,7 +39,8 @@ TDpsIdleState::TDpsIdleState(CDpsStateMachine* aStateMachine) :
 //
 void TDpsIdleState::ScriptSentNotifyL(TBool /*aReply*/)
     {
-    IF_DEBUG(Print(_L("TDpsIdleState::ScriptSentNotify")));
+    OstTraceFunctionEntry0( TDPSIDLESTATE_SCRIPTSENTNOTIFYL_ENTRY );
+    OstTraceFunctionExit0( TDPSIDLESTATE_SCRIPTSENTNOTIFYL_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -52,14 +51,13 @@ void TDpsIdleState::ScriptReceivedNotifyL(TBool aReply)
     {
     if (!aReply)
         {
-        IF_DEBUG(Print(_L("TDpsIdleState::ScriptReceived request got")));            
+        OstTrace0( TRACE_NORMAL, TDPSIDLESTATE_SCRIPTRECEIVEDNOTIFYL, "request got" );
         iStateMachine->Trader()->ParseScriptL(aReply);    
         iStateMachine->SetState(iStateMachine->SendingRepState());
         }
     else
         {
-        IF_DEBUG(Print(_L(
-            "TDpsIdleState::ScriptReceived should not get reply!!!")));    
+        OstTrace0( TRACE_NORMAL, DUP1_TDPSIDLESTATE_SCRIPTRECEIVEDNOTIFYL, "should not get reply!!!" );
         }
     }
 
@@ -69,7 +67,7 @@ void TDpsIdleState::ScriptReceivedNotifyL(TBool aReply)
 //
 void TDpsIdleState::Error(TInt aErr)
     {
-    IF_DEBUG(Print(_L("TDpsIdleState::Error %d"), aErr));
+    OstTrace1( TRACE_NORMAL, TDPSIDLESTATE_ERROR, "Error %d", aErr );
     if ((aErr != KErrCancel) && (aErr != KErrNotReady))
         {
         iStateMachine->Trader()->HandleHostRequestError(aErr);
@@ -93,13 +91,12 @@ void TDpsSendingReqState::ScriptSentNotifyL(TBool aReply)
     {
     if (!aReply)
         {
-        IF_DEBUG(Print(_L("TDpsSendingReqState::ScriptSent request")));
+        OstTrace0( TRACE_NORMAL, TDPSSENDINGREQSTATE_SCRIPTSENTNOTIFYL, " request" );
         iStateMachine->SetState(iStateMachine->WaitingRepState());
         }
     else
         {
-        IF_DEBUG(Print(_L(
-            "TDpsSendingReqState::ScriptSent should not get reply!!")));
+        OstTrace0( TRACE_NORMAL, DUP1_TDPSSENDINGREQSTATE_SCRIPTSENTNOTIFYL, " should not get reply!!" );
         }
     }
 
@@ -109,8 +106,7 @@ void TDpsSendingReqState::ScriptSentNotifyL(TBool aReply)
 //
 void TDpsSendingReqState::ScriptReceivedNotifyL(TBool /*aReply*/)
     {
-    IF_DEBUG(Print(_L("TDpsSendingReqState::ScriptReceived")));
-    IF_DEBUG(Print(_L("**should not reply to the request/reply from host")));
+    OstTrace0( TRACE_NORMAL, TDPSSENDINGREQSTATE_SCRIPTRECEIVEDNOTIFYL, "**should not reply to the request/reply from host" );
     }
 
 // ---------------------------------------------------------------------------
@@ -139,7 +135,8 @@ TDpsWaitingRepState::TDpsWaitingRepState(CDpsStateMachine* aStateMachine) :
 //
 void TDpsWaitingRepState::ScriptSentNotifyL(TBool /*aReply*/)
     {    
-    IF_DEBUG(Print(_L("TDpsWaitingRepState::ScriptSent")));
+    OstTraceFunctionEntry0( TDPSWAITINGREPSTATE_SCRIPTSENTNOTIFYL_ENTRY );
+    OstTraceFunctionExit0( TDPSWAITINGREPSTATE_SCRIPTSENTNOTIFYL_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -150,8 +147,8 @@ void TDpsWaitingRepState::ScriptReceivedNotifyL(TBool aReply)
     {
     if (aReply)
         {
-        IF_DEBUG(Print(_L("WaitingRepState reply")))
-        
+        OstTrace0( TRACE_NORMAL, TDPSWAITINGREPSTATE_SCRIPTRECEIVEDNOTIFYL, "WaitingRepState reply" );
+
         iStateMachine->Trader()->ParseScriptL(aReply);      
         User::RequestComplete(
             iStateMachine->DpsEngine()->OperationRequest(), KErrNone);        
@@ -159,7 +156,7 @@ void TDpsWaitingRepState::ScriptReceivedNotifyL(TBool aReply)
         }
     else
         {
-        IF_DEBUG(Print(_L("WaitingRepState should not get request")));
+        OstTrace0( TRACE_NORMAL, DUP1_TDPSWAITINGREPSTATE_SCRIPTRECEIVEDNOTIFYL, "WaitingRepState should not get request" );
         // collision happened, we do nothing because the host will
         // eventually handle this by sending the correct response. but we need
         // to subscribe for the event again.
@@ -194,7 +191,7 @@ void TDpsSendingRepState::ScriptSentNotifyL(TBool aReply)
     {
     if (aReply)
         {
-        IF_DEBUG(Print(_L("TDpsSendingRepState::ScriptSent reply")));
+        OstTrace0( TRACE_NORMAL, TDPSSENDINGREPSTATE_SCRIPTSENTNOTIFYL, "reply" );
         if (KErrNone == iStateMachine->CurError())
             {
             // this is the normal situation, inform the client
@@ -211,8 +208,7 @@ void TDpsSendingRepState::ScriptSentNotifyL(TBool aReply)
         }
     else
         {
-        IF_DEBUG(Print(_L(
-            "TDpsSendingRepState::ScriptSent shoul not get request!!!")));
+        OstTrace0( TRACE_NORMAL, DUP1_TDPSSENDINGREPSTATE_SCRIPTSENTNOTIFYL, "shoul not get request!!!" );
         }
     }
 
@@ -222,7 +218,8 @@ void TDpsSendingRepState::ScriptSentNotifyL(TBool aReply)
 //
 void TDpsSendingRepState::ScriptReceivedNotifyL(TBool /*aReply*/)
     {
-    IF_DEBUG(Print(_L("TDpsSendingRepState::ScriptReceived")));
+    OstTraceFunctionEntry0( TDPSSENDINGREPSTATE_SCRIPTRECEIVEDNOTIFYL_ENTRY );
+    OstTraceFunctionExit0( TDPSSENDINGREPSTATE_SCRIPTRECEIVEDNOTIFYL_EXIT );
     }
 
 // ---------------------------------------------------------------------------

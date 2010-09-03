@@ -86,10 +86,6 @@ private:
     this is currently hard coded so doesn't copy these
     */
     TTime                   iDateModified;
-    /**
-    FLOGGER debug trace member variable.
-    */
-    __FLOG_DECLARATION_MEMBER_MUTABLE;
     };
     
 #endif //CMTPIMAGEDPCOPYOBJECT_H

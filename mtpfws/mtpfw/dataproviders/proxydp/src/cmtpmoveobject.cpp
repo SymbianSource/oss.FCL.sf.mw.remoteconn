@@ -26,8 +26,13 @@
 #include "mtpproxydppanic.h"
 #include "cmtpobjectbrowser.h"
 #include "mtpdppanic.h"
+#include "mtpdebug.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpmoveobjectTraces.h"
+#endif
 
-__FLOG_STMT(_LIT8(KComponent,"PrxyMoveObj");)
+
 const TUint KInvalidDpId = 0xFF;
 /**
 Verification data for the MoveObject request
@@ -59,6 +64,7 @@ Destructor
 */    
 CMTPMoveObject::~CMTPMoveObject()
     {
+    OstTraceFunctionEntry0( CMTPMOVEOBJECT_CMTPMOVEOBJECT_ENTRY );
     iSingletons.Close();
     iNewParent.Close();
 	delete iPathToCreate;
@@ -71,8 +77,7 @@ CMTPMoveObject::~CMTPMoveObject()
     iHandles.Close();
     delete iObjBrowser;
     iTargetDps.Close();
-    __FLOG(_L8("+/-Dtor"));
-    __FLOG_CLOSE;
+    OstTraceFunctionExit0( CMTPMOVEOBJECT_CMTPMOVEOBJECT_EXIT );
     }
 
 /**
@@ -81,8 +86,6 @@ Constructor
 CMTPMoveObject::CMTPMoveObject(MMTPDataProviderFramework& aFramework, MMTPConnection& aConnection) :
     CMTPRequestProcessor(aFramework, aConnection, sizeof(KMTPMoveObjectPolicy)/sizeof(TMTPRequestElementInfo), KMTPMoveObjectPolicy)
     {
-    __FLOG_OPEN( KMTPSubsystem, KComponent );
-    __FLOG( _L8("+/-Ctor") );
     }
     
 /**
@@ -90,12 +93,12 @@ Second phase constructor.
 */
 void CMTPMoveObject::ConstructL()
     {
-    __FLOG( _L8("+ConstructL") );
+    OstTraceFunctionEntry0( CMTPMOVEOBJECT_CONSTRUCTL_ENTRY );
     iNewParent.CreateL(KMaxFileName);
     iSingletons.OpenL();
     iFolderToRemove.CreateL( KMaxFileName );
     iOwnerDp = KInvalidDpId;
-    __FLOG( _L8("-ConstructL") );
+    OstTraceFunctionExit0( CMTPMOVEOBJECT_CONSTRUCTL_EXIT );
     }
     
 /**
@@ -103,7 +106,7 @@ MoveObject request handler
 */ 
 void CMTPMoveObject::ServiceL()
     {
-    __FLOG( _L8("+ServiceL") );
+    OstTraceFunctionEntry0( CMTPMOVEOBJECT_SERVICEL_ENTRY );
     iTargetDps.Reset();
     CMTPParserRouter& router(iSingletons.Router());
     CMTPParserRouter::TRoutingParameters params(Request(), iConnection);
@@ -111,7 +114,7 @@ void CMTPMoveObject::ServiceL()
     router.RouteOperationRequestL(params, iTargetDps);
     
     BrowseHandlesL();
-    __FLOG( _L8("-ServiceL") );
+    OstTraceFunctionExit0( CMTPMOVEOBJECT_SERVICEL_EXIT );
     }
 
 void CMTPMoveObject::ProxyReceiveDataL(MMTPType& /*aData*/, const TMTPTypeRequest& /*aRequest*/, MMTPConnection& /*aConnection*/, TRequestStatus& /*aStatus*/)
@@ -130,12 +133,12 @@ void CMTPMoveObject::ProxySendResponseL(const TMTPTypeResponse& aResponse, const
 void CMTPMoveObject::ProxySendResponseL(const TMTPTypeResponse& aResponse, const TMTPTypeRequest& /*aRequest*/, MMTPConnection& /*aConnection*/, TRequestStatus& aStatus)
 #endif
     {
-    __FLOG( _L8("+ProxySendResponseL") );
+    OstTraceFunctionEntry0( CMTPMOVEOBJECT_PROXYSENDRESPONSEL_ENTRY );
     __ASSERT_DEBUG(((&iCurrentRequest == &aRequest) && (&iConnection == &aConnection)), Panic(EMTPNotSameRequestProxy));
     MMTPType::CopyL(aResponse, iResponse);
 	TRequestStatus* status = &aStatus;
 	User::RequestComplete(status, KErrNone);
-    __FLOG( _L8("-ProxySendResponseL") );
+	OstTraceFunctionExit0( CMTPMOVEOBJECT_PROXYSENDRESPONSEL_EXIT );
     }
 
 #ifdef _DEBUG    
@@ -144,7 +147,7 @@ void CMTPMoveObject::ProxyTransactionCompleteL(const TMTPTypeRequest& aRequest, 
 void CMTPMoveObject::ProxyTransactionCompleteL(const TMTPTypeRequest& /*aRequest*/, MMTPConnection& /*aConnection*/)
 #endif
     {
-    __FLOG( _L8("+ProxyTransactionCompleteL") );
+    OstTraceFunctionEntry0( CMTPMOVEOBJECT_PROXYTRANSACTIONCOMPLETEL_ENTRY );
     __ASSERT_DEBUG(((&iCurrentRequest == &aRequest) && (&iConnection == &aConnection)), Panic(EMTPNotSameRequestProxy));
     TInt err((iResponse.Uint16(TMTPTypeResponse::EResponseCode) == EMTPRespCodeOK) ? KErrNone : KErrGeneral);    
     if (err == KErrNone)
@@ -157,7 +160,7 @@ void CMTPMoveObject::ProxyTransactionCompleteL(const TMTPTypeRequest& /*aRequest
         SendResponseL( iResponse.Uint16( TMTPTypeResponse::EResponseCode ) ); 
         }
 
-    __FLOG( _L8("-ProxyTransactionCompleteL") );
+    OstTraceFunctionExit0( CMTPMOVEOBJECT_PROXYTRANSACTIONCOMPLETEL_EXIT );
     }
 
 /**
@@ -165,7 +168,7 @@ Retrive the parameters of the request
 */	
 void CMTPMoveObject::GetParametersL()
     {
-    __FLOG( _L8("+GetParametersL") );
+    OstTraceFunctionEntry0( CMTPMOVEOBJECT_GETPARAMETERSL_ENTRY );
     
     TUint32 objectHandle  = iCurrentRequest.Uint32( TMTPTypeRequest::ERequestParameter1 );
     TUint32 newParentHandle  = iCurrentRequest.Uint32( TMTPTypeRequest::ERequestParameter3 );
@@ -181,7 +184,7 @@ void CMTPMoveObject::GetParametersL()
         }
     
     iFramework.ObjectMgr().ObjectL( TMTPTypeUint32( objectHandle ), *iObjInfoCache );
-    __FLOG( _L8("-GetParametersL") );	
+    OstTraceFunctionExit0( CMTPMOVEOBJECT_GETPARAMETERSL_EXIT );
     }
 
 /**
@@ -189,11 +192,11 @@ Get a default parent object, when the current request does not specify a parent 
 */
 void CMTPMoveObject::GetDefaultParentObjectL( TDes& aObjectName )
     {
-    __FLOG( _L8("+GetDefaultParentObjectL") );
+    OstTraceFunctionEntry0( CMTPMOVEOBJECT_GETDEFAULTPARENTOBJECTL_ENTRY );
     const CMTPStorageMetaData& storageMetaData( iFramework.StorageMgr().StorageL(iStorageId) );
     aObjectName = storageMetaData.DesC(CMTPStorageMetaData::EStorageSuid);
-    __FLOG( _L8("-GetDefaultParentObjectL") );
 
+    OstTraceFunctionExit0( CMTPMOVEOBJECT_GETDEFAULTPARENTOBJECTL_EXIT );
     }
 
 /**
@@ -201,21 +204,27 @@ Check if we can move the file to the new location
 */
 TMTPResponseCode CMTPMoveObject::CanMoveObjectL(const TDesC& aOldName, const TDesC& aNewName) const
 	{
-	__FLOG(_L8("+CanMoveObjectL"));
+	OstTraceFunctionEntry0( CMTPMOVEOBJECT_CANMOVEOBJECTL_ENTRY );
 	TMTPResponseCode result = EMTPRespCodeOK;
 
 	TEntry fileEntry;
-	User::LeaveIfError(iFramework.Fs().Entry(aOldName, fileEntry));
+	LEAVEIFERROR(iFramework.Fs().Entry(aOldName, fileEntry),
+	        OstTraceExt1( TRACE_ERROR, DUP1_CMTPMOVEOBJECT_CANMOVEOBJECTL, "get entry for %S error!", aOldName));
+	        
 	TInt drive(iFramework.StorageMgr().DriveNumber(iStorageId));
-	User::LeaveIfError(drive);
+	LEAVEIFERROR(drive,
+	        OstTrace1( TRACE_ERROR, DUP2_CMTPMOVEOBJECT_CANMOVEOBJECTL, "can't identify drive number for storageId %d", iStorageId ));
 	TVolumeInfo volumeInfo;
-	User::LeaveIfError(iFramework.Fs().Volume(volumeInfo, drive));
+	LEAVEIFERROR(iFramework.Fs().Volume(volumeInfo, drive),
+	        OstTrace1( TRACE_ERROR, DUP3_CMTPMOVEOBJECT_CANMOVEOBJECTL, "can't get volume info for drive %d", drive));
 	
 	if (BaflUtils::FileExists(iFramework.Fs(), aNewName))			
 		{
 		result = EMTPRespCodeInvalidParentObject;
 		}
-	__FLOG_VA((_L8("-CanMoveObjectL (Exit with response code 0x%04X)"), result));
+    OstTrace1( TRACE_NORMAL, CMTPMOVEOBJECT_CANMOVEOBJECTL, "Exit with response code 0x%04X", result ); 	
+	OstTraceFunctionExit0( CMTPMOVEOBJECT_CANMOVEOBJECTL_EXIT );
+	
 	return result;	
 	}
 	
@@ -230,7 +239,7 @@ void CMTPMoveObject::GetSuidFromHandleL(TUint aHandle, TDes& aSuid) const
 		
 void CMTPMoveObject::RunL()
     {
-    __FLOG( _L8("+RunL") );
+    OstTraceFunctionEntry0( CMTPMOVEOBJECT_RUNL_ENTRY );
     if ( iStatus==KErrNone )
         {
         switch ( iState )
@@ -253,7 +262,7 @@ void CMTPMoveObject::RunL()
         SendResponseL( iResponse.Uint16( TMTPTypeResponse::EResponseCode ) );
         }
 
-    __FLOG( _L8("-RunL") );
+    OstTraceFunctionExit0( CMTPMOVEOBJECT_RUNL_EXIT );
     }
     	
 TInt CMTPMoveObject::RunError(TInt /*aError*/)
@@ -289,11 +298,12 @@ void CMTPMoveObject::SendResponseL(TUint16 aCode)
 
 TMTPResponseCode CMTPMoveObject::CreateFolderL()
     {
-    __FLOG( _L8("+CreateFolderL") );
+    OstTraceFunctionEntry0( CMTPMOVEOBJECT_CREATEFOLDERL_ENTRY );
     TMTPResponseCode ret = EMTPRespCodeOK;
     
     GetParametersL();
-    __FLOG_1( _L("New folder parent: %S"), &iNewParent );
+    OstTraceExt1( TRACE_NORMAL, CMTPMOVEOBJECT_CREATEFOLDERL, "New folder parent: %S", iNewParent );
+    
     const TDesC& oldPath = iObjInfoCache->DesC( CMTPObjectMetaData::ESuid );
     if ( iFolderToRemove.Length() == 0 )
         {
@@ -301,8 +311,10 @@ TMTPResponseCode CMTPMoveObject::CreateFolderL()
         }
     
     TFileName fileNamePart;
-    User::LeaveIfError( BaflUtils::MostSignificantPartOfFullName( oldPath, fileNamePart ) );
-    __FLOG_1( _L("Folder name: %S"), &fileNamePart );
+    LEAVEIFERROR( BaflUtils::MostSignificantPartOfFullName( oldPath, fileNamePart ),
+            OstTraceExt1( TRACE_ERROR, DUP1_CMTPMOVEOBJECT_CREATEFOLDERL, "can't get Folder or file name for %S", oldPath));
+
+    OstTraceExt1( TRACE_NORMAL, DUP2_CMTPMOVEOBJECT_CREATEFOLDERL, "Folder name: %S", fileNamePart );
     
     if ( ( iNewParent.Length() + fileNamePart.Length() + 1 ) <= iNewParent.MaxLength() )
         {
@@ -315,34 +327,38 @@ TMTPResponseCode CMTPMoveObject::CreateFolderL()
         }
     if ( EMTPRespCodeOK == ret )
         {
-        __FLOG_VA( ( _L("Try to move %S to %S"), &oldPath, &iNewParent ) );
+        OstTraceExt2( TRACE_NORMAL, DUP3_CMTPMOVEOBJECT_CREATEFOLDERL, 
+                "Try to move %S to %S", oldPath, iNewParent );
         ret = CanMoveObjectL( oldPath, iNewParent );
         
         if ( EMTPRespCodeOK == ret )
             {
             TInt err = iFramework.Fs().MkDir( iNewParent );
-            User::LeaveIfError( err );
+            LEAVEIFERROR( err, 
+                    OstTraceExt2( TRACE_ERROR, DUP4_CMTPMOVEOBJECT_CREATEFOLDERL, "make directory %S error! error code %d", iNewParent, err));
             iNewHandleParentStack.AppendL( iObjInfoCache->Uint( CMTPObjectMetaData::EHandle ) );
             }
         }
     
-    __FLOG( _L8("-CreateFolderL") );
+    OstTraceFunctionExit0( CMTPMOVEOBJECT_CREATEFOLDERL_EXIT );
     return ret;
     }
 
 void CMTPMoveObject::RemoveSourceFolderTreeL()
     {
-    __FLOG( _L8("+RemoveSourceFolderTreeL") );
+    OstTraceFunctionEntry0( CMTPMOVEOBJECT_REMOVESOURCEFOLDERTREEL_ENTRY );
     
     if ( iFolderToRemove.Length() > 0 )
         {
-        __FLOG_1( _L("Removing %S"), &iFolderToRemove );
+        OstTraceExt1(TRACE_NORMAL, CMTPMOVEOBJECT_REMOVESOURCEFOLDERTREEL, "Removing %S", iFolderToRemove);
         delete iFileMan;
         iFileMan = NULL;
         iFileMan = CFileMan::NewL( iFramework.Fs() );
         
         iState = ERemoveSourceFolderTree;
-        User::LeaveIfError( iFileMan->RmDir( iFolderToRemove, iStatus ) );
+        LEAVEIFERROR( iFileMan->RmDir( iFolderToRemove, iStatus ),
+                OstTraceExt1( TRACE_ERROR, DUP1_CMTPMOVEOBJECT_REMOVESOURCEFOLDERTREEL, "delete directory %S error", iFolderToRemove));
+                
         SetActive();
         }
     else
@@ -350,12 +366,12 @@ void CMTPMoveObject::RemoveSourceFolderTreeL()
         SendResponseL( iResponse.Uint16( TMTPTypeResponse::EResponseCode ) );
         }
     
-    __FLOG( _L8("-RemoveSourceFolderTreeL") );
+    OstTraceFunctionExit0( CMTPMOVEOBJECT_REMOVESOURCEFOLDERTREEL_EXIT );
     }
 
 void CMTPMoveObject::BrowseHandlesL()
     {
-    __FLOG( _L8("+BrowseHandlesL") );
+    OstTraceFunctionEntry0( CMTPMOVEOBJECT_BROWSEHANDLESL_ENTRY );
     
     iFolderToRemove.SetLength( 0 );
     iState = EInit;
@@ -381,7 +397,8 @@ void CMTPMoveObject::BrowseHandlesL()
     TUint32 newHandleParent = Request().Uint32( TMTPTypeRequest::ERequestParameter3 );
     iNewHandleParentStack.AppendL( newHandleParent );
     iObjBrowser->GoL( KMTPFormatsAll, handle, KMaxTUint32, callback );
-    __FLOG_1( _L8("iHandles.Count() = %d"), iHandles.Count() );
+    OstTrace1( TRACE_NORMAL, CMTPMOVEOBJECT_BROWSEHANDLESL, "iHandles.Count() = %d",  iHandles.Count());
+    
     
     if ( iHandles.Count() > 0 )
         {
@@ -393,24 +410,25 @@ void CMTPMoveObject::BrowseHandlesL()
         SendResponseL( EMTPRespCodeInvalidObjectHandle );
         }
     
-    __FLOG( _L8("-BrowseHandlesL") );
+    OstTraceFunctionExit0( CMTPMOVEOBJECT_BROWSEHANDLESL_EXIT );
     }
 
 void CMTPMoveObject::NextObjectHandleL()
     {
-    __FLOG( _L8("+NextObjectHandleL") );
+    OstTraceFunctionEntry0( CMTPMOVEOBJECT_NEXTOBJECTHANDLEL_ENTRY );
     __ASSERT_DEBUG( ( iNewHandleParentStack.Count() > 0 ), User::Invariant() );
     iOwnerDp = KInvalidDpId;
     if ( iCurrentHandle >=0 )
         {
-        __FLOG_1( _L8("iCurrentHandle = %d"), iCurrentHandle );
+        OstTrace1( TRACE_NORMAL, CMTPMOVEOBJECT_NEXTOBJECTHANDLEL, "iCurrentHandle = %d", iCurrentHandle );
+        
         TUint32 handle = iHandles[iCurrentHandle];
         TUint32 depth = iHandleDepths[iCurrentHandle];
-        __FLOG_1( _L8("depth = %d"), depth );
+        OstTrace1( TRACE_NORMAL, DUP1_CMTPMOVEOBJECT_NEXTOBJECTHANDLEL, "depth = %d", depth );
         if ( iCurrentHandle !=  ( iHandles.Count() - 1 ) )
             {
             TUint32 previousDepth = iHandleDepths[iCurrentHandle + 1];
-            __FLOG_1( _L8("previousDepth = %d"), previousDepth );
+            OstTrace1( TRACE_NORMAL, DUP2_CMTPMOVEOBJECT_NEXTOBJECTHANDLEL, "previousDepth = %d", previousDepth );
             if ( depth < previousDepth )
                 {
                 // Completed copying folder and all its sub-folder and files, pop all copied folders' handle which are not shallower than the current one.
@@ -460,7 +478,7 @@ void CMTPMoveObject::NextObjectHandleL()
         RemoveSourceFolderTreeL();
         }
     
-    __FLOG( _L8("-NextObjectHandleL") );
+    OstTraceFunctionExit0( CMTPMOVEOBJECT_NEXTOBJECTHANDLEL_EXIT );
     }
 
 void CMTPMoveObject::OnBrowseObjectL( TAny* aSelf, TUint aHandle, TUint32 aCurDepth )

@@ -58,10 +58,6 @@ private:
 
 private: // Owned
 
-    /**
-    FLOGGER debug trace member variable.
-    */
-    __FLOG_DECLARATION_MEMBER_MUTABLE;
     CMTPPlaybackControlDataProvider& iPlaybackControlDp;
     TMTPPbCtrlData iData;
     CMTPPlaybackCommand* iPbCmd;

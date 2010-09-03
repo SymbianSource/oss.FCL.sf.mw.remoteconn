@@ -16,18 +16,15 @@
 */
 
 
-#include <e32debug.h>
 #include <f32file.h>
 #include "dpsscriptsender.h"
 #include "dpsstatemachine.h"
 #include "pictbridge.h"
 #include "dpstransaction.h"
 #include "dpsfile.h"
-
-#ifdef _DEBUG
-#	define IF_DEBUG(t) {RDebug::t;}
-#else
-#	define IF_DEBUG(t)
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "dpsscriptsenderTraces.h"
 #endif
 
 // ---------------------------------------------------------------------------
@@ -36,7 +33,6 @@
 //
 CDpsScriptSender* CDpsScriptSender::NewL(CDpsStateMachine* aOperator)
     {
-    IF_DEBUG(Print(_L("CDpsScriptSender::NewL")));
     CDpsScriptSender* self = new(ELeave) CDpsScriptSender(aOperator);
     return self;	
     }
@@ -49,9 +45,9 @@ CDpsScriptSender::CDpsScriptSender(CDpsStateMachine* aOperator) :
     CActive(EPriorityNormal), iOperator(aOperator), 
     iReply(EFalse) 
     {
-    IF_DEBUG(Print(_L(">>>CDpsScriptSender::Ctor")));
+    OstTraceFunctionEntry0( CDPSSCRIPTSENDER_CDPSSCRIPTSENDER_CONS_ENTRY );
     CActiveScheduler::Add(this);  
-    IF_DEBUG(Print(_L("<<<CDpsScriptSender::Ctor")));
+    OstTraceFunctionExit0( CDPSSCRIPTSENDER_CDPSSCRIPTSENDER_CONS_EXIT );
     }  
   
 // ---------------------------------------------------------------------------
@@ -60,9 +56,9 @@ CDpsScriptSender::CDpsScriptSender(CDpsStateMachine* aOperator) :
 //	
 CDpsScriptSender::~CDpsScriptSender()
     {
-    IF_DEBUG(Print(_L(">>>~CDpsScriptSender")));
+    OstTraceFunctionEntry0( DUP1_CDPSSCRIPTSENDER_CDPSSCRIPTSENDER_DES_ENTRY );
     Cancel();
-    IF_DEBUG(Print(_L("<<<~CDpsScriptSender")));	
+    OstTraceFunctionExit0( DUP1_CDPSSCRIPTSENDER_CDPSSCRIPTSENDER_DES_EXIT );
     }
  
 // ---------------------------------------------------------------------------
@@ -71,7 +67,7 @@ CDpsScriptSender::~CDpsScriptSender()
 //  
 TInt CDpsScriptSender::SendScript(TBool aReply)
     {
-    IF_DEBUG(Print(_L(">>>CDpsScriptSender::SendScript")));  
+    OstTraceFunctionEntry0( CDPSSCRIPTSENDER_SENDSCRIPT_ENTRY ); 
     if (!IsActive())
         {
         iReply = aReply;  
@@ -89,6 +85,7 @@ TInt CDpsScriptSender::SendScript(TBool aReply)
             FileHandle()->FileSession(), file, EFileRead);
         if (err != KErrNone)
             {
+            OstTraceFunctionExit0( CDPSSCRIPTSENDER_SENDSCRIPT_EXIT );
             return err;
             }
         TInt size;    
@@ -105,11 +102,12 @@ TInt CDpsScriptSender::SendScript(TBool aReply)
                 Ptp().SendObject(file, iStatus, ETrue, size);
             }
         SetActive();    
-        IF_DEBUG(Print(_L("<<<CDpsScriptSender::SendScript")));
+	    OstTraceFunctionExit0( DUP1_CDPSSCRIPTSENDER_SENDSCRIPT_EXIT );
 	    return KErrNone;
         }
     else
         {
+        OstTraceFunctionExit0( DUP2_CDPSSCRIPTSENDER_SENDSCRIPT_EXIT );
         return KErrInUse;
         }
     }
@@ -120,7 +118,7 @@ TInt CDpsScriptSender::SendScript(TBool aReply)
 //
 void CDpsScriptSender::RunL()
     {
-    IF_DEBUG(Print(_L(">>>CDpsScriptSender::RunL")));
+    OstTraceFunctionEntry0( CDPSSCRIPTSENDER_RUNL_ENTRY );
     
     if (KErrNone == iStatus.Int())
         {
@@ -137,10 +135,10 @@ void CDpsScriptSender::RunL()
         }                
     else
     	{
-        IF_DEBUG(Print(_L("the iStatus is wrong %d!!!"), iStatus.Int()));
+        OstTrace1( TRACE_ERROR, CDPSSCRIPTSENDER_RUNL, "the iStatus is wrong %d!!!", iStatus.Int() );
         iOperator->Error(iStatus.Int());
     	}
-    IF_DEBUG(Print(_L("<<<CDpsScriptSender::RunL")));
+    OstTraceFunctionExit0( CDPSSCRIPTSENDER_RUNL_EXIT );
     }
   
 // ---------------------------------------------------------------------------
@@ -149,9 +147,9 @@ void CDpsScriptSender::RunL()
 //  
 void CDpsScriptSender::DoCancel()
     {
-    IF_DEBUG(Print(_L(">>>CDpsScriptSender::DoCancel")));
+    OstTraceFunctionEntry0( CDPSSCRIPTSENDER_DOCANCEL_ENTRY );
     iOperator->DpsEngine()->Ptp().CancelSendObject();
-    IF_DEBUG(Print(_L("<<<CDpsScriptSender::DoCancel")));
+    OstTraceFunctionExit0( CDPSSCRIPTSENDER_DOCANCEL_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -160,9 +158,11 @@ void CDpsScriptSender::DoCancel()
 //	
 TInt CDpsScriptSender::RunError(TInt aError)	
     {
-    IF_DEBUG(Print(_L(">>>CDpsScriptSender::RunError is %d"), aError));
+    OstTraceFunctionEntry0( CDPSSCRIPTSENDER_RUNERROR_ENTRY );
+    OstTraceDef1( OST_TRACE_CATEGORY_PRODUCTION, TRACE_IMPORTANT, CDPSSCRIPTSENDER_RUNERROR, 
+            "error code %d", aError);
     Cancel();
     iOperator->Error(aError);
-    IF_DEBUG(Print(_L("<<<CDpsScriptSender::RunError")));
+    OstTraceFunctionExit0( CDPSSCRIPTSENDER_RUNERROR_EXIT );
     return KErrNone;
     }

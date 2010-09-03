@@ -28,10 +28,15 @@
 #include "cmtpdataprovidercontroller.h"
 #include "cmtpdataprovider.h"
 #include "mtpframeworkconst.h"
+#include "mtpdebug.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpfsenumeratorTraces.h"
+#endif
+
 
 
 // Class constants.
-__FLOG_STMT(_LIT8(KComponent,"FSEnumerator");)
 
 /*
  * 
@@ -81,6 +86,7 @@ destructor
 */    
 EXPORT_C CMTPFSEnumerator::~CMTPFSEnumerator()
 	{
+	OstTraceFunctionEntry0( CMTPFSENUMERATOR_CMTPFSENUMERATOR_DES_ENTRY );
 	Cancel();	
 	iDir.Close();
 	iDirStack.Close();
@@ -88,7 +94,7 @@ EXPORT_C CMTPFSEnumerator::~CMTPFSEnumerator()
 	iDpSingletons.Close();
 	iSingletons.Close();
 	delete iObject;
-	__FLOG_CLOSE; 
+	OstTraceFunctionExit0( CMTPFSENUMERATOR_CMTPFSENUMERATOR_DES_EXIT );
 	}
 
 /**
@@ -109,7 +115,7 @@ EXPORT_C void CMTPFSEnumerator::StartL(TUint32 aStorageId, TBool aScanAll)
         {
         iObjectNeedToScan = KMAX_FILECOUNT_ENUMERATINGPHASE1;
         }
-    __FLOG_VA((_L8("iScanAll %d files %d Storage 0x%x"), iScanAll, iObjectNeedToScan, aStorageId));
+    OstTraceExt3(TRACE_NORMAL, CMTPFSENUMERATOR_STARTL, "iScanAll %d files %d Storage 0x%x", (TInt32)iScanAll, (TInt32)iObjectNeedToScan, aStorageId);
     MMTPStorageMgr& storageMgr(iFramework.StorageMgr());
     if (aStorageId == KMTPStorageAll)
         {
@@ -123,7 +129,8 @@ EXPORT_C void CMTPFSEnumerator::StartL(TUint32 aStorageId, TBool aScanAll)
         for (TUint i(0); (i < KCount); i++)
             {
             iStorages.InsertL(storages[i]->Uint(CMTPStorageMetaData::EStorageId),0);
-            __FLOG_VA((_L8("FileEnumerator is doing storage id = %x\r\n"), storages[i]->Uint(CMTPStorageMetaData::EStorageId) ));
+            OstTrace1( TRACE_NORMAL, DUP1_CMTPFSENUMERATOR_STARTL, 
+                    "FileEnumerator is doing storage id = %x\r\n",  storages[i]->Uint(CMTPStorageMetaData::EStorageId));
             }
         CleanupStack::PopAndDestroy(&storages);
         }
@@ -164,7 +171,7 @@ EXPORT_C void CMTPFSEnumerator::StartL(TUint32 aStorageId, TBool aScanAll)
                 {
                 //Scan storage leave because storage(memory card) removed.
                 //Scan next specified storage in RunL, if there is.
-                __FLOG_VA(_L8("StartL - iSkipCurrentStorage - ETrue."));
+                OstTrace0( TRACE_NORMAL, DUP2_CMTPFSENUMERATOR_STARTL, "StartL - iSkipCurrentStorage - ETrue." );   
                 iSkipCurrentStorage = ETrue;
                 TRequestStatus* status = &iStatus;
                 User::RequestComplete(status, iStatus.Int());
@@ -172,6 +179,7 @@ EXPORT_C void CMTPFSEnumerator::StartL(TUint32 aStorageId, TBool aScanAll)
                 }
             else
                 {
+                OstTrace1(TRACE_ERROR, DUP3_CMTPFSENUMERATOR_STARTL, "invalid storage %d", iStorages[iScanPos]);
                 User::Leave(err);
                 }
             }
@@ -198,22 +206,23 @@ void CMTPFSEnumerator::DoCancel()
 
 void CMTPFSEnumerator::ScanStorageL(TUint32 aStorageId)
     {
-    __FLOG_VA(_L8("ScanStorageL - entry"));
+    OstTraceFunctionEntry0( CMTPFSENUMERATOR_SCANSTORAGEL_ENTRY );
     const CMTPStorageMetaData& storage(iFramework.StorageMgr().StorageL(aStorageId));
     __ASSERT_DEBUG((storage.Uint(CMTPStorageMetaData::EStorageSystemType) == CMTPStorageMetaData::ESystemTypeDefaultFileSystem), User::Invariant());
     TFileName root(storage.DesC(CMTPStorageMetaData::EStorageSuid));
     
-    #ifdef __FLOG_ACTIVE    
+    #ifdef OST_TRACE_COMPILER_IN_USE    
     TBuf8<KMaxFileName> tmp;
     tmp.Copy(root);
-    __FLOG_VA((_L8("StorageSuid - %S"), &tmp));	
-    #endif // __FLOG_ACTIVE
+    OstTraceExt1( TRACE_NORMAL, CMTPFSENUMERATOR_SCANSTORAGEL, "StorageSuid - %s", tmp );
+    #endif // OST_TRACE_COMPILER_IN_USE
     
     if ( iExclusionMgr.IsFolderAcceptedL(root, aStorageId) )
         {
         iParentHandle = KMTPHandleNoParent;
         iCurrentPath = root;
-        User::LeaveIfError(iDir.Open(iFramework.Fs(), iCurrentPath, KEntryAttNormal | KEntryAttHidden | KEntryAttDir));
+        LEAVEIFERROR(iDir.Open(iFramework.Fs(), iCurrentPath, KEntryAttNormal | KEntryAttHidden | KEntryAttDir),
+                OstTraceExt1( TRACE_ERROR, DUP1_CMTPFSENUMERATOR_SCANSTORAGEL, "open %S failed!", iCurrentPath ));
         ScanDirL();
         }
     else
@@ -222,7 +231,7 @@ void CMTPFSEnumerator::ScanStorageL(TUint32 aStorageId)
         User::RequestComplete(status, iStatus.Int());
         SetActive();
         }
-    __FLOG_VA(_L8("ScanStorageL - exit"));
+    OstTraceFunctionExit0( CMTPFSENUMERATOR_SCANSTORAGEL_EXIT );
     }
 
 /**
@@ -247,17 +256,17 @@ The algorithm works as follows:
 
 void CMTPFSEnumerator::ScanDirL()
 	{
-	__FLOG_VA(_L8("ScanDirL - entry"));
+	OstTraceFunctionEntry0( CMTPFSENUMERATOR_SCANDIRL_ENTRY );
 	iFirstUnprocessed = 0;
 	iDir.Read(iEntries, iStatus);
 	SetActive();
-	__FLOG_VA(_L8("ScanDirL - exit"));
+	OstTraceFunctionExit0( CMTPFSENUMERATOR_SCANDIRL_EXIT );
 	}
 
 void CMTPFSEnumerator::ScanNextStorageL()
     {
+    OstTraceFunctionEntry0( CMTPFSENUMERATOR_SCANNEXTSTORAGEL_ENTRY );
     iDirStack.Reset();
-    __FLOG_VA(_L8("ScanNextStorageL - entry"));
     // If there are one or more unscanned storages left
     // (the currently scanned one is still on the list)
     if (++ iScanPos < iStorages.Count())
@@ -297,12 +306,12 @@ void CMTPFSEnumerator::ScanNextStorageL()
                 }
             }
         }
-    __FLOG_VA(_L8("ScanNextStorageL - exit"));
+    OstTraceFunctionExit0( CMTPFSENUMERATOR_SCANNEXTSTORAGEL_EXIT );
     }
 
 void CMTPFSEnumerator::ScanNextSubdirL()
 	{
-	__FLOG_VA(_L8("ScanNextSubdirL - entry"));
+	OstTraceFunctionEntry0( CMTPFSENUMERATOR_SCANNEXTSUBDIRL_ENTRY );
 	// A empty (non-constructed) TEntry is our marker telling us to pop a directory 
 	// from iPath when we see this
 	//iDirStack.AppendL(TEntry());
@@ -314,12 +323,13 @@ void CMTPFSEnumerator::ScanNextSubdirL()
 	iParentHandle = iDirStack[iDirStack.Count() - 1].iHandle;//iFramework.ObjectMgr().HandleL(suid);
 	iCurrentPath = iDirStack[iDirStack.Count() - 1].iPath;
 	iDirStack.Remove(iDirStack.Count() - 1);
-	__FLOG_VA((_L8("ScanNextSubdirL path %S"), &iCurrentPath));		
+	OstTraceExt1( TRACE_NORMAL, CMTPFSENUMERATOR_SCANNEXTSUBDIRL, "ScanNextSubdirL path %S", iCurrentPath);
 	// Kick-off a scan of the next directory
 	iDir.Close();
-	User::LeaveIfError(iDir.Open(iFramework.Fs(), iCurrentPath, KEntryAttNormal | KEntryAttHidden | KEntryAttDir));    
+	LEAVEIFERROR(iDir.Open(iFramework.Fs(), iCurrentPath, KEntryAttNormal | KEntryAttHidden | KEntryAttDir),
+	        OstTraceExt1(TRACE_ERROR, DUP1_CMTPFSENUMERATOR_SCANNEXTSUBDIRL, "Open %S failed!", iCurrentPath)); 
 	ScanDirL();
-	__FLOG_VA(_L8("ScanNextSubdirL - exit"));
+	OstTraceFunctionExit0( CMTPFSENUMERATOR_SCANNEXTSUBDIRL_EXIT );
 	}
 
 /**
@@ -329,7 +339,7 @@ and scan it for entries.
 
 void CMTPFSEnumerator::ScanNextL()
 	{
-	__FLOG_VA(_L8("ScanNextL - entry"));
+	OstTraceFunctionEntry0( CMTPFSENUMERATOR_SCANNEXTL_ENTRY );
 	TInt count = iDirStack.Count();
 	
 	if ((count == 0) || !iScanAll)
@@ -342,15 +352,15 @@ void CMTPFSEnumerator::ScanNextL()
 		// Remove directory so we don't think it's a subdirectory
 		ScanNextSubdirL();
 		}
-	__FLOG_VA(_L8("ScanNextL - exit"));
+	OstTraceFunctionExit0( CMTPFSENUMERATOR_SCANNEXTL_EXIT );
 	}
 
 void CMTPFSEnumerator::RunL()
 	{
-	__FLOG_VA(_L8("RunL - entry"));
+	OstTraceFunctionEntry0( CMTPFSENUMERATOR_RUNL_ENTRY );
 	if(iSkipCurrentStorage)
 		{
-		__FLOG_VA(_L8("RunL - iSkipCurrentStorage - ETrue."));
+		OstTrace0( TRACE_NORMAL, CMTPFSENUMERATOR_RUNL, "RunL - iSkipCurrentStorage - ETrue." );		
 		iSkipCurrentStorage = EFalse;
 		ScanNextStorageL();
 		}
@@ -387,7 +397,7 @@ void CMTPFSEnumerator::RunL()
 				break;
 			}
 		}
-	__FLOG_VA(_L8("RunL - exit"));
+	OstTraceFunctionExit0( CMTPFSENUMERATOR_RUNL_EXIT );
 	}
 
 /**
@@ -395,14 +405,15 @@ Ignore the error, continue with the next one
 */    
 TInt CMTPFSEnumerator::RunError(TInt aError)
 	{
-	__FLOG_VA((_L8("RunError - entry with error %d"), aError));
+	OstTraceFunctionEntry0( CMTPFSENUMERATOR_RUNERROR_ENTRY );
+	OstTrace1( TRACE_NORMAL, CMTPFSENUMERATOR_RUNERROR, "with error %d", aError);
 	
 	// avoid to access overflow of iStorages
     if (iScanPos < iStorages.Count())
         {
         if(!iFramework.StorageMgr().ValidStorageId(iStorages[iScanPos]))
             {
-             __FLOG_VA((_L8("Invalid StorageID = %d"),iStorages[iScanPos] ));
+             OstTrace1( TRACE_WARNING, DUP1_CMTPFSENUMERATOR_RUNERROR, "Invalid StorageID = %d",iStorages[iScanPos] );
              if (iStorages.Count()>1)
                  {
                  //Not necessary to process any entry on the storage, since the storage removed.
@@ -422,8 +433,8 @@ TInt CMTPFSEnumerator::RunError(TInt aError)
 	TRequestStatus* status = &iStatus;
 	User::RequestComplete(status, aError);
 	SetActive();
-	
-	__FLOG(_L8("RunError - Exit"));
+
+	OstTraceFunctionExit0( CMTPFSENUMERATOR_RUNERROR_EXIT );
 	return KErrNone;
 	}
 	
@@ -437,16 +448,17 @@ CMTPFSEnumerator::CMTPFSEnumerator(MMTPDataProviderFramework& aFramework, CMTPFS
     iCallback(aCallback),
     iProcessLimit(aProcessLimit)
 	{
-	__FLOG_OPEN(KMTPSubsystem, KComponent);
 	CActiveScheduler::Add(this);
 	}
 
 void CMTPFSEnumerator::ConstructL()
 	{
+	OstTraceFunctionEntry0( CMTPFSENUMERATOR_CONSTRUCTL_ENTRY );
 	iSingletons.OpenL();
 	iDpSingletons.OpenL(iFramework);
 	iObject = CMTPObjectMetaData::NewL();	
 	iDpID = iFramework.DataProviderId();
+	OstTraceFunctionExit0( CMTPFSENUMERATOR_CONSTRUCTL_EXIT );
 	}
 
 /**
@@ -467,14 +479,16 @@ void CMTPFSEnumerator::ProcessEntriesL()
         TInt len = entry.iName.Length();
         if(iCurrentPath.Length()  + len > KMaxFileName)
             {
-            __FLOG_VA(_L8("Full name exceeds KMaxFileName, ignored."));
+            OstTrace0( TRACE_WARNING, CMTPFSENUMERATOR_PROCESSENTRIESL, "Full name exceeds KMaxFileName, ignored." );
             continue;
             }
         
         iCurrentPath.Append(entry.iName);
 
-        __FLOG_VA((_L("Process path %S name %S"), &iCurrentPath, &entry.iName));
-#ifdef __FLOG_ACTIVE    
+        OstTraceExt2( TRACE_NORMAL, DUP1_CMTPFSENUMERATOR_PROCESSENTRIESL, 
+                "Process path %S name %S", iCurrentPath, entry.iName );
+        
+#ifdef  OST_TRACE_COMPILER_IN_USE    
         TBuf8<KMTPMaxFullFileName> tmp;
         tmp.Copy(iCurrentPath);
         TInt pathLen=iCurrentPath.Length();
@@ -482,18 +496,19 @@ void CMTPFSEnumerator::ProcessEntriesL()
             {
             TBuf8<KLogBufferSize> tmp1;
             tmp1.Copy(tmp.Ptr(),KLogBufferSize);
-            __FLOG_VA(_L8("Entry - "));
-            __FLOG_VA((_L8("%S"), &tmp1));
+            OstTrace0( TRACE_NORMAL, DUP2_CMTPFSENUMERATOR_PROCESSENTRIESL, "Entry - " );
+            OstTraceExt1( TRACE_NORMAL, DUP3_CMTPFSENUMERATOR_PROCESSENTRIESL, "%s", tmp1);
+            
 
             tmp1.Copy(tmp.Ptr()+KLogBufferSize, pathLen-KLogBufferSize);
-            __FLOG_VA((_L8("%S"), &tmp1));
+            OstTraceExt1( TRACE_NORMAL, DUP4_CMTPFSENUMERATOR_PROCESSENTRIESL, "%s", tmp1);
             }
         else
             {
-            __FLOG_VA(_L8("Entry - "));
-            __FLOG_VA((_L8("%S"), &tmp));
+            OstTrace0( TRACE_NORMAL, DUP5_CMTPFSENUMERATOR_PROCESSENTRIESL, "Entry - " );
+            OstTraceExt1( TRACE_NORMAL, DUP6_CMTPFSENUMERATOR_PROCESSENTRIESL, "%s", tmp);
             }
-#endif // __FLOG_ACTIVE
+#endif // OST_TRACE_COMPILER_IN_USE
 
         TUint32 handle = 0;
         TMTPFormatCode format;
@@ -554,9 +569,9 @@ void CMTPFSEnumerator::ProcessEntriesL()
                             CleanupStack::PushL(mime);
                             if ( mime != NULL )
                                 {
-                                __FLOG_VA((_L("mime %S"), mime));
+                                OstTraceExt1( TRACE_NORMAL, DUP7_CMTPFSENUMERATOR_PROCESSENTRIESL, "mime %S", *mime );
                                 DpId = iDpSingletons.MTPUtility().GetDpIdL(parse.Ext().Mid(1),*mime);
-                                __FLOG_VA((_L("DpId find %d"), DpId));
+                                OstTrace1( TRACE_NORMAL, DUP8_CMTPFSENUMERATOR_PROCESSENTRIESL, "DpId find %d", DpId );
 								
 								format = iDpSingletons.MTPUtility().GetFormatCodeByMimeTypeL(parse.Ext().Mid(1),*mime);
 								AddFileEntryForOtherDpL(iCurrentPath, handle, format, DpId, entry, iStorages[iScanPos], 
@@ -600,12 +615,13 @@ Add a file entry to the object store
 */    
 void CMTPFSEnumerator::AddEntryL(const TDesC& aPath, TUint32 &aHandle, TMTPFormatCode format, TUint32 aDPId, const TEntry& aEntry, TUint32 aStorageId, TUint32 aParentHandle)
 	{
-#ifdef __FLOG_ACTIVE    
+    OstTraceFunctionEntry0( CMTPFSENUMERATOR_ADDENTRYL_ENTRY );
+#ifdef OST_TRACE_COMPILER_IN_USE    
 	TBuf8<KMaxFileName> tmp;
 	tmp.Copy(aPath);
 	
-	__FLOG_VA((_L8("AddEntryL - entry: %S"), &tmp));
-#endif // __FLOG_ACTIVE
+	OstTraceExt1( TRACE_NORMAL, CMTPFSENUMERATOR_ADDENTRYL, "entry: %s", tmp );
+#endif // OST_TRACE_COMPILER_IN_USE
 
     TUint16 assoc;
     TPtrC name;
@@ -638,17 +654,18 @@ void CMTPFSEnumerator::AddEntryL(const TDesC& aPath, TUint32 &aHandle, TMTPForma
         aHandle = iObject->Uint(CMTPObjectMetaData::EHandle);
         
         }
-	__FLOG_VA(_L8("AddEntryL - exit"));	
+	OstTraceFunctionExit0( CMTPFSENUMERATOR_ADDENTRYL_EXIT );
 	}
 
 void CMTPFSEnumerator::AddFileEntryForOtherDpL(const TDesC& aPath, TUint32 &aHandle, TMTPFormatCode format, TUint32 aDPId, const TEntry& /*aEntry*/, TUint32 aStorageId, TUint32 aParentHandle, TUint16 aSubFormatCode/* = 0*/)
     {
-#ifdef __FLOG_ACTIVE    
+    OstTraceFunctionEntry0( CMTPFSENUMERATOR_ADDFILEENTRYFOROTHERDPL_ENTRY );
+#ifdef OST_TRACE_COMPILER_IN_USE    
     TBuf8<KMaxFileName> tmp;
     tmp.Copy(aPath);
     
-    __FLOG_VA((_L8("AddFileEntryForOtherDpL - entry: %S"), &tmp));
-#endif // __FLOG_ACTIVE
+    OstTraceExt1( TRACE_NORMAL, CMTPFSENUMERATOR_ADDFILEENTRYFOROTHERDPL, "%S", tmp );
+#endif // OST_TRACE_COMPILER_IN_USE
 
     TParsePtrC pathParser(aPath);
     TPtrC name(pathParser.Name());    
@@ -664,7 +681,7 @@ void CMTPFSEnumerator::AddFileEntryForOtherDpL(const TDesC& aPath, TUint32 &aHan
     iObject->SetUint(CMTPObjectMetaData::ENonConsumable, EMTPConsumable);
     iObject->SetDesCL(CMTPObjectMetaData::EName, name);
     iFramework.ObjectMgr().InsertObjectL(*iObject);
-    __FLOG_VA(_L8("AddEntryL - exit")); 
+    OstTraceFunctionExit0( CMTPFSENUMERATOR_ADDFILEENTRYFOROTHERDPL_EXIT );
     }
 
 void CMTPFSEnumerator::NotifyObjectAddToDP(const TUint32 aHandle,const TUint DpId)

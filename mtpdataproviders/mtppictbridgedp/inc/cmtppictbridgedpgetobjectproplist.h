@@ -66,10 +66,7 @@ private: // Owned
     RMTPDpSingletons		iDpSingletons; 
 	CMTPObjectMetaData*		iObjMeta;
 	TEntry 					iFileEntry;
-    /**
-    FLOGGER debug trace member variable.
-    */
-    __FLOG_DECLARATION_MEMBER_MUTABLE;
+
     };
 
 #endif /* CMTPPICTBRIDGEDPGETOBJECTPROPLIST_H_ */

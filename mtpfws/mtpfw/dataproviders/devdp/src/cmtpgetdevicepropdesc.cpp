@@ -31,9 +31,14 @@
 #include "mtpdevicedpconst.h"
 #include "mtpdevdppanic.h"
 #include "cmtpdevicedpconfigmgr.h"
+#include "mtpdebug.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpgetdevicepropdescTraces.h"
+#endif
+
 
 // Class constants.
-__FLOG_STMT(_LIT8(KComponent,"GetDevicePropDesc");)
 
 _LIT(KSpace, " ");
 
@@ -58,13 +63,12 @@ Destructor.
 */    
 CMTPGetDevicePropDesc::~CMTPGetDevicePropDesc()
     {    
-    __FLOG(_L8("~CMTPGetDevicePropDesc - Entry"));
+    OstTraceFunctionEntry0( CMTPGETDEVICEPROPDESC_CMTPGETDEVICEPROPDESC_DES_ENTRY );
     delete iData;
     delete iPropDesc;
     delete iRepository;
     iDpSingletons.Close();
-    __FLOG(_L8("~CMTPGetDevicePropDesc - Exit"));
-    __FLOG_CLOSE;
+    OstTraceFunctionExit0( CMTPGETDEVICEPROPDESC_CMTPGETDEVICEPROPDESC_DES_EXIT );
     }
 
 /**
@@ -81,7 +85,7 @@ GetDevicePropDesc request validator.
 */
 TMTPResponseCode CMTPGetDevicePropDesc::CheckRequestL()
     {
-    __FLOG(_L8("CheckRequestL - Entry"));
+    OstTraceFunctionEntry0( CMTPGETDEVICEPROPDESC_CHECKREQUESTL_ENTRY );
     TMTPResponseCode respCode(EMTPRespCodeDevicePropNotSupported);
     iPropCode = Request().Uint32(TMTPTypeRequest::ERequestParameter1);
     const TInt count = sizeof(KMTPDeviceDpSupportedProperties) / sizeof(KMTPDeviceDpSupportedProperties[0]);
@@ -96,7 +100,7 @@ TMTPResponseCode CMTPGetDevicePropDesc::CheckRequestL()
         {
         respCode = EMTPRespCodeOK;
         }
-    __FLOG(_L8("CheckRequestL - Exit"));
+    OstTraceFunctionExit0( CMTPGETDEVICEPROPDESC_CHECKREQUESTL_EXIT );
     return respCode;
     }
 
@@ -105,18 +109,19 @@ GetDevicePropDesc request handler.
 */    
 void CMTPGetDevicePropDesc::ServiceL()
     {
-    __FLOG(_L8("ServiceL - Entry"));    
+    OstTraceFunctionEntry0( CMTPGETDEVICEPROPDESC_SERVICEL_ENTRY );  
     iPropCode = Request().Uint32(TMTPTypeRequest::ERequestParameter1);
     //before performing any operation will check the properties are supported or 
     //not if not then return EMTPRespCodeDevicePropNotSupported
     const CMTPTypeArray *mtpArray = &(iDpSingletons.DeviceDataStore().GetSupportedDeviceProperties());
     RArray <TUint> supportedArray;	    
     mtpArray->Array(supportedArray);
-    __FLOG_VA((_L8("No of elements in supported property array = %d "), supportedArray.Count()));	
+    OstTrace1(TRACE_NORMAL, CMTPGETDEVICEPROPDESC_SERVICEL, 
+            "No of elements in supported property array = %d ", supportedArray.Count());
     if(KErrNotFound == supportedArray.Find(iPropCode))
         {
         SendResponseL(EMTPRespCodeDevicePropNotSupported);       
-        __FLOG(_L8("CMTPGetDevicePropDesc::EMTPRespCodeDevicePropNotSupported "));	  
+        OstTrace0(TRACE_NORMAL, DUP1_CMTPGETDEVICEPROPDESC_SERVICEL, "CMTPGetDevicePropDesc::EMTPRespCodeDevicePropNotSupported ");
         }
     else
         {
@@ -184,12 +189,13 @@ void CMTPGetDevicePropDesc::ServiceL()
             }
         }
     supportedArray.Close();
-    __FLOG(_L8("ServiceL - Exit"));
+    OstTraceFunctionExit0( CMTPGETDEVICEPROPDESC_SERVICEL_EXIT );
     }
     
     
 void  CMTPGetDevicePropDesc::HandleExtnServiceL(TInt aPropCode, MExtnDevicePropDp* aExtnDevplugin )
 	{
+	OstTraceFunctionEntry0( CMTPGETDEVICEPROPDESC_HANDLEEXTNSERVICEL_ENTRY );
 	//call	 plugin ->desc
 	MMTPType* mtptype;
 	if(KErrNone == aExtnDevplugin->GetDevPropertyDescL((TMTPDevicePropertyCode)aPropCode, &mtptype))
@@ -202,20 +208,21 @@ void  CMTPGetDevicePropDesc::HandleExtnServiceL(TInt aPropCode, MExtnDevicePropD
 	}
 
 	
+	OstTraceFunctionExit0( CMTPGETDEVICEPROPDESC_HANDLEEXTNSERVICEL_EXIT );
 	}
 void CMTPGetDevicePropDesc::DoCancel()
     {
-    __FLOG(_L8("DoCancel - Entry"));
+    OstTraceFunctionEntry0( CMTPGETDEVICEPROPDESC_DOCANCEL_ENTRY );
     if (iPropCode == EMTPDevicePropCodeBatteryLevel)
         {
         iDpSingletons.DeviceDataStore().Cancel();
         }
-    __FLOG(_L8("DoCancel - Exit"));
+    OstTraceFunctionExit0( CMTPGETDEVICEPROPDESC_DOCANCEL_EXIT );
     }
     
 void CMTPGetDevicePropDesc::RunL()
     {
-    __FLOG(_L8("RunL - Entry"));
+    OstTraceFunctionEntry0( CMTPGETDEVICEPROPDESC_RUNL_ENTRY );
     if (iPropCode == EMTPDevicePropCodeBatteryLevel)
         {
         ServiceBatteryLevelL();
@@ -224,7 +231,7 @@ void CMTPGetDevicePropDesc::RunL()
         {
         __DEBUG_ONLY(Panic(EMTPDevDpUnknownDeviceProperty));
         }
-    __FLOG(_L8("RunL - Exit"));
+    OstTraceFunctionExit0( CMTPGETDEVICEPROPDESC_RUNL_EXIT );
     }
 
 /**
@@ -232,13 +239,12 @@ Second-phase constructor.
 */        
 void CMTPGetDevicePropDesc::ConstructL()
     {
-    __FLOG_OPEN(KMTPSubsystem, KComponent);
-    __FLOG(_L8("CMTPGetDevicePropDesc: ConstructL - Entry")); 
+    OstTraceFunctionEntry0( CMTPGETDEVICEPROPDESC_CONSTRUCTL_ENTRY );
     iDpSingletons.OpenL(iFramework);
 	const TUint32 KUidMTPRepositoryValue(0x10282FCC);
     const TUid KUidMTPRepository = {KUidMTPRepositoryValue};
     iRepository = CRepository::NewL(KUidMTPRepository);
-    __FLOG(_L8("CMTPGetDevicePropDesc: ConstructL - Exit")); 
+    OstTraceFunctionExit0( CMTPGETDEVICEPROPDESC_CONSTRUCTL_EXIT );
     }
 
 /**
@@ -246,7 +252,7 @@ Services the battery level property.
 */        
 void CMTPGetDevicePropDesc::ServiceBatteryLevelL()
     {
-    __FLOG(_L8("ServiceBatteryLevelL - Entry")); 
+    OstTraceFunctionEntry0( CMTPGETDEVICEPROPDESC_SERVICEBATTERYLEVELL_ENTRY );
     CMTPTypeDevicePropDescRangeForm* form = CMTPTypeDevicePropDescRangeForm::NewLC(EMTPTypeUINT8);
     form->SetUint8L(CMTPTypeDevicePropDescRangeForm::EMinimumValue, 0);
     form->SetUint8L(CMTPTypeDevicePropDescRangeForm::EMaximumValue, 100);
@@ -260,7 +266,7 @@ void CMTPGetDevicePropDesc::ServiceBatteryLevelL()
     CleanupStack::PopAndDestroy(form);
 
     SendDataL(*iPropDesc);
-    __FLOG(_L8("ServiceBatteryLevelL - Exit")); 
+    OstTraceFunctionExit0( CMTPGETDEVICEPROPDESC_SERVICEBATTERYLEVELL_EXIT );
     }
 
 /**
@@ -268,7 +274,7 @@ Services the device friendly name property.
 */    
 void CMTPGetDevicePropDesc::ServiceDeviceFriendlyNameL()
     {
-    __FLOG(_L8("ServiceDeviceFriendlyNameL - Entry"));
+    OstTraceFunctionEntry0( CMTPGETDEVICEPROPDESC_SERVICEDEVICEFRIENDLYNAMEL_ENTRY );
     delete iPropDesc;
     iPropDesc = NULL;
     iPropDesc = CMTPTypeDevicePropDesc::NewL(EMTPDevicePropCodeDeviceFriendlyName);
@@ -303,7 +309,7 @@ void CMTPGetDevicePropDesc::ServiceDeviceFriendlyNameL()
         }
     
     SendDataL(*iPropDesc);    
-    __FLOG(_L8("ServiceDeviceFriendlyNameL - Exit")); 
+    OstTraceFunctionExit0( CMTPGETDEVICEPROPDESC_SERVICEDEVICEFRIENDLYNAMEL_EXIT );
     }
         
 /**
@@ -311,7 +317,7 @@ Services the synchronisation partner property.
 */    
 void CMTPGetDevicePropDesc::ServiceSynchronisationPartnerL()
     {
-    __FLOG(_L8("ServiceSynchronisationPartnerL - Entry")); 
+    OstTraceFunctionEntry0( CMTPGETDEVICEPROPDESC_SERVICESYNCHRONISATIONPARTNERL_ENTRY );
     delete iPropDesc;
     iPropDesc = NULL;
     iPropDesc = CMTPTypeDevicePropDesc::NewL(EMTPDevicePropCodeSynchronizationPartner);
@@ -321,7 +327,7 @@ void CMTPGetDevicePropDesc::ServiceSynchronisationPartnerL()
     iPropDesc->SetStringL(CMTPTypeDevicePropDesc::ECurrentValue, device.SynchronisationPartner());
     
     SendDataL(*iPropDesc); 
-    __FLOG(_L8("ServiceSynchronisationPartnerL - Exit")); 
+    OstTraceFunctionExit0( CMTPGETDEVICEPROPDESC_SERVICESYNCHRONISATIONPARTNERL_EXIT );
     }
 
 /**
@@ -329,7 +335,7 @@ void CMTPGetDevicePropDesc::ServiceSynchronisationPartnerL()
 */    
 void CMTPGetDevicePropDesc::ServiceSessionInitiatorVersionInfoL()
     {
-    __FLOG(_L8("ServiceSessionInitiatorVersionInfoL - Entry")); 
+    OstTraceFunctionEntry0( CMTPGETDEVICEPROPDESC_SERVICESESSIONINITIATORVERSIONINFOL_ENTRY );
     delete iPropDesc;
     iPropDesc = NULL;
     // this property is of type set or get 
@@ -338,7 +344,7 @@ void CMTPGetDevicePropDesc::ServiceSessionInitiatorVersionInfoL()
     iPropDesc->SetStringL(CMTPTypeDevicePropDesc::EFactoryDefaultValue, device.SessionInitiatorVersionInfoDefault());
     iPropDesc->SetStringL(CMTPTypeDevicePropDesc::ECurrentValue, device.SessionInitiatorVersionInfo());
     SendDataL(*iPropDesc); 
-    __FLOG(_L8("ServiceSessionInitiatorVersionInfoL - Exit")); 
+    OstTraceFunctionExit0( CMTPGETDEVICEPROPDESC_SERVICESESSIONINITIATORVERSIONINFOL_EXIT );
     }
 
 /**
@@ -346,7 +352,7 @@ void CMTPGetDevicePropDesc::ServiceSessionInitiatorVersionInfoL()
 */    
 void CMTPGetDevicePropDesc::ServicePerceivedDeviceTypeL()
     {
-    __FLOG(_L8("ServicePerceivedDeviceType - Entry")); 
+    OstTraceFunctionEntry0( CMTPGETDEVICEPROPDESC_SERVICEPERCEIVEDDEVICETYPEL_ENTRY ); 
     delete iPropDesc;
     iPropDesc = NULL;
     iPropDesc = CMTPTypeDevicePropDesc::NewL(EMTPDevicePropCodePerceivedDeviceType, 0x00/*get only*/, 0x00, NULL);
@@ -354,7 +360,7 @@ void CMTPGetDevicePropDesc::ServicePerceivedDeviceTypeL()
     iPropDesc->SetUint32L(CMTPTypeDevicePropDesc::EFactoryDefaultValue, device.PerceivedDeviceTypeDefault());
     iPropDesc->SetUint32L(CMTPTypeDevicePropDesc::ECurrentValue, device.PerceivedDeviceType());
     SendDataL(*iPropDesc); 
-    __FLOG(_L8("ServicePerceivedDeviceType - Exit")); 
+    OstTraceFunctionExit0( CMTPGETDEVICEPROPDESC_SERVICEPERCEIVEDDEVICETYPEL_EXIT );
     }
 
 /**
@@ -362,7 +368,7 @@ Services the Date Time property.
 */    
 void CMTPGetDevicePropDesc::ServiceDateTimeL()
     {
-    __FLOG(_L8("ServicePerceivedDeviceType - Entry")); 
+    OstTraceFunctionEntry0( CMTPGETDEVICEPROPDESC_SERVICEDATETIMEL_ENTRY );
     delete iPropDesc;
     iPropDesc = NULL;
     iPropDesc = CMTPTypeDevicePropDesc::NewL(EMTPDevicePropCodeDateTime, 0x01/*get/set*/, 0x00, NULL);
@@ -370,7 +376,7 @@ void CMTPGetDevicePropDesc::ServiceDateTimeL()
     iPropDesc->SetStringL(CMTPTypeDevicePropDesc::EFactoryDefaultValue, device.DateTimeL());
     iPropDesc->SetStringL(CMTPTypeDevicePropDesc::ECurrentValue, device.DateTimeL());
     SendDataL(*iPropDesc); 
-    __FLOG(_L8("ServicePerceivedDeviceType - Exit")); 
+    OstTraceFunctionExit0( CMTPGETDEVICEPROPDESC_SERVICEDATETIMEL_EXIT );
     }
 
 /**
@@ -378,7 +384,7 @@ Services the Date Time property.
 */	  
 void CMTPGetDevicePropDesc::ServiceDeviceIconL()
     {
-    __FLOG(_L8("ServiceDeviceIcon - Entry")); 
+    OstTraceFunctionEntry0( CMTPGETDEVICEPROPDESC_SERVICEDEVICEICONL_ENTRY );
     delete iPropDesc;
     iPropDesc = NULL;
     iPropDesc = CMTPTypeDevicePropDesc::NewL(EMTPDevicePropCodeDeviceIcon, 0x00, 0x00, NULL);
@@ -387,7 +393,7 @@ void CMTPGetDevicePropDesc::ServiceDeviceIconL()
     iPropDesc->SetL(CMTPTypeDevicePropDesc::EFactoryDefaultValue, device.DeviceIcon());
     iPropDesc->SetL(CMTPTypeDevicePropDesc::ECurrentValue, device.DeviceIcon());
     SendDataL(*iPropDesc); 
-    __FLOG(_L8("ServiceDeviceIcon- Exit"));   
+    OstTraceFunctionExit0( CMTPGETDEVICEPROPDESC_SERVICEDEVICEICONL_EXIT );
     }
 
 /*
@@ -395,14 +401,14 @@ void CMTPGetDevicePropDesc::ServiceDeviceIconL()
 */
 void CMTPGetDevicePropDesc::ServiceSupportedFormatsOrderedL()
     {
-    __FLOG(_L8("ServiceSupportedFormatsOrdered - Entry")); 
+    OstTraceFunctionEntry0( CMTPGETDEVICEPROPDESC_SERVICESUPPORTEDFORMATSORDEREDL_ENTRY );
     delete iPropDesc;
     iPropDesc = NULL;
     iPropDesc = CMTPTypeDevicePropDesc::NewL(EMTPDevicePropCodeSupportedFormatsOrdered, 0x00, 0x00, NULL);    
     iPropDesc->SetUint8L(CMTPTypeDevicePropDesc::EFactoryDefaultValue, (TUint8)FORMAT_UNORDERED);
     iPropDesc->SetUint8L(CMTPTypeDevicePropDesc::ECurrentValue, GetFormatOrdered());
     SendDataL(*iPropDesc); 
-    __FLOG(_L8("ServiceSupportedFormatsOrdered - Exit")); 
+    OstTraceFunctionExit0( CMTPGETDEVICEPROPDESC_SERVICESUPPORTEDFORMATSORDEREDL_EXIT );
     }
 
 /*
@@ -410,7 +416,7 @@ void CMTPGetDevicePropDesc::ServiceSupportedFormatsOrderedL()
 */
 void CMTPGetDevicePropDesc::ServiceFunctionalIDL()
     {
-    __FLOG(_L8("ServiceFuntionalIDL - Entry")); 
+    OstTraceFunctionEntry0( CMTPGETDEVICEPROPDESC_SERVICEFUNCTIONALIDL_ENTRY );
     delete iPropDesc;
     iPropDesc = NULL;
     iPropDesc = CMTPTypeDevicePropDesc::NewL(EMTPDevicePropCodeFunctionalID, 1, 0, NULL); 
@@ -423,7 +429,7 @@ void CMTPGetDevicePropDesc::ServiceFunctionalIDL()
 	iPropDesc->SetL(CMTPTypeDevicePropDesc::ECurrentValue, *iData);
 	
     SendDataL(*iPropDesc); 
-    __FLOG(_L8("ServiceFuntionalIDL - Exit")); 
+    OstTraceFunctionExit0( CMTPGETDEVICEPROPDESC_SERVICEFUNCTIONALIDL_EXIT );
     }
 
 /*
@@ -431,7 +437,7 @@ void CMTPGetDevicePropDesc::ServiceFunctionalIDL()
 */
 void CMTPGetDevicePropDesc::ServiceModelIDL()
     {
-    __FLOG(_L8("ServiceModelIDL - Entry")); 
+    OstTraceFunctionEntry0( CMTPGETDEVICEPROPDESC_SERVICEMODELIDL_ENTRY );
     delete iPropDesc;
     iPropDesc = NULL;
     iPropDesc = CMTPTypeDevicePropDesc::NewL(EMTPDevicePropCodeModelID, 0, 0, NULL);   
@@ -445,7 +451,7 @@ void CMTPGetDevicePropDesc::ServiceModelIDL()
 	iPropDesc->SetL(CMTPTypeDevicePropDesc::ECurrentValue, *iData);
 	
     SendDataL(*iPropDesc); 
-    __FLOG(_L8("ServiceModelIDL - Exit")); 
+    OstTraceFunctionExit0( CMTPGETDEVICEPROPDESC_SERVICEMODELIDL_EXIT );
     }
 
 /*
@@ -453,7 +459,7 @@ void CMTPGetDevicePropDesc::ServiceModelIDL()
 */
 void CMTPGetDevicePropDesc::ServiceUseDeviceStageL()
     {
-    __FLOG(_L8("ServiceUseDeviceStageL - Entry")); 
+    OstTraceFunctionEntry0( CMTPGETDEVICEPROPDESC_SERVICEUSEDEVICESTAGEL_ENTRY );
     delete iPropDesc;
     iPropDesc = NULL;
     iPropDesc = CMTPTypeDevicePropDesc::NewL(EMTPDevicePropCodeUseDeviceStage, 0, 0, NULL); 
@@ -465,7 +471,7 @@ void CMTPGetDevicePropDesc::ServiceUseDeviceStageL()
     delete data;
 
     SendDataL(*iPropDesc); 
-    __FLOG(_L8("ServiceUseDeviceStageL - Exit")); 
+    OstTraceFunctionExit0( CMTPGETDEVICEPROPDESC_SERVICEUSEDEVICESTAGEL_EXIT );
     }
 
 /*
@@ -481,7 +487,8 @@ TUint8 CMTPGetDevicePropDesc::GetFormatOrdered()
     TRAPD(error,iDpSingletons.ConfigMgr().GetRssConfigInfoArrayL(orderedFormats, EDevDpFormats));
 	if(error!=KErrNone)
 		{
-		__FLOG_VA((_L8("GetRssConfigArray returned with %d"), error));
+		OstTrace1(TRACE_WARNING, CMTPGETDEVICEPROPDESC_GETFORMATORDERED,
+		        "GetRssConfigArray returned with %d", error);
 		}
     if(orderedFormats.Count() > 0)
         {
@@ -499,7 +506,8 @@ TMTPTypeGuid* CMTPGetDevicePropDesc::GetGUIDL(const TUint aKey)
     {
     TBuf<KGUIDFormatStringLength> buf;
     
-    User::LeaveIfError(iRepository->Get(aKey,buf));
+    LEAVEIFERROR(iRepository->Get(aKey,buf),
+    OstTrace1( TRACE_ERROR, CMTPGETDEVICEPROPDESC_GETGUIDL, "can't get from iRepository. the parameter is %d", aKey));
 
     TMTPTypeGuid* ret = new (ELeave) TMTPTypeGuid( buf );
     

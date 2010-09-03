@@ -30,8 +30,6 @@
 #include "mtpimagedpconst.h"
 #include "cmtpimagedp.h"
 
-__FLOG_STMT(_LIT8(KComponent,"GetObjectPropsSupported");)
-
 /**
 Verification data for the GetObjectPropSupported request
 */
@@ -64,7 +62,6 @@ Destructor
 CMTPImageDpGetObjectPropsSupported::~CMTPImageDpGetObjectPropsSupported()
     {
     delete iObjectPropsSupported;
-    __FLOG_CLOSE;
     }
 
 /**
@@ -75,7 +72,6 @@ CMTPImageDpGetObjectPropsSupported::CMTPImageDpGetObjectPropsSupported(
                                     MMTPConnection& aConnection)
     :CMTPRequestProcessor(aFramework, aConnection, sizeof(KMTPGetObjectPropSupportedPolicy)/sizeof(TMTPRequestElementInfo), KMTPGetObjectPropSupportedPolicy)
     {
-    __FLOG_OPEN(KMTPSubsystem, KComponent);
     }
     
 /**

@@ -48,10 +48,6 @@ private:
 private:
     CMTPPictBridgeDataProvider& iPictBridgeDP;
     CMTPTypeObjectInfo* iObjectInfoToBuildP; // owned
-    /**
-    FLOGGER debug trace member variable.
-    */
-    __FLOG_DECLARATION_MEMBER_MUTABLE;
     };
 
 #endif CMTPPICTBRIDGEDPGETOBJECTINFO_H

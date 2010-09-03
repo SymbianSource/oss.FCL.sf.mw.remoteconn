@@ -54,10 +54,6 @@ private:
     void BuildPartialDataL();
     
 private:
-    /**
-    FLOGGER debug trace member variable.
-     */
-    __FLOG_DECLARATION_MEMBER_MUTABLE;
 
     RFs&                  iFs;
     TUint32               iOffset;

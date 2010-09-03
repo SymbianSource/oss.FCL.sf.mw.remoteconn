@@ -43,3 +43,4 @@ LIBRARY             edbms.lib
 LIBRARY             euser.lib
 
 SMPSAFE
+USERINCLUDE ../traces

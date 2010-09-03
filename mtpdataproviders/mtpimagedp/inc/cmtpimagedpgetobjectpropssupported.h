@@ -50,11 +50,6 @@ private:	//from CMTPRequestProcessor
     
 private:
     CMTPTypeArray*			iObjectPropsSupported;
-    
-    /**
-      FLOGGER debug trace member variable.
-      */
-      __FLOG_DECLARATION_MEMBER_MUTABLE;
     };
     
 #endif  //CMTPIMAGEDPGETOBJECTPROPSSUPPORTED_H

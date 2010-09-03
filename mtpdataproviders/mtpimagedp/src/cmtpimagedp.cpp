@@ -42,8 +42,11 @@
 #include "cmtpimagedpmdeobserver.h"
 #include "cmtpimagedprenameobject.h"
 #include "cmtpimagedpnewpicturesnotifier.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpimagedpTraces.h"
+#endif
 
-__FLOG_STMT(_LIT8(KComponent,"CMTPImageDataProvider");)
 
 static const TInt KArrayGranularity = 3;
 static const TInt KDeleteObjectGranularity = 2;
@@ -94,8 +97,8 @@ Second-phase construction
 */
 void CMTPImageDataProvider::ConstructL()
     {
-    __FLOG_OPEN(KMTPSubsystem, KComponent);
-    __FLOG(_L8(">> CMTPImageDataProvider::ConstructL"));
+    OstTraceFunctionEntry0( CMTPIMAGEDATAPROVIDER_CONSTRUCTL_ENTRY );
+    
     iNewPicNotifier = CMTPImageDpNewPicturesNotifier::NewL();
     
     //Setup central repository connection
@@ -124,12 +127,14 @@ void CMTPImageDataProvider::ConstructL()
     TInt error = RProperty::Define(tSid, KMTPNewPicKey, RProperty::EInt, KAllowReadAll, KAllowReadAll);
     if (error != KErrNone && error != KErrAlreadyExists)
         {
-        __FLOG_1(_L8("CMTPImageDataProvider::ConstructL - RProperty define error:%d"), error);
-        User::LeaveIfError(error);
+        LEAVEIFERROR(error,
+                OstTrace1( TRACE_ERROR, DUP1_CMTPIMAGEDATAPROVIDER_CONSTRUCTL, 
+                        "RProperty define error:%d", error ));
+                
         }    
     
     iEnumerationNotified = ETrue;
-    __FLOG(_L8("<< CMTPImageDataProvider::ConstructL"));
+    OstTraceFunctionExit0( CMTPIMAGEDATAPROVIDER_CONSTRUCTL_EXIT );
     }
 
 /**
@@ -137,7 +142,7 @@ void CMTPImageDataProvider::ConstructL()
 */
 CMTPImageDataProvider::~CMTPImageDataProvider()
     {
-    __FLOG(_L8(">> ~CMTPImageDataProvider"));      
+    OstTraceFunctionEntry0( CMTPIMAGEDATAPROVIDER_CMTPIMAGEDATAPROVIDER_DES_ENTRY );
     
     // delete all processor instances
     TUint count(iActiveProcessors.Count());
@@ -166,15 +171,14 @@ CMTPImageDataProvider::~CMTPImageDataProvider()
     HandleDeleteObjectsArray();
     iDeleteObjectsArray.ResetAndDestroy();
     iNewPicHandles.Reset();
-    
-    __FLOG(_L8("<< ~CMTPImageDataProvider"));
-    __FLOG_CLOSE;
+
+    OstTraceFunctionExit0( CMTPIMAGEDATAPROVIDER_CMTPIMAGEDATAPROVIDER_DES_EXIT );
     }
 
 void CMTPImageDataProvider::Cancel()
     {
-    __FLOG(_L8(">> Cancel"));
-    __FLOG(_L8("<< Cancel"));
+    OstTraceFunctionEntry0( CMTPIMAGEDATAPROVIDER_CANCEL_ENTRY );
+    OstTraceFunctionExit0( CMTPIMAGEDATAPROVIDER_CANCEL_EXIT );
     }
 
 /**
@@ -185,7 +189,7 @@ void CMTPImageDataProvider::Cancel()
 */
 void CMTPImageDataProvider::ProcessEventL(const TMTPTypeEvent& aEvent, MMTPConnection& aConnection)
     {
-    __FLOG(_L8(">> ProcessEventL"));
+    OstTraceFunctionEntry0( CMTPIMAGEDATAPROVIDER_PROCESSEVENTL_ENTRY );
     
     //Try to delete objects in array
     HandleDeleteObjectsArray();
@@ -197,7 +201,7 @@ void CMTPImageDataProvider::ProcessEventL(const TMTPTypeEvent& aEvent, MMTPConne
         iActiveProcessors[idx]->HandleEventL(aEvent);
         }
 
-    __FLOG(_L8("<< ProcessEventL"));
+    OstTraceFunctionExit0( CMTPIMAGEDATAPROVIDER_PROCESSEVENTL_EXIT );
     }
 
 /**
@@ -207,7 +211,7 @@ Process the notification from framework
 */
 void CMTPImageDataProvider::ProcessNotificationL(TMTPNotification aNotification, const TAny* aParams)
     {
-    __FLOG(_L8(">> ProcessNotificationL"));
+    OstTraceFunctionEntry0( CMTPIMAGEDATAPROVIDER_PROCESSNOTIFICATIONL_ENTRY );
 
     switch (aNotification)
         {
@@ -227,8 +231,8 @@ void CMTPImageDataProvider::ProcessNotificationL(TMTPNotification aNotification,
         // Ignore all other notifications.
         break;
         }
- 
-    __FLOG(_L8("<< ProcessNotificationL"));
+
+    OstTraceFunctionExit0( CMTPIMAGEDATAPROVIDER_PROCESSNOTIFICATIONL_EXIT );
     }
 
 /**
@@ -240,7 +244,7 @@ void CMTPImageDataProvider::ProcessNotificationL(TMTPNotification aNotification,
 */   
 void CMTPImageDataProvider::ProcessRequestPhaseL(TMTPTransactionPhase aPhase, const TMTPTypeRequest& aRequest, MMTPConnection& aConnection)
     {    
-    __FLOG(_L8(">> ProcessRequestPhaseL"));    
+    OstTraceFunctionEntry0( CMTPIMAGEDATAPROVIDER_PROCESSREQUESTPHASEL_ENTRY );
     
     //Try to handle objects which need to be deleted
     HandleDeleteObjectsArray();
@@ -262,7 +266,7 @@ void CMTPImageDataProvider::ProcessRequestPhaseL(TMTPTransactionPhase aPhase, co
         }
  
     iActiveProcessor = -1;
-    __FLOG(_L8("<< ProcessRequestPhaseL"));
+    OstTraceFunctionExit0( CMTPIMAGEDATAPROVIDER_PROCESSREQUESTPHASEL_EXIT );
     }
 
 /**
@@ -270,7 +274,7 @@ void CMTPImageDataProvider::ProcessRequestPhaseL(TMTPTransactionPhase aPhase, co
 */
 void CMTPImageDataProvider::StartObjectEnumerationL(TUint32 aStorageId, TBool /*aPersistentFullEnumeration*/)
     {
-    __FLOG(_L8(">> StartObjectEnumerationL"));
+    OstTraceFunctionEntry0( CMTPIMAGEDATAPROVIDER_STARTOBJECTENUMERATIONL_ENTRY );
     
     TBool isComplete = ETrue;
     iEnumerationNotified = EFalse;
@@ -295,7 +299,7 @@ void CMTPImageDataProvider::StartObjectEnumerationL(TUint32 aStorageId, TBool /*
         NotifyEnumerationCompleteL(aStorageId, KErrNone);
         }
     
-    __FLOG(_L8("<< StartObjectEnumerationL"));
+    OstTraceFunctionExit0( CMTPIMAGEDATAPROVIDER_STARTOBJECTENUMERATIONL_EXIT );
     }
 
 
@@ -304,9 +308,9 @@ Starts enumerate imagedp storage, just declare complete
 */
 void CMTPImageDataProvider::StartStorageEnumerationL()
     {
-    __FLOG(_L8(">> StartStorageEnumerationL"));   
-    NotifyStorageEnumerationCompleteL();
-    __FLOG(_L8("<< StartStorageEnumerationL"));        
+    OstTraceFunctionEntry0( CMTPIMAGEDATAPROVIDER_STARTSTORAGEENUMERATIONL_ENTRY );
+    NotifyStorageEnumerationCompleteL();   
+    OstTraceFunctionExit0( CMTPIMAGEDATAPROVIDER_STARTSTORAGEENUMERATIONL_EXIT );
     }
 
 /**
@@ -317,7 +321,7 @@ Defines the supported operations and formats of the data provider
 */
 void CMTPImageDataProvider::Supported(TMTPSupportCategory aCategory, RArray<TUint>& aArray) const
     {
-    __FLOG(_L8(">> Supported"));
+    OstTraceFunctionEntry0( CMTPIMAGEDATAPROVIDER_SUPPORTED_ENTRY );
 
     switch (aCategory) 
         {        
@@ -327,7 +331,8 @@ void CMTPImageDataProvider::Supported(TMTPSupportCategory aCategory, RArray<TUin
         for (TInt i(0); (i < count); i++)
             {
             aArray.Append(KMTPImageDpSupportedEvents[i]);
-            __FLOG_VA((_L("   CMTPImageDataProvider::Supported Events %d added"), KMTPImageDpSupportedEvents[i]));
+            OstTrace1( TRACE_NORMAL, CMTPIMAGEDATAPROVIDER_SUPPORTED, 
+                    "   CMTPImageDataProvider::Supported Events %d added", KMTPImageDpSupportedEvents[i] );
             }  
         }
         break;
@@ -338,11 +343,13 @@ void CMTPImageDataProvider::Supported(TMTPSupportCategory aCategory, RArray<TUin
         TInt count(sizeof(KMTPValidCodeExtensionMappings) / sizeof(KMTPValidCodeExtensionMappings[0]));
         for(TInt i(0); (i < count); i++)
             {
-            __FLOG_VA((_L("   CMTPImageDataProvider::Supported we have formatCode %d"), KMTPValidCodeExtensionMappings[i].iFormatCode ));
+            OstTrace1( TRACE_NORMAL, DUP1_CMTPIMAGEDATAPROVIDER_SUPPORTED, 
+                    "   CMTPImageDataProvider::Supported we have formatCode %d", KMTPValidCodeExtensionMappings[i].iFormatCode  );
             if(aArray.Find(KMTPValidCodeExtensionMappings[i].iFormatCode)==KErrNotFound) // KMTPValidCodeExtensionMappings may contain format code more than once
                 {
                 aArray.Append(KMTPValidCodeExtensionMappings[i].iFormatCode);
-                __FLOG_VA((_L("   CMTPImageDataProvider::Supported formatCode %d added"), KMTPValidCodeExtensionMappings[i].iFormatCode));
+                OstTrace1( TRACE_NORMAL, DUP2_CMTPIMAGEDATAPROVIDER_SUPPORTED, 
+                        "   CMTPImageDataProvider::Supported formatCode %d added", KMTPValidCodeExtensionMappings[i].iFormatCode );
                 }
             }
         }
@@ -353,7 +360,9 @@ void CMTPImageDataProvider::Supported(TMTPSupportCategory aCategory, RArray<TUin
         for (TInt i(0); (i < count); i++)
             {
             aArray.Append(KMTPImageDpSupportedProperties[i]);
-            __FLOG_VA((_L("   CMTPImageDataProvider::Supported property %d added"), KMTPImageDpSupportedProperties[i]));
+            OstTrace1( TRACE_NORMAL, DUP3_CMTPIMAGEDATAPROVIDER_SUPPORTED, 
+                    "   CMTPImageDataProvider::Supported property %d added", KMTPImageDpSupportedProperties[i] );
+            
             }   
         }
         break; 
@@ -364,7 +373,8 @@ void CMTPImageDataProvider::Supported(TMTPSupportCategory aCategory, RArray<TUin
         for (TInt i(0); (i < count); i++)
             {
             aArray.Append(KMTPImageDpSupportedOperations[i]);
-            __FLOG_VA((_L("   CMTPImageDataProvider::Supported operation %d added"), KMTPImageDpSupportedOperations[i]));
+            OstTrace1( TRACE_NORMAL, DUP4_CMTPIMAGEDATAPROVIDER_SUPPORTED, 
+                    "   CMTPImageDataProvider::Supported operation %d added", KMTPImageDpSupportedOperations[i] );
             }   
         }
         break;  
@@ -378,7 +388,7 @@ void CMTPImageDataProvider::Supported(TMTPSupportCategory aCategory, RArray<TUin
         break;
         }
 
-    __FLOG(_L8("<< Supported"));
+    OstTraceFunctionExit0( CMTPIMAGEDATAPROVIDER_SUPPORTED_EXIT );
     }
 
 /**
@@ -447,9 +457,9 @@ Notify framework the image dp has completed enumeration
 */
 void CMTPImageDataProvider::NotifyStorageEnumerationCompleteL()
     {
-    __FLOG(_L8(">> NotifyStorageEnumerationCompleteL"));    
-    Framework().StorageEnumerationCompleteL();    
-    __FLOG(_L8("<< NotifyStorageEnumerationCompleteL"));        
+    OstTraceFunctionEntry0( CMTPIMAGEDATAPROVIDER_NOTIFYSTORAGEENUMERATIONCOMPLETEL_ENTRY );   
+    Framework().StorageEnumerationCompleteL();          
+    OstTraceFunctionExit0( CMTPIMAGEDATAPROVIDER_NOTIFYSTORAGEENUMERATIONCOMPLETEL_EXIT );
     }
 
 CMTPImageDpThumbnailCreator* CMTPImageDataProvider::ThumbnailManager()
@@ -477,22 +487,23 @@ CRepository& CMTPImageDataProvider::Repository() const
 // 
 // --------------------------------------------------------------------------
 //
-#ifdef __FLOG_ACTIVE  
+#ifdef OST_TRACE_COMPILER_IN_USE  
 void CMTPImageDataProvider::NotifyEnumerationCompleteL(TUint32 aStorageId, TInt aError)
 #else
 void CMTPImageDataProvider::NotifyEnumerationCompleteL(TUint32 aStorageId, TInt /*aError*/)
-#endif // __FLOG_ACTIVE
+#endif // OST_TRACE_COMPILER_IN_USE
     {
-    __FLOG(_L8(">> NotifyEnumerationCompletedL"));
-    __FLOG_VA((_L8("Enumeration of storage 0x%08X completed with error status %d"), aStorageId, aError));
-        
+    OstTraceFunctionEntry0( CMTPIMAGEDATAPROVIDER_NOTIFYENUMERATIONCOMPLETEL_ENTRY );
+    OstTraceExt2( TRACE_NORMAL, CMTPIMAGEDATAPROVIDER_NOTIFYENUMERATIONCOMPLETEL, 
+            "Enumeration of storage 0x%08X completed with error status %d", aStorageId, (TInt32)aError );
+
     if (!iEnumerationNotified)
         {
         iEnumerationNotified = ETrue;
         Framework().ObjectEnumerationCompleteL(aStorageId);
         }
     
-    __FLOG(_L8("<< HandleEnumerationCompletedL"));
+    OstTraceFunctionExit0( CMTPIMAGEDATAPROVIDER_NOTIFYENUMERATIONCOMPLETEL_EXIT );
     }
 
 /**
@@ -505,7 +516,7 @@ Find or create a request processor that can process the request
 */
 TInt CMTPImageDataProvider::LocateRequestProcessorL(const TMTPTypeRequest& aRequest, MMTPConnection& aConnection)
     {
-    __FLOG(_L8(">> LocateRequestProcessorL"));        
+    OstTraceFunctionEntry0( CMTPIMAGEDATAPROVIDER_LOCATEREQUESTPROCESSORL_ENTRY );     
     
     TInt idx(KErrNotFound);
     TInt count(iActiveProcessors.Count());
@@ -526,8 +537,8 @@ TInt CMTPImageDataProvider::LocateRequestProcessorL(const TMTPTypeRequest& aRequ
         CleanupStack::Pop();
         idx = count;
         }
- 
-    __FLOG(_L8("<< LocateRequestProcessorL"));
+
+    OstTraceFunctionExit0( CMTPIMAGEDATAPROVIDER_LOCATEREQUESTPROCESSORL_EXIT );
     return idx;
     }
 
@@ -541,7 +552,7 @@ Find or create a request processor that can process the event
 */
 TInt CMTPImageDataProvider::LocateRequestProcessorL(const TMTPTypeEvent& aEvent, MMTPConnection& aConnection)
     {
-    __FLOG(_L8(">> LocateRequestProcessorL"));
+    OstTraceFunctionEntry0( DUP1_CMTPIMAGEDATAPROVIDER_LOCATEREQUESTPROCESSORL_ENTRY );
         
     TInt idx(KErrNotFound);
     TInt count(iActiveProcessors.Count());
@@ -554,7 +565,7 @@ TInt CMTPImageDataProvider::LocateRequestProcessorL(const TMTPTypeEvent& aEvent,
             }
         }    
 
-    __FLOG(_L8("<< LocateRequestProcessorL"));
+    OstTraceFunctionExit0( DUP1_CMTPIMAGEDATAPROVIDER_LOCATEREQUESTPROCESSORL_EXIT );
     return idx;
     }
 
@@ -566,7 +577,8 @@ TInt CMTPImageDataProvider::LocateRequestProcessorL(const TMTPTypeEvent& aEvent,
 */
 void CMTPImageDataProvider::SessionClosedL(const TMTPNotificationParamsSessionChange& aSession)
     {
-    __FLOG_VA((_L8(">> SessionClosedL SessionID = %d"), aSession.iMTPId));
+    OstTraceFunctionEntry0( CMTPIMAGEDATAPROVIDER_SESSIONCLOSEDL_ENTRY );
+    OstTrace1( TRACE_NORMAL, CMTPIMAGEDATAPROVIDER_SESSIONCLOSEDL, "SessionID = %d", aSession.iMTPId );
     
     TInt count = iActiveProcessors.Count();
     while(count--)
@@ -591,8 +603,8 @@ void CMTPImageDataProvider::SessionClosedL(const TMTPNotificationParamsSessionCh
      * We clear property manager cache when receiving session close notification from framework every times
      */
     iPropertyMgr->ClearAllCache();
-    
-    __FLOG(_L8("<< SessionClosedL"));
+
+    OstTraceFunctionExit0( CMTPIMAGEDATAPROVIDER_SESSIONCLOSEDL_EXIT );
     }
 
 /**
@@ -601,13 +613,14 @@ void CMTPImageDataProvider::SessionClosedL(const TMTPNotificationParamsSessionCh
  @param aSessionId    The session Id opened
  @param aConnection   The connection of the sesssion
 */
-#ifdef __FLOG_ACTIVE
+#ifdef OST_TRACE_COMPILER_IN_USE
 void CMTPImageDataProvider::SessionOpenedL(const TMTPNotificationParamsSessionChange& aSession)
 #else
 void CMTPImageDataProvider::SessionOpenedL(const TMTPNotificationParamsSessionChange& /*aSession*/)
 #endif
     {
-    __FLOG_VA((_L8(">> SessionOpenedL SessionID = %d"), aSession.iMTPId));
+    OstTraceFunctionEntry0( CMTPIMAGEDATAPROVIDER_SESSIONOPENEDL_ENTRY );
+    OstTrace1( TRACE_NORMAL, CMTPIMAGEDATAPROVIDER_SESSIONOPENEDL, "SessionID = %d", aSession.iMTPId );
     
     if (iEnumerated)
         {
@@ -616,11 +629,12 @@ void CMTPImageDataProvider::SessionOpenedL(const TMTPNotificationParamsSessionCh
          */
         TUint newPictures = QueryImageObjectCountL();        
         iNewPicNotifier->SetNewPictures(newPictures);
-        __FLOG_1(_L16("CMTPImageDpEnumerator::CompleteEnumeration - New Pics: %d"), newPictures);        
+        OstTrace1( TRACE_NORMAL, DUP1_CMTPIMAGEDATAPROVIDER_SESSIONOPENEDL, 
+                "CMTPImageDpEnumerator::CompleteEnumeration - New Pics: %d", newPictures );
         iEnumerated = EFalse;
         }
-    
-    __FLOG(_L8("<< SessionOpenedL "));
+
+    OstTraceFunctionExit0( CMTPIMAGEDATAPROVIDER_SESSIONOPENEDL_EXIT );
     }
 
 /**
@@ -630,7 +644,9 @@ void CMTPImageDataProvider::SessionOpenedL(const TMTPNotificationParamsSessionCh
 */
 void CMTPImageDataProvider::RenameObjectL(const TMTPNotificationParamsHandle& aParam)
     {
-    __FLOG_VA((_L16(">> RenameObjectL Handle: %u, Old name: %S"), aParam.iHandleId, &aParam.iFileName));
+    OstTraceFunctionEntry0( CMTPIMAGEDATAPROVIDER_RENAMEOBJECTL_ENTRY );
+    OstTraceExt2( TRACE_NORMAL, CMTPIMAGEDATAPROVIDER_RENAMEOBJECTL, 
+            "Handle: %u, Old name: %S", aParam.iHandleId, aParam.iFileName);
     
     if (!iRenameObject)
         {
@@ -638,8 +654,8 @@ void CMTPImageDataProvider::RenameObjectL(const TMTPNotificationParamsHandle& aP
         }
 
     iRenameObject->StartL(aParam.iHandleId, aParam.iFileName);    
-    
-    __FLOG(_L8("<< RenameObjectL "));
+
+    OstTraceFunctionExit0( CMTPIMAGEDATAPROVIDER_RENAMEOBJECTL_EXIT );
     }
 
 /**
@@ -725,7 +741,7 @@ TUint CMTPImageDataProvider::QueryImageObjectCountL()
     CleanupStack::PopAndDestroy(objMetadata);
     CleanupStack::PopAndDestroy(&handles);
     CleanupStack::PopAndDestroy(&context);
-    
+
     return newPictures;
     }
 
@@ -741,7 +757,9 @@ void CMTPImageDataProvider::HandleDeleteObjectsArray()
         {
         HBufC* object = iDeleteObjectsArray[i];
         TInt err = Framework().Fs().Delete(object->Des());
-        __FLOG_2(_L8("delete left objects %d error code is %d \n"), i, err );
+        OstTraceExt2( TRACE_NORMAL, CMTPIMAGEDATAPROVIDER_HANDLEDELETEOBJECTSARRAY, 
+                "delete left objects %d error code is %d \n", i, err  );
+        
         
         if ( err == KErrNone )
             {
@@ -755,31 +773,34 @@ void CMTPImageDataProvider::HandleDeleteObjectsArray()
 
 void CMTPImageDataProvider::IncreaseNewPictures(TInt aCount)
     {
-    __FLOG_VA((_L16(">> IncreaseNewPictures New Pictures: %d"), aCount));
+    OstTraceFunctionEntry0( CMTPIMAGEDATAPROVIDER_INCREASENEWPICTURES_ENTRY );
+    OstTrace1( TRACE_NORMAL, CMTPIMAGEDATAPROVIDER_INCREASENEWPICTURES, "New Pictures: %d", aCount );
 
     iNewPicNotifier->IncreaseCount(aCount);    
-    
-    __FLOG(_L8("<< IncreaseNewPictures "));    
+ 
+    OstTraceFunctionExit0( CMTPIMAGEDATAPROVIDER_INCREASENEWPICTURES_EXIT );
     }
 
 void CMTPImageDataProvider::DecreaseNewPictures(TInt aCount)
     {
-    __FLOG_VA((_L16(">> DecreaseNewPictures New Pictures: %d"), aCount));
+    OstTraceFunctionEntry0( CMTPIMAGEDATAPROVIDER_DECREASENEWPICTURES_ENTRY );
+    OstTrace1( TRACE_NORMAL, CMTPIMAGEDATAPROVIDER_DECREASENEWPICTURES, "New Pictures: %d", aCount );
 
     iNewPicNotifier->DecreaseCount(aCount);
-    
-    __FLOG(_L8("<< DecreaseNewPictures "));    
+
+    OstTraceFunctionExit0( CMTPIMAGEDATAPROVIDER_DECREASENEWPICTURES_EXIT );
     }
 
 void CMTPImageDataProvider::ResetNewPictures()
 	{
-	__FLOG(_L8(">> ResetNewPictures "));
+	OstTraceFunctionEntry0( CMTPIMAGEDATAPROVIDER_RESETNEWPICTURES_ENTRY );
 
 	iNewPicNotifier->SetNewPictures(0);
 	
 	TInt count = iNewPicHandles.Count();
 	if (!count)
 		{
+		OstTraceFunctionExit0( CMTPIMAGEDATAPROVIDER_RESETNEWPICTURES_EXIT );
 		return;
 		}
 
@@ -793,13 +814,13 @@ void CMTPImageDataProvider::ResetNewPictures()
 	
 	iNewPicHandles.Reset();
 	CleanupStack::PopAndDestroy(objMetadata);
-	
-	__FLOG(_L8("<< ResetNewPictures "));
+
+	OstTraceFunctionExit0( DUP1_CMTPIMAGEDATAPROVIDER_RESETNEWPICTURES_EXIT );
 	}
 
 void CMTPImageDataProvider::HandleMdeSessionCompleteL(TInt aError)
     {
-    __FLOG(_L8(">> HandleMdeSessionComplete"));    
+    OstTraceFunctionEntry0( CMTPIMAGEDATAPROVIDER_HANDLEMDESESSIONCOMPLETEL_ENTRY );
 
     NotifyEnumerationCompleteL(KMTPStorageAll, KErrNone);
     if (aError == KErrNone)
@@ -807,7 +828,7 @@ void CMTPImageDataProvider::HandleMdeSessionCompleteL(TInt aError)
         iMdeObserver = CMTPImageDpMdeObserver::NewL(Framework(), *this);
         iMdeObserver->SubscribeForChangeNotificationL();
         }
-    
-    __FLOG(_L8("<< HandleMdeSessionComplete "));    
+
+    OstTraceFunctionExit0( CMTPIMAGEDATAPROVIDER_HANDLEMDESESSIONCOMPLETEL_EXIT );
     }
 

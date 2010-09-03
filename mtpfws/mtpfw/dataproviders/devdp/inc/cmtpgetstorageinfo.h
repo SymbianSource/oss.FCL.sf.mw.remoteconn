@@ -25,7 +25,6 @@
 
 #include "cmtprequestprocessor.h"
 #include "rmtpframework.h"
-#include "mtpdebug.h"
 
 //forward declaration
 class CMTPTypeStorageInfo;
@@ -76,11 +75,7 @@ private:
 	void SetupDriveVolumeInfoL();	
 		
 private:
-	/**
-    FLOGGER debug trace member variable.
-    */
-    __FLOG_DECLARATION_MEMBER_MUTABLE;
-    
+
 	CMTPTypeStorageInfo*		iStorageInfo;
 	TDriveInfo					iDriveInfo;
 	TVolumeInfo 				iVolumeInfo;

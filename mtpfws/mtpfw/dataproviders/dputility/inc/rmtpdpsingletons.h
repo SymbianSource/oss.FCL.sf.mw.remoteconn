@@ -21,8 +21,6 @@
 #ifndef RMTPDPSINGLETONS_H
 #define RMTPDPSINGLETONS_H
 
-#include "mtpdebug.h"
-
 #include "rmtputility.h"
 
 class MMTPDataProviderFramework;
@@ -80,11 +78,6 @@ private:
 
     public: // Owned
 
-        /**
-        FLOGGER debug trace member variable.
-        */
-        __FLOG_DECLARATION_MEMBER_MUTABLE;
-            
     	
     	/**
     	The file system exclusion manager list. This list contains all the Data Providers'
@@ -109,10 +102,6 @@ private: //Not owned
 	MMTPDataProviderFramework* iFramework;
     
 private: // Owned
-    /**
-    FLOGGER debug trace member variable.
-    */
-    __FLOG_DECLARATION_MEMBER_MUTABLE;
     
     /**
     The singletons reference block.

@@ -22,23 +22,24 @@
 #include "cptpipeventhandler.h"
 #include "tptpipinitevtack.h"
 #include "ptpippanic.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cptpipeventhandlerTraces.h"
+#endif
 
-__FLOG_STMT(_LIT8(KComponent,"CEventHandler");) 
 
 /**
 Creates the channel for commands. The base class constructl is called. 
 */
 CPTPIPEventHandler* CPTPIPEventHandler::NewL(CPTPIPConnection& aConnection)
 	{
+	OstTraceFunctionEntry0( CPTPIPEVENTHANDLER_NEWL_ENTRY );
 	
 	CPTPIPEventHandler* self = new(ELeave) CPTPIPEventHandler(aConnection);
 	CleanupStack::PushL(self);
-#ifdef __FLOG_ACTIVE    
-    self->ConstructL(KComponent);
-#else
     self->ConstructL();
-#endif
 	CleanupStack::Pop();
+	OstTraceFunctionExit0( CPTPIPEVENTHANDLER_NEWL_EXIT );
 	return self;
 	}
 
@@ -47,8 +48,8 @@ Destructor
 */
 CPTPIPEventHandler::~CPTPIPEventHandler()
 	{
-	__FLOG(_L8("Destructor - Entry"));
-	__FLOG(_L8("Destructor - Exit"));
+	OstTraceFunctionEntry0( CPTPIPEVENTHANDLER_CPTPIPEVENTHANDLER_ENTRY );
+	OstTraceFunctionExit0( CPTPIPEVENTHANDLER_CPTPIPEVENTHANDLER_EXIT );
 	}
 
 /**
@@ -57,6 +58,8 @@ Constructor
 CPTPIPEventHandler::CPTPIPEventHandler(CPTPIPConnection& aConnection): 
 	CPTPIPSocketHandlerBase(aConnection, CActive::EPriorityUserInput )
 	{
+	OstTraceFunctionEntry0( DUP1_CPTPIPEVENTHANDLER_CPTPIPEVENTHANDLER_ENTRY );
+	OstTraceFunctionExit0( DUP1_CPTPIPEVENTHANDLER_CPTPIPEVENTHANDLER_EXIT );
 	}
 
 /**
@@ -65,13 +68,13 @@ Sends the init ack packet, which is created in the connection class.
 */
 void CPTPIPEventHandler::SendInitAck(CPTPIPGenericContainer* aEvtAck)
 	{
-	__FLOG(_L8("SendInitAck - Entry"));
+	OstTraceFunctionEntry0( CPTPIPEVENTHANDLER_SENDINITACK_ENTRY );
 	iChunkStatus = aEvtAck->FirstReadChunk(iSendChunkData);
 	iSendData.Set(iSendChunkData);
 	iSocket.Send(iSendData,0,iStatus);
 	SetState(EInitSendInProgress);
 	SetActive();
-	__FLOG(_L8("SendInitAck - Exit"));
+	OstTraceFunctionExit0( CPTPIPEVENTHANDLER_SENDINITACK_EXIT );
 	}
 
 /**
@@ -81,13 +84,13 @@ Initiates the sending of the event data over the event channel. The base class
 */
 void CPTPIPEventHandler::SendEventL(const MMTPType& aEvent)
     {
-	__FLOG(_L8("SendEventL - Entry"));
+	OstTraceFunctionEntry0( CPTPIPEVENTHANDLER_SENDEVENTL_ENTRY );
 	
 	// We need to stop listening, and send the event. 
 	Cancel();
 	
     SendDataL(aEvent, 0);
-	__FLOG(_L8("SendEventL - Exit"));
+    OstTraceFunctionExit0( CPTPIPEVENTHANDLER_SENDEVENTL_EXIT );
     }
 
 /**
@@ -99,9 +102,9 @@ connection.
 */
 void CPTPIPEventHandler::SendDataCompleteL(TInt aError, const MMTPType& aSource)
     {
-	__FLOG(_L8("SendDataCompleteL - Entry"));
+	OstTraceFunctionEntry0( CPTPIPEVENTHANDLER_SENDDATACOMPLETEL_ENTRY );
     Connection().SendEventCompleteL(aError, aSource);
-	__FLOG(_L8("SendDataCompleteL - Exit"));
+    OstTraceFunctionExit0( CPTPIPEVENTHANDLER_SENDDATACOMPLETEL_EXIT );
     }
 
 /**
@@ -110,9 +113,9 @@ Initiates the receiving of the event data on the event channel.
 */
 void CPTPIPEventHandler::ReceiveEventL(MMTPType& aEvent)
     {
-	__FLOG(_L8("ReceiveEventL - Entry"));
+	OstTraceFunctionEntry0( CPTPIPEVENTHANDLER_RECEIVEEVENTL_ENTRY );
     ReceiveDataL(aEvent);
-	__FLOG(_L8("ReceiveEventL - Exit"));
+    OstTraceFunctionExit0( CPTPIPEVENTHANDLER_RECEIVEEVENTL_EXIT );
     }
 
 /**
@@ -124,9 +127,9 @@ connection.
 */
 void CPTPIPEventHandler::ReceiveDataCompleteL(TInt aError, MMTPType& aSink)
     {
-	__FLOG(_L8("ReceiveDataCompleteL - Entry"));
+	OstTraceFunctionEntry0( CPTPIPEVENTHANDLER_RECEIVEDATACOMPLETEL_ENTRY );
     Connection().ReceiveEventCompleteL(aError, aSink); 
-	__FLOG(_L8("ReceiveDataCompleteL - Exit"));
+    OstTraceFunctionExit0( CPTPIPEVENTHANDLER_RECEIVEDATACOMPLETEL_EXIT );
     }
 
 /**
@@ -136,12 +139,12 @@ and sets the value of the packet length.
 */   
 TInt CPTPIPEventHandler::ParsePTPIPHeaderL()
 	{
-	__FLOG(_L8("ParsePTPIPHeaderL - Entry"));
+	OstTraceFunctionEntry0( CPTPIPEVENTHANDLER_PARSEPTPIPHEADERL_ENTRY );
 	
 	TUint32 type = Connection().ValidateAndSetEventPayloadL();
 	iPTPPacketLength = Connection().EventContainer()->Uint32L(CPTPIPGenericContainer::EPacketLength);
 	
-	__FLOG(_L8("ParsePTPIPHeaderL - Exit"));
+	OstTraceFunctionExit0( CPTPIPEVENTHANDLER_PARSEPTPIPHEADERL_EXIT );
 	return type;
 	}
 
@@ -152,7 +155,7 @@ of sending the init ack to the initiator
 */
 TBool CPTPIPEventHandler::HandleInitAck()
 	{
-	__FLOG(_L8("HandleInitAck - Entry"));
+	OstTraceFunctionEntry0( CPTPIPEVENTHANDLER_HANDLEINITACK_ENTRY );
 	TBool isHandled(EFalse);
 	
 	if (iState == EInitSendInProgress)
@@ -163,7 +166,7 @@ TBool CPTPIPEventHandler::HandleInitAck()
 		iState = EIdle;
 		isHandled = ETrue;
 		}
-	__FLOG(_L8("HandleInitAck - Exit"));
+	OstTraceFunctionExit0( CPTPIPEVENTHANDLER_HANDLEINITACK_EXIT );
 	return isHandled;
 	}
 

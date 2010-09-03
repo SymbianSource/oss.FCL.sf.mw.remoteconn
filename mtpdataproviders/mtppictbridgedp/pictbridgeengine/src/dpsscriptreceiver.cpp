@@ -15,18 +15,15 @@
 *
 */
 
-
-#include <e32debug.h>
 #include <f32file.h>
 #include "dpsscriptreceiver.h"
 #include "dpsstatemachine.h"
 #include "pictbridge.h"
 #include "dpsconst.h"
-
-#ifdef _DEBUG
-#	define IF_DEBUG(t) {RDebug::t;}
-#else
-#	define IF_DEBUG(t)
+#include "mtpdebug.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "dpsscriptreceiverTraces.h"
 #endif
 
 // ---------------------------------------------------------------------------
@@ -35,7 +32,6 @@
 //
 CDpsScriptReceiver* CDpsScriptReceiver::NewL(CDpsStateMachine* aOperator)								 	     
     {
-    IF_DEBUG(Print(_L("CDpsScriptReceiver::NewL")));
     CDpsScriptReceiver* self = new(ELeave) CDpsScriptReceiver(aOperator);
     return self;	
     }
@@ -48,10 +44,10 @@ CDpsScriptReceiver::CDpsScriptReceiver(CDpsStateMachine* aOperator) :
     CActive(EPriorityNormal), iOperator(aOperator),
     iFileNameAndPath(KDpsHostResponseFileName)
     {
-    IF_DEBUG(Print(_L(">>>CDpsScriptReceiver::Ctor")));
+    OstTraceFunctionEntry0( CDPSSCRIPTRECEIVER_CDPSSCRIPTRECEIVER_CONS_ENTRY );
     CActiveScheduler::Add(this);  
     WaitForReceive();
-    IF_DEBUG(Print(_L("<<<CDpsScriptReceiver::Ctor")));
+    OstTraceFunctionExit0( CDPSSCRIPTRECEIVER_CDPSSCRIPTRECEIVER_CONS_EXIT );
     }  
  
 // ---------------------------------------------------------------------------
@@ -60,9 +56,9 @@ CDpsScriptReceiver::CDpsScriptReceiver(CDpsStateMachine* aOperator) :
 //	
 CDpsScriptReceiver::~CDpsScriptReceiver()
     {
-    IF_DEBUG(Print(_L(">>>~CDpsScriptReceiver")));
+    OstTraceFunctionEntry0( CDPSSCRIPTRECEIVER_CDPSSCRIPTRECEIVER_DES_ENTRY );
     Cancel();
-    IF_DEBUG(Print(_L("<<<~CDpsScriptReceiver")));
+    OstTraceFunctionExit0( CDPSSCRIPTRECEIVER_CDPSSCRIPTRECEIVER_DES_EXIT );
     }
  
 // ---------------------------------------------------------------------------
@@ -71,14 +67,14 @@ CDpsScriptReceiver::~CDpsScriptReceiver()
 //   
 void CDpsScriptReceiver::WaitForReceive()
     {
-    IF_DEBUG(Print(_L(">>>CDpsScriptReceiver::WaitForReceive"))); 
+    OstTraceFunctionEntry0( CDPSSCRIPTRECEIVER_WAITFORRECEIVE_ENTRY );
     if (!IsActive())
         {	
         iOperator->DpsEngine()->Ptp().ObjectReceivedNotify(KDpsScriptFile, 
             iFileNameAndPath, iStatus, EFalse);        
         SetActive();		    	
-        }
-    IF_DEBUG(Print(_L("<<<CDpsScriptReceiver::WaitForReceive"))); 		
+        }		
+    OstTraceFunctionExit0( CDPSSCRIPTRECEIVER_WAITFORRECEIVE_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -111,7 +107,8 @@ const TDesC& CDpsScriptReceiver::FileNameAndPath()
 //	
 void CDpsScriptReceiver::RunL()
     {
-    IF_DEBUG(Print(_L(">>>CDpsScriptReceiver::RunL %S"), &iFileNameAndPath));
+    OstTraceFunctionEntry0( CDPSSCRIPTRECEIVER_RUNL_ENTRY );
+    OstTraceExt1( TRACE_NORMAL, CDPSSCRIPTRECEIVER_RUNL, "iFileNameAndPath %S", iFileNameAndPath );
     // in the certain error case, it is possible that the printer sending
     // the device status before the UI is ready to receive this event.
     // in this case, pictbridge engine still does not get the ptp folder
@@ -126,8 +123,11 @@ void CDpsScriptReceiver::RunL()
     if (KErrNone == iStatus.Int())
         {
         TFileName receive;
-        User::LeaveIfError(GetFileName(receive));
-        IF_DEBUG(Print(_L("received file is %S"), &receive));
+        LEAVEIFERROR(GetFileName(receive),
+                OstTraceExt2( TRACE_ERROR, DUP3_CDPSSCRIPTRECEIVER_RUNL, 
+                        "Gets the file name from %S failed! error code %d",receive, munged_err  ));
+                
+        OstTraceExt1( TRACE_NORMAL, DUP1_CDPSSCRIPTRECEIVER_RUNL, "received file is %S", receive );
          // reply from Host is received    
         if (!receive.Compare(KDpsHostResponseFileName))
             {
@@ -142,10 +142,10 @@ void CDpsScriptReceiver::RunL()
         }                
     else
     	{
-        IF_DEBUG(Print(_L("the iStatus is wrong!!! %d"), iStatus.Int()));
+        OstTrace1( TRACE_ERROR, DUP2_CDPSSCRIPTRECEIVER_RUNL, "the iStatus is wrong!!! %d", iStatus.Int() );
         iOperator->Error(iStatus.Int());
         }    
-    IF_DEBUG(Print(_L("<<<CDpsScriptReceiver::RunL")));
+    OstTraceFunctionExit0( CDPSSCRIPTRECEIVER_RUNL_EXIT );
     }
  
 // ---------------------------------------------------------------------------
@@ -154,9 +154,9 @@ void CDpsScriptReceiver::RunL()
 //    
 void CDpsScriptReceiver::DoCancel()
     {
-    IF_DEBUG(Print(_L(">>>CDpsScriptReceiver::DoCancel")));
+    OstTraceFunctionEntry0( CDPSSCRIPTRECEIVER_DOCANCEL_ENTRY );
     iOperator->DpsEngine()->Ptp().CancelObjectReceivedNotify();
-    IF_DEBUG(Print(_L("<<<CDpsScriptReceiver::DoCancel")));
+    OstTraceFunctionExit0( CDPSSCRIPTRECEIVER_DOCANCEL_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -165,10 +165,12 @@ void CDpsScriptReceiver::DoCancel()
 //	
 TInt CDpsScriptReceiver::RunError(TInt aError)	
     {
-    IF_DEBUG(Print(_L(">>>CDpsScriptReceiver::RunError is %d"), aError));
+    OstTraceFunctionEntry0( CDPSSCRIPTRECEIVER_RUNERROR_ENTRY );
+    OstTraceDef1( OST_TRACE_CATEGORY_PRODUCTION, TRACE_IMPORTANT, CDPSSCRIPTRECEIVER_RUNERROR, 
+            "error code %d", aError);
     // if error happened cancel the outstanding request
     Cancel();
     iOperator->Error(aError);
-    IF_DEBUG(Print(_L("<<<CDpsScriptReceiver::RunError")));
+    OstTraceFunctionExit0( CDPSSCRIPTRECEIVER_RUNERROR_EXIT );
     return KErrNone;
     }

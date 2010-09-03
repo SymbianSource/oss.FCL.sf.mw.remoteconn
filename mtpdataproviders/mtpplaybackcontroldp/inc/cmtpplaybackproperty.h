@@ -22,7 +22,6 @@
 #define CMTPPLAYBACKPROPERTY_H
 
 #include "mtpplaybackcontroldpconst.h"
-#include "mtpdebug.h"
 #include "cmtpplaybackcommand.h"
 
 class CMTPPlaybackControlDataProvider;
@@ -85,7 +84,6 @@ private:
 
 private: // Owned.
 
-    __FLOG_DECLARATION_MEMBER_MUTABLE;
     TMTPPbDataVolume* iPlaybackVolumeData;
     };
     

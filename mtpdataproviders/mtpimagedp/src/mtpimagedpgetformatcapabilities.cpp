@@ -26,8 +26,12 @@
 
 #include "cmtpimagedpgetformatcapabilities.h"
 #include "cmtpimagedp.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "mtpimagedpgetformatcapabilitiesTraces.h"
+#endif
 
-__FLOG_STMT(_LIT8(KComponent,"ImageDpGetFormatCapabilities");)
+
 MMTPRequestProcessor* CMTPImageDpGetFormatCapabilities::NewL(MMTPDataProviderFramework& aFramework, MMTPConnection& aConnection,CMTPImageDataProvider& /*aDataProvider*/)
     {
     CMTPImageDpGetFormatCapabilities* self = new (ELeave) CMTPImageDpGetFormatCapabilities(aFramework, aConnection);
@@ -39,15 +43,14 @@ MMTPRequestProcessor* CMTPImageDpGetFormatCapabilities::NewL(MMTPDataProviderFra
     
 CMTPImageDpGetFormatCapabilities::~CMTPImageDpGetFormatCapabilities()
     {
-    __FLOG(_L8(">> ~CMTPPictureDpGetObject"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPGETFORMATCAPABILITIES_CMTPIMAGEDPGETFORMATCAPABILITIES_ENTRY );
     delete iCapabilityList;
-    __FLOG(_L8("<< ~CMTPPictureDpGetObject"));
-    __FLOG_CLOSE;
+    OstTraceFunctionExit0( CMTPIMAGEDPGETFORMATCAPABILITIES_CMTPIMAGEDPGETFORMATCAPABILITIES_EXIT );
     }
 
 void CMTPImageDpGetFormatCapabilities::ServiceL()
     {
-    __FLOG(_L8(">> CMTPPictureDpGetFormatCapabilities::ServiceL"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPGETFORMATCAPABILITIES_SERVICEL_ENTRY );
     delete iCapabilityList;
     iCapabilityList = NULL;
     iCapabilityList = CMTPTypeFormatCapabilityList::NewL();
@@ -66,12 +69,12 @@ void CMTPImageDpGetFormatCapabilities::ServiceL()
         }
 
     SendDataL(*iCapabilityList); 
-    __FLOG(_L8("<< CMTPPictureDpGetFormatCapabilities::ServiceL"));   
+    OstTraceFunctionExit0( CMTPIMAGEDPGETFORMATCAPABILITIES_SERVICEL_EXIT );
     }
     
 void CMTPImageDpGetFormatCapabilities::ServiceOneFormatCapabilitiesL(TUint aFormatCode)
     {
-    __FLOG(_L8(">> CMTPPictureDpGetFormatCapabilities::BuildFormatExifJpegL"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPGETFORMATCAPABILITIES_SERVICEONEFORMATCAPABILITIESL_ENTRY );
     CMTPTypeInterdependentPropDesc*  interDesc = CMTPTypeInterdependentPropDesc::NewLC();
     CMTPTypeFormatCapability* frmCap = CMTPTypeFormatCapability::NewLC(aFormatCode, interDesc);
     
@@ -132,7 +135,8 @@ void CMTPImageDpGetFormatCapabilities::ServiceOneFormatCapabilitiesL(TUint aForm
     //EMTPObjectPropCodeNonConsumable
     frmCap->AppendL(ServiceNonConsumableL() );
     
-    
+    //EMTPObjectPropCodeHidden
+    frmCap->AppendL( ServiceHiddenL() ); 
     
     CMTPTypeObjectPropDesc::TPropertyInfo info;
     info.iDataType     = EMTPTypeString;
@@ -210,13 +214,13 @@ void CMTPImageDpGetFormatCapabilities::ServiceOneFormatCapabilitiesL(TUint aForm
     iCapabilityList->AppendL(frmCap);
     CleanupStack::Pop(frmCap);
     CleanupStack::Pop(interDesc);
-    __FLOG(_L8("<< CMTPPictureDpGetFormatCapabilities::BuildFormatExifJpegL"));
+    OstTraceFunctionExit0( CMTPIMAGEDPGETFORMATCAPABILITIES_SERVICEONEFORMATCAPABILITIESL_EXIT );
     }
 
 
 CMTPTypeObjectPropDesc* CMTPImageDpGetFormatCapabilities::ServiceProtectionStatusL()
     {
-    __FLOG(_L8(">> CMTPPictureDpGetFormatCapabilities::ServiceProtectionStatusL"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPGETFORMATCAPABILITIES_SERVICEPROTECTIONSTATUSL_ENTRY );
     CMTPTypeObjectPropDescEnumerationForm* expectedForm = CMTPTypeObjectPropDescEnumerationForm::NewL(EMTPTypeUINT16);
     CleanupStack::PushL(expectedForm);
     //Currently, we only support EMTPProtectionNoProtection and EMTPProtectionReadOnly
@@ -232,14 +236,14 @@ CMTPTypeObjectPropDesc* CMTPImageDpGetFormatCapabilities::ServiceProtectionStatu
     ret->SetUint32L(CMTPTypeObjectPropDesc::EGroupCode, GetPropertyGroupNumber(EMTPObjectPropCodeProtectionStatus));
     CleanupStack::Pop(1, ret);
     CleanupStack::PopAndDestroy(expectedForm);
-    __FLOG(_L8("<< CMTPPictureDpGetFormatCapabilities::ServiceProtectionStatusL"));
+    OstTraceFunctionExit0( CMTPIMAGEDPGETFORMATCAPABILITIES_SERVICEPROTECTIONSTATUSL_EXIT );
     return ret;
    
     }
 
 CMTPTypeObjectPropDesc* CMTPImageDpGetFormatCapabilities::ServiceNonConsumableL()
     {
-    __FLOG(_L8(">> CMTPPictureDpGetFormatCapabilities::ServiceNonConsumableL"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPGETFORMATCAPABILITIES_SERVICENONCONSUMABLEL_ENTRY );
     CMTPTypeObjectPropDescEnumerationForm* expectedForm = CMTPTypeObjectPropDescEnumerationForm::NewL(EMTPTypeUINT8);
     CleanupStack::PushL(expectedForm);
     TUint8 values[] = {0,1};
@@ -253,14 +257,14 @@ CMTPTypeObjectPropDesc* CMTPImageDpGetFormatCapabilities::ServiceNonConsumableL(
     ret->SetUint32L(CMTPTypeObjectPropDesc::EGroupCode, GetPropertyGroupNumber(EMTPObjectPropCodeNonConsumable));
     CleanupStack::Pop(1, ret);
     CleanupStack::PopAndDestroy(expectedForm);
-    __FLOG(_L8("<< CMTPPictureDpGetFormatCapabilities::ServiceNonConsumableL"));
+    OstTraceFunctionExit0( CMTPIMAGEDPGETFORMATCAPABILITIES_SERVICENONCONSUMABLEL_EXIT );
     return ret;
     }
 
 
 TMTPResponseCode CMTPImageDpGetFormatCapabilities::CheckRequestL()
     {
-    __FLOG(_L8(">> CMTPPictureDpGetFormatCapabilities::CheckRequestL"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPGETFORMATCAPABILITIES_CHECKREQUESTL_ENTRY );
     TMTPResponseCode response = EMTPRespCodeOK;
     iFormatCode = Request().Uint32(TMTPTypeRequest::ERequestParameter1);
     
@@ -276,8 +280,10 @@ TMTPResponseCode CMTPImageDpGetFormatCapabilities::CheckRequestL()
                 break;
                 }
             }        
-        }
-    __FLOG_VA((_L8("<< CMTPPictureDpGetFormatCapabilities::CheckRequestL - response = 0x%x"), response));   
+        } 
+    OstTrace1( TRACE_NORMAL, CMTPIMAGEDPGETFORMATCAPABILITIES_CHECKREQUESTL, "response = 0x%x", response );    
+    OstTraceFunctionExit0( CMTPIMAGEDPGETFORMATCAPABILITIES_CHECKREQUESTL_EXIT );
+    
     return response; 
     }
     
@@ -289,17 +295,33 @@ CMTPImageDpGetFormatCapabilities::CMTPImageDpGetFormatCapabilities(MMTPDataProvi
     
 void CMTPImageDpGetFormatCapabilities::ConstructL()
     {
-    __FLOG_OPEN(KMTPSubsystem, KComponent);
-    __FLOG(_L8(">> CMTPPictureDpGetFormatCapabilities::ConstructL"));
-    __FLOG(_L8("<< CMTPPictureDpGetFormatCapabilities::ConstructL"));
+    OstTraceFunctionEntry0( CMTPIMAGEDPGETFORMATCAPABILITIES_CONSTRUCTL_ENTRY );
+    OstTraceFunctionExit0( CMTPIMAGEDPGETFORMATCAPABILITIES_CONSTRUCTL_EXIT );
     }
 
+CMTPTypeObjectPropDesc* CMTPImageDpGetFormatCapabilities::ServiceHiddenL()
+    {
+    CMTPTypeObjectPropDescEnumerationForm* expectedForm = CMTPTypeObjectPropDescEnumerationForm::NewL(EMTPTypeUINT16);
+    CleanupStack::PushL(expectedForm);
+    TUint16 values[] = {EMTPVisible, EMTPHidden};
+    TUint   numValues((sizeof(values) / sizeof(values[0])));
+    for (TUint i = 0; i < numValues; i++)
+        {
+        TMTPTypeUint16 data(values[i]);
+        expectedForm->AppendSupportedValueL(data);
+        }   
+    CMTPTypeObjectPropDesc* ret = CMTPTypeObjectPropDesc::NewL(EMTPObjectPropCodeHidden, *expectedForm);     
+    CleanupStack::PopAndDestroy(expectedForm);
+    return ret;
+    }
+	
 TUint16 CMTPImageDpGetFormatCapabilities::GetPropertyGroupNumber(const TUint16 aPropCode) const
     {
     for( TInt propCodeIndex = 0 ; propCodeIndex < KMTPImageDpGroupOneSize ; propCodeIndex++)
         {
             if(KMTPImageDpGroupOneProperties[propCodeIndex] == aPropCode)
                 {
+                OstTraceFunctionExit0( CMTPIMAGEDPGETFORMATCAPABILITIES_GETPROPERTYGROUPNUMBER_EXIT );
                 return KMTPImageDpPropertyGroupOneNumber;
                 }
         }

@@ -26,17 +26,5 @@ locod.mmp
 PRJ_TESTMMPFILES
 
 PRJ_EXPORTS
-../commoninc/locodbearer.h                  |../../../inc/locodbearer.h
-../commoninc/locodplugin.hrh                |../../../inc/locodplugin.hrh
-../commoninc/locodbearerplugin.h            |../../../inc/locodbearerplugin.h
-../commoninc/locodbearerplugin.inl          |../../../inc/locodbearerplugin.inl
-../commoninc/locodbearerpluginobserver.h    |../../../inc/locodbearerpluginobserver.h
-../commoninc/locodbearerpluginparams.h      |../../../inc/locodbearerpluginparams.h
-../commoninc/locodbearerpluginparams.inl    |../../../inc/locodbearerpluginparams.inl
-../commoninc/locodserviceplugin.h           |../../inc/locodserviceplugin.h
-../commoninc/locodserviceplugin.inl         |../../inc/locodserviceplugin.inl
-../commoninc/locodservicepluginobserver.h   |../../inc/locodservicepluginobserver.h
-../commoninc/locodservicepluginparams.h     |../../inc/locodservicepluginparams.h
-../commoninc/locodservicepluginparams.inl   |../../inc/locodservicepluginparams.inl
 ../rom/locod.iby        CORE_MW_LAYER_IBY_EXPORT_PATH(locod.iby)
 

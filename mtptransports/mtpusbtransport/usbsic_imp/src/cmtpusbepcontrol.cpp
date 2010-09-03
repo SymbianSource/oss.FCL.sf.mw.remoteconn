@@ -6,7 +6,6 @@
 // at the URL "http://www.eclipse.org/legal/epl-v10.html".
 //
 // Initial Contributors:
-// Nokia Corporation - initial contribution.
 //
 // Contributors:
 //
@@ -22,9 +21,11 @@
 #include "cmtpusbepcontrol.h"
 #include "mtpusbpanic.h"
 #include "mtpusbtransportconstants.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpusbepcontrolTraces.h"
+#endif
 
-// Class constants.
-__FLOG_STMT(_LIT8(KComponent,"UsbEpControl");)
 
 /**
 USB MTP device class control endpoint data transfer controller factory method.
@@ -39,12 +40,8 @@ CMTPUsbEpControl* CMTPUsbEpControl::NewL(TUint aId, CMTPUsbConnection& aConnecti
     {
     CMTPUsbEpControl* self = new(ELeave) CMTPUsbEpControl(aId, aConnection);
     CleanupStack::PushL(self);
-    
-#ifdef __FLOG_ACTIVE    
-    self->ConstructL(KComponent);
-#else
+
     self->ConstructL();
-#endif
 
     CleanupStack::Pop(self);
     return self;    
@@ -55,8 +52,8 @@ Destructor.
 */
 CMTPUsbEpControl::~CMTPUsbEpControl()
     {
-    __FLOG(_L8("~CMTPUsbEpControl - Entry"));
-    __FLOG(_L8("~CMTPUsbEpControl - Exit"));
+    OstTraceFunctionEntry0( CMTPUSBEPCONTROL_CMTPUSBEPCONTROL_DES_ENTRY );
+    OstTraceFunctionExit0( CMTPUSBEPCONTROL_CMTPUSBEPCONTROL_DES_EXIT );
     }
 
 /**
@@ -66,16 +63,19 @@ Initiates an USB MTP device class specific request data receive sequence.
 */
 void CMTPUsbEpControl::ReceiveControlRequestDataL(MMTPType& aData)
     {
-    __FLOG(_L8("ReceiveControlRequestDataL - Entry"));
-    __FLOG_VA((_L8("CMTPUsbEpControl state on entry = %d"), iState));
+    OstTraceFunctionEntry0( CMTPUSBEPCONTROL_RECEIVECONTROLREQUESTDATAL_ENTRY );
+    OstTrace1( TRACE_NORMAL, CMTPUSBEPCONTROL_RECEIVECONTROLREQUESTDATAL, 
+            "CMTPUsbEpControl state on entry = %d", iState );
+    
     __ASSERT_DEBUG((iState == EControlRequestSetupComplete), Panic(EMTPUsbBadState));
     
     // Pass the bulk data sink buffer to the base class and update state..
     ReceiveDataL(aData);
     SetState(EControlRequestDataReceive);
-    
-    __FLOG_VA((_L8("CMTPUsbEpControl state on entry = %d"), iState));
-    __FLOG(_L8("ReceiveControlRequestDataL - Exit"));
+
+    OstTrace1( TRACE_NORMAL, DUP1_CMTPUSBEPCONTROL_RECEIVECONTROLREQUESTDATAL, 
+            "CMTPUsbEpControl state on entry = %d", iState );
+    OstTraceFunctionExit0( CMTPUSBEPCONTROL_RECEIVECONTROLREQUESTDATAL_EXIT );
     }
 
 /**
@@ -85,16 +85,19 @@ Initiates an USB MTP device class specific request request processing sequence.
 */
 void CMTPUsbEpControl::ReceiveControlRequestSetupL(MMTPType& aData)
     {
-    __FLOG(_L8("ReceiveControlRequestSetupL - Entry"));
-    __FLOG_VA((_L8("CMTPUsbEpControl state on entry = %d"), iState));
+    OstTraceFunctionEntry0( CMTPUSBEPCONTROL_RECEIVECONTROLREQUESTSETUPL_ENTRY );
+    OstTrace1( TRACE_NORMAL, CMTPUSBEPCONTROL_RECEIVECONTROLREQUESTSETUPL, 
+            "CMTPUsbEpControl state on entry = %d", iState );
+    
     __ASSERT_DEBUG((iState == EIdle), Panic(EMTPUsbBadState));
     
     // Pass the bulk data sink buffer to the base class and update state.
     ReceiveDataL(aData);
     SetState(EControlRequestSetupPending);
-    
-    __FLOG_VA((_L8("CMTPUsbEpControl state on entry = %d"), iState));
-    __FLOG(_L8("ReceiveControlRequestSetupL - Exit"));
+
+    OstTrace1( TRACE_NORMAL, DUP1_CMTPUSBEPCONTROL_RECEIVECONTROLREQUESTSETUPL, 
+            "CMTPUsbEpControl state on entry = %d", iState );
+    OstTraceFunctionExit0( CMTPUSBEPCONTROL_RECEIVECONTROLREQUESTSETUPL_EXIT );
     }
 
 /**
@@ -104,14 +107,14 @@ Initiates an USB MTP device class specific request data send sequence.
 */
 void CMTPUsbEpControl::SendControlRequestDataL(const MMTPType& aData)
     {
-    __FLOG(_L8("SendControlRequestDataL - Entry"));
+    OstTraceFunctionEntry0( CMTPUSBEPCONTROL_SENDCONTROLREQUESTDATAL_ENTRY );
     __ASSERT_DEBUG((iState == EControlRequestSetupComplete), Panic(EMTPUsbBadState));
     
     // Pass the bulk data source buffer to the base class and update state.
     SendDataL(aData);
     SetState(EControlRequestDataSend);
-    
-    __FLOG(_L8("SendControlRequestDataL - Exit"));
+
+    OstTraceFunctionExit0( CMTPUSBEPCONTROL_SENDCONTROLREQUESTDATAL_EXIT );
     }
 
 /**
@@ -119,20 +122,25 @@ Concludes an USB MTP device class specific request request processing sequence.
 */
 void CMTPUsbEpControl::SendControlRequestStatus()
     {
-    __FLOG(_L8("SendControlRequestStatus - Entry"));
-    __FLOG_VA((_L8("CMTPUsbEpControl state on entry = %d"), iState));
+    OstTraceFunctionEntry0( CMTPUSBEPCONTROL_SENDCONTROLREQUESTSTATUS_ENTRY );
+    OstTrace1( TRACE_NORMAL, CMTPUSBEPCONTROL_SENDCONTROLREQUESTSTATUS, 
+            "CMTPUsbEpControl state on entry = %d", iState );
     __ASSERT_DEBUG(((iState == EControlRequestStatusSend) || (iState == EControlRequestSetupComplete)), Panic(EMTPUsbBadState));
     TInt ret = Connection().Ldd().SendEp0StatusPacket();
-    __FLOG_VA((_L8("SendEp0StatusPacket result = %d."), ret));
+    OstTrace1( TRACE_NORMAL, DUP1_CMTPUSBEPCONTROL_SENDCONTROLREQUESTSTATUS, 
+            "SendEp0StatusPacket result = %d.", ret );
     SetState(EIdle);
-    __FLOG_VA((_L8("CMTPUsbEpControl state on exit = %d"), iState));
-    __FLOG(_L8("SendControlRequestStatus - Exit"));
+    OstTrace1( TRACE_NORMAL, DUP2_CMTPUSBEPCONTROL_SENDCONTROLREQUESTSTATUS, 
+            "CMTPUsbEpControl state on exit = %d", iState );
+    OstTraceFunctionExit0( CMTPUSBEPCONTROL_SENDCONTROLREQUESTSTATUS_EXIT );
     }
     
 void CMTPUsbEpControl::ReceiveDataCompleteL(TInt aError, MMTPType& aSink)
     {
-    __FLOG(_L8("ReceiveDataCompleteL - Entry"));
-    __FLOG_VA((_L8("CMTPUsbEpControl state on entry = %d"), iState));
+    OstTraceFunctionEntry0( CMTPUSBEPCONTROL_RECEIVEDATACOMPLETEL_ENTRY );
+    OstTrace1( TRACE_NORMAL, CMTPUSBEPCONTROL_RECEIVEDATACOMPLETEL, 
+            "CMTPUsbEpControl state on entry = %d", iState );
+    
     switch (iState)
         {
     case EControlRequestSetupPending:
@@ -161,19 +169,23 @@ void CMTPUsbEpControl::ReceiveDataCompleteL(TInt aError, MMTPType& aSink)
 	    // Reset the internal state to idle.
 	    SetState(EIdle);
 	    }
-    __FLOG_VA((_L8("CMTPUsbEpControl state on exit = %d"), iState));
-    __FLOG(_L8("ReceiveDataCompleteL - Exit"));
+    OstTrace1( TRACE_NORMAL, DUP1_CMTPUSBEPCONTROL_RECEIVEDATACOMPLETEL, 
+            "CMTPUsbEpControl state on exit = %d", iState );
+    OstTraceFunctionExit0( CMTPUSBEPCONTROL_RECEIVEDATACOMPLETEL_EXIT );
     }
     
 void CMTPUsbEpControl::SendDataCompleteL(TInt aError, const MMTPType& aSource)
     {
-    __FLOG(_L8("SendDataCompleteL - Entry"));
-    __FLOG_VA((_L8("CMTPUsbEpControl state on entry = %d"), iState));
+    OstTraceFunctionEntry0( CMTPUSBEPCONTROL_SENDDATACOMPLETEL_ENTRY );
+    OstTrace1( TRACE_NORMAL, CMTPUSBEPCONTROL_SENDDATACOMPLETEL, 
+            "CMTPUsbEpControl state on entry = %d", iState );
     __ASSERT_DEBUG((iState == EControlRequestDataSend), Panic(EMTPUsbBadState));
     SetState(EIdle);
     Connection().SendControlRequestDataCompleteL(aError, aSource);        
-    __FLOG_VA((_L8("CMTPUsbEpControl state on exit = %d"), iState));
-    __FLOG(_L8("SendDataCompleteL - Exit"));
+    OstTrace1( TRACE_NORMAL, DUP1_CMTPUSBEPCONTROL_SENDDATACOMPLETEL, 
+            "CMTPUsbEpControl state on exit = %d", iState );
+    
+    OstTraceFunctionExit0( CMTPUSBEPCONTROL_SENDDATACOMPLETEL_EXIT );
     }    
     
 /**
@@ -194,10 +206,10 @@ Sets the endpoint data send/receive state variable.
 */
 void CMTPUsbEpControl::SetState(TUint aState)
     {
-    __FLOG(_L8("SetState - Entry"));
+    OstTraceFunctionEntry0( CMTPUSBEPCONTROL_SETSTATE_ENTRY );
     iState = aState;
-    __FLOG_VA((_L8("State set to %d"), iState));
-    __FLOG(_L8("SetState - Exit"));
+    OstTrace1( TRACE_NORMAL, CMTPUSBEPCONTROL_SETSTATE, "State set to %d", iState );
+    OstTraceFunctionExit0( CMTPUSBEPCONTROL_SETSTATE_EXIT );
     }
 /**
 Overide this method derived from base class.
@@ -205,10 +217,10 @@ reset the state.
 */      
 void CMTPUsbEpControl::DoCancel()
 	{
-	__FLOG(_L8("DoCancel - Entry"));
+	OstTraceFunctionEntry0( CMTPUSBEPCONTROL_DOCANCEL_ENTRY );
 	CMTPUsbEpBase::DoCancel();
 	SetState(EIdle);
-	__FLOG(_L8("DoCancel - Exit"));
+	OstTraceFunctionExit0( CMTPUSBEPCONTROL_DOCANCEL_EXIT );
 	}
 	
 

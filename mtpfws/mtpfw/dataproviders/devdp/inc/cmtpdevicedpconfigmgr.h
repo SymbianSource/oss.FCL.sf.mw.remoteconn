@@ -24,7 +24,6 @@
 #include <e32base.h>
 #include <badesca.h>
 
-#include "mtpdebug.h"
 #include "mtpdevicedpconst.h"
 
 class MMTPDataProviderFramework;
@@ -122,10 +121,6 @@ private:
 	void  GetDriveInfoL(TInt aDriveNo, TDes& aVolumeName, TDes& aRootDirPath);
 
 private:
-	/**
-    FLOGGER debug trace member variable.
-    */
-    __FLOG_DECLARATION_MEMBER_MUTABLE;
     
 	MMTPDataProviderFramework& iFramework;
 	TUint iResourceId;

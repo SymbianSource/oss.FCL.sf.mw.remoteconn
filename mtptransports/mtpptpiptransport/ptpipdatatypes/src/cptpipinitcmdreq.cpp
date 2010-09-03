@@ -19,7 +19,12 @@
 
 
 #include "cptpipinitcmdreq.h"
-#include "ptpipdatatypes.h"    
+#include "ptpipdatatypes.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cptpipinitcmdreqTraces.h"
+#endif
+    
 
 
 
@@ -38,10 +43,12 @@ const CMTPTypeCompoundBase::TElementInfo CPTPIPInitCmdRequest::iElementMetaData[
 
 EXPORT_C  CPTPIPInitCmdRequest* CPTPIPInitCmdRequest::NewL()
     {
+    OstTraceFunctionEntry0( CPTPIPINITCMDREQUEST_NEWL_ENTRY );
     CPTPIPInitCmdRequest* self = new (ELeave) CPTPIPInitCmdRequest(); 
     CleanupStack::PushL(self); 
     self->ConstructL();   
     CleanupStack::Pop(self);
+    OstTraceFunctionExit0( CPTPIPINITCMDREQUEST_NEWL_EXIT );
     return self; 
     }
 /**
@@ -52,7 +59,9 @@ EXPORT_C CPTPIPInitCmdRequest::CPTPIPInitCmdRequest() :
     iChunkHeader(KFlatChunkSize, *this),
     iElementInfo(iElementMetaData, ENumElements),iBuffer()
     {
+    OstTraceFunctionEntry0( CPTPIPINITCMDREQUEST_CPTPIPINITCMDREQUEST_ENTRY );
     
+    OstTraceFunctionExit0( CPTPIPINITCMDREQUEST_CPTPIPINITCMDREQUEST_EXIT );
     }
 
 /**
@@ -60,39 +69,50 @@ Destructor.
 */
  EXPORT_C CPTPIPInitCmdRequest::~CPTPIPInitCmdRequest()
     {
+    OstTraceFunctionEntry0( DUP1_CPTPIPINITCMDREQUEST_CPTPIPINITCMDREQUEST_ENTRY );
     iChunkHeader.Close();
     iBuffer.Close();
+    OstTraceFunctionExit0( DUP1_CPTPIPINITCMDREQUEST_CPTPIPINITCMDREQUEST_EXIT );
     }
     /**
 Second phase constructor.
 */   
  void CPTPIPInitCmdRequest::ConstructL()
     {
+    OstTraceFunctionEntry0( CPTPIPINITCMDREQUEST_CONSTRUCTL_ENTRY );
     iChunkHeader.OpenL();
     ChunkAppendL(iChunkHeader);
     ChunkAppendL(iVersion);
    iChunkCount = EIdNumChunks;
     
+    OstTraceFunctionExit0( CPTPIPINITCMDREQUEST_CONSTRUCTL_EXIT );
     }
     
     
  EXPORT_C TUint CPTPIPInitCmdRequest::Type() const
     {
+    OstTraceFunctionEntry0( CPTPIPINITCMDREQUEST_TYPE_ENTRY );
+    OstTraceFunctionExit0( CPTPIPINITCMDREQUEST_TYPE_EXIT );
     return EPTPIPTypeInitCmdRequest;
     } 
 const CMTPTypeCompoundBase::TElementInfo& CPTPIPInitCmdRequest::ElementInfo(TInt aElementId) const
     {
+    OstTraceFunctionEntry0( CPTPIPINITCMDREQUEST_ELEMENTINFO_ENTRY );
     __ASSERT_DEBUG((aElementId < ENumElements), User::Invariant());
+    OstTraceFunctionExit0( CPTPIPINITCMDREQUEST_ELEMENTINFO_EXIT );
     return iElementInfo[aElementId];
     }
 EXPORT_C TInt CPTPIPInitCmdRequest::FirstWriteChunk(TPtr8& aChunk)
 {
+	OstTraceFunctionEntry0( CPTPIPINITCMDREQUEST_FIRSTWRITECHUNK_ENTRY );
 	iChunkCount = EIdFlatChunk;
+    OstTraceFunctionExit0( CPTPIPINITCMDREQUEST_FIRSTWRITECHUNK_EXIT );
 	return CMTPTypeCompoundBase::FirstWriteChunk(aChunk);
 	
 }
 EXPORT_C TInt CPTPIPInitCmdRequest::NextWriteChunk(TPtr8& aChunk)
 {
+	OstTraceFunctionEntry0( CPTPIPINITCMDREQUEST_NEXTWRITECHUNK_ENTRY );
 	TInt ret = KErrNone;
 	if(iChunkCount == EIdFlatChunk)
 		{	
@@ -111,22 +131,27 @@ EXPORT_C TInt CPTPIPInitCmdRequest::NextWriteChunk(TPtr8& aChunk)
 		ret = CMTPTypeCompoundBase::NextWriteChunk(aChunk);	
 		}
 	iChunkCount++;
+	OstTraceFunctionExit0( CPTPIPINITCMDREQUEST_NEXTWRITECHUNK_EXIT );
 	return ret;
 }
 
 EXPORT_C MMTPType* CPTPIPInitCmdRequest::CommitChunkL(TPtr8& aChunk)
 {
+    OstTraceFunctionEntry0( CPTPIPINITCMDREQUEST_COMMITCHUNKL_ENTRY );
 
 	if(iChunkCount != EIdVersionChunk)
 		{
 		return CMTPTypeCompoundBase::CommitChunkL(aChunk);
 			
 		}
+	OstTraceFunctionExit0( CPTPIPINITCMDREQUEST_COMMITCHUNKL_EXIT );
 	return NULL;	
 }
 
 EXPORT_C TDes16& CPTPIPInitCmdRequest::HostFriendlyName()
 {
+OstTraceFunctionEntry0( CPTPIPINITCMDREQUEST_HOSTFRIENDLYNAME_ENTRY );
+OstTraceFunctionExit0( CPTPIPINITCMDREQUEST_HOSTFRIENDLYNAME_EXIT );
 return iBuffer;
 }
 

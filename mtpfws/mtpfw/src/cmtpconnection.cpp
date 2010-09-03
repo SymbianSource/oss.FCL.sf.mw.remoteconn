@@ -35,9 +35,13 @@
 #include "cmtprequestlogger.h"
 #endif
 
-#define UNUSED_VAR(a) (a) = (a)
+#include "mtpdebug.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpconnectionTraces.h"
+#endif
 
-__FLOG_STMT(_LIT8(KComponent,"MTPConnection");)
+#define UNUSED_VAR(a) (a) = (a)
 
 /**
 CMTPConnection panics
@@ -79,7 +83,7 @@ Destructor.
 */
 CMTPConnection::~CMTPConnection()
     {
-    __FLOG(_L8("~CMTPConnection - Entry"));
+    OstTraceFunctionEntry0( CMTPCONNECTION_CMTPCONNECTION_DES_ENTRY );
     CloseAllSessions();
     
 	//remove all events
@@ -97,8 +101,7 @@ CMTPConnection::~CMTPConnection()
     // delete the ‘name?property
     RProcess process;
     RProperty::Delete(process.SecureId(), EMTPConnStateKey);
-    __FLOG(_L8("~CMTPConnection - Exit"));
-	__FLOG_CLOSE;
+    OstTraceFunctionExit0( CMTPCONNECTION_CMTPCONNECTION_DES_EXIT );
     }
 
 /**
@@ -116,7 +119,8 @@ connection.
 */
 void CMTPConnection::ReceiveDataL(MMTPType& aData, const TMTPTypeRequest& aRequest, TRequestStatus& aStatus)
     {   
-    __FLOG(_L8("ReceiveDataL - Entry"));
+    OstTraceFunctionEntry0( CMTPCONNECTION_RECEIVEDATAL_ENTRY );
+    
     iDataReceiveResult = KErrNone;
     const TUint KValidPhases(ERequestPhase);
     CMTPSession& session(SessionL(aRequest, TMTPTypeRequest::ERequestSessionID));
@@ -132,7 +136,7 @@ void CMTPConnection::ReceiveDataL(MMTPType& aData, const TMTPTypeRequest& aReque
         
         iTransportConnection->ReceiveDataL(aData, aRequest);      
         }
-    __FLOG(_L8("ReceiveDataL - Exit"));
+    OstTraceFunctionExit0( CMTPCONNECTION_RECEIVEDATAL_EXIT );
     }
 
 /**
@@ -150,7 +154,7 @@ connection.
 */
 void CMTPConnection::SendDataL(const MMTPType& aData, const TMTPTypeRequest& aRequest, TRequestStatus& aStatus)
     {
-    __FLOG(_L8("SendDataL - Entry"));
+    OstTraceFunctionEntry0( CMTPCONNECTION_SENDDATAL_ENTRY );
 #ifdef MTP_CAPTURE_TEST_DATA
     iRequestLogger->WriteDataPhaseL(aData, EDataRToIPhase);
 #endif
@@ -170,7 +174,7 @@ void CMTPConnection::SendDataL(const MMTPType& aData, const TMTPTypeRequest& aRe
             }
         iTransportConnection->SendDataL(aData, aRequest);
         }
-    __FLOG(_L8("SendDataL - Exit"));
+    OstTraceFunctionExit0( CMTPCONNECTION_SENDDATAL_EXIT );
     }
 
 /**
@@ -180,7 +184,7 @@ Sends an MTP event dataset.
 */
 void CMTPConnection::SendEventL(const TMTPTypeEvent& aEvent)
     {
-    __FLOG(_L8("SendEventL - Entry"));
+    OstTraceFunctionEntry0( CMTPCONNECTION_SENDEVENTL_ENTRY );
     const TUint KValidPhases(EIdlePhase | ERequestPhase | EDataIToRPhase| EDataRToIPhase | EResponsePhase | ECompletingPhase);
     if (ValidFrameworkRequest(NULL, KValidPhases, NULL))
         {
@@ -188,7 +192,9 @@ void CMTPConnection::SendEventL(const TMTPTypeEvent& aEvent)
         TUint32 sessionId(aEvent.Uint32(TMTPTypeEvent::EEventSessionID));
         if (sessionId != KMTPSessionAll)
             {
-            User::LeaveIfError(iSessions.FindInOrder(sessionId, SessionOrder));
+            TInt ret = iSessions.FindInOrder(sessionId, SessionOrder);
+            LEAVEIFERROR(ret, 
+                    OstTrace1(TRACE_ERROR, CMTPCONNECTION_SENDEVENTL, "can't find according to session_id %d", sessionId));
             }
             
 
@@ -199,7 +205,7 @@ void CMTPConnection::SendEventL(const TMTPTypeEvent& aEvent)
 			iTransportConnection->SendEventL(iEventQ.First()->iEvent);			
 			}
         }
-    __FLOG(_L8("SendEventL - Exit"));
+    OstTraceFunctionExit0( CMTPCONNECTION_SENDEVENTL_EXIT );
     }
 
 /**
@@ -219,7 +225,7 @@ connection.
 */
 void CMTPConnection::SendResponseL(const TMTPTypeResponse& aResponse, const TMTPTypeRequest& aRequest, TRequestStatus& aStatus)
     {
-    __FLOG(_L8("SendResponseL - Entry"));
+    OstTraceFunctionEntry0( CMTPCONNECTION_SENDRESPONSEL_ENTRY );
 #ifdef MTP_CAPTURE_TEST_DATA
     // Running under debug capture mode save this request off to disk.
     iRequestLogger->LogResponseL(aResponse);
@@ -239,7 +245,8 @@ void CMTPConnection::SendResponseL(const TMTPTypeResponse& aResponse, const TMTP
             transaction irrecoverably hanging.
             */
             UnrecoverableMTPError();
-            User::Leave(KErrArgument);                
+            OstTrace0(TRACE_ERROR, CMTPCONNECTION_SENDRESPONSEL, "Request/Response mismatch");
+            User::Leave(KErrArgument);   
             }
 
         if (session.TransactionPhase() == ERequestPhase)
@@ -252,7 +259,7 @@ void CMTPConnection::SendResponseL(const TMTPTypeResponse& aResponse, const TMTP
         
         iTransportConnection->SendResponseL(aResponse, aRequest);
         }
-    __FLOG(_L8("SendResponseL - Exit"));
+    OstTraceFunctionExit0( CMTPCONNECTION_SENDRESPONSEL_EXIT );
     }
 
 /**
@@ -267,7 +274,7 @@ occurs.
 */
 EXPORT_C void CMTPConnection::SessionClosedL(TUint32 aMTPId)
     {
-    __FLOG(_L8("SessionClosedL - Entry"));
+    OstTraceFunctionEntry0( CMTPCONNECTION_SESSIONCLOSEDL_ENTRY );
     if(0x0FFFFFFF != aMTPId)
     	{
     	TInt idx(iSessions.FindInOrder(aMTPId, SessionOrder));
@@ -288,7 +295,7 @@ EXPORT_C void CMTPConnection::SessionClosedL(TUint32 aMTPId)
 		    session = NULL;
 		    }
 	    }
-    __FLOG(_L8("SessionClosedL - Exit"));
+    OstTraceFunctionExit0( CMTPCONNECTION_SESSIONCLOSEDL_EXIT );
     }
 
 /**
@@ -311,11 +318,12 @@ occurs.
 */
 EXPORT_C void CMTPConnection::SessionOpenedL(TUint32 aMTPId)
     {
-    __FLOG(_L8("SessionOpenedL - Entry"));
+    OstTraceFunctionEntry0( CMTPCONNECTION_SESSIONOPENEDL_ENTRY );
     // Validate the SessionID
     if (SessionWithMTPIdExists(aMTPId))
         {
-        User::Leave(KErrAlreadyExists);            
+        OstTrace1(TRACE_ERROR, CMTPCONNECTION_SESSIONOPENEDL, "session %d alreay exist", aMTPId);
+        User::Leave(KErrAlreadyExists);   
         }
     
     // Create a new session object
@@ -332,7 +340,7 @@ EXPORT_C void CMTPConnection::SessionOpenedL(TUint32 aMTPId)
         TMTPNotificationParamsSessionChange params = {aMTPId, *this};
         iSingletons.DpController().NotifyDataProvidersL(EMTPSessionOpened, &params);
         }
-    __FLOG(_L8("SessionOpenedL - Exit"));
+    OstTraceFunctionExit0( CMTPCONNECTION_SESSIONOPENEDL_EXIT );
     }
 
 /*
@@ -344,7 +352,7 @@ EXPORT_C void CMTPConnection::SessionOpenedL(TUint32 aMTPId)
  */
 TBool CMTPConnection::ConnectionSuspended()
     {
-    __FLOG(_L8("ConnectionSuspended - Entry"));
+    OstTraceFunctionEntry0( CMTPCONNECTION_CONNECTIONSUSPENDED_ENTRY );
     
     TBool ret = EFalse;
     TUint currentState = State();
@@ -360,13 +368,13 @@ TBool CMTPConnection::ConnectionSuspended()
         PublishConnState(EDisconnectedFromHost);   
         }
     
-    __FLOG(_L8("ConnectionSuspended - Exit"));
+    OstTraceFunctionExit0( CMTPCONNECTION_CONNECTIONSUSPENDED_EXIT );
     return ret;
     }
 
 void CMTPConnection::CompleteCloseConnection()
     {
-    __FLOG(_L8("CompleteCloseConnection - Entry"));
+    OstTraceFunctionEntry0( CMTPCONNECTION_COMPLETECLOSECONNECTION_ENTRY );
     
     CloseAllSessions();
     iSessions.Reset();
@@ -375,7 +383,7 @@ void CMTPConnection::CompleteCloseConnection()
     iSingletons.ConnectionMgr().ConnectionCloseComplete(iConnectionId);    
     iSingletons.Close();
 
-    __FLOG(_L8("CompleteCloseConnection - Exit"));
+    OstTraceFunctionExit0( CMTPCONNECTION_COMPLETECLOSECONNECTION_EXIT );
     }
 
 /*
@@ -386,7 +394,7 @@ void CMTPConnection::CompleteCloseConnection()
  */
 void CMTPConnection::ConnectionResumedL(MMTPTransportConnection& aTransportConnection)
     {
-    __FLOG(_L8("ConnectionResumed - Entry"));
+    OstTraceFunctionEntry0( CMTPCONNECTION_CONNECTIONRESUMEDL_ENTRY );
     
     TUint currentState = State();
     if (currentState != EStateOpen && currentState != EStateErrorRecovery)
@@ -409,7 +417,7 @@ void CMTPConnection::ConnectionResumedL(MMTPTransportConnection& aTransportConne
          
         }
     
-    __FLOG(_L8("ConnectionResumed - Exit"));
+    OstTraceFunctionExit0( CMTPCONNECTION_CONNECTIONRESUMEDL_EXIT );
     }
 
 /**
@@ -422,7 +430,8 @@ ECompletingPhase.
 */
 void CMTPConnection::TransactionCompleteL(const TMTPTypeRequest& aRequest)
     {
-    __FLOG(_L8("TransactionCompleteL - Entry"));
+    OstTraceFunctionEntry0( CMTPCONNECTION_TRANSACTIONCOMPLETEL_ENTRY );
+
     const TUint KValidPhases(ECompletingPhase);
     CMTPSession& session(SessionL(aRequest, TMTPTypeRequest::ERequestSessionID));    
 
@@ -440,7 +449,8 @@ void CMTPConnection::TransactionCompleteL(const TMTPTypeRequest& aRequest)
             CompleteCloseConnection();
             }
         }
-    __FLOG(_L8("TransactionCompleteL - Exit"));
+
+    OstTraceFunctionExit0( CMTPCONNECTION_TRANSACTIONCOMPLETEL_EXIT );
     }
     
 TUint CMTPConnection::ConnectionId() const
@@ -461,7 +471,8 @@ TBool CMTPConnection::SessionWithMTPIdExists(TUint32 aMTPId) const
 MMTPSession& CMTPConnection::SessionWithMTPIdL(TUint32 aMTPId) const
     {
     TInt idx(iSessions.FindInOrder(aMTPId, SessionOrder));
-    User::LeaveIfError(idx);
+    LEAVEIFERROR(idx, 
+            OstTrace1(TRACE_ERROR, CMTPCONNECTION_SESSIONWITHMTPIDL, "can't find according to session_id %d", aMTPId));
     return *iSessions[idx];
     }
     
@@ -477,7 +488,8 @@ MMTPSession& CMTPConnection::SessionWithUniqueIdL(TUint32 aUniqueId) const
     
 void CMTPConnection::ReceivedEventL(const TMTPTypeEvent& aEvent)
     {  
-    __FLOG(_L8("ReceivedEventL - Entry"));
+    OstTraceFunctionEntry0( CMTPCONNECTION_RECEIVEDEVENTL_ENTRY );
+
     TInt idx(KErrNotFound);
     
     // Validate the SessionID.
@@ -485,7 +497,8 @@ void CMTPConnection::ReceivedEventL(const TMTPTypeEvent& aEvent)
     if (sessionId != KMTPSessionAll)
         {
         idx = iSessions.FindInOrder(sessionId, SessionOrder);
-        User::LeaveIfError(idx);
+        LEAVEIFERROR(idx, 
+                OstTrace1(TRACE_ERROR, CMTPCONNECTION_RECEIVEDEVENTL, "can't find according to session_id %d", sessionId));
         }
        
     // Check that this event is valid.
@@ -501,15 +514,14 @@ void CMTPConnection::ReceivedEventL(const TMTPTypeEvent& aEvent)
     	}
     else
     	{
-	   	if (request.Uint32(TMTPTypeRequest::ERequestTransactionID) > 
-	    	aEvent.Uint32(TMTPTypeEvent::EEventTransactionID) )
+        TUint32 requestTransactionId = request.Uint32(TMTPTypeRequest::ERequestTransactionID);
+        TUint32 eventTransactionId = aEvent.Uint32(TMTPTypeEvent::EEventTransactionID); 
+	   	if (eventTransactionId > requestTransactionId)
 	        {
 	        // Event to be queued for future use, we can only queue one event at a time
 	        session.StorePendingEventL(aEvent);
 	        }
-	        
-	    if (request.Uint32(TMTPTypeRequest::ERequestTransactionID) == 
-	         aEvent.Uint32(TMTPTypeEvent::EEventTransactionID) )
+	   	else if (eventTransactionId == requestTransactionId)
 	        {     
 	        // Event is valid	     
 	        // Perform transport layer processing.
@@ -529,16 +541,21 @@ void CMTPConnection::ReceivedEventL(const TMTPTypeEvent& aEvent)
 	                }
 	            }
 	        
-	         // Forward the event to the DP framework layer.
+	        // Forward the event to the DP framework layer.
 	        iSingletons.Router().ProcessEventL(aEvent, *this); 
 	        }
+	   	
+	   	//discard the event if the event transaction id < requestion transaction id
+	   	
     	}	
-    __FLOG(_L8("ReceivedEventL - Exit"));
+
+    OstTraceFunctionExit0( CMTPCONNECTION_RECEIVEDEVENTL_EXIT );
     }
 
 void CMTPConnection::ReceivedRequestL(const TMTPTypeRequest& aRequest)
     {  
-    __FLOG(_L8("ReceivedRequestL - Entry"));
+    OstTraceFunctionEntry0( CMTPCONNECTION_RECEIVEDREQUESTL_ENTRY );
+    
 #ifdef MTP_CAPTURE_TEST_DATA
     // Running under debug capture mode save this request off to disk.
     iRequestLogger->LogRequestL(aRequest);
@@ -574,11 +591,12 @@ void CMTPConnection::ReceivedRequestL(const TMTPTypeRequest& aRequest)
             if(err!=KErrNone)
                 {
                 session.SetTransactionPhase(EIdlePhase);
+                OstTrace1(TRACE_ERROR, CMTPCONNECTION_RECEIVEDREQUESTL, "router process request error! error code %d", err);
                 User::Leave(err);
                 }
             }
         }
-    __FLOG(_L8("ReceivedRequestL - Exit"));
+    OstTraceFunctionExit0( CMTPCONNECTION_RECEIVEDREQUESTL_EXIT );
     }
 
 #ifdef MTP_CAPTURE_TEST_DATA
@@ -587,7 +605,8 @@ void CMTPConnection::ReceiveDataCompleteL(TInt aErr, const MMTPType& aData, cons
 void CMTPConnection::ReceiveDataCompleteL(TInt aErr, const MMTPType& aData, const TMTPTypeRequest& aRequest)
 #endif
     {
-    __FLOG(_L8("ReceiveDataCompleteL - Entry"));    
+    OstTraceFunctionEntry0( CMTPCONNECTION_RECEIVEDATACOMPLETEL_ENTRY );
+    
     CMTPSession& session(SessionL(aRequest, TMTPTypeRequest::ERequestSessionID)); 
     __ASSERT_DEBUG((session.TransactionPhase() == EDataIToRPhase), Panic(EMTPPanicInvalidState));
     
@@ -604,13 +623,12 @@ void CMTPConnection::ReceiveDataCompleteL(TInt aErr, const MMTPType& aData, cons
 	session.SetTransactionPhase(EResponsePhase);
 	iDataReceiveResult = aErr;
 	session.CompletePendingRequest(aErr);
-    
-    __FLOG(_L8("ReceiveDataCompleteL - Exit"));
+	OstTraceFunctionExit0( CMTPCONNECTION_RECEIVEDATACOMPLETEL_EXIT );
     }
 
 void CMTPConnection::SendDataCompleteL(TInt aErr, const MMTPType& aData, const TMTPTypeRequest& aRequest)
     {
-    __FLOG(_L8("SendDataCompleteL - Entry"));  
+    OstTraceFunctionEntry0( CMTPCONNECTION_SENDDATACOMPLETEL_ENTRY );   
     CMTPSession& session(SessionL(aRequest, TMTPTypeRequest::ERequestSessionID)); 
     __ASSERT_DEBUG((session.TransactionPhase() == EDataRToIPhase), Panic(EMTPPanicInvalidState));
 
@@ -625,12 +643,12 @@ void CMTPConnection::SendDataCompleteL(TInt aErr, const MMTPType& aData, const T
     
     session.CompletePendingRequest(aErr);
     
-    __FLOG(_L8("SendDataCompleteL - Exit"));
+    OstTraceFunctionExit0( CMTPCONNECTION_SENDDATACOMPLETEL_EXIT );
     }
 
 void CMTPConnection::SendEventCompleteL(TInt aErr, const TMTPTypeEvent& aEvent)
     {
-    __FLOG(_L8("SendEventCompleteL - Entry"));
+    OstTraceFunctionEntry0( CMTPCONNECTION_SENDEVENTCOMPLETEL_ENTRY );
 
     
     if (aErr != KErrNone)
@@ -662,7 +680,7 @@ void CMTPConnection::SendEventCompleteL(TInt aErr, const TMTPTypeEvent& aEvent)
 		if (NULL != iTransportConnection)
 			{
 			// Forward the event to the transport connection layer.
-			__FLOG(_L8("Sending queued event"));
+			OstTrace0( TRACE_NORMAL, CMTPCONNECTION_SENDEVENTCOMPLETEL, "Sending queued event");
 			iTransportConnection->SendEventL(iEventQ.First()->iEvent);
 			}
 		else
@@ -671,12 +689,13 @@ void CMTPConnection::SendEventCompleteL(TInt aErr, const TMTPTypeEvent& aEvent)
 			}
    		}
     
-    __FLOG(_L8("SendEventCompleteL - Exit"));
+    OstTraceFunctionExit0( CMTPCONNECTION_SENDEVENTCOMPLETEL_EXIT );
     }
 
 void CMTPConnection::SendResponseCompleteL(TInt aErr, const TMTPTypeResponse& /*aResponse*/, const TMTPTypeRequest& aRequest)
     {   
-    __FLOG(_L8("SendResponseCompleteL - Entry"));
+    OstTraceFunctionEntry0( CMTPCONNECTION_SENDRESPONSECOMPLETEL_ENTRY );
+    
 	if(iState == EStateErrorRecovery)
 		{
 		MTPErrorRecoveryComplete();	    
@@ -688,7 +707,7 @@ void CMTPConnection::SendResponseCompleteL(TInt aErr, const TMTPTypeResponse& /*
     	session.SetTransactionPhase(ECompletingPhase);
     	session.CompletePendingRequest(aErr);
 		}
-    __FLOG(_L8("SendResponseCompleteL - Exit"));
+    OstTraceFunctionExit0( CMTPCONNECTION_SENDRESPONSECOMPLETEL_EXIT );
     }
 
 void CMTPConnection::Unbind(MMTPTransportConnection& /*aConnection*/)
@@ -700,7 +719,8 @@ void CMTPConnection::Unbind(MMTPTransportConnection& /*aConnection*/)
 TMTPTransactionPhase CMTPConnection::TransactionPhaseL(TUint32 aMTPId) const
     {
     TInt idx(iSessions.FindInOrder(aMTPId, SessionOrder));
-    User::LeaveIfError(idx);
+    LEAVEIFERROR(idx, 
+            OstTrace1(TRACE_ERROR, CMTPCONNECTION_TRANSACTIONPHASEL, "can't find according to session_id %d", aMTPId));
     return iSessions[idx]->TransactionPhase();
     }
 
@@ -721,8 +741,7 @@ Second phase constructor.
 */
 void CMTPConnection::ConstructL()
     {
-	__FLOG_OPEN(KMTPSubsystem, KComponent);
-    __FLOG(_L8("ConstructL - Entry"));
+    OstTraceFunctionEntry0( CMTPCONNECTION_CONSTRUCTL_ENTRY );   
     //define the property for publishing connection state.
     DefineConnStatePropertyL();
     PublishConnState(EDisconnectedFromHost);  
@@ -730,7 +749,7 @@ void CMTPConnection::ConstructL()
     // Running under debug capture mode save this request off to disk.
     iRequestLogger = CMTPRequestLogger::NewL();
 #endif
-    __FLOG(_L8("ConstructL - Exit"));
+    OstTraceFunctionExit0( CMTPCONNECTION_CONSTRUCTL_EXIT );
     }
     
 /**
@@ -750,7 +769,7 @@ initiator.
 */
 void CMTPConnection::InitiateMTPErrorRecoveryL(const TMTPTypeRequest& aRequest, TUint16 aResponseCode)
     {
-    __FLOG(_L8("InitiateMTPErrorRecoveryL - Entry"));
+    OstTraceFunctionEntry0( CMTPCONNECTION_INITIATEMTPERRORRECOVERYL_ENTRY );   
     // Populate error response.
     iResponse.Reset();
     iResponse.SetUint16(TMTPTypeResponse::EResponseCode, aResponseCode);
@@ -760,7 +779,7 @@ void CMTPConnection::InitiateMTPErrorRecoveryL(const TMTPTypeRequest& aRequest, 
     // Set the connection state pending completion, and send the response.
     SetState(EStateErrorRecovery);
     iTransportConnection->SendResponseL(iResponse, aRequest);
-    __FLOG(_L8("InitiateMTPErrorRecoveryL - Exit"));
+    OstTraceFunctionExit0( CMTPCONNECTION_INITIATEMTPERRORRECOVERYL_EXIT );
     }
     
 /**
@@ -769,10 +788,10 @@ Concludes an MTP connection level protocol error recovery sequence.
 */
 void CMTPConnection::MTPErrorRecoveryComplete()
     {
-    __FLOG(_L8("MTPErrorRecoveryComplete - Entry"));
+    OstTraceFunctionEntry0( CMTPCONNECTION_MTPERRORRECOVERYCOMPLETE_ENTRY ); 
     SetState(EStateOpen);
     PublishConnState(EConnectedToHost);	
-    __FLOG(_L8("MTPErrorRecoveryComplete - Exit"));
+    OstTraceFunctionExit0( CMTPCONNECTION_MTPERRORRECOVERYCOMPLETE_EXIT );
     }
     
 /**
@@ -783,11 +802,11 @@ concluded.
 */
 void CMTPConnection::UnrecoverableMTPError()
     {
-    __FLOG(_L8("UnrecoverableMTPError - Entry"));
+    OstTraceFunctionEntry0( CMTPCONNECTION_UNRECOVERABLEMTPERROR_ENTRY ); 
     SetState(EStateErrorShutdown);
     PublishConnState(EDisconnectedFromHost);		
     iTransportConnection->CloseConnection();
-    __FLOG(_L8("UnrecoverableMTPError - Exit"));
+    OstTraceFunctionExit0( CMTPCONNECTION_UNRECOVERABLEMTPERROR_EXIT );
     }
 
 /**
@@ -798,7 +817,7 @@ processing on the specified session.
 */
 void CMTPConnection::InitiateTransactionCancelL(TInt aIdx)
     {    
-    __FLOG(_L8("InitiateTransactionCancelL - Entry"));
+    OstTraceFunctionEntry0( CMTPCONNECTION_INITIATETRANSACTIONCANCELL_ENTRY );   
     // Initiate transport connection level termination of the active data phase.
     CMTPSession& session(*iSessions[aIdx]);
     
@@ -818,7 +837,7 @@ void CMTPConnection::InitiateTransactionCancelL(TInt aIdx)
         iTransportConnection->SendDataCancelL(session.ActiveRequestL());
         break;
         }
-    __FLOG(_L8("InitiateTransactionCancelL - Exit"));
+    OstTraceFunctionExit0( CMTPCONNECTION_INITIATETRANSACTIONCANCELL_EXIT );
     }
 
 /**
@@ -826,7 +845,7 @@ Provides a count of the number of sessions with transactions in-progress.
 */
 TUint CMTPConnection::ActiveSessions() const
     {
-    __FLOG(_L8("ActiveSessions - Entry"));
+    OstTraceFunctionEntry0( CMTPCONNECTION_ACTIVESESSIONS_ENTRY );   
     TUint active(0);
     const TUint count(iSessions.Count());
     for (TUint i(0); (i < count); i++)
@@ -836,8 +855,8 @@ TUint CMTPConnection::ActiveSessions() const
             active++;
             }
         }
-    __FLOG_VA((_L8("Active sessions = %d"), active));
-    __FLOG(_L8("ActiveSessions - Exit"));
+    OstTrace1( TRACE_NORMAL, CMTPCONNECTION_ACTIVESESSIONS, "Active sessions = %d", active );  
+    OstTraceFunctionExit0( CMTPCONNECTION_ACTIVESESSIONS_EXIT );
     return active;
     }
 
@@ -846,16 +865,16 @@ Closes all sessions which have been opened on the connection.
 */
 void CMTPConnection::CloseAllSessions()
     {
-    __FLOG(_L8("CloseAllSessions - Entry"));
+    OstTraceFunctionEntry0( CMTPCONNECTION_CLOSEALLSESSIONS_ENTRY );
 	
     TInt count = iSessions.Count();
-    __FLOG_VA((_L8("Sessions number to be closed = %d"), count));   
+    OstTrace1( TRACE_NORMAL, CMTPCONNECTION_CLOSEALLSESSIONS, "Sessions number to be closed = %d", count );
 	for (TInt i(count - 1); i>=0; i--)
 		{
 		CloseSession(i);
 		}
 	
-    __FLOG(_L8("CloseAllSessions - Exit"));
+    OstTraceFunctionExit0( CMTPCONNECTION_CLOSEALLSESSIONS_EXIT );
     }
 
 /**
@@ -864,9 +883,9 @@ Closes the sessions with the specified session index.
 */
 void CMTPConnection::CloseSession(TUint aIdx)
     {
-    __FLOG(_L8("CloseSession - Entry"));
+    OstTraceFunctionEntry0( CMTPCONNECTION_CLOSESESSION_ENTRY );
     
-    __FLOG_VA((_L8("Session index to be closed = %d"), aIdx));    
+    OstTrace1(TRACE_NORMAL, CMTPCONNECTION_CLOSESESSION, "Session index to be closed = %d", aIdx);
     CMTPSession* session(iSessions[aIdx]);
         
     TUint id(session->SessionMTPId());
@@ -885,7 +904,7 @@ void CMTPConnection::CloseSession(TUint aIdx)
     iSessions.Remove(aIdx);
     delete session;
     
-    __FLOG(_L8("CloseSession - Exit"));
+    OstTraceFunctionExit0( CMTPCONNECTION_CLOSESESSION_EXIT );
     }
     
 /**
@@ -938,9 +957,9 @@ Get the data receive result.
 */
 EXPORT_C TInt CMTPConnection::GetDataReceiveResult() const
 	{
-	__FLOG(_L8("GetDataReceiveResult - Entry"));
-    __FLOG_VA((_L8("Data receive result = %d"), iDataReceiveResult));
-    __FLOG(_L8("GetDataReceiveResult - Exit"));
+    OstTraceFunctionEntry0( CMTPCONNECTION_GETDATARECEIVERESULT_ENTRY );
+    OstTrace1( TRACE_NORMAL, CMTPCONNECTION_GETDATARECEIVERESULT, "Data receive result = %d", iDataReceiveResult);
+    OstTraceFunctionExit0( CMTPCONNECTION_GETDATARECEIVERESULT_EXIT );
     return iDataReceiveResult;
 	}
     
@@ -950,10 +969,10 @@ Sets the MTP connection state variable.
 */
 void CMTPConnection::SetState(TUint aState)
     {
-    __FLOG(_L8("SetState - Entry"));
-    __FLOG_VA((_L8("Setting state = %d"), aState));
+    OstTraceFunctionEntry0( CMTPCONNECTION_SETSTATE_ENTRY );   
+    OstTrace1( TRACE_NORMAL, CMTPCONNECTION_SETSTATE, "CMTPConnection::SetState;aState=%d", aState );
     iState = aState;
-    __FLOG(_L8("SetState - Exit"));
+    OstTraceFunctionExit0( CMTPCONNECTION_SETSTATE_EXIT );
     }
   
     
@@ -963,9 +982,9 @@ Provide the current MTP connection state.
 */
 TUint CMTPConnection::State() const
     {
-    __FLOG(_L8("State - Entry"));
-    __FLOG_VA((_L8("State = %d"), iState));
-    __FLOG(_L8("State - Exit"));
+    OstTraceFunctionEntry0( CMTPCONNECTION_STATE_ENTRY );    
+    OstTrace1( TRACE_NORMAL, CMTPCONNECTION_STATE, "State = %d", iState);
+    OstTraceFunctionExit0( CMTPCONNECTION_STATE_EXIT );
     return iState;        
     }
     
@@ -986,7 +1005,7 @@ connection.
 */
 TBool CMTPConnection::ValidFrameworkRequest(CMTPSession* aSession, TUint aValidPhases, TRequestStatus* aStatus)
     {
-    __FLOG(_L8("ValidFrameworkRequest - Entry"));
+    OstTraceFunctionEntry0( CMTPCONNECTION_VALIDFRAMEWORKREQUEST_ENTRY );
     __ASSERT_ALWAYS((!aSession || (aSession->TransactionPhase() & aValidPhases)), Panic(EMTPPanicInvalidState));
     __ASSERT_ALWAYS((!aStatus || (!aSession->RequestPending())), Panic(EMTPPanicBusy));
     
@@ -1022,13 +1041,13 @@ TBool CMTPConnection::ValidFrameworkRequest(CMTPSession* aSession, TUint aValidP
         break;
         }
         
-    __FLOG(_L8("ValidFrameworkRequest - Exit"));
+    OstTraceFunctionExit0( CMTPCONNECTION_VALIDFRAMEWORKREQUEST_EXIT );
     return ret;
     }
 
 void CMTPConnection::RemoveEventsForSession(TUint32 aMTPId)
 	{
-    __FLOG(_L8("RemoveEventsForSession - Entry"));
+    OstTraceFunctionEntry0( CMTPCONNECTION_REMOVEEVENTSFORSESSION_ENTRY );
     
     TSglQueIter<CMTPEventLink> iter(iEventQ);
     iter.SetToFirst();
@@ -1042,7 +1061,7 @@ void CMTPConnection::RemoveEventsForSession(TUint32 aMTPId)
 			}
 		}
     
-    __FLOG(_L8("RemoveEventsForSession - Exit"));
+	OstTraceFunctionExit0( CMTPCONNECTION_REMOVEEVENTSFORSESSION_EXIT );
 	}
 
 void CMTPConnection::DequeueAllEvents()
@@ -1082,8 +1101,7 @@ CMTPConnection::CMTPEventLink::CMTPEventLink(const TMTPTypeEvent& aEvent) :
   */
 void CMTPConnection::DefineConnStatePropertyL()
 	{
-	
-	 __FLOG(_L8("DefineConnStatePropertyL - Entry"));
+	OstTraceFunctionEntry0( CMTPCONNECTION_DEFINECONNSTATEPROPERTYL_ENTRY );	
 	 RProcess process;
 	 TUid tSid = process.SecureId();	
 	//Property can read by anyone who subscribe for it.
@@ -1093,22 +1111,25 @@ void CMTPConnection::DefineConnStatePropertyL()
 	TInt error = RProperty::Define(tSid, EMTPConnStateKey, RProperty::EInt, KAllowReadAll, KAllowReadAll);	
 	if (KErrAlreadyExists != error)
 		{
-		User::LeaveIfError(error);
+        LEAVEIFERROR(error, OstTrace1(TRACE_ERROR, CMTPCONNECTION_DEFINECONNSTATEPROPERTYL, "property define error! error code %d", error));
 		}
-	User::LeaveIfError(iProperty.Attach(tSid, EMTPConnStateKey, EOwnerThread));
-	__FLOG(_L8("DefineConnStatePropertyL - Exit"));
+	LEAVEIFERROR(iProperty.Attach(tSid, EMTPConnStateKey, EOwnerThread), 
+	        OstTrace0(TRACE_ERROR, DUP1_CMTPCONNECTION_DEFINECONNSTATEPROPERTYL, "property attach error"));
+	OstTraceFunctionExit0( CMTPCONNECTION_DEFINECONNSTATEPROPERTYL_EXIT );
 	}
 
 /**
   * This method is to publish various connection state. 
   */
 void CMTPConnection::PublishConnState(TMTPConnStateType aConnState)	
-	{
-	__FLOG_VA((_L8("PublishConnState - Entry \n publishing state = %d"), (TInt)aConnState));
+	{  
+    OstTraceFunctionEntry0( CMTPCONNECTION_PUBLISHCONNSTATE_ENTRY);
+	OstTrace1( TRACE_NORMAL, CMTPCONNECTION_PUBLISHCONNSTATE, "publishing state = %d", (TInt)aConnState );
+	
 	RProcess process;    
 	TInt error = iProperty.Set(process.SecureId(), EMTPConnStateKey, (TInt)aConnState);		
 	 __ASSERT_DEBUG((error == KErrNone), Panic(EMTPPanicPublishEvent));;
-	__FLOG(_L8("PublishConnState - Exit"));
+	 OstTraceFunctionExit0( CMTPCONNECTION_PUBLISHCONNSTATE_EXIT);
 	}
 
 /**
@@ -1117,8 +1138,9 @@ void CMTPConnection::PublishConnState(TMTPConnStateType aConnState)
   */
 void CMTPConnection::ValidateAndPublishConnState(CMTPSession& aSession, TInt aState)
 	{	
-    	__FLOG_VA((_L8("ValidateAndPublishConnState - Entry \n publishing state = %d"), aState));
-
+    OstTraceFunctionEntry0(CMTPCONNECTION_VALIDATEANDPUBLISHCONNSTATE_ENTRY);
+    OstTrace1( TRACE_NORMAL, CMTPCONNECTION_VALIDATEANDPUBLISHCONNSTATE, "publishing state = %d", aState );
+    	
 	TMTPConnStateType conState = EConnectedToHost;
 	switch((TStates)aState)
 		{
@@ -1158,7 +1180,7 @@ void CMTPConnection::ValidateAndPublishConnState(CMTPSession& aSession, TInt aSt
 		  break;
 		}
 	PublishConnState(conState);
-	__FLOG(_L8("ValidateAndPublishConnStateL - Exit"));
+	OstTraceFunctionExit0(CMTPCONNECTION_VALIDATEANDPUBLISHCONNSTATE_EXIT);
 	}
 
 void CMTPConnection::DisconnectionNotifyL()

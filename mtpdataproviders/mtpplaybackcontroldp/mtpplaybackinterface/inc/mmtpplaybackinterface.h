@@ -21,6 +21,8 @@
 #ifndef MMTPPLAYBACKINTERFACE_H
 #define MMTPPLAYBACKINTERFACE_H
 
+#include "mtpdebug.h"
+
 const TInt KPlaybackErrNone = 0;
 const TInt KPlaybackErrDeviceBusy = (-8000);
 const TInt KPlaybackErrDeviceUnavailable = (-8001);

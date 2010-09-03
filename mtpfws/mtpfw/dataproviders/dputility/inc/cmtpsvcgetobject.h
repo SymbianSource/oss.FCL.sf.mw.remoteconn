@@ -48,9 +48,5 @@ private:
 	MMTPSvcObjectHandler*       iObjectHandler; // Not own
 	MMTPType*                   iBuffer; // Not own
 	CMTPObjectMetaData*         iReceivedObjectMetaData;
-	/**
-	FLOGGER debug trace member variable.
-	*/
-	__FLOG_DECLARATION_MEMBER_MUTABLE;
 	};
 #endif // __CMTPSVCGETOBJECT_H__

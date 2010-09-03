@@ -20,11 +20,16 @@
 
 
 #include "cmtpdeltadatamgr.h"
+#include "mtpdebug.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpdeltadatamgrTraces.h"
+#endif
+
 //! Size of a PUID in bytes
 static const TInt KMTPPuidSize = 16;
 
 
-__FLOG_STMT(_LIT8(KComponent,"MTPDeltaDataMgr:");)
 
 _LIT(KMTPDeltaDataTable, "MTPDeltaDataTable");
 _LIT(KSQLPuidIndexName, "PuidIndex");
@@ -46,9 +51,8 @@ Second-phase construction
 */	
 void CMtpDeltaDataMgr::ConstructL()
 	{
-	__FLOG_OPEN(KMTPSubsystem, KComponent);
-	__FLOG(_L8("ConstructL - Entry"));
-	__FLOG(_L8("ConstructL - Exit"));
+    OstTraceFunctionEntry0( CMTPDELTADATAMGR_CONSTRUCTL_ENTRY );
+	OstTraceFunctionExit0( CMTPDELTADATAMGR_CONSTRUCTL_EXIT );
 	}
 
 
@@ -76,7 +80,6 @@ CMtpDeltaDataMgr::~CMtpDeltaDataMgr()
 	iAnchorTableBatched.Close();
 	iView.Close();
 	iSuidIdArray.Close();
-	__FLOG_CLOSE;
 	}
 /**
 Create the MTP Delta Data Table
@@ -84,23 +87,26 @@ Create the MTP Delta Data Table
 */
 EXPORT_C void CMtpDeltaDataMgr::CreateDeltaDataTableL()
 	{
-	__FLOG(_L8("CreateDeltaDataTableL - Entry"));
+	OstTraceFunctionEntry0( CMTPDELTADATAMGR_CREATEDELTADATATABLEL_ENTRY );
+	
 	
 	iDeltaTableBatched.Close();
 	if(!DBUtility::IsTableExistsL(iDatabase, KMTPDeltaDataTable))
 		{
 		_LIT(KSQLCreateMTPDeltaDataTableText,"CREATE TABLE MTPDeltaDataTable (SuidId BIGINT , OpCode TINYINT )");		
-		User::LeaveIfError(iDatabase.Execute(KSQLCreateMTPDeltaDataTableText));
-		
+		LEAVEIFERROR(iDatabase.Execute(KSQLCreateMTPDeltaDataTableText),
+		        OstTrace0( TRACE_ERROR, CMTPDELTADATAMGR_CREATEDELTADATATABLEL, "MTPDeltaDataTable create error!" ));
+
 		if(!DBUtility::IsIndexExistsL(iDatabase, KMTPDeltaDataTable, KSQLPuidIndexName))
 			{
 			_LIT(KSQLCreateReferenceIndexText,"CREATE UNIQUE INDEX PuidIndex on MTPDeltaDataTable (SuidId)");
-			User::LeaveIfError(iDatabase.Execute(KSQLCreateReferenceIndexText));
+			LEAVEIFERROR(iDatabase.Execute(KSQLCreateReferenceIndexText),
+			        OstTrace0( TRACE_ERROR, DUP1_CMTPDELTADATAMGR_CREATEDELTADATATABLEL, "PuidIndex on MTPDeltaDataTable create error!" ));       
 			}
 		}
 	iDeltaTableBatched.Open(iDatabase, KMTPDeltaDataTable, RDbRowSet::EUpdatable);
 		
-	__FLOG(_L8("CreateDeltaDataTableL - Exit"));
+	OstTraceFunctionExit0( CMTPDELTADATAMGR_CREATEDELTADATATABLEL_EXIT );
 	}
 
 /**
@@ -109,22 +115,26 @@ Create the Anchor Id Table anchor Id will be stored here
 */
 EXPORT_C void CMtpDeltaDataMgr::CreateAnchorIdTableL()
 	{
-	__FLOG(_L8("CreateAnchorIdTableL - Entry"));
+	OstTraceFunctionEntry0( CMTPDELTADATAMGR_CREATEANCHORIDTABLEL_ENTRY );
+	
 	iAnchorTableBatched.Close();
 	if(!DBUtility::IsTableExistsL(iDatabase, KAnchorIdTable))
 		{
 		_LIT(KSQLCreateAnchorIdTableText,"CREATE TABLE AnchorIdTable (anchorid INTEGER, curindex INTEGER, identifier INTEGER)");
-		User::LeaveIfError(iDatabase.Execute(KSQLCreateAnchorIdTableText));
+		LEAVEIFERROR(iDatabase.Execute(KSQLCreateAnchorIdTableText),
+		        OstTrace0( TRACE_ERROR, CMTPDELTADATAMGR_CREATEANCHORIDTABLEL, "TABLE AnchorIdTable create error!" ));
+		        
 			
 		if(!DBUtility::IsIndexExistsL(iDatabase, KAnchorIdTable, KSQLIdentifierIndexName))
 			{
 			_LIT(KSQLCreateRefIndexText,"CREATE UNIQUE INDEX IdentifierIndex on AnchorIdTable (identifier)");
-			User::LeaveIfError(iDatabase.Execute(KSQLCreateRefIndexText));
+			LEAVEIFERROR(iDatabase.Execute(KSQLCreateRefIndexText),
+			        OstTrace0( TRACE_ERROR, DUP1_CMTPDELTADATAMGR_CREATEANCHORIDTABLEL, "INDEX IdentifierIndex on AnchorIdTable create error!" ));
 			}
 		}
 	iAnchorTableBatched.Open(iDatabase, KAnchorIdTable, RDbRowSet::EUpdatable);
 		
-	__FLOG(_L8("CreateAnchorIdTableL - Exit"));
+	OstTraceFunctionExit0( CMTPDELTADATAMGR_CREATEANCHORIDTABLEL_EXIT );
 	}
 
 /**
@@ -135,7 +145,8 @@ Add a new anchor ID to the AnchorIdTable
 */	
 EXPORT_C void CMtpDeltaDataMgr::InsertAnchorIdL(TInt aAnchorId, TInt aIdentifier)
 	{
-	__FLOG(_L8("InsertAnchorIdL - Entry"));	
+	OstTraceFunctionEntry0( CMTPDELTADATAMGR_INSERTANCHORIDL_ENTRY );
+	
 	iAnchorTableBatched.SetIndex(KSQLIdentifierIndexName);
 	if(!(iAnchorTableBatched.SeekL(aIdentifier)))
 		{
@@ -145,7 +156,7 @@ EXPORT_C void CMtpDeltaDataMgr::InsertAnchorIdL(TInt aAnchorId, TInt aIdentifier
 		iAnchorTableBatched.SetColL(3, aIdentifier);
 		iAnchorTableBatched.PutL();
 		}
-	__FLOG(_L8("InsertAnchorIdL - Exit"));
+	OstTraceFunctionExit0( CMTPDELTADATAMGR_INSERTANCHORIDL_EXIT );
 	}
 
 /**
@@ -156,7 +167,8 @@ Overwrite the anchor Id with new one
 */	
 EXPORT_C void CMtpDeltaDataMgr::UpdateAnchorIdL(TInt aAnchorId, TInt aIdentifier)
 	{
-	__FLOG(_L8("UpdateAnchorIdL - Entry"));
+	OstTraceFunctionEntry0( CMTPDELTADATAMGR_UPDATEANCHORIDL_ENTRY );
+	
 	iAnchorTableBatched.SetIndex(KSQLIdentifierIndexName);
 	if(iAnchorTableBatched.SeekL(aIdentifier))
 		{
@@ -164,7 +176,7 @@ EXPORT_C void CMtpDeltaDataMgr::UpdateAnchorIdL(TInt aAnchorId, TInt aIdentifier
 		iAnchorTableBatched.SetColL(1, aAnchorId);
 		iAnchorTableBatched.PutL();
 		}
-	__FLOG(_L8("UpdateAnchorIdL - Exit"));
+	OstTraceFunctionExit0( CMTPDELTADATAMGR_UPDATEANCHORIDL_EXIT );
 	}
 
 /**
@@ -174,7 +186,8 @@ Get the anchor ID with specified identifier
 */	
 EXPORT_C TInt CMtpDeltaDataMgr::GetAnchorIdL(TInt aIdentifier)
 	{
-	__FLOG(_L8("GetAnchorIdL - Entry"));
+	OstTraceFunctionEntry0( CMTPDELTADATAMGR_GETANCHORIDL_ENTRY );
+	
 	TInt anchorId = 0;
 	iAnchorTableBatched.SetIndex(KSQLIdentifierIndexName);
 	if(iAnchorTableBatched.SeekL(aIdentifier))
@@ -182,7 +195,7 @@ EXPORT_C TInt CMtpDeltaDataMgr::GetAnchorIdL(TInt aIdentifier)
 		iAnchorTableBatched.GetL();
 		anchorId = iAnchorTableBatched.ColInt32(1);
 		}
-	__FLOG(_L8("GetAnchorIdL - Exit"));
+	OstTraceFunctionExit0( CMTPDELTADATAMGR_GETANCHORIDL_EXIT );
 	return anchorId;
 	}
 
@@ -192,7 +205,8 @@ Overwrite the old index  with new one
 */	
 EXPORT_C void CMtpDeltaDataMgr::UpdatePersistentIndexL(TInt aCurindex, TInt aIdentifier)
 	{	
-	__FLOG(_L8("UpdatePersistentIndexL - Entry"));
+	OstTraceFunctionEntry0( CMTPDELTADATAMGR_UPDATEPERSISTENTINDEXL_ENTRY );
+	
 	iAnchorTableBatched.SetIndex(KSQLIdentifierIndexName);
 	if(iAnchorTableBatched.SeekL(aIdentifier))
 		{
@@ -200,7 +214,7 @@ EXPORT_C void CMtpDeltaDataMgr::UpdatePersistentIndexL(TInt aCurindex, TInt aIde
 		iAnchorTableBatched.SetColL(2, aCurindex);
 		iAnchorTableBatched.PutL();
 		}
-	__FLOG(_L8("UpdatePersistentIndexL - Exit"));
+	OstTraceFunctionExit0( CMTPDELTADATAMGR_UPDATEPERSISTENTINDEXL_EXIT );
 	}
 	
 /**
@@ -209,7 +223,8 @@ returns the stored index
 */
 EXPORT_C TInt CMtpDeltaDataMgr::GetPersistentIndexL(TInt aIdentifier)
 	{
-	__FLOG(_L8("GetPersistentIndexL - Entry"));
+	OstTraceFunctionEntry0( CMTPDELTADATAMGR_GETPERSISTENTINDEXL_ENTRY );
+	
 
 	TInt currIndex = 0;
 	iAnchorTableBatched.SetIndex(KSQLIdentifierIndexName);
@@ -217,8 +232,8 @@ EXPORT_C TInt CMtpDeltaDataMgr::GetPersistentIndexL(TInt aIdentifier)
 		{
 		iAnchorTableBatched.GetL();
 		currIndex = iAnchorTableBatched.ColInt32(2);
-		}
-	__FLOG(_L8("GetPersistentIndexL - Exit"));		
+		}	
+	OstTraceFunctionExit0( CMTPDELTADATAMGR_GETPERSISTENTINDEXL_EXIT );
 	return currIndex;
 	}
 
@@ -230,7 +245,8 @@ Add the Opcode and SuidId to the MTPDeltaDataTable
 */
 void CMtpDeltaDataMgr::UpdateDeltaDataTableL(TInt64 aSuidId, TOpCode aOpCode)
 	{
-	__FLOG(_L8("UpdateDeltaDataTableL - Entry"));
+	OstTraceFunctionEntry0( CMTPDELTADATAMGR_UPDATEDELTADATATABLEL_ENTRY );
+	
 	if(!DBUtility::IsTableExistsL(iDatabase, KMTPDeltaDataTable))
 		return;
 		
@@ -247,7 +263,7 @@ void CMtpDeltaDataMgr::UpdateDeltaDataTableL(TInt64 aSuidId, TOpCode aOpCode)
 		iDeltaTableBatched.SetColL(2, aOpCode);
 		}
 	iDeltaTableBatched.PutL();
-	__FLOG(_L8("UpdateDeltaDataTableL - Exit"));
+	OstTraceFunctionExit0( CMTPDELTADATAMGR_UPDATEDELTADATATABLEL_EXIT );
 	}
 
 /**
@@ -259,14 +275,17 @@ void CMtpDeltaDataMgr::UpdateDeltaDataTableL(TInt64 aSuidId, TOpCode aOpCode)
 */
 EXPORT_C TInt CMtpDeltaDataMgr::GetChangedPuidsL(TInt aMaxArraySize, TInt& aPosition, CMTPTypeArray& aModifiedPuidIdArray, CMTPTypeArray& aDeletedPuidArray)
 	{
-	__FLOG(_L8("GetChangedPuidsL - Entry"));
+	OstTraceFunctionEntry0( CMTPDELTADATAMGR_GETCHANGEDPUIDSL_ENTRY );
+	
 	
 	if(!iNeedToSendMore)
 		{
 		_LIT(KSQLGetAll, "SELECT * FROM MTPDeltaDataTable");
 		
-		User::LeaveIfError(iView.Prepare(iDatabase, TDbQuery(KSQLGetAll)));
-		User::LeaveIfError(iView.EvaluateAll());
+		LEAVEIFERROR(iView.Prepare(iDatabase, TDbQuery(KSQLGetAll)),
+		        OstTrace0( TRACE_ERROR, CMTPDELTADATAMGR_GETCHANGEDPUIDSL, "view for MTPDeltaDataTable prepare failure!" ));
+		LEAVEIFERROR(iView.EvaluateAll(),
+		        OstTrace0( TRACE_ERROR, DUP1_CMTPDELTADATAMGR_GETCHANGEDPUIDSL, "view evaluate failed!" ));    
 		iNeedToSendMore = ETrue;
 		iView.FirstL();
 		iTotalRows = iView.CountL();
@@ -284,6 +303,7 @@ EXPORT_C TInt CMtpDeltaDataMgr::GetChangedPuidsL(TInt aMaxArraySize, TInt& aPosi
 		{
 		iNeedToSendMore = EFalse;
 		iView.Close();
+		OstTraceFunctionExit0( CMTPDELTADATAMGR_GETCHANGEDPUIDSL_EXIT );
 		return 0;
 		}
 	
@@ -324,7 +344,7 @@ EXPORT_C TInt CMtpDeltaDataMgr::GetChangedPuidsL(TInt aMaxArraySize, TInt& aPosi
 			}
 		}
 	
-	__FLOG(_L8("GetChangedPuidsL - Exit"));
+	OstTraceFunctionExit0( DUP1_CMTPDELTADATAMGR_GETCHANGEDPUIDSL_EXIT );
 	return	(iTotalRows - aPosition);
 	}
 
@@ -336,7 +356,7 @@ EXPORT_C TInt CMtpDeltaDataMgr::GetChangedPuidsL(TInt aMaxArraySize, TInt& aPosi
 */
 EXPORT_C TInt CMtpDeltaDataMgr::GetAddedPuidsL(TInt aMaxArraySize, TInt &aPosition, CMTPTypeArray& aAddedPuidIdArray)
 	{
-	__FLOG(_L8("GetAddedPuidsL - Entry"));
+	OstTraceFunctionEntry0( CMTPDELTADATAMGR_GETADDEDPUIDSL_ENTRY );
 	
 	if(!iNeedToSendMore)
 		{
@@ -344,8 +364,10 @@ EXPORT_C TInt CMtpDeltaDataMgr::GetAddedPuidsL(TInt aMaxArraySize, TInt &aPositi
 		_LIT(KSQLSelectAdded, "SELECT * FROM MTPDeltaDataTable WHERE OpCode = %d");
 		iSqlStatement.Format(KSQLSelectAdded, opcode);
 		
-		User::LeaveIfError(iView.Prepare(iDatabase, TDbQuery(iSqlStatement)));
-		User::LeaveIfError(iView.EvaluateAll());
+		LEAVEIFERROR(iView.Prepare(iDatabase, TDbQuery(iSqlStatement)),
+		        OstTrace0( TRACE_ERROR, CMTPDELTADATAMGR_GETADDEDPUIDSL, "view for MTPDeltaDataTable prepare failed!" ));	        
+		LEAVEIFERROR(iView.EvaluateAll(),
+		        OstTrace0( TRACE_ERROR, DUP1_CMTPDELTADATAMGR_GETADDEDPUIDSL, "view evaluate failed!" ));
 		iNeedToSendMore = ETrue;
 		iView.FirstL();
 		iTotalRows = iView.CountL();
@@ -363,6 +385,7 @@ EXPORT_C TInt CMtpDeltaDataMgr::GetAddedPuidsL(TInt aMaxArraySize, TInt &aPositi
 		{
 		iNeedToSendMore = EFalse;
 		iView.Close();
+		OstTraceFunctionExit0( CMTPDELTADATAMGR_GETADDEDPUIDSL_EXIT );
 		return 0;
 		}
 	
@@ -396,7 +419,7 @@ EXPORT_C TInt CMtpDeltaDataMgr::GetAddedPuidsL(TInt aMaxArraySize, TInt &aPositi
 			}
 		}
 	
-	__FLOG(_L8("GetAddedPuidsL - Exit"));
+	OstTraceFunctionExit0( DUP1_CMTPDELTADATAMGR_GETADDEDPUIDSL_EXIT );
 	return 	(iTotalRows - aPosition);
 	}
 
@@ -408,7 +431,7 @@ EXPORT_C TInt CMtpDeltaDataMgr::GetAddedPuidsL(TInt aMaxArraySize, TInt &aPositi
 */
 EXPORT_C TInt CMtpDeltaDataMgr::GetDeletedPuidsL(TInt aMaxArraySize, TInt &aPosition, CMTPTypeArray& aDeletedPuidIdArray)
 	{
-	__FLOG(_L8("GetDeletedPuidsL - Entry"));
+	OstTraceFunctionEntry0( CMTPDELTADATAMGR_GETDELETEDPUIDSL_ENTRY );
 
 	if(!iNeedToSendMore)
 		{
@@ -416,8 +439,11 @@ EXPORT_C TInt CMtpDeltaDataMgr::GetDeletedPuidsL(TInt aMaxArraySize, TInt &aPosi
 		_LIT(KSQLSelectDeleted, "SELECT * FROM MTPDeltaDataTable WHERE OpCode = %d");
 		iSqlStatement.Format(KSQLSelectDeleted, opcode);
 		
-		User::LeaveIfError(iView.Prepare(iDatabase, TDbQuery(iSqlStatement)));
-		User::LeaveIfError(iView.EvaluateAll());
+		LEAVEIFERROR(iView.Prepare(iDatabase, TDbQuery(iSqlStatement)),
+		        OstTrace0( TRACE_ERROR, CMTPDELTADATAMGR_GETDELETEDPUIDSL, "view for MTPDeltaDataTable prepare failed!" ));
+		LEAVEIFERROR(iView.EvaluateAll(),
+		        OstTrace0( TRACE_ERROR, DUP1_CMTPDELTADATAMGR_GETDELETEDPUIDSL, "view evaluated failed!" ));
+		        
 		iNeedToSendMore = ETrue;
 		iView.FirstL();
 		iTotalRows = iView.CountL();
@@ -435,6 +461,7 @@ EXPORT_C TInt CMtpDeltaDataMgr::GetDeletedPuidsL(TInt aMaxArraySize, TInt &aPosi
 		{
 		iNeedToSendMore = EFalse;
 		iView.Close();
+		OstTraceFunctionExit0( CMTPDELTADATAMGR_GETDELETEDPUIDSL_EXIT );
 		return 0;
 		}
 	
@@ -468,7 +495,7 @@ EXPORT_C TInt CMtpDeltaDataMgr::GetDeletedPuidsL(TInt aMaxArraySize, TInt &aPosi
 			}
 		}
 		
-	__FLOG(_L8("GetDeletedPuidsL - Exit"));
+	OstTraceFunctionExit0( DUP1_CMTPDELTADATAMGR_GETDELETEDPUIDSL_EXIT );
 	return 	(iTotalRows - aPosition);
 	}
 
@@ -480,7 +507,7 @@ EXPORT_C TInt CMtpDeltaDataMgr::GetDeletedPuidsL(TInt aMaxArraySize, TInt &aPosi
 */
 EXPORT_C TInt CMtpDeltaDataMgr::GetModifiedPuidsL(TInt aMaxArraySize, TInt &aPosition, CMTPTypeArray& aModifiedPuidIdArray)
 	{
-	__FLOG(_L8("GetDeletedPuidsL - Entry"));
+	OstTraceFunctionEntry0( CMTPDELTADATAMGR_GETMODIFIEDPUIDSL_ENTRY );
 
 	if(!iNeedToSendMore)
 		{
@@ -488,8 +515,10 @@ EXPORT_C TInt CMtpDeltaDataMgr::GetModifiedPuidsL(TInt aMaxArraySize, TInt &aPos
 		_LIT(KSQLSelectModified, "SELECT * FROM MTPDeltaDataTable WHERE OpCode = %d");
 		iSqlStatement.Format(KSQLSelectModified, opcode);
 		
-		User::LeaveIfError(iView.Prepare(iDatabase, TDbQuery(iSqlStatement)));
-		User::LeaveIfError(iView.EvaluateAll());
+		LEAVEIFERROR(iView.Prepare(iDatabase, TDbQuery(iSqlStatement)),
+		        OstTrace0( TRACE_ERROR, CMTPDELTADATAMGR_GETMODIFIEDPUIDSL, "view for MTPDeltaDataTable prepare failed!" ));
+		LEAVEIFERROR(iView.EvaluateAll(),
+		        OstTrace0( TRACE_ERROR, DUP1_CMTPDELTADATAMGR_GETMODIFIEDPUIDSL, "view evaluate failed!" ));
 		iNeedToSendMore = ETrue;
 		iView.FirstL();
 		iTotalRows = iView.CountL();
@@ -507,6 +536,7 @@ EXPORT_C TInt CMtpDeltaDataMgr::GetModifiedPuidsL(TInt aMaxArraySize, TInt &aPos
 		{
 		iNeedToSendMore = EFalse;
 		iView.Close();
+		OstTraceFunctionExit0( CMTPDELTADATAMGR_GETMODIFIEDPUIDSL_EXIT );
 		return 0;
 		}
 	
@@ -540,7 +570,7 @@ EXPORT_C TInt CMtpDeltaDataMgr::GetModifiedPuidsL(TInt aMaxArraySize, TInt &aPos
 			}
 		}
 		
-	__FLOG(_L8("GetDeletedPuidsL - Exit"));
+	OstTraceFunctionExit0( DUP1_CMTPDELTADATAMGR_GETMODIFIEDPUIDSL_EXIT );
 	return 	(iTotalRows - aPosition);
 	}
 
@@ -549,11 +579,12 @@ EXPORT_C TInt CMtpDeltaDataMgr::GetModifiedPuidsL(TInt aMaxArraySize, TInt &aPos
 */
 EXPORT_C void CMtpDeltaDataMgr::ResetMTPDeltaDataTableL()
 	{
-	__FLOG(_L8("ResetMTPDeltaDataTableL - Entry"));
+	OstTraceFunctionEntry0( CMTPDELTADATAMGR_RESETMTPDELTADATATABLEL_ENTRY );
 
 	iView.Close();
 	iNeedToSendMore = EFalse;
-	User::LeaveIfError(iDatabase.Execute(KDeleteDeltaTable));
+	LEAVEIFERROR(iDatabase.Execute(KDeleteDeltaTable),
+	        OstTrace0( TRACE_ERROR, CMTPDELTADATAMGR_RESETMTPDELTADATATABLEL, "DELETE FROM MTPDeltaDataTable failed!" ));
 	
-	__FLOG(_L8("ResetMTPDeltaDataTableL - Exit"));
+	OstTraceFunctionExit0( CMTPDELTADATAMGR_RESETMTPDELTADATATABLEL_EXIT );
 	}

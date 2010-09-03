@@ -23,6 +23,11 @@
 #include "cmtppictbridgeprinter.h"
 #include "mtppictbridgedpconst.h"
 #include "cmtppictbridgeusbconnection.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtppictbridgeprinterTraces.h"
+#endif
+
 
 // --------------------------------------------------------------------------
 // 
@@ -43,7 +48,6 @@ CMTPPictBridgePrinter* CMTPPictBridgePrinter::NewL(CPtpServer& aServer)
 //
 void CMTPPictBridgePrinter::ConstructL()
     {
-    __FLOG_OPEN(KMTPSubsystem, KPtpServerLog);
     iMsgHandlerP = CPtpReceivedMsgHandler::NewL(&iServer);
     iUsbConnectionP = CMTPPictBridgeUsbConnection::NewL(*this);
     }
@@ -64,7 +68,6 @@ CMTPPictBridgePrinter::~CMTPPictBridgePrinter()
     {
     delete iMsgHandlerP;
     delete iUsbConnectionP;
-    __FLOG_CLOSE;
     }
 
 // --------------------------------------------------------------------------
@@ -103,7 +106,8 @@ void CMTPPictBridgePrinter::NoDpsDiscovery()
         }
     else
         {
-        __FLOG(_L8("WARNING! CMTPPictBridgePrinter::NoDpsDiscovery trying to say no printer even though already discovered"));
+        OstTrace0( TRACE_WARNING, CMTPPICTBRIDGEPRINTER_NODPSDISCOVERY, 
+                "WARNING! trying to say no printer even though already discovered" );
         }
     }
 
@@ -113,15 +117,18 @@ void CMTPPictBridgePrinter::NoDpsDiscovery()
 //
 void CMTPPictBridgePrinter::DpsObjectReceived(TUint32 aHandle)
     {
-    __FLOG(_L8("CMTPPictBridgePrinter::DpsObjectReceived"));                    
+    OstTraceFunctionEntry0( CMTPPICTBRIDGEPRINTER_DPSOBJECTRECEIVED_ENTRY );                 
     if(iPrinterStatus==EConnected) // we only handle the object when we are connected to the printer
         {
         iMsgHandlerP->ObjectReceived(aHandle);
         }
     else
         {
-        __FLOG(_L8("!!!!WARNING: CMTPPictBridgePrinter::DpsObjectReceived Rx dps file when printer not connected!"));
+        OstTrace0( TRACE_WARNING, CMTPPICTBRIDGEPRINTER_DPSOBJECTRECEIVED, 
+                "!!!!WARNING: CMTPPictBridgePrinter::DpsObjectReceived Rx dps file when printer not connected!" );
+        
         }
+    OstTraceFunctionExit0( CMTPPICTBRIDGEPRINTER_DPSOBJECTRECEIVED_EXIT );
     }        
 
 // --------------------------------------------------------------------------
@@ -130,12 +137,12 @@ void CMTPPictBridgePrinter::DpsObjectReceived(TUint32 aHandle)
 //
 void CMTPPictBridgePrinter::DpsDiscovery(const TFileName& aFileName, MMTPConnection* aConnectionP)
     {
-    __FLOG_VA(_L8(">> CMTPPictBridgePrinter::DpsDiscovery"));
+    OstTraceFunctionEntry0( CMTPPICTBRIDGEPRINTER_DPSDISCOVERY_ENTRY );
     if ( iPrinterStatus != EConnected )
         {
         if (KErrNotFound!=aFileName.Find(KHostDiscovery))
             {
-            __FLOG(_L8("***Dps printer Discovered."));
+            OstTrace0( TRACE_NORMAL, DUP1_CMTPPICTBRIDGEPRINTER_DPSDISCOVERY, "***Dps printer Discovered." );
             iPrinterConnectionP=aConnectionP;
             iPrinterStatus=EConnected;
             iUsbConnectionP->Listen();
@@ -144,8 +151,9 @@ void CMTPPictBridgePrinter::DpsDiscovery(const TFileName& aFileName, MMTPConnect
                 iDpsPrinterNotifyCbP->IsDpsPrinterCompleted(EPrinterAvailable);    
                 }
             }
-        }    
-    __FLOG_VA((_L16("<< CMTPPictBridgePrinter::DpsDiscovery received file %S"), &aFileName)); 
+        }   
+    OstTraceExt1( TRACE_NORMAL, CMTPPICTBRIDGEPRINTER_DPSDISCOVERY, "received file %S", aFileName );    
+    OstTraceFunctionExit0( CMTPPICTBRIDGEPRINTER_DPSDISCOVERY_EXIT );
     }
 // --------------------------------------------------------------------------
 //
@@ -153,9 +161,9 @@ void CMTPPictBridgePrinter::DpsDiscovery(const TFileName& aFileName, MMTPConnect
 //    
 void CMTPPictBridgePrinter::DeRegisterDpsPrinterNotify(CPtpSession* /*aSessionP*/ )
     {
-    __FLOG(_L8(">>>CMTPPictBridgePrinter::DeRegisterDpsPrinterNotify"));
+    OstTraceFunctionEntry0( CMTPPICTBRIDGEPRINTER_DEREGISTERDPSPRINTERNOTIFY_ENTRY );
     iDpsPrinterNotifyCbP=NULL;
-    __FLOG(_L8("<<<CMTPPictBridgePrinter::DeRegisterDpsPrinterNotify"));
+    OstTraceFunctionExit0( CMTPPICTBRIDGEPRINTER_DEREGISTERDPSPRINTERNOTIFY_EXIT );
     }
     
 // --------------------------------------------------------------------------
@@ -164,10 +172,12 @@ void CMTPPictBridgePrinter::DeRegisterDpsPrinterNotify(CPtpSession* /*aSessionP*
 //
 void CMTPPictBridgePrinter::RegisterDpsPrinterNotify(CPtpSession* aSessionP)
     {
-    __FLOG_VA((_L8(">>>CMTPPictBridgePrinter::RegisterDpsPrinterNotify 0x%x (old) 0x%x (new)"), iDpsPrinterNotifyCbP, aSessionP));
+    OstTraceFunctionEntry0( CMTPPICTBRIDGEPRINTER_REGISTERDPSPRINTERNOTIFY_ENTRY );
+    OstTraceExt2( TRACE_NORMAL, CMTPPICTBRIDGEPRINTER_REGISTERDPSPRINTERNOTIFY, 
+            " 0x%x (old) 0x%x (new)", (TUint)iDpsPrinterNotifyCbP, (TUint)aSessionP );
     __ASSERT_DEBUG(iDpsPrinterNotifyCbP==NULL, User::Invariant());
     iDpsPrinterNotifyCbP=aSessionP;
-    __FLOG(_L8("<<<CMTPPictBridgePrinter::RegisterDpsPrinterNotify"));    
+    OstTraceFunctionExit0( CMTPPICTBRIDGEPRINTER_REGISTERDPSPRINTERNOTIFY_EXIT );
     }
 
     
@@ -179,20 +189,23 @@ void CMTPPictBridgePrinter::RegisterDpsPrinterNotify(CPtpSession* aSessionP)
 //    
 void CMTPPictBridgePrinter::SendDpsFileL(const TDesC& aFile, TBool /*aTimeout*/, TInt /*aSize*/)
     {
-    __FLOG_VA((_L16(">> CMTPPictBridgePrinter::SendDpsFileL %S"), &aFile));            
+    OstTraceFunctionEntry0( CMTPPICTBRIDGEPRINTER_SENDDPSFILEL_ENTRY );
+    OstTraceExt1( TRACE_NORMAL, CMTPPICTBRIDGEPRINTER_SENDDPSFILEL, "DpsFile %S", aFile );          
     
     TUint32 handle(0);  
     TRAPD(err, iServer.GetObjectHandleByNameL(aFile, handle));
     if(err!=KErrNone || handle==0)
         {
-        __FLOG_VA((_L8("   Object does not exist, adding it, errorcode = %d"), err));
+        OstTrace1( TRACE_WARNING, DUP1_CMTPPICTBRIDGEPRINTER_SENDDPSFILEL, 
+                "   Object does not exist, adding it, errorcode = %d", err);
         iServer.AddTemporaryObjectL(aFile, handle);    
         }
 
     CreateRequestObjectTransfer(handle, iEvent);
     iServer.SendEventL(iEvent);
     iOutgoingObjectHandle=handle;
-    __FLOG_VA((_L8("<< CMTPPictBridgePrinter::SendDpsFileL handle 0x%x"),iOutgoingObjectHandle));
+    OstTrace1( TRACE_NORMAL, DUP2_CMTPPICTBRIDGEPRINTER_SENDDPSFILEL, "handle 0x%x", iOutgoingObjectHandle );    
+    OstTraceFunctionExit0( CMTPPICTBRIDGEPRINTER_SENDDPSFILEL_EXIT );
     }
 
 // --------------------------------------------------------------------------
@@ -202,9 +215,9 @@ void CMTPPictBridgePrinter::SendDpsFileL(const TDesC& aFile, TBool /*aTimeout*/,
 //
 void CMTPPictBridgePrinter::CancelSendDpsFile()
     {
-    __FLOG(_L8(">>>CMTPPictBridgePrinter::CancelSendObject"));    
-    iOutgoingObjectHandle=0;
-    __FLOG(_L8("<<<CMTPPictBridgePrinter::CancelSendObject"));    
+    OstTraceFunctionEntry0( CMTPPICTBRIDGEPRINTER_CANCELSENDDPSFILE_ENTRY );  
+    iOutgoingObjectHandle=0; 
+    OstTraceFunctionExit0( CMTPPICTBRIDGEPRINTER_CANCELSENDDPSFILE_EXIT );
     }
 
 // --------------------------------------------------------------------------
@@ -223,7 +236,9 @@ TBool CMTPPictBridgePrinter::SendObjectPending() const
 void CMTPPictBridgePrinter::CreateRequestObjectTransfer(TUint32 aHandle, 
                                                  TMTPTypeEvent& aEvent )
     {
-    __FLOG_VA((_L8("CMTPPictBridgePrinter::CreateRequestEventTransfer for 0x%x"), aHandle)); 
+    OstTraceFunctionEntry0( CMTPPICTBRIDGEPRINTER_CREATEREQUESTOBJECTTRANSFER_ENTRY );
+    OstTrace1( TRACE_NORMAL, CMTPPICTBRIDGEPRINTER_CREATEREQUESTOBJECTTRANSFER, 
+            " for handle 0x%x", aHandle );
 
     aEvent.Reset();
 
@@ -234,6 +249,7 @@ void CMTPPictBridgePrinter::CreateRequestObjectTransfer(TUint32 aHandle,
     aEvent.SetUint32(TMTPTypeEvent::EEventParameter1, aHandle);
     aEvent.SetUint32(TMTPTypeEvent::EEventParameter2, KPtpNoValue);
     aEvent.SetUint32(TMTPTypeEvent::EEventParameter3, KPtpNoValue);
+    OstTraceFunctionExit0( CMTPPICTBRIDGEPRINTER_CREATEREQUESTOBJECTTRANSFER_EXIT );
     }
 
 // --------------------------------------------------------------------------
@@ -243,8 +259,9 @@ void CMTPPictBridgePrinter::CreateRequestObjectTransfer(TUint32 aHandle,
 //
 void CMTPPictBridgePrinter::ObjectReceived(TDes& aFile)
     {
-    __FLOG(_L8("CMTPPictBridgePrinter::ObjectReceived"));                    
+    OstTraceFunctionEntry0( CMTPPICTBRIDGEPRINTER_OBJECTRECEIVED_ENTRY );                  
     iObserverP->ReceivedObjectCompleted(aFile);
+    OstTraceFunctionExit0( CMTPPICTBRIDGEPRINTER_OBJECTRECEIVED_EXIT );
     }    
 
 // --------------------------------------------------------------------------
@@ -252,12 +269,15 @@ void CMTPPictBridgePrinter::ObjectReceived(TDes& aFile)
 //
 void CMTPPictBridgePrinter::DpsFileSent(TInt aError)
     {
-    __FLOG_VA((_L8("CMTPPictBridgePrinter::DpsFileSent error %d handle 0x%x"), aError, iOutgoingObjectHandle));
+    OstTraceFunctionEntry0( CMTPPICTBRIDGEPRINTER_DPSFILESENT_ENTRY );
+    OstTraceExt2( TRACE_NORMAL, CMTPPICTBRIDGEPRINTER_DPSFILESENT, "error %d handle 0x%x", (TInt32)aError, iOutgoingObjectHandle );
+
     if( SendObjectPending() )
         {
         iObserverP->SendObjectCompleted(aError); 
         iOutgoingObjectHandle=0;
         }
+    OstTraceFunctionExit0( CMTPPICTBRIDGEPRINTER_DPSFILESENT_EXIT );
     }
 
 // --------------------------------------------------------------------------

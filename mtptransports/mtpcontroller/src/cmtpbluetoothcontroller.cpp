@@ -21,8 +21,11 @@
 */
 
 #include "cmtpbluetoothcontroller.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpbluetoothcontrollerTraces.h"
+#endif
 
-__FLOG_STMT( _LIT8( KComponent, "mtpbtcontroller" ); )
 LOCAL_D const TUid KMTPBtTransportUid = { 0x10286FCB };
 
 CMTPBluetoothController* CMTPBluetoothController::NewL( CMTPBearerMonitor& aMon )
@@ -33,14 +36,15 @@ CMTPBluetoothController* CMTPBluetoothController::NewL( CMTPBearerMonitor& aMon 
 
 CMTPBluetoothController::~CMTPBluetoothController()
     {
+    OstTraceFunctionEntry0( CMTPBLUETOOTHCONTROLLER_DES_ENTRY );
     delete iMTPOperator;
-    __FLOG( _L8("+/-Dtor") );
-    __FLOG_CLOSE;
+    OstTraceFunctionExit0( CMTPBLUETOOTHCONTROLLER_DES_EXIT );
     }
 
 void CMTPBluetoothController::ManageService( TBool aStatus )
     {
-    __FLOG_1( _L8("+/-ManageService( %d )"), aStatus );
+    OstTraceFunctionEntry0( CMTPBLUETOOTHCONTROLLER_MANAGESERVICE_ENTRY );
+    OstTrace1( TRACE_NORMAL, CMTPBLUETOOTHCONTROLLER_MANAGESERVICE, "The status is %d", aStatus );
     iStat = aStatus;
     TInt err = KErrNone;
     if ( !iMTPOperator )
@@ -50,6 +54,7 @@ void CMTPBluetoothController::ManageService( TBool aStatus )
     if ( KErrNone != err )
         {
         Monitor().ManageServiceCompleted( Bearer(), iStat, err );
+        OstTraceFunctionExit0( CMTPBLUETOOTHCONTROLLER_MANAGESERVICE_EXIT );
         return;
         }
     
@@ -61,11 +66,13 @@ void CMTPBluetoothController::ManageService( TBool aStatus )
         {
         iMTPOperator->StopTransport( KMTPBtTransportUid );
         }
+    OstTraceFunctionExit0( DUP1_CMTPBLUETOOTHCONTROLLER_MANAGESERVICE_EXIT );
     }
 
 void CMTPBluetoothController::HandleStartTrasnportCompleteL( TInt aError )
     {
-    __FLOG_1( _L8("+HandleStartTrasnportCompleteL( %d )"), aError );
+    OstTraceFunctionEntry0( CMTPBLUETOOTHCONTROLLER_HANDLESTARTTRASNPORTCOMPLETEL_ENTRY );
+    OstTrace1( TRACE_NORMAL, CMTPBLUETOOTHCONTROLLER_HANDLESTARTTRASNPORTCOMPLETEL, "The error is %d", aError );
     switch( aError )
         {
         case KErrServerBusy:// Another transport is running, keep observing the status of the transport bearer
@@ -75,21 +82,22 @@ void CMTPBluetoothController::HandleStartTrasnportCompleteL( TInt aError )
             break;
         }
     Monitor().ManageServiceCompleted( Bearer(), iStat, aError );
-    __FLOG( _L8("-HandleStartTrasnportCompleteL") );
+    OstTraceFunctionExit0( CMTPBLUETOOTHCONTROLLER_HANDLESTARTTRASNPORTCOMPLETEL_EXIT );
     }
 
 void CMTPBluetoothController::HandleStopTrasnportCompleteL( TInt aError )
     {
-    __FLOG_1( _L8("+HandleStopTrasnportCompleteL( %d )"), aError );
+    OstTraceFunctionEntry0( CMTPBLUETOOTHCONTROLLER_HANDLESTOPTRASNPORTCOMPLETEL_ENTRY );
+    OstTrace1( TRACE_NORMAL, CMTPBLUETOOTHCONTROLLER_HANDLESTOPTRASNPORTCOMPLETEL, "The error is %d", aError );
     Monitor().ManageServiceCompleted( Bearer(), iStat, aError );
-    __FLOG( _L8("-HandleStopTrasnportCompleteL") );
+    OstTraceFunctionExit0( CMTPBLUETOOTHCONTROLLER_HANDLESTOPTRASNPORTCOMPLETEL_EXIT );
     }
 
 CMTPBluetoothController::CMTPBluetoothController( CMTPBearerMonitor& aMon ):
     CMTPControllerBase( aMon, ELocodBearerBT ),
     iStat( EFalse )
     {
-    __FLOG_OPEN( KMTPSubsystem, KComponent );
-    __FLOG( _L8("+/-Ctor") );
+    OstTraceFunctionEntry0( CMTPBLUETOOTHCONTROLLER_CONS_ENTRY );
+    OstTraceFunctionExit0( CMTPBLUETOOTHCONTROLLER_CONS_EXIT );
     }
 

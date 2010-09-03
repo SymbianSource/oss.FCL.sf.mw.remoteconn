@@ -16,8 +16,11 @@
 #include "cmtpsvcgetserviceproplist.h"
 #include "mmtpservicedataprovider.h"
 #include "mmtpservicehandler.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpsvcgetserviceproplistTraces.h"
+#endif
 
-__FLOG_STMT (_LIT8(KComponent,"SvcGetSvcPList");)
 
 const TUint16 KMTPServicePropsAll(0x0000);
 
@@ -32,10 +35,9 @@ EXPORT_C MMTPRequestProcessor* CMTPSvcGetServicePropList::NewL(MMTPDataProviderF
 
 EXPORT_C CMTPSvcGetServicePropList::~CMTPSvcGetServicePropList()
 	{
-	__FLOG(_L8("~CMTPSvcGetServicePropList - Entry"));
+	OstTraceFunctionEntry0( CMTPSVCGETSERVICEPROPLIST_CMTPSVCGETSERVICEPROPLIST_ENTRY );
 	delete iServicePropList;
-	__FLOG(_L8("~CMTPSvcGetServicePropList - Exit"));
-	__FLOG_CLOSE;
+	OstTraceFunctionExit0( CMTPSVCGETSERVICEPROPLIST_CMTPSVCGETSERVICEPROPLIST_EXIT );
 	}
 
 CMTPSvcGetServicePropList::CMTPSvcGetServicePropList(MMTPDataProviderFramework& aFramework, MMTPConnection& aConnection, MMTPServiceDataProvider& aDataProvider) :
@@ -45,15 +47,14 @@ CMTPSvcGetServicePropList::CMTPSvcGetServicePropList(MMTPDataProviderFramework& 
 
 void CMTPSvcGetServicePropList::ConstructL()
 	{
-	__FLOG_OPEN(KMTPSubsystem, KComponent);
-	__FLOG(_L8("ConstructL - Entry")); 
+	OstTraceFunctionEntry0( CMTPSVCGETSERVICEPROPLIST_CONSTRUCTL_ENTRY );
 	iServicePropList = CMTPTypeServicePropList::NewL();
-	__FLOG(_L8("ConstructL - Exit")); 
+	OstTraceFunctionExit0( CMTPSVCGETSERVICEPROPLIST_CONSTRUCTL_EXIT );
 	}
 
 void CMTPSvcGetServicePropList::ServiceL()
 	{
-	__FLOG(_L8("ServiceL - Entry"));
+	OstTraceFunctionEntry0( CMTPSVCGETSERVICEPROPLIST_SERVICEL_ENTRY );
 	TUint32 propcode = Request().Uint32(TMTPTypeRequest::ERequestParameter2);
 	if (KMTPServicePropertyAll == propcode)
 		{
@@ -72,12 +73,12 @@ void CMTPSvcGetServicePropList::ServiceL()
 		iResponseCode = (iDataProvider.ServiceHandler())->GetServicePropertyL(propcode, *iServicePropList);
 		}
 	SendDataL(*iServicePropList);
-	__FLOG(_L8("ServiceL - Exit"));
+	OstTraceFunctionExit0( CMTPSVCGETSERVICEPROPLIST_SERVICEL_EXIT );
 	}
 
 TMTPResponseCode CMTPSvcGetServicePropList::CheckRequestL()
 {
-	__FLOG(_L8("CheckRequestL - Entry")); 
+	OstTraceFunctionEntry0( CMTPSVCGETSERVICEPROPLIST_CHECKREQUESTL_ENTRY );
 	TMTPResponseCode responseCode = CMTPRequestProcessor::CheckRequestL();
 	if (EMTPRespCodeOK == responseCode)
 		{
@@ -96,15 +97,18 @@ TMTPResponseCode CMTPSvcGetServicePropList::CheckRequestL()
 				}
 			}
 		}
-	__FLOG_VA((_L8("CheckRequestL - Exit with responseCode = 0x%04X"), responseCode));
+    OstTrace1( TRACE_NORMAL, CMTPSVCGETSERVICEPROPLIST_CHECKREQUESTL, "Exit with responseCode = 0x%04X", responseCode );	
+	OstTraceFunctionExit0( CMTPSVCGETSERVICEPROPLIST_CHECKREQUESTL_EXIT );
+	
 	return responseCode;
 }
 
 TBool CMTPSvcGetServicePropList::DoHandleResponsePhaseL()
 	{
-	__FLOG(_L8("DoHandleResponsePhaseL - Entry"));
+	OstTraceFunctionEntry0( CMTPSVCGETSERVICEPROPLIST_DOHANDLERESPONSEPHASEL_ENTRY );
 	TMTPResponseCode responseCode = (iCancelled ? EMTPRespCodeIncompleteTransfer : iResponseCode);
 	SendResponseL(responseCode);
-	__FLOG_VA((_L8("DoHandleResponsePhaseL - Exit with Response Code: 0x%x"), iResponseCode));
+    OstTrace1( TRACE_NORMAL, CMTPSVCGETSERVICEPROPLIST_DOHANDLERESPONSEPHASEL, "Exit with responseCode = 0x%04X", iResponseCode );	
+	OstTraceFunctionExit0( CMTPSVCGETSERVICEPROPLIST_DOHANDLERESPONSEPHASEL_EXIT );
 	return EFalse;
 	}

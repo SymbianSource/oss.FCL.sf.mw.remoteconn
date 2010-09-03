@@ -24,8 +24,6 @@
 #include <cusbclasscontrollerplugin.h>
 #include <mtp/rmtpclient.h>
 
-#include "mtpdebug.h"
-
 class MUsbClassControllerNotify;
 class TUsbDescriptor;
 
@@ -58,13 +56,6 @@ private:
 
 	CMTPUsbSicClassController(MUsbClassControllerNotify& aOwner);
 	void ConstructL();
-	
-protected:
-
-	/**
-    FLOGGER debug trace member variable.
-    */
-    __FLOG_DECLARATION_MEMBER_MUTABLE;
 
 private:
 

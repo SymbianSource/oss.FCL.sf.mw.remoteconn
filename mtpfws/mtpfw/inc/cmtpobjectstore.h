@@ -26,7 +26,6 @@
 
 #include "mtpframeworkconst.h"
 #include "rmtpframework.h"
-#include "mtpdebug.h"
 #include "cmtpreferencemgr.h"
 class CFileStore;
 class CMTPHandleAllocator;
@@ -172,7 +171,8 @@ class CMTPObjectStore : public CBase
             void RunL();
             TInt RunErr();
             void ActiveSelf();
-            
+            ~CSnapshotWorker();
+			
         private:
             CSnapshotWorker(CMTPObjectStore* aObjectStore, TBool aOnlyRoot);
             void ConstructL();
@@ -368,10 +368,6 @@ private:
 	CSnapshotWorker*                        iSnapshotWorker;
 	mutable TFileName                       iSuidBuf;
 	TBool                                   iCleanUndefined;
-	/**
-	 FLOGGER debug trace member variable.
-	 */
-	__FLOG_DECLARATION_MEMBER_MUTABLE;
 	};
 
 #endif // CMTPOBJECTSTORE_H

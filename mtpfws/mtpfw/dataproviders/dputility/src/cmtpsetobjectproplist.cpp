@@ -128,7 +128,35 @@ TBool CMTPSetObjectPropList::DoHandleResponsePhaseL()
 						}
     				}			
     				break;
-    				
+    			case EMTPObjectPropCodeHidden:
+    			    {
+    			    TUint16 hiddenStatus = element.Uint16L(CMTPTypeObjectPropListElement::EValue);
+                    TEntry entry;
+    			    if ( EMTPHidden == hiddenStatus )
+    			        {
+                        User::LeaveIfError(iFramework.Fs().Entry(iObjMeta->DesC(CMTPObjectMetaData::ESuid), entry));
+                        if ( !entry.IsHidden())
+                            {
+                            entry.iAtt &= ~KEntryAttHidden;
+                            entry.iAtt |= KEntryAttHidden;
+                            User::LeaveIfError(iFramework.Fs().SetAtt(iObjMeta->DesC(CMTPObjectMetaData::ESuid), entry.iAtt, ~entry.iAtt));
+                            }
+    			        }
+    			    else if ( EMTPVisible == hiddenStatus )
+    			        {
+                        User::LeaveIfError(iFramework.Fs().Entry(iObjMeta->DesC(CMTPObjectMetaData::ESuid), entry));
+                        if ( entry.IsHidden())
+                            {
+                            entry.iAtt &= ~KEntryAttHidden;
+                            User::LeaveIfError(iFramework.Fs().SetAtt(iObjMeta->DesC(CMTPObjectMetaData::ESuid), entry.iAtt, ~entry.iAtt));
+                            }
+    			        }
+    			    else
+    			        {
+                        responseCode = EMTPRespCodeInvalidObjectPropValue;
+    			        }
+    			    break;   
+    			    }
     			case EMTPObjectPropCodeNonConsumable:
     				iObjMeta->SetUint( CMTPObjectMetaData::ENonConsumable, element.Uint8L(CMTPTypeObjectPropListElement::EValue));
 					iFramework.ObjectMgr().ModifyObjectL(*iObjMeta);
@@ -211,6 +239,7 @@ TMTPResponseCode CMTPSetObjectPropList::CheckPropCode(TUint16 aPropertyCode, TUi
 				}
 			break;
 		case EMTPObjectPropCodeAssociationType:
+		case EMTPObjectPropCodeHidden:
 			if (aDataType != EMTPTypeUINT16)
 				{
 				responseCode = EMTPRespCodeInvalidObjectPropFormat;

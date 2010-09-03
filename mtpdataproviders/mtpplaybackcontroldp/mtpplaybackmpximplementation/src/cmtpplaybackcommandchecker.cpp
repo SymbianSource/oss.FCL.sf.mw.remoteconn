@@ -20,9 +20,11 @@
 
 #include "cmtpplaybackcommandchecker.h"
 #include "cmtpplaybackcontrolimpl.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpplaybackcommandcheckerTraces.h"
+#endif
 
-// Constants
-__FLOG_STMT(_LIT8(KComponent,"PlaybackCommandChecker");)
 
 // ======== MEMBER FUNCTIONS ========
 
@@ -33,8 +35,10 @@ __FLOG_STMT(_LIT8(KComponent,"PlaybackCommandChecker");)
 CMTPPlaybackCommandChecker* CMTPPlaybackCommandChecker::NewL(
             CMTPPlaybackControlImpl& aControlImpl )
     {
+    OstTraceFunctionEntry0( CMTPPLAYBACKCOMMANDCHECKER_NEWL_ENTRY );
     CMTPPlaybackCommandChecker* self = new ( ELeave ) 
                         CMTPPlaybackCommandChecker( aControlImpl );
+    OstTraceFunctionExit0( CMTPPLAYBACKCOMMANDCHECKER_NEWL_EXIT );
     return self;
     }
 
@@ -44,9 +48,8 @@ CMTPPlaybackCommandChecker* CMTPPlaybackCommandChecker::NewL(
 //
 CMTPPlaybackCommandChecker::~CMTPPlaybackCommandChecker()
     {
-    __FLOG(_L8("+CMTPPlaybackCommandChecker::~CMTPPlaybackCommandChecker"));
-    __FLOG(_L8("-CMTPPlaybackCommandChecker::~CMTPPlaybackCommandChecker"));
-    __FLOG_CLOSE;
+    OstTraceFunctionEntry0( CMTPPLAYBACKCOMMANDCHECKER_CMTPPLAYBACKCOMMANDCHECKER_ENTRY );
+    OstTraceFunctionExit0( CMTPPLAYBACKCOMMANDCHECKER_CMTPPLAYBACKCOMMANDCHECKER_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -55,7 +58,7 @@ CMTPPlaybackCommandChecker::~CMTPPlaybackCommandChecker()
 //
 void CMTPPlaybackCommandChecker::CheckPlaybackCommandContextL( TMTPPlaybackCommand aMTPPBCommand )
     {
-    __FLOG(_L8("+CMTPPlaybackCommandChecker::CheckPlaybackCommandContextL"));
+    OstTraceFunctionEntry0( CMTPPLAYBACKCOMMANDCHECKER_CHECKPLAYBACKCOMMANDCONTEXTL_ENTRY );
     
     MTPPlaybackControlImpl().SetMTPPBCmd( aMTPPBCommand );
     
@@ -67,7 +70,7 @@ void CMTPPlaybackCommandChecker::CheckPlaybackCommandContextL( TMTPPlaybackComma
         case EPlaybackCmdGetState:
         case EPlaybackCmdSetVolume:
             {
-            __FLOG(_L8("no context check for init object command"));
+            OstTrace0( TRACE_NORMAL, CMTPPLAYBACKCOMMANDCHECKER_CHECKPLAYBACKCOMMANDCONTEXTL, "no context check for init object command" );
             }
             break;
         case EPlaybackCmdInitIndex:
@@ -76,7 +79,8 @@ void CMTPPlaybackCommandChecker::CheckPlaybackCommandContextL( TMTPPlaybackComma
             {
             if ( MTPPlaybackControlImpl().SongCount() < 0 )
                 {
-                User::Leave( KPlaybackErrContextInvalid );
+                LEAVEIFERROR(KPlaybackErrContextInvalid, 
+                        OstTrace0( TRACE_ERROR, DUP2_CMTPPLAYBACKCOMMANDCHECKER_CHECKPLAYBACKCOMMANDCONTEXTL, "Context invalid" ));
                 }
             }
             break;
@@ -93,7 +97,8 @@ void CMTPPlaybackCommandChecker::CheckPlaybackCommandContextL( TMTPPlaybackComma
                 {
                 case EPbStateNotInitialised:
                     {
-                    User::Leave( KPlaybackErrContextInvalid );
+                    LEAVEIFERROR(KPlaybackErrContextInvalid, 
+                            OstTrace0( TRACE_ERROR, DUP3_CMTPPLAYBACKCOMMANDCHECKER_CHECKPLAYBACKCOMMANDCONTEXTL, "Context invalid" ));
                     }
                 default:
                     break;
@@ -102,13 +107,15 @@ void CMTPPlaybackCommandChecker::CheckPlaybackCommandContextL( TMTPPlaybackComma
             break;
         default:
             {
-            __FLOG(_L8("Not support command!"));
-            User::Leave( KPlaybackErrParamInvalid );
+            OstTrace0( TRACE_NORMAL, DUP1_CMTPPLAYBACKCOMMANDCHECKER_CHECKPLAYBACKCOMMANDCONTEXTL, "Not support command!" );
+            
+            LEAVEIFERROR(KPlaybackErrParamInvalid, 
+                    OstTrace0( TRACE_ERROR, DUP4_CMTPPLAYBACKCOMMANDCHECKER_CHECKPLAYBACKCOMMANDCONTEXTL, "Parameter invalid" ));
             }
             break;
         }
     
-    __FLOG(_L8("-CMTPPlaybackCommandChecker::CheckPlaybackCommandContextL"));
+    OstTraceFunctionExit0( CMTPPLAYBACKCOMMANDCHECKER_CHECKPLAYBACKCOMMANDCONTEXTL_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -118,7 +125,7 @@ void CMTPPlaybackCommandChecker::CheckPlaybackCommandContextL( TMTPPlaybackComma
 void CMTPPlaybackCommandChecker::CheckAndUpdatePlaybackParamL( CMTPPlaybackCommand& aMTPPPBSourceCmd, 
                 CMTPPbCmdParam** aMTPPPBTargetParam )
     {
-    __FLOG(_L8("+CMTPPlaybackCommandChecker::CheckAndUpdatePlaybackParamL"));
+    OstTraceFunctionEntry0( CMTPPLAYBACKCOMMANDCHECKER_CHECKANDUPDATEPLAYBACKPARAML_ENTRY );
     
     delete *aMTPPPBTargetParam;
     *aMTPPPBTargetParam = NULL;
@@ -137,7 +144,8 @@ void CMTPPlaybackCommandChecker::CheckAndUpdatePlaybackParamL( CMTPPlaybackComma
             TUint32 songIndex = aMTPPPBSourceCmd.ParamL().Uint32L();
             if ( songIndex > ( MTPPlaybackControlImpl().SongCount()-1 ))
                 {
-                User::Leave( KPlaybackErrParamInvalid );
+                LEAVEIFERROR(KPlaybackErrParamInvalid, 
+                        OstTrace0( TRACE_ERROR, DUP1_CMTPPLAYBACKCOMMANDCHECKER_CHECKANDUPDATEPLAYBACKPARAML, "Parameter invalid" ));
                 }
             *aMTPPPBTargetParam = CMTPPbCmdParam::NewL( songIndex );
             }
@@ -165,7 +173,8 @@ void CMTPPlaybackCommandChecker::CheckAndUpdatePlaybackParamL( CMTPPlaybackComma
             TUint32 volume = aMTPPPBSourceCmd.ParamL().Uint32L();
             if( volume > KPbPlaybackVolumeLevelMax )
                 {
-                User::Leave( KPlaybackErrParamInvalid );
+                LEAVEIFERROR(KPlaybackErrParamInvalid, 
+                        OstTrace0( TRACE_ERROR, DUP2_CMTPPLAYBACKCOMMANDCHECKER_CHECKANDUPDATEPLAYBACKPARAML, "Parameter invalid" ));
                 }
             *aMTPPPBTargetParam = CMTPPbCmdParam::NewL( volume );
             }
@@ -178,12 +187,12 @@ void CMTPPlaybackCommandChecker::CheckAndUpdatePlaybackParamL( CMTPPlaybackComma
             break;
         default:
             {
-            __FLOG(_L8("No param, just cache command"));
+            OstTrace0( TRACE_NORMAL, CMTPPLAYBACKCOMMANDCHECKER_CHECKANDUPDATEPLAYBACKPARAML, "No param, just cache command" );
             }
             break;
         }
     
-    __FLOG(_L8("-CMTPPlaybackCommandChecker::CheckAndUpdatePlaybackParamL"));
+    OstTraceFunctionExit0( CMTPPLAYBACKCOMMANDCHECKER_CHECKANDUPDATEPLAYBACKPARAML_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -194,7 +203,8 @@ CMTPPlaybackCommandChecker::CMTPPlaybackCommandChecker(
         CMTPPlaybackControlImpl& aControlImpl )
                 : iMTPPlaybackControl( aControlImpl )
     {
-    __FLOG_OPEN(KMTPSubsystem, KComponent);
+    OstTraceFunctionEntry0( DUP1_CMTPPLAYBACKCOMMANDCHECKER_CMTPPLAYBACKCOMMANDCHECKER_ENTRY );
+    OstTraceFunctionExit0( DUP1_CMTPPLAYBACKCOMMANDCHECKER_CMTPPLAYBACKCOMMANDCHECKER_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -203,6 +213,8 @@ CMTPPlaybackCommandChecker::CMTPPlaybackCommandChecker(
 //
 CMTPPlaybackControlImpl& CMTPPlaybackCommandChecker::MTPPlaybackControlImpl()
     {
+    OstTraceFunctionEntry0( CMTPPLAYBACKCOMMANDCHECKER_MTPPLAYBACKCONTROLIMPL_ENTRY );
+    OstTraceFunctionExit0( CMTPPLAYBACKCOMMANDCHECKER_MTPPLAYBACKCONTROLIMPL_EXIT );
     return iMTPPlaybackControl;
     }
 

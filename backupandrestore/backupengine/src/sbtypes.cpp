@@ -24,10 +24,14 @@
 #include <s32mem.h>
 #include <apgcli.h>
 #include <apmstd.h>
+#include "OstTraceDefinitions.h"
+#include "sbtrace.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "sbtypesTraces.h"
+#endif
 
 namespace conn
-	{
-	
+	{	
 	EXPORT_C CDataOwnerInfo* CDataOwnerInfo::NewL( CSBGenericDataType* aGenericDataType,
 										  TCommonBURSettings aCommonSettings,
 										  TPassiveBURSettings aPassiveSettings,
@@ -45,10 +49,12 @@ namespace conn
 	@return A pointer to the CDataOwnerInfo object
 	*/
 		{
+		OstTraceFunctionEntry0( CDATAOWNERINFO_NEWL_ENTRY );
 		CDataOwnerInfo* self = new(ELeave) CDataOwnerInfo();
 		CleanupStack::PushL(self);
 		self->ConstructL(aGenericDataType, aCommonSettings, aPassiveSettings, aActiveSettings, aDriveList);
 		CleanupStack::Pop(self);
+		OstTraceFunctionExit0( CDATAOWNERINFO_NEWL_EXIT );
 		return self;
 		}
 
@@ -61,10 +67,12 @@ namespace conn
 	@return A pointer to the CDataOwnerInfo object
 	*/
 		{
+		OstTraceFunctionEntry0( DUP1_CDATAOWNERINFO_NEWL_ENTRY );
 		CDataOwnerInfo* self = new(ELeave) CDataOwnerInfo();
 		CleanupStack::PushL(self);
 		self->ConstructL(aFlatDataOwnerInfo);
 		CleanupStack::Pop(self);
+		OstTraceFunctionExit0( DUP1_CDATAOWNERINFO_NEWL_EXIT );
 		return self;
 		}
 	
@@ -73,6 +81,8 @@ namespace conn
 	C++ Constructor 
 	*/
 		{
+		OstTraceFunctionEntry0( CDATAOWNERINFO_CDATAOWNERINFO_CONS_ENTRY );
+		OstTraceFunctionExit0( CDATAOWNERINFO_CDATAOWNERINFO_CONS_EXIT );
 		}
 
 	EXPORT_C CDataOwnerInfo::~CDataOwnerInfo()
@@ -80,7 +90,10 @@ namespace conn
 	C++ Destructor
 	*/
 		{
+		OstTraceFunctionEntry0( CDATAOWNERINFO_CDATAOWNERINFO_DES_ENTRY );
 		delete iGenericDataType;
+		iGenericDataType = NULL;
+		OstTraceFunctionExit0( CDATAOWNERINFO_CDATAOWNERINFO_DES_EXIT );
 		}
 
 	void CDataOwnerInfo::ConstructL(CSBGenericDataType* aGenericDataType,
@@ -98,8 +111,10 @@ namespace conn
 	@param aDriveList the array of drives the data owner has data on
 	*/
 		{
+		OstTraceFunctionEntry0( CDATAOWNERINFO_CONSTRUCTL_ENTRY );
 		if (aGenericDataType == NULL)
 			{
+		    OstTrace0(TRACE_ERROR, CDATAOWNERINFO_CONSTRUCTL, "Leave: KErrArgument");
 			User::Leave(KErrArgument);
 			}
 		iGenericDataType = aGenericDataType;
@@ -107,6 +122,7 @@ namespace conn
 		iPassiveBURSettings = aPassiveSettings;
 		iActiveBURSettings = aActiveSettings;
 		iDriveList = aDriveList;
+		OstTraceFunctionExit0( CDATAOWNERINFO_CONSTRUCTL_EXIT );
 		}
 
 	void CDataOwnerInfo::ConstructL(const TDesC8& aFlatDataOwnerInfo)
@@ -117,6 +133,7 @@ namespace conn
 	@param aFlatDataOwnerInfo a flat data owner info returned from IPC
 	*/
 		{
+		OstTraceFunctionEntry0( DUP1_CDATAOWNERINFO_CONSTRUCTL_ENTRY );
 		// TPtr8 that points to aFlatDataOwnerInfo (which remains const)
 		TPtr8 pSource(const_cast<TUint8*>(aFlatDataOwnerInfo.Ptr()), aFlatDataOwnerInfo.Size());
 		pSource.SetMax();
@@ -137,6 +154,7 @@ namespace conn
 		UnpackTypeAdvance(iPassiveBURSettings, pSource, sourcePos);
 		UnpackTypeAdvance(iActiveBURSettings, pSource, sourcePos);
 		UnpackTypeAdvance(iDriveList, pSource, sourcePos);
+		OstTraceFunctionExit0( DUP1_CDATAOWNERINFO_CONSTRUCTL_EXIT );
 		}
 		
 	EXPORT_C CSBGenericDataType& CDataOwnerInfo::Identifier()
@@ -226,9 +244,11 @@ namespace conn
 	@return The externalised buffer
 	*/
 		{
+		OstTraceFunctionEntry0( CDATAOWNERINFO_EXTERNALISEL_ENTRY );
 		HBufC8* dataOwnerBuffer = ExternaliseLC();
 		CleanupStack::Pop(dataOwnerBuffer);
 		
+		OstTraceFunctionExit0( CDATAOWNERINFO_EXTERNALISEL_EXIT );
 		return dataOwnerBuffer;
 		}
 		
@@ -240,6 +260,7 @@ namespace conn
 	@return The externalised buffer
 	*/
 		{
+		OstTraceFunctionEntry0( CDATAOWNERINFO_EXTERNALISELC_ENTRY );
 		HBufC8* dataBuffer = HBufC8::NewLC(Size());				
 		TPtr8 bufferPtr(dataBuffer->Des());
 						
@@ -254,6 +275,7 @@ namespace conn
 		bufferPtr.Append(reinterpret_cast<TUint8*>(&iActiveBURSettings), sizeof(TActiveBURSettings));
 		bufferPtr.Append(iDriveList);
 		
+		OstTraceFunctionExit0( CDATAOWNERINFO_EXTERNALISELC_EXIT );
 		return dataBuffer;
 		}
 		
@@ -265,6 +287,7 @@ namespace conn
 	@return Size of class in bytes once flattened
 	*/
 		{
+		OstTraceFunctionEntry0( CDATAOWNERINFO_SIZE_ENTRY );
 		TInt size = 	sizeof(TCommonBURSettings) +
 						sizeof(TPassiveBURSettings) +
 						sizeof(TActiveBURSettings) +
@@ -272,6 +295,7 @@ namespace conn
 						iGenericDataType->Externalise().Size() +
 						iDriveList.Size();
 						
+		OstTraceFunctionExit0( CDATAOWNERINFO_SIZE_EXIT );
 		return size;
 		}
 		
@@ -287,10 +311,12 @@ namespace conn
 	@return A pointer to the CSBGenericDataType object
 	*/
 		{
+		OstTraceFunctionEntry0( CSBGENERICDATATYPE_NEWL_ENTRY );
 		CSBGenericDataType* self = new(ELeave) CSBGenericDataType();
 		CleanupStack::PushL(self);
 		self->ConstructL(aDes);
 		CleanupStack::Pop(self);
+		OstTraceFunctionExit0( CSBGENERICDATATYPE_NEWL_EXIT );
 		return self;
 		}
 	
@@ -301,8 +327,10 @@ namespace conn
 	to be large enough to accomodate the data stored by the derived type
 	*/
 		{
+		OstTraceFunctionEntry0( CSBGENERICDATATYPE_CSBGENERICDATATYPE_CONS_ENTRY );
 		// Initialise iSize
 		iSize = sizeof(TSBDerivedType);
+		OstTraceFunctionExit0( CSBGENERICDATATYPE_CSBGENERICDATATYPE_CONS_EXIT );
 		}
 
 	EXPORT_C CSBGenericDataType::~CSBGenericDataType()
@@ -310,7 +338,10 @@ namespace conn
 	C++ Destructor
 	*/
 		{
+		OstTraceFunctionEntry0( CSBGENERICDATATYPE_CSBGENERICDATATYPE_DES_ENTRY );
 		delete iDataBuffer;
+		iDataBuffer = NULL;
+		OstTraceFunctionExit0( CSBGENERICDATATYPE_CSBGENERICDATATYPE_DES_EXIT );
 		}
 
 	void CSBGenericDataType::ConstructL(const TDesC8& aDes)
@@ -321,6 +352,7 @@ namespace conn
 	@param aDes descriptor containing the buffer of data
 	*/
 		{
+		OstTraceFunctionEntry0( CSBGENERICDATATYPE_CONSTRUCTL_ENTRY );
 		// Store the length of the descriptor as our max length
 		iSize = aDes.Size();
 			
@@ -335,6 +367,7 @@ namespace conn
 		
 		// The base type should be as long as the des passed in (more info in a derived)
 		iDataBuffer->Des().SetLength(iSize);
+		OstTraceFunctionExit0( CSBGENERICDATATYPE_CONSTRUCTL_EXIT );
 		}
 		
 	void CSBGenericDataType::InitialiseL(TInt& aOffset)
@@ -345,8 +378,10 @@ namespace conn
 			been parsed up to
 	*/
 		{
+		OstTraceFunctionEntry0( CSBGENERICDATATYPE_INITIALISEL_ENTRY );
 		if (iSize < sizeof(TSBDerivedType))
 			{
+		    OstTrace0(TRACE_ERROR, CSBGENERICDATATYPE_INITIALISEL, "Leave: KErrCorrupt");
 			User::Leave(KErrCorrupt);
 			}
 		
@@ -358,11 +393,13 @@ namespace conn
 		
 		if (derivedType < 0 || derivedType > KMaxDerivedTypes)
 			{
+		    OstTrace0(TRACE_ERROR, DUP1_CSBGENERICDATATYPE_INITIALISEL, "Leave: KErrCorrupt");
 			User::Leave(KErrCorrupt);
 			}
 				
 		iDataBuffer->Des().SetLength(aOffset);
 		
+		OstTraceFunctionExit0( CSBGENERICDATATYPE_INITIALISEL_EXIT );
 		}
 	
 	void CSBGenericDataType::BaseConstructL()
@@ -374,8 +411,10 @@ namespace conn
 	the data of all classes is created.
 	*/
 		{
+		OstTraceFunctionEntry0( CSBGENERICDATATYPE_BASECONSTRUCTL_ENTRY );
 		// All derived classes should += their size to iSize
 		iDataBuffer = HBufC8::NewL(iSize);
+		OstTraceFunctionExit0( CSBGENERICDATATYPE_BASECONSTRUCTL_EXIT );
 		}
 		
 	EXPORT_C const TDesC8& CSBGenericDataType::Externalise() const
@@ -396,10 +435,12 @@ namespace conn
 	@return The type of the derived object
 	*/
 		{
+		OstTraceFunctionEntry0( CSBGENERICDATATYPE_DERIVEDTYPEL_ENTRY );
 		TSBDerivedType derivedType;
 		
 		UnpackType(derivedType, *iDataBuffer, iDerivedTypeOffset);
 		
+		OstTraceFunctionExit0( CSBGENERICDATATYPE_DERIVEDTYPEL_EXIT );
 		return derivedType;
 		}
 
@@ -414,6 +455,7 @@ namespace conn
 		@param aOffset The running index of where the following type begins. Updated by ExtractPointer
 		*/
 		{
+		OstTraceFunctionEntry0( CSBGENERICDATATYPE_UNPACKDESCRIPTORTYPEADVANCE_ENTRY );
 		// Set length of the unicode string in characters
 		TUint32 length;
 	
@@ -427,6 +469,7 @@ namespace conn
 			*pRawTarget++ = *pRawSource++;
 			aOffset++;
 			}
+		OstTraceFunctionExit0( CSBGENERICDATATYPE_UNPACKDESCRIPTORTYPEADVANCE_EXIT );
 		}
 
 	void CSBGenericDataType::UnpackDescriptorTypeAdvance(TDesC8& aDes, TInt& aOffset)
@@ -440,6 +483,7 @@ namespace conn
 		@param aOffset The running index of where the following type begins. Updated by ExtractPointer
 		*/
 		{
+		OstTraceFunctionEntry0( DUP1_CSBGENERICDATATYPE_UNPACKDESCRIPTORTYPEADVANCE_ENTRY );
 		// Set length of the string in 8-bit byte characters
 		TUint32 length;
 	
@@ -453,6 +497,7 @@ namespace conn
 			*pRawTarget++ = *pRawSource++;
 			aOffset++;
 			}
+		OstTraceFunctionExit0( DUP1_CSBGENERICDATATYPE_UNPACKDESCRIPTORTYPEADVANCE_EXIT );
 		}
 
 	void CSBGenericDataType::UnpackTPtrAdvance(TPtrC16& aDes, TInt& aOffset)
@@ -466,6 +511,7 @@ namespace conn
 		@param aOffset The running index of where the following type begins. Updated by ExtractPointer
 		*/
 		{
+		OstTraceFunctionEntry0( CSBGENERICDATATYPE_UNPACKTPTRADVANCE_ENTRY );
 		// Set length of the unicode string in characters
 		TInt32 length;
 	
@@ -474,6 +520,7 @@ namespace conn
 		aDes.Set(reinterpret_cast<const TUint16*>(iDataBuffer->Ptr() + aOffset), length);
 
 		aOffset += aDes.Size();
+		OstTraceFunctionExit0( CSBGENERICDATATYPE_UNPACKTPTRADVANCE_EXIT );
 		}
 
 	void CSBGenericDataType::UnpackTPtrAdvance(TPtrC8& aDes, TInt& aOffset)
@@ -487,6 +534,7 @@ namespace conn
 		@param aOffset The running index of where the following type begins. Updated by ExtractPointer
 		*/
 		{
+		OstTraceFunctionEntry0( DUP1_CSBGENERICDATATYPE_UNPACKTPTRADVANCE_ENTRY );
 		// Set length of the string in 8-bit byte characters
 		TInt32 length;
 	
@@ -495,6 +543,7 @@ namespace conn
 		aDes.Set(iDataBuffer->Ptr() + aOffset, length);
 
 		aOffset += aDes.Size();
+		OstTraceFunctionExit0( DUP1_CSBGENERICDATATYPE_UNPACKTPTRADVANCE_EXIT );
 		}
 
 	void CSBGenericDataType::PackDescriptorTypeAdvance(const TDesC16& aDes, TInt& aOffset)
@@ -506,6 +555,7 @@ namespace conn
 		@param aOffset The running index of where the following type begins. Updated by ExtractPointer
 		*/
 		{
+		OstTraceFunctionEntry0( CSBGENERICDATATYPE_PACKDESCRIPTORTYPEADVANCE_ENTRY );
 		TInt32 length = aDes.Length();
 
 		PackTypeAdvance(length, *iDataBuffer, aOffset);
@@ -518,6 +568,7 @@ namespace conn
 			*pRawTarget++ = *pRawSource++;
 			aOffset++;
 			}
+		OstTraceFunctionExit0( CSBGENERICDATATYPE_PACKDESCRIPTORTYPEADVANCE_EXIT );
 		}
 
 	void CSBGenericDataType::PackDescriptorTypeAdvance(const TDesC8& aDes, TInt& aOffset)
@@ -529,6 +580,7 @@ namespace conn
 		@param aOffset The running index of where the following type begins. Updated by ExtractPointer
 		*/
 		{
+		OstTraceFunctionEntry0( DUP1_CSBGENERICDATATYPE_PACKDESCRIPTORTYPEADVANCE_ENTRY );
 		TInt32 length = aDes.Size();
 
 		PackTypeAdvance(length, *iDataBuffer, aOffset);
@@ -541,6 +593,7 @@ namespace conn
 			*pRawTarget++ = *pRawSource++;
 			aOffset++;
 			}
+		OstTraceFunctionExit0( DUP1_CSBGENERICDATATYPE_PACKDESCRIPTORTYPEADVANCE_EXIT );
 		}
 		
 		
@@ -554,10 +607,12 @@ namespace conn
 	@return A pointer to the CSBSecureId object
 	*/
 		{
+		OstTraceFunctionEntry0( CSBSECUREID_NEWL_ENTRY );
 		CSBSecureId* self = new(ELeave) CSBSecureId();
 		CleanupStack::PushL(self);
 		self->ConstructL(aSecureId);
 		CleanupStack::Pop(self);
+		OstTraceFunctionExit0( CSBSECUREID_NEWL_EXIT );
 		return self;
 		}
 	
@@ -571,10 +626,12 @@ namespace conn
 	@return A pointer to the CSBSecureId object
 	*/
 		{
+		OstTraceFunctionEntry0( DUP1_CSBSECUREID_NEWL_ENTRY );
 		CSBSecureId* self = new(ELeave) CSBSecureId();
 		CleanupStack::PushL(self);
 		self->ConstructL(aGenericDataType);
 		CleanupStack::Pop(self);
+		OstTraceFunctionExit0( DUP1_CSBSECUREID_NEWL_EXIT );
 		return self;
 		}
 		
@@ -585,7 +642,9 @@ namespace conn
 	to be large enough to accomodate the data stored by the derived type
 	*/
 		{
+		OstTraceFunctionEntry0( CSBSECUREID_CSBSECUREID_CONS_ENTRY );
 		iSize += sizeof(TSecureId);
+		OstTraceFunctionExit0( CSBSECUREID_CSBSECUREID_CONS_EXIT );
 		}
 
 	EXPORT_C CSBSecureId::~CSBSecureId()
@@ -593,6 +652,8 @@ namespace conn
 	C++ Destructor
 	*/
 		{
+		OstTraceFunctionEntry0( CSBSECUREID_CSBSECUREID_DES_ENTRY );
+		OstTraceFunctionExit0( CSBSECUREID_CSBSECUREID_DES_EXIT );
 		}
 
 	void CSBSecureId::InitialiseL(TInt& aOffset)
@@ -602,6 +663,7 @@ namespace conn
 	@param aOffset The running offset of where the descriptor has been parsed up to
 	*/
 		{
+		OstTraceFunctionEntry0( CSBSECUREID_INITIALISEL_ENTRY );
 		// Throwaway type used for sizeof information only
 		TSecureId sid;
 		
@@ -612,6 +674,7 @@ namespace conn
 		
 		// Increment the size of the data buffer
 		iDataBuffer->Des().SetLength(aOffset);
+		OstTraceFunctionExit0( CSBSECUREID_INITIALISEL_EXIT );
 		}
 
 	void CSBSecureId::ConstructL(TSecureId aSecureId)
@@ -621,6 +684,7 @@ namespace conn
 	@param aSecureId the secure identifier
 	*/
 		{
+		OstTraceFunctionEntry0( CSBSECUREID_CONSTRUCTL_ENTRY );
 		TInt offset = 0;
 		// Call the Base ConstructL in order to allocate the buffer
 		BaseConstructL();
@@ -633,6 +697,7 @@ namespace conn
 		TSecureId sid = aSecureId;
 		
 		PackType(sid, *iDataBuffer, iSecureIdOffset);
+		OstTraceFunctionExit0( CSBSECUREID_CONSTRUCTL_EXIT );
 		}
 		
 	void CSBSecureId::ConstructL(CSBGenericDataType* aGenericDataType)
@@ -642,23 +707,28 @@ namespace conn
 	@param aGenericDataType pointer to a CSBGenericDataType object
 	*/
 		{
+		OstTraceFunctionEntry0( DUP1_CSBSECUREID_CONSTRUCTL_ENTRY );
 		if (aGenericDataType == NULL)
 			{
+		    OstTrace0(TRACE_ERROR, CSBSECUREID_CONSTRUCTL, "Leave: KErrArgument");
 			User::Leave(KErrArgument);
 			}
 		if (ESIDDerivedType != aGenericDataType->DerivedTypeL())
 			{
+		    OstTrace0(TRACE_ERROR, DUP1_CSBSECUREID_CONSTRUCTL, "Leave: KErrArgument");
 			User::Leave(KErrArgument);
 			}
 		// If the descriptor is different to the size we're expecting then it's not correct
 		const TDesC8& des = aGenericDataType->Externalise();
 		if (des.Size() != iSize)
 			{
+		    OstTrace0(TRACE_ERROR, DUP2_CSBSECUREID_CONSTRUCTL, "Leave: KErrArgument");
 			User::Leave(KErrArgument);
 			}
 		
 		// Call the base class ConstructL
 		CSBGenericDataType::ConstructL(des);
+		OstTraceFunctionExit0( DUP1_CSBSECUREID_CONSTRUCTL_EXIT );
 		}
 		
 	EXPORT_C TSecureId CSBSecureId::SecureIdL() const
@@ -668,10 +738,12 @@ namespace conn
 	@return  The secure identifier
 	*/
 		{
+		OstTraceFunctionEntry0( CSBSECUREID_SECUREIDL_ENTRY );
 		TSecureId sid;
 		
 		UnpackType(sid, *iDataBuffer, iSecureIdOffset);
 		
+		OstTraceFunctionExit0( CSBSECUREID_SECUREIDL_EXIT );
 		return sid;
 		}
 	
@@ -688,10 +760,12 @@ namespace conn
 	@return A pointer to the CSBPackageId object
 	*/
 		{
+		OstTraceFunctionEntry0( CSBPACKAGEID_NEWL_ENTRY );
 		CSBPackageId* self = new(ELeave) CSBPackageId();
 		CleanupStack::PushL(self);
 		self->ConstructL(aPackageId, aSecureId, aPackageName);
 		CleanupStack::Pop(self);
+		OstTraceFunctionExit0( CSBPACKAGEID_NEWL_EXIT );
 		return self;
 		}
 	
@@ -705,10 +779,12 @@ namespace conn
 	@return A pointer to the CSBPackageId object
 	*/
 		{
+		OstTraceFunctionEntry0( DUP1_CSBPACKAGEID_NEWL_ENTRY );
 		CSBPackageId* self = new(ELeave) CSBPackageId();
 		CleanupStack::PushL(self);
 		self->ConstructL(aGenericDataType);
 		CleanupStack::Pop(self);
+		OstTraceFunctionExit0( DUP1_CSBPACKAGEID_NEWL_EXIT );
 		return self;
 		}	
 	
@@ -719,7 +795,9 @@ namespace conn
 	to be large enough to accomodate the data stored by the derived type
 	*/
 		{
+		OstTraceFunctionEntry0( CSBPACKAGEID_CSBPACKAGEID_CONS_ENTRY );
 		iSize += (sizeof(TUid) + sizeof(TSecureId) + sizeof(TPackageName));
+		OstTraceFunctionExit0( CSBPACKAGEID_CSBPACKAGEID_CONS_EXIT );
 		}
 
 	EXPORT_C CSBPackageId::~CSBPackageId()
@@ -727,6 +805,8 @@ namespace conn
 	C++ Destructor
 	*/
 		{
+		OstTraceFunctionEntry0( CSBPACKAGEID_CSBPACKAGEID_DES_ENTRY );
+		OstTraceFunctionExit0( CSBPACKAGEID_CSBPACKAGEID_DES_EXIT );
 		}
 
 
@@ -738,6 +818,7 @@ namespace conn
 	@param aPackageNameLength The lenght of the package name
 	*/
 		{
+		OstTraceFunctionEntry0( CSBPACKAGEID_INITIALISEL_ENTRY );
 		TUid pkgId;
 		TSecureId sid;
 		TPackageName pkgName;
@@ -758,6 +839,7 @@ namespace conn
 		
 		// Increment the size of the data buffer
 		iDataBuffer->Des().SetLength(aOffset);
+		OstTraceFunctionExit0( CSBPACKAGEID_INITIALISEL_EXIT );
 		}
 		
 	void CSBPackageId::InitialiseL(TInt& aOffset)
@@ -767,6 +849,7 @@ namespace conn
 	@param aOffset The running offset of where the descriptor has been parsed up to
 	*/
 		{
+		OstTraceFunctionEntry0( DUP1_CSBPACKAGEID_INITIALISEL_ENTRY );
 		TUid pkgId;
 		TSecureId sid;
 		TPackageName pkgName;
@@ -790,6 +873,7 @@ namespace conn
 		
 		// Increment the size of the data buffer
 		iDataBuffer->Des().SetLength(aOffset);
+		OstTraceFunctionExit0( DUP1_CSBPACKAGEID_INITIALISEL_EXIT );
 		}
 		
 
@@ -803,6 +887,7 @@ namespace conn
 	@param aPackageName  the name of the package
 	*/
 		{
+		OstTraceFunctionEntry0( CSBPACKAGEID_CONSTRUCTL_ENTRY );
 		// Call the Base ConstructL in order to allocate the buffer
 		BaseConstructL();
 		
@@ -822,6 +907,7 @@ namespace conn
 		PackType(packageId, *iDataBuffer, iPackageIdOffset);
 		PackType(secureId, *iDataBuffer, iSecureIdOffset);
 		PackType(packageName, *iDataBuffer, iPackageNameOffset);
+		OstTraceFunctionExit0( CSBPACKAGEID_CONSTRUCTL_EXIT );
 		}
 
 	void CSBPackageId::ConstructL(CSBGenericDataType* aGenericDataType)
@@ -831,22 +917,27 @@ namespace conn
 	@param aGenericDataType  pointer to a CSBGenericDataType object
 	*/
 		{
+		OstTraceFunctionEntry0( DUP1_CSBPACKAGEID_CONSTRUCTL_ENTRY );
 		if (aGenericDataType == NULL)
 			{
+		    OstTrace0(TRACE_ERROR, CSBPACKAGEID_CONSTRUCTL, "Leave: KErrArgument");
 			User::Leave(KErrArgument);
 			}
 		if (EPackageDerivedType != aGenericDataType->DerivedTypeL())
 			{
+		    OstTrace0(TRACE_ERROR, DUP1_CSBPACKAGEID_CONSTRUCTL, "Leave: KErrArgument");
 			User::Leave(KErrArgument);
 			}
 		const TDesC8& des = aGenericDataType->Externalise();
 		
 		if (des.Size() > iSize)
 			{
+		    OstTrace0(TRACE_ERROR, DUP2_CSBPACKAGEID_CONSTRUCTL, "Leave: KErrArgument");
 			User::Leave(KErrArgument);
 			}
 		// Call the base class ConstructL
 		CSBGenericDataType::ConstructL(des);
+		OstTraceFunctionExit0( DUP1_CSBPACKAGEID_CONSTRUCTL_EXIT );
 		}
 		
 	EXPORT_C TUid CSBPackageId::PackageIdL() const
@@ -856,10 +947,12 @@ namespace conn
 	@return  The package identifier
 	*/
 		{
+		OstTraceFunctionEntry0( CSBPACKAGEID_PACKAGEIDL_ENTRY );
 		TUid pkgId;
 		
 		UnpackType(pkgId, *iDataBuffer, iPackageIdOffset);
 		
+		OstTraceFunctionExit0( CSBPACKAGEID_PACKAGEIDL_EXIT );
 		return pkgId;
 		}
 		
@@ -870,10 +963,12 @@ namespace conn
 	@return  The secure identifier
 	*/
 		{
+		OstTraceFunctionEntry0( CSBPACKAGEID_SECUREIDL_ENTRY );
 		TSecureId secureId;
 		
 		UnpackType(secureId, *iDataBuffer, iSecureIdOffset);
 		
+		OstTraceFunctionExit0( CSBPACKAGEID_SECUREIDL_EXIT );
 		return secureId;
 		}
 
@@ -884,10 +979,12 @@ namespace conn
 	@return  Reference to the package name
 	*/
 		{
+		OstTraceFunctionEntry0( CSBPACKAGEID_PACKAGENAMEL_ENTRY );
 		TPackageName pkgName;
 		
 		UnpackType(pkgName, *iDataBuffer, iPackageNameOffset);
 		
+		OstTraceFunctionExit0( CSBPACKAGEID_PACKAGENAMEL_EXIT );
 		return pkgName;
 		}
 
@@ -901,10 +998,12 @@ namespace conn
 	@return A pointer to the CSBGenericTransferType object
 	*/
 		{
+		OstTraceFunctionEntry0( CSBGENERICTRANSFERTYPE_NEWL_ENTRY );
 		CSBGenericTransferType* self = new(ELeave) CSBGenericTransferType();
 		CleanupStack::PushL(self);
 		self->CSBGenericDataType::ConstructL(aDes);
 		CleanupStack::Pop(self);
+		OstTraceFunctionExit0( CSBGENERICTRANSFERTYPE_NEWL_EXIT );
 		return self;
 		}
 
@@ -915,10 +1014,12 @@ namespace conn
 	@param aOffset The running offset of where the descriptor has been parsed up to
 	*/
 		{
+		OstTraceFunctionEntry0( CSBGENERICTRANSFERTYPE_INITIALISEL_ENTRY );
 		CSBGenericDataType::InitialiseL(aOffset);
 		
 		if (iSize < (aOffset + sizeof(TDriveNumber)))
 			{
+		    OstTrace0(TRACE_ERROR, CSBGENERICTRANSFERTYPE_INITIALISEL, "Leave: KErrCorrupt");
 			User::Leave(KErrCorrupt);
 			}
 		
@@ -930,6 +1031,7 @@ namespace conn
 		
 		// Increment the size of the data buffer
 		iDataBuffer->Des().SetLength(aOffset);
+		OstTraceFunctionExit0( CSBGENERICTRANSFERTYPE_INITIALISEL_EXIT );
 		}
 	
 	CSBGenericTransferType::CSBGenericTransferType()
@@ -939,7 +1041,9 @@ namespace conn
 	to be large enough to accomodate the data stored by the derived type
 	*/
 		{
+		OstTraceFunctionEntry0( CSBGENERICTRANSFERTYPE_CSBGENERICTRANSFERTYPE_CONS_ENTRY );
 		iSize += sizeof(TDriveNumber);
+		OstTraceFunctionExit0( CSBGENERICTRANSFERTYPE_CSBGENERICTRANSFERTYPE_CONS_EXIT );
 		}
 
 	EXPORT_C CSBGenericTransferType::~CSBGenericTransferType()
@@ -947,6 +1051,8 @@ namespace conn
 	C++ Destructor
 	*/
 		{
+		OstTraceFunctionEntry0( CSBGENERICTRANSFERTYPE_CSBGENERICTRANSFERTYPE_DES_ENTRY );
+		OstTraceFunctionExit0( CSBGENERICTRANSFERTYPE_CSBGENERICTRANSFERTYPE_DES_EXIT );
 		}
 
 	EXPORT_C TDriveNumber CSBGenericTransferType::DriveNumberL() const
@@ -956,10 +1062,12 @@ namespace conn
 	@return The drive number
 	*/
 		{
+		OstTraceFunctionEntry0( CSBGENERICTRANSFERTYPE_DRIVENUMBERL_ENTRY );
 		TDriveNumber driveNum;
 		
 		UnpackType(driveNum, *iDataBuffer, iDriveNumberOffset);
 		
+		OstTraceFunctionExit0( CSBGENERICTRANSFERTYPE_DRIVENUMBERL_EXIT );
 		return driveNum;
 		}
 		
@@ -975,10 +1083,12 @@ namespace conn
 	@return A pointer to the CSBSIDTransferType object
 	*/
 		{
+		OstTraceFunctionEntry0( CSBSIDTRANSFERTYPE_NEWL_ENTRY );
 		CSBSIDTransferType* self = new(ELeave) CSBSIDTransferType();
 		CleanupStack::PushL(self);
 		self->ConstructL(aSecureId, aDriveNumber, aTransferDataType);
 		CleanupStack::Pop(self);
+		OstTraceFunctionExit0( CSBSIDTRANSFERTYPE_NEWL_EXIT );
 		return self;
 		}
 	
@@ -992,10 +1102,12 @@ namespace conn
 	@return A pointer to the CSBSIDTransferType object
 	*/
 		{
+		OstTraceFunctionEntry0( DUP1_CSBSIDTRANSFERTYPE_NEWL_ENTRY );
 		CSBSIDTransferType* self = new(ELeave) CSBSIDTransferType();
 		CleanupStack::PushL(self);
 		self->ConstructL(aGenericTransferType);
 		CleanupStack::Pop(self);
+		OstTraceFunctionExit0( DUP1_CSBSIDTRANSFERTYPE_NEWL_EXIT );
 		return self;
 		}	
 	
@@ -1006,7 +1118,9 @@ namespace conn
 	to be large enough to accomodate the data stored by the derived type
 	*/
 		{
+		OstTraceFunctionEntry0( CSBSIDTRANSFERTYPE_CSBSIDTRANSFERTYPE_CONS_ENTRY );
 		iSize += (sizeof(TSecureId) + sizeof(TTransferDataType));
+		OstTraceFunctionExit0( CSBSIDTRANSFERTYPE_CSBSIDTRANSFERTYPE_CONS_EXIT );
 		}
 
 	EXPORT_C CSBSIDTransferType::~CSBSIDTransferType()
@@ -1014,6 +1128,8 @@ namespace conn
 	C++ Destructor
 	*/
 		{
+		OstTraceFunctionEntry0( CSBSIDTRANSFERTYPE_CSBSIDTRANSFERTYPE_DES_ENTRY );
+		OstTraceFunctionExit0( CSBSIDTRANSFERTYPE_CSBSIDTRANSFERTYPE_DES_EXIT );
 		}
 
 	void CSBSIDTransferType::InitialiseL(TInt& aOffset)
@@ -1023,6 +1139,7 @@ namespace conn
 	@param aOffset The running offset of where the descriptor has been parsed up to
 	*/
 		{
+		OstTraceFunctionEntry0( CSBSIDTRANSFERTYPE_INITIALISEL_ENTRY );
 		CSBGenericTransferType::InitialiseL(aOffset);
 
 		TSecureId sid;
@@ -1036,6 +1153,7 @@ namespace conn
 		
 		// Increment the size of the data buffer
 		iDataBuffer->Des().SetLength(aOffset);
+		OstTraceFunctionExit0( CSBSIDTRANSFERTYPE_INITIALISEL_EXIT );
 		}
 
 	void CSBSIDTransferType::ConstructL(TSecureId aSecureId, TDriveNumber aDriveNumber,
@@ -1048,6 +1166,7 @@ namespace conn
 	@param aTransferDataType the type of the data you wish to transfer
 	*/
 		{
+		OstTraceFunctionEntry0( CSBSIDTRANSFERTYPE_CONSTRUCTL_ENTRY );
 		TInt offset = 0;
 
 		BaseConstructL();
@@ -1064,6 +1183,7 @@ namespace conn
 		PackType(driveNum, *iDataBuffer, iDriveNumberOffset);
 		PackType(sid, *iDataBuffer, iSecureIdOffset);
 		PackType(transType, *iDataBuffer, iTransferDataTypeOffset);
+		OstTraceFunctionExit0( CSBSIDTRANSFERTYPE_CONSTRUCTL_EXIT );
 		}
 
 	void CSBSIDTransferType::ConstructL(CSBGenericTransferType* aGenericTransferType)
@@ -1073,23 +1193,28 @@ namespace conn
 	@param aGenericTransferType pointer to a CSBGenericTransferType object
 	*/
 		{
+		OstTraceFunctionEntry0( DUP1_CSBSIDTRANSFERTYPE_CONSTRUCTL_ENTRY );
 		if (aGenericTransferType == NULL)
 			{
+		    OstTrace0(TRACE_ERROR, CSBSIDTRANSFERTYPE_CONSTRUCTL, "Leave: KErrArgument");
 			User::Leave(KErrArgument);
 			}
 		if (ESIDTransferDerivedType != aGenericTransferType->DerivedTypeL())
 			{
+		    OstTrace0(TRACE_ERROR, DUP1_CSBSIDTRANSFERTYPE_CONSTRUCTL, "Leave: KErrArgument");
 			User::Leave(KErrArgument);
 			}
 		// If the descriptor is different to the size we're expecting then it's not correct
 		const TDesC8& des = aGenericTransferType->Externalise();
 		if (des.Size() != iSize)
 			{
+		    OstTrace0(TRACE_ERROR, DUP2_CSBSIDTRANSFERTYPE_CONSTRUCTL, "Leave: KErrArgument");
 			User::Leave(KErrArgument);
 			}
 		
 		// Call the base class ConstructL
 		CSBGenericDataType::ConstructL(des);
+		OstTraceFunctionExit0( DUP1_CSBSIDTRANSFERTYPE_CONSTRUCTL_EXIT );
 		}
 		
 	EXPORT_C TSecureId CSBSIDTransferType::SecureIdL() const
@@ -1099,10 +1224,12 @@ namespace conn
 	@return  The secure identifier
 	*/
 		{
+		OstTraceFunctionEntry0( CSBSIDTRANSFERTYPE_SECUREIDL_ENTRY );
 		TSecureId sid;
 		
 		UnpackType(sid, *iDataBuffer, iSecureIdOffset);
 		
+		OstTraceFunctionExit0( CSBSIDTRANSFERTYPE_SECUREIDL_EXIT );
 		return sid;
 		}
 
@@ -1113,10 +1240,12 @@ namespace conn
 	@return  The transfer data type
 	*/
 		{
+		OstTraceFunctionEntry0( CSBSIDTRANSFERTYPE_DATATYPEL_ENTRY );
 		TTransferDataType transType;
 		
 		UnpackType(transType, *iDataBuffer, iTransferDataTypeOffset);
 
+		OstTraceFunctionExit0( CSBSIDTRANSFERTYPE_DATATYPEL_EXIT );
 		return transType;
 		}
 		
@@ -1134,10 +1263,12 @@ namespace conn
 	@return A pointer to the CSBPackageTransferType object
 	*/
 		{
+		OstTraceFunctionEntry0( CSBPACKAGETRANSFERTYPE_NEWL_ENTRY );
 		CSBPackageTransferType* self = new(ELeave) CSBPackageTransferType();
 		CleanupStack::PushL(self);
 		self->ConstructL(aPackageId, aDriveNumber, aPackageDataType);
 		CleanupStack::Pop(self);
+		OstTraceFunctionExit0( CSBPACKAGETRANSFERTYPE_NEWL_EXIT );
 		return self;
 		}
 	
@@ -1151,10 +1282,12 @@ namespace conn
 	@return A pointer to the CSBPackageTransferType object
 	*/
 		{
+		OstTraceFunctionEntry0( DUP1_CSBPACKAGETRANSFERTYPE_NEWL_ENTRY );
 		CSBPackageTransferType* self = new(ELeave) CSBPackageTransferType();
 		CleanupStack::PushL(self);
 		self->ConstructL(aGenericTransferType);
 		CleanupStack::Pop(self);
+		OstTraceFunctionExit0( DUP1_CSBPACKAGETRANSFERTYPE_NEWL_EXIT );
 		return self;
 		}	
 	
@@ -1165,7 +1298,9 @@ namespace conn
 	to be large enough to accomodate the data stored by the derived type
 	*/
 		{
+		OstTraceFunctionEntry0( CSBPACKAGETRANSFERTYPE_CSBPACKAGETRANSFERTYPE_CONS_ENTRY );
 		iSize += (sizeof(TUid) + sizeof(TPackageDataType));
+		OstTraceFunctionExit0( CSBPACKAGETRANSFERTYPE_CSBPACKAGETRANSFERTYPE_CONS_EXIT );
 		}
 
 	void CSBPackageTransferType::InitialiseL(TInt& aOffset)
@@ -1175,6 +1310,7 @@ namespace conn
 	@param aOffset The running offset of where the descriptor has been parsed up to
 	*/
 		{
+		OstTraceFunctionEntry0( CSBPACKAGETRANSFERTYPE_INITIALISEL_ENTRY );
 		CSBGenericTransferType::InitialiseL(aOffset);
 
 		TUid pkgId;
@@ -1188,6 +1324,7 @@ namespace conn
 		
 		// Increment the size of the data buffer
 		iDataBuffer->Des().SetLength(aOffset);
+		OstTraceFunctionExit0( CSBPACKAGETRANSFERTYPE_INITIALISEL_EXIT );
 		}
 
 	EXPORT_C CSBPackageTransferType::~CSBPackageTransferType()
@@ -1195,6 +1332,8 @@ namespace conn
 	C++ Destructor
 	*/
 		{
+		OstTraceFunctionEntry0( CSBPACKAGETRANSFERTYPE_CSBPACKAGETRANSFERTYPE_DES_ENTRY );
+		OstTraceFunctionExit0( CSBPACKAGETRANSFERTYPE_CSBPACKAGETRANSFERTYPE_DES_EXIT );
 		}
 
 	void CSBPackageTransferType::ConstructL(TUid aPackageId, TDriveNumber aDriveNumber,
@@ -1207,6 +1346,7 @@ namespace conn
 	@param aPackageDataType the type of the data you wish to transfer
 	*/
 		{
+		OstTraceFunctionEntry0( CSBPACKAGETRANSFERTYPE_CONSTRUCTL_ENTRY );
 		TInt offset = 0;
 
 		BaseConstructL();
@@ -1223,6 +1363,7 @@ namespace conn
 		PackType(driveNum, *iDataBuffer, iDriveNumberOffset);
 		PackType(pkgId, *iDataBuffer, iPackageIdOffset);
 		PackType(pkgDataType, *iDataBuffer, iPackageDataTypeOffset);
+		OstTraceFunctionExit0( CSBPACKAGETRANSFERTYPE_CONSTRUCTL_EXIT );
 		}
 
 	void CSBPackageTransferType::ConstructL(CSBGenericTransferType* aGenericTransferType)
@@ -1232,12 +1373,15 @@ namespace conn
 	@param aGenericTransferType pointer to a CSBGenericTransferType object
 	*/
 		{
+		OstTraceFunctionEntry0( DUP1_CSBPACKAGETRANSFERTYPE_CONSTRUCTL_ENTRY );
 		if (aGenericTransferType == NULL)
 			{
+		    OstTrace0(TRACE_ERROR, CSBPACKAGETRANSFERTYPE_CONSTRUCTL, "Leave: KErrArgument");
 			User::Leave(KErrArgument);
 			}
 		if (EPackageTransferDerivedType != aGenericTransferType->DerivedTypeL())
 			{
+		    OstTrace0(TRACE_ERROR, DUP1_CSBPACKAGETRANSFERTYPE_CONSTRUCTL, "Leave: KErrArgument");
 			User::Leave(KErrArgument);
 			}
 		// If the descriptor is different to the size we're expecting then it's not correct
@@ -1245,11 +1389,13 @@ namespace conn
 		
 		if (des.Size() != iSize)
 			{
+		    OstTrace0(TRACE_ERROR, DUP2_CSBPACKAGETRANSFERTYPE_CONSTRUCTL, "Leave: KErrArgument");
 			User::Leave(KErrArgument);
 			}
 		
 		// Call the base class ConstructL
 		CSBGenericDataType::ConstructL(des);
+		OstTraceFunctionExit0( DUP1_CSBPACKAGETRANSFERTYPE_CONSTRUCTL_EXIT );
 		}
 		
 	EXPORT_C TUid CSBPackageTransferType::PackageIdL() const
@@ -1259,10 +1405,12 @@ namespace conn
 	@return  The package identifier
 	*/
 		{
+		OstTraceFunctionEntry0( CSBPACKAGETRANSFERTYPE_PACKAGEIDL_ENTRY );
 		TUid pkgId;
 		
 		UnpackType(pkgId, *iDataBuffer, iPackageIdOffset);
 		
+		OstTraceFunctionExit0( CSBPACKAGETRANSFERTYPE_PACKAGEIDL_EXIT );
 		return pkgId;
 		}
 
@@ -1273,10 +1421,12 @@ namespace conn
 	@return  The package data type
 	*/
 		{
+		OstTraceFunctionEntry0( CSBPACKAGETRANSFERTYPE_DATATYPEL_ENTRY );
 		TPackageDataType pkgDataType;
 		
 		UnpackType(pkgDataType, *iDataBuffer, iPackageDataTypeOffset);
 		
+		OstTraceFunctionExit0( CSBPACKAGETRANSFERTYPE_DATATYPEL_EXIT );
 		return pkgDataType;
 		}
 		
@@ -1295,10 +1445,12 @@ namespace conn
 	@return A pointer to the CSBJavaId object
 	*/
 		{
+		OstTraceFunctionEntry0( CSBJAVAID_NEWL_ENTRY );
 		CSBJavaId* self = new(ELeave) CSBJavaId(aSuiteName, aSuiteVendor, aSuiteVersion, aSuiteHash);
 		CleanupStack::PushL(self);
 		self->ConstructL(aSuiteName, aSuiteVendor, aSuiteVersion, aSuiteHash);
 		CleanupStack::Pop(self);
+		OstTraceFunctionExit0( CSBJAVAID_NEWL_EXIT );
 		return self;
 		}
 	
@@ -1312,15 +1464,19 @@ namespace conn
 	@return A pointer to the CSBJavaId object
 	*/
 		{
+		OstTraceFunctionEntry0( DUP1_CSBJAVAID_NEWL_ENTRY );
 		CSBJavaId* self = new(ELeave) CSBJavaId;
 		CleanupStack::PushL(self);
 		self->ConstructFromExistingL(aGenericDataType);
 		CleanupStack::Pop(self);
+		OstTraceFunctionExit0( DUP1_CSBJAVAID_NEWL_EXIT );
 		return self;
 		}	
 		
 	CSBJavaId::CSBJavaId()
 		{
+		OstTraceFunctionEntry0( CSBJAVAID_CSBJAVAID_CONS_ENTRY );
+		OstTraceFunctionExit0( CSBJAVAID_CSBJAVAID_CONS_EXIT );
 		}
 	
 	CSBJavaId::CSBJavaId(const TDesC& aSuiteName, const TDesC& aSuiteVendor,
@@ -1336,8 +1492,10 @@ namespace conn
 	@param aSuiteVersion The version of the MIDlet suite
 	*/
 		{
+		OstTraceFunctionEntry0( DUP1_CSBJAVAID_CSBJAVAID_CONS_ENTRY );
 		iSize += (4 * sizeof(TUint32)) + aSuiteName.Size() + aSuiteVendor.Size() + aSuiteVersion.Size() 
 			+ aSuiteHash.Size();
+		OstTraceFunctionExit0( DUP1_CSBJAVAID_CSBJAVAID_CONS_EXIT );
 		}
 
 	EXPORT_C CSBJavaId::~CSBJavaId()
@@ -1345,6 +1503,8 @@ namespace conn
 	C++ Destructor
 	*/
 		{
+		OstTraceFunctionEntry0( CSBJAVAID_CSBJAVAID_DES_ENTRY );
+		OstTraceFunctionExit0( CSBJAVAID_CSBJAVAID_DES_EXIT );
 		}
 
 	void CSBJavaId::InitialiseL(TInt& aOffset)
@@ -1354,6 +1514,7 @@ namespace conn
 	@param aOffset The running offset of where the descriptor has been parsed up to
 	*/
 		{
+		OstTraceFunctionEntry0( CSBJAVAID_INITIALISEL_ENTRY );
 		CSBGenericDataType::InitialiseL(aOffset);
 		
 		UnpackTPtrAdvance(iSuiteName, aOffset);
@@ -1363,6 +1524,7 @@ namespace conn
 
 		// Increment the size of the data buffer
 		iDataBuffer->Des().SetLength(aOffset);
+		OstTraceFunctionExit0( CSBJAVAID_INITIALISEL_EXIT );
 		}
 
 	void CSBJavaId::InitialiseL(TInt& aOffset, const TDesC& aSuiteName, const TDesC& aSuiteVendor,
@@ -1377,6 +1539,7 @@ namespace conn
 	@param aSuiteVersion The version of the MIDlet suite
 	*/
 		{
+		OstTraceFunctionEntry0( DUP1_CSBJAVAID_INITIALISEL_ENTRY );
 		TSBDerivedType derivedType = EJavaDerivedType;
 		
 		PackType(derivedType, *iDataBuffer, aOffset);
@@ -1399,6 +1562,7 @@ namespace conn
 		
 		// Increment the size of the data buffer
 		iDataBuffer->Des().SetLength(aOffset);
+		OstTraceFunctionExit0( DUP1_CSBJAVAID_INITIALISEL_EXIT );
 		}
 		
 	void CSBJavaId::ConstructL(const TDesC& aSuiteName, const TDesC& aSuiteVendor, 
@@ -1412,6 +1576,7 @@ namespace conn
 	@param aSuiteVersion The version of the MIDlet suite
 	*/
 		{
+		OstTraceFunctionEntry0( CSBJAVAID_CONSTRUCTL_ENTRY );
 		// Call the Base ConstructL in order to allocate the buffer
 		BaseConstructL();
 		
@@ -1419,6 +1584,7 @@ namespace conn
 		
 		// Initialise all member pointers right up the inheritence tree
 		InitialiseL(offset, aSuiteName, aSuiteVendor, aSuiteVersion, aSuiteHash);
+		OstTraceFunctionExit0( CSBJAVAID_CONSTRUCTL_EXIT );
 		}
 
 	void CSBJavaId::ConstructFromExistingL(CSBGenericDataType* aGenericDataType)
@@ -1428,16 +1594,20 @@ namespace conn
 	@param aGenericDataType  pointer to a CSBGenericDataType object
 	*/
 		{
+		OstTraceFunctionEntry0( CSBJAVAID_CONSTRUCTFROMEXISTINGL_ENTRY );
 		if (aGenericDataType == NULL)
 			{
+		    OstTrace0(TRACE_ERROR, CSBJAVAID_CONSTRUCTFROMEXISTINGL, "Leave: KErrArgument");
 			User::Leave(KErrArgument);
 			}
 		if (EJavaDerivedType != aGenericDataType->DerivedTypeL())
 			{
+		    OstTrace0(TRACE_ERROR, DUP1_CSBJAVAID_CONSTRUCTFROMEXISTINGL, "Leave: KErrArgument");
 			User::Leave(KErrArgument);
 			}
 		// Call the base class ConstructL
 		CSBGenericDataType::ConstructL(aGenericDataType->Externalise());
+		OstTraceFunctionExit0( CSBJAVAID_CONSTRUCTFROMEXISTINGL_EXIT );
 		}
 		
 	EXPORT_C const TDesC& CSBJavaId::SuiteNameL() const
@@ -1492,10 +1662,12 @@ namespace conn
 	@return A pointer to the CSBJavaTransferType object
 	*/
 		{
+		OstTraceFunctionEntry0( CSBJAVATRANSFERTYPE_NEWL_ENTRY );
 		CSBJavaTransferType* self = new(ELeave) CSBJavaTransferType(aSuiteHash);
 		CleanupStack::PushL(self);
 		self->ConstructL(aSuiteHash, aDriveNumber, aTransferDataType);
 		CleanupStack::Pop(self);
+		OstTraceFunctionExit0( CSBJAVATRANSFERTYPE_NEWL_EXIT );
 		return self;
 		}
 	
@@ -1509,10 +1681,12 @@ namespace conn
 	@return A pointer to the CSBJavaTransferType object
 	*/
 		{
+		OstTraceFunctionEntry0( DUP1_CSBJAVATRANSFERTYPE_NEWL_ENTRY );
 		CSBJavaTransferType* self = new(ELeave) CSBJavaTransferType;
 		CleanupStack::PushL(self);
 		self->ConstructL(aGenericTransferType);
 		CleanupStack::Pop(self);
+		OstTraceFunctionExit0( DUP1_CSBJAVATRANSFERTYPE_NEWL_EXIT );
 		return self;
 		}
 		
@@ -1521,6 +1695,8 @@ namespace conn
 	C++ Constructor
 	*/
 		{
+		OstTraceFunctionEntry0( CSBJAVATRANSFERTYPE_CSBJAVATRANSFERTYPE_CONS_ENTRY );
+		OstTraceFunctionExit0( CSBJAVATRANSFERTYPE_CSBJAVATRANSFERTYPE_CONS_EXIT );
 		}
 	
 	CSBJavaTransferType::CSBJavaTransferType(const TDesC& aSuiteHash)
@@ -1530,7 +1706,9 @@ namespace conn
 	to be large enough to accomodate the data stored by the derived type
 	*/
 		{
+		OstTraceFunctionEntry0( DUP1_CSBJAVATRANSFERTYPE_CSBJAVATRANSFERTYPE_CONS_ENTRY );
 		iSize += aSuiteHash.Size() + sizeof(TUint32) + sizeof(TJavaTransferType);
+		OstTraceFunctionExit0( DUP1_CSBJAVATRANSFERTYPE_CSBJAVATRANSFERTYPE_CONS_EXIT );
 		}
 
 	EXPORT_C CSBJavaTransferType::~CSBJavaTransferType()
@@ -1538,6 +1716,8 @@ namespace conn
 	C++ Destructor
 	*/
 		{
+		OstTraceFunctionEntry0( CSBJAVATRANSFERTYPE_CSBJAVATRANSFERTYPE_DES_ENTRY );
+		OstTraceFunctionExit0( CSBJAVATRANSFERTYPE_CSBJAVATRANSFERTYPE_DES_EXIT );
 		}
 
 	void CSBJavaTransferType::InitialiseL(TInt& aOffset)
@@ -1547,6 +1727,7 @@ namespace conn
 	@param aOffset The running offset of where the descriptor has been parsed up to
 	*/
 		{
+		OstTraceFunctionEntry0( CSBJAVATRANSFERTYPE_INITIALISEL_ENTRY );
 		CSBGenericTransferType::InitialiseL(aOffset);
 		
 		iTransferDataTypeOffset = aOffset;
@@ -1557,6 +1738,7 @@ namespace conn
 
 		// Increment the size of the data buffer
 		iDataBuffer->Des().SetLength(aOffset);
+		OstTraceFunctionExit0( CSBJAVATRANSFERTYPE_INITIALISEL_EXIT );
 		}
 
 	void CSBJavaTransferType::InitialiseL(TInt& aOffset, const TDesC& aSuiteHash, TDriveNumber aDriveNumber,
@@ -1569,6 +1751,7 @@ namespace conn
 	@param aSuiteVersion The version of the MIDlet suite
 	*/
 		{
+		OstTraceFunctionEntry0( DUP1_CSBJAVATRANSFERTYPE_INITIALISEL_ENTRY );
 		TSBDerivedType derivedType = EJavaTransferDerivedType;
 		PackType(derivedType, *iDataBuffer, aOffset);
 		
@@ -1593,6 +1776,7 @@ namespace conn
 		
 		// Increment the size of the data buffer
 		iDataBuffer->Des().SetLength(aOffset);
+		OstTraceFunctionExit0( DUP1_CSBJAVATRANSFERTYPE_INITIALISEL_EXIT );
 		}
 
 	void CSBJavaTransferType::ConstructL(const TDesC& aSuiteHash, TDriveNumber aDriveNumber,
@@ -1605,11 +1789,13 @@ namespace conn
 	@param aTransferDataType the type of the data you wish to transfer
 	*/
 		{
+		OstTraceFunctionEntry0( CSBJAVATRANSFERTYPE_CONSTRUCTL_ENTRY );
 		TInt offset = 0;
 
 		BaseConstructL();
 
 		InitialiseL(offset, aSuiteHash, aDriveNumber, aTransferDataType);
+		OstTraceFunctionExit0( CSBJAVATRANSFERTYPE_CONSTRUCTL_EXIT );
 		}
 
 	void CSBJavaTransferType::ConstructL(CSBGenericTransferType* aGenericTransferType)
@@ -1619,16 +1805,20 @@ namespace conn
 	@param aGenericTransferType pointer to a CSBGenericTransferType object
 	*/
 		{
+		OstTraceFunctionEntry0( DUP1_CSBJAVATRANSFERTYPE_CONSTRUCTL_ENTRY );
 		if (aGenericTransferType == NULL)
 			{
+		    OstTrace0(TRACE_ERROR, CSBJAVATRANSFERTYPE_CONSTRUCTL, "Leave: KErrArgument");
 			User::Leave(KErrArgument);
 			}
 		if (EJavaTransferDerivedType != aGenericTransferType->DerivedTypeL())
 			{
+		    OstTrace0(TRACE_ERROR, DUP1_CSBJAVATRANSFERTYPE_CONSTRUCTL, "Leave: KErrArgument");
 			User::Leave(KErrArgument);
 			}
 		// Call the base class ConstructL
 		CSBGenericDataType::ConstructL(aGenericTransferType->Externalise());
+		OstTraceFunctionExit0( DUP1_CSBJAVATRANSFERTYPE_CONSTRUCTL_EXIT );
 		}
 		
 	EXPORT_C const TDesC& CSBJavaTransferType::SuiteHashL() const
@@ -1648,10 +1838,12 @@ namespace conn
 	@return  The transfer data type
 	*/
 		{
+		OstTraceFunctionEntry0( CSBJAVATRANSFERTYPE_DATATYPEL_ENTRY );
 		TJavaTransferType transType;
 		
 		UnpackType(transType, *iDataBuffer, iTransferDataTypeOffset);
 
+		OstTraceFunctionExit0( CSBJAVATRANSFERTYPE_DATATYPEL_EXIT );
 		return transType;
 		}
 		
@@ -1666,9 +1858,11 @@ namespace conn
 	@return Instance of CSBEFileEntry created from data supplied in aEntry
 	*/
 		{
+		OstTraceFunctionEntry0( CSBEFILEENTRY_NEWLC_ENTRY );
 		CSBEFileEntry* self = new (ELeave) CSBEFileEntry(aEntry);
 		CleanupStack::PushL(self);
 		self->ConstructL(aEntry, aSession);
+		OstTraceFunctionExit0( CSBEFILEENTRY_NEWLC_EXIT );
 		return self;
 		}
 		
@@ -1682,15 +1876,19 @@ namespace conn
 	@return Instance of CSBEFileEntry containing the information previously packed into aStream
 	*/
 		{
+		OstTraceFunctionEntry0( DUP1_CSBEFILEENTRY_NEWLC_ENTRY );
 		CSBEFileEntry* self = new (ELeave) CSBEFileEntry;
 		CleanupStack::PushL(self);
 		self->InternaliseL(aStream, aBytesRead);
+		OstTraceFunctionExit0( DUP1_CSBEFILEENTRY_NEWLC_EXIT );
 		return self;
 		}
 		
 	CSBEFileEntry::CSBEFileEntry()
 	/** C++ ctor */
 		{
+		OstTraceFunctionEntry0( CSBEFILEENTRY_CSBEFILEENTRY_CONS_ENTRY );
+		OstTraceFunctionExit0( CSBEFILEENTRY_CSBEFILEENTRY_CONS_EXIT );
 		}
 
 	CSBEFileEntry::CSBEFileEntry(const TEntry& aEntry)
@@ -1699,13 +1897,19 @@ namespace conn
 	*/
 		: iAtt(aEntry.iAtt), iSize(aEntry.iSize), iModified(aEntry.iModified), iUidType(aEntry.iType)
 		{
+		OstTraceFunctionEntry0( DUP1_CSBEFILEENTRY_CSBEFILEENTRY_CONS_ENTRY );
+		OstTraceFunctionExit0( DUP1_CSBEFILEENTRY_CSBEFILEENTRY_CONS_EXIT );
 		}
 		
 	EXPORT_C CSBEFileEntry::~CSBEFileEntry()
 	/** C++ dtor */
 		{
+		OstTraceFunctionEntry0( CSBEFILEENTRY_CSBEFILEENTRY_DES_ENTRY );
 		delete iType;
+		iType = NULL;
 		delete iFilename;
+		iFilename = NULL;
+		OstTraceFunctionExit0( CSBEFILEENTRY_CSBEFILEENTRY_DES_EXIT );
 		}
 		
 	void CSBEFileEntry::ConstructL(const TEntry& aEntry, RApaLsSession& aSession)
@@ -1715,12 +1919,14 @@ namespace conn
 	@param aSession Required to map from TEntry's UID MIME type into a textual representation
 	*/
 		{
+		OstTraceFunctionEntry0( CSBEFILEENTRY_CONSTRUCTL_ENTRY );
 		// Look up the textual mime type of the file instead of the numerical one given by TEntry
 		TUid uidForType;
 		TDataType appDataType;
 		aSession.AppForDocument(aEntry.iName,uidForType,appDataType);
 		iType = appDataType.Des().AllocL();
 		iFilename = aEntry.iName.AllocL();
+		OstTraceFunctionExit0( CSBEFILEENTRY_CONSTRUCTL_EXIT );
 		}
 		
 	void CSBEFileEntry::InternaliseL(const TDesC8& aStream, TInt& aBytesRead)
@@ -1733,6 +1939,7 @@ namespace conn
 						in order to internalise this single instance of CSBEFileEntry
 	*/
 		{
+		OstTraceFunctionEntry0( CSBEFILEENTRY_INTERNALISEL_ENTRY );
 		RDesReadStream stream(aStream);
 		CleanupClosePushL(stream);
 		
@@ -1764,6 +1971,7 @@ namespace conn
 		
 		aBytesRead = CalculatePackedSize();
 		CleanupStack::PopAndDestroy(&stream);
+		OstTraceFunctionExit0( CSBEFILEENTRY_INTERNALISEL_EXIT );
 		}
 		
 	TUint16 CSBEFileEntry::CalculatePackedSize() const
@@ -1771,6 +1979,7 @@ namespace conn
 	@return the size in bytes of the externalised representation of this object
 	*/
 		{
+		OstTraceFunctionEntry0( CSBEFILEENTRY_CALCULATEPACKEDSIZE_ENTRY );
 		TInt total = 
 			sizeof(TUint32) +		// Length of attribute field
 			sizeof(TInt32) +		// Length of file size
@@ -1780,6 +1989,7 @@ namespace conn
 			iType->Size() +		// Text MIME type data
 			sizeof(TUint16) + 	// Filename length
 			iFilename->Size();	// Filename data
+		OstTraceFunctionExit0( CSBEFILEENTRY_CALCULATEPACKEDSIZE_EXIT );
 		return total;
 		}
 
@@ -1790,6 +2000,7 @@ namespace conn
 	@return An externalised instance of this object suitable for Internalising
 	*/
 		{
+		OstTraceFunctionEntry0( CSBEFILEENTRY_EXTERNALISELC_ENTRY );
 		TUint16 packedSize = CalculatePackedSize();
 		HBufC8* pBuf = HBufC8::NewLC(packedSize);
 		TPtr8 buf(pBuf->Des());
@@ -1809,6 +2020,7 @@ namespace conn
 		stream.WriteL(*iFilename);
 		
 		CleanupStack::PopAndDestroy(&stream);
+		OstTraceFunctionExit0( CSBEFILEENTRY_EXTERNALISELC_EXIT );
 		return pBuf;
 		}
 		

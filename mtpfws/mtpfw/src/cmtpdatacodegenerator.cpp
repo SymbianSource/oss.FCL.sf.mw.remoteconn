@@ -23,11 +23,13 @@
 #include "rmtpframework.h"
 #include "cmtpdatacodegenerator.h"
 #include "cmtpservicemgr.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpdatacodegeneratorTraces.h"
+#endif
 
 
 
-// Class constants.
-__FLOG_STMT(_LIT8(KComponent,"DataCodeGenerator");)
 
 const TUint16 KUndenfinedStartCode = EMTPCodeUndefined1Start + 1;
 const TUint16 KUndenfinedEndCode = EMTPCodeUndefined1End;
@@ -44,23 +46,20 @@ CMTPDataCodeGenerator* CMTPDataCodeGenerator::NewL()
 
 CMTPDataCodeGenerator::~CMTPDataCodeGenerator()
     {
-    __FLOG(_L8("CMTPDataCodeGenerator::~CMTPDataCodeGenerator - Entry"));
+    OstTraceFunctionEntry0( CMTPDATACODEGENERATOR_CMTPDATACODEGENERATOR_DES_ENTRY );
 
     iSingletons.Close();
 
-    __FLOG(_L8("CMTPDataCodeGenerator::~CMTPDataCodeGenerator - Exit"));
-    
-    __FLOG_CLOSE;
+    OstTraceFunctionExit0( CMTPDATACODEGENERATOR_CMTPDATACODEGENERATOR_DES_EXIT );
     }
 
 void CMTPDataCodeGenerator::ConstructL()
     {
-    __FLOG_OPEN(KMTPSubsystem, KComponent);
-    __FLOG(_L8("CMTPDataCodeGenerator::ConstructL - Entry"));
+    OstTraceFunctionEntry0( CMTPDATACODEGENERATOR_CONSTRUCTL_ENTRY );
 
     iSingletons.OpenL ();
 
-    __FLOG(_L8("CMTPDataCodeGenerator::ConstructL - Exit"));
+    OstTraceFunctionExit0( CMTPDATACODEGENERATOR_CONSTRUCTL_EXIT );
     }
 
 CMTPDataCodeGenerator::CMTPDataCodeGenerator() :
@@ -72,7 +71,8 @@ CMTPDataCodeGenerator::CMTPDataCodeGenerator() :
 
 TInt CMTPDataCodeGenerator::IncServiceIDResource( const TUint aServiceType, TUint& aServiceID )
     {
-    __FLOG(_L8("CMTPDataCodeGenerator::IncServiceIDResource - Entry"));
+    OstTraceFunctionEntry0( CMTPDATACODEGENERATOR_INCSERVICEIDRESOURCE_ENTRY);
+
     if ( iUndefinedNextCode >= KUndenfinedEndCode )
         return KErrOverflow;
     
@@ -91,18 +91,19 @@ TInt CMTPDataCodeGenerator::IncServiceIDResource( const TUint aServiceType, TUin
            break;
        default:
            {
-           __FLOG(_L8("CMTPDataCodeGenerator::IncServiceIDResource - Service Type not supported")); 
+           OstTrace0( TRACE_NORMAL, CMTPDATACODEGENERATOR_INCSERVICEIDRESOURCE, "CMTPDataCodeGenerator::IncServiceIDResource - Service Type not supported" );          
            }
        }
-    __FLOG(_L8("CMTPDataCodeGenerator::IncServiceIDResource - Exit"));
+
+    OstTraceFunctionExit0( CMTPDATACODEGENERATOR_INCSERVICEIDRESOURCE_EXIT);
     return KErrNone;
     }
 
 void CMTPDataCodeGenerator::DecServiceIDResource()
     {
-    __FLOG(_L8("CMTPDataCodeGenerator::DecServiceIDResource - Entry"));
+    OstTraceFunctionEntry0( CMTPDATACODEGENERATOR_DECSERVICEIDRESOURCE_ENTRY );
     iUndefinedNextCode--;
-    __FLOG(_L8("CMTPDataCodeGenerator::DecServiceIDResource - Exit"));
+    OstTraceFunctionExit0( CMTPDATACODEGENERATOR_DECSERVICEIDRESOURCE_EXIT );
     }
 
 TBool CMTPDataCodeGenerator::IsValidServiceType( const TUint aServiceType ) const
@@ -112,28 +113,38 @@ TBool CMTPDataCodeGenerator::IsValidServiceType( const TUint aServiceType ) cons
 
 TInt CMTPDataCodeGenerator::AllocateServiceID(const TMTPTypeGuid& aPGUID, const TUint aServiceType, TUint& aServiceID )
     {
-    __FLOG(_L8("CMTPDataCodeGenerator::AllocateServiceID - Entry"));
+    OstTraceFunctionEntry0( CMTPDATACODEGENERATOR_ALLOCATESERVICEID_ENTRY );
     
     if( !IsValidServiceType(aServiceType) )
+        {
+        OstTraceFunctionExit0( CMTPDATACODEGENERATOR_ALLOCATESERVICEID_EXIT );
         return KErrArgument;
-        
+        }
+    
     TInt err(KErrNone);
     TUint retID (KInvliadServiceID);
     if( iSingletons.ServiceMgr().IsSupportedService(aPGUID) )
         {
         if( iSingletons.ServiceMgr().ServiceTypeOfSupportedService(aPGUID) != aServiceType )
+            {
+            OstTraceFunctionExit0( DUP1_CMTPDATACODEGENERATOR_ALLOCATESERVICEID_EXIT );
             return KErrArgument;
-            
+            }
+                       
         err = iSingletons.ServiceMgr().GetServiceId(aPGUID , retID);
         if( KErrNone != err )
             {
             if((err = IncServiceIDResource( aServiceType, retID )) != KErrNone)
+                {
+                OstTraceFunctionExit0( DUP2_CMTPDATACODEGENERATOR_ALLOCATESERVICEID_EXIT );
                 return err;
-            
+                }
+                            
             err = iSingletons.ServiceMgr().EnableService( aPGUID, retID );
             if( KErrNone != err )
                 {
                 DecServiceIDResource();
+                OstTraceFunctionExit0( DUP3_CMTPDATACODEGENERATOR_ALLOCATESERVICEID_EXIT );
                 return err;
                 }
             }
@@ -142,31 +153,40 @@ TInt CMTPDataCodeGenerator::AllocateServiceID(const TMTPTypeGuid& aPGUID, const 
     else
         {
         if((err = IncServiceIDResource( aServiceType, retID )) != KErrNone)
+            {
+            OstTraceFunctionExit0( DUP4_CMTPDATACODEGENERATOR_ALLOCATESERVICEID_EXIT );
             return err;
+            }
         }
     
    aServiceID = retID;
    iSingletons.ServiceMgr().InsertServiceId( retID );
 
-    __FLOG(_L8("CMTPDataCodeGenerator::AllocateServiceID - Exit"));
+    OstTraceFunctionExit0( DUP5_CMTPDATACODEGENERATOR_ALLOCATESERVICEID_EXIT );
     return KErrNone;
     }
 
 TInt CMTPDataCodeGenerator::AllocateServicePropertyCode( const TMTPTypeGuid& aServicePGUID, const TMTPTypeGuid& aPKNamespace, const TUint aPKID, TUint16& aServicePropertyCode )
     {
-    __FLOG(_L8("CMTPDataCodeGenerator::AllocateServicePropertyCode - Entry"));
+    OstTraceFunctionEntry0( CMTPDATACODEGENERATOR_ALLOCATESERVICEPROPERTYCODE_ENTRY );
 
     TUint retID = KInvliadU16DataCode;
     if( iSingletons.ServiceMgr().IsSupportedService(aServicePGUID) )
         {
         TInt err = iSingletons.ServiceMgr().GetServicePropertyCode( aServicePGUID, aPKNamespace, aPKID, retID );
         if( KErrNone != err )
+            {
+            OstTraceFunctionExit0( CMTPDATACODEGENERATOR_ALLOCATESERVICEPROPERTYCODE_EXIT );
             return err;
-
+            }
+        
         if(retID == KInvliadU16DataCode)
            {
            if ( iUndefinedNextCode >= KUndenfinedEndCode )
+               {
+               OstTraceFunctionExit0( DUP1_CMTPDATACODEGENERATOR_ALLOCATESERVICEPROPERTYCODE_EXIT );
                return KErrOverflow;
+               }
            
            retID = ++iUndefinedNextCode;
            iSingletons.ServiceMgr().SetServicePropertyCode( aServicePGUID, aPKNamespace, aPKID, retID);
@@ -175,32 +195,42 @@ TInt CMTPDataCodeGenerator::AllocateServicePropertyCode( const TMTPTypeGuid& aSe
     else
         {
         if ( iUndefinedNextCode >= KUndenfinedEndCode )
+            {
+            OstTraceFunctionExit0( DUP2_CMTPDATACODEGENERATOR_ALLOCATESERVICEPROPERTYCODE_EXIT );
             return KErrOverflow;
+            }
+            
     
         retID = ++iUndefinedNextCode;
         }
     
     aServicePropertyCode = retID;
     
-    __FLOG(_L8("CMTPDataCodeGenerator::AllocateServicePropertyCode - Exit"));
+    OstTraceFunctionExit0( DUP3_CMTPDATACODEGENERATOR_ALLOCATESERVICEPROPERTYCODE_EXIT );
     return KErrNone;
     }
 
 TInt CMTPDataCodeGenerator::AllocateServiceFormatCode( const TMTPTypeGuid& aServicePGUID, const TMTPTypeGuid& aGUID, TUint16& aServiceFormatCode )
     {
-    __FLOG(_L8("CMTPServiceConfig::AllocateServiceFormatCode - Entry"));
+    OstTraceFunctionEntry0( CMTPDATACODEGENERATOR_ALLOCATESERVICEFORMATCODE_ENTRY );
 
     TUint retID = KInvliadU16DataCode;
     if( iSingletons.ServiceMgr().IsSupportedService(aServicePGUID) )
         {
         TInt err = iSingletons.ServiceMgr().GetServiceFormatCode( aServicePGUID, aGUID, retID );
         if( KErrNone != err )
+            {
+            OstTraceFunctionExit0( CMTPDATACODEGENERATOR_ALLOCATESERVICEFORMATCODE_EXIT );
             return err;
-
+            }
+        
         if(retID == KInvliadU16DataCode)
            {
            if ( iVendorExtFormatCode > EMTPFormatCodeVendorExtDynamicEnd )
+               {
+               OstTraceFunctionExit0( DUP1_CMTPDATACODEGENERATOR_ALLOCATESERVICEFORMATCODE_EXIT );
                return KErrOverflow;
+               }
            
            retID = ++iVendorExtFormatCode;
            iSingletons.ServiceMgr().SetServiceFormatCode( aServicePGUID, aGUID, retID);
@@ -209,32 +239,42 @@ TInt CMTPDataCodeGenerator::AllocateServiceFormatCode( const TMTPTypeGuid& aServ
     else
         {
         if ( iVendorExtFormatCode > EMTPFormatCodeVendorExtDynamicEnd )
+            {
+            OstTraceFunctionExit0( DUP2_CMTPDATACODEGENERATOR_ALLOCATESERVICEFORMATCODE_EXIT );
             return KErrOverflow;
-            
+            }
+        
         retID = ++iVendorExtFormatCode;
         }
     
     aServiceFormatCode = retID;
     
-    __FLOG(_L8("CMTPServiceConfig::AllocateServiceFormatCode - Exit"));
+
+    OstTraceFunctionExit0( DUP3_CMTPDATACODEGENERATOR_ALLOCATESERVICEFORMATCODE_EXIT );
     return KErrNone;
     }
 
 TInt CMTPDataCodeGenerator::AllocateServiceMethodFormatCode( const TMTPTypeGuid& aServicePGUID, const TMTPTypeGuid& aGUID, TUint16& aMethodFormatCode )
     {
-    __FLOG(_L8("CMTPDataCodeGenerator::AllocateServiceMethodFormatCode - Entry"));
+    OstTraceFunctionEntry0( CMTPDATACODEGENERATOR_ALLOCATESERVICEMETHODFORMATCODE_ENTRY );
     
     TUint retID = KInvliadU16DataCode;
     if( iSingletons.ServiceMgr().IsSupportedService(aServicePGUID) )
         {
         TInt err = iSingletons.ServiceMgr().GetServiceMethodCode( aServicePGUID, aGUID, retID );
         if( KErrNone != err )
+            {
+            OstTraceFunctionExit0( CMTPDATACODEGENERATOR_ALLOCATESERVICEMETHODFORMATCODE_EXIT );
             return err;
-    
+            }
+        
         if(retID == KInvliadU16DataCode)
            {
            if ( iUndefinedNextCode > KUndenfinedEndCode )
+               {
+               OstTraceFunctionExit0( DUP1_CMTPDATACODEGENERATOR_ALLOCATESERVICEMETHODFORMATCODE_EXIT );
                return KErrOverflow;
+               }
            
            retID = ++iUndefinedNextCode;
            iSingletons.ServiceMgr().SetServiceMethodCode( aServicePGUID, aGUID, retID);
@@ -243,14 +283,17 @@ TInt CMTPDataCodeGenerator::AllocateServiceMethodFormatCode( const TMTPTypeGuid&
     else
         {
         if ( iUndefinedNextCode > KUndenfinedEndCode )
+            {
+            OstTraceFunctionExit0( DUP2_CMTPDATACODEGENERATOR_ALLOCATESERVICEMETHODFORMATCODE_EXIT );
             return KErrOverflow;
-            
+            }
+        
         retID = ++iUndefinedNextCode;
         }
     
     aMethodFormatCode = retID;
     
-    __FLOG(_L8("CMTPDataCodeGenerator::AllocateServiceMethodFormatCode - Exit"));
+    OstTraceFunctionExit0( DUP3_CMTPDATACODEGENERATOR_ALLOCATESERVICEMETHODFORMATCODE_EXIT );
     return KErrNone;
     }
 

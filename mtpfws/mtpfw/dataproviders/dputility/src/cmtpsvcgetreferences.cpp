@@ -23,8 +23,12 @@
 #include "cmtpsvcgetreferences.h"
 #include "mmtpservicedataprovider.h"
 #include "mmtpsvcobjecthandler.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpsvcgetreferencesTraces.h"
+#endif
 
-__FLOG_STMT(_LIT8(KComponent,"SvcGetRef");)
+
 
 EXPORT_C MMTPRequestProcessor* CMTPSvcGetReferences::NewL(MMTPDataProviderFramework& aFramework, 
 														MMTPConnection& aConnection, 
@@ -39,11 +43,10 @@ Destructor
 */
 EXPORT_C CMTPSvcGetReferences::~CMTPSvcGetReferences()
 	{
-	__FLOG(_L8("~CMTPSvcGetReferences - Entry"));
+	OstTraceFunctionEntry0( CMTPSVCGETREFERENCES_CMTPSVCGETREFERENCES_DES_ENTRY );
 	delete iReferences;
 	delete iReceivedObjectMetaData;
-	__FLOG(_L8("~CMTPSvcGetReferences - Exit"));
-	__FLOG_CLOSE; 
+	OstTraceFunctionExit0( CMTPSVCGETREFERENCES_CMTPSVCGETREFERENCES_DES_EXIT );
 	}
 
 /**
@@ -55,13 +58,13 @@ CMTPSvcGetReferences::CMTPSvcGetReferences(MMTPDataProviderFramework& aFramework
 	:CMTPRequestProcessor(aFramework, aConnection, 0, NULL), 
 	iDataProvider(aDataProvider)
 	{
-	__FLOG_OPEN(KMTPSubsystem, KComponent);
-	__FLOG(_L8("Constructed"));
+	OstTraceFunctionEntry0( CMTPSVCGETREFERENCES_CMTPSVCGETREFERENCES_CONS_ENTRY );
+	OstTraceFunctionExit0( CMTPSVCGETREFERENCES_CMTPSVCGETREFERENCES_CONS_EXIT );
 	}
 
 TMTPResponseCode CMTPSvcGetReferences::CheckRequestL()
 	{
-	__FLOG(_L8("CheckRequestL - Entry"));
+	OstTraceFunctionEntry0( CMTPSVCGETREFERENCES_CHECKREQUESTL_ENTRY );
 
 	TMTPResponseCode responseCode = CMTPRequestProcessor::CheckRequestL();
 	if (EMTPRespCodeOK == responseCode)
@@ -77,7 +80,7 @@ TMTPResponseCode CMTPSvcGetReferences::CheckRequestL()
 			if (iReceivedObjectMetaData->Uint(CMTPObjectMetaData::EDataProviderId) != iFramework.DataProviderId())
 				{
 				responseCode = EMTPRespCodeInvalidObjectHandle;
-				__FLOG(_L8("CheckRequestL - DataProviderId dismatch"));
+				OstTrace0( TRACE_WARNING, DUP1_CMTPSVCGETREFERENCES_CHECKREQUESTL, "CheckRequestL - DataProviderId dismatch" );
 				}
 			else
 				{
@@ -94,18 +97,19 @@ TMTPResponseCode CMTPSvcGetReferences::CheckRequestL()
 			responseCode = EMTPRespCodeInvalidObjectHandle;
 			}
 		}
-	__FLOG_VA((_L8("CheckRequestL - Exit with code: 0x%04X"), responseCode));
+    OstTrace1( TRACE_NORMAL, CMTPSVCGETREFERENCES_CHECKREQUESTL, "Exit with code: 0x%04X", responseCode );	
+	OstTraceFunctionExit0( CMTPSVCGETREFERENCES_CHECKREQUESTL_EXIT );
 	return responseCode;
 	}
 
 void CMTPSvcGetReferences::ServiceL()
 	{
-	__FLOG(_L8("ServiceL - Entry"));
+	OstTraceFunctionEntry0( CMTPSVCGETREFERENCES_SERVICEL_ENTRY );
 	TUint16 formatCode = iReceivedObjectMetaData->Uint(CMTPObjectMetaData::EFormatCode);
 	delete iReferences;
 	iReferences = NULL;
 	iReferences = CMTPTypeArray::NewL(EMTPTypeAUINT32);
 	iDataProvider.ObjectHandler(formatCode)->GetObjectReferenceL(*iReceivedObjectMetaData, *iReferences);
 	SendDataL(*iReferences);
-	__FLOG(_L8("ServiceL - Exit"));
+	OstTraceFunctionExit0( CMTPSVCGETREFERENCES_SERVICEL_EXIT );
 	}

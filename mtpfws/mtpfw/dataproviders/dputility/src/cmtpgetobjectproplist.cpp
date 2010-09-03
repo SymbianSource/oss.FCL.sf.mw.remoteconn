@@ -28,8 +28,12 @@
 #include "mtpdpconst.h"
 #include "mtpdppanic.h"
 #include "cmtpfsentrycache.h"
+#include "mtpdebug.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpgetobjectproplistTraces.h"
+#endif
 
-__FLOG_STMT(_LIT8(KComponent,"MTPGetObjectPropList");)
 
 /**
 Verification data for the GetNumObjects request
@@ -50,16 +54,17 @@ EXPORT_C MMTPRequestProcessor* CMTPGetObjectPropList::NewL(MMTPDataProviderFrame
     
 EXPORT_C CMTPGetObjectPropList::~CMTPGetObjectPropList()
     {
+    OstTraceFunctionEntry0( CMTPGETOBJECTPROPLIST_CMTPGETOBJECTPROPLIST_DES_ENTRY );
     delete iHandles;
     delete iPropertyList;
     iDpSingletons.Close();
     delete iObjMeta;
-    __FLOG_CLOSE;
+    OstTraceFunctionExit0( CMTPGETOBJECTPROPLIST_CMTPGETOBJECTPROPLIST_DES_EXIT );
     }
 
 void CMTPGetObjectPropList::ServiceL()
 	{
-	__FLOG(_L8("ServiceL - Entry"));
+	OstTraceFunctionEntry0( CMTPGETOBJECTPROPLIST_SERVICEL_ENTRY );
 	TUint32 propCode(Request().Uint32(TMTPTypeRequest::ERequestParameter3));
 	TUint32 groupCode(Request().Uint32(TMTPTypeRequest::ERequestParameter4));
 	
@@ -80,7 +85,8 @@ void CMTPGetObjectPropList::ServiceL()
 						(iDpSingletons.CopyingBigFileCache().IsOnGoing()))
 					{
 					// The object is being copied, it is not created in fs yet. Use its cache entry to get properties
-					__FLOG(_L8("ServiceL - The object is being copied, use its cache entry to get properties"));
+					OstTrace0( TRACE_NORMAL, CMTPGETOBJECTPROPLIST_SERVICEL, 
+					        "ServiceL - The object is being copied, use its cache entry to get properties" );
 					iFileEntry = iDpSingletons.CopyingBigFileCache().FileEntry();
 					err = KErrNone;
 					}
@@ -88,14 +94,17 @@ void CMTPGetObjectPropList::ServiceL()
 									(iDpSingletons.MovingBigFileCache().IsOnGoing()))
 					{
 					// The object is being moved, it is not created in fs yet. Use its cache entry to get properties
-					__FLOG(_L8("ServiceL - The object is being moved, use its cache entry to get properties"));
+					OstTrace0( TRACE_NORMAL, DUP1_CMTPGETOBJECTPROPLIST_SERVICEL, 
+					        "ServiceL - The object is being moved, use its cache entry to get properties" );
 					iFileEntry = iDpSingletons.MovingBigFileCache().FileEntry();
 					err = KErrNone;
 					}	
 				}
 			
-			User::LeaveIfError(err);
-			
+			LEAVEIFERROR(err,
+			        OstTraceExt2( TRACE_ERROR, DUP2_CMTPGETOBJECTPROPLIST_SERVICEL, 
+			                "Can't get entry details for %S even after error handling! error code %d", iObjMeta->DesC(CMTPObjectMetaData::ESuid), err));
+
 			if (propCode == KMaxTUint)
 				{
 				ServiceAllPropertiesL(handle);
@@ -115,8 +124,8 @@ void CMTPGetObjectPropList::ServiceL()
 	//but we use one empty ObjectPropList to replace the EMTPRespCodeGroupNotSupported(0xA805) response.
 	
 	SendDataL(*iPropertyList);
-	
-	__FLOG(_L8("ServiceL - Exit"));
+
+	OstTraceFunctionExit0( CMTPGETOBJECTPROPLIST_SERVICEL_EXIT );
 	}
 	
 TMTPResponseCode CMTPGetObjectPropList::CheckRequestL()
@@ -143,14 +152,15 @@ TMTPResponseCode CMTPGetObjectPropList::CheckRequestL()
 CMTPGetObjectPropList::CMTPGetObjectPropList(MMTPDataProviderFramework& aFramework, MMTPConnection& aConnection) :
     CMTPRequestProcessor(aFramework, aConnection, (sizeof(KMTPGetObjectPropListPolicy) / sizeof(TMTPRequestElementInfo)), KMTPGetObjectPropListPolicy)
     {
-    __FLOG_OPEN(KMTPSubsystem, KComponent);
     }
     
 void CMTPGetObjectPropList::ConstructL()
     {
+    OstTraceFunctionEntry0( CMTPGETOBJECTPROPLIST_CONSTRUCTL_ENTRY );
     iDpSingletons.OpenL(iFramework);
     iPropertyList = CMTPTypeObjectPropList::NewL();
 	iObjMeta = CMTPObjectMetaData::NewL();
+    OstTraceFunctionExit0( CMTPGETOBJECTPROPLIST_CONSTRUCTL_EXIT );
     }
 
 TMTPResponseCode CMTPGetObjectPropList::CheckFormatL() const
@@ -477,8 +487,24 @@ void CMTPGetObjectPropList::ServiceOneObjectPropertyL(TUint32 aHandle, TUint32 a
                 iPropertyList->CommitPropElemL(propElem);  
 				}
         	}
-        	break;    
+        	break;
+         case EMTPObjectPropCodeHidden:
+             {
+             TBool isHidden = iFileEntry.IsHidden();
+             CMTPTypeObjectPropListElement& propElem = iPropertyList->ReservePropElemL(aHandle, aPropCode);
+             if ( isHidden )
+                 {
+                 propElem.SetUint16L(CMTPTypeObjectPropListElement::EValue, EMTPHidden);
+                 }
+             else
+                 {
+                 propElem.SetUint16L(CMTPTypeObjectPropListElement::EValue, EMTPVisible);
+                 }
+             iPropertyList->CommitPropElemL(propElem);  
+             }
+             break;
         default:
+            OstTrace1(TRACE_ERROR, CMTPGETOBJECTPROPLIST_SERVICEONEOBJECTPROPERTYL, "invalid property code %d", aPropCode);
             User::Leave( KErrNotSupported );
             break;
             }       

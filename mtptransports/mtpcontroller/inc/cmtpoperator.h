@@ -28,9 +28,6 @@
 
 #include "mmtpoperatornotifier.h"
 #include "cmtpcontrollertimer.h"
-#include "mtpdebug.h"
-
-
 
 NONSHARABLE_CLASS( CMTPOperator ) : public CActive
     {
@@ -71,10 +68,6 @@ private:
     void HandleOperationL( const TOperation& aOperation );
     
 private:
-    /**
-     * FLOGGER debug trace member variable.
-     */
-    __FLOG_DECLARATION_MEMBER_MUTABLE;
     
     MMTPOperatorNotifier& iNotifier;
     

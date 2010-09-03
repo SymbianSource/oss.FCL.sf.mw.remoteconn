@@ -19,6 +19,11 @@
 
 #include "tptpipinitevtack.h"
 #include "ptpipdatatypes.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "tptpipinitevtackTraces.h"
+#endif
+
     
 // Dataset element metadata.
 const TPTPIPInitEvtAck::TElementInfo TPTPIPInitEvtAck::iElementMetaData[ENumElements] = 
@@ -34,16 +39,22 @@ EXPORT_C TPTPIPInitEvtAck::TPTPIPInitEvtAck() :
     iElementInfo(iElementMetaData, ENumElements),
     iBuffer(KSize)
     {
+    OstTraceFunctionEntry0( TPTPIPINITEVTACK_TPTPIPINITEVTACK_ENTRY );
     SetBuffer(iBuffer);
+    OstTraceFunctionExit0( TPTPIPINITEVTACK_TPTPIPINITEVTACK_EXIT );
     }     
 
 EXPORT_C TUint TPTPIPInitEvtAck::Type() const
 	{
+	OstTraceFunctionEntry0( TPTPIPINITEVTACK_TYPE_ENTRY );
+	OstTraceFunctionExit0( TPTPIPINITEVTACK_TYPE_EXIT );
 	return EPTPIPTypeInitEvtAck ;
 	}
     
 EXPORT_C const TMTPTypeFlatBase::TElementInfo& TPTPIPInitEvtAck::ElementInfo(TInt aElementId) const
     {
+    OstTraceFunctionEntry0( TPTPIPINITEVTACK_ELEMENTINFO_ENTRY );
     __ASSERT_DEBUG((aElementId < ENumElements), User::Invariant());
+    OstTraceFunctionExit0( TPTPIPINITEVTACK_ELEMENTINFO_EXIT );
     return iElementInfo[aElementId];
     }

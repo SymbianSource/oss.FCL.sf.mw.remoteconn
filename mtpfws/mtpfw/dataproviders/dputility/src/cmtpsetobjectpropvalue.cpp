@@ -29,6 +29,12 @@
 #include "rmtpdpsingletons.h"
 #include "rmtputility.h"
 #include "cmtpstoragemgr.h"
+#include "mtpdebug.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpsetobjectpropvalueTraces.h"
+#endif
+
 
 /**
 Verification data for the SetObjectPropValue request
@@ -152,8 +158,8 @@ TMTPResponseCode CMTPSetObjectPropValue::CheckRequestL()
 	    {
 	    const TDesC& suid(meta->DesC(CMTPObjectMetaData::ESuid));
 	    TEntry entry;
-	    User::LeaveIfError( iFramework.Fs().Entry(suid, entry) );
-        
+	    LEAVEIFERROR( iFramework.Fs().Entry(suid, entry),
+	            OstTraceExt1( TRACE_ERROR, CMTPSETOBJECTPROPVALUE_CHECKREQUESTL, "Gets entry details for %S failed!", suid));
 	    //According to spec, there are 4 statuses: No Protection; Read-only; Read-only data; Non-transferrable data
 	    //Currently, we only use FS's Read-only attribute to support No Protection and Read-only statuses.
 	    //so if the attribute is read-only, we will return EMTPRespCodeAccessDenied.
@@ -176,7 +182,9 @@ void CMTPSetObjectPropValue::ServiceL()
 	TUint32 propCode = Request().Uint32(TMTPTypeRequest::ERequestParameter2);
 	
 	iFramework.ObjectMgr().ObjectL(TMTPTypeUint32(handle), *iObjMeta);
-	User::LeaveIfError(iRfs.Entry(iObjMeta->DesC(CMTPObjectMetaData::ESuid), iFileEntry));
+	LEAVEIFERROR(iRfs.Entry(iObjMeta->DesC(CMTPObjectMetaData::ESuid), iFileEntry),
+	           OstTraceExt1(TRACE_ERROR, CMTPSETOBJECTPROPVALUE_SERVICEL, 
+	                    "can't get entry details for %S!", iObjMeta->DesC(CMTPObjectMetaData::ESuid)));
 	
 	delete iMTPTypeString;
 	iMTPTypeString = NULL;
@@ -192,6 +200,7 @@ void CMTPSetObjectPropValue::ServiceL()
 			ReceiveDataL(iMTPTypeUint8);
 			break;
 		case EMTPObjectPropCodeAssociationType:
+		case EMTPObjectPropCodeHidden:
 			{
 			ReceiveDataL(iMTPTypeUint16);
 			}
@@ -214,6 +223,7 @@ void CMTPSetObjectPropValue::ServiceL()
 			//No break sentance, goto Panic
 			}
 		default:
+		    OstTrace1( TRACE_ERROR, DUP1_CMTPSETOBJECTPROPVALUE_SERVICEL, "Invalid property code %d", propCode);
 		    User::Leave( KErrNotSupported );
 		    break;
 		}	
@@ -245,7 +255,37 @@ TBool CMTPSetObjectPropValue::DoHandleResponsePhaseL()
 				}
 			}
 			break;
-			
+		case EMTPObjectPropCodeHidden:
+		    {
+            if ( EMTPHidden == iMTPTypeUint16.Value())
+                  {
+                  TEntry entry;
+                  User::LeaveIfError(iFramework.Fs().Entry(iObjMeta->DesC(CMTPObjectMetaData::ESuid), entry));
+                  if ( !entry.IsHidden())
+                      {
+                      entry.iAtt &= ~KEntryAttHidden;
+                      entry.iAtt |= KEntryAttHidden;
+                      User::LeaveIfError(iFramework.Fs().SetAtt(iObjMeta->DesC(CMTPObjectMetaData::ESuid), entry.iAtt, ~entry.iAtt));
+                      }
+                  responseCode = EMTPRespCodeOK;
+                  }
+              else if ( EMTPVisible == iMTPTypeUint16.Value())
+                  {
+                  TEntry entry;
+                  User::LeaveIfError(iFramework.Fs().Entry(iObjMeta->DesC(CMTPObjectMetaData::ESuid), entry));
+                  if ( entry.IsHidden())
+                      {
+                      entry.iAtt &= ~KEntryAttHidden;
+                      User::LeaveIfError(iFramework.Fs().SetAtt(iObjMeta->DesC(CMTPObjectMetaData::ESuid), entry.iAtt, ~entry.iAtt));
+                      }
+                  responseCode = EMTPRespCodeOK;
+                  }
+              else
+                  {
+                  responseCode = EMTPRespCodeInvalidObjectPropValue;
+                  }
+		    }
+		    break;
 		case EMTPObjectPropCodeObjectFileName:
 			{
 
@@ -317,6 +357,7 @@ TBool CMTPSetObjectPropValue::DoHandleResponsePhaseL()
 			
 			
 		default:
+		    OstTrace1( TRACE_ERROR, CMTPSETOBJECTPROPVALUE_DOHANDLERESPONSEPHASEL, "Invalid property code %d", propCode);
 		    User::Leave( KErrNotSupported );
 		    break;
 		}

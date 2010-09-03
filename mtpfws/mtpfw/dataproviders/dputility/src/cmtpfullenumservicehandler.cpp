@@ -25,9 +25,13 @@
 #include "mtpsvcdpconst.h"
 #include "cmtpfullenumservicehandler.h"
 #include "cmtpabstractdatacodemgr.h"
+#include "mtpdebug.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpfullenumservicehandlerTraces.h"
+#endif
 
-// Class constants.
-__FLOG_STMT(_LIT8(KComponent, "FullEnumServiceHandler");)
+
 
 EXPORT_C CMTPFullEnumServiceHandler* CMTPFullEnumServiceHandler::NewL(MMTPDataProviderFramework& aFramework,
 		const CMTPFullEnumDataCodeMgr& aDataCodeMgr,
@@ -47,8 +51,8 @@ EXPORT_C CMTPFullEnumServiceHandler* CMTPFullEnumServiceHandler::NewL(MMTPDataPr
 
 EXPORT_C CMTPFullEnumServiceHandler::~CMTPFullEnumServiceHandler()
 	{
-	__FLOG(_L8("~CMTPFullEnumServiceHandler - Destructed"));
-	__FLOG_CLOSE;
+	OstTraceFunctionEntry0( CMTPFULLENUMSERVICEHANDLER_CMTPFULLENUMSERVICEHANDLER_DES_ENTRY );
+	OstTraceFunctionExit0( CMTPFULLENUMSERVICEHANDLER_CMTPFULLENUMSERVICEHANDLER__DES_EXIT );
 	}
 
 CMTPFullEnumServiceHandler::CMTPFullEnumServiceHandler(MMTPDataProviderFramework& aFramework,
@@ -63,18 +67,17 @@ CMTPFullEnumServiceHandler::CMTPFullEnumServiceHandler(MMTPDataProviderFramework
 
 void CMTPFullEnumServiceHandler::ConstructL()
 	{
-	__FLOG_OPEN(KMTPSubsystem, KComponent);
-	__FLOG(_L8("ConstructL - Entry"));
+	OstTraceFunctionEntry0( CMTPFULLENUMSERVICEHANDLER_CONSTRUCTL_ENTRY );
 	// Initialize the service properties's value stored in iRepository
 	LoadServicePropValueL();
-	__FLOG(_L8("ConstructL - Exit"));
+	OstTraceFunctionExit0( CMTPFULLENUMSERVICEHANDLER_CONSTRUCTL_EXIT );
 	}
 
 // GetServiceCapabilities
 EXPORT_C TMTPResponseCode CMTPFullEnumServiceHandler::GetServiceCapabilityL(
 	TUint16 aServiceFormatCode, CMTPTypeServiceCapabilityList& aServiceCapabilityList) const
 	{
-	__FLOG(_L8("GetServiceCapabilitiesL - Entry"));
+	OstTraceFunctionEntry0( CMTPFULLENUMSERVICEHANDLER_GETSERVICECAPABILITYL_ENTRY );
 
 	__ASSERT_DEBUG((aServiceFormatCode == iDataCodeMgr.KnowledgeFormat().iFormatCode), User::Invariant());
 
@@ -97,7 +100,7 @@ EXPORT_C TMTPResponseCode CMTPFullEnumServiceHandler::GetServiceCapabilityL(
 		} // End of loop for every format
 	aServiceCapabilityList.AppendL(element);
 	CleanupStack::Pop(element);
-	__FLOG(_L8("GetServiceCapabilitiesL - Exit"));
+	OstTraceFunctionExit0( CMTPFULLENUMSERVICEHANDLER_GETSERVICECAPABILITYL_EXIT );
 	return EMTPRespCodeOK;
 	}
 
@@ -105,7 +108,7 @@ EXPORT_C TMTPResponseCode CMTPFullEnumServiceHandler::GetServiceCapabilityL(
 EXPORT_C TMTPResponseCode CMTPFullEnumServiceHandler::GetServicePropDescL(
 	TUint16 aServicePropertyCode, CMTPTypeServicePropDescList& aPropDescList) const
 	{
-	__FLOG(_L8("GetServicePropDescL - Entry"));
+	OstTraceFunctionEntry0( CMTPFULLENUMSERVICEHANDLER_GETSERVICEPROPDESCL_ENTRY );
 	TMTPResponseCode respCode(EMTPRespCodeOK);
 	CMTPTypeServicePropDesc* servicePropDesc = NULL;
 	const TMTPServicePropertyInfo* pPropInfo = iDataCodeMgr.ServicePropertyInfo(aServicePropertyCode);
@@ -234,14 +237,14 @@ EXPORT_C TMTPResponseCode CMTPFullEnumServiceHandler::GetServicePropDescL(
 		aPropDescList.AppendL(servicePropDesc);
 		CleanupStack::Pop(servicePropDesc);
 		}
-	__FLOG(_L8("GetServicePropDescL - Exit"));
+	OstTraceFunctionExit0( CMTPFULLENUMSERVICEHANDLER_GETSERVICEPROPDESCL_EXIT );
 	return respCode;
 	}
 
 // Get specific property of the service
 EXPORT_C TMTPResponseCode CMTPFullEnumServiceHandler::GetServicePropetyL(TUint16 aPropertyCode, CMTPTypeServicePropList& aPropList) const
 	{
-	__FLOG(_L8("GetServicePropetyL - Entry"));
+	OstTraceFunctionEntry0( CMTPFULLENUMSERVICEHANDLER_GETSERVICEPROPETYL_ENTRY );
 
 	TMTPResponseCode responseCode = EMTPRespCodeOK;
 	const TMTPServicePropertyInfo* pPropInfo = iDataCodeMgr.ServicePropertyInfo(aPropertyCode);
@@ -371,14 +374,15 @@ EXPORT_C TMTPResponseCode CMTPFullEnumServiceHandler::GetServicePropetyL(TUint16
 		aPropList.AppendL(propertyElement);
 		CleanupStack::Pop(propertyElement);
 		}
-	__FLOG_VA((_L8("GetServicePropetyL - Exit with responseCode = 0x%04X"), responseCode));
+	OstTrace1( TRACE_NORMAL, CMTPFULLENUMSERVICEHANDLER_GETSERVICEPROPETYL, "responseCode = 0x%04X", responseCode);
+	OstTraceFunctionExit0( CMTPFULLENUMSERVICEHANDLER_GETSERVICEPROPETYL_EXIT );
 	return responseCode;
 	}
 
 EXPORT_C TMTPResponseCode CMTPFullEnumServiceHandler::SetServicePropetyL(
 	TUint16 aPropEnumIndex, const CMTPTypeServicePropListElement& aElement)
 	{
-	__FLOG(_L8("SetServicePropetyL - Entry"));
+	OstTraceFunctionEntry0( CMTPFULLENUMSERVICEHANDLER_SETSERVICEPROPETYL_ENTRY );
 	TMTPResponseCode responseCode = EMTPRespCodeOK;
 
 	TUint16 dataType = aElement.Uint16L(CMTPTypeServicePropListElement::EDatatype);
@@ -472,13 +476,14 @@ EXPORT_C TMTPResponseCode CMTPFullEnumServiceHandler::SetServicePropetyL(
 			responseCode = EMTPRespCodeInvalidServicePropCode;
 			break;
 		} //End of switch
-	__FLOG_VA((_L8("SetServicePropertyL - Exit with responseCode = 0x%04X"), responseCode));
+	OstTrace1( TRACE_NORMAL, CMTPFULLENUMSERVICEHANDLER_SETSERVICEPROPETYL, "responseCode = 0x%04X", responseCode );
+	OstTraceFunctionExit0( CMTPFULLENUMSERVICEHANDLER_SETSERVICEPROPETYL_EXIT );
 	return responseCode;
 	}
 
 EXPORT_C TMTPResponseCode CMTPFullEnumServiceHandler::DeleteServiceProperty(TUint16 aPropEnumIndex)
 	{
-	__FLOG(_L8("DeleteServiceProperty - Entry"));
+	OstTraceFunctionEntry0( CMTPFULLENUMSERVICEHANDLER_DELETESERVICEPROPERTY_ENTRY );
 	TMTPResponseCode responseCode = EMTPRespCodeOK;
 	switch (aPropEnumIndex)
 		{
@@ -523,33 +528,37 @@ EXPORT_C TMTPResponseCode CMTPFullEnumServiceHandler::DeleteServiceProperty(TUin
 		default:
 			{
 			responseCode = EMTPRespCodeInvalidServicePropCode;
-			__FLOG(_L8("Invalid service propcode"));
+			OstTrace0( TRACE_ERROR, CMTPFULLENUMSERVICEHANDLER_DELETESERVICEPROPERTY, "Invalid service propcode" );
 			break;
 			}
 		}
-	__FLOG(_L8("DeleteServiceProperty - Exit"));
+	OstTraceFunctionExit0( CMTPFULLENUMSERVICEHANDLER_DELETESERVICEPROPERTY_EXIT );
 	return responseCode;
 	}
 
 void CMTPFullEnumServiceHandler::LoadServicePropValueL()
 	{
-	__FLOG(_L8("LoadServicePropValueL - Entry"));
+	OstTraceFunctionEntry0( CMTPFULLENUMSERVICEHANDLER_LOADSERVICEPROPVALUEL_ENTRY );
 	// Load ReplicaID:
 	TPtr8 writeBuf(NULL, 0); //walkaroud for the TMTPTypeGuid
 	iReplicateID.FirstWriteChunk(writeBuf);
-	User::LeaveIfError(iRepository.Get(EReplicaID, writeBuf));
+	LEAVEIFERROR(iRepository.Get(EReplicaID, writeBuf),
+	        OstTrace0( TRACE_ERROR, CMTPFULLENUMSERVICEHANDLER_LOADSERVICEPROPVALUEL, "Can't load ReplicaID from iRepository!"));
 
 	//load LastSyncProxyID
 	iLastSyncProxyID.FirstWriteChunk(writeBuf);
-	User::LeaveIfError(iRepository.Get(ELastSyncProxyID, writeBuf));
+	LEAVEIFERROR(iRepository.Get(ELastSyncProxyID, writeBuf),
+	        OstTrace0( TRACE_ERROR, DUP1_CMTPFULLENUMSERVICEHANDLER_LOADSERVICEPROPVALUEL, "Can't load LastSyncProxyID from iRepository!"));
 
 	TInt value;
 	// Load LocalOnlyDelete
-	User::LeaveIfError(iRepository.Get(ELocalOnlyDelete, value));
+	LEAVEIFERROR(iRepository.Get(ELocalOnlyDelete, value),
+	        OstTrace0( TRACE_ERROR, DUP2_CMTPFULLENUMSERVICEHANDLER_LOADSERVICEPROPVALUEL, "Can't load LocalOnlyDelete from iRepository!"));        
 	iLocalOnlyDelete = static_cast<TMTPSyncSvcLocalOnlyDelete>(value);
 
 	// Load EFilterType
-	User::LeaveIfError(iRepository.Get(EFilterType, value));
+	LEAVEIFERROR(iRepository.Get(EFilterType, value),
+	        OstTrace0( TRACE_ERROR, DUP3_CMTPFULLENUMSERVICEHANDLER_LOADSERVICEPROPVALUEL, "Can't load FilterType from iRepository!"));
 	iFilterType = static_cast<TMTPSyncSvcFilterType>(value);
 
 	//Load SyncObjectReferenceEnabled
@@ -558,10 +567,12 @@ void CMTPFullEnumServiceHandler::LoadServicePropValueL()
 	TInt ret = iRepository.Get(ESyncObjectReference, value);
 	if (ret != KErrNone && ret != KErrNotFound )
 	    {
+        OstTrace1( TRACE_ERROR, DUP4_CMTPFULLENUMSERVICEHANDLER_LOADSERVICEPROPVALUEL, 
+                "can't load SyncObjectReferenceEnabled from iRepository! error code %d", ret );
 	    User::Leave(ret);
 	    }
 	iSyncObjectReference = static_cast<TMTPSyncSvcSyncObjectReferences>(value);
 	
-	__FLOG(_L8("LoadServicePropValueL - Exit"));
+	OstTraceFunctionExit0( CMTPFULLENUMSERVICEHANDLER_LOADSERVICEPROPVALUEL_EXIT );
 	return;
 	}

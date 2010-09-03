@@ -54,10 +54,6 @@ private:
 	MMTPServiceDataProvider&       iDataProvider;
 	CMTPTypeDeleteObjectPropList*  iPropertyList;
 	CMTPObjectMetaData*            iReceivedObjectMetaData;
-	/**
-	FLOGGER debug trace member variable.
-	*/
-	__FLOG_DECLARATION_MEMBER_MUTABLE;
 	};
 
 #endif // __CMTPSVCDELETEOBJECTPROPLIST_H__

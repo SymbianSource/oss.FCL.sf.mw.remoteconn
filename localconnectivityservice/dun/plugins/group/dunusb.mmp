@@ -33,7 +33,6 @@ SOURCE                  DunUsbConfig.cpp
 MW_LAYER_SYSTEMINCLUDE
 
 USERINCLUDE             ../inc/usb ../../utils/inc
-USERINCLUDE             ../../../inc
 
 LIBRARY                 euser.lib
 LIBRARY                 c32.lib

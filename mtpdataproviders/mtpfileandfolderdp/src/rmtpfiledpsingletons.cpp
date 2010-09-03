@@ -19,9 +19,13 @@
 #include <mtp/cmtpobjectmetadata.h>
 
 #include "cmtpfiledpconfigmgr.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "rmtpfiledpsingletonsTraces.h"
+#endif
+
 
 // Class constants.
-__FLOG_STMT(_LIT8(KComponent,"FileDpSingletons");)
 
 /**
 Constructor.
@@ -36,10 +40,9 @@ Opens the singletons reference.
 */
 void RMTPFileDpSingletons::OpenL(MMTPDataProviderFramework& aFramework)
     {
-    __FLOG_OPEN(KMTPSubsystem, KComponent);
-    __FLOG(_L8("OpenL - Entry"));
+    OstTraceFunctionEntry0( RMTPFILEDPSINGLETONS_OPENL_ENTRY );
     iSingletons = &CSingletons::OpenL(aFramework);
-    __FLOG(_L8("OpenL - Exit"));
+    OstTraceFunctionExit0( RMTPFILEDPSINGLETONS_OPENL_EXIT );
     }
     
 /**
@@ -47,14 +50,13 @@ Closes the singletons reference.
 */
 void RMTPFileDpSingletons::Close()
     {
-    __FLOG(_L8("Close - Entry"));
+    OstTraceFunctionEntry0( RMTPFILEDPSINGLETONS_CLOSE_ENTRY );
     if (iSingletons)
         {
         iSingletons->Close();
         iSingletons = NULL;
         }
-    __FLOG(_L8("Close - Exit"));
-    __FLOG_CLOSE;
+    OstTraceFunctionExit0( RMTPFILEDPSINGLETONS_CLOSE_EXIT );
     }
 
 /**
@@ -64,10 +66,10 @@ Provides a handle to the MTP file data provider's configuration manager.
 
 CMTPFileDpConfigMgr& RMTPFileDpSingletons::FrameworkConfig()
     {
-    __FLOG(_L8("FrameworkConfig - Entry"));
+    OstTraceFunctionEntry0( RMTPFILEDPSINGLETONS_FRAMEWORKCONFIG_ENTRY );
     __ASSERT_DEBUG(iSingletons, User::Invariant());
     __ASSERT_DEBUG(iSingletons->iConfigMgr, User::Invariant());
-    __FLOG(_L8("FrameworkConfig - Exit"));
+    OstTraceFunctionExit0( RMTPFILEDPSINGLETONS_FRAMEWORKCONFIG_EXIT );
     return *iSingletons->iConfigMgr;
     }
 
@@ -82,7 +84,7 @@ RMTPFileDpSingletons::CSingletons* RMTPFileDpSingletons::CSingletons::NewL(MMTPD
 
 RMTPFileDpSingletons::CSingletons& RMTPFileDpSingletons::CSingletons::OpenL(MMTPDataProviderFramework& aFramework)
     {
-    __FLOG_STATIC(KMTPSubsystem, KComponent, _L8("CSingletons::OpenL - Entry"));
+    OstTraceFunctionEntry0( RMTPFILEDPSINGLETONS_CSINGLETONS_OPENL_ENTRY );
     CSingletons* self(reinterpret_cast<CSingletons*>(Dll::Tls()));
     if (!self)
         {
@@ -93,7 +95,7 @@ RMTPFileDpSingletons::CSingletons& RMTPFileDpSingletons::CSingletons::OpenL(MMTP
         {        
         self->Inc();
         }
-    __FLOG_STATIC(KMTPSubsystem, KComponent, _L8("CSingletons::OpenL - Exit"));
+    OstTraceFunctionExit0( RMTPFILEDPSINGLETONS_CSINGLETONS_OPENL_EXIT );
     return *self;
     }
     
@@ -102,35 +104,33 @@ void RMTPFileDpSingletons::CSingletons::Close()
     CSingletons* self(reinterpret_cast<CSingletons*>(Dll::Tls()));
     if (self)
         {
-        __FLOG(_L8("CSingletons::Close - Entry"));
+        OstTraceFunctionEntry0( RMTPFILEDPSINGLETONS_CSINGLETONS_CLOSE_ENTRY );
         self->Dec();
         if (self->AccessCount() == 0)
             {
-            __FLOG(_L8("CSingletons::Close - Exit"));
+            OstTraceFunctionExit0( RMTPFILEDPSINGLETONS_CSINGLETONS_CLOSE_EXIT );
             delete self;
             Dll::SetTls(NULL);
             }
         else
             {
-            __FLOG(_L8("CSingletons::Close - Exit"));
+            OstTraceFunctionExit0( DUP1_RMTPFILEDPSINGLETONS_CSINGLETONS_CLOSE_EXIT );
             }
         }
     }
     
 RMTPFileDpSingletons::CSingletons::~CSingletons()
     {
-    __FLOG(_L8("CSingletons::~CSingletons - Entry"));
+    OstTraceFunctionEntry0( RMTPFILEDPSINGLETONS_CSINGLETONS_CSINGLETONS_ENTRY );
     delete iConfigMgr;
-    __FLOG(_L8("CSingletons::~CSingletons - Exit"));
-    __FLOG_CLOSE;
+    OstTraceFunctionExit0( RMTPFILEDPSINGLETONS_CSINGLETONS_CSINGLETONS_EXIT );
     }
     
 void RMTPFileDpSingletons::CSingletons::ConstructL(MMTPDataProviderFramework& aFramework)
     {
-    __FLOG_OPEN(KMTPSubsystem, KComponent);
-    __FLOG(_L8("CSingletons::ConstructL - Entry"));
+    OstTraceFunctionEntry0( RMTPFILEDPSINGLETONS_CSINGLETONS_CONSTRUCTL_ENTRY );
     iConfigMgr = CMTPFileDpConfigMgr::NewL(aFramework);
-    __FLOG(_L8("CSingletons::ConstructL - Exit"));
+    OstTraceFunctionExit0( RMTPFILEDPSINGLETONS_CSINGLETONS_CONSTRUCTL_EXIT );
     }
 
 

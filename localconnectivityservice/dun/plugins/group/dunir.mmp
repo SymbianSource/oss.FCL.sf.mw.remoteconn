@@ -31,7 +31,6 @@ SOURCE                  DunIrPlugin.cpp
 MW_LAYER_SYSTEMINCLUDE
 
 USERINCLUDE             ../inc/ir ../../utils/inc
-USERINCLUDE             ../../../inc
 
 LIBRARY                 euser.lib
 LIBRARY                 c32.lib

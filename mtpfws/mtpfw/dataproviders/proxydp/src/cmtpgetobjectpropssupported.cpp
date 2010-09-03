@@ -25,6 +25,11 @@
 #include "cmtpdataprovider.h"
 #include "cmtpgetobjectpropssupported.h"
 #include "mtpproxydppanic.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpgetobjectpropssupportedTraces.h"
+#endif
+
    
 /**
 Factory method.
@@ -90,6 +95,7 @@ void CMTPGetObjectPropsSupported::ProxySendDataL(const MMTPType& aData, const TM
 		if ((KErr != KErrNone) &&
 		    (KErr != KErrAlreadyExists))
 		    {
+            OstTrace1( TRACE_ERROR, CMTPGETOBJECTPROPSSUPPORTED_PROXYSENDDATAL, "add property to support property list error! error code:%d", KErr );
 		    User::Leave(KErr);
 		    }
 		}

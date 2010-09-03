@@ -34,7 +34,6 @@ SOURCE                  DunCloseWait.cpp
 MW_LAYER_SYSTEMINCLUDE
 
 USERINCLUDE             ../inc ../../utils/inc
-USERINCLUDE             ../../../inc ../../../../inc
 
 LIBRARY                 euser.lib
 LIBRARY                 dunutils.lib

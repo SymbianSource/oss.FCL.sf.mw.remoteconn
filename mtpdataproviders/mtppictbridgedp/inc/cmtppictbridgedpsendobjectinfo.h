@@ -120,10 +120,6 @@ private: // Owned
     RMTPDpSingletons		iDpSingletons;
     TFileName				iName;
     TBool					iNoRollback;
-    /**
-    FLOGGER debug trace member variable.
-    */
-    __FLOG_DECLARATION_MEMBER_MUTABLE;
     };
     
 #endif //CMTPPictBridgeDpSendObjectInfo_H

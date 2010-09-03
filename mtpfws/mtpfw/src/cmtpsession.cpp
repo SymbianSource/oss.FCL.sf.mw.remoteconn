@@ -21,9 +21,14 @@
 #include <mtp/mtpprotocolconstants.h>
 
 #include "cmtpsession.h"
+#include "mtpdebug.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpsessionTraces.h"
+#endif
+
 
 // Class constants.
-__FLOG_STMT(_LIT8(KComponent,"Session");)
 
 #ifdef _DEBUG
 
@@ -67,10 +72,9 @@ Destructor.
 */ 
 CMTPSession::~CMTPSession()
     {
-    __FLOG(_L8("~CMTPSession - Entry"));
+    OstTraceFunctionEntry0( CMTPSESSION_CMTPSESSION_DES_ENTRY );
     iRoutingRegistrations.Close();
-    __FLOG(_L8("~CMTPSession - Exit"));
-    __FLOG_CLOSE;
+    OstTraceFunctionExit0( CMTPSESSION_CMTPSESSION_DES_EXIT );
     }
     
 /**
@@ -81,9 +85,10 @@ in incremental sequence by the MTP initiator in the range 0x00000001 to
 */
 TUint32 CMTPSession::ExpectedTransactionId() const
     {
-    __FLOG(_L8("ExpectedTransactionId - Entry"));
-    __FLOG_VA((_L8("iExpectedTransactionId = 0x%08X"), iExpectedTransactionId));
-    __FLOG(_L8("ExpectedTransactionId - Exit")); 
+    OstTraceFunctionEntry0( CMTPSESSION_EXPECTEDTRANSACTIONID_ENTRY );
+    OstTrace1(TRACE_NORMAL, CMTPSESSION_EXPECTEDTRANSACTIONID, 
+            "iExpectedTransactionId = 0x%08X", iExpectedTransactionId);
+    OstTraceFunctionExit0( CMTPSESSION_EXPECTEDTRANSACTIONID_EXIT );
     return iExpectedTransactionId; 
     }
 
@@ -94,13 +99,14 @@ When the TransactionID increments to 0xFFFFFFFF it wraps back to 0x00000001.
 */
 void CMTPSession::IncrementExpectedTransactionId()
     {
-    __FLOG(_L8("IncrementExpectedTransactionId - Entry"));
+    OstTraceFunctionEntry0( CMTPSESSION_INCREMENTEXPECTEDTRANSACTIONID_ENTRY );
     if (++iExpectedTransactionId == KMTPTransactionIdLast)
         {
         iExpectedTransactionId = KMTPTransactionIdFirst;
         }
-    __FLOG_VA((_L8("iExpectedTransactionId = 0x%08X"), iExpectedTransactionId));
-    __FLOG(_L8("IncrementExpectedTransactionId - Exit"));
+    OstTrace1(TRACE_NORMAL, CMTPSESSION_INCREMENTEXPECTEDTRANSACTIONID, 
+            "iExpectedTransactionId = 0x%08X", iExpectedTransactionId);    
+    OstTraceFunctionExit0( CMTPSESSION_INCREMENTEXPECTEDTRANSACTIONID_EXIT );
     }
 
 /**
@@ -111,9 +117,9 @@ transaction request dataset should only be set at the start of the transaction
 */
 void CMTPSession::SetActiveRequestL(const TMTPTypeRequest& aRequest)
     {
-    __FLOG(_L8("SetActiveRequestL - Entry"));
+    OstTraceFunctionEntry0( CMTPSESSION_SETACTIVEREQUESTL_ENTRY );
     MMTPType::CopyL(aRequest, iActiveRequest);    
-    __FLOG(_L8("SetActiveRequestL - Exit"));
+    OstTraceFunctionExit0( CMTPSESSION_SETACTIVEREQUESTL_EXIT );
     }
 
 /**
@@ -122,10 +128,11 @@ Sets the session's transaction phase state variable.
 */
 void CMTPSession::SetTransactionPhase(TMTPTransactionPhase aPhase)
     {
-    __FLOG(_L8("SetTransactionPhase - Entry"));
+    OstTraceFunctionEntry0( CMTPSESSION_SETTRANSACTIONPHASE_ENTRY );
     iTransactionPhase = aPhase;
-    __FLOG_VA((_L8("iTransactionPhase = 0x%08X"), iTransactionPhase));
-    __FLOG(_L8("SetTransactionPhase - Exit"));
+    OstTrace1(TRACE_NORMAL, CMTPSESSION_SETTRANSACTIONPHASE, 
+            "iTransactionPhase = 0x%08X", iTransactionPhase);        
+    OstTraceFunctionExit0( CMTPSESSION_SETTRANSACTIONPHASE_EXIT );
     }
 
     
@@ -135,15 +142,16 @@ Provides the current MTP transaction state for the session.
 */
 TMTPTransactionPhase CMTPSession::TransactionPhase() const
     {
-    __FLOG(_L8("TransactionPhase - Entry"));
-    __FLOG_VA((_L8("iTransactionPhase = 0x%08X"), iTransactionPhase));
-    __FLOG(_L8("TransactionPhase - Exit"));
+    OstTraceFunctionEntry0( CMTPSESSION_TRANSACTIONPHASE_ENTRY );
+    OstTrace1(TRACE_NORMAL, CMTPSESSION_TRANSACTIONPHASE, 
+            "iTransactionPhase = 0x%08X", iTransactionPhase);        
+	OstTraceFunctionExit0( CMTPSESSION_TRANSACTIONPHASE_EXIT );
 	return  iTransactionPhase;
     }
     
 TInt CMTPSession::RouteRequest(const TMTPTypeRequest& aRequest)
     {
-    __FLOG(_L8("RouteRequest - Entry"));
+    OstTraceFunctionEntry0( CMTPSESSION_ROUTEREQUEST_ENTRY );
     TInt ret(KErrNotFound);
     
     // Attempt to match the request to existing registrations.
@@ -168,25 +176,28 @@ TInt CMTPSession::RouteRequest(const TMTPTypeRequest& aRequest)
         if ((op == EMTPOpCodeSendObject) ||
             (op == EMTPOpCodeTerminateOpenCapture))
             {
-            __FLOG_VA((_L8("Unregistering follow-on request 0x%08X"), op));
+            OstTrace1(TRACE_NORMAL, CMTPSESSION_ROUTEREQUEST, 
+                    "Unregistering follow-on request 0x%08X", op);
             iRoutingRegistrations.Remove(idx);
             }
         }
         
-    __FLOG_VA((_L8("DP ID = %d"), ret));
-    __FLOG(_L8("RouteRequest - Exit"));
+    OstTrace1(TRACE_NORMAL, DUP1_CMTPSESSION_ROUTEREQUEST, 
+            "DP ID = %d", ret);
+    OstTraceFunctionExit0( CMTPSESSION_ROUTEREQUEST_EXIT );
     return ret;
     }
   
 void CMTPSession::RouteRequestRegisterL(const TMTPTypeRequest& aRequest, TInt aDpId)
     {
-    __FLOG(_L8("RouteRequestRegisterL - Entry"));
+    OstTraceFunctionEntry0( CMTPSESSION_ROUTEREQUESTREGISTERL_ENTRY );
     // Locate any pre-existing registration (which if found, will be overwritten).
     TInt idx(iRoutingRegistrations.FindInOrder(aRequest, CMTPSession::RouteRequestOrder));
     if (idx == KErrNotFound)
         {
         iRoutingRegistrations.InsertInOrderL(aRequest, CMTPSession::RouteRequestOrder);
-        User::LeaveIfError(idx = iRoutingRegistrations.FindInOrder(aRequest, CMTPSession::RouteRequestOrder));
+        LEAVEIFERROR(idx = iRoutingRegistrations.FindInOrder(aRequest, CMTPSession::RouteRequestOrder),
+                OstTrace1( TRACE_ERROR, CMTPSESSION_ROUTEREQUESTREGISTERL, "can't find in routing registrations for request, dpId %d",  aDpId));
         }
     
     /*
@@ -194,7 +205,7 @@ void CMTPSession::RouteRequestRegisterL(const TMTPTypeRequest& aRequest, TInt aD
     TransactionID element (which is unused for routing).
     */
     iRoutingRegistrations[idx].SetUint32(TMTPTypeRequest::ERequestTransactionID, aDpId);
-    __FLOG(_L8("RouteRequestRegisterL - Exit"));
+    OstTraceFunctionExit0( CMTPSESSION_ROUTEREQUESTREGISTERL_EXIT );
     }
 
 /**
@@ -206,20 +217,20 @@ registered on the session, otherwise EFalse.
 */
 TBool CMTPSession::RouteRequestRegistered(TUint16 aOpCode) const
     {
-    __FLOG(_L8("RouteRequestPending - Entry"));
-    __FLOG(_L8("RouteRequestPending - Entry"));
+    OstTraceFunctionEntry0( CMTPSESSION_ROUTEREQUESTREGISTERED_ENTRY );
+    OstTraceFunctionExit0( CMTPSESSION_ROUTEREQUESTREGISTERED_EXIT );
     return (iRoutingRegistrations.Find(aOpCode, CMTPSession::RouteRequestMatchOpCode) != KErrNotFound);
     }
 
 void CMTPSession::RouteRequestUnregister(const TMTPTypeRequest& aRequest)
     {
-    __FLOG(_L8("RouteRequestUnregister - Entry"));
+    OstTraceFunctionEntry0( CMTPSESSION_ROUTEREQUESTUNREGISTER_ENTRY );
     TInt idx(iRoutingRegistrations.FindInOrder(aRequest, CMTPSession::RouteRequestOrder));
     if (idx != KErrNotFound)
         {
         iRoutingRegistrations.Remove(idx);
         }
-    __FLOG(_L8("RouteRequestUnregister - Exit"));
+    OstTraceFunctionExit0( CMTPSESSION_ROUTEREQUESTUNREGISTER_EXIT );
     }
     
 void CMTPSession::StorePendingEventL(const TMTPTypeEvent& aEvent)
@@ -253,15 +264,15 @@ completion code.
 */
 void CMTPSession::CompletePendingRequest(TInt aErr)
     {
-    __FLOG(_L8("CompletePendingRequest - Entry"));
+    OstTraceFunctionEntry0( CMTPSESSION_COMPLETEPENDINGREQUEST_ENTRY );
     
     if (iRequestStatus != NULL)
         {
         __ASSERT_DEBUG(*iRequestStatus == KRequestPending, Panic(EMTPPanicStraySignal));
         User::RequestComplete(iRequestStatus, aErr);
         }
-    
-    __FLOG(_L8("CompletePendingRequest - Exit"));
+
+    OstTraceFunctionExit0( CMTPSESSION_COMPLETEPENDINGREQUEST_EXIT );
     }
     
 
@@ -281,45 +292,46 @@ Set the status to complete for the currently pending asynchronous request.
 */
 void CMTPSession::SetRequestPending(TRequestStatus& aStatus)
     {
-    __FLOG(_L8("SetRequestPending - Entry"));
+    OstTraceFunctionEntry0( CMTPSESSION_SETREQUESTPENDING_ENTRY );
     __ASSERT_DEBUG(!iRequestStatus, Panic(EMTPPanicBusy));
     iRequestStatus = &aStatus;
     *iRequestStatus = KRequestPending;
-    __FLOG(_L8("SetRequestPending - Exit"));
+    OstTraceFunctionExit0( CMTPSESSION_SETREQUESTPENDING_EXIT );
     }
 
 const TMTPTypeRequest& CMTPSession::ActiveRequestL() const
     {
-    __FLOG(_L8("ActiveRequestL - Entry"));
+    OstTraceFunctionEntry0( CMTPSESSION_ACTIVEREQUESTL_ENTRY );
     
     if (iTransactionPhase == EIdlePhase)
         {
+        OstTrace0( TRACE_ERROR, CMTPSESSION_ACTIVEREQUESTL, "transaction in EIdlePhase!" );
         User::Leave(KErrNotFound);            
         }
     
-    __FLOG(_L8("ActiveRequestL - Exit"));
+    OstTraceFunctionExit0( CMTPSESSION_ACTIVEREQUESTL_EXIT );
     return iActiveRequest;  
     }
 
 TUint32 CMTPSession::SessionMTPId() const
     {
-    __FLOG(_L8("SessionMTPId - Entry"));
-    __FLOG_VA( (_L8("Session MTP ID = %d"), iIdMTP) );
-    __FLOG(_L8("SessionMTPId - Exit"));
+    OstTraceFunctionEntry0( CMTPSESSION_SESSIONMTPID_ENTRY );
+    OstTrace1(TRACE_NORMAL, CMTPSESSION_SESSIONMTPID, "Session MTP ID = %d", iIdMTP);
+    OstTraceFunctionExit0( CMTPSESSION_SESSIONMTPID_EXIT );
     return iIdMTP;        
     }
 
 TUint CMTPSession::SessionUniqueId() const
     {
-    __FLOG(_L8("SessionUniqueId - Entry"));
-    __FLOG(_L8("SessionUniqueId - Exit"));
+    OstTraceFunctionEntry0( CMTPSESSION_SESSIONUNIQUEID_ENTRY );
+    OstTraceFunctionExit0( CMTPSESSION_SESSIONUNIQUEID_EXIT );
     return iIdUnique;        
     }
     
 TAny* CMTPSession::GetExtendedInterface(TUid /*aInterfaceUid*/)
     {
-    __FLOG(_L8("GetExtendedInterface - Entry"));
-    __FLOG(_L8("GetExtendedInterface - Exit"));
+    OstTraceFunctionEntry0( CMTPSESSION_GETEXTENDEDINTERFACE_ENTRY );
+    OstTraceFunctionExit0( CMTPSESSION_GETEXTENDEDINTERFACE_EXIT );
     return NULL;        
     }
     
@@ -337,9 +349,8 @@ CMTPSession::CMTPSession(TUint32 aMTPId, TUint aUniqueId) :
 
 void CMTPSession::ConstructL()
     {
-    __FLOG_OPEN(KMTPSubsystem, KComponent);
-    __FLOG(_L8("ConstructL - Entry"));
-    __FLOG(_L8("ConstructL - Exit"));
+    OstTraceFunctionEntry0( CMTPSESSION_CONSTRUCTL_ENTRY );
+    OstTraceFunctionExit0( CMTPSESSION_CONSTRUCTL_EXIT );
     }
     
 TBool CMTPSession::RouteRequestMatchOpCode(const TUint16* aOpCode, const TMTPTypeRequest& aRequest)

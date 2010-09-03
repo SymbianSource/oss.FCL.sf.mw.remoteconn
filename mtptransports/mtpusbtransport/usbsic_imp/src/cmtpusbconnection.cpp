@@ -33,8 +33,9 @@
 #include "mtpusbpanic.h"
 #include "mtpusbprotocolconstants.h"
 
-#ifdef _DEBUG
-#include <e32debug.h>
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpusbconnectionTraces.h"
 #endif
 
 #define UNUSED_VAR(a) (a)=(a)
@@ -44,9 +45,6 @@
 const TInt KMTPNullChunkSize(0x00020000); // 100KB
 const TUint KUSBHeaderSize = 12;
 
-// Class constants.
-__FLOG_STMT(_LIT8(KComponent,"UsbConnection");)
-    
 // Endpoint meta data.
 const CMTPUsbConnection::TEpInfo CMTPUsbConnection::KEndpointMetaData[EMTPUsbEpNumEndpoints] = 
     {
@@ -77,7 +75,7 @@ Destructor.
 */
 CMTPUsbConnection::~CMTPUsbConnection()
     {
-    __FLOG(_L8("~CMTPUsbConnection - Entry"));
+    OstTraceFunctionEntry0( CMTPUSBCONNECTION_CMTPUSBCONNECTION_DES_ENTRY );
     
     // Terminate all endpoint data transfer activity.
     StopConnection();
@@ -97,30 +95,29 @@ CMTPUsbConnection::~CMTPUsbConnection()
         BoundProtocolLayer().Unbind(*this);
         }
     iProtocolLayer = NULL;
-    
-    __FLOG(_L8("~CMTPUsbConnection - Exit"));
-    __FLOG_CLOSE;
+
+    OstTraceFunctionExit0( CMTPUSBCONNECTION_CMTPUSBCONNECTION_DES_EXIT );
     }
 
 void CMTPUsbConnection::BindL(MMTPConnectionProtocol& aProtocol)
     {
-    __FLOG(_L8("BindL - Entry"));
+    OstTraceFunctionEntry0( CMTPUSBCONNECTION_BINDL_ENTRY );
     __ASSERT_DEBUG(!iProtocolLayer, Panic(EMTPUsbBadState));
     iProtocolLayer = &aProtocol;
-    __FLOG(_L8("BindL - Exit"));
+    OstTraceFunctionExit0( CMTPUSBCONNECTION_BINDL_EXIT );
     }
     
 MMTPConnectionProtocol& CMTPUsbConnection::BoundProtocolLayer()
     {
-    __FLOG(_L8("BoundProtocolLayer - Entry"));
+    OstTraceFunctionEntry0( CMTPUSBCONNECTION_BOUNDPROTOCOLLAYER_ENTRY );
     __ASSERT_DEBUG(iProtocolLayer, Panic(EMTPUsbBadState));
-    __FLOG(_L8("BoundProtocolLayer - Exit"));
+    OstTraceFunctionExit0( CMTPUSBCONNECTION_BOUNDPROTOCOLLAYER_EXIT );
     return *iProtocolLayer;
     }
     
 void CMTPUsbConnection::CloseConnection()
     {
-    __FLOG(_L8("CloseConnection - Entry"));
+    OstTraceFunctionEntry0( CMTPUSBCONNECTION_CLOSECONNECTION_ENTRY );
     /* 
     Terminate all endpoint data transfer activity, stall all but the control 
     endpoints, and wait for the host to issue a Device Reset Request.
@@ -128,19 +125,19 @@ void CMTPUsbConnection::CloseConnection()
     StopConnection();
     TRAPD(err, BulkEndpointsStallL());
     UNUSED_VAR(err);
-    __FLOG(_L8("CloseConnection - Exit"));
+    OstTraceFunctionExit0( CMTPUSBCONNECTION_CLOSECONNECTION_EXIT );
     }
     
 void CMTPUsbConnection::ReceiveDataL(MMTPType& aData, const TMTPTypeRequest& /*aRequest*/)
     {
-    __FLOG(_L8("ReceiveDataL - Entry"));
+    OstTraceFunctionEntry0( CMTPUSBCONNECTION_RECEIVEDATAL_ENTRY );
     
     // Update the transaction state.
     SetBulkTransactionState(EDataIToRPhase);
     
     if (iIsCancelReceived) //cancel received
         {
-        __FLOG(_L8("Transaction has been cancelled, just flush trash data and complete"));
+        OstTrace0( TRACE_NORMAL, CMTPUSBCONNECTION_RECEIVEDATAL, "Transaction has been cancelled, just flush trash data and complete" );
         static_cast<CMTPUsbEpBulkOut*>(iEndpoints[EMTPUsbEpBulkOut])->FlushRxDataL();
         BoundProtocolLayer().ReceiveDataCompleteL(KErrCancel, aData, iMTPRequest);
         }
@@ -155,13 +152,13 @@ void CMTPUsbConnection::ReceiveDataL(MMTPType& aData, const TMTPTypeRequest& /*a
         
         static_cast<CMTPUsbEpBulkOut*>(iEndpoints[EMTPUsbEpBulkOut])->ReceiveBulkDataL(*iUsbBulkContainer);
         }
-    
-    __FLOG(_L8("ReceiveDataL - Exit"));       
+         
+    OstTraceFunctionExit0( CMTPUSBCONNECTION_RECEIVEDATAL_EXIT );
     }
 
 void CMTPUsbConnection::ReceiveDataCancelL(const TMTPTypeRequest& /*aRequest*/)
     {
-    __FLOG(_L8("ReceiveDataCancelL - Entry"));
+    OstTraceFunctionEntry0( CMTPUSBCONNECTION_RECEIVEDATACANCELL_ENTRY );
     
     // Store the device status code.
     TUint16 deviceStatus = iDeviceStatusCode;
@@ -171,19 +168,19 @@ void CMTPUsbConnection::ReceiveDataCancelL(const TMTPTypeRequest& /*aRequest*/)
    	
    	// Restore it.
    	SetDeviceStatus(deviceStatus);
-    __FLOG(_L8("ReceiveDataCancelL - Exit"));
+    OstTraceFunctionExit0( CMTPUSBCONNECTION_RECEIVEDATACANCELL_EXIT );
     }
 
 void CMTPUsbConnection::SendDataL(const MMTPType& aData, const TMTPTypeRequest& aRequest)
     {
-    __FLOG(_L8("SendDataL - Entry"));  
+    OstTraceFunctionEntry0( CMTPUSBCONNECTION_SENDDATAL_ENTRY ); 
     ProcessBulkDataInL(aRequest, aData);
-    __FLOG(_L8("SendDataL - Exit"));  
+    OstTraceFunctionExit0( CMTPUSBCONNECTION_SENDDATAL_EXIT );
     }
 
 void CMTPUsbConnection::SendDataCancelL(const TMTPTypeRequest& /*aRequest*/)
     {
-    __FLOG(_L8("SendDataCancelL - Entry"));
+    OstTraceFunctionEntry0( CMTPUSBCONNECTION_SENDDATACANCELL_ENTRY );
     // Store the device status code.
     TUint16 deviceStatus = iDeviceStatusCode;
     
@@ -191,12 +188,12 @@ void CMTPUsbConnection::SendDataCancelL(const TMTPTypeRequest& /*aRequest*/)
  	static_cast<CMTPUsbEpBulkIn*>(iEndpoints[EMTPUsbEpBulkIn])->CancelSendL(KErrCancel);
  	// Restore it.
    	SetDeviceStatus(deviceStatus);
-    __FLOG(_L8("SendDataCancelL - Exit"));
+    OstTraceFunctionExit0( CMTPUSBCONNECTION_SENDDATACANCELL_EXIT );
     }
         
 void CMTPUsbConnection::SendEventL(const TMTPTypeEvent& aEvent)
     {    
-    __FLOG(_L8("SendEventL - Entry"));
+    OstTraceFunctionEntry0( CMTPUSBCONNECTION_SENDEVENTL_ENTRY );
     
     // Reset the event.
     iMTPEvent.Reset(); 
@@ -207,7 +204,7 @@ void CMTPUsbConnection::SendEventL(const TMTPTypeEvent& aEvent)
     case EIdle:
     case EStalled:
         // Drop the event.    
-        __FLOG(_L8("Dropping the event")); 
+        OstTrace0( TRACE_NORMAL, CMTPUSBCONNECTION_SENDEVENTL, "Dropping the event" );
         BoundProtocolLayer().SendEventCompleteL(KErrNone, aEvent);
         break;
         
@@ -221,7 +218,7 @@ void CMTPUsbConnection::SendEventL(const TMTPTypeEvent& aEvent)
             if (!iEventPending)
             	{
             	// Send the event data.
-	            __FLOG(_L8("Sending the event"));
+	            OstTrace0( TRACE_NORMAL, DUP1_CMTPUSBCONNECTION_SENDEVENTL, "Sending the event" );
     	        BufferEventDataL(aEvent);
         	    SendEventDataL(); 	
             	}
@@ -237,13 +234,13 @@ void CMTPUsbConnection::SendEventL(const TMTPTypeEvent& aEvent)
             if (iLdd.SignalRemoteWakeup() == KErrNone)
                 {
                 // Remote wakeup is enabled, buffer the event data.
-                __FLOG(_L8("Buffer event data and signal remote wakeup"));
+                OstTrace0( TRACE_NORMAL, DUP2_CMTPUSBCONNECTION_SENDEVENTL, "Buffer event data and signal remote wakeup" );
                 BufferEventDataL(aEvent);
                 }
             else
                 {
                 // Remote wakeup is not enabled, drop the event.    
-                __FLOG(_L8("Dropping the event")); 
+                OstTrace0( TRACE_NORMAL, DUP3_CMTPUSBCONNECTION_SENDEVENTL, "Dropping the event" );
                 BoundProtocolLayer().SendEventCompleteL(KErrNone, aEvent);
                 }
             
@@ -255,30 +252,31 @@ void CMTPUsbConnection::SendEventL(const TMTPTypeEvent& aEvent)
                 
         case ESuspendedEventsPending:
             // Drop the event.    
-            __FLOG(_L8("Dropping the event")); 
+            OstTrace0( TRACE_NORMAL, DUP4_CMTPUSBCONNECTION_SENDEVENTL, "Dropping the event" );
             BoundProtocolLayer().SendEventCompleteL(KErrNone, aEvent);
             break; 
               
         default:
-            __FLOG(_L8("Invalid suspend state"));
+            OstTraceDef1(OST_TRACE_CATEGORY_PRODUCTION, TRACE_FATAL, DUP5_CMTPUSBCONNECTION_SENDEVENTL, "Invalid suspend state %d", SuspendState() );
             Panic(EMTPUsbBadState);
             break;
             }
         break;
                 
     default:
-        __FLOG(_L8("Invalid connection state"));
+        OstTraceDef1(OST_TRACE_CATEGORY_PRODUCTION, TRACE_FATAL, DUP6_CMTPUSBCONNECTION_SENDEVENTL, "Invalid connection state %d", ConnectionState() );
         Panic(EMTPUsbBadState);
         break;
         }
-    
-    __FLOG(_L8("SendEventL - Exit"));
+
+    OstTraceFunctionExit0( CMTPUSBCONNECTION_SENDEVENTL_EXIT );
     }
     
 void CMTPUsbConnection::SendResponseL(const TMTPTypeResponse& aResponse, const TMTPTypeRequest& aRequest)
     {
-    __FLOG(_L8("SendResponseL - Entry"));
-    __FLOG_VA((_L8("DeviceState: 0x%x TransactionState: 0x%x Connection: 0x%x"), iDeviceStatusCode, iBulkTransactionState, ConnectionState()));
+    OstTraceFunctionEntry0( CMTPUSBCONNECTION_SENDRESPONSEL_ENTRY );
+    OstTraceExt3( TRACE_NORMAL, CMTPUSBCONNECTION_SENDRESPONSEL, 
+            "DeviceState: 0x%x TransactionState: 0x%x Connection: 0x%x", (TUint32)iDeviceStatusCode, iBulkTransactionState, ConnectionState() );
     
     // Update the transaction state.
 	SetBulkTransactionState(EResponsePhase);
@@ -286,18 +284,21 @@ void CMTPUsbConnection::SendResponseL(const TMTPTypeResponse& aResponse, const T
     	{  	      
    		TUint16 opCode(aRequest.Uint16(TMTPTypeRequest::ERequestOperationCode));
    		TUint16 rspCode(aResponse.Uint16(TMTPTypeResponse::EResponseCode));
-   		__FLOG_VA((_L8("ResponseCode = 0x%04X, Operation Code = 0x%04X"), rspCode, opCode));
-    
+   		OstTraceExt2( TRACE_NORMAL, DUP1_CMTPUSBCONNECTION_SENDRESPONSEL, 
+   		        "ResponseCode = 0x%04X, Operation Code = 0x%04X", rspCode, opCode );
+
    		if ((opCode == EMTPOpCodeOpenSession) && (rspCode == EMTPRespCodeOK))
         	{        
    	    	// An session has been opened. Record the active SessionID.
        		iMTPSessionId = aRequest.Uint32(TMTPTypeRequest::ERequestParameter1);
-       		__FLOG_VA((_L8("Processing OpenSession response, SessionID = %d"), iMTPSessionId));
+       		OstTrace1( TRACE_NORMAL, DUP2_CMTPUSBCONNECTION_SENDRESPONSEL, 
+       		        "Processing OpenSession response, SessionID = %d", iMTPSessionId );
        		}
    		else if (((opCode == EMTPOpCodeCloseSession) || (opCode == EMTPOpCodeResetDevice))&& (rspCode == EMTPRespCodeOK))
         	{
    	    	// An session has been closed. Clear the active SessionID.        
-       		__FLOG_VA((_L8("Processing CloseSession or ResetDevice response, SessionID = %d"), iMTPSessionId));
+            OstTrace1( TRACE_NORMAL, DUP3_CMTPUSBCONNECTION_SENDRESPONSEL, 
+                    "Processing CloseSession or ResetDevice response, SessionID = %d", iMTPSessionId );
        		iMTPSessionId = KMTPSessionNone;
        		}
 
@@ -318,23 +319,24 @@ void CMTPUsbConnection::SendResponseL(const TMTPTypeResponse& aResponse, const T
    		iUsbBulkContainer->SetUint32L(CMTPUsbContainer::ETransactionID, aRequest.Uint32(TMTPTypeRequest::ERequestTransactionID));
 
     	// Initiate the bulk data send sequence.
-   		__FLOG_VA((_L8("Sending response 0x%04X (%d bytes)"), iUsbBulkContainer->Uint16L(CMTPUsbContainer::ECode), iUsbBulkContainer->Uint32L(CMTPUsbContainer::EContainerLength)));
+   		OstTraceExt2( TRACE_NORMAL, DUP4_CMTPUSBCONNECTION_SENDRESPONSEL, 
+   		        "Sending response 0x%04X (%d bytes)", (TUint32)iUsbBulkContainer->Uint16L(CMTPUsbContainer::ECode), iUsbBulkContainer->Uint32L(CMTPUsbContainer::EContainerLength));
    		static_cast<CMTPUsbEpBulkIn*>(iEndpoints[EMTPUsbEpBulkIn])->SendBulkDataL(*iUsbBulkContainer);
     	}
     else
     	{
     	BoundProtocolLayer().SendResponseCompleteL(KErrNone, aResponse, aRequest);
     	}
-    
-    __FLOG(_L8("SendResponseL - Exit"));
+
+    OstTraceFunctionExit0( CMTPUSBCONNECTION_SENDRESPONSEL_EXIT );
     } 
     
 void CMTPUsbConnection::TransactionCompleteL(const TMTPTypeRequest& /*aRequest*/)
     {
-    __FLOG(_L8("TransactionCompleteL - Entry"));
+    OstTraceFunctionEntry0( CMTPUSBCONNECTION_TRANSACTIONCOMPLETEL_ENTRY );
+    OstTraceExt2( TRACE_NORMAL, CMTPUSBCONNECTION_TRANSACTIONCOMPLETEL, 
+            "DeviceState: 0x%x TransactionState: 0x%x", iDeviceStatusCode, iBulkTransactionState );
    
-   	__FLOG_VA((_L8("DeviceState: 0x%x TransactionState: 0x%x"), iDeviceStatusCode, iBulkTransactionState));
-   	
    	if (iBulkTransactionState != ERequestPhase)
    	    {
         // Update the transaction state.
@@ -355,16 +357,16 @@ void CMTPUsbConnection::TransactionCompleteL(const TMTPTypeRequest& /*aRequest*/
             StartConnectionL();
             }
    	    }
-    
-    __FLOG(_L8("TransactionCompleteL - Exit"));
+
+    OstTraceFunctionExit0( CMTPUSBCONNECTION_TRANSACTIONCOMPLETEL_EXIT );
     } 
 
 void CMTPUsbConnection::Unbind(MMTPConnectionProtocol& /*aProtocol*/)
     {
-    __FLOG(_L8("Unbind - Entry"));
+    OstTraceFunctionEntry0( CMTPUSBCONNECTION_UNBIND_ENTRY );
     __ASSERT_DEBUG(iProtocolLayer, Panic(EMTPUsbBadState));
     iProtocolLayer = NULL;
-    __FLOG(_L8("Unbind - Exit"));
+    OstTraceFunctionExit0( CMTPUSBCONNECTION_UNBIND_EXIT );
     } 
     
 TAny* CMTPUsbConnection::GetExtendedInterface(TUid /*aInterfaceUid*/)
@@ -379,12 +381,13 @@ TUint CMTPUsbConnection::GetImplementationUid()
 
 void CMTPUsbConnection::ReceiveBulkDataCompleteL(TInt aError, MMTPType& /*aData*/)
     {
-    __FLOG(_L8("ReceiveBulkDataCompleteL - Entry"));  
+    OstTraceFunctionEntry0( CMTPUSBCONNECTION_RECEIVEBULKDATACOMPLETEL_ENTRY );
     if (!BulkRequestErrorHandled(aError))
         { 
         TUint type(iUsbBulkContainer->Uint16L(CMTPUsbContainer::EContainerType));        
-	    __FLOG_VA((_L8("Received container type 0x%04X"), type));
-	    
+	    OstTrace1( TRACE_NORMAL, CMTPUSBCONNECTION_RECEIVEBULKDATACOMPLETEL, 
+	            "Received container type 0x%04X", type );
+
 	    // The proper behaviour at this point is to stall the end points
 	    // but alas Microsoft does not honor this.
 	    // The solution is to store the error code, consume all the data
@@ -397,7 +400,8 @@ void CMTPUsbConnection::ReceiveBulkDataCompleteL(TInt aError, MMTPType& /*aData*
        		&& iDeviceStatusCode != EMTPUsbDeviceStatusTransactionCancelled // we haven't been cancelled by the initiator
             )
        		{
-       		__FLOG_VA((_L8("ReceiveBulkDataCompleteL - error: %d"), aError));
+       		OstTrace1( TRACE_ERROR, DUP1_CMTPUSBCONNECTION_RECEIVEBULKDATACOMPLETEL, 
+       		        "ReceiveBulkDataCompleteL - error: %d", aError );
        		iXferError = aError;
        		
        		// Update the transaction state.
@@ -434,7 +438,8 @@ void CMTPUsbConnection::ReceiveBulkDataCompleteL(TInt aError, MMTPType& /*aData*
         	case EMTPUsbContainerTypeEventBlock:
         	default:
             	// Invalid container received, shutdown the bulk data pipe.
-            	__FLOG_VA((_L8("Invalid container type = 0x%04X"), type));
+            	OstTrace1( TRACE_ERROR, DUP2_CMTPUSBCONNECTION_RECEIVEBULKDATACOMPLETEL, 
+            	        "Invalid container type = 0x%04X", type );
             	CloseConnection();
             	}
 	        // Reset the bulk container.
@@ -452,13 +457,13 @@ void CMTPUsbConnection::ReceiveBulkDataCompleteL(TInt aError, MMTPType& /*aData*
 			isCommandIgnored = false;
 	    	}         
         }
-        
-    __FLOG(_L8("ReceiveBulkDataCompleteL - Exit"));
+
+    OstTraceFunctionExit0( CMTPUSBCONNECTION_RECEIVEBULKDATACOMPLETEL_EXIT );
     }
     
 void CMTPUsbConnection::ReceiveControlRequestDataCompleteL(TInt aError, MMTPType& /*aData*/)
     {
-    __FLOG(_L8("ReceiveControlRequestDataCompleteL - Entry"));
+    OstTraceFunctionEntry0( CMTPUSBCONNECTION_RECEIVECONTROLREQUESTDATACOMPLETEL_ENTRY );
     if (!ControlRequestErrorHandled(aError))
         {
         // Complete the control request sequence.
@@ -467,17 +472,24 @@ void CMTPUsbConnection::ReceiveControlRequestDataCompleteL(TInt aError, MMTPType
         if (iUsbControlRequestSetup.Uint8(TMTPUsbControlRequestSetup::EbRequest) == EMTPUsbControlRequestCancel)
             {
             // Cancel data received.
-            __FLOG(_L8("Cancel request data received."));
-    
+            OstTrace0( TRACE_NORMAL, CMTPUSBCONNECTION_RECEIVECONTROLREQUESTDATACOMPLETEL, "Cancel request data received." );
+
             // Setup the event dataset.
-            __FLOG_VA((_L8("Cancellation Code = 0x%04X"), iUsbControlRequestCancelData.Uint16(TMTPUsbControlRequestCancelData::ECancellationCode)));
-            __FLOG_VA((_L8("Transaction ID = 0x%08X"), iUsbControlRequestCancelData.Uint32(TMTPUsbControlRequestCancelData::ETransactionID)));
+                        OstTrace1( TRACE_NORMAL, DUP1_CMTPUSBCONNECTION_RECEIVECONTROLREQUESTDATACOMPLETEL, 
+                    "Cancellation Code = 0x%04X", iUsbControlRequestCancelData.Uint16(TMTPUsbControlRequestCancelData::ECancellationCode));
+            OstTrace1( TRACE_NORMAL, DUP2_CMTPUSBCONNECTION_RECEIVECONTROLREQUESTDATACOMPLETEL, 
+                    "Transaction ID = 0x%08X", iUsbControlRequestCancelData.Uint32(TMTPUsbControlRequestCancelData::ETransactionID));
   
 			#ifdef _DEBUG            
             // print log about the cacel event
-            RDebug::Print(_L("cancel event received!!!!!!!!!!!!!!!!!Transaction phase is %d ----------------\n"), BoundProtocolLayer().TransactionPhaseL(iMTPSessionId));
-            RDebug::Print(_L("The Transaction ID want to canceled is %d -------------"), iUsbControlRequestCancelData.Uint32(TMTPUsbControlRequestCancelData::ETransactionID));
-            RDebug::Print(_L("Current Transaction ID is %d ----------------"),iMTPRequest.Uint32(TMTPTypeRequest::ERequestTransactionID));
+            OstTrace1( TRACE_NORMAL, DUP3_CMTPUSBCONNECTION_RECEIVECONTROLREQUESTDATACOMPLETEL, 
+                    "cancel event received!!!!!!!!!!!!!!!!!Transaction phase is %d ----------------", 
+                    BoundProtocolLayer().TransactionPhaseL(iMTPSessionId));
+            OstTrace1( TRACE_NORMAL, DUP4_CMTPUSBCONNECTION_RECEIVECONTROLREQUESTDATACOMPLETEL, 
+                    "The Transaction ID want to canceled is %d -------------", 
+                    iUsbControlRequestCancelData.Uint32(TMTPUsbControlRequestCancelData::ETransactionID));
+            OstTrace1( TRACE_NORMAL, DUP5_CMTPUSBCONNECTION_RECEIVECONTROLREQUESTDATACOMPLETEL, 
+                    "Current Transaction ID is %d ----------------", iMTPRequest.Uint32(TMTPTypeRequest::ERequestTransactionID));
 			#endif
             
             isResponseTransactionCancelledNeeded = true;
@@ -505,15 +517,17 @@ void CMTPUsbConnection::ReceiveControlRequestDataCompleteL(TInt aError, MMTPType
             	}
             else if (transPhase == ECompletingPhase)
                 {
-                __FLOG(_L8("cancel event received at completing phase, flush rx data"));
+                OstTrace0( TRACE_NORMAL, DUP6_CMTPUSBCONNECTION_RECEIVECONTROLREQUESTDATACOMPLETEL, 
+                        "cancel event received at completing phase, flush rx data" );
 
                 //flush rx data.
                 iEndpoints[EMTPUsbEpBulkOut]->FlushRxDataL();
                 }
             else
             	{
-                __FLOG(_L8("cancel event received at idle phase, stop data EPs, flush rx data, restart data eps"));
-                
+                OstTrace0( TRACE_NORMAL, DUP7_CMTPUSBCONNECTION_RECEIVECONTROLREQUESTDATACOMPLETEL, 
+                        "cancel event received at idle phase, stop data EPs, flush rx data, restart data eps" );
+
             	// stop data endpoint
             	DataEndpointsStop();
       
@@ -530,17 +544,19 @@ void CMTPUsbConnection::ReceiveControlRequestDataCompleteL(TInt aError, MMTPType
         // Initiate the next control request sequence.     
         InitiateControlRequestSequenceL();
         }
-    __FLOG(_L8("ReceiveControlRequestDataCompleteL - Exit"));
+    OstTraceFunctionExit0( CMTPUSBCONNECTION_RECEIVECONTROLREQUESTDATACOMPLETEL_EXIT );
     }
    
 void CMTPUsbConnection::ReceiveControlRequestSetupCompleteL(TInt aError, MMTPType& aData)
     {
-    __FLOG(_L8("ReceiveControlRequestSetupCompleteL - Entry"));
+    OstTraceFunctionEntry0( CMTPUSBCONNECTION_RECEIVECONTROLREQUESTSETUPCOMPLETEL_ENTRY );
     if (!ControlRequestErrorHandled(aError))
         {
         TMTPUsbControlRequestSetup& data(static_cast<TMTPUsbControlRequestSetup&> (aData));
-        __FLOG_VA((_L8("bRequest = 0x%X"), data.Uint8(TMTPUsbControlRequestSetup::EbRequest)));
-        __FLOG_VA((_L8("wLength = %d bytes"), data.Uint16(TMTPUsbControlRequestSetup::EwLength)));
+        OstTrace1( TRACE_NORMAL, CMTPUSBCONNECTION_RECEIVECONTROLREQUESTSETUPCOMPLETEL, 
+                "bRequest = 0x%X", data.Uint8(TMTPUsbControlRequestSetup::EbRequest) );
+        OstTrace1( TRACE_NORMAL, DUP1_CMTPUSBCONNECTION_RECEIVECONTROLREQUESTSETUPCOMPLETEL, 
+                "wLength = %d bytes", data.Uint16(TMTPUsbControlRequestSetup::EwLength));
         
         switch (data.Uint8(TMTPUsbControlRequestSetup::EbRequest))
             {
@@ -557,29 +573,28 @@ void CMTPUsbConnection::ReceiveControlRequestSetupCompleteL(TInt aError, MMTPTyp
             break;
   
         default:
-            __FLOG(_L8("Unrecognised class specific request received"));
+            OstTrace0( TRACE_ERROR, DUP2_CMTPUSBCONNECTION_RECEIVECONTROLREQUESTSETUPCOMPLETEL, 
+                    "Unrecognised class specific request received" );
             CloseConnection();
             break;
             }
         }
-    __FLOG(_L8("ReceiveControlRequestSetupCompleteL - Exit"));
+    OstTraceFunctionExit0( CMTPUSBCONNECTION_RECEIVECONTROLREQUESTSETUPCOMPLETEL_EXIT );
     }
     
 void CMTPUsbConnection::SendBulkDataCompleteL(TInt aError, const MMTPType& /*aData*/)
     {
-    __FLOG(_L8("SendBulkDataCompleteL - Entry")); 
+    OstTraceFunctionEntry0( CMTPUSBCONNECTION_SENDBULKDATACOMPLETEL_ENTRY );
 
-#ifdef _DEBUG
-    RDebug::Print(_L("\nCMTPUsbConnection::SendBulkDataCompleteL----entry"));
-#endif
     if (!BulkRequestErrorHandled(aError))
         {
         TUint16 containerType(iUsbBulkContainer->Uint16L(CMTPUsbContainer::EContainerType));
 
 #ifdef _DEBUG              
         TUint16 transactionID(iUsbBulkContainer->Uint32L(CMTPUsbContainer::ETransactionID));
-        RDebug::Print(_L("Time Stamp is :%d"), User::TickCount());
-        RDebug::Print(_L("the container Type is 0x%x, the transaction ID is 0x%x\n"), containerType,transactionID);
+        OstTrace1( TRACE_NORMAL, CMTPUSBCONNECTION_SENDBULKDATACOMPLETEL, "Time Stamp is :%d", User::TickCount() );
+        OstTraceExt2( TRACE_NORMAL, DUP1_CMTPUSBCONNECTION_SENDBULKDATACOMPLETEL, 
+                "the container Type is 0x%x, the transaction ID is 0x%x", containerType,transactionID );
 #endif
         
         if (containerType == EMTPUsbContainerTypeResponseBlock)
@@ -600,7 +615,8 @@ void CMTPUsbConnection::SendBulkDataCompleteL(TInt aError, const MMTPType& /*aDa
             }
         else
 	        {
-	        __FLOG(_L8("Invalid container type"));
+	        OstTraceDef1(OST_TRACE_CATEGORY_PRODUCTION, TRACE_FATAL, DUP2_CMTPUSBCONNECTION_SENDBULKDATACOMPLETEL, 
+	                "Invalid container type %d", containerType );
             Panic(EMTPUsbBadState);
 	        }
              
@@ -610,12 +626,12 @@ void CMTPUsbConnection::SendBulkDataCompleteL(TInt aError, const MMTPType& /*aDa
     		iUsbBulkContainer->SetPayloadL(NULL);
             }		     
         }
-    __FLOG(_L8("SendBulkDataCompleteL - Exit"));
+    OstTraceFunctionExit0( CMTPUSBCONNECTION_SENDBULKDATACOMPLETEL_EXIT );
     }
     
 void CMTPUsbConnection::SendControlRequestDataCompleteL(TInt aError, const MMTPType& /*aData*/)
     {
-    __FLOG(_L8("SendControlRequestDataCompleteL - Entry"));
+    OstTraceFunctionEntry0( CMTPUSBCONNECTION_SENDCONTROLREQUESTDATACOMPLETEL_ENTRY );
     if (!ControlRequestErrorHandled(aError))
         {
         // Complete the control request sequence.
@@ -623,25 +639,25 @@ void CMTPUsbConnection::SendControlRequestDataCompleteL(TInt aError, const MMTPT
             {
             // Cancel request processed, clear the device status.
             SetDeviceStatus(EMTPUsbDeviceStatusOK);
-            __FLOG(_L8("Cancel Request processed"));
+            OstTrace0( TRACE_NORMAL, CMTPUSBCONNECTION_SENDCONTROLREQUESTDATACOMPLETEL, "Cancel Request processed" );
             }
         
         // Initiate the next control request sequence. 
         InitiateControlRequestSequenceL();            
         }
-    __FLOG(_L8("SendControlRequestDataCompleteL - Exit"));
+    OstTraceFunctionExit0( CMTPUSBCONNECTION_SENDCONTROLREQUESTDATACOMPLETEL_EXIT );
     }
 
 void CMTPUsbConnection::SendInterruptDataCompleteL(TInt aError, const MMTPType& /*aData*/)
     {
-    __FLOG(_L8("SendInterruptDataCompleteL - Entry"));
+    OstTraceFunctionEntry0( CMTPUSBCONNECTION_SENDINTERRUPTDATACOMPLETEL_ENTRY );
     iEventPending = EFalse;	
     
     if ( NULL != iProtocolLayer)
         {
     BoundProtocolLayer().SendEventCompleteL(aError, iMTPEvent);
         }
-    __FLOG(_L8("SendInterruptDataCompleteL - Exit"));
+    OstTraceFunctionExit0( CMTPUSBCONNECTION_SENDINTERRUPTDATACOMPLETEL_EXIT );
     }    
 
 /**
@@ -672,20 +688,23 @@ endpoints required by the USB MTP device class.
 */
 const TUsbcEndpointCaps& CMTPUsbConnection::EndpointCapsL(TUint aId)
     {
-    __FLOG(_L8("EndpointCapsL - Entry"));
+    OstTraceFunctionEntry0( CMTPUSBCONNECTION_ENDPOINTCAPSL_ENTRY );
     
     // Verify the the USB device supports the minimum number of endpoints.
     TInt totalEndpoints = iDeviceCaps().iTotalEndpoints;
     
-    __FLOG_VA((_L8("% d endpoints available, %d required"), totalEndpoints, KMTPUsbRequiredNumEndpoints));
+    OstTraceExt2( TRACE_NORMAL, CMTPUSBCONNECTION_ENDPOINTCAPSL, 
+            "% d endpoints available, %d required", totalEndpoints, KMTPUsbRequiredNumEndpoints );
     if (totalEndpoints < KMTPUsbRequiredNumEndpoints)
         {
+        OstTrace0( TRACE_ERROR, DUP1_CMTPUSBCONNECTION_ENDPOINTCAPSL, 
+                "Count of endpoints smaller than the minimum number of endpoints required to support the USM MTP device" );
         User::Leave(KErrOverflow);            
         }      
         
     TUint   flags(EndpointDirectionAndType(aId));
-    __FLOG_VA((_L8("Required EP%d iTypesAndDir = 0x%X"), aId, flags));
-	
+    OstTraceExt2( TRACE_NORMAL, DUP2_CMTPUSBCONNECTION_ENDPOINTCAPSL, "Required EP%d iTypesAndDir = 0x%X", aId, flags );
+
     TBool   found(EFalse);
     for (TUint i(0); ((!found) && (i < totalEndpoints)); i++)
         {
@@ -695,19 +714,23 @@ const TUsbcEndpointCaps& CMTPUsbConnection::EndpointCapsL(TUint aId)
             {
             found           = ETrue;
             iEndpointCaps   = caps;
-			
-            __FLOG_VA((_L8("Matched EP%d iTypesAndDir = 0x%X"), i, caps.iTypesAndDir));
-            __FLOG_VA((_L8("Matched EP%d MaxPacketSize = %d"), i, caps.MaxPacketSize()));
-            __FLOG_VA((_L8("Matched EP%d MinPacketSize = %d"), i, caps.MinPacketSize()));
+
+            OstTraceExt2( TRACE_NORMAL, DUP3_CMTPUSBCONNECTION_ENDPOINTCAPSL, 
+                    "Matched EP%d iTypesAndDir = 0x%X", i, caps.iTypesAndDir );
+            OstTraceExt2( TRACE_NORMAL, DUP4_CMTPUSBCONNECTION_ENDPOINTCAPSL, 
+                    "Matched EP%d MaxPacketSize = %d", i, caps.MaxPacketSize() );
+            OstTraceExt2( TRACE_NORMAL, DUP5_CMTPUSBCONNECTION_ENDPOINTCAPSL, 
+                    "Matched EP%d MinPacketSize = %d", i, caps.MinPacketSize() );
             }
         }
         
     if (!found)    
         {
+        OstTrace1( TRACE_ERROR, DUP6_CMTPUSBCONNECTION_ENDPOINTCAPSL, "Can't find endpoint capabilities for flags %d", flags );
         User::Leave(KErrHardwareNotAvailable);
         }
-                
-    __FLOG(_L8("EndpointCapsL - Exit"));
+
+    OstTraceFunctionExit0( CMTPUSBCONNECTION_ENDPOINTCAPSL_EXIT );
     return iEndpointCaps; 
     }   
 
@@ -752,19 +775,20 @@ RDevUsbcClient& CMTPUsbConnection::Ldd()
     
 void CMTPUsbConnection::DoCancel()
     {
-    __FLOG(_L8("DoCancel - Entry"));    
+    OstTraceFunctionEntry0( CMTPUSBCONNECTION_DOCANCEL_ENTRY );
     iLdd.AlternateDeviceStatusNotifyCancel();
-    __FLOG(_L8("DoCancel - Exit"));  
+    OstTraceFunctionExit0( CMTPUSBCONNECTION_DOCANCEL_EXIT );
     }
     
-#ifdef __FLOG_ACTIVE
+#ifdef OST_TRACE_COMPILER_IN_USE
 TInt CMTPUsbConnection::RunError(TInt aError)
 #else
 TInt CMTPUsbConnection::RunError(TInt /*aError*/)
 #endif
     {
-    __FLOG(_L8("RunError - Entry"));
-    __FLOG_VA((_L8("Error = %d"), aError));
+    OstTraceFunctionEntry0( CMTPUSBCONNECTION_RUNERROR_ENTRY );
+    OstTraceDef1( OST_TRACE_CATEGORY_PRODUCTION, TRACE_IMPORTANT, 
+            CMTPUSBCONNECTION_RUNERROR, "error code %d", aError);
     
     // Cancel all the outstanding requests.
     Cancel();   
@@ -777,19 +801,20 @@ TInt CMTPUsbConnection::RunError(TInt /*aError*/)
     
     // Issue the notify request again.
     IssueAlternateDeviceStatusNotifyRequest();
-    
-    __FLOG(_L8("RunError - Exit"));
+
+    OstTraceFunctionExit0( CMTPUSBCONNECTION_RUNERROR_EXIT );
     return KErrNone;
     }
     
 void CMTPUsbConnection::RunL()
     {
-    __FLOG(_L8("RunL - Entry"));
+    OstTraceFunctionEntry0( CMTPUSBCONNECTION_RUNL_ENTRY );
     
     if (!(iControllerStateCurrent & KUsbAlternateSetting))
         {
         // Alternative interface setting has not changed.
-        __FLOG_VA((_L8("Alternate device state changed to %d"), iControllerStateCurrent));
+        OstTrace1( TRACE_NORMAL, CMTPUSBCONNECTION_RUNL, 
+                "Alternate device state changed to %d", iControllerStateCurrent );
         
         if ((SuspendState() & ESuspended) &&
         	(iControllerStateCurrent != EUsbcDeviceStateSuspended))
@@ -822,7 +847,7 @@ void CMTPUsbConnection::RunL()
             
             case EUsbcDeviceStateConfigured:
                 {
-				__FLOG(_L8("Device state : EUsbcDeviceStateConfigured"));
+				OstTrace0( TRACE_NORMAL, DUP1_CMTPUSBCONNECTION_RUNL, "Device state : EUsbcDeviceStateConfigured" );
 
                 if (iControllerStatePrevious == EUsbcDeviceStateSuspended)
                     {
@@ -843,13 +868,13 @@ void CMTPUsbConnection::RunL()
                         if (iRemoteWakeup)
                             {
                             // Send the event data.
-                            __FLOG(_L8("Sending buffered event data"));
+                            OstTrace0( TRACE_NORMAL, DUP2_CMTPUSBCONNECTION_RUNL, "Sending buffered event data" );
                             SendEventDataL();
                             }
                         else
                             {
                             // Send PTP UnreportedStatus event
-                            __FLOG(_L8("Sending PTP UnreportedStatus event"));
+                            OstTrace0( TRACE_NORMAL, DUP3_CMTPUSBCONNECTION_RUNL, "Sending PTP UnreportedStatus event" );
                             SendUnreportedStatusEventL();
                             }
                         } 
@@ -872,7 +897,8 @@ void CMTPUsbConnection::RunL()
                 }
                 
             default:
-                __FLOG(_L8("Invalid alternate device state"));
+                OstTraceDef1(OST_TRACE_CATEGORY_PRODUCTION, TRACE_FATAL, DUP4_CMTPUSBCONNECTION_RUNL, 
+                        "Invalid alternate device state %d", iControllerStateCurrent );
                 Panic(EMTPUsbBadState);
                 break;
             }
@@ -880,15 +906,16 @@ void CMTPUsbConnection::RunL()
     else
         {
         // Alternate interface setting has changed.
-        __FLOG_VA((_L8("Alternate interface setting changed from %d to %d"), iControllerStatePrevious, iControllerStateCurrent));
+        OstTraceExt2( TRACE_NORMAL, DUP5_CMTPUSBCONNECTION_RUNL, 
+                "Alternate interface setting changed from %d to %d", iControllerStatePrevious, iControllerStateCurrent );
         }
         
         
     // Record the controller state and issue the next notification request.
     iControllerStatePrevious = iControllerStateCurrent;
     IssueAlternateDeviceStatusNotifyRequest();
-    
-    __FLOG(_L8("RunL - Exit"));
+
+    OstTraceFunctionExit0( CMTPUSBCONNECTION_RUNL_EXIT );
     }
     
 /**
@@ -911,8 +938,7 @@ Second phase constructor.
 */
 void CMTPUsbConnection::ConstructL()
     {
-    __FLOG_OPEN(KMTPSubsystem, KComponent);
-    __FLOG(_L8("ConstructL - Entry"));
+    OstTraceFunctionEntry0( CMTPUSBCONNECTION_CONSTRUCTL_ENTRY );
     
     // Start the USB device.
     StartUsbL();
@@ -932,14 +958,16 @@ void CMTPUsbConnection::ConstructL()
     
     // Fetch the remote wakeup flag.
     TUsbDeviceCaps dCaps;
-    User::LeaveIfError(iLdd.DeviceCaps(dCaps));
+    LEAVEIFERROR(iLdd.DeviceCaps(dCaps),
+            OstTrace0( TRACE_ERROR, DUP1_CMTPUSBCONNECTION_CONSTRUCTL, "Retrieves the capabilities of the USB device failed!" ));
+            
     iRemoteWakeup = dCaps().iRemoteWakeup;
-    __FLOG_VA((_L8("iRemote = %d"), iRemoteWakeup));
-    
+    OstTrace1( TRACE_NORMAL, CMTPUSBCONNECTION_CONSTRUCTL, "iRemote = %d", iRemoteWakeup );
+
     // Start monitoring the USB device controller state.
     IssueAlternateDeviceStatusNotifyRequest();
-    
-    __FLOG(_L8("ConstructL - Exit"));
+
+    OstTraceFunctionExit0( CMTPUSBCONNECTION_CONSTRUCTL_EXIT );
     }
 
 /**
@@ -948,7 +976,7 @@ interface setting changes.
 */
 void CMTPUsbConnection::IssueAlternateDeviceStatusNotifyRequest()
     {
-    __FLOG(_L8("IssueAlternateDeviceStatusNotifyRequest - Entry"));
+    OstTraceFunctionEntry0( CMTPUSBCONNECTION_ISSUEALTERNATEDEVICESTATUSNOTIFYREQUEST_ENTRY );
     
     if (!IsActive())
         {
@@ -956,7 +984,7 @@ void CMTPUsbConnection::IssueAlternateDeviceStatusNotifyRequest()
         }
 
     SetActive();
-    __FLOG(_L8("IssueAlternateDeviceStatusNotifyRequest - Exit"));
+    OstTraceFunctionExit0( CMTPUSBCONNECTION_ISSUEALTERNATEDEVICESTATUSNOTIFYREQUEST_EXIT );
     }
     
 /**
@@ -965,7 +993,7 @@ Populates the asynchronous event interrupt dataset buffer.
 */
 void CMTPUsbConnection::BufferEventDataL(const TMTPTypeEvent& aEvent)
     {
-    __FLOG(_L8("BufferEventData - Entry")); 
+    OstTraceFunctionEntry0( CMTPUSBCONNECTION_BUFFEREVENTDATAL_ENTRY );
     /* 
     Setup the parameter block payload dataset. Note that since this is a 
     variable length dataset, it must first be reset.
@@ -979,7 +1007,7 @@ void CMTPUsbConnection::BufferEventDataL(const TMTPTypeEvent& aEvent)
     iUsbEventContainer->SetUint16L(CMTPUsbContainer::EContainerType, EMTPUsbContainerTypeEventBlock);
     iUsbEventContainer->SetUint16L(CMTPUsbContainer::ECode, aEvent.Uint16(TMTPTypeEvent::EEventCode));
     iUsbEventContainer->SetUint32L(CMTPUsbContainer::ETransactionID, aEvent.Uint32(TMTPTypeEvent::EEventTransactionID));
-    __FLOG(_L8("BufferEventData - Exit"));
+    OstTraceFunctionExit0( CMTPUSBCONNECTION_BUFFEREVENTDATAL_EXIT );
     }
     
 /**
@@ -988,11 +1016,14 @@ Initiates an interrupt data send sequence.
 */
 void CMTPUsbConnection::SendEventDataL()
     {
-    __FLOG(_L8("SendEventData - Entry"));
-    __FLOG_VA((_L8("Sending event 0x%4X (%d bytes)"), iUsbEventContainer->Uint16L(CMTPUsbContainer::ECode), iUsbEventContainer->Uint32L(CMTPUsbContainer::EContainerLength)));
+    OstTraceFunctionEntry0( CMTPUSBCONNECTION_SENDEVENTDATAL_ENTRY );
+    OstTraceExt2( TRACE_NORMAL, CMTPUSBCONNECTION_SENDEVENTDATAL, 
+            "Sending event 0x%4X (%d bytes)", (TUint32)iUsbEventContainer->Uint16L(CMTPUsbContainer::ECode), 
+            iUsbEventContainer->Uint32L(CMTPUsbContainer::EContainerLength) );
+    
     static_cast<CMTPUsbEpInterruptIn*>(iEndpoints[EMTPUsbEpInterrupt])->SendInterruptDataL(*iUsbEventContainer);
     iEventPending = ETrue;
-    __FLOG(_L8("SendEventData - Exit"));
+    OstTraceFunctionExit0( CMTPUSBCONNECTION_SENDEVENTDATAL_EXIT );
     }
     
 /**
@@ -1001,7 +1032,7 @@ Issues a PTP UnreportedStatus event.
 */
 void CMTPUsbConnection::SendUnreportedStatusEventL()
     {
-    __FLOG(_L8("SendUnreportedStatusEventL - Entry"));
+    OstTraceFunctionEntry0( CMTPUSBCONNECTION_SENDUNREPORTEDSTATUSEVENTL_ENTRY );
         
     // Construct an UnreportedStatus event
     TMTPTypeEvent mtpEvent;
@@ -1009,8 +1040,8 @@ void CMTPUsbConnection::SendUnreportedStatusEventL()
     mtpEvent.SetUint32(TMTPTypeEvent::EEventSessionID, KMTPSessionNone);
     mtpEvent.SetUint32(TMTPTypeEvent::EEventTransactionID, KMTPTransactionIdNone);
     SendEventL(mtpEvent);
-    
-    __FLOG(_L8("SendUnreportedStatusEventL - Exit"));
+
+    OstTraceFunctionExit0( CMTPUSBCONNECTION_SENDUNREPORTEDSTATUSEVENTL_EXIT );
     }
     
 /**
@@ -1019,7 +1050,7 @@ Issues a request to the bulk-out endpoint to receive a command block dataset.
 */
 void CMTPUsbConnection::InitiateBulkRequestSequenceL()
     {
-    __FLOG(_L8("InitiateBulkRequestSequenceL - Entry"));
+    OstTraceFunctionEntry0( CMTPUSBCONNECTION_INITIATEBULKREQUESTSEQUENCEL_ENTRY );
     CMTPUsbEpBulkOut& bulkOut(*static_cast<CMTPUsbEpBulkOut*>(iEndpoints[EMTPUsbEpBulkOut]));
 
         // Update the transaction state.
@@ -1031,8 +1062,8 @@ void CMTPUsbConnection::InitiateBulkRequestSequenceL()
         
         // Initiate the next request phase bulk data receive sequence.
         bulkOut.ReceiveBulkDataL(*iUsbBulkContainer);
-        
-    __FLOG(_L8("InitiateBulkRequestSequenceL - Exit"));
+
+    OstTraceFunctionExit0( CMTPUSBCONNECTION_INITIATEBULKREQUESTSEQUENCEL_EXIT );
     }
 
 /**
@@ -1041,14 +1072,14 @@ Issues a request to the control endpoint to receive a request setup dataset.
 */
 void CMTPUsbConnection::InitiateControlRequestSequenceL()
     {
-    __FLOG(_L8("InitiateControlRequestSequenceL - Entry"));
+    OstTraceFunctionEntry0( CMTPUSBCONNECTION_INITIATECONTROLREQUESTSEQUENCEL_ENTRY );
     CMTPUsbEpControl& ctrl(*static_cast<CMTPUsbEpControl*>(iEndpoints[EMTPUsbEpControl]));
     if (!ctrl.Stalled())
         {
 
         ctrl.ReceiveControlRequestSetupL(iUsbControlRequestSetup);
-        }
-    __FLOG(_L8("InitiateControlRequestSequenceL - Exit"));        
+        }     
+    OstTraceFunctionExit0( CMTPUSBCONNECTION_INITIATECONTROLREQUESTSEQUENCEL_EXIT );
     }
 
 /**
@@ -1057,20 +1088,22 @@ connected host on the bulk out data pipe.
 @param aError The error completion status of the bulk data receive request.
 @leave One of the system wide error codes, if a processing failure occurs.
 */         
-#ifdef __FLOG_ACTIVE
+#ifdef OST_TRACE_COMPILER_IN_USE
 void CMTPUsbConnection::ProcessBulkCommandL(TInt aError)
 #else
 void CMTPUsbConnection::ProcessBulkCommandL(TInt /*aError*/)
 #endif
     {
-    __FLOG(_L8("ProcessBulkCommandL - Entry"));
-    __FLOG_VA((_L8("aError = %d"), aError));
+    OstTraceFunctionEntry0( CMTPUSBCONNECTION_PROCESSBULKCOMMANDL_ENTRY );
+    OstTrace1( TRACE_NORMAL, CMTPUSBCONNECTION_PROCESSBULKCOMMANDL, "aError = %d", aError );
+
     if (BulkRequestTransactionStateValid(ERequestPhase))
         {
         // Request block received.
         TUint16 op(iUsbBulkContainer->Uint16L(CMTPUsbContainer::ECode));
-   	    __FLOG_VA((_L8("Command block 0x%04X received"), op));
-        
+   	    OstTrace1( TRACE_NORMAL, DUP1_CMTPUSBCONNECTION_PROCESSBULKCOMMANDL, 
+   	            "Command block 0x%04X received", op );
+
        	// Reset the iMTPRequest.
        	iMTPRequest.Reset();
 
@@ -1081,14 +1114,14 @@ void CMTPUsbConnection::ProcessBulkCommandL(TInt /*aError*/)
        	// Set SessionID.
        	if (op == EMTPOpCodeOpenSession)
            	{
-           	__FLOG(_L8("Processing OpenSession request"));
+           	OstTrace0( TRACE_NORMAL, DUP2_CMTPUSBCONNECTION_PROCESSBULKCOMMANDL, "Processing OpenSession request" );
            	// Force OpenSession requests to be processed outside an active session.
            	// It is a known problem for MTP Protocol, it is a workaround here.
            	iMTPRequest.SetUint32(TMTPTypeRequest::ERequestSessionID, KMTPSessionNone);  
            	}
        	else if (op == EMTPOpCodeCloseSession || op == EMTPOpCodeResetDevice)
            	{
-           	__FLOG(_L8("Processing CloseSession or the ResetDevice request"));
+           	OstTrace0( TRACE_NORMAL, DUP3_CMTPUSBCONNECTION_PROCESSBULKCOMMANDL, "Processing CloseSession or the ResetDevice request" );
            	// Force CloseSession requests to be processed outside an active session. 
            	// ResetDevice currently behaves the same way as CloseSession. 
            	iMTPRequest.SetUint32(TMTPTypeRequest::ERequestSessionID, KMTPSessionNone); 
@@ -1096,14 +1129,15 @@ void CMTPUsbConnection::ProcessBulkCommandL(TInt /*aError*/)
            	}       	
        	else
            	{
-           	__FLOG_VA((_L8("Processing general request on session %d"), iMTPSessionId));
+           	OstTrace1( TRACE_NORMAL, DUP4_CMTPUSBCONNECTION_PROCESSBULKCOMMANDL, "Processing general request on session %d", iMTPSessionId );
            	// Update the request dataset with the single active session's SessionID.
            	iMTPRequest.SetUint32(TMTPTypeRequest::ERequestSessionID, iMTPSessionId);
            	}
        	
 #ifdef _DEBUG
-       	RDebug::Print(_L("The time stamp is: %d"), User::TickCount());
-       	RDebug::Print(_L("New command comes, Operation code is 0x%x, transaction id is %d \n"), op, iUsbBulkContainer->Uint32L(CMTPUsbContainer::ETransactionID));  	
+       	OstTrace1( TRACE_NORMAL, DUP5_CMTPUSBCONNECTION_PROCESSBULKCOMMANDL, "The time stamp is: %d", User::TickCount() );
+       	OstTraceExt2( TRACE_NORMAL, DUP6_CMTPUSBCONNECTION_PROCESSBULKCOMMANDL, 
+       	        "New command comes, Operation code is 0x%x, transaction id is %d", (TUint32)op, iUsbBulkContainer->Uint32L(CMTPUsbContainer::ETransactionID));
 #endif
        	
         TUint  commandTransID(iUsbBulkContainer->Uint32L(CMTPUsbContainer::ETransactionID));
@@ -1119,7 +1153,7 @@ void CMTPUsbConnection::ProcessBulkCommandL(TInt /*aError*/)
         // Notify the protocol layer.
         BoundProtocolLayer().ReceivedRequestL(iMTPRequest);
         }
-    __FLOG(_L8("ProcessBulkCommandL - Exit"));
+    OstTraceFunctionExit0( CMTPUSBCONNECTION_PROCESSBULKCOMMANDL_EXIT );
     }
 
 /**
@@ -1131,7 +1165,7 @@ bulk in data pipe.
 */       
 void CMTPUsbConnection::ProcessBulkDataInL(const TMTPTypeRequest& aRequest, const MMTPType& aData)
     {
-    __FLOG(_L8("ProcessBulkDataInL - Entry"));
+    OstTraceFunctionEntry0( CMTPUSBCONNECTION_PROCESSBULKDATAINL_ENTRY );
     
     // Update the transaction state.
     SetBulkTransactionState(EDataRToIPhase);
@@ -1148,10 +1182,12 @@ void CMTPUsbConnection::ProcessBulkDataInL(const TMTPTypeRequest& aRequest, cons
     iUsbBulkContainer->SetUint32L(CMTPUsbContainer::ETransactionID, aRequest.Uint32(TMTPTypeRequest::ERequestTransactionID));
 
     // Initiate the bulk data send sequence.
-    __FLOG_VA((_L8("Sending %d data bytes"), iUsbBulkContainer->Uint32L(CMTPUsbContainer::EContainerLength)));
+    OstTrace1( TRACE_NORMAL, CMTPUSBCONNECTION_PROCESSBULKDATAINL, 
+            "Sending %d data bytes", iUsbBulkContainer->Uint32L(CMTPUsbContainer::EContainerLength) );
     
 #ifdef _DEBUG
-    RDebug::Print(_L("ProcessBulkDataInL:    iIsCancelReceived = %d, SuspendState() is  %d \n"),iIsCancelReceived,SuspendState());
+    OstTraceExt2( TRACE_NORMAL, DUP1_CMTPUSBCONNECTION_PROCESSBULKDATAINL, 
+            "ProcessBulkDataInL: iIsCancelReceived = %d, SuspendState() is  %d", (TInt32)iIsCancelReceived,SuspendState() );
 #endif
     
     // if the cancel event is received before send data. That is, the phase is before DATA R2I, 
@@ -1180,13 +1216,14 @@ void CMTPUsbConnection::ProcessBulkDataInL(const TMTPTypeRequest& aRequest, cons
     	{
     	
 #ifdef _DEBUG    	
-    	RDebug::Print(_L("the senddata is canceled!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n"));
+    	OstTrace0( TRACE_NORMAL, DUP2_CMTPUSBCONNECTION_PROCESSBULKDATAINL, 
+    	        "the senddata is canceled!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n" );
 #endif    	
     	// by pass the calling to lower level send data
     	SendBulkDataCompleteL(KErrNone, *iUsbBulkContainer);
     	
     	}
-    __FLOG(_L8("ProcessBulkDataInL - Exit"));
+    OstTraceFunctionExit0( CMTPUSBCONNECTION_PROCESSBULKDATAINL_EXIT );
     }
 
 /**
@@ -1197,14 +1234,15 @@ connected host on the bulk out data pipe.
 */       
 void CMTPUsbConnection::ProcessBulkDataOutL(TInt aError)
     {
-    __FLOG(_L8("ProcessBulkDataOutL - Entry"));
+    OstTraceFunctionEntry0( CMTPUSBCONNECTION_PROCESSBULKDATAOUTL_ENTRY );
     if ((BulkRequestTransactionStateValid(EDataIToRPhase)))
         {
         // Data block received, notify the protocol layer.
-        __FLOG_VA((_L8("Data block received (%d bytes)"), iUsbBulkContainer->Uint32L(CMTPUsbContainer::EContainerLength)));
+        OstTrace1( TRACE_NORMAL, CMTPUSBCONNECTION_PROCESSBULKDATAOUTL, 
+                "Data block received (%d bytes)", iUsbBulkContainer->Uint32L(CMTPUsbContainer::EContainerLength) );
         BoundProtocolLayer().ReceiveDataCompleteL(aError, *iUsbBulkContainer->Payload(), iMTPRequest);
         }
-    __FLOG(_L8("ProcessBulkDataOutL - Exit"));
+    OstTraceFunctionExit0( CMTPUSBCONNECTION_PROCESSBULKDATAOUTL_EXIT );
     }
 
 /**
@@ -1214,10 +1252,10 @@ Processes received USB SIC class specific Cancel requests
 */   
 void CMTPUsbConnection::ProcessControlRequestCancelL(const TMTPUsbControlRequestSetup& /*aRequest*/)
     {
-    __FLOG(_L8("ProcessControlRequestCancelL - Entry"));
+    OstTraceFunctionEntry0( CMTPUSBCONNECTION_PROCESSCONTROLREQUESTCANCELL_ENTRY );
     static_cast<CMTPUsbEpControl*>(iEndpoints[EMTPUsbEpControl])->ReceiveControlRequestDataL(iUsbControlRequestCancelData);
-    __FLOG(_L8("Waiting for Cancel Request Data"));
-    __FLOG(_L8("ProcessControlRequestCancelL - Exit"));
+    OstTrace0( TRACE_NORMAL, CMTPUSBCONNECTION_PROCESSCONTROLREQUESTCANCELL, "Waiting for Cancel Request Data" );
+    OstTraceFunctionExit0( CMTPUSBCONNECTION_PROCESSCONTROLREQUESTCANCELL_EXIT );
     }
     
 /**
@@ -1227,7 +1265,7 @@ Processes received USB SIC class specific Device Reset requests
 */ 
 void CMTPUsbConnection::ProcessControlRequestDeviceResetL(const TMTPUsbControlRequestSetup& /*aRequest*/)
     {
-    __FLOG(_L8("ProcessControlRequestDeviceResetL - Entry"));
+    OstTraceFunctionEntry0( CMTPUSBCONNECTION_PROCESSCONTROLREQUESTDEVICERESETL_ENTRY );
     
     // Clear stalled endpoints and re-open connection
     BulkEndpointsStallClearL();
@@ -1250,7 +1288,7 @@ void CMTPUsbConnection::ProcessControlRequestDeviceResetL(const TMTPUsbControlRe
         iIsResetRequestSignaled = ETrue;
         }
 
-    __FLOG(_L8("ProcessControlRequestDeviceResetL - Exit"));
+    OstTraceFunctionExit0( CMTPUSBCONNECTION_PROCESSCONTROLREQUESTDEVICERESETL_EXIT );
     }
     
 /**
@@ -1260,7 +1298,7 @@ Processes received USB SIC class specific Get Device Status requests
 */ 
 void CMTPUsbConnection::ProcessControlRequestDeviceStatusL(const TMTPUsbControlRequestSetup& /*aRequest*/)
     {
-    __FLOG(_L8("ProcessControlRequestDeviceStatusL - Entry"));
+    OstTraceFunctionEntry0( CMTPUSBCONNECTION_PROCESSCONTROLREQUESTDEVICESTATUSL_ENTRY );
     iUsbControlRequestDeviceStatus.Reset();
     
     TUint offset = 0;
@@ -1269,12 +1307,17 @@ void CMTPUsbConnection::ProcessControlRequestDeviceStatusL(const TMTPUsbControlR
         if ( IsEpStalled(i) )
             {
             TInt epSize(0);
-            User::LeaveIfError( iLdd.GetEndpointDescriptorSize(KMTPUsbAlternateInterface, i, epSize) );
+            LEAVEIFERROR( iLdd.GetEndpointDescriptorSize(KMTPUsbAlternateInterface, i, epSize),
+                    OstTrace1( TRACE_ERROR, CMTPUSBCONNECTION_PROCESSCONTROLREQUESTDEVICESTATUSL, 
+                            "Copies the size of the endpoint descriptor failed! error code %d", munged_err));
+                    
             
             RBuf8 epDesc; //endpoint descriptor, epDesc[2] is the address of endpoint. More info, pls refer to USB Sepc2.0 - 9.6.6
             epDesc.CreateL(epSize);
             CleanupClosePushL(epDesc); 
-            User::LeaveIfError( iLdd.GetEndpointDescriptor(KMTPUsbAlternateInterface, i, epDesc) );
+            LEAVEIFERROR( iLdd.GetEndpointDescriptor(KMTPUsbAlternateInterface, i, epDesc),
+                    OstTrace1( TRACE_ERROR, DUP1_CMTPUSBCONNECTION_PROCESSCONTROLREQUESTDEVICESTATUSL, 
+                            "Copies Copies the endpoint descriptor failed! error code %d", munged_err));
 
             //Maybe here is a little bit confused. Although an endpoint address is a 8-bit byte in Endpoint Descriptor,
             //but in practice, it's requested by host with a 32-bit value, so we plus offset with 4 to reflect this.
@@ -1303,8 +1346,8 @@ void CMTPUsbConnection::ProcessControlRequestDeviceStatusL(const TMTPUsbControlR
       
     // restore the original device status
     SetDeviceStatus(originalStatus);
-    
-    __FLOG(_L8("ProcessControlRequestDeviceStatusL - Exit"));
+
+    OstTraceFunctionExit0( CMTPUSBCONNECTION_PROCESSCONTROLREQUESTDEVICESTATUSL_EXIT );
     }
 
 /**
@@ -1317,8 +1360,8 @@ EFalse.
 */
 TBool CMTPUsbConnection::BulkRequestErrorHandled(TInt aError)
     {
-    __FLOG(_L8("BulkRequestErrorHandled - Entry"));
-    __FLOG_VA((_L8("Bulk transfer request completion status = %d"), aError));
+    OstTraceFunctionEntry0( CMTPUSBCONNECTION_BULKREQUESTERRORHANDLED_ENTRY );
+    OstTrace1( TRACE_NORMAL, CMTPUSBCONNECTION_BULKREQUESTERRORHANDLED, "Bulk transfer request completion status = %d", aError );
     TBool ret(EFalse);
     
     // Only handle USB error codes
@@ -1343,7 +1386,7 @@ TBool CMTPUsbConnection::BulkRequestErrorHandled(TInt aError)
             break;            
             }
         }
-    __FLOG(_L8("BulkRequestErrorHandled - Exit"));
+    OstTraceFunctionExit0( CMTPUSBCONNECTION_BULKREQUESTERRORHANDLED_EXIT );
     return ret;
     }
     
@@ -1355,13 +1398,16 @@ EFalse.
 */
 TBool CMTPUsbConnection::BulkRequestTransactionStateValid(TMTPTransactionPhase aExpectedTransactionState)
     {
-    __FLOG(_L8("BulkRequestTransactionStateValid - Entry"));
-    __FLOG_VA((_L8("Bulk transaction state = %d"), iBulkTransactionState));
+    OstTraceFunctionEntry0( CMTPUSBCONNECTION_BULKREQUESTTRANSACTIONSTATEVALID_ENTRY );
+    OstTrace1( TRACE_NORMAL, CMTPUSBCONNECTION_BULKREQUESTTRANSACTIONSTATEVALID, 
+            "Bulk transaction state = %d", iBulkTransactionState);
+    
     TBool valid(iBulkTransactionState == aExpectedTransactionState);
     if (!valid)
         {
         // Invalid bulk transaction state, close the connection.
-        __FLOG_VA((_L8("Expected bulk transaction state = %d"), aExpectedTransactionState));
+        OstTrace1( TRACE_NORMAL, DUP1_CMTPUSBCONNECTION_BULKREQUESTTRANSACTIONSTATEVALID, 
+                "Expected bulk transaction state = %d", aExpectedTransactionState );
 
         //if transaction is in request phase, while the container type of data we received is other transaction phase,
         //just ignore the data and initiate another request receiving. 
@@ -1374,7 +1420,7 @@ TBool CMTPUsbConnection::BulkRequestTransactionStateValid(TMTPTransactionPhase a
         CloseConnection();
             }
         }
-    __FLOG(_L8("BulkRequestTransactionStateValid - Exit"));
+    OstTraceFunctionExit0( CMTPUSBCONNECTION_BULKREQUESTTRANSACTIONSTATEVALID_EXIT );
     return valid;
     }
     
@@ -1387,8 +1433,9 @@ EFalse.
 */
 TBool CMTPUsbConnection::ControlRequestErrorHandled(TInt aError)
     {
-    __FLOG(_L8("ControlRequestErrorHandled - Entry"));
-    __FLOG_VA((_L8("Control request completion status = %d"), aError));
+    OstTraceFunctionEntry0( CMTPUSBCONNECTION_CONTROLREQUESTERRORHANDLED_ENTRY );
+    OstTrace1( TRACE_NORMAL, CMTPUSBCONNECTION_CONTROLREQUESTERRORHANDLED, 
+            "Control request completion status = %d", aError );
     TBool ret(EFalse);
     
     if (aError != KErrNone)
@@ -1418,7 +1465,7 @@ TBool CMTPUsbConnection::ControlRequestErrorHandled(TInt aError)
         ret = ETrue;
         }
     
-    __FLOG(_L8("ControlRequestErrorHandled - Exit"));
+    OstTraceFunctionExit0( CMTPUSBCONNECTION_CONTROLREQUESTERRORHANDLED_EXIT );
     return ret;
     }
 
@@ -1427,7 +1474,7 @@ Clears the USB MTP device class configuration descriptor.
 */
 void CMTPUsbConnection::ConfigurationDescriptorClear()
     {
-    __FLOG(_L8("ConfigurationDescriptorClear - Entry"));
+    OstTraceFunctionEntry0( CMTPUSBCONNECTION_CONFIGURATIONDESCRIPTORCLEAR_ENTRY );
     const TInt KNumInterfacesOffset(4);
     
     TInt descriptorSize(0);
@@ -1442,8 +1489,8 @@ void CMTPUsbConnection::ConfigurationDescriptorClear()
             iLdd.SetConfigurationDescriptor(descriptor);
             }
         }
-    
-    __FLOG(_L8("ConfigurationDescriptorClear - Exit"));
+
+    OstTraceFunctionExit0( CMTPUSBCONNECTION_CONFIGURATIONDESCRIPTORCLEAR_EXIT );
     }
 
 /**
@@ -1453,7 +1500,7 @@ Sets the USB MTP device class configuration descriptor.
 */
 void CMTPUsbConnection::ConfigurationDescriptorSetL()
     {
-    __FLOG(_L8("SetupConfigurationDescriptorL - Entry"));
+    OstTraceFunctionEntry0( CMTPUSBCONNECTION_CONFIGURATIONDESCRIPTORSETL_ENTRY );
     const TInt KNumInterfacesOffset(4);
     
     TInt descriptorSize(0);
@@ -1461,15 +1508,20 @@ void CMTPUsbConnection::ConfigurationDescriptorSetL()
     
     if (static_cast<TUint>(descriptorSize) != KUsbDescSize_Config)
         {
+        OstTrace0( TRACE_ERROR, CMTPUSBCONNECTION_CONFIGURATIONDESCRIPTORSETL, "Not configration descriptor!");
         User::Leave(KErrCorrupt);
         }
  
     TBuf8<KUsbDescSize_Config> descriptor;
-    User::LeaveIfError(iLdd.GetConfigurationDescriptor(descriptor));
+    LEAVEIFERROR(iLdd.GetConfigurationDescriptor(descriptor),
+            OstTrace1( TRACE_ERROR, DUP1_CMTPUSBCONNECTION_CONFIGURATIONDESCRIPTORSETL, 
+                    "Copies the current configuration descriptor failed! error code %d", munged_err));
     ++descriptor[KNumInterfacesOffset];
-    User::LeaveIfError(iLdd.SetConfigurationDescriptor(descriptor));
-    
-    __FLOG(_L8("SetupConfigurationDescriptorL - Exit"));
+    LEAVEIFERROR(iLdd.SetConfigurationDescriptor(descriptor),
+            OstTrace1( TRACE_ERROR, DUP2_CMTPUSBCONNECTION_CONFIGURATIONDESCRIPTORSETL, 
+                    "Sets the current configuration descriptor failed! error code %d", munged_err));
+
+    OstTraceFunctionExit0( CMTPUSBCONNECTION_CONFIGURATIONDESCRIPTORSETL_EXIT );
     }
 
 /**
@@ -1494,9 +1546,9 @@ Starts data transfer activity on the control endpoint.
 */
 void CMTPUsbConnection::ControlEndpointStartL()
     {
-    __FLOG(_L8("StartControlEndpoint - Entry"));
+    OstTraceFunctionEntry0( CMTPUSBCONNECTION_CONTROLENDPOINTSTARTL_ENTRY );
     InitiateControlRequestSequenceL();
-    __FLOG(_L8("StartControlEndpoint - Exit"));  
+    OstTraceFunctionExit0( CMTPUSBCONNECTION_CONTROLENDPOINTSTARTL_EXIT );
     }
 
 /**
@@ -1504,9 +1556,9 @@ Stops data transfer activity on the control endpoint.
 */    
 void CMTPUsbConnection::ControlEndpointStop()
     {
-    __FLOG(_L8("ControlEndpointStop - Entry"));
+    OstTraceFunctionEntry0( CMTPUSBCONNECTION_CONTROLENDPOINTSTOP_ENTRY );
     iEndpoints[EMTPUsbEpControl]->Cancel();
-    __FLOG(_L8("ControlEndpointStop - Exit"));    
+    OstTraceFunctionExit0( CMTPUSBCONNECTION_CONTROLENDPOINTSTOP_EXIT );
     }
 
 /**
@@ -1514,11 +1566,11 @@ Stalls all but the control endpoint.
 */    
 void CMTPUsbConnection::BulkEndpointsStallL()
     {
-    __FLOG(_L8("BulkEndpointsStallL - Entry"));
+    OstTraceFunctionEntry0( CMTPUSBCONNECTION_BULKENDPOINTSSTALLL_ENTRY );
     EndpointStallL(EMTPUsbEpBulkIn);
     EndpointStallL(EMTPUsbEpBulkOut);
     SetDeviceStatus(EMTPUsbDeviceStatusTransactionCancelled);
-    __FLOG(_L8("BulkEndpointsStallL - Exit"));
+    OstTraceFunctionExit0( CMTPUSBCONNECTION_BULKENDPOINTSSTALLL_EXIT );
     }
 
 /**
@@ -1526,10 +1578,10 @@ Clears stall conditions all but the control endpoint.
 */
 void CMTPUsbConnection::BulkEndpointsStallClearL()
     {
-    __FLOG(_L8("BulkEndpointsStallClearL - Entry"));
+    OstTraceFunctionEntry0( CMTPUSBCONNECTION_BULKENDPOINTSSTALLCLEARL_ENTRY );
     EndpointStallClearL(EMTPUsbEpBulkIn);
     EndpointStallClearL(EMTPUsbEpBulkOut);
-    __FLOG(_L8("BulkEndpointsStallClearL - Exit"));  
+    OstTraceFunctionExit0( CMTPUSBCONNECTION_BULKENDPOINTSSTALLCLEARL_EXIT );
     }
 
 /**
@@ -1538,9 +1590,9 @@ Starts data transfer activity on the data endpoints.
 */    
 void CMTPUsbConnection::DataEndpointsStartL()
     {
-    __FLOG(_L8("DataEndpointsStartL - Entry"));
+    OstTraceFunctionEntry0( CMTPUSBCONNECTION_DATAENDPOINTSSTARTL_ENTRY );
     InitiateBulkRequestSequenceL();
-    __FLOG(_L8("DataEndpointsStartL - Exit"));
+    OstTraceFunctionExit0( CMTPUSBCONNECTION_DATAENDPOINTSSTARTL_EXIT );
     }
 
 /**
@@ -1548,45 +1600,46 @@ Stops data transfer activity on all but the control endpoint.
 */    
 void CMTPUsbConnection::DataEndpointsStop()
     {
-    __FLOG(_L8("DataEndpointsStop - Entry"));
+    OstTraceFunctionEntry0( CMTPUSBCONNECTION_DATAENDPOINTSSTOP_ENTRY );
     if (ConnectionOpen() && (!(SuspendState() & ESuspended))&& (iControllerStatePrevious != EUsbcDeviceStateSuspended))
         {
-        __FLOG(_L8("Stopping active endpoints"));
+        OstTrace0( TRACE_NORMAL, CMTPUSBCONNECTION_DATAENDPOINTSSTOP, "Stopping active endpoints" );
         iEndpoints[EMTPUsbEpBulkIn]->Cancel();
         iEndpoints[EMTPUsbEpBulkOut]->Cancel();
         iEndpoints[EMTPUsbEpInterrupt]->Cancel();
         if ((iBulkTransactionState == EDataIToRPhase) && iUsbBulkContainer->Payload())
             {
-            __FLOG(_L8("Aborting active I to R data phase"));
+            OstTrace0( TRACE_NORMAL, DUP1_CMTPUSBCONNECTION_DATAENDPOINTSSTOP, "Aborting active I to R data phase" );
             TRAPD(err, BoundProtocolLayer().ReceiveDataCompleteL(KErrAbort, *iUsbBulkContainer->Payload(), iMTPRequest));
             UNUSED_VAR(err);
             }
         else if ((iBulkTransactionState == EDataRToIPhase) && iUsbBulkContainer->Payload())
             {
-            __FLOG(_L8("Aborting active R to I data phase"));
+            OstTrace0( TRACE_NORMAL, DUP2_CMTPUSBCONNECTION_DATAENDPOINTSSTOP, "Aborting active R to I data phase" );
             TRAPD(err, BoundProtocolLayer().SendDataCompleteL(KErrAbort, *iUsbBulkContainer->Payload(), iMTPRequest));
             UNUSED_VAR(err);
             }
 		else if ((iBulkTransactionState == EResponsePhase) && iUsbBulkContainer->Payload())
             {
-            __FLOG(_L8("Aborting active response phase"));
+            OstTrace0( TRACE_NORMAL, DUP3_CMTPUSBCONNECTION_DATAENDPOINTSSTOP, "Aborting active response phase" );
             TRAPD(err, BoundProtocolLayer().SendResponseCompleteL(KErrAbort, *static_cast<TMTPTypeResponse*>(iUsbBulkContainer->Payload()), iMTPRequest));
             UNUSED_VAR(err);
             }
         }
-#ifdef __FLOG_ACTIVE
+#ifdef OST_TRACE_COMPILER_IN_USE
     else
         {
-        __FLOG(_L8("Endpoints inactive, do nothing"));
+        OstTrace0( TRACE_NORMAL, DUP4_CMTPUSBCONNECTION_DATAENDPOINTSSTOP, "Endpoints inactive, do nothing" );
         }
-#endif // __FLOG_ACTIVE
-    __FLOG(_L8("DataEndpointsStop - Exit"));
+#endif // OST_TRACE_COMPILER_IN_USE
+    OstTraceFunctionExit0( CMTPUSBCONNECTION_DATAENDPOINTSSTOP_EXIT );
     }
     
 void CMTPUsbConnection::EndpointStallL(TMTPUsbEndpointId aId)
     {
-    __FLOG(_L8("EndpointStallL - Entry"));
-    __FLOG_VA((_L8("Creating stall condition on endpoint %d"), aId));
+    OstTraceFunctionEntry0( CMTPUSBCONNECTION_ENDPOINTSTALLL_ENTRY );
+    OstTrace1( TRACE_NORMAL, CMTPUSBCONNECTION_ENDPOINTSTALLL, "Creating stall condition on endpoint %d", aId );
+    
     __ASSERT_DEBUG((aId < EMTPUsbEpNumEndpoints), Panic(EMTPUsbReserved));
     
     // Stall the endpoint.
@@ -1596,13 +1649,13 @@ void CMTPUsbConnection::EndpointStallL(TMTPUsbEndpointId aId)
     // Update the connection state.
     SetConnectionState(EStalled);
     
-    __FLOG(_L8("EndpointStallL - Exit"));
+    OstTraceFunctionExit0( CMTPUSBCONNECTION_ENDPOINTSTALLL_EXIT );
     }
     
 void CMTPUsbConnection::EndpointStallClearL(TMTPUsbEndpointId aId)
     {
-    __FLOG(_L8("EndpointStallClearL - Entry"));
-    __FLOG_VA((_L8("Clearing stall condition on endpoint %d"), aId));
+    OstTraceFunctionEntry0( CMTPUSBCONNECTION_ENDPOINTSTALLCLEARL_ENTRY );
+    OstTrace1( TRACE_NORMAL, CMTPUSBCONNECTION_ENDPOINTSTALLCLEARL, "Clearing stall condition on endpoint %d", aId );
     __ASSERT_DEBUG((aId < EMTPUsbEpNumEndpoints), Panic(EMTPUsbReserved));
     
     // Check the endoints current stall condition.
@@ -1626,7 +1679,7 @@ void CMTPUsbConnection::EndpointStallClearL(TMTPUsbEndpointId aId)
           	SetConnectionState(EIdle);
             }
         }
-    __FLOG(_L8("EndpointStallClearL - Exit"));
+    OstTraceFunctionExit0( CMTPUSBCONNECTION_ENDPOINTSTALLCLEARL_EXIT );
     }
        
 /**
@@ -1635,14 +1688,14 @@ Resumes USB MTP device class processing.
 */ 
 void CMTPUsbConnection::ResumeConnectionL()
     {
-    __FLOG(_L8("ResumeConnectionL - Entry"));
+    OstTraceFunctionEntry0( CMTPUSBCONNECTION_RESUMECONNECTIONL_ENTRY );
     if (ConnectionOpen())
         {    
         // Restart data transfer activity.
         ControlEndpointStartL();
         DataEndpointsStartL();
         }
-    __FLOG(_L8("ResumeConnectionL - Exit"));
+    OstTraceFunctionExit0( CMTPUSBCONNECTION_RESUMECONNECTIONL_EXIT );
     }
        
 /**
@@ -1651,18 +1704,18 @@ Initiates USB MTP device class processing.
 */ 
 void CMTPUsbConnection::StartConnectionL()
     {
-    __FLOG(_L8("StartConnectionL - Entry"));   
+    OstTraceFunctionEntry0( CMTPUSBCONNECTION_STARTCONNECTIONL_ENTRY );  
     
     // Notify the connection manager and update state, if necessary. 
     if (ConnectionClosed())
         {
-        __FLOG(_L8("Notifying protocol layer connection opened"));
+        OstTrace0( TRACE_NORMAL, CMTPUSBCONNECTION_STARTCONNECTIONL, "Notifying protocol layer connection opened" );
         iConnectionMgr->ConnectionOpenedL(*this);
         SetConnectionState(EOpen);
         SetDeviceStatus(EMTPUsbDeviceStatusOK);
         InitiateBulkRequestSequenceL();
         }
-    __FLOG(_L8("StartConnectionL - Exit"));
+    OstTraceFunctionExit0( CMTPUSBCONNECTION_STARTCONNECTIONL_EXIT );
     }
        
 /**
@@ -1670,7 +1723,7 @@ Halts USB MTP device class processing.
 */ 
 TBool CMTPUsbConnection::StopConnection()
     {
-    __FLOG(_L8("StopConnection - Entry"));
+    OstTraceFunctionEntry0( CMTPUSBCONNECTION_STOPCONNECTION_ENTRY );
     
     TBool ret = ETrue;
     // Stop all data transfer activity.
@@ -1679,7 +1732,7 @@ TBool CMTPUsbConnection::StopConnection()
     // Notify the connection manager and update state, if necessary.
     if (ConnectionOpen())
         {
-        __FLOG(_L8("Notifying protocol layer connection closed"));
+        OstTrace0( TRACE_NORMAL, CMTPUSBCONNECTION_STOPCONNECTION, "Notifying protocol layer connection closed" );
         ret = iConnectionMgr->ConnectionClosed(*this);
         SetBulkTransactionState(EUndefined);
         SetConnectionState(EIdle);
@@ -1687,8 +1740,7 @@ TBool CMTPUsbConnection::StopConnection()
 		iMTPSessionId = KMTPSessionNone;
         }
     
-    __FLOG(_L8("StopConnection - Exit"));
-    
+    OstTraceFunctionExit0( CMTPUSBCONNECTION_STOPCONNECTION_EXIT );
     return ret;
     }
        
@@ -1698,7 +1750,7 @@ Suspends USB MTP device class processing.
 */ 
 void CMTPUsbConnection::SuspendConnectionL()
     {
-    __FLOG(_L8("SuspendConnectionL - Entry"));
+    OstTraceFunctionEntry0( CMTPUSBCONNECTION_SUSPENDCONNECTIONL_ENTRY );
     if (ConnectionOpen())
         {    
         // Stop all data transfer activity.
@@ -1711,7 +1763,7 @@ void CMTPUsbConnection::SuspendConnectionL()
 
     //  Update state.
     SetSuspendState(ESuspended);
-    __FLOG(_L8("SuspendConnectionL - Exit"));
+    OstTraceFunctionExit0( CMTPUSBCONNECTION_SUSPENDCONNECTIONL_EXIT );
     }
 
 /**
@@ -1720,16 +1772,18 @@ Configures the USB MTP device class.
 */
 void CMTPUsbConnection::StartUsbL()
     {
-    __FLOG(_L8("StartUsbL - Entry"));
+    OstTraceFunctionEntry0( CMTPUSBCONNECTION_STARTUSBL_ENTRY );
     
     // Open the USB device interface.
-    User::LeaveIfError(iLdd.Open(KDefaultUsbClientController));
-    
+    LEAVEIFERROR(iLdd.Open(KDefaultUsbClientController),
+            OstTrace1( TRACE_ERROR, CMTPUSBCONNECTION_STARTUSBL, 
+                    "Open the USB device interface failed! error code %d", munged_err));
+
     // Configure the class descriptors.
     ConfigurationDescriptorSetL();
     SetInterfaceDescriptorL();
-    
-    __FLOG(_L8("StartUsbL - Exit"));
+
+    OstTraceFunctionExit0( CMTPUSBCONNECTION_STARTUSBL_EXIT );
     }
     
 /**
@@ -1737,7 +1791,7 @@ This method stops the end points transfer.
 */
 void CMTPUsbConnection::StopUsb()
     {
-    __FLOG(_L8("StopUsb - Entry"));
+    OstTraceFunctionEntry0( CMTPUSBCONNECTION_STOPUSB_ENTRY );
     // Stop monitoring the USB device controller state.
     iLdd.AlternateDeviceStatusNotifyCancel();
     
@@ -1750,8 +1804,8 @@ void CMTPUsbConnection::StopUsb()
     // Close the USB device interface.
     iLdd.ReleaseInterface(KMTPUsbAlternateInterface);
     iLdd.Close();
-    
-    __FLOG(_L8("StopUsb - Exit"));
+
+    OstTraceFunctionExit0( CMTPUSBCONNECTION_STOPUSB_EXIT );
     }
     
 /**
@@ -1771,7 +1825,7 @@ Provides the current state of the USB MTP device class connection.
 TInt32 CMTPUsbConnection::ConnectionState() const
     {
     TInt32 state(iState & EConnectionStateMask);
-    __FLOG_VA((_L8("Connection state = 0x%08X"), state));
+    OstTrace1( TRACE_NORMAL, CMTPUSBCONNECTION_CONNECTIONSTATE, "Connection state = 0x%08X", state );
     return (state); 
     }
 
@@ -1783,8 +1837,8 @@ Provides the current USB device suspend state..
 TInt32 CMTPUsbConnection::SuspendState() const
     {
     TInt32 state(iState & ESuspendStateMask);
-    __FLOG_VA((_L8("Suspend state = 0x%08X"), state));
-    
+    OstTrace1( TRACE_NORMAL, CMTPUSBCONNECTION_SUSPENDSTATE, "Suspend state = 0x%08X", state );
+
     return (state);
     }
 
@@ -1795,10 +1849,11 @@ Sets the bulk transfer transaction state.
 */
 void CMTPUsbConnection::SetBulkTransactionState(TMTPTransactionPhase aState)
     {
-    __FLOG(_L8("SetBulkTransactionState - Entry"));
+    OstTraceFunctionEntry0( CMTPUSBCONNECTION_SETBULKTRANSACTIONSTATE_ENTRY );
     iBulkTransactionState = aState;
-    __FLOG_VA((_L8("SetBulkTransactionState state set to 0x%08X"), iBulkTransactionState));
-    __FLOG(_L8("SetBulkTransactionState - Exit"));
+    OstTrace1( TRACE_NORMAL, CMTPUSBCONNECTION_SETBULKTRANSACTIONSTATE,
+            "SetBulkTransactionState state set to 0x%08X", iBulkTransactionState );
+    OstTraceFunctionExit0( CMTPUSBCONNECTION_SETBULKTRANSACTIONSTATE_EXIT );
     }
 
 /**
@@ -1807,10 +1862,10 @@ Sets the MTP USB device class device status Code value.
 */
 void CMTPUsbConnection::SetDeviceStatus(TUint16 aCode)
     {
-    __FLOG(_L8("SetDeviceStatus - Entry"));
+    OstTraceFunctionEntry0( CMTPUSBCONNECTION_SETDEVICESTATUS_ENTRY );
     iDeviceStatusCode = aCode;
-    __FLOG_VA((_L8("Device status set to 0x%04X"), iDeviceStatusCode));
-    __FLOG(_L8("SetDeviceStatus - Exit"));
+    OstTrace1( TRACE_NORMAL, CMTPUSBCONNECTION_SETDEVICESTATUS, "Device status set to 0x%04X", iDeviceStatusCode );
+    OstTraceFunctionExit0( CMTPUSBCONNECTION_SETDEVICESTATUS_EXIT );
     }
 
 /**
@@ -1820,15 +1875,20 @@ Sets the USB MTP device class interface descriptor.
 */
 void CMTPUsbConnection::SetInterfaceDescriptorL()
     {
-    __FLOG(_L8("SetInterfaceDescriptorL - Entry"));
+    OstTraceFunctionEntry0( CMTPUSBCONNECTION_SETINTERFACEDESCRIPTORL_ENTRY );
     
     TUsbcInterfaceInfoBuf ifc;
     // Get device capabilities.
-    User::LeaveIfError(iLdd.DeviceCaps(iDeviceCaps));
-    
+    LEAVEIFERROR(iLdd.DeviceCaps(iDeviceCaps),
+            OstTrace1( TRACE_ERROR, DUP3_CMTPUSBCONNECTION_SETINTERFACEDESCRIPTORL, 
+                    "Get device capabilities failed! error code %d", munged_err));
+
     // Fetch the endpoint capabilities set.
     TPtr8 capsPtr(reinterpret_cast<TUint8*>(iEndpointCapSets), sizeof(iEndpointCapSets), sizeof(iEndpointCapSets));
-    User::LeaveIfError(iLdd.EndpointCaps(capsPtr));
+    LEAVEIFERROR(iLdd.EndpointCaps(capsPtr),
+            OstTrace1( TRACE_ERROR, DUP4_CMTPUSBCONNECTION_SETINTERFACEDESCRIPTORL, 
+                    "Get end point capabilities failed! error code %d", munged_err));
+            
     // Set the interface endpoint properties.
     for (TUint i(EMTPUsbEpBulkIn); (i < EMTPUsbEpNumEndpoints); i++)
         {
@@ -1872,17 +1932,18 @@ void CMTPUsbConnection::SetInterfaceDescriptorL()
     
     if (err == KErrNoMemory)
         {
-        __FLOG(_L8("NoMem when setinterface, try with lower priority"));
+        OstTrace0( TRACE_NORMAL, CMTPUSBCONNECTION_SETINTERFACEDESCRIPTORL, "NoMem when setinterface, try with lower priority" );
         // Allocate 64KB*2 buffer for OUT EndPoint, and 64KB for IN EndPoint
         bandwidthPriority = EUsbcBandwidthINPlus2 | EUsbcBandwidthOUTPlus2;
         err = iLdd.SetInterface(KMTPUsbAlternateInterface, ifc, bandwidthPriority);
-        __FLOG_1(_L8("setinterface return for lower priority:%d"),err);
+        OstTrace1( TRACE_NORMAL, DUP1_CMTPUSBCONNECTION_SETINTERFACEDESCRIPTORL, "setinterface return for lower priority:%d", err);
         }
-     
-    __FLOG_1(_L8("setinterface error code:%d"),err);
-    User::LeaveIfError(err);
+    OstTrace1( TRACE_NORMAL, DUP2_CMTPUSBCONNECTION_SETINTERFACEDESCRIPTORL, "setinterface error code:%d",err );
     
-    __FLOG(_L8("SetInterfaceDescriptorL - Exit"));
+    LEAVEIFERROR(err,  OstTrace1( TRACE_NORMAL, DUP5_CMTPUSBCONNECTION_SETINTERFACEDESCRIPTORL, 
+                    "Set interface failed! error code %d", munged_err ));
+
+    OstTraceFunctionExit0( CMTPUSBCONNECTION_SETINTERFACEDESCRIPTORL_EXIT );
     }
 
 /**
@@ -1892,10 +1953,10 @@ Sets the USB MTP device class connection state.
 */
 void CMTPUsbConnection::SetConnectionState(TInt32 aState)
     {
-    __FLOG(_L8("SetConnectionState - Entry"));
+    OstTraceFunctionEntry0( CMTPUSBCONNECTION_SETCONNECTIONSTATE_ENTRY );
     iState = ((~EConnectionStateMask & iState) | aState);
-    __FLOG_VA((_L8("Connection state set to 0x%08X"), iState));
-    __FLOG(_L8("SetConnectionState - Exit"));
+    OstTrace1( TRACE_NORMAL, CMTPUSBCONNECTION_SETCONNECTIONSTATE, "Connection state set to 0x%08X", iState );
+    OstTraceFunctionExit0( CMTPUSBCONNECTION_SETCONNECTIONSTATE_EXIT );
     }
 
 /**
@@ -1905,10 +1966,10 @@ Sets the USB device suspend state.
 */
 void CMTPUsbConnection::SetSuspendState(TInt32 aState)
     {
-    __FLOG(_L8("SetSuspendState - Entry"));
+    OstTraceFunctionEntry0( CMTPUSBCONNECTION_SETSUSPENDSTATE_ENTRY );
     iState = ((~ESuspendStateMask & iState) | aState);
-    __FLOG_VA((_L8("Connection state set to 0x%08X"), iState));
-    __FLOG(_L8("SetSuspendState - Exit"));
+    OstTrace1( TRACE_NORMAL, CMTPUSBCONNECTION_SETSUSPENDSTATE, "Connection state set to 0x%08X", iState );
+    OstTraceFunctionExit0( CMTPUSBCONNECTION_SETSUSPENDSTATE_EXIT );
     }
     
 /**
@@ -1918,24 +1979,24 @@ connected to.
 */
 void CMTPUsbConnection::SetTransportPacketSizeL()
 	{
-	__FLOG(_L8("SetTransportPacketSizeL - Entry"));
+	OstTraceFunctionEntry0( CMTPUSBCONNECTION_SETTRANSPORTPACKETSIZEL_ENTRY );
 	if(iLdd.CurrentlyUsingHighSpeed())
 		{
-		__FLOG(_L8("HS USB connection"));
+		OstTrace0( TRACE_NORMAL, CMTPUSBCONNECTION_SETTRANSPORTPACKETSIZEL, "HS USB connection" );
 		iEndpoints[EMTPUsbEpControl]->SetMaxPacketSizeL(KMaxPacketTypeControlHS);
 		iEndpoints[EMTPUsbEpBulkIn]->SetMaxPacketSizeL(KMaxPacketTypeBulkHS);
 		iEndpoints[EMTPUsbEpBulkOut]->SetMaxPacketSizeL(KMaxPacketTypeBulkHS);
 		}
 	else
 		{
-		__FLOG(_L8("FS USB connection"));
+		OstTrace0( TRACE_NORMAL, DUP1_CMTPUSBCONNECTION_SETTRANSPORTPACKETSIZEL, "FS USB connection" );
 		iEndpoints[EMTPUsbEpControl]->SetMaxPacketSizeL(KMaxPacketTypeControlFS);
 		iEndpoints[EMTPUsbEpBulkIn]->SetMaxPacketSizeL(KMaxPacketTypeBulkFS);
 		iEndpoints[EMTPUsbEpBulkOut]->SetMaxPacketSizeL(KMaxPacketTypeBulkFS);
 		}		
 	iEndpoints[EMTPUsbEpInterrupt]->SetMaxPacketSizeL(KMaxPacketTypeInterrupt);
-	
-	__FLOG(_L8("SetTransportPacketSizeL - Exit"));
+
+	OstTraceFunctionExit0( CMTPUSBCONNECTION_SETTRANSPORTPACKETSIZEL_EXIT );
 	}
 
 TBool CMTPUsbConnection::IsEpStalled(const TUint& aEpNumber)
