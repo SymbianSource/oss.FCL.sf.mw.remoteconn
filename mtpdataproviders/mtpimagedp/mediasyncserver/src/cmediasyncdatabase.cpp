@@ -440,8 +440,8 @@ void CMediaSyncDatabase::FetchNotificationsL(CMediaSyncDataWriter& aResulWriter,
     RDbView view;
     CleanupClosePushL(view);
     
-    view.Prepare(iDatabase, TDbQuery(KSQLQuery));
-    view.EvaluateAll();
+    User::LeaveIfError(view.Prepare(iDatabase, TDbQuery(KSQLQuery)));
+    User::LeaveIfError(view.EvaluateAll());
     
     //goto the last fetch position
     if (iSavePosition)

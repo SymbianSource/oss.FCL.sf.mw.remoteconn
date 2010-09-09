@@ -1272,7 +1272,8 @@ TInt CParser::HandleGlobalReportCount( const TItem& aItem )
     iGlobal.iCount = aItem.Data();
     if (aItem.Data() == 0)
         {
-        retVal = EZeroReportCount;
+        TRACE_INFO((_L("Global report count zero\n")));	
+     
         }
     iItemsDefined |= EReportCount;
 
