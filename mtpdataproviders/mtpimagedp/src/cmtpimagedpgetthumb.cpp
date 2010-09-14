@@ -111,21 +111,26 @@ void CMTPImageDpGetThumb::ServiceL()
         TEntry fileEntry;
         
         User::LeaveIfError(iFramework.Fs().Entry(iObjectMeta->DesC(CMTPObjectMetaData::ESuid), fileEntry));
-        imgDp.ThumbnailManager().GetThumbMgr()->SetFlagsL(CThumbnailManager::EDefaultFlags);
-        if(fileEntry.FileSize() > KFileSizeMax)
+        
+        CMTPImageDpThumbnailCreator* tnc = imgDp.ThumbnailManager();
+        if(tnc != NULL)
             {
-            __FLOG(_L8(">> CMTPImageDpGetThumb::ServiceL, fileEntry.FileSize() > KFileSizeMax"));
-            imgDp.ThumbnailManager().GetThumbMgr()->SetFlagsL(CThumbnailManager::EDoNotCreate);
+            tnc->GetThumbMgr()->SetFlagsL(CThumbnailManager::EDefaultFlags);
+            if(fileEntry.FileSize() > KFileSizeMax)
+                {
+                __FLOG(_L8(">> CMTPImageDpGetThumb::ServiceL, fileEntry.FileSize() > KFileSizeMax"));
+                tnc->GetThumbMgr()->SetFlagsL(CThumbnailManager::EDoNotCreate);
+                }
+            
+            tnc->GetThumbnailL(iObjectMeta->DesC(CMTPObjectMetaData::ESuid), thumbnailData, err);
+            imgDp.PropertyMgr().StoreThunmnail(iObjectMeta->Uint(CMTPObjectMetaData::EHandle), thumbnailData);
             }
-        
-        imgDp.ThumbnailManager().GetThumbnailL(iObjectMeta->DesC(CMTPObjectMetaData::ESuid), thumbnailData, err);
-        User::LeaveIfError(err);
-        User::LeaveIfNull(thumbnailData);
-        
-        //Transfer ownership of thumbnailData to Property Manager
-        imgDp.PropertyMgr().StoreThunmnail(iObjectMeta->Uint(CMTPObjectMetaData::EHandle), thumbnailData);
+        //Transfer ownership of thumbnailData to Property Manager       
         }
-    iThumb->Write(*thumbnailData);
+    if(thumbnailData != NULL)
+        {
+        iThumb->Write(*thumbnailData);
+        }
     SendDataL(*iThumb);
     __FLOG(_L8("<< CMTPImageDpGetThumb::ServiceL"));
     }
