@@ -21,8 +21,7 @@
 #include <data_caging_paths.hrh>
 
 VENDORID        VID_DEFAULT
-
-CAPABILITY      CAP_SERVER TrustedUI
+CAPABILITY      ReadDeviceData WriteDeviceData SwEvent NetworkServices ReadUserData WriteUserData LocalServices TrustedUI
 
 TARGET          sconpcconnserver.exe
 TARGETTYPE      exe

@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -23,7 +23,7 @@
 #include <s32mem.h>
 #include <nsmlchangefinder.h>
 #include <e32cmn.h>
-#include <ecom/ImplementationInformation.h>
+#include <ecom/implementationinformation.h>
 #include <mmf/common/mmfcontrollerpluginresolver.h>
 
 #include "sconsyncclientserver.h"
@@ -42,8 +42,9 @@ const TInt KDefaultExpandSize = 1024;
 const TInt KMaxStoresCount = 10;
 
 const TInt KDefaultTimeOutInMicroSeconds = 30 * 1000000; // 30 seconds
-const TInt KDeleteAllTimeOutInMicroSeconds = 300 * 1000000; // 5 minutes
-const TInt KOpenStoreTimeOutInMicroSeconds = 180 * 1000000; // 180 seconds
+const TInt KDeleteAllTimeOutInMicroSeconds = 540 * 1000000; // 9 minutes
+const TInt KOpenStoreTimeOutInMicroSeconds = 540 * 1000000; //  9 minutes
+const TInt KResetChangeInfoTimeOutInMicroSeconds = 540 * 1000000; // 9 minutes
 
 CSconAsyncHandler::~CSconAsyncHandler()
     {
@@ -180,6 +181,7 @@ void CSconAsyncHandler::HandleServiceL( const RMessage2& aMessage )
             MovedItemsL();
             break;
         case EResetChangeInfo:
+            iTimeOut->Start( KResetChangeInfoTimeOutInMicroSeconds );
             ResetChangeInfoL();
             break;
         case ECommitChangeInfo:

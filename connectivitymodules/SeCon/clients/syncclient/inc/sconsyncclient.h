@@ -21,7 +21,7 @@
 
 #include <e32base.h>
 #include <e32std.h>
-#include <ecom/ImplementationInformation.h>
+#include <ecom/implementationinformation.h>
 #include <SmlDataProvider.h>
 
 #include "scondataproviderinfo.h"

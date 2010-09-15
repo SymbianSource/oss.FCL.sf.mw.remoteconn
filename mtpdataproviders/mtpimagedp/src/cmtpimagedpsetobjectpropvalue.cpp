@@ -168,7 +168,10 @@ void CMTPImageDpSetObjectPropValue::ServiceL()
 			break;
         case EMTPObjectPropCodeNonConsumable:
             ReceiveDataL(iMTPTypeUint8);
-            break;			
+            break;
+        case EMTPObjectPropCodeHidden:
+            ReceiveDataL(iMTPTypeUint16);
+            break;
 		default:
 			User::Leave(KErrGeneral);
 		}	
@@ -233,7 +236,13 @@ TBool CMTPImageDpSetObjectPropValue::DoHandleResponsePhaseL()
             iFramework.ObjectMgr().ModifyObjectL(*iObjectMeta);
             responseCode = EMTPRespCodeOK;
             }
-            break;            
+            break;
+        case EMTPObjectPropCodeHidden:
+            {
+            iObjectPropertyMgr.SetPropertyL(TMTPObjectPropertyCode(propCode), iMTPTypeUint16.Value());
+            responseCode = EMTPRespCodeOK;
+            }
+            break;    
  		default:
 			responseCode = EMTPRespCodeInvalidObjectPropFormat;
 			//Panic(EMTPImageDpUnsupportedProperty);

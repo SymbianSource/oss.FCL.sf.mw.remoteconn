@@ -116,7 +116,10 @@ TBool CMTPImageDpSetObjectPropList::DoHandleResponsePhaseL()
                     case EMTPObjectPropCodeNonConsumable:
                         iPropertyMgr.SetPropertyL(TMTPObjectPropertyCode(propertyCode), element.Uint8L(CMTPTypeObjectPropListElement::EValue));
                         objects.ModifyObjectL(*iObjectMeta);
-                        break;                        
+                        break;
+                    case EMTPObjectPropCodeHidden:
+                        iPropertyMgr.SetPropertyL(TMTPObjectPropertyCode(propertyCode), element.Uint16L(CMTPTypeObjectPropListElement::EValue));
+                        break;
                     default:
                         responseCode = EMTPRespCodeInvalidObjectPropCode;
                         break;
@@ -180,7 +183,13 @@ TMTPResponseCode CMTPImageDpSetObjectPropList::CheckPropCode(TUint16 aPropertyCo
                 {
                 responseCode = EMTPRespCodeInvalidObjectPropFormat;
                 }
-            break;            
+            break;
+        case EMTPObjectPropCodeHidden:
+            if (aDataType != EMTPTypeUINT16)
+                {
+                responseCode = EMTPRespCodeInvalidObjectPropFormat;
+                }
+            break;
         default:
             responseCode = EMTPRespCodeInvalidObjectPropCode;
         }

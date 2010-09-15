@@ -98,6 +98,7 @@ Standard c++ constructor
 CMTPImageDpSendObjectInfo::CMTPImageDpSendObjectInfo(MMTPDataProviderFramework& aFramework, MMTPConnection& aConnection, CMTPImageDataProvider& aDataProvider) :
     CMTPRequestProcessor(aFramework, aConnection, 0, NULL),
     iDataProvider(aDataProvider),
+    iHiddenStatus( EMTPVisible ),
     iObjectPropertyMgr(aDataProvider.PropertyMgr())
     {
 
@@ -785,12 +786,12 @@ TBool CMTPImageDpSendObjectInfo::DoHandleSendObjectCompleteL(TAny* /*aPtr*/)
         SendResponseL(EMTPRespCodeTransactionCancelled);    
         }
     else if (result && !iCancelled)
-	    {	    	    
+	    {
+        TUint attValue = 0;
+        User::LeaveIfError(iFileReceived->File().Att(attValue));
         if (iProtectionStatus ==  EMTPProtectionNoProtection ||
             iProtectionStatus == EMTPProtectionReadOnly)
             {
-            TUint attValue = 0;
-            User::LeaveIfError(iFileReceived->File().Att(attValue));
             attValue &= ~(KEntryAttNormal | KEntryAttReadOnly);
             
             if (iProtectionStatus == EMTPProtectionNoProtection)
@@ -801,6 +802,12 @@ TBool CMTPImageDpSendObjectInfo::DoHandleSendObjectCompleteL(TAny* /*aPtr*/)
                 {
                 attValue |= KEntryAttReadOnly;
                 }
+            User::LeaveIfError(iFileReceived->File().SetAtt(attValue, ~attValue));
+            }
+        if ( iHiddenStatus == EMTPHidden )
+            {
+            attValue &= ~KEntryAttHidden;
+            attValue |= KEntryAttHidden;
             User::LeaveIfError(iFileReceived->File().SetAtt(attValue, ~attValue));
             }
         TTime modifiedTime;
@@ -1062,7 +1069,9 @@ TMTPResponseCode CMTPImageDpSendObjectInfo::ExtractPropertyL(const CMTPTypeObjec
     case EMTPObjectPropCodeNonConsumable:
         iNonConsumable = aElement.Uint8L(CMTPTypeObjectPropListElement::EValue);       
         break;
-        
+    case EMTPObjectPropCodeHidden:
+        iHiddenStatus = aElement.Uint16L(CMTPTypeObjectPropListElement::EValue);
+        break;    
     default:
         break;
         }
@@ -1133,6 +1142,7 @@ TMTPResponseCode CMTPImageDpSendObjectInfo::CheckPropCodeL(const CMTPTypeObjectP
 
     case EMTPObjectPropCodeRepresentativeSampleFormat:
     case EMTPObjectPropCodeProtectionStatus:
+    case EMTPObjectPropCodeHidden:
         if (aElement.Uint16L(CMTPTypeObjectPropListElement::EDatatype) != EMTPTypeUINT16)
             {
             responseCode = EMTPRespCodeInvalidObjectPropFormat;

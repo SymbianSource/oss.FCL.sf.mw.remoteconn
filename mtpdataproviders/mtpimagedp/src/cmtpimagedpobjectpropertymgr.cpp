@@ -277,6 +277,24 @@ void CMTPImageDpObjectPropertyMgr::SetPropertyL(TMTPObjectPropertyCode aProperty
     case EMTPObjectPropCodeProtectionStatus://this property does not supported by image dp
         //nothing to do
         break;
+    case EMTPObjectPropCodeHidden:
+        {
+		__ASSERT_ALWAYS(( EMTPHidden == aValue )||( EMTPVisible == aValue ), User::Leave(KErrArgument));
+        TEntry entry;
+		User::LeaveIfError(iFramework.Fs().Entry(iObjectInfo->DesC(CMTPObjectMetaData::ESuid), entry));
+        if (( EMTPHidden == aValue ) && ( !entry.IsHidden()))
+            {
+            entry.iAtt &= ~KEntryAttHidden;
+            entry.iAtt |= KEntryAttHidden;
+            User::LeaveIfError(iFramework.Fs().SetAtt(iObjectInfo->DesC(CMTPObjectMetaData::ESuid), entry.iAtt, ~entry.iAtt));
+            }
+        else if (( EMTPVisible == aValue )&&( entry.IsHidden()))
+            {
+            entry.iAtt &= ~KEntryAttHidden;
+            User::LeaveIfError(iFramework.Fs().SetAtt(iObjectInfo->DesC(CMTPObjectMetaData::ESuid), entry.iAtt, ~entry.iAtt));
+            }
+        } 
+        break;
     default:
         //nothing to do
         break;
@@ -420,7 +438,20 @@ void CMTPImageDpObjectPropertyMgr::GetPropertyL(TMTPObjectPropertyCode aProperty
             aValue = EMTPProtectionNoProtection;
             }        
         }    
-        break;    
+        break;
+    case EMTPObjectPropCodeHidden:
+        {
+        TInt err = iFs.Entry(iObjectInfo->DesC(CMTPObjectMetaData::ESuid), entry);        
+        if ( err == KErrNone && entry.IsHidden())
+            {
+            aValue = EMTPHidden;
+            }
+        else
+            {
+            aValue = EMTPVisible;
+            }        
+        } 
+        break;
     default:
         aValue = 0;//initialization
         //ingore the failure if we can't get properties form MdS

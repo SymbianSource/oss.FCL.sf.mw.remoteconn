@@ -18,8 +18,8 @@
 
 #include "sconsynchandler.h"
 #include <f32file.h>
-#include <S32MEM.H>
-#include <UTF.H>
+#include <s32mem.h>
+#include <utf.h>
 #include <mmf/common/mmfcontrollerpluginresolver.h>
 #include <bautils.h>
 #include <nsmlconstants.h>

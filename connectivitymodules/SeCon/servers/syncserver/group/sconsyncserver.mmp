@@ -44,7 +44,7 @@ SOURCEPATH      ../../../clients/syncclient/src
 USERINCLUDE     ../../../clients/syncclient/inc
 SOURCE          scondataproviderinfo.cpp
 
-USERINCLUDE     ..\inc
+USERINCLUDE     ../inc
 
 // Default system include paths for middleware layer modules.
 MW_LAYER_SYSTEMINCLUDE

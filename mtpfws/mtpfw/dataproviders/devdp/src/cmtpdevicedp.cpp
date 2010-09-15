@@ -416,7 +416,14 @@ void CMTPDeviceDataProvider::AddFolderRecursiveL( const TMTPNotificationParamsFo
     TInt lengthOfRight( folderRight.Length());
     TFileName folderLeft;
     
-    _LIT( KRootFolder, "?:\\");
+    // get root path of storage
+    TInt driveNumber;
+    User::LeaveIfError(Framework().Fs().CharToDrive(folderRight[0], driveNumber));
+    RBuf rootDirPath;
+    rootDirPath.CreateL(KMaxFileName);
+    rootDirPath.CleanupClosePushL();
+    iDevDpSingletons.ConfigMgr().GetRootDirPathL(driveNumber, rootDirPath);
+    rootDirPath.Insert(0, folderRight.Mid(0, 2));// get drive:
     
     /*
     Go through from beginning.
@@ -434,7 +441,7 @@ void CMTPDeviceDataProvider::AddFolderRecursiveL( const TMTPNotificationParamsFo
         lengthOfRight = folderRight.Length()-pos -1;
         folderRight.Set( folderRight.Right( lengthOfRight ));
         
-        if ( KErrNotFound != folderLeft.Match( KRootFolder ))
+        if ( rootDirPath.FindF(folderLeft) != KErrNotFound)
         	{
         	//first time, root folder
         	//continue
@@ -444,7 +451,7 @@ void CMTPDeviceDataProvider::AddFolderRecursiveL( const TMTPNotificationParamsFo
         handle = Framework().ObjectMgr().HandleL( folderLeft );
         }
     while( KMTPHandleNone != handle );
-    
+    CleanupStack::PopAndDestroy(&rootDirPath);
 
     if ( KMTPHandleNone == handle )
         {

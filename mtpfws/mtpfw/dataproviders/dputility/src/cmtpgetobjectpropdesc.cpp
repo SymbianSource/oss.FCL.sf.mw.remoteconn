@@ -157,6 +157,9 @@ void CMTPGetObjectPropDesc::ServiceL()
 		case EMTPObjectPropCodeNonConsumable:
 			ServiceNonConsumableL();
 			break;
+		case EMTPObjectPropCodeHidden:
+		    ServiceHiddenL();
+		    break;
 		default:
 		    User::Leave( KErrNotSupported );
 			break;
@@ -294,7 +297,20 @@ void CMTPGetObjectPropDesc::ServiceNonConsumableL()
 	CleanupStack::PopAndDestroy(expectedForm);
 	}
 
-
+void CMTPGetObjectPropDesc::ServiceHiddenL()
+    {
+    CMTPTypeObjectPropDescEnumerationForm* expectedForm = CMTPTypeObjectPropDescEnumerationForm::NewL(EMTPTypeUINT16);
+    CleanupStack::PushL(expectedForm);
+    TUint16 values[] = {EMTPVisible,EMTPHidden};
+    TUint   numValues((sizeof(values) / sizeof(values[0])));
+    for (TUint i = 0; i < numValues; i++)
+        {
+        TMTPTypeUint16 data(values[i]);
+        expectedForm->AppendSupportedValueL(data);
+        }   
+    iObjectProperty = CMTPTypeObjectPropDesc::NewL(EMTPObjectPropCodeHidden, *expectedForm);
+    CleanupStack::PopAndDestroy(expectedForm);
+    }
 	
 TUint16  CMTPGetObjectPropDesc::GetPropertyGroupNumber(const TUint16 aPropCode) const
     {

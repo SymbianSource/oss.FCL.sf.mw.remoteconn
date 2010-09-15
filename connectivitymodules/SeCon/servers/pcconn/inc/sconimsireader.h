@@ -20,7 +20,7 @@
 #define __SCONIMSIREADER_H__
 
 #include <e32base.h>
-#include <Etel3rdParty.h>
+#include <etel3rdparty.h>
 
 enum TImsiReaderStatus
     {

@@ -189,7 +189,10 @@ void CMTPImageDpGetObjectPropValue::ServiceL()
             break;
         case EMTPObjectPropCodeNonConsumable:
             ServiceNonConsumableL();
-            break;            
+            break;
+        case EMTPObjectPropCodeHidden:
+            ServiceHiddenL();
+            break;
         default:
             User::Leave(KErrGeneral);
         }	
@@ -352,4 +355,12 @@ void CMTPImageDpGetObjectPropValue::ServiceNonConsumableL()
     iObjectPropertyMgr.GetPropertyL(EMTPObjectPropCodeNonConsumable, nonConsumable);
     iMTPTypeUint8.Set(nonConsumable);
     SendDataL(iMTPTypeUint8);
+    }
+
+void CMTPImageDpGetObjectPropValue::ServiceHiddenL()
+    {
+    TUint16 hiddenStatus;
+    iObjectPropertyMgr.GetPropertyL(EMTPObjectPropCodeHidden, hiddenStatus);
+    iMTPTypeUint16.Set(hiddenStatus);
+    SendDataL(iMTPTypeUint16);
     }

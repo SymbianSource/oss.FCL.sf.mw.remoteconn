@@ -175,6 +175,7 @@ private: // Owned
     CMTPObjectMetaData*      iReceivedObject;
     TMTPTypeRequest          iExpectedSendObjectRequest;
     TUint16                  iProtectionStatus;
+    TUint16                  iHiddenStatus;
     TUint16                  iFormatCode;
     TUint32                  iPreviousTransactionID;
     CMTPImageDpObjectPropertyMgr&  iObjectPropertyMgr;

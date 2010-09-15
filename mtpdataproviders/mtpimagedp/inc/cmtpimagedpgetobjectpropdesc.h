@@ -70,6 +70,7 @@ private:
     void ServiceRepresentativeSampleWidthL();
     void ServiceRepresentativeSampleDataL();
     void ServiceNonConsumableL();
+    void ServiceHiddenL();
     TUint16 GetPropertyGroupNumber(const TUint16 aPropCode) const;
     
 private:

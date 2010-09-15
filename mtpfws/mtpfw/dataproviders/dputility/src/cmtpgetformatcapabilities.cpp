@@ -160,6 +160,12 @@ void CMTPGetFormatCapabilities::BuildFormatAssociationL()
     CleanupStack::PushL(nonConsumable);
     frmCap->AppendL(nonConsumable);
     CleanupStack::Pop(nonConsumable);
+	
+    //Hidden
+	CMTPTypeObjectPropDesc* hidden = ServiceHiddenL();
+    CleanupStack::PushL( hidden );
+    frmCap->AppendL( hidden );
+	CleanupStack::Pop( hidden ); 
     
     iCapabilityList->AppendL(frmCap);
     CleanupStack::Pop(frmCap);
@@ -227,6 +233,11 @@ void CMTPGetFormatCapabilities::BuildFormatAsUndefinedL( TUint aFormatCode )
     CleanupStack::PushL(nonConsumable);
     frmCap->AppendL(nonConsumable);
     CleanupStack::Pop(nonConsumable);
+    //Hidden
+	CMTPTypeObjectPropDesc* hidden = ServiceHiddenL();
+    CleanupStack::PushL( hidden );
+    frmCap->AppendL( hidden );
+	CleanupStack::Pop( hidden ); 
     
     iCapabilityList->AppendL(frmCap);
     CleanupStack::Pop(frmCap);
@@ -290,6 +301,23 @@ CMTPTypeObjectPropDesc* CMTPGetFormatCapabilities::ServiceNonConsumableL()
         expectedForm->AppendSupportedValueL(data);
         }   
     CMTPTypeObjectPropDesc* ret = CMTPTypeObjectPropDesc::NewL(EMTPObjectPropCodeNonConsumable, *expectedForm);     
+    CleanupStack::PopAndDestroy(expectedForm);
+    
+    return ret;
+    }
+
+CMTPTypeObjectPropDesc* CMTPGetFormatCapabilities::ServiceHiddenL()
+    {
+    CMTPTypeObjectPropDescEnumerationForm* expectedForm = CMTPTypeObjectPropDescEnumerationForm::NewL(EMTPTypeUINT16);
+    CleanupStack::PushL(expectedForm);
+    TUint16 values[] = {EMTPVisible, EMTPHidden};
+    TUint   numValues((sizeof(values) / sizeof(values[0])));
+    for (TUint i = 0; i < numValues; i++)
+        {
+        TMTPTypeUint16 data(values[i]);
+        expectedForm->AppendSupportedValueL(data);
+        }   
+    CMTPTypeObjectPropDesc* ret = CMTPTypeObjectPropDesc::NewL(EMTPObjectPropCodeHidden, *expectedForm);     
     CleanupStack::PopAndDestroy(expectedForm);
     
     return ret;

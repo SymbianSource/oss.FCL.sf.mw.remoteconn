@@ -110,7 +110,8 @@ static const TUint16 KMTPDeviceDpSupportedObjectProperties[] =
 	EMTPObjectPropCodeParentObject,
 	EMTPObjectPropCodePersistentUniqueObjectIdentifier,
 	EMTPObjectPropCodeName,
-	EMTPObjectPropCodeNonConsumable	
+	EMTPObjectPropCodeNonConsumable,
+	EMTPObjectPropCodeHidden
 	};	
 
 static const TUint16 KMTPDeviceDpSupportedEvents[] = 

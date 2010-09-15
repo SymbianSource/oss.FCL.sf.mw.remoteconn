@@ -18,7 +18,7 @@
 
 #include <s32mem.h> // For RMemReadStream
 #include <utf.h>
-#include <Etel3rdParty.h>
+#include <etel3rdparty.h>
 #include <f32file.h>
 
 #include "sconpcconnclientserver.h"

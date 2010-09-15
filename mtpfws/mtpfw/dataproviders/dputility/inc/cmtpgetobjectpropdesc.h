@@ -62,6 +62,7 @@ private:
 	void ServicePuidL();
 	void ServiceNameL();
 	void ServiceNonConsumableL();
+	void ServiceHiddenL();
 	TUint16 GetPropertyGroupNumber(const TUint16 aPropCode) const;
 	
 private:
