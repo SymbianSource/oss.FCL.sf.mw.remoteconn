@@ -20,8 +20,6 @@
 
 #if !defined(GCCXML)  // NO GCCXML
 
-#include "../mediasyncserver/group/bld.inf"
-
 PRJ_PLATFORMS
 DEFAULT
 

@@ -368,6 +368,7 @@ private:
 	CSnapshotWorker*                        iSnapshotWorker;
 	mutable TFileName                       iSuidBuf;
 	TBool                                   iCleanUndefined;
+	TBool                                   iDbOpened;
 	};
 
 #endif // CMTPOBJECTSTORE_H

@@ -140,8 +140,11 @@ CMTPObjectStore::~CMTPObjectStore()
 	delete iPkgIDStore;
 	delete iSentinal;
 	delete iSnapshotWorker;
-	TRAP_IGNORE(CommitTransactionL());
-	iDatabase.Compact();
+	if (iDbOpened)
+	    {
+	    TRAP_IGNORE(CommitTransactionL());
+	    iDatabase.Compact();
+	    }
 	iBatched.Close();
 	iBatched_SuidHashID.Close();
 	CloseDb();
@@ -1004,9 +1007,19 @@ void CMTPObjectStore::CreateDbL(const TDesC& aFileName)
 	{
 	BaflUtils::EnsurePathExistsL(iSingletons.Fs(), aFileName);
 
-	LEAVEIFERROR(iDatabase.Replace(iSingletons.Fs(), aFileName, KMTPFormat),
-	        OstTrace0( TRACE_ERROR, CMTPOBJECTSTORE_CREATEDBL, " a new non-secure database create error!" ));
-	        
+	iDbOpened = EFalse;
+	TInt err = iDatabase.Replace(iSingletons.Fs(), aFileName, KMTPFormat);
+	if ( KErrNone == err )
+	    {
+	    iDbOpened = ETrue;
+	    }
+	else
+	    {
+        OstTrace0( TRACE_ERROR, CMTPOBJECTSTORE_CREATEDBL, 
+                    " a new non-secure database create error!" );
+	    User::Leave(err);
+	    }
+	
 	// Create table and index
 	CreateHandleTableL();
 	CreateHandleIndexL();

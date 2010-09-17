@@ -34,8 +34,10 @@ START_TESTCASE MTP-SBE-ACTIVEBACKUP-0010
 //! @SYMTestActions Do BaseOnly active-backup for three data owners 
 //! @SYMTestExpectedResults Backup succeeds
 //! @SYMTestType CIT
-RUN_TEST_STEP 100 BURTestServer TestBackup z:\testdata\scripts\sbetestdata\test.ini ACTIVE_BACKUP_0010
+RUN_TEST_STEP 300 BURTestServer TestBackup z:\testdata\scripts\sbetestdata\test.ini ACTIVE_BACKUP_0010
 END_TESTCASE MTP-SBE-ACTIVEBACKUP-0010
+
+DELAY 10000
 
 START_TESTCASE MTP-SBE-ACTIVEBACKUP-0020
 //! @SYMTestCaseID MTP-SBE-ACTIVEBACKUP-0020
@@ -46,8 +48,10 @@ START_TESTCASE MTP-SBE-ACTIVEBACKUP-0020
 //! @SYMTestActions Do Proxy active-backup for specified data owner
 //! @SYMTestExpectedResults Backup succeeds
 //! @SYMTestType CIT
-RUN_TEST_STEP 100 BURTestServer TestBackup z:\testdata\scripts\sbetestdata\test.ini ACTIVE_BACKUP_0020
+RUN_TEST_STEP 300 BURTestServer TestBackup z:\testdata\scripts\sbetestdata\test.ini ACTIVE_BACKUP_0020
 END_TESTCASE MTP-SBE-ACTIVEBACKUP-0020
+
+DELAY 10000
 
 START_TESTCASE MTP-SBE-ACTIVEBACKUP-0030
 //! @SYMTestCaseID MTP-SBE-ACTIVEBACKUP-0030
@@ -58,8 +62,10 @@ START_TESTCASE MTP-SBE-ACTIVEBACKUP-0030
 //! @SYMTestActions Do Incremental active-backup for specified data owner
 //! @SYMTestExpectedResults Backup succeeds
 //! @SYMTestType CIT
-RUN_TEST_STEP 100 BURTestServer TestBackup z:\testdata\scripts\sbetestdata\test.ini ACTIVE_BACKUP_0030
+RUN_TEST_STEP 300 BURTestServer TestBackup z:\testdata\scripts\sbetestdata\test.ini ACTIVE_BACKUP_0030
 END_TESTCASE MTP-SBE-ACTIVEBACKUP-0030
+
+DELAY 10000
 
 START_TESTCASE MTP-SBE-ACTIVEBACKUP-0040
 //! @SYMTestCaseID MTP-SBE-ACTIVEBACKUP-0040
@@ -70,8 +76,10 @@ START_TESTCASE MTP-SBE-ACTIVEBACKUP-0040
 //! @SYMTestActions Do active-backup for a data owner whose executable file is missing
 //! @SYMTestExpectedResults Backup fails with error code 5
 //! @SYMTestType CIT
-RUN_TEST_STEP 100 BURTestServer TestBackup z:\testdata\scripts\sbetestdata\test.ini ACTIVE_BACKUP_0040
+RUN_TEST_STEP 300 BURTestServer TestBackup z:\testdata\scripts\sbetestdata\test.ini ACTIVE_BACKUP_0040
 END_TESTCASE MTP-SBE-ACTIVEBACKUP-0040
+
+DELAY 10000
 
 PRINT ----------------------------------------------
 PRINT  Test Active Restore
@@ -86,8 +94,10 @@ START_TESTCASE MTP-SBE-ACTIVERESTORE-0010
 //! @SYMTestActions Do BaseOnly active-restore for three data owners  
 //! @SYMTestExpectedResults Restore succeeds
 //! @SYMTestType CIT
-RUN_TEST_STEP 100 BURTestServer TestRestore z:\testdata\scripts\sbetestdata\test.ini ACTIVE_RESTORE_0010
+RUN_TEST_STEP 300 BURTestServer TestRestore z:\testdata\scripts\sbetestdata\test.ini ACTIVE_RESTORE_0010
 END_TESTCASE MTP-SBE-ACTIVERESTORE-0010
+
+DELAY 10000
 
 START_TESTCASE MTP-SBE-ACTIVERESTORE-0020
 //! @SYMTestCaseID MTP-SBE-ACTIVERESTORE-0020
@@ -98,8 +108,10 @@ START_TESTCASE MTP-SBE-ACTIVERESTORE-0020
 //! @SYMTestActions Do Proxy active-restore for specified data owner  
 //! @SYMTestExpectedResults Restore succeeds
 //! @SYMTestType CIT
-RUN_TEST_STEP 100 BURTestServer TestRestore z:\testdata\scripts\sbetestdata\test.ini ACTIVE_RESTORE_0020
+RUN_TEST_STEP 300 BURTestServer TestRestore z:\testdata\scripts\sbetestdata\test.ini ACTIVE_RESTORE_0020
 END_TESTCASE MTP-SBE-ACTIVERESTORE-0020
+
+DELAY 10000
 
 START_TESTCASE MTP-SBE-ACTIVERESTORE-0030
 //! @SYMTestCaseID MTP-SBE-ACTIVERESTORE-0030
@@ -110,8 +122,10 @@ START_TESTCASE MTP-SBE-ACTIVERESTORE-0030
 //! @SYMTestActions Do Incremental active-restore for specified data owner  
 //! @SYMTestExpectedResults Restore succeeds
 //! @SYMTestType CIT
-RUN_TEST_STEP 100 BURTestServer TestRestore z:\testdata\scripts\sbetestdata\test.ini ACTIVE_RESTORE_0030
+RUN_TEST_STEP 300 BURTestServer TestRestore z:\testdata\scripts\sbetestdata\test.ini ACTIVE_RESTORE_0030
 END_TESTCASE MTP-SBE-ACTIVERESTORE-0030
+
+DELAY 10000
 
 START_TESTCASE MTP-SBE-ACTIVERESTORE-0040
 //! @SYMTestCaseID MTP-SBE-ACTIVERESTORE-0040
@@ -122,8 +136,10 @@ START_TESTCASE MTP-SBE-ACTIVERESTORE-0040
 //! @SYMTestActions Do active-restore for a data owner whose executable file is missing 
 //! @SYMTestExpectedResults Restore fails with error code 5
 //! @SYMTestType CIT
-RUN_TEST_STEP 100 BURTestServer TestRestore z:\testdata\scripts\sbetestdata\test.ini ACTIVE_RESTORE_0040
+RUN_TEST_STEP 300 BURTestServer TestRestore z:\testdata\scripts\sbetestdata\test.ini ACTIVE_RESTORE_0040
 END_TESTCASE MTP-SBE-ACTIVERESTORE-0040
+
+DELAY 10000
 
 PRINT ----------------------------------------------
 PRINT  Test Active Backup Async
@@ -138,8 +154,10 @@ START_TESTCASE MTP-SBE-ACTIVEBACKUP-ASYNC-0010
 //! @SYMTestActions Do BaseOnly active-backup for three data owners asynchronously
 //! @SYMTestExpectedResults Backup succeeds
 //! @SYMTestType CIT
-RUN_TEST_STEP 100 BURTestServer TestBackupAsync z:\testdata\scripts\sbetestdata\test.ini ACTIVE_BACKUP_0010
+RUN_TEST_STEP 300 BURTestServer TestBackupAsync z:\testdata\scripts\sbetestdata\test.ini ACTIVE_BACKUP_0010
 END_TESTCASE MTP-SBE-ACTIVEBACKUP-ASYNC-0010
+
+DELAY 10000
 
 START_TESTCASE MTP-SBE-ACTIVEBACKUP-ASYNC-0020
 //! @SYMTestCaseID MTP-SBE-ACTIVEBACKUP-ASYNC-0020
@@ -150,8 +168,10 @@ START_TESTCASE MTP-SBE-ACTIVEBACKUP-ASYNC-0020
 //! @SYMTestActions Do Proxy active-backup for specified data owner asynchronously
 //! @SYMTestExpectedResults Backup succeeds
 //! @SYMTestType CIT
-RUN_TEST_STEP 100 BURTestServer TestBackupAsync z:\testdata\scripts\sbetestdata\test.ini ACTIVE_BACKUP_0020
+RUN_TEST_STEP 300 BURTestServer TestBackupAsync z:\testdata\scripts\sbetestdata\test.ini ACTIVE_BACKUP_0020
 END_TESTCASE MTP-SBE-ACTIVEBACKUP-ASYNC-0020
+
+DELAY 10000
 
 START_TESTCASE MTP-SBE-ACTIVEBACKUP-ASYNC-0030
 //! @SYMTestCaseID MTP-SBE-ACTIVEBACKUP-ASYNC-0030
@@ -162,8 +182,10 @@ START_TESTCASE MTP-SBE-ACTIVEBACKUP-ASYNC-0030
 //! @SYMTestActions Do Incremental active-backup for specified data owner asynchronously 
 //! @SYMTestExpectedResults Backup succeeds
 //! @SYMTestType CIT
-RUN_TEST_STEP 100 BURTestServer TestBackupAsync z:\testdata\scripts\sbetestdata\test.ini ACTIVE_BACKUP_0030
+RUN_TEST_STEP 300 BURTestServer TestBackupAsync z:\testdata\scripts\sbetestdata\test.ini ACTIVE_BACKUP_0030
 END_TESTCASE MTP-SBE-ACTIVEBACKUP-ASYNC-0030
+
+DELAY 10000
 
 START_TESTCASE MTP-SBE-ACTIVEBACKUP-ASYNC-0040
 //! @SYMTestCaseID MTP-SBE-ACTIVEBACKUP-ASYNC-0040
@@ -174,8 +196,10 @@ START_TESTCASE MTP-SBE-ACTIVEBACKUP-ASYNC-0040
 //! @SYMTestActions Do active-backup asynchronously for a data owner whose executable file is missing  
 //! @SYMTestExpectedResults Backup fails with error code 5
 //! @SYMTestType CIT
-RUN_TEST_STEP 100 BURTestServer TestBackupAsync z:\testdata\scripts\sbetestdata\test.ini ACTIVE_BACKUP_0040
+RUN_TEST_STEP 300 BURTestServer TestBackupAsync z:\testdata\scripts\sbetestdata\test.ini ACTIVE_BACKUP_0040
 END_TESTCASE MTP-SBE-ACTIVEBACKUP-ASYNC-0040
+
+DELAY 10000
 
 PRINT ----------------------------------------------
 PRINT  Test Active Restore Async
@@ -190,8 +214,10 @@ START_TESTCASE MTP-SBE-ACTIVERESTORE-ASYNC-0010
 //! @SYMTestActions Do BaseOnly active-restore for three data owners asynchronously
 //! @SYMTestExpectedResults Restore succeeds
 //! @SYMTestType CIT
-RUN_TEST_STEP 100 BURTestServer TestRestoreAsync z:\testdata\scripts\sbetestdata\test.ini ACTIVE_RESTORE_0010
+RUN_TEST_STEP 300 BURTestServer TestRestoreAsync z:\testdata\scripts\sbetestdata\test.ini ACTIVE_RESTORE_0010
 END_TESTCASE MTP-SBE-ACTIVERESTORE-ASYNC-0010
+
+DELAY 10000
 
 START_TESTCASE MTP-SBE-ACTIVERESTORE-ASYNC-0020
 //! @SYMTestCaseID MTP-SBE-ACTIVERESTORE-ASYNC-0020
@@ -202,8 +228,10 @@ START_TESTCASE MTP-SBE-ACTIVERESTORE-ASYNC-0020
 //! @SYMTestActions Do Proxy active-restore for specified data owner asynchronously
 //! @SYMTestExpectedResults Restore succeeds
 //! @SYMTestType CIT
-RUN_TEST_STEP 100 BURTestServer TestRestoreAsync z:\testdata\scripts\sbetestdata\test.ini ACTIVE_RESTORE_0020
+RUN_TEST_STEP 300 BURTestServer TestRestoreAsync z:\testdata\scripts\sbetestdata\test.ini ACTIVE_RESTORE_0020
 END_TESTCASE MTP-SBE-ACTIVERESTORE-ASYNC-0020
+
+DELAY 10000
 
 START_TESTCASE MTP-SBE-ACTIVERESTORE-ASYNC-0030
 //! @SYMTestCaseID MTP-SBE-ACTIVERESTORE-ASYNC-0030
@@ -214,8 +242,10 @@ START_TESTCASE MTP-SBE-ACTIVERESTORE-ASYNC-0030
 //! @SYMTestActions Do Incremental active-restore for specified data owner asynchronously 
 //! @SYMTestExpectedResults Restore succeeds
 //! @SYMTestType CIT
-RUN_TEST_STEP 100 BURTestServer TestRestoreAsync z:\testdata\scripts\sbetestdata\test.ini ACTIVE_RESTORE_0030
+RUN_TEST_STEP 300 BURTestServer TestRestoreAsync z:\testdata\scripts\sbetestdata\test.ini ACTIVE_RESTORE_0030
 END_TESTCASE MTP-SBE-ACTIVERESTORE-ASYNC-0030
+
+DELAY 10000
 
 START_TESTCASE MTP-SBE-ACTIVERESTORE-ASYNC-0040
 //! @SYMTestCaseID MTP-SBE-ACTIVERESTORE-ASYNC-0040
@@ -226,5 +256,7 @@ START_TESTCASE MTP-SBE-ACTIVERESTORE-ASYNC-0040
 //! @SYMTestActions Do active-restore asynchronously for a data owner whose executable file is missing 
 //! @SYMTestExpectedResults Restore fails with error code 5
 //! @SYMTestType CIT
-RUN_TEST_STEP 100 BURTestServer TestRestoreAsync z:\testdata\scripts\sbetestdata\test.ini ACTIVE_RESTORE_0040
+RUN_TEST_STEP 300 BURTestServer TestRestoreAsync z:\testdata\scripts\sbetestdata\test.ini ACTIVE_RESTORE_0040
 END_TESTCASE MTP-SBE-ACTIVERESTORE-ASYNC-0040
+
+DELAY 10000

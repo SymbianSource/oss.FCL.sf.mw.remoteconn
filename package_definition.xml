@@ -38,13 +38,13 @@
    </component>
   </collection>
   <collection id="mtptransports" name="MTP Transports" level="plugin">
-   <component id="mtpusbtransport" name="MTP USB Transport" introduced="^2" purpose="optional" class="plugin">
+   <component id="mtpusbtransport" name="MTP USB Transport" introduced="^2" purpose="optional" class="plugin" filter="s60">
     <unit bldFile="mtptransports/mtpusbtransport/group" mrp="mtptransports/mtpusbtransport/group/mtp_usbsic.mrp"/>
    </component>
-   <component id="mtpptpiptransport" name="MTP PTP-IP Transport" introduced="^3" purpose="optional" class="plugin">
+   <component id="mtpptpiptransport" name="MTP PTP-IP Transport" introduced="^3" purpose="optional" class="plugin" filter="s60">
     <unit bldFile="mtptransports/mtpptpiptransport/group" mrp="mtptransports/mtpptpiptransport/group/mtp_ptpip.mrp"/>
    </component>
-   <component id="mtpcontroller" name="MTP Controller" introduced="^3" purpose="optional" class="plugin">
+   <component id="mtpcontroller" name="MTP Controller" introduced="^3" purpose="optional" class="plugin" filter="s60">
     <meta rel="config">
      <defined condition="FF_MTP_CONTROLLER"/>
     </meta>
@@ -52,22 +52,22 @@
    </component>
   </collection>
   <collection id="mtpfws" name="MTP Frameworks" level="framework">
-   <component id="mtpfw" name="MTP Framework" introduced="^2" purpose="optional">
+   <component id="mtpfw" name="MTP Framework" introduced="^2" purpose="optional" filter="s60">
     <unit bldFile="mtpfws/mtpfw/group" mrp="mtpfws/mtpfw/group/mtp_framework.mrp"/>
    </component>
-   <component id="devdpextn" name="MTP Device Provider Extension" introduced="^4" purpose="optional">
+   <component id="devdpextn" name="MTP Device Provider Extension" introduced="^4" purpose="optional" filter="s60">
  	  <!-- can't have a component inside another component. Need to move to mtpfws/devdpextn/group -->
 	 <unit bldFile="mtpfws/mtpfw/dataproviders/devdp/devdpextn/group"/>
    </component>
   </collection>
   <collection id="mtpdataproviders" name="MTP Data Providers" level="generic">
-   <component id="mtpfileandfolderdp" name="MTP File and Folder Provider" introduced="^2" purpose="optional" class="plugin">
+   <component id="mtpfileandfolderdp" name="MTP File and Folder Provider" introduced="^2" purpose="optional" class="plugin" filter="s60">
     <unit bldFile="mtpdataproviders/mtpfileandfolderdp/group" mrp="mtpdataproviders/mtpfileandfolderdp/group/mtp_filedp.mrp"/>
    </component>
-   <component id="mtpimagedp" name="MTP Image Data Provider" filter="gt" introduced="^3" purpose="optional" class="plugin">
+   <component id="mtpimagedp" name="MTP Image Data Provider" filter="s60" introduced="^3" purpose="optional" class="plugin">
     <unit bldFile="mtpdataproviders/mtpimagedp/group" mrp="mtpdataproviders/mtpimagedp/group/mtp_imagedp.mrp"/>
    </component>
-   <component id="mtppictbridgedp" name="MTP PictBridge Data Provider" introduced="^3" purpose="optional" class="plugin" filter="gt">
+   <component id="mtppictbridgedp" name="MTP PictBridge Data Provider" introduced="^3" purpose="optional" class="plugin" filter="s60">
     <unit bldFile="mtpdataproviders/mtppictbridgedp/group" mrp="mtpdataproviders/mtppictbridgedp/group/mtp_pictbridgedp.mrp"/>
    </component>
    <component id="pictbridgeengine" name="MTP PictBridge Engine" introduced="^4" purpose="optional" filter="s60">
@@ -79,18 +79,18 @@
    </component>
   </collection>
   <collection id="backupandrestore" name="Backup and Restore" level="specific">
-   <component id="backupengine" name="Backup Engine" introduced="9.0" purpose="optional">
+   <component id="backupengine" name="Backup Engine" introduced="9.0" purpose="optional" filter="s60">
     <unit bldFile="backupandrestore/backupengine/group" mrp="backupandrestore/backupengine/group/connectivity_backupengine.mrp"/>
    </component>
-   <component id="backuptest" name="Backup Test" introduced="^2" purpose="development">
+   <component id="backuptest" name="Backup Test" introduced="^2" purpose="development" filter="s60">
     <unit bldFile="backupandrestore/backuptest/group" mrp="backupandrestore/backuptest/group/connectivity_backuptest.mrp"/>
    </component>
   </collection>
   <collection id="obex" name="OBEX" level="generic">
-   <component id="obexprotocol" name="OBEX Protocol" introduced="9.1" purpose="optional">
+   <component id="obexprotocol" name="OBEX Protocol" introduced="9.1" purpose="optional" filter="s60">
     <unit bldFile="obex/obexprotocol/group" mrp="obex/obexprotocol/group/obex.mrp"/>
    </component>
-   <component id="obexextensionapi" name="OBEX Extension API" introduced="9.2" purpose="optional">
+   <component id="obexextensionapi" name="OBEX Extension API" introduced="9.2" purpose="optional" filter="s60">
     <unit bldFile="obex/obexextensionapi/group" mrp="obex/obexextensionapi/group/obex_extensionapis.mrp"/>
    </component>
   </collection>

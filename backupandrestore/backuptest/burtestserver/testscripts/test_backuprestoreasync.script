@@ -34,8 +34,10 @@ START_TESTCASE MTP-SBE-BACKUPPARTIALBASEASYNC-0000
 //! @SYMTestActions   Specify ini file for base and partial backup
 //! @SYMTestExpectedResults no error
 //! @SYMTestType CIT
-RUN_TEST_STEP 100 BURTestServer TestBackupAsync z:\testdata\scripts\sbetestdata\test.ini BACKUP_RESTORE_0010
+RUN_TEST_STEP 300 BURTestServer TestBackupAsync z:\testdata\scripts\sbetestdata\test.ini BACKUP_RESTORE_0010
 END_TESTCASE MTP-SBE-BACKUPPARTIALBASEASYNC-0000
+
+DELAY 10000
 
 START_TESTCASE MTP-SBE-RESTOREPARTIALBASEASYNC-0001
 //! @SYMTestCaseID MTP-SBE-RESTOREPARTIALBASEASYNC-0001
@@ -46,8 +48,10 @@ START_TESTCASE MTP-SBE-RESTOREPARTIALBASEASYNC-0001
 //! @SYMTestActions   Specify ini file for base and partial restore
 //! @SYMTestExpectedResults no error
 //! @SYMTestType CIT
-RUN_TEST_STEP 100 BURTestServer TestRestoreAsync z:\testdata\scripts\sbetestdata\test.ini BACKUP_RESTORE_0010
+RUN_TEST_STEP 300 BURTestServer TestRestoreAsync z:\testdata\scripts\sbetestdata\test.ini BACKUP_RESTORE_0010
 END_TESTCASE MTP-SBE-RESTOREPARTIALBASEASYNC-0001
+
+DELAY 10000
 
 START_TESTCASE MTP-SBE-BACKUPPARTIALASYNC-0002
 //! @SYMTestCaseID MTP-SBE-BACKUPPARTIALASYNC-0002
@@ -58,8 +62,10 @@ START_TESTCASE MTP-SBE-BACKUPPARTIALASYNC-0002
 //! @SYMTestActions   Specify ini file for increament and partial backup
 //! @SYMTestExpectedResults no error
 //! @SYMTestType CIT
-RUN_TEST_STEP 100 BURTestServer TestBackupAsync z:\testdata\scripts\sbetestdata\test.ini BACKUP_RESTORE_0020
+RUN_TEST_STEP 300 BURTestServer TestBackupAsync z:\testdata\scripts\sbetestdata\test.ini BACKUP_RESTORE_0020
 END_TESTCASE MTP-SBE-BACKUPPARTIALASYNC-0002
+
+DELAY 10000
 
 START_TESTCASE MTP-SBE-RESTOREPARTIALASYNC-0003
 //! @SYMTestCaseID MTP-SBE-RESTOREPARTIALASYNC-0003
@@ -70,8 +76,10 @@ START_TESTCASE MTP-SBE-RESTOREPARTIALASYNC-0003
 //! @SYMTestActions   Specify ini file for increament and partial restore
 //! @SYMTestExpectedResults no error
 //! @SYMTestType CIT
-RUN_TEST_STEP 100 BURTestServer TestRestoreAsync z:\testdata\scripts\sbetestdata\test.ini BACKUP_RESTORE_0020
+RUN_TEST_STEP 300 BURTestServer TestRestoreAsync z:\testdata\scripts\sbetestdata\test.ini BACKUP_RESTORE_0020
 END_TESTCASE MTP-SBE-RESTOREPARTIALASYNC-0003
+
+DELAY 10000
 
 START_TESTCASE MTP-SBE-BACKUPFULLBASEASYNC-0004
 //! @SYMTestCaseID MTP-SBE-BACKUPFULLBASEASYNC-0004
@@ -82,8 +90,10 @@ START_TESTCASE MTP-SBE-BACKUPFULLBASEASYNC-0004
 //! @SYMTestActions   Specify ini file for full and base backup
 //! @SYMTestExpectedResults no error
 //! @SYMTestType CIT
-RUN_TEST_STEP 500 BURTestServer TestBackupAsync z:\testdata\scripts\sbetestdata\test.ini BACKUP_RESTORE_0030
+RUN_TEST_STEP 300 BURTestServer TestBackupAsync z:\testdata\scripts\sbetestdata\test.ini BACKUP_RESTORE_0030
 END_TESTCASE MTP-SBE-BACKUPFULLBASEASYNC-0004
+
+DELAY 10000
 
 START_TESTCASE MTP-SBE-RESTOREFULLBASEASYNC-0005
 //! @SYMTestCaseID MTP-SBE-RESTOREFULLBASEASYNC-0005
@@ -94,8 +104,10 @@ START_TESTCASE MTP-SBE-RESTOREFULLBASEASYNC-0005
 //! @SYMTestActions   Specify ini file for full and base restore
 //! @SYMTestExpectedResults no error
 //! @SYMTestType CIT
-RUN_TEST_STEP 500 BURTestServer TestRestoreAsync z:\testdata\scripts\sbetestdata\test.ini BACKUP_RESTORE_0030
+RUN_TEST_STEP 300 BURTestServer TestRestoreAsync z:\testdata\scripts\sbetestdata\test.ini BACKUP_RESTORE_0030
 END_TESTCASE MTP-SBE-RESTOREFULLBASEASYNC-0005
+
+DELAY 10000
 
 START_TESTCASE MTP-SBE-BACKUPFULLASYNC-0006
 //! @SYMTestCaseID MTP-SBE-BACKUPFULLASYNC-0006
@@ -106,8 +118,10 @@ START_TESTCASE MTP-SBE-BACKUPFULLASYNC-0006
 //! @SYMTestActions   Specify ini file for full and increament backup
 //! @SYMTestExpectedResults no error
 //! @SYMTestType CIT
-RUN_TEST_STEP 500 BURTestServer TestBackupAsync z:\testdata\scripts\sbetestdata\test.ini BACKUP_RESTORE_0040
+RUN_TEST_STEP 300 BURTestServer TestBackupAsync z:\testdata\scripts\sbetestdata\test.ini BACKUP_RESTORE_0040
 END_TESTCASE MTP-SBE-BACKUPFULLASYNC-0006
+
+DELAY 10000
 
 START_TESTCASE MTP-SBE-RESTOREFULLASYNC-0007
 //! @SYMTestCaseID MTP-SBE-RESTOREFULLASYNC-0007
@@ -118,5 +132,7 @@ START_TESTCASE MTP-SBE-RESTOREFULLASYNC-0007
 //! @SYMTestActions   Specify ini file for full and increament restore
 //! @SYMTestExpectedResults no error 
 //! @SYMTestType CIT
-RUN_TEST_STEP 500 BURTestServer TestRestoreAsync z:\testdata\scripts\sbetestdata\test.ini BACKUP_RESTORE_0040
+RUN_TEST_STEP 300 BURTestServer TestRestoreAsync z:\testdata\scripts\sbetestdata\test.ini BACKUP_RESTORE_0040
 END_TESTCASE MTP-SBE-RESTOREFULLASYNC-0007
+
+DELAY 10000

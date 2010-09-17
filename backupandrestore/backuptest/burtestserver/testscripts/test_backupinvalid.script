@@ -33,8 +33,10 @@ START_TESTCASE MTP-SBE-BACKUPINVALIDIDS-0000
 //! @SYMTestActions   Specify an invlid id and try backup it.
 //! @SYMTestExpectedResults SBE can't found and do nothing
 //! @SYMTestType CIT
-RUN_TEST_STEP 100 BURTestServer TestBackup z:\testdata\scripts\sbetestdata\test.ini BACKUP_RESTORE_0050
+RUN_TEST_STEP 300 BURTestServer TestBackup z:\testdata\scripts\sbetestdata\test.ini BACKUP_RESTORE_0050
 END_TESTCASE MTP-SBE-BACKUPINVALIDIDS-0000
+
+DELAY 10000
 
 START_TESTCASE MTP-SBE-BACKUPINVALIDDRIVE-0001
 //! @SYMTestCaseID MTP-SBE-BACKUPINVALIDDRIVE-0001
@@ -45,8 +47,10 @@ START_TESTCASE MTP-SBE-BACKUPINVALIDDRIVE-0001
 //! @SYMTestActions   Specify an invalid drive for a data owner to backup
 //! @SYMTestExpectedResults SBE backup operation return -1
 //! @SYMTestType CIT
-RUN_TEST_STEP 100 BURTestServer TestBackup z:\testdata\scripts\sbetestdata\test.ini BACKUP_RESTORE_0060
+RUN_TEST_STEP 300 BURTestServer TestBackup z:\testdata\scripts\sbetestdata\test.ini BACKUP_RESTORE_0060
 END_TESTCASE MTP-SBE-BACKUPINVALIDDRIVE-0001
+
+DELAY 10000
 
 RUN_UTILS MkDir c:\private\12345678\
 RUN_UTILS CopyFile z:\testdata\scripts\sbetestdata\backup_registration.xml c:\private\12345678\backup_registration.xml
@@ -59,8 +63,10 @@ START_TESTCASE MTP-SBE-BACKUPINVALIDDIR-0002
 //! @SYMTestActions   Specify an invalid directory for a data owner to backup
 //! @SYMTestExpectedResults SBE can't found and do nothing
 //! @SYMTestType CIT
-RUN_TEST_STEP 100 BURTestServer TestBackup z:\testdata\scripts\sbetestdata\test.ini BACKUP_RESTORE_0070
+RUN_TEST_STEP 300 BURTestServer TestBackup z:\testdata\scripts\sbetestdata\test.ini BACKUP_RESTORE_0070
 END_TESTCASE MTP-SBE-BACKUPINVALIDDIR-0002
+
+DELAY 10000
 
 RUN_UTILS DeleteDirectory c:\private\12345678\
 RUN_UTILS DeleteDirectory c:\BackupArchive\
@@ -77,8 +83,10 @@ START_TESTCASE MTP-SBE-BACKUPINVALIDPROXY-0003
 //! @SYMTestActions   Specify an invalid proxy manager in register file for a data owner to backup
 //! @SYMTestExpectedResults SBE can't found and do nothing
 //! @SYMTestType CIT
-RUN_TEST_STEP 100 BURTestServer TestBackup z:\testdata\scripts\sbetestdata\test.ini BACKUP_RESTORE_0075
+RUN_TEST_STEP 300 BURTestServer TestBackup z:\testdata\scripts\sbetestdata\test.ini BACKUP_RESTORE_0075
 END_TESTCASE MTP-SBE-BACKUPINVALIDPROXY-0003
+
+DELAY 10000
 
 RUN_UTILS DeleteDirectory c:\private\0AB7E58F\
 RUN_UTILS DeleteDirectory c:\BackupArchive\
@@ -94,8 +102,10 @@ START_TESTCASE MTP-SBE-BACKUPREADONLY-0004
 //! @SYMTestActions   Backup a read only file
 //! @SYMTestExpectedResults no error
 //! @SYMTestType CIT
-RUN_TEST_STEP 100 BURTestServer TestBackup z:\testdata\scripts\sbetestdata\test.ini BACKUP_RESTORE_0075
+RUN_TEST_STEP 300 BURTestServer TestBackup z:\testdata\scripts\sbetestdata\test.ini BACKUP_RESTORE_0075
 END_TESTCASE MTP-SBE-BACKUPREADONLY-0004
+
+DELAY 10000
 
 START_TESTCASE MTP-SBE-RESTOREREADONLY-0005
 //! @SYMTestCaseID MTP-SBE-RESTOREREADONLY-0005
@@ -106,6 +116,8 @@ START_TESTCASE MTP-SBE-RESTOREREADONLY-0005
 //! @SYMTestActions   Restore a readonly file, but the origin file exist
 //! @SYMTestExpectedResults -21
 //! @SYMTestType CIT
-RUN_TEST_STEP 100 BURTestServer TestRestore z:\testdata\scripts\sbetestdata\test.ini BACKUP_RESTORE_0077
+RUN_TEST_STEP 300 BURTestServer TestRestore z:\testdata\scripts\sbetestdata\test.ini BACKUP_RESTORE_0077
 END_TESTCASE MTP-SBE-RESTOREREADONLY-0005
 RUN_UTILS DeleteDirectory c:\private\0AB7E58F\
+
+DELAY 10000

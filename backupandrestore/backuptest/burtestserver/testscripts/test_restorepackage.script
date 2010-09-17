@@ -37,8 +37,10 @@ START_TESTCASE MTP-SBE-RESTOREBACKUPPACKAGE-0000
 //!                             2. The name and size of private files are same like after installing application.
 //!                             3. The public files don't be restored.  
 //! @SYMTestType                CIT
-RUN_TEST_STEP 100 BURTestServer TestRestore z:\testdata\scripts\sbetestdata\test.ini PACKAGE_0020
+RUN_TEST_STEP 300 BURTestServer TestRestore z:\testdata\scripts\sbetestdata\test.ini PACKAGE_0020
 END_TESTCASE MTP-SBE-RESTOREBACKUPPACKAGE-0000
+
+DELAY 10000
 
 START_TESTCASE MTP-SBE-RESTOREBACKUPPACKAGE-0001
 //! @SYMTestCaseID MTP-SBE-RESTOREBACKUPPACKAGE-0001
@@ -51,8 +53,10 @@ START_TESTCASE MTP-SBE-RESTOREBACKUPPACKAGE-0001
 //!                             2. The name and size of DLLs are same like after installing application.
 //!                             3. The public files don't be restored. 
 //! @SYMTestType                CIT
-RUN_TEST_STEP 100 BURTestServer TestRestore z:\testdata\scripts\sbetestdata\test.ini PACKAGE_0040
+RUN_TEST_STEP 300 BURTestServer TestRestore z:\testdata\scripts\sbetestdata\test.ini PACKAGE_0040
 END_TESTCASE MTP-SBE-RESTOREBACKUPPACKAGE-0001
 
 RUN_PROGRAM 900 swiconsole /u /uid 0x8111300b /pkg "big exe for backup" /vendor "Unique Vendor Name" /optimal
 RUN_PROGRAM 1000 swiconsole /u /uid 0x81113002 /pkg "tswinocapability" /vendor "Symbian" /optimal
+
+DELAY 10000

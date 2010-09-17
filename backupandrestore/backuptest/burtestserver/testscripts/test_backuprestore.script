@@ -33,8 +33,10 @@ START_TESTCASE MTP-SBE-BACKUPPARTIALBASE-0000
 //! @SYMTestActions   Specify ini file for base and partial backup
 //! @SYMTestExpectedResults no error
 //! @SYMTestType CIT
-RUN_TEST_STEP 100 BURTestServer TestBackup z:\testdata\scripts\sbetestdata\test.ini BACKUP_RESTORE_0010
+RUN_TEST_STEP 300 BURTestServer TestBackup z:\testdata\scripts\sbetestdata\test.ini BACKUP_RESTORE_0010
 END_TESTCASE MTP-SBE-BACKUPPARTIALBASE-0000
+
+DELAY 10000
 
 START_TESTCASE MTP-SBE-RESTOREPARTIALBASE-0001
 //! @SYMTestCaseID MTP-SBE-RESTOREPARTIALBASE-0001
@@ -45,8 +47,10 @@ START_TESTCASE MTP-SBE-RESTOREPARTIALBASE-0001
 //! @SYMTestActions   Specify ini file for base and partial restore
 //! @SYMTestExpectedResults no error
 //! @SYMTestType CIT
-RUN_TEST_STEP 100 BURTestServer TestRestore z:\testdata\scripts\sbetestdata\test.ini BACKUP_RESTORE_0010
+RUN_TEST_STEP 300 BURTestServer TestRestore z:\testdata\scripts\sbetestdata\test.ini BACKUP_RESTORE_0010
 END_TESTCASE MTP-SBE-RESTOREPARTIALBASE-0001
+
+DELAY 10000
 
 START_TESTCASE MTP-SBE-BACKUPPARTIAL-0002
 //! @SYMTestCaseID MTP-SBE-BACKUPPARTIAL-0002
@@ -57,8 +61,10 @@ START_TESTCASE MTP-SBE-BACKUPPARTIAL-0002
 //! @SYMTestActions   Specify ini file for increament and partial backup
 //! @SYMTestExpectedResults no error
 //! @SYMTestType CIT
-RUN_TEST_STEP 100 BURTestServer TestBackup z:\testdata\scripts\sbetestdata\test.ini BACKUP_RESTORE_0020
+RUN_TEST_STEP 300 BURTestServer TestBackup z:\testdata\scripts\sbetestdata\test.ini BACKUP_RESTORE_0020
 END_TESTCASE MTP-SBE-BACKUPPARTIAL-0002
+
+DELAY 10000
 
 START_TESTCASE MTP-SBE-RESTOREPARTIAL-0003
 //! @SYMTestCaseID MTP-SBE-RESTOREPARTIAL-0003
@@ -69,8 +75,10 @@ START_TESTCASE MTP-SBE-RESTOREPARTIAL-0003
 //! @SYMTestActions   Specify ini file for increament and partial restore
 //! @SYMTestExpectedResults no error
 //! @SYMTestType CIT
-RUN_TEST_STEP 100 BURTestServer TestRestore z:\testdata\scripts\sbetestdata\test.ini BACKUP_RESTORE_0020
+RUN_TEST_STEP 300 BURTestServer TestRestore z:\testdata\scripts\sbetestdata\test.ini BACKUP_RESTORE_0020
 END_TESTCASE MTP-SBE-RESTOREPARTIAL-0003
+
+DELAY 10000
 
 START_TESTCASE MTP-SBE-BACKUPFULLBASE-0004
 //! @SYMTestCaseID MTP-SBE-BACKUPFULLBASE-0004
@@ -81,8 +89,10 @@ START_TESTCASE MTP-SBE-BACKUPFULLBASE-0004
 //! @SYMTestActions   Specify ini file for full and base backup
 //! @SYMTestExpectedResults no error
 //! @SYMTestType CIT
-RUN_TEST_STEP 500 BURTestServer TestBackup z:\testdata\scripts\sbetestdata\test.ini BACKUP_RESTORE_0030
+RUN_TEST_STEP 300 BURTestServer TestBackup z:\testdata\scripts\sbetestdata\test.ini BACKUP_RESTORE_0030
 END_TESTCASE MTP-SBE-BACKUPFULLBASE-0004
+
+DELAY 10000
 
 START_TESTCASE MTP-SBE-RESTOREFULLBASE-0005
 //! @SYMTestCaseID MTP-SBE-RESTOREFULLBASE-0005
@@ -93,8 +103,10 @@ START_TESTCASE MTP-SBE-RESTOREFULLBASE-0005
 //! @SYMTestActions   Specify ini file for full and base restore
 //! @SYMTestExpectedResults no error
 //! @SYMTestType CIT
-RUN_TEST_STEP 500 BURTestServer TestRestore z:\testdata\scripts\sbetestdata\test.ini BACKUP_RESTORE_0030
+RUN_TEST_STEP 300 BURTestServer TestRestore z:\testdata\scripts\sbetestdata\test.ini BACKUP_RESTORE_0030
 END_TESTCASE MTP-SBE-RESTOREFULLBASE-0005
+
+DELAY 10000
 
 START_TESTCASE MTP-SBE-BACKUPFULL-0006
 //! @SYMTestCaseID MTP-SBE-BACKUPFULL-0006
@@ -105,8 +117,10 @@ START_TESTCASE MTP-SBE-BACKUPFULL-0006
 //! @SYMTestActions   Specify ini file for full and increament backup
 //! @SYMTestExpectedResults no error
 //! @SYMTestType CIT
-RUN_TEST_STEP 500 BURTestServer TestBackup z:\testdata\scripts\sbetestdata\test.ini BACKUP_RESTORE_0040
+RUN_TEST_STEP 300 BURTestServer TestBackup z:\testdata\scripts\sbetestdata\test.ini BACKUP_RESTORE_0040
 END_TESTCASE MTP-SBE-BACKUPFULL-0006
+
+DELAY 10000
 
 START_TESTCASE MTP-SBE-RESTOREFULL-0007
 //! @SYMTestCaseID MTP-SBE-RESTOREFULL-0007
@@ -117,8 +131,10 @@ START_TESTCASE MTP-SBE-RESTOREFULL-0007
 //! @SYMTestActions   Specify ini file for full and increament restore
 //! @SYMTestExpectedResults no error
 //! @SYMTestType CIT
-RUN_TEST_STEP 500 BURTestServer TestRestore z:\testdata\scripts\sbetestdata\test.ini BACKUP_RESTORE_0040
+RUN_TEST_STEP 300 BURTestServer TestRestore z:\testdata\scripts\sbetestdata\test.ini BACKUP_RESTORE_0040
 END_TESTCASE MTP-SBE-RESTOREFULL-0007
+
+DELAY 10000
 
 RUN_UTILS DeleteFile c:\sbetest1.txt
 RUN_UTILS DeleteFile c:\sbetest2.txt
@@ -135,8 +151,10 @@ START_TESTCASE MTP-SBE-BACKUPPARTIALBASE-0008
 //! @SYMTestActions Do passive backup for a data owner which has a very complex backup registration file  
 //! @SYMTestExpectedResults Backup succeeds
 //! @SYMTestType CIT
-RUN_TEST_STEP 500 BURTestServer TestBackup z:\testdata\scripts\sbetestdata\test.ini BACKUP_RESTORE_0100
+RUN_TEST_STEP 300 BURTestServer TestBackup z:\testdata\scripts\sbetestdata\test.ini BACKUP_RESTORE_0100
 END_TESTCASE MTP-SBE-BACKUPPARTIALBASE-0008
+
+DELAY 10000
 
 START_TESTCASE MTP-SBE-BACKUPPARTIALBASE-0010
 //! @SYMTestCaseID MTP-SBE-BACKUPPARTIALBASE-0010
@@ -147,8 +165,10 @@ START_TESTCASE MTP-SBE-BACKUPPARTIALBASE-0010
 //! @SYMTestActions Do passive backup for a data owner with a invalid drive list  
 //! @SYMTestExpectedResults Backup fails with error code -1
 //! @SYMTestType CIT
-RUN_TEST_STEP 500 BURTestServer TestBackup z:\testdata\scripts\sbetestdata\test.ini BACKUP_RESTORE_0110
+RUN_TEST_STEP 300 BURTestServer TestBackup z:\testdata\scripts\sbetestdata\test.ini BACKUP_RESTORE_0110
 END_TESTCASE MTP-SBE-BACKUPPARTIALBASE-0010
+
+DELAY 10000
 
 START_TESTCASE MTP-SBE-BACKUPPARTIALBASE-0012
 //! @SYMTestCaseID MTP-SBE-BACKUPPARTIALBASE-0012
@@ -159,5 +179,7 @@ START_TESTCASE MTP-SBE-BACKUPPARTIALBASE-0012
 //! @SYMTestActions Do passive backup with abnormal operation sequence   
 //! @SYMTestExpectedResults Backup fails with error code -21
 //! @SYMTestType CIT
-RUN_TEST_STEP 500 BURTestServer TestBackup2 z:\testdata\scripts\sbetestdata\test.ini BACKUP_RESTORE_0120
+RUN_TEST_STEP 300 BURTestServer TestBackup2 z:\testdata\scripts\sbetestdata\test.ini BACKUP_RESTORE_0120
 END_TESTCASE MTP-SBE-BACKUPPARTIALBASE-0012
+
+DELAY 10000
