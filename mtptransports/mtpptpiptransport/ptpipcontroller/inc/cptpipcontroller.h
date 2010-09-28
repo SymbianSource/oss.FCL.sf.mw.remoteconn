@@ -73,7 +73,7 @@ enum TParameter
 }; 		
 
 
-class CPTPIPController : public MPTPIPController,public CActive
+class CPTPIPController : public CActive, public MPTPIPController
 {
 public:	 
 	IMPORT_C static CPTPIPController* NewL();

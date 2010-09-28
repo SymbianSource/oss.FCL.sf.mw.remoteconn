@@ -422,9 +422,11 @@ void CMTPGetDevicePropDesc::ServiceFunctionalIDL()
     iPropDesc = CMTPTypeDevicePropDesc::NewL(EMTPDevicePropCodeFunctionalID, 1, 0, NULL); 
     
     delete iData;
+    iData = NULL;
 	iData = GetGUIDL( MMTPFrameworkConfig::EDeviceDefaultFuncationalID ); 
 	iPropDesc->SetL(CMTPTypeDevicePropDesc::EFactoryDefaultValue, *iData);
 	delete iData;
+	iData = NULL;
 	iData = GetGUIDL(MMTPFrameworkConfig::EDeviceCurrentFuncationalID); 
 	iPropDesc->SetL(CMTPTypeDevicePropDesc::ECurrentValue, *iData);
 	
@@ -443,10 +445,12 @@ void CMTPGetDevicePropDesc::ServiceModelIDL()
     iPropDesc = CMTPTypeDevicePropDesc::NewL(EMTPDevicePropCodeModelID, 0, 0, NULL);   
     
     delete iData;
+    iData = NULL;
     iData = GetGUIDL(MMTPFrameworkConfig::EDeviceDefaultModelID);  
     iPropDesc->SetL(CMTPTypeDevicePropDesc::EFactoryDefaultValue, *iData);
     
     delete iData;
+    iData = NULL;
     iData = GetGUIDL(MMTPFrameworkConfig::EDeviceCurrentModelID); 
 	iPropDesc->SetL(CMTPTypeDevicePropDesc::ECurrentValue, *iData);
 	

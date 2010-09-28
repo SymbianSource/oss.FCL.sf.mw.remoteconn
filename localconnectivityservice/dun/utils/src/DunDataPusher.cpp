@@ -194,7 +194,6 @@ TBool CDunDataPusher::SendQueuedData()
         FTRACE(FPrint( _L("CDunDataPusher::SendQueuedData() (ERROR) complete" )));
         return EFalse;
         }
-    iPushState = EDunStateDataPushing;
     FTRACE(FPrint( _L("CDunDataPusher::SendQueuedData() complete (%d)" ), iEventQueue.Count() ));
     return ETrue;
     }
@@ -338,21 +337,24 @@ TInt CDunDataPusher::ManageOneEvent()
     if ( iComm )
         {
         iStatus = KRequestPending;
+        iPushState = EDunStateDataPushing;
         iComm->Write( iStatus, *dataToPush );
-        FTRACE(FPrint( _L("CDunDataPusher::ManageOneEvent() RComm Write() requested (buffer=0x%08X)" ), dataToPush ));
+        SetActive();
+        FTRACE(FPrint( _L("CDunDataPusher::ManageOneEvent() RComm Write() requested for %d bytes... (buffer=0x%08X)" ), dataToPush->Length(), dataToPush ));
         }
     else if ( iSocket )
         {
         iStatus = KRequestPending;
+        iPushState = EDunStateDataPushing;
         iSocket->Send( *dataToPush, 0, iStatus );
-        FTRACE(FPrint( _L("CDunDataPusher::ManageOneEvent() RSocket Send() requested (buffer=0x%08X)" ), dataToPush ));
+        SetActive();
+        FTRACE(FPrint( _L("CDunDataPusher::ManageOneEvent() RSocket Send() requested for %d bytes... (buffer=0x%08X)" ), dataToPush->Length(), dataToPush ));
         }
     else
         {
         FTRACE(FPrint( _L("CDunDataPusher::ManageOneEvent() (ERROR) complete" )));
         return KErrGeneral;
         }
-    SetActive();
     FTRACE(FPrint( _L("CDunDataPusher::ManageOneEvent() complete" )));
     return KErrNone;
     }
@@ -412,6 +414,7 @@ void CDunDataPusher::RunL()
         }  // if ( !stop )
     else  // stop -> tear down connection
         {
+        iPushState = EDunStateIdle;
         TDunConnectionReason connReason;
         connReason.iReasonType = EDunReasonTypeRW;
         connReason.iContext = EDunMediaContextLocal;

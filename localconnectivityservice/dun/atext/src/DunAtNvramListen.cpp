@@ -91,9 +91,9 @@ TInt CDunAtNvramListen::IssueRequest()
         iStarted = ETrue;
         }
     iStatus = KRequestPending;
+    iNvramHandleState = EDunStateNvramListening;
     iAtCmdExtCommon->ReceiveNvramStatusChange( iStatus, iNvramBuffer );
     SetActive();
-    iNvramHandleState = EDunStateNvramListening;
     FTRACE(FPrint( _L("CDunAtNvramListen::IssueRequest() complete") ));
     return KErrNone;
     }

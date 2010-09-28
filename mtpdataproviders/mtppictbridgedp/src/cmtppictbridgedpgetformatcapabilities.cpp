@@ -56,6 +56,7 @@ void CMTPPictBridgeDpGetFormatCapabilities::ServiceL()
     {
     __FLOG(_L8(">> CMTPPictBridgeDpGetFormatCapabilities::ServiceL"));
     delete iCapabilityList;
+    iCapabilityList = NULL;
     iCapabilityList = CMTPTypeFormatCapabilityList::NewL();
     iFormatCode = Request().Uint32(TMTPTypeRequest::ERequestParameter1);
     BuildFormatScriptL();

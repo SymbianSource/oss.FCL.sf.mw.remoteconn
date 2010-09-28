@@ -48,6 +48,7 @@ EXPORT_C CMTPGetFormatCapabilities::~CMTPGetFormatCapabilities()
 void CMTPGetFormatCapabilities::ServiceL()
     {
     delete iCapabilityList;
+    iCapabilityList = NULL;
     iCapabilityList = CMTPTypeFormatCapabilityList::NewL();
     iFormatCode = Request().Uint32(TMTPTypeRequest::ERequestParameter1);
 

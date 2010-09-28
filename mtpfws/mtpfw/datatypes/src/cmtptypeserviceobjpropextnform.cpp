@@ -190,6 +190,7 @@ EXPORT_C MMTPType* CMTPTypeServiceObjPropExtnForm::CommitChunkL(TPtr8& aChunk)
             {
         case EFlat1Chunk:     
             delete iChunkName;
+            iChunkName = NULL;
             iChunkName = CMTPTypeString::NewL();
             ChunkAppendL(*iChunkName);
             break;

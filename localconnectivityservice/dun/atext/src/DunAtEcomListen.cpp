@@ -86,9 +86,9 @@ TInt CDunAtEcomListen::IssueRequest()
         return KErrNotReady;
         }
     iStatus = KRequestPending;
+    iEcomListenState = EDunStateEcomListening;
     iAtCmdExt->ReceiveEcomPluginChange( iStatus, iPluginUidPckg, iEcomTypePckg );
     SetActive();
-    iEcomListenState = EDunStateEcomListening;
     FTRACE(FPrint( _L("CDunAtEcomListen::IssueRequest() complete") ));
     return KErrNone;
     }

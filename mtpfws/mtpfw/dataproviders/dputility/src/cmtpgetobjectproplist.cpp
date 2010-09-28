@@ -278,6 +278,7 @@ void CMTPGetObjectPropList::GetObjectHandlesL(TUint32 aStorageId, TUint32 aForma
 	CleanupClosePushL(handles);
 	
 	delete iHandles;
+	iHandles = NULL;
 	iHandles = CMTPTypeArray::NewL(EMTPTypeAUINT32);
 	
 	do

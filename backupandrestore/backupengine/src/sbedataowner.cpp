@@ -2278,7 +2278,7 @@ namespace conn
 							{
 						    OstTrace0(TRACE_NORMAL, DUP4_CDATAOWNER_GETNEXTPUBLICFILEL, "parsing directory...");
 							RDir dir;
-							dir.Open(ipDataOwnerManager->GetRFs(), fileName, KEntryAttMaskSupported);
+							User::LeaveIfError(dir.Open(ipDataOwnerManager->GetRFs(), fileName, KEntryAttMaskSupported));
 							iPublicDirStack.AppendL(dir);
 							iPublicDirNameStack.AppendL(fileName.AllocL());
 							++stackCount;

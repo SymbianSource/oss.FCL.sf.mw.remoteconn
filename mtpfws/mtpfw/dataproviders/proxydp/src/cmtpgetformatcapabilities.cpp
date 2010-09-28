@@ -83,6 +83,7 @@ void CMTPGetFormatCapabilities::ServiceL()
     OstTraceFunctionEntry0( CMTPGETFORMATCAPABILITIES_SERVICEL_ENTRY );
     
     delete iCapabilityList;
+    iCapabilityList = NULL;
     iCapabilityList = CMTPTypeFormatCapabilityList::NewL();
     iTargetDps.Reset();
     

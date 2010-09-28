@@ -37,7 +37,7 @@
 #include <mtp/mptpiphostfilter.h>
 
 
-class CPTPIPHostFilterInterface : public MPTPIPHostFilter
+class CPTPIPHostFilterInterface : public CBase, public MPTPIPHostFilter
 {	
 	public:
 		IMPORT_C static CPTPIPHostFilterInterface* NewL();				

@@ -134,11 +134,11 @@ TInt CDunDataWaiter::IssueRequest()
         FTRACE(FPrint( _L("CDunDataWaiter::IssueRequest() (iComm) not initialized!" ) ));
         return KErrGeneral;
         }
-    iStatus = KRequestPending;
     iComm->ResetBuffers();
+    iStatus = KRequestPending;
+    iDataWaiterState = EDunStateDataWaiting;
     iComm->NotifyDataAvailable( iStatus );
     SetActive();
-    iDataWaiterState = EDunStateDataWaiting;
     FTRACE(FPrint( _L("CDunDataWaiter::IssueRequest() complete" )));
     return KErrNone;
     }

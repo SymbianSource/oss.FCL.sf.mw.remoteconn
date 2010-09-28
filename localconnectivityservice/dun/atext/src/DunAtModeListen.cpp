@@ -84,9 +84,9 @@ TInt CDunAtModeListen::IssueRequest()
         return KErrNotReady;
         }
     iStatus = KRequestPending;
+    iModeListenState = EDunStateModeListening;
     iAtCmdExtCommon->ReceiveModeStatusChange( iStatus, iModePckg );
     SetActive();
-    iModeListenState = EDunStateModeListening;
     FTRACE(FPrint( _L("CDunAtModeListen::IssueRequest() complete" )));
     return KErrNone;
     }
@@ -179,4 +179,6 @@ void CDunAtModeListen::RunL()
 //
 void CDunAtModeListen::DoCancel()
     {
+    FTRACE(FPrint( _L("CDunAtModeListen::DoCancel()") ));
+    FTRACE(FPrint( _L("CDunAtModeListen::DoCancel() complete") ));
     }

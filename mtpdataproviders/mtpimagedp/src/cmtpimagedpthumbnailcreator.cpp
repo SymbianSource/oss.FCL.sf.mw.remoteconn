@@ -65,20 +65,36 @@ CMTPImageDpThumbnailCreator::~CMTPImageDpThumbnailCreator()
         {
         iThumbMgr->CancelRequest(iCurrentReq);
         }
+    
     delete iData;
+    iData = NULL;
+    	
     delete iImgEnc;
+    iImgEnc = NULL;
+    
 #ifdef MTPTHUMBSCALING
     delete iScaler;
+    iScaler = NULL;
 #endif
+    
     delete iBitmap;  
+    iBitmap = NULL;  
+    
     delete iObjectSource;
+    iObjectSource = NULL;
+    	
     delete iThumbMgr;
+    iThumbMgr = NULL;
+    
     if(iActiveSchedulerWait != NULL && iActiveSchedulerWait->IsStarted())
         {
         *iCreationErr = KErrNotReady;
         iActiveSchedulerWait->AsyncStop();
         }
+    
     delete iActiveSchedulerWait;
+    iActiveSchedulerWait = NULL;
+    
     OstTraceFunctionExit0( CMTPIMAGEDPTHUMBNAILCREATOR_CMTPIMAGEDPTHUMBNAILCREATOR_DES_EXIT );
     }
  
@@ -183,6 +199,7 @@ void CMTPImageDpThumbnailCreator::RunL()
                         "CMTPImageDpThumbnailCreator::RunL(),EDoNotCreate; iState %d", iState );
                 
                 delete iData;
+                iData = NULL;
                 iData = HBufC8::NewL(1);
                 }
 

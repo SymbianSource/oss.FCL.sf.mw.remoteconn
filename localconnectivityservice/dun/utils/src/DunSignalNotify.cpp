@@ -165,9 +165,9 @@ TInt CDunSignalNotify::IssueRequest()
         {
         FTRACE(FPrint( _L("CDunSignalNotify::IssueRequest() start waiting for change..." ) ));
         iStatus = KRequestPending;
+        iSignalNotifyState = EDunStateSignalNotify;
         iNetwork->NotifySignalChange( iStatus, iSignals, iListenSignals );
         SetActive();
-        iSignalNotifyState = EDunStateSignalNotify;
         }
     FTRACE(FPrint( _L("CDunSignalNotify::IssueRequest() complete" )));
     return KErrNone;
@@ -382,4 +382,6 @@ void CDunSignalNotify::RunL()
 //
 void CDunSignalNotify::DoCancel()
     {
+    FTRACE(FPrint( _L("CDunSignalNotify::DoCancel()" ) ));
+    FTRACE(FPrint( _L("CDunSignalNotify::DoCancel() complete" ) ));
     }

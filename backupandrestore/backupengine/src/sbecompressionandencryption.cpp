@@ -126,7 +126,12 @@ OstTraceFunctionEntry0( CSBECOMPRESSANDENCRYPT_CSBECOMPRESSANDENCRYPT_DES_ENTRY 
 		if( ! iIsFreed )
 			iOffsetStart->Set(iActualStart);	// free reserved space when leave occurs.
 #endif
-		delete iCipher;
+		if( iCipher )
+		{
+			delete iCipher;
+			iCipher = NULL;
+		}
+		
 		OstTraceFunctionExit0( CSBECOMPRESSANDENCRYPT_CSBECOMPRESSANDENCRYPT_DES_EXIT );
 		}
 	

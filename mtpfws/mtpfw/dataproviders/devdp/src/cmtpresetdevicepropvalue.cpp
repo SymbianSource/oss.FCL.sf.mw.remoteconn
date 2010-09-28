@@ -239,6 +239,7 @@ void CMTPResetDevicePropValue::ServiceFunctionalIDL()
     {	 
     OstTraceFunctionEntry0( CMTPRESETDEVICEPROPVALUE_SERVICEFUNCTIONALIDL_ENTRY );
     delete iData;
+    iData = NULL;
     iData = GetGUIDL( MMTPFrameworkConfig::EDeviceDefaultFuncationalID ); 
     SaveGUID(MMTPFrameworkConfig::EDeviceCurrentFuncationalID, *iData);
     SendResponseL(EMTPRespCodeOK);

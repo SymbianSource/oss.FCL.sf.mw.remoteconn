@@ -237,7 +237,7 @@ void CMTPObjectStore::TraverseL(const TMTPObjectMgrQueryParams& aParams, MTraver
 	{
 	RDbTable temp;
 	CleanupClosePushL(temp);
-	temp.Open(iDatabase, KSQLHandleTableName, RDbRowSet::EUpdatable);
+	User::LeaveIfError(temp.Open(iDatabase, KSQLHandleTableName, RDbRowSet::EUpdatable));
 
 	TUint32 tmpStorageID = 0;
 	TBool bStorageAvailable = ETrue;

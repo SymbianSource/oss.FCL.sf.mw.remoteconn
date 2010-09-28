@@ -182,11 +182,11 @@ TInt CDunUsbListen::Activate()
         }
     iDeviceStatePrev = iDeviceState;
     iStatus = KRequestPending;
+    iListenState = EUsbListenStateListening;
     iUsbServer.DeviceStateNotification( KDunUsbDeviceStateMask,
                                         iDeviceState,
                                         iStatus );
     SetActive();
-    iListenState = EUsbListenStateListening;
     FTRACE(FPrint( _L( "CDunUsbListen::Activate() complete" ) ));
     return KErrNone;
     }

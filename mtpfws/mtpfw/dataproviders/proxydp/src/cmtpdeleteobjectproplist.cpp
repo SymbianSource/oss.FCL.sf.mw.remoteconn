@@ -92,6 +92,7 @@ void CMTPDeleteObjectPropList::ServiceL()
     OstTraceFunctionEntry0( CMTPDELETEOBJECTPROPLIST_SERVICEL_ENTRY );
     
     delete iDeleteObjectPropList;
+    iDeleteObjectPropList = NULL;
     iTargetDps.Reset();
     iSubDatasets.Reset();
     

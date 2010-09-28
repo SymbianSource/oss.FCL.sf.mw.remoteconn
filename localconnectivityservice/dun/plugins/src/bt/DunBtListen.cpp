@@ -142,9 +142,9 @@ void CDunBtListen::IssueRequestL()
         User::Leave( retTemp );
         }
     iStatus = KRequestPending;
+    iListenState = EBtListenStateListening;
     iListenSocket.Accept( iEntity.iBTPort, iStatus );
     SetActive();
-    iListenState = EBtListenStateListening;
 
     FTRACE(FPrint( _L( "CDunBtListen::IssueRequestL() complete") ));
     }

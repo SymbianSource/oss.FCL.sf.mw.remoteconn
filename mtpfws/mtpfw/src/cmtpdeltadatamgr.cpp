@@ -104,7 +104,8 @@ EXPORT_C void CMtpDeltaDataMgr::CreateDeltaDataTableL()
 			        OstTrace0( TRACE_ERROR, DUP1_CMTPDELTADATAMGR_CREATEDELTADATATABLEL, "PuidIndex on MTPDeltaDataTable create error!" ));       
 			}
 		}
-	iDeltaTableBatched.Open(iDatabase, KMTPDeltaDataTable, RDbRowSet::EUpdatable);
+	LEAVEIFERROR(iDeltaTableBatched.Open(iDatabase, KMTPDeltaDataTable, RDbRowSet::EUpdatable),
+			        OstTrace0( TRACE_ERROR, DUP1_CMTPDELTADATAMGR_CREATEDELTADATATABLEL, "MTPDeltaDataTable open error!" ));       
 		
 	OstTraceFunctionExit0( CMTPDELTADATAMGR_CREATEDELTADATATABLEL_EXIT );
 	}
@@ -132,7 +133,8 @@ EXPORT_C void CMtpDeltaDataMgr::CreateAnchorIdTableL()
 			        OstTrace0( TRACE_ERROR, DUP1_CMTPDELTADATAMGR_CREATEANCHORIDTABLEL, "INDEX IdentifierIndex on AnchorIdTable create error!" ));
 			}
 		}
-	iAnchorTableBatched.Open(iDatabase, KAnchorIdTable, RDbRowSet::EUpdatable);
+	LEAVEIFERROR(iAnchorTableBatched.Open(iDatabase, KAnchorIdTable, RDbRowSet::EUpdatable),
+		OstTrace0( TRACE_ERROR, DUP1_CMTPDELTADATAMGR_CREATEANCHORIDTABLEL, "AnchorIdTable open error!" ));       
 		
 	OstTraceFunctionExit0( CMTPDELTADATAMGR_CREATEANCHORIDTABLEL_EXIT );
 	}

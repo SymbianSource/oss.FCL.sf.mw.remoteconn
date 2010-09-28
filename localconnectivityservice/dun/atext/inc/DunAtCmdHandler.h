@@ -555,9 +555,13 @@ private:
      *
      * @since TB9.2
      * @param aCharacter Character to test
+     * @param aBasic ETrue if basic check needed, EFalse otherwise
+     * @param aExtended ETrue if extended check needed, EFalse otherwise
      * @return ETrue if delimiter character, EFalse otherwise
      */
-    TBool IsDelimiterCharacter( TChar aCharacter );
+    TBool IsDelimiterCharacter( TChar aCharacter,
+                                TBool aBasic,
+                                TBool aExtended );
 
     /**
      * Checks if character is of extended group
@@ -608,7 +612,19 @@ private:
      * @param aEndIndex End index (changes)
      * @return Symbian error code on error, KErrNone otherwise
      */
-    TBool FindSubCommandQuotes( TChar aCharacter, TInt aStartIndex, TInt& aEndIndex );
+    TBool FindSubCommandQuotes( TChar aCharacter,
+                                TInt aStartIndex,
+                                TInt& aEndIndex );
+
+    /**
+     * Check if in basic command delimiter skip zone
+     *
+     * @since TB9.2
+     * @param aCharacter Character to check
+     * @param aEndIndex End index (changes)
+     * @return Symbian error code on error, KErrNone otherwise
+     */
+    TBool IsBasicDelimiterSkipZone( TChar aCharacter, TInt& aEndIndex );
 
     /**
      * Check if in next subcommand's extended border
@@ -619,7 +635,9 @@ private:
      * @param aEndIndex End index (changes)
      * @return ETrue if in next command's extended border, EFalse otherwise
      */
-    TBool IsExtendedBorder( TChar aCharacter, TInt aStartIndex, TInt& aEndIndex );
+    TBool IsExtendedBorder( TChar aCharacter,
+                            TInt aStartIndex,
+                            TInt& aEndIndex );
 
     /**
      * Finds subcommand with alphanumeric borders

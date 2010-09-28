@@ -341,6 +341,7 @@ EXPORT_C void CPTPIPController::SetDeviceFriendlyName(TDesC16* aDeviceFreindlyNa
 	{
 	OstTraceFunctionEntry0( CPTPIPCONTROLLER_SETDEVICEFRIENDLYNAME_ENTRY );
 	delete iDeviceFriendlyName;
+	iDeviceFriendlyName = NULL;
 	
 	TRAPD(err, iDeviceFriendlyName=aDeviceFreindlyName->AllocL());
 	

@@ -70,9 +70,9 @@ TInt CDunAtCmdEchoer::SendEchoCharacter(
         FTRACE(FPrint( _L("CDunAtCmdEchoer::SendEchoCharacter() (not ready) complete") ));
         return KErrNotReady;
         }
+    iAtEchoState = EDunStateAtCmdEchoing;
     iStreamCallback->NotifyDataPushRequest( aInput, this );
     iCallback = aCallback;
-    iAtEchoState = EDunStateAtCmdEchoing;
     FTRACE(FPrint( _L("CDunDownstream::SendEchoCharacter() complete" ) ));
     return KErrNone;
     }

@@ -114,6 +114,7 @@ void CMTPGetObjectHandles::ServiceL()
     iTimeoutCount = 0;
     
 	delete iHandles;
+	iHandles = NULL;
 	iHandles = CMTPTypeArray::NewL(EMTPTypeAUINT32);
 
 	OstTraceExt2( TRACE_NORMAL, DUP2_CMTPGETOBJECTHANDLES_SERVICEL, 

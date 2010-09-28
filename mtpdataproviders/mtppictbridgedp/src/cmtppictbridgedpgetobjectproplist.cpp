@@ -255,6 +255,7 @@ void CMTPPictBridgeDpGetObjectPropList::GetObjectHandlesL( TUint32 aStorageId, T
     CleanupClosePushL( handles );
 
     delete iHandles;
+    iHandles = NULL;
     iHandles = CMTPTypeArray::NewL( EMTPTypeAUINT32 );
 
     do
@@ -284,6 +285,7 @@ void CMTPPictBridgeDpGetObjectPropList::GetRootObjectHandlesL( TUint32 aFormatCo
     else if ( 0 == aDepth )
         {
         delete iHandles;
+        iHandles = NULL;
         iHandles = CMTPTypeArray::NewL( EMTPTypeAUINT32 );    //empty array
         }
     else

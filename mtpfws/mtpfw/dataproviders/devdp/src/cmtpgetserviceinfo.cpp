@@ -128,6 +128,7 @@ void CMTPGetServiceInfo::BuildServiceInfoL()
     OstTraceFunctionEntry0( CMTPGETSERVICEINFO_BUILDSERVICEINFOL_ENTRY );
     
     delete iServiceInfo;
+    iServiceInfo = NULL;
     iServiceInfo = CMTPTypeServiceInfo::NewL();
     
     TUint32 serviceId = Request().Uint32(TMTPTypeRequest::ERequestParameter1);

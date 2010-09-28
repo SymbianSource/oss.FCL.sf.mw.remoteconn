@@ -117,9 +117,9 @@ TInt CDunUsbConfig::IssueRequest()
         return KErrNotReady;
         }
     iStatus = KRequestPending;
+    iConfigState = EUsbConfigStateWaiting;
     iAcmProperty.Subscribe( iStatus );
     SetActive();
-    iConfigState = EUsbConfigStateWaiting;
     FTRACE(FPrint( _L("CDunUsbConfig::IssueRequest() complete" )));
     return KErrNone;
     }

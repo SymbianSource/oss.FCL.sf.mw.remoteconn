@@ -139,6 +139,7 @@ void CMTPGetPartialObject::ServiceL()
     else
         {
         delete iFileObject;
+        iFileObject = NULL;
         iFileObject = CMTPTypeFile::NewL(iFramework.Fs(), iObjectInfo->DesC(CMTPObjectMetaData::ESuid), EFileRead, iLength, iOffset);
     	SendDataL(*iFileObject);
         }

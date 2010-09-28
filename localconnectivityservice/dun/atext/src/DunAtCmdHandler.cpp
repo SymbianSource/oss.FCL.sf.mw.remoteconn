@@ -53,6 +53,11 @@
  * Refer to test specification if planning to change the heuristic.
  * Note2: Input buffer management (ExtractLineFromInputBuffer()) can be tested
  * with non-line based terminals such as HyperTerminal or Realterm.
+ * Note3: If there is a need to handle commands with random data, the extended
+ * command checking can interfere with the character set of this random data.
+ * Best way to handle this random data is to create a handler for these commands
+ * which skips the valid "not to be parsed" data or use quotes. For these cases
+ * the CDunAtSpecialCmdHandler could be extended.
  */
 
 #include "DunAtCmdHandler.h"
@@ -978,7 +983,7 @@ TInt CDunAtCmdHandler::SkipSubCommandDelimiterCharacters( TInt aStartIndex )
     for ( TInt i=aStartIndex; i<inputLength; i++ )
         {
         TChar character = (*iInput)[i];
-        if ( !IsDelimiterCharacter(character) )
+        if ( !IsDelimiterCharacter(character,ETrue,ETrue) )
             {
             foundIndex = i;
             break;
@@ -1162,6 +1167,8 @@ TBool CDunAtCmdHandler::ExtractNextSubCommand( TBool aPeek )
         iDecodeInfo.iCmdsHandled++;
         FTRACE(FPrint( _L("CDunAtCmdHandler::ExtractNextSubCommand() (handled=%d)"), iDecodeInfo.iCmdsHandled ));
         }
+    FTRACE(FPrint( _L("CDunAtCmdPusher::ExtractNextSubCommand() extracted:") ));
+    FTRACE(FPrintRaw(iParseInfo.iSendBuffer) );
     FTRACE(FPrint( _L("CDunAtCmdHandler::ExtractNextSubCommand() complete") ));
     return ETrue;
     }
@@ -1179,7 +1186,7 @@ TBool CDunAtCmdHandler::FindStartOfSubCommand()
     for ( i=iDecodeInfo.iDecodeIndex; i<lineLength; i++ )
         {
         TChar character = iLineBuffer[i];
-        if ( !IsDelimiterCharacter(character) )
+        if ( !IsDelimiterCharacter(character,ETrue,ETrue) )
             {
             foundIndex = i;
             break;
@@ -1226,12 +1233,19 @@ TBool CDunAtCmdHandler::IsEndOfLine( TChar& aCharacter )
 // Checks if character is delimiter character
 // ---------------------------------------------------------------------------
 //
-TBool CDunAtCmdHandler::IsDelimiterCharacter( TChar aCharacter )
+TBool CDunAtCmdHandler::IsDelimiterCharacter( TChar aCharacter,
+                                              TBool aBasic,
+                                              TBool aExtended )
     {
     FTRACE(FPrint( _L("CDunAtCmdHandler::IsDelimiterCharacter()") ));
-    if ( aCharacter.IsSpace() || aCharacter==';' || aCharacter==0x00 )
+   if ( aBasic && ( aCharacter.IsSpace()||aCharacter==0x00) )
         {
         FTRACE(FPrint( _L("CDunAtCmdHandler::IsDelimiterCharacter() complete") ));
+        return ETrue;
+        }
+   if ( aExtended && aCharacter == ';' )
+        {
+        FTRACE(FPrint( _L("CDunAtCmdHandler::IsDelimiterCharacter() (extended) complete") ));
         return ETrue;
         }
     FTRACE(FPrint( _L("CDunAtCmdHandler::IsDelimiterCharacter() (not delimiter) complete") ));
@@ -1245,6 +1259,16 @@ TBool CDunAtCmdHandler::IsDelimiterCharacter( TChar aCharacter )
 TBool CDunAtCmdHandler::IsExtendedCharacter( TChar aCharacter )
     {
     FTRACE(FPrint( _L("CDunAtCmdHandler::IsExtendedCharacter()") ));
+    // Extended characters supported by this function (parser understands these)
+    // '+': Universal; mentioned in 3GPP TS 27.007, 3GPP TS 27.005, ITU-T V.250
+    // '&': Mentioned in ITU-T V.250 and in some "de facto" commands
+    // '%': Used by some old Hayes modems, left just in case
+    // '\': Used by some old Hayes modems, left just in case
+    // '*': Used by some old Hayes modems, AT&T and others
+    // '#': Used by some old Hayes modems, left just in case
+    // '$': Used by AT&T and Qualcomm
+    // '^': Used by China Mobile
+    // [please maintain this list here for quick reference]
     if ( aCharacter=='+'  || aCharacter=='&' || aCharacter=='%' ||
          aCharacter=='\\' || aCharacter=='*' || aCharacter=='#' ||
          aCharacter=='$'  || aCharacter=='^' )
@@ -1381,6 +1405,46 @@ TBool CDunAtCmdHandler::FindSubCommandQuotes( TChar aCharacter,
     }
 
 // ---------------------------------------------------------------------------
+// Check if in basic command delimiter skip zone
+// ---------------------------------------------------------------------------
+//
+TBool CDunAtCmdHandler::IsBasicDelimiterSkipZone( TChar aCharacter,
+                                                  TInt& aEndIndex )
+    {
+    FTRACE(FPrint( _L("CDunAtCmdHandler::IsBasicDelimiterSkipZone()") ));
+    if ( !IsDelimiterCharacter(aCharacter,ETrue,EFalse) )
+        {
+        FTRACE(FPrint( _L("CDunAtCmdHandler::IsBasicDelimiterSkipZone() complete") ));
+        return EFalse;
+        }
+    // Check the case after '='
+    if ( iDecodeInfo.iAssignFound )
+        {
+        FTRACE(FPrint( _L("CDunAtCmdHandler::IsBasicDelimiterSkipZone() (after =) complete") ));
+        return ETrue;
+        }
+    // Check the case before '='
+    TInt peekIndex = aEndIndex + 1;
+    TInt lineLength = iLineBuffer.Length();
+    for ( ; peekIndex<lineLength; peekIndex++ )
+        {
+        TChar peekCharacter = iLineBuffer[peekIndex];
+        if ( peekCharacter=='?' || peekCharacter=='=' )
+            {
+            aEndIndex = peekIndex;
+            FTRACE(FPrint( _L("CDunAtCmdHandler::IsBasicDelimiterSkipZone() (? or =) complete") ));
+            return ETrue;
+            }
+        if ( !IsDelimiterCharacter(peekCharacter,ETrue,EFalse) )
+            {
+            break;
+            }
+        }
+    FTRACE(FPrint( _L("CDunAtCmdHandler::IsBasicDelimiterSkipZone() complete") ));
+    return EFalse;
+    }
+
+// ---------------------------------------------------------------------------
 // Check if in next subcommand's extended border
 // ---------------------------------------------------------------------------
 //
@@ -1436,7 +1500,8 @@ TBool CDunAtCmdHandler::FindSubCommandAlphaBorder( TChar aCharacter,
         // Check the special case when assigning a number with "basic" command
         // and there is no delimiter after it. In this case <Numeric>|<Alpha>
         // border must be detected but only for a "basic" command, not for
-        // extended.
+        // extended. This type of case is in active use in initialization
+        // strings where "ATS7=60L1M1X3" is one example
         if ( iDecodeInfo.iExtendedIndex<0    && iDecodeInfo.iPrevExists &&
              iDecodeInfo.iPrevChar.IsDigit() && aCharacter.IsAlpha() )
             {
@@ -1497,6 +1562,7 @@ TInt CDunAtCmdHandler::FindSubCommand( TInt& aEndIndex )
     TInt startIndex = iDecodeInfo.iDecodeIndex;
     aEndIndex = startIndex;
     TBool found = EFalse;
+    TBool skipZone = EFalse;
     TInt lineLength = iLineBuffer.Length();
     iDecodeInfo.iAssignFound = EFalse;
     iDecodeInfo.iInQuotes = EFalse;
@@ -1506,11 +1572,22 @@ TInt CDunAtCmdHandler::FindSubCommand( TInt& aEndIndex )
     for ( ; aEndIndex<lineLength; aEndIndex++ )
         {
         TChar character = iLineBuffer[aEndIndex];
+        // Skip '=', quotes and data in quotes
         found = FindSubCommandQuotes( character, startIndex, aEndIndex );
         if ( found )
             {
             continue;
             }
+        // Skip basic command delimiter in the following cases:
+        // "ATCOMMAND    ?"
+        // "AT+COMMAND   ="
+        // "AT+COMMAND=PARAM1,     PARAM2"
+        skipZone = IsBasicDelimiterSkipZone( character, aEndIndex );
+        if ( skipZone )
+            {
+            continue;
+            }
+        // If '?', stop immediately
         if ( character == '?' )
             {
             FTRACE(FPrint( _L("CDunAtCmdHandler::FindSubCommand() (?) complete") ));
@@ -1518,7 +1595,7 @@ TInt CDunAtCmdHandler::FindSubCommand( TInt& aEndIndex )
             }
         // The check below detects the following type of cases:
         // ATCMD<delimiter>
-        if ( IsDelimiterCharacter(character) )
+        if ( IsDelimiterCharacter(character,ETrue,ETrue) )
             {
             aEndIndex--;
             FTRACE(FPrint( _L("CDunAtCmdHandler::FindSubCommand() (delimiter) complete") ));

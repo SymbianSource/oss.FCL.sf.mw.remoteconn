@@ -121,6 +121,12 @@ TInt CDunUpstream::InitializeForAtParsing(
         FTRACE(FPrint( _L("CDunUpstream::InitializeForAtParsing() (trapped!) complete" ) ));
         return retTrap;
         }
+    // Note: the order of the added callbacks is important. When a mode change
+    // occurs, it is best to do the most important stuff with the first callback
+    // object and after this cleanups with the second. Example: Data mode start
+    // should stop command handling; first callback stops command handling,
+    // second callback stops multiplexer (doing this differently could cause the
+    // multiplexer to re-activate).
     atCmdHandler->AddCmdModeCallback( aCallbackUp );
     atCmdHandler->AddCmdModeCallback( aCallbackDown );
     iParseData.iDataMode = EFalse;
@@ -189,6 +195,7 @@ TInt CDunUpstream::Stop()
         }
     Cancel();
     iTransferState = EDunStateIdle;
+    iOperationType = EDunOperationTypeUndefined;
     // Notify parent about inactivity
     if ( iActivityData.iActivityCallback && iActivityData.iNotified )
         {
@@ -279,13 +286,17 @@ TInt CDunUpstream::IssueRequest()
             if ( iComm )
                 {
                 iStatus = KRequestPending;
+                iTransferState = EDunStateTransferring;
                 iComm->ReadOneOrMore( iStatus, *iBufferPtr );
+                SetActive();
                 FTRACE(FPrint( _L("CDunUpstream::IssueRequest() RComm ReadOneOrMore() requested" ) ));
                 }
             else if ( iSocket )
                 {
                 iStatus = KRequestPending;
+                iTransferState = EDunStateTransferring;
                 iSocket->RecvOneOrMore( *iBufferPtr, 0, iStatus, iReadLengthSocket );
+                SetActive();
                 FTRACE(FPrint( _L("CDunUpstream::IssueRequest() RSocket RecvOneOrMore() requested" ) ));
                 }
             else
@@ -296,16 +307,15 @@ TInt CDunUpstream::IssueRequest()
             break;
         case EDunWriterUpstream:
             iStatus = KRequestPending;
+            iTransferState = EDunStateTransferring;
             iNetwork->Write( iStatus, *iBufferPtr );
+            SetActive();
             FTRACE(FPrint( _L("CDunUpstream::IssueRequest() RComm Write() requested" ) ));
             break;
         default:
             FTRACE(FPrint( _L("CDunUpstream::IssueRequest() (ERROR) complete" ) ));
             return KErrGeneral;
         }
-
-    SetActive();
-    iTransferState = EDunStateTransferring;
 
     FTRACE(FPrint( _L("CDunUpstream::IssueRequest() (Dir=%d) complete" ), iDirection));
     return KErrNone;
@@ -440,6 +450,8 @@ void CDunUpstream::RunL()
 //
 void CDunUpstream::DoCancel()
     {
+    FTRACE(FPrint( _L("CDunUpstream::DoCancel()" )));
+    FTRACE(FPrint( _L("CDunUpstream::DoCancel() complete" )));
     }
 
 // ---------------------------------------------------------------------------
@@ -450,6 +462,11 @@ void CDunUpstream::DoCancel()
 void CDunUpstream::NotifyParserNeedsMoreData()
     {
     FTRACE(FPrint( _L("CDunUpstream::NotifyParserNeedsMoreData()" )));
+    if ( iOperationType != EDunOperationTypeRead )
+        {
+        FTRACE(FPrint( _L("CDunUpstream::NotifyParserNeedsMoreData() (not ready) complete" )));
+        return;
+        }
     IssueRequest();  // iOperationType must be read here (don't set)
     FTRACE(FPrint( _L("CDunUpstream::NotifyParserNeedsMoreData() complete" )));
     }
@@ -550,15 +567,12 @@ void CDunUpstream::NotifyCommandModeEnd()
     iParseData.iDataMode = ETrue;
     // Stop processing (mandatory).
     // This will stop any possibly pending operations of
-    // CDunAtCmdHandler and CDunAtUrcHandler. CDunDownstream will take care of
-    // clearing (and stopping) non-callback write queues.
+    // CDunAtCmdHandler and CDunAtUrcHandler(s). CDunDownstream will take care
+    // of clearing (and stopping) non-callback write queues.
     StopAtCmdHandling();
-    // The follow is needed because stopping the AT command handling here
-    // prevents the subsequent AT command handling notification to reach the
-    // NotifyAtCmdHandlingEnd() in this class (the notification starts from
-    // CDunAtCmdPusher's SetToIdleAndNotifyEnd()).
-    // So here we have to do the block "if ( aStartIndex < 0 )" in function
-    // NotifyAtCmdHandlingEnd().
+    // The following is needed here because stopping the AT command handling
+    // causes CDunAtCmdHandler not to call NotifyParserNeedsMoreData().
+    // In command mode iOperationType is always EDunOperationTypeRead.
     IssueRequest();
     FTRACE(FPrint( _L("CDunUpstream::NotifyCommandModeEnd() complete" )));
     }
@@ -571,6 +585,7 @@ void CDunUpstream::NotifyCommandModeEnd()
 void CDunUpstream::NotifyEchoComplete()
     {
     FTRACE(FPrint( _L("CDunUpstream::NotifyEchoComplete()" )));
+    // iOperationType is always EDunOperationTypeRead here
     IssueRequest();
     FTRACE(FPrint( _L("CDunUpstream::NotifyEchoComplete() complete" )));
     }

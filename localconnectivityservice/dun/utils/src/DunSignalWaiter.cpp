@@ -141,9 +141,9 @@ TInt CDunSignalWaiter::IssueRequest()
         return KErrGeneral;
         }
     iStatus = KRequestPending;
+    iSignalWaiterState = EDunStateSignalWaiting;
     iComm->NotifySignalChange( iStatus, iSignals, KSignalDCEInputs );
     SetActive();
-    iSignalWaiterState = EDunStateSignalWaiting;
     FTRACE(FPrint( _L("CDunSignalWaiter::IssueRequest() complete" )));
     return KErrNone;
     }

@@ -223,6 +223,7 @@ void CMTPGetDevicePropValue::ServiceSupportedFormatsOrderedL()
      OstTraceFunctionEntry0( CMTPGETDEVICEPROPVALUE_SERVICEFUNCTIONALIDL_ENTRY );
 
     delete iData;
+    iData = NULL;
     iData = GetGUIDL(MMTPFrameworkConfig::EDeviceCurrentFuncationalID); 
     
      SendDataL(*iData); 
@@ -237,6 +238,7 @@ void CMTPGetDevicePropValue::ServiceSupportedFormatsOrderedL()
      OstTraceFunctionEntry0( CMTPGETDEVICEPROPVALUE_SERVICEMODELIDL_ENTRY );
      
      delete iData;
+     iData = NULL;
      iData = GetGUIDL(MMTPFrameworkConfig::EDeviceCurrentModelID); 
  	
      SendDataL(*iData); 

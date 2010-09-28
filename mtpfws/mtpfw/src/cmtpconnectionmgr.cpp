@@ -169,6 +169,7 @@ EXPORT_C void CMTPConnectionMgr::StartTransportL(TUid aTransport, const TAny* aP
                 {
                 iTransport->Stop(*this);
                 delete iTransport;
+                iTransport = NULL;
                 iTransportCount--;
                 iTransport = CMTPTransportPlugin::NewL(aTransport, aParameter);
                 

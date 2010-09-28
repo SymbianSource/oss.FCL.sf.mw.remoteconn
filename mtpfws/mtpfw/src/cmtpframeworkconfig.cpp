@@ -44,9 +44,14 @@ CMTPFrameworkConfig::~CMTPFrameworkConfig()
     {
     //Save the AbnormalDown state to EFalse
     const TInt KNormalShutDownValue = 0;
-    iRepository->Set(EAbnormalDown, KNormalShutDownValue);
     
-    delete iRepository;
+    if( iRepository )
+    	{
+    	iRepository->Set(EAbnormalDown, KNormalShutDownValue);
+    	delete iRepository;
+    	iRepository = NULL;
+  		}
+    
     }
 
 EXPORT_C void CMTPFrameworkConfig::GetValueL(TParameter aParam, TDes& aValue) const

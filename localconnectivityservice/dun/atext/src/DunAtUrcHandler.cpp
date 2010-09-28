@@ -90,9 +90,9 @@ TInt CDunAtUrcHandler::IssueRequest()
         return KErrNotReady;
         }
     iStatus = KRequestPending;
+    iUrcHandleState = EDunStateAtUrcHandling;
     iAtCmdExt->ReceiveUnsolicitedResult( iStatus, iRecvBuffer, iOwnerUidPckg );
     SetActive();
-    iUrcHandleState = EDunStateAtUrcHandling;
     // Next mark ownership
     if ( !iStarted )
         {
@@ -213,6 +213,8 @@ void CDunAtUrcHandler::RunL()
 //
 void CDunAtUrcHandler::DoCancel()
     {
+    FTRACE(FPrint( _L("CDunAtUrcHandler::DoCancel()") ));
+    FTRACE(FPrint( _L("CDunAtUrcHandler::DoCancel() complete") ));
     }
 
 // ---------------------------------------------------------------------------

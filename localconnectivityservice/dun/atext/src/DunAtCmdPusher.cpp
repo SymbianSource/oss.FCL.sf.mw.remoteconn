@@ -119,13 +119,13 @@ TInt CDunAtCmdPusher::IssueRequest( TDesC8& aInput, TBool aNormalMode )
         return KErrGeneral;
         }
     iStatus = KRequestPending;
+    iAtPushState = EDunStateAtCmdPushing;
     iAtCmdExt->HandleCommand( iStatus,
                               aInput,
                               iRecvBuffer,
                               iReplyLeftPckg,
                               iReplyTypePckg );
     SetActive();
-    iAtPushState = EDunStateAtCmdPushing;
     FTRACE(FPrint( _L("CDunAtCmdPusher::IssueRequest() complete") ));
     return KErrNone;
     }

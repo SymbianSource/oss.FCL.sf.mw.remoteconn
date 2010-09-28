@@ -192,9 +192,9 @@ TInt CDunSignalCopy::IssueRequest()
         {
         FTRACE(FPrint( _L("CDunSignalCopy::IssueRequest() start waiting for change..." ) ));
         iStatus = KRequestPending;
+        iSignalCopyState = EDunStateSignalCopy;
         comm->NotifySignalChange( iStatus, iSignals, iListenSignals );
         SetActive();
-        iSignalCopyState = EDunStateSignalCopy;
         }
     FTRACE(FPrint( _L("CDunSignalCopy::IssueRequest() complete" )));
     return KErrNone;

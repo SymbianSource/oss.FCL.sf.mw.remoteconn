@@ -77,9 +77,12 @@ CMTPServer::~CMTPServer()
     OstTraceFunctionEntry0( CMTPSERVER_CMTPSERVER_DES_ENTRY ); 
     delete iShutdown;
     iShutdown = NULL;
-    iFrameworkSingletons.ConnectionMgr().StopTransports();
-    iFrameworkSingletons.DpController().UnloadDataProviders();
-    iFrameworkSingletons.Close();
+    if(iFrameworkSingletonsOpened)
+        {
+        iFrameworkSingletons.ConnectionMgr().StopTransports();
+        iFrameworkSingletons.DpController().UnloadDataProviders();
+        iFrameworkSingletons.Close();	    
+        }
     REComSession::FinalClose();
     OstTraceFunctionExit0( CMTPSERVER_CMTPSERVER_DES_EXIT );
     }
@@ -192,6 +195,7 @@ void CMTPServer::ConstructL()
     OstTraceFunctionEntry0( CMTPSERVER_CONSTRUCTL_ENTRY );
     StartL(KMTPServerName);
     iFrameworkSingletons.OpenL();
+    iFrameworkSingletonsOpened = ETrue;
     if (!iShutdown)
         {
         TRAPD(error, iShutdown = CMTPShutdown::NewL());

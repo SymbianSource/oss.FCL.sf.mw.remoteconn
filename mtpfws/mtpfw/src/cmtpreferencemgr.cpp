@@ -176,7 +176,7 @@ void CMTPReferenceMgr::ConstructL()
 		{
 		CreateIndexL();
 		}
-	iBatched.Open(*iDatabase, KSQLReferenceTableName, RDbRowSet::EUpdatable);
+	User::LeaveIfError(iBatched.Open(*iDatabase, KSQLReferenceTableName, RDbRowSet::EUpdatable));
 	iBatched.SetIndex( KSQLReferenceIndexName ); 
 	}
 
