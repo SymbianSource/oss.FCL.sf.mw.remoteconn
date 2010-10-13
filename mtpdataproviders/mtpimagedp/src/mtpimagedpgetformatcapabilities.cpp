@@ -132,8 +132,7 @@ void CMTPImageDpGetFormatCapabilities::ServiceOneFormatCapabilitiesL(TUint aForm
     //EMTPObjectPropCodeNonConsumable
     frmCap->AppendL(ServiceNonConsumableL() );
     
-    //EMTPObjectPropCodeHidden
-    frmCap->AppendL( ServiceHiddenL() ); 
+    
     
     CMTPTypeObjectPropDesc::TPropertyInfo info;
     info.iDataType     = EMTPTypeString;
@@ -295,22 +294,6 @@ void CMTPImageDpGetFormatCapabilities::ConstructL()
     __FLOG(_L8("<< CMTPPictureDpGetFormatCapabilities::ConstructL"));
     }
 
-CMTPTypeObjectPropDesc* CMTPImageDpGetFormatCapabilities::ServiceHiddenL()
-    {
-    CMTPTypeObjectPropDescEnumerationForm* expectedForm = CMTPTypeObjectPropDescEnumerationForm::NewL(EMTPTypeUINT16);
-    CleanupStack::PushL(expectedForm);
-    TUint16 values[] = {EMTPVisible, EMTPHidden};
-    TUint   numValues((sizeof(values) / sizeof(values[0])));
-    for (TUint i = 0; i < numValues; i++)
-        {
-        TMTPTypeUint16 data(values[i]);
-        expectedForm->AppendSupportedValueL(data);
-        }   
-    CMTPTypeObjectPropDesc* ret = CMTPTypeObjectPropDesc::NewL(EMTPObjectPropCodeHidden, *expectedForm);     
-    CleanupStack::PopAndDestroy(expectedForm);
-    return ret;
-    }
-	
 TUint16 CMTPImageDpGetFormatCapabilities::GetPropertyGroupNumber(const TUint16 aPropCode) const
     {
     for( TInt propCodeIndex = 0 ; propCodeIndex < KMTPImageDpGroupOneSize ; propCodeIndex++)

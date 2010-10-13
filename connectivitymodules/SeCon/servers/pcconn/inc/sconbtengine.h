@@ -23,7 +23,7 @@
 #include <e32std.h>
 #include <e32base.h>
 #include <s32mem.h>
-#include <btengdevman.h>
+#include <BTEngDevMan.h>
 #include <btengsettings.h>
 
 const TInt KCenRepAddrBufSize = 2 * KBTDevAddrSize;

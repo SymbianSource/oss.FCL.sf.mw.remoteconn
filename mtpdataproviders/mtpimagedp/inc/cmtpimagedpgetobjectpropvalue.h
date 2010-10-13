@@ -73,7 +73,6 @@ private:
     void ServiceRepresentativeSampleWidthL();
     void ServiceRepresentativeSampleDataL();
     void ServiceNonConsumableL();
-    void ServiceHiddenL();
 
 private:
     CMTPImageDpObjectPropertyMgr&	iObjectPropertyMgr;

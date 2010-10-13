@@ -51,7 +51,6 @@ private:
     void ServiceOneFormatCapabilitiesL(TUint aFormatCode);
     CMTPTypeObjectPropDesc* ServiceProtectionStatusL();
     CMTPTypeObjectPropDesc* ServiceNonConsumableL();
-	CMTPTypeObjectPropDesc* ServiceHiddenL();
     
     TUint16 GetPropertyGroupNumber(const TUint16 aPropCode) const;
     

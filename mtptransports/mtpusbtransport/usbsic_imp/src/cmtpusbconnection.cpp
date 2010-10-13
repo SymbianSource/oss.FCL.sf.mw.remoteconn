@@ -1684,7 +1684,6 @@ TBool CMTPUsbConnection::StopConnection()
         SetBulkTransactionState(EUndefined);
         SetConnectionState(EIdle);
         SetSuspendState(ENotSuspended);
-		iMTPSessionId = KMTPSessionNone;
         }
     
     __FLOG(_L8("StopConnection - Exit"));

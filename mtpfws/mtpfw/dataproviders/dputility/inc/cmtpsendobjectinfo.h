@@ -123,7 +123,6 @@ private: // Owned
     TBool                   iIsFolder;
     TMTPTypeNull            iNullObject;
     TUint16                 iProtectionStatus;
-    TUint16                 iHiddenStatus;
     TUint32                 iPreviousTransactionID;
     RMTPDpSingletons		iDpSingletons;
     TFileName				iName;

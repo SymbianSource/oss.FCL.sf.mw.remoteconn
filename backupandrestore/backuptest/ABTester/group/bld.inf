@@ -33,10 +33,10 @@ PRJ_EXPORTS
    ./abtester.oby		/epoc32/rom/include/abtester.oby
    ./abtester.iby		/epoc32/rom/include/abtester.iby
 
-   ../data/incremental_active_backup_registration.xml   z:/private/0ab7e57c/backup_registration.xml
-   ../data/proxy_active_backup_registration.xml         z:/private/0ab7e57d/backup_registration.xml
-   ../data/base_active_backup_registration.xml          z:/private/0ab7e57e/backup_registration.xml
-   ../data/base_active_backup_registration2.xml         z:/private/0ab7e58a/backup_registration.xml
-   ../data/base_active_backup_registration3.xml         z:/private/0ab7e58b/backup_registration.xml
-   ../data/passive_backup_registration.xml              z:/private/0ab7e58c/backup_registration.xml
-   ../data/backup_public_files_registration.xml         z:/private/0fa00001/backup_registration.xml
+   ../data/incremental_active_backup_registration.xml   z:/private/0AB7E57C/backup_registration.xml
+   ../data/proxy_active_backup_registration.xml         z:/private/0AB7E57D/backup_registration.xml
+   ../data/base_active_backup_registration.xml          z:/private/0AB7E57E/backup_registration.xml
+   ../data/base_active_backup_registration2.xml         z:/private/0AB7E58A/backup_registration.xml
+   ../data/base_active_backup_registration3.xml         z:/private/0AB7E58B/backup_registration.xml
+   ../data/passive_backup_registration.xml              z:/private/0AB7E58C/backup_registration.xml
+   ../data/backup_public_files_registration.xml         z:/private/0FA00001/backup_registration.xml

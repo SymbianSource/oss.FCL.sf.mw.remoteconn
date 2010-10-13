@@ -155,7 +155,7 @@ TBool CMTPImageDpGetObject::DoHandleCompletingPhaseL()
             {       
             //update new picture status            
             MTPImageDpUtilits::UpdateObjectStatusToOldL(iFramework, *objectInfo);
-            iDataProvider.ResetNewPictures();
+            iDataProvider.DecreaseNewPictures(1);
             }
         }
     

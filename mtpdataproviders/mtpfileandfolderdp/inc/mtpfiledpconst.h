@@ -75,8 +75,7 @@ static const TUint16 KMTPFileDpSupportedProperties[] =
 	EMTPObjectPropCodeParentObject,
 	EMTPObjectPropCodePersistentUniqueObjectIdentifier,
 	EMTPObjectPropCodeName,
-	EMTPObjectPropCodeNonConsumable,
-	EMTPObjectPropCodeHidden
+	EMTPObjectPropCodeNonConsumable	
 	};
 
 /**

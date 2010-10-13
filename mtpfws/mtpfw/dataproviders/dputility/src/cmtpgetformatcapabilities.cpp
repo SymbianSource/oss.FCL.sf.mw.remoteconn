@@ -95,77 +95,44 @@ void CMTPGetFormatCapabilities::BuildFormatAssociationL()
     CMTPTypeFormatCapability* frmCap = CMTPTypeFormatCapability::NewLC( EMTPFormatCodeAssociation ,interDesc );
     
     //EMTPObjectPropCodeStorageID
-    CMTPTypeObjectPropDesc* storageId = CMTPTypeObjectPropDesc::NewLC(EMTPObjectPropCodeStorageID);
-    frmCap->AppendL(storageId);
-    CleanupStack::Pop(storageId);
+    frmCap->AppendL( CMTPTypeObjectPropDesc::NewL(EMTPObjectPropCodeStorageID) );
     
     //EMTPObjectPropCodeObjectFormat
-    CMTPTypeObjectPropDesc* objFormat = CMTPTypeObjectPropDesc::NewLC(EMTPObjectPropCodeObjectFormat);
-    frmCap->AppendL(objFormat);
-    CleanupStack::Pop(objFormat);
+    frmCap->AppendL( CMTPTypeObjectPropDesc::NewL(EMTPObjectPropCodeObjectFormat) );
     
     //EMTPObjectPropCodeProtectionStatus
-    CMTPTypeObjectPropDesc* protectionStatus = ServiceProtectionStatusL();
-    CleanupStack::PushL(protectionStatus);
-    frmCap->AppendL(protectionStatus);
-    CleanupStack::Pop(protectionStatus);
+    frmCap->AppendL( ServiceProtectionStatusL() );
     
     //EMTPObjectPropCodeAssociationType
-    CMTPTypeObjectPropDesc* associationType = ServiceAssociationTypeL();
-    CleanupStack::PushL(associationType);
-    frmCap->AppendL(associationType);
-    CleanupStack::Pop(associationType);
+    frmCap->AppendL( ServiceAssociationTypeL() );
     
     //EMTPObjectPropCodeAssociationDesc
-    CMTPTypeObjectPropDesc* associationDesc = CMTPTypeObjectPropDesc::NewLC(EMTPObjectPropCodeAssociationDesc);
-    frmCap->AppendL(associationDesc);
-    CleanupStack::Pop(associationDesc);
+    frmCap->AppendL( CMTPTypeObjectPropDesc::NewL(EMTPObjectPropCodeAssociationDesc) );
     
     //EMTPObjectPropCodeObjectSize
-    CMTPTypeObjectPropDesc* objSize = CMTPTypeObjectPropDesc::NewLC(EMTPObjectPropCodeObjectSize);
-    frmCap->AppendL(objSize);
-    CleanupStack::Pop(objSize);
+    frmCap->AppendL( CMTPTypeObjectPropDesc::NewL(EMTPObjectPropCodeObjectSize) );
     
     //EMTPObjectPropCodeObjectFileName
     _LIT(KMtpObjDescObjFileName, "[a-zA-Z!#\\$%&'\\(\\)\\-0-9@\\^_\\`\\{\\}\\~][a-zA-Z!#\\$%&'\\(\\)\\-0-9@\\^_\\`\\{\\}\\~ ]{0, 7}\\.[[a-zA-Z!#\\$%&'\\(\\)\\-0-9@\\^_\\`\\{\\}\\~][a-zA-Z!#\\$%&'\\(\\)\\-0-9@\\^_\\`\\{\\}\\~ ]{0, 2}]?");
-    CMTPTypeString* form = CMTPTypeString::NewLC( KMtpObjDescObjFileName ); 
-    CMTPTypeObjectPropDesc* objFileName = CMTPTypeObjectPropDesc::NewLC( EMTPObjectPropCodeObjectFileName,
-                CMTPTypeObjectPropDesc::ERegularExpressionForm, form);
-    frmCap->AppendL(objFileName);
-    CleanupStack::Pop(objFileName);
+    CMTPTypeString* form = CMTPTypeString::NewLC( KMtpObjDescObjFileName );   
+    frmCap->AppendL(CMTPTypeObjectPropDesc::NewL( EMTPObjectPropCodeObjectFileName,
+            CMTPTypeObjectPropDesc::ERegularExpressionForm, form));
     CleanupStack::PopAndDestroy(form );       
     
     //EMTPObjectPropCodeDateModified
-    CMTPTypeObjectPropDesc* dateModified = CMTPTypeObjectPropDesc::NewLC(EMTPObjectPropCodeDateModified);
-    frmCap->AppendL(dateModified);
-    CleanupStack::Pop(dateModified);
+    frmCap->AppendL(  CMTPTypeObjectPropDesc::NewL(EMTPObjectPropCodeDateModified) );
     
     //EMTPObjectPropCodeParentObject
-    CMTPTypeObjectPropDesc* parentobj = CMTPTypeObjectPropDesc::NewLC(EMTPObjectPropCodeParentObject);
-    frmCap->AppendL(parentobj);
-    CleanupStack::Pop(parentobj);
+    frmCap->AppendL( CMTPTypeObjectPropDesc::NewL(EMTPObjectPropCodeParentObject) );
     
     //EMTPObjectPropCodePersistentUniqueObjectIdentifier
-    CMTPTypeObjectPropDesc* objectIdentifier = CMTPTypeObjectPropDesc::NewLC(EMTPObjectPropCodePersistentUniqueObjectIdentifier);
-    frmCap->AppendL(objectIdentifier);
-    CleanupStack::Pop(objectIdentifier);
+    frmCap->AppendL( CMTPTypeObjectPropDesc::NewL(EMTPObjectPropCodePersistentUniqueObjectIdentifier) );
     
     //EMTPObjectPropCodeName
-    CMTPTypeObjectPropDesc* name = CMTPTypeObjectPropDesc::NewLC(EMTPObjectPropCodeName);
-    frmCap->AppendL(name);
-    CleanupStack::Pop(name);
+    frmCap->AppendL( CMTPTypeObjectPropDesc::NewL(EMTPObjectPropCodeName)); 
     
     //EMTPObjectPropCodeNonConsumable
-    CMTPTypeObjectPropDesc* nonConsumable = ServiceNonConsumableL();
-    CleanupStack::PushL(nonConsumable);
-    frmCap->AppendL(nonConsumable);
-    CleanupStack::Pop(nonConsumable);
-	
-    //Hidden
-	CMTPTypeObjectPropDesc* hidden = ServiceHiddenL();
-    CleanupStack::PushL( hidden );
-    frmCap->AppendL( hidden );
-	CleanupStack::Pop( hidden ); 
+    frmCap->AppendL(ServiceNonConsumableL() );
     
     iCapabilityList->AppendL(frmCap);
     CleanupStack::Pop(frmCap);
@@ -179,65 +146,38 @@ void CMTPGetFormatCapabilities::BuildFormatAsUndefinedL( TUint aFormatCode )
     CMTPTypeFormatCapability* frmCap = CMTPTypeFormatCapability::NewLC( aFormatCode ,interDesc );
     
     //EMTPObjectPropCodeStorageID
-    CMTPTypeObjectPropDesc* storageID = CMTPTypeObjectPropDesc::NewLC(EMTPObjectPropCodeStorageID);
-    frmCap->AppendL(storageID);
-    CleanupStack::Pop(storageID);
+    frmCap->AppendL( CMTPTypeObjectPropDesc::NewL(EMTPObjectPropCodeStorageID) );
     
     //EMTPObjectPropCodeObjectFormat
-    CMTPTypeObjectPropDesc* objectFormat = CMTPTypeObjectPropDesc::NewLC(EMTPObjectPropCodeObjectFormat);
-    frmCap->AppendL(objectFormat);
-    CleanupStack::Pop(objectFormat);
+    frmCap->AppendL( CMTPTypeObjectPropDesc::NewL(EMTPObjectPropCodeObjectFormat) );
     
     //EMTPObjectPropCodeProtectionStatus
-    CMTPTypeObjectPropDesc* protectionStatus = ServiceProtectionStatusL();
-    CleanupStack::PushL(protectionStatus);
-    frmCap->AppendL(protectionStatus);
-    CleanupStack::Pop(protectionStatus);
+    frmCap->AppendL( ServiceProtectionStatusL() );
     
     //EMTPObjectPropCodeObjectSize
-    CMTPTypeObjectPropDesc* objSize = CMTPTypeObjectPropDesc::NewLC(EMTPObjectPropCodeObjectSize);
-    frmCap->AppendL(objSize);
-    CleanupStack::Pop(objSize);
+    frmCap->AppendL( CMTPTypeObjectPropDesc::NewL(EMTPObjectPropCodeObjectSize) );
     
     //EMTPObjectPropCodeObjectFileName
     _LIT(KMtpObjDescObjFileName, "[a-zA-Z!#\\$%&'\\(\\)\\-0-9@\\^_\\`\\{\\}\\~][a-zA-Z!#\\$%&'\\(\\)\\-0-9@\\^_\\`\\{\\}\\~ ]{0, 7}\\.[[a-zA-Z!#\\$%&'\\(\\)\\-0-9@\\^_\\`\\{\\}\\~][a-zA-Z!#\\$%&'\\(\\)\\-0-9@\\^_\\`\\{\\}\\~ ]{0, 2}]?");
-    CMTPTypeString* form = CMTPTypeString::NewLC( KMtpObjDescObjFileName );
-    CMTPTypeObjectPropDesc* objFileName = CMTPTypeObjectPropDesc::NewLC( EMTPObjectPropCodeObjectFileName,
-                CMTPTypeObjectPropDesc::ERegularExpressionForm, form);
-    frmCap->AppendL(objFileName);
-    CleanupStack::Pop(objFileName);
+    CMTPTypeString* form = CMTPTypeString::NewLC( KMtpObjDescObjFileName );   
+    frmCap->AppendL(CMTPTypeObjectPropDesc::NewL( EMTPObjectPropCodeObjectFileName,
+            CMTPTypeObjectPropDesc::ERegularExpressionForm, form));
     CleanupStack::PopAndDestroy(form );     
     
     //EMTPObjectPropCodeDateModified
-    CMTPTypeObjectPropDesc* dateModified = CMTPTypeObjectPropDesc::NewLC(EMTPObjectPropCodeDateModified);
-    frmCap->AppendL(dateModified);
-    CleanupStack::Pop(dateModified);
+    frmCap->AppendL(  CMTPTypeObjectPropDesc::NewL(EMTPObjectPropCodeDateModified) );
     
     //EMTPObjectPropCodeParentObject
-    CMTPTypeObjectPropDesc* parentObject = CMTPTypeObjectPropDesc::NewLC(EMTPObjectPropCodeParentObject);
-    frmCap->AppendL(parentObject);
-    CleanupStack::Pop(parentObject);
+    frmCap->AppendL( CMTPTypeObjectPropDesc::NewL(EMTPObjectPropCodeParentObject) );
     
     //EMTPObjectPropCodePersistentUniqueObjectIdentifier
-    CMTPTypeObjectPropDesc* objectIdentifier = CMTPTypeObjectPropDesc::NewLC(EMTPObjectPropCodePersistentUniqueObjectIdentifier);
-    frmCap->AppendL(objectIdentifier);
-    CleanupStack::Pop(objectIdentifier);
+    frmCap->AppendL( CMTPTypeObjectPropDesc::NewL(EMTPObjectPropCodePersistentUniqueObjectIdentifier) );
     
     //EMTPObjectPropCodeName
-    CMTPTypeObjectPropDesc* name = CMTPTypeObjectPropDesc::NewLC(EMTPObjectPropCodeName);
-    frmCap->AppendL(name);
-    CleanupStack::Pop(name);
+    frmCap->AppendL( CMTPTypeObjectPropDesc::NewL(EMTPObjectPropCodeName)); 
     
     //EMTPObjectPropCodeNonConsumable
-    CMTPTypeObjectPropDesc* nonConsumable = ServiceNonConsumableL();
-    CleanupStack::PushL(nonConsumable);
-    frmCap->AppendL(nonConsumable);
-    CleanupStack::Pop(nonConsumable);
-    //Hidden
-	CMTPTypeObjectPropDesc* hidden = ServiceHiddenL();
-    CleanupStack::PushL( hidden );
-    frmCap->AppendL( hidden );
-	CleanupStack::Pop( hidden ); 
+    frmCap->AppendL(ServiceNonConsumableL() );
     
     iCapabilityList->AppendL(frmCap);
     CleanupStack::Pop(frmCap);
@@ -301,23 +241,6 @@ CMTPTypeObjectPropDesc* CMTPGetFormatCapabilities::ServiceNonConsumableL()
         expectedForm->AppendSupportedValueL(data);
         }   
     CMTPTypeObjectPropDesc* ret = CMTPTypeObjectPropDesc::NewL(EMTPObjectPropCodeNonConsumable, *expectedForm);     
-    CleanupStack::PopAndDestroy(expectedForm);
-    
-    return ret;
-    }
-
-CMTPTypeObjectPropDesc* CMTPGetFormatCapabilities::ServiceHiddenL()
-    {
-    CMTPTypeObjectPropDescEnumerationForm* expectedForm = CMTPTypeObjectPropDescEnumerationForm::NewL(EMTPTypeUINT16);
-    CleanupStack::PushL(expectedForm);
-    TUint16 values[] = {EMTPVisible, EMTPHidden};
-    TUint   numValues((sizeof(values) / sizeof(values[0])));
-    for (TUint i = 0; i < numValues; i++)
-        {
-        TMTPTypeUint16 data(values[i]);
-        expectedForm->AppendSupportedValueL(data);
-        }   
-    CMTPTypeObjectPropDesc* ret = CMTPTypeObjectPropDesc::NewL(EMTPObjectPropCodeHidden, *expectedForm);     
     CleanupStack::PopAndDestroy(expectedForm);
     
     return ret;

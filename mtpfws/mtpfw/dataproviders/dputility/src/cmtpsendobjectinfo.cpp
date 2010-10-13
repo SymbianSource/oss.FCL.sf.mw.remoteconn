@@ -100,8 +100,7 @@ Standard c++ constructor
 @param aConnection    The connection from which the request comes
 */    
 CMTPSendObjectInfo::CMTPSendObjectInfo(MMTPDataProviderFramework& aFramework, MMTPConnection& aConnection) :
-    CMTPRequestProcessor(aFramework, aConnection, 0, NULL),
-    iHiddenStatus( EMTPVisible )
+    CMTPRequestProcessor(aFramework, aConnection, 0, NULL)
     {
     }
 
@@ -661,15 +660,14 @@ TBool CMTPSendObjectInfo::DoHandleSendObjectCompleteL()
         
     if (!iIsFolder)
         {        
+        delete iFileReceived;
+        iFileReceived = NULL;
         
         TEntry fileEntry;
         User::LeaveIfError(iFramework.Fs().Entry(iFullPath, fileEntry));
 
         if (fileEntry.FileSize() != iObjectSize)
             {
-			delete iFileReceived;
-        	iFileReceived = NULL;
-			
             iFramework.RouteRequestUnregisterL(iExpectedSendObjectRequest, iConnection);
             
             iFramework.Fs().Delete(iFullPath);
@@ -715,8 +713,6 @@ TBool CMTPSendObjectInfo::DoHandleSendObjectCompleteL()
         if(!iIsFolder)
             {
             SetPropertiesL();    
-            delete iFileReceived;
-            iFileReceived = NULL;
             iFramework.ObjectMgr().CommitReservedObjectHandleL(*iReceivedObject);
             iFullPath.LowerCase();
             __FLOG_VA((_L8("File Name %S"), &iFullPath));
@@ -943,9 +939,6 @@ TMTPResponseCode CMTPSendObjectInfo::ExtractPropertyL(const CMTPTypeObjectPropLi
     case EMTPObjectPropCodeName:
     	iName = aElement.StringL(CMTPTypeObjectPropListElement::EValue);
     	break;
-    case EMTPObjectPropCodeHidden:
-        iHiddenStatus = aElement.Uint16L(CMTPTypeObjectPropListElement::EValue);
-        break;
     default:
         break;
         }
@@ -1038,7 +1031,6 @@ TMTPResponseCode CMTPSendObjectInfo::CheckPropCodeL(const CMTPTypeObjectPropList
         break;
         
     case EMTPObjectPropCodeAssociationType:
-    case EMTPObjectPropCodeHidden:
         if (aElement.Uint16L(CMTPTypeObjectPropListElement::EDatatype) != EMTPTypeUINT16)
              {
              responseCode = EMTPRespCodeInvalidObjectPropFormat;
@@ -1207,7 +1199,6 @@ Sets the read only status on the current file to match the sent object.
 void CMTPSendObjectInfo::SetPropertiesL()
     {
     __FLOG(_L8("SetPropertiesL - Entry"));
-
     TEntry entry;
     User::LeaveIfError(iFramework.Fs().Entry(iFullPath, entry));  
     
@@ -1244,42 +1235,14 @@ void CMTPSendObjectInfo::SetPropertiesL()
             {
             entry.iAtt |= KEntryAttReadOnly;
             }
-        if ( iFileReceived )
-            {
-            User::LeaveIfError(iFileReceived->File().SetAtt(entry.iAtt, ~entry.iAtt));
-            }
-        else
-            {
-            User::LeaveIfError(iFramework.Fs().SetAtt(iFullPath, entry.iAtt, ~entry.iAtt));
-            }
+        User::LeaveIfError(iFramework.Fs().SetAtt(iFullPath, entry.iAtt, ~entry.iAtt));
         }
-    
-    if ( EMTPHidden == iHiddenStatus )
-        {
-		entry.iAtt &= ~KEntryAttHidden;
-        entry.iAtt |= KEntryAttHidden;
-        if ( iFileReceived )
-            {
-            User::LeaveIfError(iFileReceived->File().SetAtt(entry.iAtt, ~entry.iAtt));
-            }
-        else
-            {
-            User::LeaveIfError(iFramework.Fs().SetAtt(iFullPath, entry.iAtt, ~entry.iAtt));
-            }
-        }
-    
+
     if(iDateMod != NULL && iDateMod->Length())
        {
        TTime modifiedTime;
        iDpSingletons.MTPUtility().MTPTimeStr2TTime(*iDateMod, modifiedTime);
-       if ( iFileReceived )
-           { 
-           User::LeaveIfError(iFileReceived->File().SetModified( modifiedTime ));
-           }
-       else
-           {
-           User::LeaveIfError(iFramework.Fs().SetModified(iFullPath, modifiedTime));
-           }
+       User::LeaveIfError(iFramework.Fs().SetModified(iFullPath, modifiedTime));
        }  
     
     iReceivedObject->SetDesCL(CMTPObjectMetaData::EName, iName);

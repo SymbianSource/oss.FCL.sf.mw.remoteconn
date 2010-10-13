@@ -52,7 +52,6 @@ private:
     CMTPTypeObjectPropDesc* ServiceProtectionStatusL();
     CMTPTypeObjectPropDesc* ServiceAssociationTypeL();
     CMTPTypeObjectPropDesc* ServiceNonConsumableL();
-    CMTPTypeObjectPropDesc* ServiceHiddenL();
     
 private: // Owned
 

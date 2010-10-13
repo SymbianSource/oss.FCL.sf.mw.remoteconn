@@ -98,8 +98,7 @@ static const TUint16 KMTPImageDpSupportedProperties[] =
   	EMTPObjectPropCodeRepresentativeSampleHeight,
   	EMTPObjectPropCodeRepresentativeSampleWidth,
   	EMTPObjectPropCodeRepresentativeSampleData,
-  	EMTPObjectPropCodeNonConsumable,
-  	EMTPObjectPropCodeHidden
+  	EMTPObjectPropCodeNonConsumable
   	};
 
 /**
@@ -135,10 +134,7 @@ static const TUint16 KMTPImageDpGroupOneProperties[] =
     EMTPObjectPropCodeRepresentativeSampleSize,
     EMTPObjectPropCodeRepresentativeSampleHeight,
     EMTPObjectPropCodeRepresentativeSampleWidth,
-    EMTPObjectPropCodeRepresentativeSampleData,
-    
-    //From file system
-    EMTPObjectPropCodeHidden
+    EMTPObjectPropCodeRepresentativeSampleData
     };
 
 /**

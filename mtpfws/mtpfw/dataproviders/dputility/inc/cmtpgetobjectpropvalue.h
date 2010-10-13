@@ -69,8 +69,6 @@ private:
 	void ServicePuidL();
 	void ServiceNameL();
 	void ServiceNonConsumableL();
-	void ServiceHiddenL();
-	
 private:
 	TMTPTypeUint8			iMTPTypeUint8;
 	TMTPTypeUint16			iMTPTypeUint16;

@@ -368,7 +368,7 @@ enum TMTPResponseCode
     EMTPRespCodeCaptureAlreadyTerminated                = 0x2018,
     EMTPRespCodeDeviceBusy                              = 0x2019,
     EMTPRespCodeInvalidParentObject                     = 0x201A,
-    EMTPRespCodeInvalidDevicePropFormat                 = 0x201B,
+    EMTPRespCodeInvalidDeviEMTPRespCodecePropFormat     = 0x201B,
     EMTPRespCodeInvalidDevicePropValue                  = 0x201C,
     EMTPRespCodeInvalidParameter                        = 0x201D,
     EMTPRespCodeSessionAlreadyOpen                      = 0x201E,
@@ -798,12 +798,6 @@ enum TMTPProtectionStatus
     EMTPProtectionReadOnly          = 0x0001,
     EMTPProtectionReadOnlyData      = 0x8002, 
     EMTPProtectionNonTransferable   = 0x8003
-    };
-
-enum TMTPHiddenStatus
-    {
-    EMTPVisible      = 0x0000,
-    EMTPHidden       = 0x0001
     };
 
 /**

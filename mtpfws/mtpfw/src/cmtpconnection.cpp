@@ -82,9 +82,17 @@ CMTPConnection::~CMTPConnection()
     __FLOG(_L8("~CMTPConnection - Entry"));
     CloseAllSessions();
     
-	//remove all events
-    DequeueAllEvents();
-	
+    // Remove any events not associated 
+    // with a session
+    TSglQueIter<CMTPEventLink> iter(iEventQ);
+    iter.SetToFirst();
+    CMTPEventLink* link = NULL;
+    
+    while ((link = iter++) != NULL)
+    	{
+    	delete link;
+    	}
+    
     iSessions.ResetAndDestroy();
     
     if (iTransportConnection != NULL)
@@ -659,16 +667,9 @@ void CMTPConnection::SendEventCompleteL(TInt aErr, const TMTPTypeEvent& aEvent)
     DequeueEvent(iEventQ.First());       
    	if (iPendingEventCount > 0)
    		{
-		if (NULL != iTransportConnection)
-			{
-			// Forward the event to the transport connection layer.
-			__FLOG(_L8("Sending queued event"));
-			iTransportConnection->SendEventL(iEventQ.First()->iEvent);
-			}
-		else
-			{
-			DequeueAllEvents();
-			}
+   		// Forward the event to the transport connection layer.
+   		__FLOG(_L8("Sending queued event"));
+ 	    iTransportConnection->SendEventL(iEventQ.First()->iEvent);
    		}
     
     __FLOG(_L8("SendEventCompleteL - Exit"));
@@ -1045,19 +1046,6 @@ void CMTPConnection::RemoveEventsForSession(TUint32 aMTPId)
     __FLOG(_L8("RemoveEventsForSession - Exit"));
 	}
 
-void CMTPConnection::DequeueAllEvents()
-	{
-	TSglQueIter<CMTPEventLink> iter(iEventQ);
-    iter.SetToFirst();
-    CMTPEventLink* link = NULL;
-    
-    while ((link = iter++) != NULL)
-    	{
-    	delete link;
-    	}
-	iPendingEventCount = 0;
-	}
-	
 void CMTPConnection::DequeueEvent(CMTPEventLink* aLink)
 	{
 	iEventQ.Remove(*aLink);

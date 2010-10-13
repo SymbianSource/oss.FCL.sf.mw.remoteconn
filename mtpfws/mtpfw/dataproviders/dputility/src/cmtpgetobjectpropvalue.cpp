@@ -165,9 +165,6 @@ void CMTPGetObjectPropValue::ServiceL()
 		case EMTPObjectPropCodeNonConsumable:
 			ServiceNonConsumableL();
 			break;
-		case EMTPObjectPropCodeHidden:
-		    ServiceHiddenL();
-		    break;
 		default:
 		    User::Leave( KErrNotSupported );
 			break;
@@ -268,19 +265,6 @@ void CMTPGetObjectPropValue::ServiceNonConsumableL()
 	SendDataL(iMTPTypeUint8);
 	}
 
-void CMTPGetObjectPropValue::ServiceHiddenL()
-    {
-    TBool isHidden = iFileEntry.IsHidden();
-    if ( isHidden )
-        {
-        iMTPTypeUint16.Set(EMTPHidden);
-        }
-    else
-        {
-        iMTPTypeUint16.Set(EMTPVisible);
-        } 
-    SendDataL(iMTPTypeUint16);
-    }
 
 
 	

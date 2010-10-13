@@ -424,24 +424,7 @@ void CMTPImageDpGetObjectPropList::ServiceOneObjectPropertyL(TUint32 aHandle, TU
             propElem.SetUint8L(CMTPTypeObjectPropListElement::EValue, value);
             iPropertyList->CommitPropElemL(propElem);
             }        
-            break;
-        case EMTPObjectPropCodeHidden:
-            {
-            TEntry FileEntry;
-            User::LeaveIfError(iFramework.Fs().Entry(iObjectMeta->DesC(CMTPObjectMetaData::ESuid), FileEntry));
-            CMTPTypeObjectPropListElement& propElem = iPropertyList->ReservePropElemL(aHandle, aPropCode);
-            TBool isHidden = FileEntry.IsHidden();
-            if ( isHidden )
-                {
-                propElem.SetUint16L(CMTPTypeObjectPropListElement::EValue,EMTPHidden );
-                }
-            else
-                {
-                propElem.SetUint16L(CMTPTypeObjectPropListElement::EValue,EMTPVisible );
-                }
-            iPropertyList->CommitPropElemL(propElem); 
-            }
-            break;
+            break;               
         default:
             //Leave 
             {

@@ -84,7 +84,6 @@ private:
 	TUint32								iNewParentHandle;
 	TUint32								iStorageId;
 	TTime									iPreviousModifiedTime;
-	TBool                               iIsHidden;
   RMTPFramework					iSingletons;
   RMTPDpSingletons			iDpSingletons;
   CPeriodic*						iTimer;

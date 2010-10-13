@@ -58,7 +58,7 @@ public:
     
 public:
     CMTPImageDpObjectPropertyMgr& PropertyMgr()const;
-    CMTPImageDpThumbnailCreator*  ThumbnailManager();
+    CMTPImageDpThumbnailCreator&  ThumbnailManager() const;
     CRepository& Repository() const;
     
     TMTPFormatCode FindFormat(const TDesC& aExtension);
@@ -67,7 +67,6 @@ public:
     void HandleDeleteObjectsArray();
     void IncreaseNewPictures(TInt aCount);
     void DecreaseNewPictures(TInt aCount);
-    void ResetNewPictures();
     void HandleMdeSessionCompleteL(TInt aError);
     
 public: // From CMTPDataProviderPlugin
@@ -130,7 +129,6 @@ private:
     TBool                   iEnumerationNotified;
 	
 	RPointerArray<HBufC>    iDeleteObjectsArray;
-	RArray<TUint>			iNewPicHandles;
     };
     
 #endif // CMTPIMAGEDP_H

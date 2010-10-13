@@ -477,22 +477,7 @@ void CMTPGetObjectPropList::ServiceOneObjectPropertyL(TUint32 aHandle, TUint32 a
                 iPropertyList->CommitPropElemL(propElem);  
 				}
         	}
-        	break;
-         case EMTPObjectPropCodeHidden:
-             {
-             TBool isHidden = iFileEntry.IsHidden();
-             CMTPTypeObjectPropListElement& propElem = iPropertyList->ReservePropElemL(aHandle, aPropCode);
-             if ( isHidden )
-                 {
-                 propElem.SetUint16L(CMTPTypeObjectPropListElement::EValue, EMTPHidden);
-                 }
-             else
-                 {
-                 propElem.SetUint16L(CMTPTypeObjectPropListElement::EValue, EMTPVisible);
-                 }
-             iPropertyList->CommitPropElemL(propElem);  
-             }
-             break;
+        	break;    
         default:
             User::Leave( KErrNotSupported );
             break;

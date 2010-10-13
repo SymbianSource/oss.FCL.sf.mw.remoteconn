@@ -709,7 +709,7 @@ namespace conn
 			iEncryptionHeader.iEncrypted, iEncryptionHeader.iBufferSize, iEncryptionHeader.iTotalSize);
 		
 		// Check we have a sensible encryption header
-		if ((iEncryptionHeader.iBufferSize < 0) || (iEncryptionHeader.iBufferSize >= KMaxTInt/2) ||
+		if ((iEncryptionHeader.iBufferSize < 0) ||
 			(iEncryptionHeader.iTotalSize < 0))
 			{
 			__LOG("CSBEDecompressAndEncrypt::CreateCipherL() - Corrupt data");

@@ -175,10 +175,7 @@ void CMTPImageDpGetObjectPropDesc::ServiceL()
             break;
         case EMTPObjectPropCodeNonConsumable:
             ServiceNonConsumableL();
-            break;
-        case EMTPObjectPropCodeHidden:
-            ServiceHiddenL();
-            break;
+            break;            
         default:
             {
             //Leave 
@@ -435,21 +432,6 @@ void CMTPImageDpGetObjectPropDesc::ServiceNonConsumableL()
         expectedForm->AppendSupportedValueL(data);
         }   
     iObjectProperty = CMTPTypeObjectPropDesc::NewL(EMTPObjectPropCodeNonConsumable, *expectedForm);     
-    CleanupStack::PopAndDestroy(expectedForm);
-    }
-	
-void CMTPImageDpGetObjectPropDesc::ServiceHiddenL()
-    {
-    CMTPTypeObjectPropDescEnumerationForm* expectedForm = CMTPTypeObjectPropDescEnumerationForm::NewL(EMTPTypeUINT16);
-    CleanupStack::PushL(expectedForm);
-    TUint16 values[] = {EMTPVisible,EMTPHidden};
-    TUint   numValues((sizeof(values) / sizeof(values[0])));
-    for (TUint i = 0; i < numValues; i++)
-        {
-        TMTPTypeUint16 data(values[i]);
-        expectedForm->AppendSupportedValueL(data);
-        }   
-    iObjectProperty = CMTPTypeObjectPropDesc::NewL(EMTPObjectPropCodeHidden, *expectedForm);
     CleanupStack::PopAndDestroy(expectedForm);
     }
 

@@ -192,7 +192,6 @@ void CMTPSetObjectPropValue::ServiceL()
 			ReceiveDataL(iMTPTypeUint8);
 			break;
 		case EMTPObjectPropCodeAssociationType:
-		case EMTPObjectPropCodeHidden:
 			{
 			ReceiveDataL(iMTPTypeUint16);
 			}
@@ -246,37 +245,7 @@ TBool CMTPSetObjectPropValue::DoHandleResponsePhaseL()
 				}
 			}
 			break;
-		case EMTPObjectPropCodeHidden:
-		    {
-            if ( EMTPHidden == iMTPTypeUint16.Value())
-                  {
-                  TEntry entry;
-                  User::LeaveIfError(iFramework.Fs().Entry(iObjMeta->DesC(CMTPObjectMetaData::ESuid), entry));
-                  if ( !entry.IsHidden())
-                      {
-                      entry.iAtt &= ~KEntryAttHidden;
-                      entry.iAtt |= KEntryAttHidden;
-                      User::LeaveIfError(iFramework.Fs().SetAtt(iObjMeta->DesC(CMTPObjectMetaData::ESuid), entry.iAtt, ~entry.iAtt));
-                      }
-                  responseCode = EMTPRespCodeOK;
-                  }
-              else if ( EMTPVisible == iMTPTypeUint16.Value())
-                  {
-                  TEntry entry;
-                  User::LeaveIfError(iFramework.Fs().Entry(iObjMeta->DesC(CMTPObjectMetaData::ESuid), entry));
-                  if ( entry.IsHidden())
-                      {
-                      entry.iAtt &= ~KEntryAttHidden;
-                      User::LeaveIfError(iFramework.Fs().SetAtt(iObjMeta->DesC(CMTPObjectMetaData::ESuid), entry.iAtt, ~entry.iAtt));
-                      }
-                  responseCode = EMTPRespCodeOK;
-                  }
-              else
-                  {
-                  responseCode = EMTPRespCodeInvalidObjectPropValue;
-                  }
-		    }
-		    break;
+			
 		case EMTPObjectPropCodeObjectFileName:
 			{
 

@@ -85,7 +85,6 @@ private:
 	CPeriodic*						iTimer;
 	HBufC*								iNewFileName;
 	TBool									iIsFolder;
-	TBool                                   iIsHidden;
 	/**
     FLOGGER debug trace member variable.
     */

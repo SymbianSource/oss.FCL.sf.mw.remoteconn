@@ -380,12 +380,6 @@ void CMTPMoveObject::GetPreviousPropertiesL(const TDesC& aFileName)
 	{
 	__FLOG(_L8("GetPreviousPropertiesL - Entry"));
 	User::LeaveIfError(iFramework.Fs().Modified(aFileName, iPreviousModifiedTime));
-	if ( iIsFolder )
-	    {
-	    TEntry fileEntry;
-	    User::LeaveIfError(iFramework.Fs().Entry( aFileName, fileEntry ));
-	    iIsHidden = fileEntry.IsHidden();
-	    }
 	__FLOG(_L8("GetPreviousPropertiesL - Exit"));
 	}
 
@@ -396,14 +390,6 @@ void CMTPMoveObject::SetPreviousPropertiesL(const TDesC& aFileName)
 	{
 	__FLOG(_L8("SetPreviousPropertiesL - Entry"));
 	User::LeaveIfError(iFramework.Fs().SetModified(aFileName, iPreviousModifiedTime));
-	if ( iIsFolder && iIsHidden )
-	    {
-	    TEntry fileEntry;
-	    User::LeaveIfError(iFramework.Fs().Entry( aFileName, fileEntry ));
-	    fileEntry.iAtt &= ~KEntryAttHidden;
-	    fileEntry.iAtt |= KEntryAttHidden;
-	    User::LeaveIfError(iFramework.Fs().SetAtt( aFileName, fileEntry.iAtt, ~fileEntry.iAtt));
-	    }
 	__FLOG(_L8("SetPreviousPropertiesL - Exit"));
 	}
 
