@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2006-2008 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2006-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -94,7 +94,7 @@ void CDunBtListen::IssueRequestL()
     {
     FTRACE(FPrint( _L( "CDunBtListen::IssueRequestL()" ) ));
 
-    if ( iListenState == EBtListenStateListening )
+    if ( IsActive() )
         {
         FTRACE(FPrint( _L( "CDunBtListen::IssueRequestL() (already active) complete" ) ));
         User::Leave( KErrNotReady );
@@ -141,8 +141,6 @@ void CDunBtListen::IssueRequestL()
         FTRACE(FPrint( _L( "CDunBtListen::IssueRequestL() (ERROR) complete (%d)" ), retTemp));
         User::Leave( retTemp );
         }
-    iStatus = KRequestPending;
-    iListenState = EBtListenStateListening;
     iListenSocket.Accept( iEntity.iBTPort, iStatus );
     SetActive();
 
@@ -153,19 +151,11 @@ void CDunBtListen::IssueRequestL()
 // Stops listening
 // ---------------------------------------------------------------------------
 //
-TInt CDunBtListen::Stop()
+void CDunBtListen::Stop()
     {
     FTRACE(FPrint( _L( "CDunBtListen::Stop()") ));
-    if ( iListenState != EBtListenStateListening )
-        {
-        FTRACE(FPrint( _L("CDunBtListen::Stop() (not ready) complete" )));
-        return KErrNotReady;
-        }
-    iListenSocket.CancelAccept();
     Cancel();
-    iListenState = EBtListenStateIdle;
     FTRACE(FPrint( _L( "CDunBtListen::Stop() complete") ));
-    return KErrNone;
     }
 
 // ---------------------------------------------------------------------------
@@ -222,7 +212,6 @@ void CDunBtListen::Initialize()
     // Don't initialize iParent here (it is set through NewL)
     // Don't initialize iTransporter here (it is set through NewL)
     // Don't initialize iEntity here (it is set through NewL)
-    iListenState = EBtListenStateIdle;
     iDiscovery = NULL;
     iChannelNum = 0;
     iSDPHandleDun = 0;
@@ -394,7 +383,6 @@ TInt CDunBtListen::DoExtendedBind( RSocket& aListenSocket,
 void CDunBtListen::RunL()
     {
     FTRACE(FPrint( _L( "CDunBtListen::RunL()" ) ));
-    iListenState = EBtListenStateIdle;
 
     StopServiceAdvertisement();
 
@@ -432,6 +420,9 @@ void CDunBtListen::RunL()
 //
 void CDunBtListen::DoCancel()
     {
+    FTRACE(FPrint( _L( "CDunBtListen::DoCancel()" ) ));
+    iListenSocket.CancelAccept();
+    FTRACE(FPrint( _L( "CDunBtListen::DoCancel() complete" ) ));
     }
 
 // ---------------------------------------------------------------------------

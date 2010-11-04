@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2006-2008 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2006-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -24,12 +24,6 @@
 #include "DunTransporter.h"
 
 class TBtPortEntity;
-
-enum TBtListenState
-    {
-    EBtListenStateIdle,
-    EBtListenStateListening
-    };
 
 /**
  *  DUN Bluetooth plugin's listener class
@@ -86,9 +80,9 @@ public:
      * Stops listening
      *
      * @since S60 3.2
-     * @return Symbian error code on error, KErrNone otherwise
+     * @return None
      */
-    TInt Stop();
+    void Stop();
 
 private:
 
@@ -221,11 +215,6 @@ private:  // data
      * listener socket
      */
     TBtPortEntity& iEntity;
-
-    /**
-     * Current state of listening: active or inactive
-     */
-    TBtListenState iListenState;
 
     /**
      * Listener socket that will listen for activity in RFComm channel

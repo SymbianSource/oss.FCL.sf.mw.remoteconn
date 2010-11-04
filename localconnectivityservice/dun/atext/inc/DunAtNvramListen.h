@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2008-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -78,9 +78,9 @@ public:
      * Stops waiting for NVRAM status changes
      *
      * @since TB9.2
-     * @return Symbian error code on error, KErrNone otherwise
+     * @return None
      */
-    TInt Stop();
+    void Stop();
 
 private:
 
@@ -130,11 +130,6 @@ private:  // data
      * Not own.
      */
     RATExtCommon* iAtCmdExtCommon;
-
-    /**
-     * Current state of NVRAM status change listening; active or inactive
-     */
-    TDunState iNvramHandleState;
 
     /**
      * Buffer for NVRAM

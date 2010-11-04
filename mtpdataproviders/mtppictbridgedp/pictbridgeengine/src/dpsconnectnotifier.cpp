@@ -134,9 +134,13 @@ void CDpsConnectNotifier::DoCancel()
 // 
 // ---------------------------------------------------------------------------
 // 
+#ifdef OST_TRACE_COMPILER_IN_USE
 TInt CDpsConnectNotifier::RunError(TInt aErr)
+#else
+TInt CDpsConnectNotifier::RunError(TInt /*aErr*/)
+#endif
     {
     OstTraceDef1(OST_TRACE_CATEGORY_PRODUCTION, TRACE_IMPORTANT, CDPSCONNECTNOTIFIER_RUNERROR, 
             "CDpsConnectNotifier::RunError is %d", aErr );
-    return aErr;
+    return KErrNone;
     }

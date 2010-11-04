@@ -166,35 +166,7 @@ TInt CDunUpstream::Stop()
     {
     FTRACE(FPrint( _L("CDunUpstream::Stop() (Dir=%d)" ), iDirection));
     // Don't stop CDunAtCmdHandler here as it is downstream related!
-    if ( iTransferState != EDunStateTransferring )
-        {
-        FTRACE(FPrint( _L("CDunUpstream::Stop() (not ready) complete" )));
-        return KErrNotReady;
-        }
-    // Stop only current operation
-    if ( iOperationType == EDunOperationTypeRead )
-        {
-        if ( iComm )
-            {
-            iComm->ReadCancel();
-            FTRACE(FPrint( _L("CDunUpstream::Stop() (RComm) cancelled" )));
-            }
-        else if ( iSocket )
-            {
-            iSocket->CancelRecv();
-            FTRACE(FPrint( _L("CDunUpstream::Stop() (RSocket) cancelled" )));
-            }
-        }
-    else if ( iOperationType == EDunOperationTypeWrite )
-        {
-        if ( iNetwork )
-            {
-            iNetwork->WriteCancel();
-            FTRACE(FPrint( _L("CDunUpstream::Stop() (Network) cancelled" )));
-            }
-        }
     Cancel();
-    iTransferState = EDunStateIdle;
     iOperationType = EDunOperationTypeUndefined;
     // Notify parent about inactivity
     if ( iActivityData.iActivityCallback && iActivityData.iNotified )
@@ -264,7 +236,7 @@ TInt CDunUpstream::IssueRequest()
 
     FTRACE(FPrint( _L("CDunUpstream::IssueRequest() (Dir=%d)" ), iDirection));
 
-    if ( iTransferState != EDunStateIdle )
+    if ( IsActive() )
         {
         FTRACE(FPrint( _L("CDunUpstream::IssueRequest() (not ready) complete" ) ));
         return KErrNotReady;
@@ -285,16 +257,12 @@ TInt CDunUpstream::IssueRequest()
         case EDunReaderUpstream:
             if ( iComm )
                 {
-                iStatus = KRequestPending;
-                iTransferState = EDunStateTransferring;
                 iComm->ReadOneOrMore( iStatus, *iBufferPtr );
                 SetActive();
                 FTRACE(FPrint( _L("CDunUpstream::IssueRequest() RComm ReadOneOrMore() requested" ) ));
                 }
             else if ( iSocket )
                 {
-                iStatus = KRequestPending;
-                iTransferState = EDunStateTransferring;
                 iSocket->RecvOneOrMore( *iBufferPtr, 0, iStatus, iReadLengthSocket );
                 SetActive();
                 FTRACE(FPrint( _L("CDunUpstream::IssueRequest() RSocket RecvOneOrMore() requested" ) ));
@@ -306,8 +274,6 @@ TInt CDunUpstream::IssueRequest()
                 }
             break;
         case EDunWriterUpstream:
-            iStatus = KRequestPending;
-            iTransferState = EDunStateTransferring;
             iNetwork->Write( iStatus, *iBufferPtr );
             SetActive();
             FTRACE(FPrint( _L("CDunUpstream::IssueRequest() RComm Write() requested" ) ));
@@ -386,7 +352,6 @@ TInt CDunUpstream::ManageChannelActivity()
 void CDunUpstream::RunL()
     {
     FTRACE(FPrint( _L("CDunUpstream::RunL() (Dir=%d)" ), iDirection));
-    iTransferState = EDunStateIdle;
 
     TBool isError;
     TInt retTemp = iStatus.Int();
@@ -451,6 +416,32 @@ void CDunUpstream::RunL()
 void CDunUpstream::DoCancel()
     {
     FTRACE(FPrint( _L("CDunUpstream::DoCancel()" )));
+    // Stop only current operation
+    if ( iOperationType == EDunOperationTypeRead )
+        {
+        if ( iComm )
+            {
+            iComm->ReadCancel();
+            FTRACE(FPrint( _L("CDunUpstream::DoCancel() (RComm) cancelled" )));
+            }
+        else if ( iSocket )
+            {
+            iSocket->CancelRecv();
+            FTRACE(FPrint( _L("CDunUpstream::DoCancel() (RSocket) cancelled" )));
+            }
+        }
+    else if ( iOperationType == EDunOperationTypeWrite )
+        {
+        if ( iNetwork )
+            {
+            iNetwork->WriteCancel();
+            FTRACE(FPrint( _L("CDunUpstream::DoCancel() (Network) cancelled" )));
+            }
+        }
+    else
+        {
+        FTRACE(FPrint( _L("CDunUpstream::DoCancel() (ERROR) complete" )));
+        }
     FTRACE(FPrint( _L("CDunUpstream::DoCancel() complete" )));
     }
 
@@ -518,23 +509,15 @@ TInt CDunUpstream::StartUrc()
 // Stops AT command handling downstream related activity (also URC)
 // ---------------------------------------------------------------------------
 //
-TInt CDunUpstream::StopAtCmdHandling()
+void CDunUpstream::StopAtCmdHandling()
     {
     FTRACE(FPrint( _L("CDunUpstream::StopAtCmdHandling()" )));
-    TInt retVal = KErrNone;
     if ( iParseData.iAtCmdHandler )  // optional
         {
-        retVal = iParseData.iAtCmdHandler->StopUrc();
-        if ( retVal != KErrNone )
-            {
-            iParseData.iAtCmdHandler->Stop();
-            FTRACE(FPrint( _L("CDunUpstream::StopAtCmdHandling() (iAtCmdHandler) complete" )));
-            return retVal;
-            }
-        retVal = iParseData.iAtCmdHandler->Stop();
+        iParseData.iAtCmdHandler->StopUrc();
+        iParseData.iAtCmdHandler->Stop();
         }
     FTRACE(FPrint( _L("CDunUpstream::StopAtCmdHandling() complete" )));
-    return retVal;
     }
 
 // ---------------------------------------------------------------------------

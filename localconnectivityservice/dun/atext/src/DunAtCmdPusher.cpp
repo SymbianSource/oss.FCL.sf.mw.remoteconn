@@ -118,7 +118,6 @@ TInt CDunAtCmdPusher::IssueRequest( TDesC8& aInput, TBool aNormalMode )
         FTRACE(FPrint( _L("CDunAtCmdPusher::IssueRequest() (in queue!) complete") ));
         return KErrGeneral;
         }
-    iStatus = KRequestPending;
     iAtPushState = EDunStateAtCmdPushing;
     iAtCmdExt->HandleCommand( iStatus,
                               aInput,
@@ -134,22 +133,13 @@ TInt CDunAtCmdPusher::IssueRequest( TDesC8& aInput, TBool aNormalMode )
 // Stops AT command handling
 // ---------------------------------------------------------------------------
 //
-TInt CDunAtCmdPusher::Stop()
+void CDunAtCmdPusher::Stop()
     {
     FTRACE(FPrint( _L("CDunAtCmdPusher::Stop()") ));
     SetEndOfCmdLine();
-    if ( iAtPushState != EDunStateAtCmdPushing )
-        {
-        FTRACE(FPrint( _L("CDunAtCmdHandler::Stop() (not ready) complete" )));
-        return KErrNotReady;
-        }
-    // As the EDunStateAtCmdHandling can be set even when the actual request
-    // has completed (when replying with NotifyDataPushComplete() and setting
-    // idle eventually), cancel the actual operation in DoCancel()
     Cancel();
     iAtPushState = EDunStateIdle;
     FTRACE(FPrint( _L("CDunAtCmdPusher::Stop() complete") ));
-    return KErrNone;
     }
 
 // ---------------------------------------------------------------------------

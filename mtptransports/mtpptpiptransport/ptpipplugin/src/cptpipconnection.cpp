@@ -288,13 +288,16 @@ void CPTPIPConnection::RunL( )
 /**
  Called when an error occurs in the RunL 
  */
+#ifdef OST_TRACE_COMPILER_IN_USE
 TInt CPTPIPConnection::RunError(TInt aError )
+#else
+TInt CPTPIPConnection::RunError(TInt /*aError*/ )
+#endif
 	{
 	OstTraceFunctionEntry0( CPTPIPCONNECTION_RUNERROR_ENTRY );
 	
 	OstTrace1( TRACE_NORMAL, CPTPIPCONNECTION_RUNERROR, "PTPIP ERROR: Error received is %d", aError );
 	
-
 	// Cancel all the outstanding requests.
 	Cancel( );
 
@@ -1389,7 +1392,11 @@ void CPTPIPConnection::StopConnection( )
 /**
  * Invoked by the SocketHandler when there is an error.
  */
+#ifdef OST_TRACE_COMPILER_IN_USE
 void CPTPIPConnection::HandleError(TInt aError)
+#else
+void CPTPIPConnection::HandleError(TInt /*aError*/)
+#endif
 	{
 	OstTraceFunctionEntry0( CPTPIPCONNECTION_HANDLEERROR_ENTRY );
 	OstTrace1( TRACE_NORMAL, CPTPIPCONNECTION_HANDLEERROR, "SocketHandler received an error=%d, stopping connection.", aError );

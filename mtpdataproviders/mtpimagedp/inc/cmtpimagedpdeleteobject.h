@@ -55,6 +55,8 @@ private: // From CMTPRequestProcessor
     */
 	void DoCancel();
 
+	TInt RunError( TInt aErr );
+
 private:    
 
 	CMTPImageDpDeleteObject(MMTPDataProviderFramework& aFramework, MMTPConnection& aConnection,CMTPImageDataProvider& aDataProvider);
@@ -74,7 +76,7 @@ private:
 	/**
 	AO start
 	 */
-	void StartL();
+	void Start();
 	
 	/**
 	Send response to PC

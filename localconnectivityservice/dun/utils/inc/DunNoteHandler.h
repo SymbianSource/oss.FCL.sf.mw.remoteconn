@@ -20,7 +20,9 @@
 #define C_CDUNNOTEHANDLER_H
 
 #include <e32base.h>
-#include <hb/hbwidgets/hbdevicemessageboxsymbian.h>
+#include <dunutils.rsg>
+#include <AknGlobalConfirmationQuery.h>
+#include <data_caging_path_literals.hrh>
 #include "DunTransporter.h"
 
 /**
@@ -29,8 +31,7 @@
  *  @lib dunutils.lib
  *  @since S60 v3.2
  */
-NONSHARABLE_CLASS( CDunNoteHandler ) : public CBase,
-                                       public MHbDeviceMessageBoxObserver
+NONSHARABLE_CLASS( CDunNoteHandler ) : public CActive
     {
 
 public:
@@ -92,18 +93,42 @@ private:
      */
     void DoIssueRequestL();
 
-// from base class MHbDeviceMessageBoxObserver
+    /**
+     * Reads resource text
+     *
+     * @since S60 3.2
+     * @param aResourceId Resource ID to read
+     * @param aUnicode Buffer containing the note string to show
+     * @return None
+     */
+    void ReadResourceTextL( TInt aResourceId, HBufC16*& aUnicode );
 
-	// TODO: ADD DESCRIPTION HERE!
-    void MessageBoxClosed( const CHbDeviceMessageBoxSymbian* aMessageBox,
-                           CHbDeviceMessageBoxSymbian::TButtonId aButton );
+// from base class CActive
+
+    /*
+     * From CActive.
+     * Gets called when UI note dismissed
+     *
+     * @since S60 3.2
+     * @return None
+     */
+    void RunL();
+
+    /**
+     * From CActive.
+     * Gets called on cancel
+     *
+     * @since S60 3.2
+     * @return None
+     */
+    void DoCancel();
 
 private:  // data
 
     /**
      * Note to show
      */
-    CHbDeviceMessageBoxSymbian* iNote;
+    CAknGlobalConfirmationQuery* iNote;
 
     /**
      * Current state of note showing: active or inactive

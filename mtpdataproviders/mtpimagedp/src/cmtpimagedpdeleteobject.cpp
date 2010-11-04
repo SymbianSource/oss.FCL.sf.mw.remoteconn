@@ -125,7 +125,7 @@ void CMTPImageDpDeleteObject::ServiceL()
         OstTrace0( TRACE_FLOW, CMTPIMAGEDPDELETEOBJECT_SERVICEL, "delete all objects" );
         GetObjectHandlesL( KMTPStorageAll, formatCode, KMTPHandleNone );
         iObjectsNotDelete = iObjectsToDelete.Count();
-        StartL();
+        Start();
         }
     else
         {
@@ -153,7 +153,7 @@ void CMTPImageDpDeleteObject::RunL()
         }
     
     // Start the process again to read the next row...
-    StartL();
+    Start();
 
     OstTraceFunctionExit0( CMTPIMAGEDPDELETEOBJECT_RUNL_EXIT );
     }
@@ -165,6 +165,17 @@ void CMTPImageDpDeleteObject::DoCancel()
     TRAP_IGNORE( SendResponseL());
 
     OstTraceFunctionExit0( CMTPIMAGEDPDELETEOBJECT_DOCANCEL_EXIT );
+    }
+
+#ifdef OST_TRACE_COMPILER_IN_USE
+TInt CMTPImageDpDeleteObject::RunError(TInt aErr)
+#else
+TInt CMTPImageDpDeleteObject::RunError(TInt /*aErr*/)
+#endif
+    {
+    OstTrace1(TRACE_ERROR, CMTPIMAGEDPDELETEOBJECT_RUNERROR,"CMTPImageDpDeleteObject::RunError is %d", aErr );
+	TRAP_IGNORE(CMTPRequestProcessor::SendResponseL(EMTPRespCodeGeneralError));
+    return KErrNone;
     }
 
 /**
@@ -275,17 +286,17 @@ void CMTPImageDpDeleteObject::DeleteObjectL( TUint32 aHandle )
     OstTraceFunctionExit0( CMTPIMAGEDPDELETEOBJECT_DELETEOBJECTL_EXIT );
     }
 
-void CMTPImageDpDeleteObject::StartL()
+void CMTPImageDpDeleteObject::Start()
     {
-    OstTraceFunctionEntry0( CMTPIMAGEDPDELETEOBJECT_STARTL_ENTRY );
+    OstTraceFunctionEntry0( CMTPIMAGEDPDELETEOBJECT_START_ENTRY );
     
     if(iCancelled)
         {
-        OstTrace0( TRACE_NORMAL, CMTPIMAGEDPDELETEOBJECT_STARTL, "Cancell the delete" );
-        CMTPRequestProcessor::SendResponseL(EMTPRespCodeTransactionCancelled);
+        OstTrace0( TRACE_NORMAL, CMTPIMAGEDPDELETEOBJECT_START, "Cancell the delete" );
+        TRAP_IGNORE(CMTPRequestProcessor::SendResponseL(EMTPRespCodeTransactionCancelled));
         iObjectsToDelete.Reset();
         iCancelled = EFalse;
-        OstTraceFunctionExit0( CMTPIMAGEDPDELETEOBJECT_STARTL_EXIT );
+        OstTraceFunctionExit0( CMTPIMAGEDPDELETEOBJECT_START_EXIT );
         return;
         }
     
@@ -300,9 +311,9 @@ void CMTPImageDpDeleteObject::StartL()
         }
     else
         {
-        SendResponseL();
+        TRAP_IGNORE(SendResponseL());
         }
-    OstTraceFunctionExit0( DUP1_CMTPIMAGEDPDELETEOBJECT_STARTL_EXIT );
+    OstTraceFunctionExit0( DUP1_CMTPIMAGEDPDELETEOBJECT_START_EXIT );
     }
 
 void CMTPImageDpDeleteObject::SendResponseL()

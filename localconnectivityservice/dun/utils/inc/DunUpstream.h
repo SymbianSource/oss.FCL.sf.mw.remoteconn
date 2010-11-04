@@ -110,7 +110,7 @@ public:
      * @since S60 3.2
      * @return None
      */
-    virtual TInt StopAtCmdHandling() = 0;
+    virtual void StopAtCmdHandling() = 0;
 
     };
 
@@ -292,9 +292,9 @@ private:
      * This is an accessor for CDunDownstream's Stop()
      *
      * @since S60 3.2
-     * @return Symbian error code on error, KErrNone otherwise
+     * @return None
      */
-    TInt StopAtCmdHandling();
+    void StopAtCmdHandling();
 
 // from base class MDunCmdModeMonitor
 

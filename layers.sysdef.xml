@@ -83,8 +83,6 @@
 			
       <module name="from_package_definition">      
       	<unit name="mtpcontroller" unitID="smw.mtptransports.mtpcontroller" bldFile="sf\mw\remoteconn\mtptransports\mtpcontroller\group" mrp=""/>
-      	<unit name="obexprotocol" unitID="smw.obex.obexprotocol" bldFile="sf\mw\remoteconn\obex\obexprotocol\group" mrp=""/>
-      	<unit name="obexextensionapi" unitID="smw.obex.obexextensionapi" bldFile="sf\mw\remoteconn\obex\obexextensionapi\group" mrp=""/>
       </module>      		
     </layer>
   </systemModel>

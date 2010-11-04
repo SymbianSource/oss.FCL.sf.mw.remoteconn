@@ -108,17 +108,11 @@ TInt CDunCloseWait::IssueRequest()
 // Stops closing the objects in the close list
 // ---------------------------------------------------------------------------
 //
-TInt CDunCloseWait::Stop()
+void CDunCloseWait::Stop()
     {
     FTRACE(FPrint( _L("CDunCloseWait::Stop()" )));
-    if ( !IsActive() )
-        {
-        FTRACE(FPrint( _L("CDunCloseWait::Stop() (not ready) complete" )));
-        return KErrNotReady;
-        }
     Cancel();
     FTRACE(FPrint( _L("CDunCloseWait::Stop() complete" )));
-    return KErrNone;
     }
 
 // ---------------------------------------------------------------------------
@@ -175,4 +169,6 @@ void CDunCloseWait::RunL()
 //
 void CDunCloseWait::DoCancel()
     {
+    FTRACE(FPrint( _L("CDunCloseWait::DoCancel()" )));
+    FTRACE(FPrint( _L("CDunCloseWait::DoCancel() complete" )));
     }

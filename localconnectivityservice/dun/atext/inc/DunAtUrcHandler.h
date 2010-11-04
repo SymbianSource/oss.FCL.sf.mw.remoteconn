@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2008-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -79,9 +79,9 @@ public:
      * Stops waiting for an incoming URC message
      *
      * @since TB9.2
-     * @return Symbian error code on error, KErrNone otherwise
+     * @return None
      */
-    TInt Stop();
+    void Stop();
 
     /**
      * UID of the owning plugin
@@ -151,11 +151,6 @@ private:  // data
      * Not own.
      */
     MDunStreamManipulator* iStreamCallback;
-
-    /**
-     * Current state of URC message handling: active or inactive
-     */
-    TDunState iUrcHandleState;
 
     /**
      * Buffer for receiving

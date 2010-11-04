@@ -130,7 +130,7 @@ TInt CDunSignalWaiter::SetMedia( RComm* aComm )
 TInt CDunSignalWaiter::IssueRequest()
     {
     FTRACE(FPrint( _L("CDunSignalWaiter::IssueRequest()" )));
-    if ( iSignalWaiterState != EDunStateIdle )
+    if ( IsActive() )
         {
         FTRACE(FPrint( _L("CDunSignalWaiter::IssueRequest() (not ready) complete" )));
         return KErrNotReady;
@@ -140,8 +140,6 @@ TInt CDunSignalWaiter::IssueRequest()
         FTRACE(FPrint( _L("CDunSignalWaiter::IssueRequest() (iComm) not initialized!" ) ));
         return KErrGeneral;
         }
-    iStatus = KRequestPending;
-    iSignalWaiterState = EDunStateSignalWaiting;
     iComm->NotifySignalChange( iStatus, iSignals, KSignalDCEInputs );
     SetActive();
     FTRACE(FPrint( _L("CDunSignalWaiter::IssueRequest() complete" )));
@@ -152,24 +150,11 @@ TInt CDunSignalWaiter::IssueRequest()
 // Stops monitoring for new data
 // ---------------------------------------------------------------------------
 //
-TInt CDunSignalWaiter::Stop()
+void CDunSignalWaiter::Stop()
     {
     FTRACE(FPrint( _L("CDunSignalWaiter::Stop()" )));
-    if ( iSignalWaiterState != EDunStateSignalWaiting )
-        {
-        FTRACE(FPrint( _L("CDunSignalWaiter::Stop() (not ready) complete" )));
-        return KErrNotReady;
-        }
-    if ( !iComm )
-        {
-        FTRACE(FPrint( _L("CDunSignalWaiter::Stop() (iComm) not initialized!" )));
-        return KErrGeneral;
-        }
-    iComm->NotifySignalChangeCancel();
     Cancel();
-    iSignalWaiterState = EDunStateIdle;
     FTRACE(FPrint( _L("CDunSignalWaiter::Stop() complete" )));
-    return KErrNone;
     }
 
 // ---------------------------------------------------------------------------
@@ -206,7 +191,6 @@ void CDunSignalWaiter::Initialize()
     {
     FTRACE(FPrint( _L("CDunSignalWaiter::Initialize()" ) ));
     // Don't initialize iChannelCallback here (it is set through NewL)
-    iSignalWaiterState = EDunStateIdle;
     iSignals = 0;
     iComm = NULL;
     FTRACE(FPrint( _L("CDunSignalWaiter::Initialize() complete" ) ));
@@ -220,7 +204,6 @@ void CDunSignalWaiter::Initialize()
 void CDunSignalWaiter::RunL()
     {
     FTRACE(FPrint( _L("CDunSignalWaiter::RunL()" ) ));
-    iSignalWaiterState = EDunStateIdle;
     TInt retTemp = iStatus.Int();
     if ( retTemp != KErrNone )
         {
@@ -254,4 +237,7 @@ void CDunSignalWaiter::RunL()
 //
 void CDunSignalWaiter::DoCancel()
     {
+    FTRACE(FPrint( _L("CDunSignalWaiter::RunL()" ) ));
+    iComm->NotifySignalChangeCancel();
+    FTRACE(FPrint( _L("CDunSignalWaiter::RunL() complete" ) ));
     }

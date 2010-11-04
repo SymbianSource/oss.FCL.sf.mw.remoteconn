@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2006-2007 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2006-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -22,12 +22,6 @@
 #include <e32property.h>
 #include <usb/acmconfig.h>
 #include "DunPlugin.h"
-
-enum TUsbConfigState
-    {
-    EUsbConfigStateIdle,
-    EUsbConfigStateWaiting
-    };
 
 /**
  *  Notification interface class to report USB ACM configuration change
@@ -117,9 +111,9 @@ public:
      * Stops listening for ACM configuration changes
      *
      * @since S60 3.2
-     * @return Symbian error code on error, KErrNone otherwise
+     * @return None
      */
-    TInt Stop();
+    void Stop();
 
 private:
 
@@ -174,11 +168,6 @@ private:  // data
      * Callback to call when notification(s) via MDunUsbConfig to be made
      */
     MDunUsbConfig* iCallback;
-
-    /**
-     * Current state of configuration waiting: active or inactive
-     */
-    TUsbConfigState iConfigState;
 
     /*
      * Protocol number of USB ACM to which listening is done

@@ -73,7 +73,8 @@ private:
 	static TInt OnTimeoutL(TAny* aPtr);
 	void DoOnTimeoutL();
 	void RunL();
-	
+	TInt RunError( TInt aErr );
+
 private:
 	CFileMan*							iFileMan;
 	CMTPObjectMetaData*		iObjectInfo;	//Not owned.

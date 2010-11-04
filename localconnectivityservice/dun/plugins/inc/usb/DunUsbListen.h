@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2006-2007 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2006-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -23,12 +23,6 @@
 #include <c32comm.h>
 #include <usbman.h>
 #include "DunPlugin.h"
-
-enum TUsbListenState
-    {
-    EUsbListenStateIdle,
-    EUsbListenStateListening
-    };
 
 /**
  *  DUN USB plugin's listener class
@@ -81,9 +75,9 @@ public:
      * Stops listening
      *
      * @since S60 3.2
-     * @return Symbian error code on error, KErrNone otherwise
+     * @return None
      */
-    TInt Stop();
+    void Stop();
 
 private:
 
@@ -141,11 +135,6 @@ private:  // data
      * Not own.
      */
     MDunListenCallback* iParent;
-
-    /**
-     * Current state of listening: active or inactive
-     */
-    TUsbListenState iListenState;
 
     /**
      * USB server (USB manager) needed for device state notifications

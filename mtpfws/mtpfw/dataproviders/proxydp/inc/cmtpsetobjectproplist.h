@@ -55,7 +55,7 @@ private: // From MMTPTransactionProxy
 private: // From CActive
 
     void RunL();
-
+	TInt RunError( TInt aErr );
 private:    
 
     CMTPSetObjectPropList(MMTPDataProviderFramework& aFramework,MMTPConnection& aConnection);

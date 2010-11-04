@@ -96,9 +96,9 @@ public:
      * Stops closing the objects in the close list
      *
      * @since S60 5.0
-     * @return Symbian error code on error, KErrNone otherwise
+     * @return None
      */
-    TInt Stop();
+    void Stop();
 
 private:
 

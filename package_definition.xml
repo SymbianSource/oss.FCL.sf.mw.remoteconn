@@ -86,13 +86,5 @@
     <unit bldFile="backupandrestore/backuptest/group" mrp="backupandrestore/backuptest/group/connectivity_backuptest.mrp"/>
    </component>
   </collection>
-  <collection id="obex" name="OBEX" level="generic">
-   <component id="obexprotocol" name="OBEX Protocol" introduced="9.1" purpose="optional" filter="s60">
-    <unit bldFile="obex/obexprotocol/group" mrp="obex/obexprotocol/group/obex.mrp"/>
-   </component>
-   <component id="obexextensionapi" name="OBEX Extension API" introduced="9.2" purpose="optional" filter="s60">
-    <unit bldFile="obex/obexextensionapi/group" mrp="obex/obexextensionapi/group/obex_extensionapis.mrp"/>
-   </component>
-  </collection>
  </package>
 </SystemDefinition>

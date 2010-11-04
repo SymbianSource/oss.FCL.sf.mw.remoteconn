@@ -209,19 +209,24 @@ void CMTPFileDataProvider::Supported(TMTPSupportCategory aCategory, RArray<TUint
         }
     OstTraceFunctionExit0( CMTPFILEDATAPROVIDER_SUPPORTED_EXIT );
     }    
-       
+
+#ifdef OST_TRACE_COMPILER_IN_USE
 void CMTPFileDataProvider::NotifyEnumerationCompleteL(TUint32 aStorageId, TInt aError)
+#else
+void CMTPFileDataProvider::NotifyEnumerationCompleteL(TUint32 aStorageId, TInt /*aError*/)
+#endif       
     {
     OstTraceFunctionEntry0( CMTPFILEDATAPROVIDER_NOTIFYENUMERATIONCOMPLETEL_ENTRY );
     OstTraceExt2( TRACE_NORMAL, CMTPFILEDATAPROVIDER_NOTIFYENUMERATIONCOMPLETEL, 
             "Enumeration of storage 0x%08X completed with error status %d", aStorageId, (TInt32)aError);
+    aStorageId = aStorageId;
     __ASSERT_DEBUG((aStorageId == iPendingEnumerations[KActiveEnumeration]), User::Invariant());
     
     Framework().ObjectEnumerationCompleteL(iPendingEnumerations[KActiveEnumeration]);
     iPendingEnumerations.Remove(KActiveEnumeration);
     OstTraceFunctionExit0( CMTPFILEDATAPROVIDER_NOTIFYENUMERATIONCOMPLETEL_EXIT );
     }
-    
+
 /**
 Standard C++ constructor
 */

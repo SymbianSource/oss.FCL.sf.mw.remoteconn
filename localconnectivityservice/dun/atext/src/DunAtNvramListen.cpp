@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2008-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -79,7 +79,7 @@ void CDunAtNvramListen::ResetData()
 TInt CDunAtNvramListen::IssueRequest()
     {
     FTRACE(FPrint( _L("CDunAtNvramListen::IssueRequest()") ));
-    if ( iNvramHandleState != EDunStateIdle )
+    if ( IsActive() )
         {
         FTRACE(FPrint( _L("CDunAtNvramListen::IssueRequest() (not ready) complete") ));
         return KErrNotReady;
@@ -90,8 +90,6 @@ TInt CDunAtNvramListen::IssueRequest()
         iAtCmdExt->BroadcastNvramStatusChange( iNvramBuffer );
         iStarted = ETrue;
         }
-    iStatus = KRequestPending;
-    iNvramHandleState = EDunStateNvramListening;
     iAtCmdExtCommon->ReceiveNvramStatusChange( iStatus, iNvramBuffer );
     SetActive();
     FTRACE(FPrint( _L("CDunAtNvramListen::IssueRequest() complete") ));
@@ -102,20 +100,12 @@ TInt CDunAtNvramListen::IssueRequest()
 // Stops waiting for NVRAM status changes
 // ---------------------------------------------------------------------------
 //
-TInt CDunAtNvramListen::Stop()
+void CDunAtNvramListen::Stop()
     {
     FTRACE(FPrint( _L("CDunAtNvramListen::Stop()") ));
-    if ( iNvramHandleState != EDunStateNvramListening )
-        {
-        FTRACE(FPrint( _L("CDunAtNvramListen::Stop() (not ready) complete" )));
-        return KErrNotReady;
-        }
-    iAtCmdExtCommon->CancelReceiveNvramStatusChange();
     Cancel();
-    iNvramHandleState = EDunStateIdle;
     FTRACE(FPrint( _L("CDunAtNvramListen::Stop() complete") ));
     // Note: Don't mark iStarted to EFalse here!
-    return KErrNone;
     }
 
 // ---------------------------------------------------------------------------
@@ -154,7 +144,6 @@ void CDunAtNvramListen::Initialize()
     {
     // Don't initialize iAtCmdExt here (it is set through NewL)
     // Don't initialize iAtCmdExtCommon here (it is set through NewL)
-    iNvramHandleState = EDunStateIdle;
     iStarted = EFalse;
     }
 
@@ -166,7 +155,6 @@ void CDunAtNvramListen::Initialize()
 void CDunAtNvramListen::RunL()
     {
     FTRACE(FPrint( _L("CDunAtNvramListen::RunL()") ));
-    iNvramHandleState = EDunStateIdle;
     TInt retTemp = iStatus.Int();
     if ( retTemp != KErrNone )
         {
@@ -186,5 +174,6 @@ void CDunAtNvramListen::RunL()
 void CDunAtNvramListen::DoCancel()
     {
     FTRACE(FPrint( _L("CDunAtNvramListen::DoCancel()") ));
+    iAtCmdExtCommon->CancelReceiveNvramStatusChange();
     FTRACE(FPrint( _L("CDunAtNvramListen::DoCancel() complete") ));
     }

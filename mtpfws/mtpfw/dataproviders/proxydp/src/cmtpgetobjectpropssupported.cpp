@@ -158,6 +158,16 @@ void CMTPGetObjectPropsSupported::RunL()
         } 	
 	}
 
+#ifdef OST_TRACE_COMPILER_IN_USE
+TInt CMTPGetObjectPropsSupported::RunError(TInt aErr)
+#else
+TInt CMTPGetObjectPropsSupported::RunError(TInt /*aErr*/)
+#endif
+	{
+	OstTrace1(TRACE_ERROR, DUP1_CMTPGETOBJECTPROPSSUPPORTED_RUNERROR,"CMTPGetObjectPropsSupported::RunError is %d", aErr );
+	TRAP_IGNORE(SendResponseL(EMTPRespCodeGeneralError));
+	return KErrNone;
+	}
 /**
 Constructor.
 */	

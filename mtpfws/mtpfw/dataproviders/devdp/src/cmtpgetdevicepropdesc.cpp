@@ -225,7 +225,11 @@ void CMTPGetDevicePropDesc::RunL()
     OstTraceFunctionEntry0( CMTPGETDEVICEPROPDESC_RUNL_ENTRY );
     if (iPropCode == EMTPDevicePropCodeBatteryLevel)
         {
-        ServiceBatteryLevelL();
+        TRAPD(err,ServiceBatteryLevelL());
+		if ( err != KErrNone)
+			{
+			TRAP_IGNORE(SendResponseL(EMTPRespCodeGeneralError));
+			}
         }
     else
         {

@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2006-2007 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2006-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -124,7 +124,7 @@ TInt CDunDataWaiter::SetMedia( RComm* aComm )
 TInt CDunDataWaiter::IssueRequest()
     {
     FTRACE(FPrint( _L("CDunDataWaiter::IssueRequest()" )));
-    if ( iDataWaiterState != EDunStateIdle )
+    if ( IsActive() )
         {
         FTRACE(FPrint( _L("CDunDataWaiter::IssueRequest() (not ready) complete" )));
         return KErrNotReady;
@@ -135,8 +135,6 @@ TInt CDunDataWaiter::IssueRequest()
         return KErrGeneral;
         }
     iComm->ResetBuffers();
-    iStatus = KRequestPending;
-    iDataWaiterState = EDunStateDataWaiting;
     iComm->NotifyDataAvailable( iStatus );
     SetActive();
     FTRACE(FPrint( _L("CDunDataWaiter::IssueRequest() complete" )));
@@ -147,24 +145,11 @@ TInt CDunDataWaiter::IssueRequest()
 // Stops monitoring for new data
 // ---------------------------------------------------------------------------
 //
-TInt CDunDataWaiter::Stop()
+void CDunDataWaiter::Stop()
     {
     FTRACE(FPrint( _L("CDunDataWaiter::Stop()" )));
-    if ( iDataWaiterState != EDunStateDataWaiting )
-        {
-        FTRACE(FPrint( _L("CDunDataWaiter::Stop() (not ready) complete" )));
-        return KErrNotReady;
-        }
-    if ( !iComm )
-        {
-        FTRACE(FPrint( _L("CDunDataWaiter::Stop() (iComm) not initialized!" )));
-        return KErrGeneral;
-        }
-    iComm->NotifyDataAvailableCancel();
     Cancel();
-    iDataWaiterState = EDunStateIdle;
     FTRACE(FPrint( _L("CDunDataWaiter::Stop() complete" )));
-    return KErrNone;
     }
 
 // ---------------------------------------------------------------------------
@@ -201,7 +186,6 @@ void CDunDataWaiter::Initialize()
     {
     FTRACE(FPrint( _L("CDunDataWaiter::Initialize()" ) ));
     // Don't initialize iChannelCallback here (it is set through NewL)
-    iDataWaiterState = EDunStateIdle;
     iComm = NULL;
     FTRACE(FPrint( _L("CDunDataWaiter::Initialize() complete" ) ));
     }
@@ -214,7 +198,6 @@ void CDunDataWaiter::Initialize()
 void CDunDataWaiter::RunL()
     {
     FTRACE(FPrint( _L("CDunDataWaiter::RunL()" ) ));
-    iDataWaiterState = EDunStateIdle;
     TInt retTemp = iStatus.Int();
     if ( retTemp != KErrNone )
         {
@@ -250,4 +233,7 @@ void CDunDataWaiter::RunL()
 //
 void CDunDataWaiter::DoCancel()
     {
+    FTRACE(FPrint( _L("CDunDataWaiter::DoCancel()" ) ));
+    iComm->NotifyDataAvailableCancel();
+    FTRACE(FPrint( _L("CDunDataWaiter::DoCancel() complete" ) ));
     }

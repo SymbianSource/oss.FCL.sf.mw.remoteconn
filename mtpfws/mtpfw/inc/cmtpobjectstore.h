@@ -169,7 +169,7 @@ class CMTPObjectStore : public CBase
             static CSnapshotWorker* NewL(CMTPObjectStore* aObjectStore, TBool aOnlyRoot); 
             
             void RunL();
-            TInt RunErr();
+            TInt RunError(TInt aErr);
             void ActiveSelf();
             ~CSnapshotWorker();
 			

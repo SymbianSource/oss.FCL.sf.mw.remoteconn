@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2006-2008 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2006-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -107,21 +107,13 @@ TInt CDunUsbListen::IssueRequestL()
 // Stops listening
 // ---------------------------------------------------------------------------
 //
-TInt CDunUsbListen::Stop()
+void CDunUsbListen::Stop()
     {
     FTRACE(FPrint( _L( "CDunUsbListen::Stop()" ) ));
-    if ( iListenState != EUsbListenStateListening )
-        {
-        FTRACE(FPrint( _L( "CDunUsbListen::Stop() (not ready) complete" ) ));
-        return KErrNotReady;
-        }
-    iUsbServer.DeviceStateNotificationCancel();
     Cancel();
-    iListenState = EUsbListenStateIdle;
     iDeviceState = EUsbDeviceStateUndefined;
     iDeviceStatePrev = EUsbDeviceStateUndefined;
     FTRACE(FPrint( _L( "CDunUsbListen::Stop() complete" ) ));
-    return KErrNone;
     }
 
 // ---------------------------------------------------------------------------
@@ -175,14 +167,12 @@ TInt CDunUsbListen::Activate()
     {
     FTRACE(FPrint( _L( "CDunUsbListen::Activate()" ) ));
 
-    if ( iListenState != EUsbListenStateIdle )
+    if ( IsActive() )
         {
         FTRACE(FPrint( _L( "CDunUsbListen::Activate() (not ready) complete" ) ));
         return KErrNotReady;
         }
     iDeviceStatePrev = iDeviceState;
-    iStatus = KRequestPending;
-    iListenState = EUsbListenStateListening;
     iUsbServer.DeviceStateNotification( KDunUsbDeviceStateMask,
                                         iDeviceState,
                                         iStatus );
@@ -199,7 +189,6 @@ TInt CDunUsbListen::Activate()
 void CDunUsbListen::RunL()
     {
     FTRACE(FPrint( _L( "CDunUsbListen::RunL() iStatus=%d"), iStatus.Int() ));
-    iListenState = EUsbListenStateIdle;
 
     if ( iStatus.Int() != KErrNone )
         {
@@ -256,4 +245,7 @@ void CDunUsbListen::RunL()
 //
 void CDunUsbListen::DoCancel()
     {
+    FTRACE(FPrint( _L( "CDunUsbListen::DoCancel()" )));
+    iUsbServer.DeviceStateNotificationCancel();
+    FTRACE(FPrint( _L( "CDunUsbListen::DoCancel() complete" )));
     }

@@ -34,7 +34,7 @@ SOURCE        locodserviceman.cpp
 SOURCE        locodservice.cpp
 
 USERINCLUDE   ../inc
-
+SYSTEMINCLUDE       /epoc32/include/ecom
 MW_LAYER_SYSTEMINCLUDE
 
 LIBRARY         euser.lib

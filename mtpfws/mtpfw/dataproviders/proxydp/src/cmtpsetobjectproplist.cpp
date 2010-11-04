@@ -28,6 +28,10 @@
 #include "mtpproxydppanic.h"
 #include "rmtpframework.h"
 #include "cmtpstoragemgr.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cmtpsetobjectproplistTraces.h"
+#endif
 
 /**
 Two-phase construction method
@@ -245,6 +249,17 @@ void CMTPSetObjectPropList::RunL()
         SendResponseL(iResponseCode, 1, &iPropertyIdx);
         }    
     }
+
+#ifdef OST_TRACE_COMPILER_IN_USE
+TInt CMTPSetObjectPropList::RunError(TInt aErr)
+#else
+TInt CMTPSetObjectPropList::RunError(TInt /*aErr*/)
+#endif
+	{
+	OstTrace1(TRACE_ERROR, CMTPSETOBJECTPROPLIST_RUNERROR,"CMTPSetObjectPropList::RunError is %d", aErr );
+	TRAP_IGNORE(SendResponseL(EMTPRespCodeGeneralError));
+	return KErrNone;
+	}
 
 /**
 Reschedules the active object with the specified completion code.

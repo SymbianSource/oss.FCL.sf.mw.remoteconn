@@ -476,14 +476,18 @@ void CMTPImageDpGetObjectPropList::RunL()
     OstTraceFunctionExit0( CMTPIMAGEDPGETOBJECTPROPLIST_RUNL_EXIT );
     }
 
-TInt CMTPImageDpGetObjectPropList::RunError( TInt aError )
+#ifdef OST_TRACE_COMPILER_IN_USE
+TInt CMTPImageDpGetObjectPropList::RunError(TInt aError)
+#else
+TInt CMTPImageDpGetObjectPropList::RunError(TInt /*aError*/)
+#endif
     {
     OstTraceFunctionEntry0( CMTPIMAGEDPGETOBJECTPROPLIST_RUNERROR_ENTRY );
     
     TRAP_IGNORE( SendResponseL( EMTPRespCodeGeneralError ) );
     
     OstTraceFunctionExit0( CMTPIMAGEDPGETOBJECTPROPLIST_RUNERROR_EXIT );
-    return aError;
+    return KErrNone;
     }
 
 void CMTPImageDpGetObjectPropList::StartL()

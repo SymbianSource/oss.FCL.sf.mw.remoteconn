@@ -282,7 +282,11 @@ void CMTPPlaybackControlDataProvider::SessionClosedL(const TMTPNotificationParam
 Prepares for a newly-opened session.
 @param aSession notification parameter block
 */
+#ifdef OST_TRACE_COMPILER_IN_USE
 void CMTPPlaybackControlDataProvider::SessionOpenedL(const TMTPNotificationParamsSessionChange& aSession)
+#else
+void CMTPPlaybackControlDataProvider::SessionOpenedL(const TMTPNotificationParamsSessionChange& /*aSession*/)
+#endif
     {
     OstTraceFunctionEntry0( DUP1_CMTPPLAYBACKCONTROLDATAPROVIDER_SESSIONOPENEDL_ENTRY );
     OstTrace1( TRACE_NORMAL, CMTPPLAYBACKCONTROLDATAPROVIDER_SESSIONOPENEDL, "SessionID = %d", aSession.iMTPId );

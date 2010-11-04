@@ -520,6 +520,17 @@ void CMTPCopyObject::RunL()
 	OstTraceFunctionExit0( CMTPCOPYOBJECT_RUNL_EXIT );
 	}
 
+#ifdef OST_TRACE_COMPILER_IN_USE
+TInt CMTPCopyObject::RunError(TInt aErr)
+#else
+TInt CMTPCopyObject::RunError(TInt /*aErr*/)
+#endif
+    {
+    OstTrace1(TRACE_ERROR, CMTPCOPYOBJECT_RUNERROR,"CMTPCopyObject::RunError is %d", aErr );
+	TRAP_IGNORE(SendResponseL(EMTPRespCodeGeneralError));
+    return KErrNone;
+    }
+
 /**
 Override to handle the complete phase of copy object
 @return EFalse

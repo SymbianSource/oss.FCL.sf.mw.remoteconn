@@ -187,11 +187,6 @@ TInt CDunDownstream::StartStream()
 TInt CDunDownstream::Stop( TBool aStopMplex )
     {
     FTRACE(FPrint( _L("CDunDownstream::Stop() (Dir=%d)" ), iDirection));
-    if ( !iPushData.iDataPusher )
-        {
-        FTRACE(FPrint( _L("CDunDownstream::Stop() (iPushData.iDatapusher not initialized!) complete" )));
-        return KErrGeneral;
-        }
     // Stop the downstream related AT command handling functionality
     if ( aStopMplex )  // optional
         {
@@ -200,28 +195,12 @@ TInt CDunDownstream::Stop( TBool aStopMplex )
             iPushData.iAtCmdHandler->StopAtCmdHandling();
             }
         // Stop the multiplexer separately
-        iPushData.iDataPusher->Stop();
-        }
-    if ( iTransferState != EDunStateTransferring )
-        {
-        FTRACE(FPrint( _L("CDunDownstream::Stop() (not ready) complete" )));
-        return KErrNotReady;
-        }
-    // Stop only current operation
-    if ( iOperationType == EDunOperationTypeRead )
-        {
-        if ( iNetwork )
+        if ( iPushData.iDataPusher )
             {
-            iNetwork->ReadCancel();
-            Cancel();
-            FTRACE(FPrint( _L("CDunDownstream::Stop() (Network) cancelled" )));
+            iPushData.iDataPusher->Stop();
             }
         }
-    else if ( iOperationType == EDunOperationTypeWrite )
-        {
-        iPushData.iDataPusher->StopOneEvent( iBufferPtr );
-        }
-    iTransferState = EDunStateIdle;
+    Cancel();
     iOperationType = EDunOperationTypeUndefined;
     FTRACE(FPrint( _L("CDunDownstream::Stop() complete" )));
     return KErrNone;
@@ -273,13 +252,8 @@ TInt CDunDownstream::IssueRequest()
     iDirection = static_cast<TDunDirection>( EDunStreamTypeDownstream | iOperationType );
 
     FTRACE(FPrint( _L("CDunDownstream::IssueRequest() (Dir=%d)" ), iDirection));
-    if ( !iPushData.iDataPusher )
-        {
-        FTRACE(FPrint( _L("CDunDownstream::IssueRequest() (iPushData.iDataPusher not initialized!) complete" ) ));
-        return KErrGeneral;
-        }
 
-    if ( iTransferState != EDunStateIdle )
+    if ( IsActive() )
         {
         FTRACE(FPrint( _L("CDunDownstream::IssueRequest() (not ready) complete" ) ));
         return KErrNotReady;
@@ -298,14 +272,11 @@ TInt CDunDownstream::IssueRequest()
     switch ( iDirection )
         {
         case EDunReaderDownstream:
-            iStatus = KRequestPending;
-            iTransferState = EDunStateTransferring;
             iNetwork->ReadOneOrMore( iStatus, *iBufferPtr );
             SetActive();
             FTRACE(FPrint( _L("CDunDownstream::IssueRequest() RComm ReadOneOrMore() requested" ) ));
             break;
         case EDunWriterDownstream:
-            iTransferState = EDunStateTransferring;
             AddToQueueAndSend( iBufferPtr, this );
             break;
         default:
@@ -325,7 +296,7 @@ TInt CDunDownstream::IssueRequest()
 void CDunDownstream::RunL()
     {
     FTRACE(FPrint( _L("CDunDownstream::RunL() (Dir=%d)" ), iDirection));
-    iTransferState = EDunStateIdle;
+
     if ( iOperationType != EDunOperationTypeRead )
         {
         FTRACE(FPrint( _L("CDunDownstream::RunL() (wrong operation type!) complete" )));
@@ -376,6 +347,7 @@ void CDunDownstream::RunL()
 void CDunDownstream::DoCancel()
     {
     FTRACE(FPrint( _L("CDunDownstream::DoCancel()" )));
+    iNetwork->ReadCancel();
     FTRACE(FPrint( _L("CDunDownstream::DoCancel() complete" )));
     }
 
@@ -424,7 +396,6 @@ void CDunDownstream::NotifyDataPushComplete( TBool aAllPushed )
     FTRACE(FPrint( _L("CDunDownstream::NotifyDataPushComplete() (find event)" )));
     if ( foundIndex >= 0 )
         {
-        iTransferState = EDunStateIdle;
         iOperationType = EDunOperationTypeUndefined;
         FTRACE(FPrint( _L("CDunDownstream::NotifyDataPushComplete() (issue request)" )));
         if ( iPushData.iDataMode )
@@ -445,13 +416,8 @@ void CDunDownstream::NotifyCommandModeStart()
     {
     FTRACE(FPrint( _L("CDunDownstream::NotifyCommandModeStart()" )));
     iPushData.iDataMode = EFalse;
-    // Now the data mode has ended. If read operation then cancel it.
-    // Check for iTransferState here to minimize logging
-    if ( iTransferState==EDunStateTransferring &&
-         iOperationType==EDunOperationTypeRead )
-        {
-        Stop( EFalse );
-        }
+    // Now the data mode has ended. Stop read operation but not the multiplexer.
+    Stop( EFalse );
     FTRACE(FPrint( _L("CDunDownstream::NotifyCommandModeStart() complete" )));
     }
 
@@ -464,14 +430,7 @@ void CDunDownstream::NotifyCommandModeEnd()
     {
     FTRACE(FPrint( _L("CDunDownstream::NotifyCommandModeEnd()" )));
     iPushData.iDataMode = ETrue;
-    // Command mode ends here so start reading from Dataport only if generic
-    // transferring state is not EDunStateIdle. This is a reduced form of having
-    // read pending -> reissue not needed OR write pending -> reissue not needed
-    // (NotifyDataPushComplete() will reissue).
-    if ( iTransferState == EDunStateIdle )
-        {
-        iOperationType = EDunOperationTypeRead;  // just in case
-        IssueRequest();
-        }
+    iOperationType = EDunOperationTypeRead;  // just in case
+    IssueRequest();
     FTRACE(FPrint( _L("CDunDownstream::NotifyCommandModeEnd() complete" )));
     }

@@ -30,8 +30,7 @@ VENDORID        0x70000001
 CAPABILITY      ALL -TCB
 
 SYSTEMINCLUDE   /epoc32/include/ecom
-SYSTEMINCLUDE   ../locodinc
-MW_LAYER_SYSTEMINCLUDE_SYMBIAN
+MW_LAYER_SYSTEMINCLUDE
 
 USERINCLUDE     ../inc
 USERINCLUDE     ../../../mtpfws/mtpfw/common/inc 

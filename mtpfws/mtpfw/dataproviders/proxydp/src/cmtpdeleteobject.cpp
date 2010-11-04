@@ -223,6 +223,17 @@ void CMTPDeleteObject::RunL()
 
     OstTraceFunctionExit0( CMTPDELETEOBJECT_RUNL_EXIT );
     }
+
+#ifdef OST_TRACE_COMPILER_IN_USE
+TInt CMTPDeleteObject::RunError(TInt aErr)
+#else
+TInt CMTPDeleteObject::RunError(TInt /*aErr*/)
+#endif
+	{
+	OstTrace1(TRACE_ERROR, DUP1_CMTPDELETEOBJECT_RUNERROR,"CMTPDeleteObject::RunError is %d", aErr );
+	TRAP_IGNORE(SendResponseL(EMTPRespCodeGeneralError));
+	return KErrNone;
+	}
     
 /**
 Completes the current asynchronous request with the specified 

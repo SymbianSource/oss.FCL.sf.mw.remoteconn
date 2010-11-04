@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2008-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -80,13 +80,11 @@ void CDunAtEcomListen::ResetData()
 TInt CDunAtEcomListen::IssueRequest()
     {
     FTRACE(FPrint( _L("CDunAtEcomListen::IssueRequest()") ));
-    if ( iEcomListenState != EDunStateIdle )
+    if ( IsActive() )
         {
         FTRACE(FPrint( _L("CDunAtEcomListen::IssueRequest() (not ready) complete") ));
         return KErrNotReady;
         }
-    iStatus = KRequestPending;
-    iEcomListenState = EDunStateEcomListening;
     iAtCmdExt->ReceiveEcomPluginChange( iStatus, iPluginUidPckg, iEcomTypePckg );
     SetActive();
     FTRACE(FPrint( _L("CDunAtEcomListen::IssueRequest() complete") ));
@@ -97,19 +95,11 @@ TInt CDunAtEcomListen::IssueRequest()
 // Stops waiting for Ecom plugin install/uninstall/version status changes
 // ---------------------------------------------------------------------------
 //
-TInt CDunAtEcomListen::Stop()
+void CDunAtEcomListen::Stop()
     {
     FTRACE(FPrint( _L("CDunAtEcomListen::Stop()") ));
-    if ( iEcomListenState != EDunStateEcomListening )
-        {
-        FTRACE(FPrint( _L("CDunAtEcomListen::Stop() (not ready) complete" )));
-        return KErrNotReady;
-        }
-    iAtCmdExt->CancelReceiveEcomPluginChange();
     Cancel();
-    iEcomListenState = EDunStateIdle;
     FTRACE(FPrint( _L("CDunAtEcomListen::Stop() complete") ));
-    return KErrNone;
     }
 
 // ---------------------------------------------------------------------------
@@ -150,7 +140,6 @@ void CDunAtEcomListen::Initialize()
     {
     // Don't initialize iAtCmdExt here (it is set through NewL)
     // Don't initialize iCallback here (it is set through NewL)
-    iEcomListenState = EDunStateIdle;
     iPluginUid = TUid::Null();
     }
 
@@ -162,7 +151,6 @@ void CDunAtEcomListen::Initialize()
 void CDunAtEcomListen::RunL()
     {
     FTRACE(FPrint( _L("CDunAtEcomListen::RunL()") ));
-    iEcomListenState = EDunStateIdle;
     TInt retTemp = iStatus.Int();
     if ( retTemp != KErrNone )
         {
@@ -195,5 +183,6 @@ void CDunAtEcomListen::RunL()
 void CDunAtEcomListen::DoCancel()
     {
     FTRACE(FPrint( _L("CDunAtEcomListen::DoCancel()") ));
+    iAtCmdExt->CancelReceiveEcomPluginChange();
     FTRACE(FPrint( _L("CDunAtEcomListen::DoCancel() complete") ));
     }

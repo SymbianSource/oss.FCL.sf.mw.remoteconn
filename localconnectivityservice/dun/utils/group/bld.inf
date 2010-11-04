@@ -23,7 +23,8 @@ PRJ_PLATFORMS
 
 PRJ_EXPORTS
 ../../rom/dunutils.iby         CORE_MW_LAYER_IBY_EXPORT_PATH(dunutils.iby)
-
+../../rom/dunresources.iby     LANGUAGE_MW_LAYER_IBY_EXPORT_PATH(dunresources.iby)
+../loc/dunutils.loc            MW_LAYER_LOC_EXPORT_PATH(dunutils.loc)
 
 PRJ_MMPFILES
 dunutils.mmp

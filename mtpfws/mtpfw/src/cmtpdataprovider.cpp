@@ -502,8 +502,11 @@ void CMTPDataProvider::RouteRequestUnregisterL(const TMTPTypeRequest& aRequest, 
     OstTraceFunctionExit0( CMTPDATAPROVIDER_ROUTEREQUESTUNREGISTERL_EXIT );    
     }
 
-
+#ifdef OST_TRACE_COMPILER_IN_USE
 void CMTPDataProvider::ObjectEnumerationCompleteL(TUint32 aStorageId)
+#else
+void CMTPDataProvider::ObjectEnumerationCompleteL(TUint32 /*aStorageId*/)
+#endif
     {
     OstTraceFunctionEntry0( CMTPDATAPROVIDER_OBJECTENUMERATIONCOMPLETEL_ENTRY );
     OstTrace1(TRACE_NORMAL, CMTPDATAPROVIDER_OBJECTENUMERATIONCOMPLETEL, 

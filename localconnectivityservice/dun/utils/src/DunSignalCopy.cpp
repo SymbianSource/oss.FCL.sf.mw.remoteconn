@@ -152,7 +152,7 @@ TInt CDunSignalCopy::SetMedia( RComm* aComm,
 TInt CDunSignalCopy::IssueRequest()
     {
     FTRACE(FPrint( _L("CDunSignalCopy::IssueRequest()" )));
-    if ( iSignalCopyState != EDunStateIdle )
+    if ( IsActive() )
         {
         FTRACE(FPrint( _L("CDunSignalCopy::IssueRequest() (not ready) complete" ) ));
         return KErrNotReady;
@@ -191,8 +191,6 @@ TInt CDunSignalCopy::IssueRequest()
     else
         {
         FTRACE(FPrint( _L("CDunSignalCopy::IssueRequest() start waiting for change..." ) ));
-        iStatus = KRequestPending;
-        iSignalCopyState = EDunStateSignalCopy;
         comm->NotifySignalChange( iStatus, iSignals, iListenSignals );
         SetActive();
         }
@@ -204,31 +202,11 @@ TInt CDunSignalCopy::IssueRequest()
 // Stops monitoring the endpoint for line status change
 // ---------------------------------------------------------------------------
 //
-TInt CDunSignalCopy::Stop()
+void CDunSignalCopy::Stop()
     {
     FTRACE(FPrint( _L("CDunSignalCopy::Stop()" )));
-    if ( iSignalCopyState != EDunStateSignalCopy )
-        {
-        FTRACE(FPrint( _L("CDunSignalCopy::Stop() (not ready) complete" )));
-        return KErrNotReady;
-        }
-    if ( iStreamType == EDunStreamTypeUpstream )
-        {
-        iComm->NotifySignalChangeCancel();
-        }
-    else if ( iStreamType == EDunStreamTypeDownstream )
-        {
-        iNetwork->NotifySignalChangeCancel();
-        }
-    else
-        {
-        FTRACE(FPrint( _L("CDunSignalCopy::Stop() (ERROR) complete" )));
-        return KErrGeneral;
-        }
     Cancel();
-    iSignalCopyState = EDunStateIdle;
     FTRACE(FPrint( _L("CDunSignalCopy::Stop() complete" )));
-    return KErrNone;
     }
 
 // ---------------------------------------------------------------------------
@@ -261,7 +239,6 @@ void CDunSignalCopy::Initialize()
     FTRACE(FPrint( _L("CDunSignalCopy::Initialize()" ) ));
     iContextInUse = EDunMediaContextUndefined;
     iStreamType = EDunStreamTypeUndefined;
-    iSignalCopyState = EDunStateIdle;
     iListenSignals = 0;
     iSignals = 0;
     iNetwork = NULL;
@@ -439,7 +416,6 @@ void CDunSignalCopy::ChangeDownstreamSignal( TUint aSetMask, TUint aClearMask )
 void CDunSignalCopy::RunL()
     {
     FTRACE(FPrint( _L("CDunSignalCopy::RunL()" ) ));
-    iSignalCopyState = EDunStateIdle;
     TInt retTemp = iStatus.Int();
     if ( retTemp != KErrNone )
         {
@@ -472,4 +448,18 @@ void CDunSignalCopy::RunL()
 //
 void CDunSignalCopy::DoCancel()
     {
+    FTRACE(FPrint( _L("CDunSignalCopy::DoCancel()" ) ));
+    if ( iStreamType == EDunStreamTypeUpstream )
+        {
+        iComm->NotifySignalChangeCancel();
+        }
+    else if ( iStreamType == EDunStreamTypeDownstream )
+        {
+        iNetwork->NotifySignalChangeCancel();
+        }
+    else
+        {
+        FTRACE(FPrint( _L("CDunSignalCopy::DoCancel() (ERROR) complete" )));
+        }
+    FTRACE(FPrint( _L("CDunSignalCopy::DoCancel() complete" ) ));
     }

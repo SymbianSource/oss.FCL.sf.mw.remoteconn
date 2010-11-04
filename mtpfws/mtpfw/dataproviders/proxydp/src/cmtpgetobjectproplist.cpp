@@ -201,6 +201,17 @@ void CMTPGetObjectPropList::RunL()
     OstTraceFunctionExit0( CMTPGETOBJECTPROPLIST_RUNL_EXIT );
     }
 
+#ifdef OST_TRACE_COMPILER_IN_USE
+TInt CMTPGetObjectPropList::RunError(TInt aErr)
+#else
+TInt CMTPGetObjectPropList::RunError(TInt /*aErr*/)
+#endif
+	{
+	OstTrace1(TRACE_ERROR, DUP1_CMTPGETOBJECTPROPLIST_RUNERROR,"CMTPGetObjectPropList::RunError is %d", aErr );
+	TRAP_IGNORE(SendResponseL(EMTPRespCodeGeneralError));
+	return KErrNone;
+	}
+
 /**
 Constructor.
 */	

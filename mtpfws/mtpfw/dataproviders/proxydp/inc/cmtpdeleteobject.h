@@ -57,7 +57,7 @@ private: // From MMTPTransactionProxy
 private: // From CActive
 
     void RunL();
-
+	TInt RunError( TInt aErr );
 private:    
 
     CMTPDeleteObject(MMTPDataProviderFramework& aFramework, MMTPConnection& aConnection);

@@ -136,7 +136,7 @@ TInt CDunSignalNotify::SetMedia( RComm* aComm )
 TInt CDunSignalNotify::IssueRequest()
     {
     FTRACE(FPrint( _L("CDunSignalNotify::IssueRequest()" )));
-    if ( iSignalNotifyState != EDunStateIdle )
+    if ( IsActive() )
         {
         FTRACE(FPrint( _L("CDunSignalNotify::IssueRequest() (not ready) complete" )));
         return KErrNotReady;
@@ -164,8 +164,6 @@ TInt CDunSignalNotify::IssueRequest()
     else
         {
         FTRACE(FPrint( _L("CDunSignalNotify::IssueRequest() start waiting for change..." ) ));
-        iStatus = KRequestPending;
-        iSignalNotifyState = EDunStateSignalNotify;
         iNetwork->NotifySignalChange( iStatus, iSignals, iListenSignals );
         SetActive();
         }
@@ -177,24 +175,11 @@ TInt CDunSignalNotify::IssueRequest()
 // Stops monitoring the endpoint for line status change
 // ---------------------------------------------------------------------------
 //
-TInt CDunSignalNotify::Stop()
+void CDunSignalNotify::Stop()
     {
     FTRACE(FPrint( _L("CDunSignalNotify::Stop()" )));
-    if ( iSignalNotifyState != EDunStateSignalNotify )
-        {
-        FTRACE(FPrint( _L("CDunSignalNotify::Stop() (not ready) complete" )));
-        return KErrNotReady;
-        }
-    if ( !iNetwork )
-        {
-        FTRACE(FPrint( _L("CDunSignalNotify::Stop() (iNetwork) not initialized!" )));
-        return KErrGeneral;
-        }
-    iNetwork->NotifySignalChangeCancel();
     Cancel();
-    iSignalNotifyState = EDunStateIdle;
     FTRACE(FPrint( _L("CDunSignalNotify::Stop() complete" )));
-    return KErrNone;
     }
 
 // ---------------------------------------------------------------------------
@@ -231,7 +216,6 @@ void CDunSignalNotify::Initialize()
     {
     FTRACE(FPrint( _L("CDunSignalNotify::Initialize()" ) ));
     // Don't initialize iUtility here (it is set through NewL)
-    iSignalNotifyState = EDunStateIdle;
     iListenSignals = 0;
     iSignals = 0;
     iNetwork = NULL;
@@ -349,7 +333,6 @@ void CDunSignalNotify::ReportSignalChange( TUint aSetMask, TUint aClearMask )
 void CDunSignalNotify::RunL()
     {
     FTRACE(FPrint( _L("CDunSignalNotify::RunL()" ) ));
-    iSignalNotifyState = EDunStateIdle;
     TInt retTemp = iStatus.Int();
     if ( retTemp != KErrNone )
         {
@@ -383,5 +366,6 @@ void CDunSignalNotify::RunL()
 void CDunSignalNotify::DoCancel()
     {
     FTRACE(FPrint( _L("CDunSignalNotify::DoCancel()" ) ));
+    iNetwork->NotifySignalChangeCancel();
     FTRACE(FPrint( _L("CDunSignalNotify::DoCancel() complete" ) ));
     }

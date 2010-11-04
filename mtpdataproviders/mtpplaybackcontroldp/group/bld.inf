@@ -22,7 +22,7 @@ PRJ_PLATFORMS
 DEFAULT
 
 PRJ_EXPORTS
-mtp_playbackcontroldp.iby   /epoc32/rom/include/mtp_playbackcontroldp.iby
+mtp_playbackcontroldp.iby   CORE_MW_LAYER_IBY_EXPORT_PATH(mtp_playbackcontroldp.iby)
 
 PRJ_MMPFILES 
 mtpplaybackcontroldp.mmp

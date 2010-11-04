@@ -521,6 +521,17 @@ void CMTPMoveObject::RunL()
 	OstTraceFunctionExit0( CMTPMOVEOBJECT_RUNL_EXIT );
 	}
 
+#ifdef OST_TRACE_COMPILER_IN_USE
+TInt CMTPMoveObject::RunError(TInt aErr)
+#else
+TInt CMTPMoveObject::RunError(TInt /*aErr*/)
+#endif
+    {
+    OstTrace1(TRACE_ERROR, CMTPMOVEOBJECT_RUNERROR,"CMTPMoveObject::RunError is %d", aErr );
+	TRAP_IGNORE(SendResponseL(EMTPRespCodeGeneralError));
+    return KErrNone;
+    }
+
 /**
 Override to handle the complete phase of move object
 */

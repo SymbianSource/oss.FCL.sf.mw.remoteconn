@@ -164,17 +164,9 @@ public:
      * Stops sending for write endpoint
      *
      * @since S60 3.2
-     * @return Symbian error code on error, KErrNone otherwise
+     * @return None
      */
-    TInt Stop();
-
-    /**
-     * Stops sending for write endpoint and clears event queue
-     *
-     * @since S60 3.2
-     * @return Symbian error code on error, KErrNone otherwise
-     */
-    TInt StopAndClearQueue();
+    void Stop();
 
     /**
      * Signals completion status in round robin and clears event queue

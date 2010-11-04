@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2008-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -78,13 +78,11 @@ void CDunAtModeListen::ResetData()
 TInt CDunAtModeListen::IssueRequest()
     {
     FTRACE(FPrint( _L("CDunAtModeListen::IssueRequest()" )));
-    if ( iModeListenState != EDunStateIdle )
+    if ( IsActive() )
         {
         FTRACE(FPrint( _L("CDunAtModeListen::IssueRequest() (not ready) complete" ) ));
         return KErrNotReady;
         }
-    iStatus = KRequestPending;
-    iModeListenState = EDunStateModeListening;
     iAtCmdExtCommon->ReceiveModeStatusChange( iStatus, iModePckg );
     SetActive();
     FTRACE(FPrint( _L("CDunAtModeListen::IssueRequest() complete" )));
@@ -95,19 +93,11 @@ TInt CDunAtModeListen::IssueRequest()
 // Stops monitoring for mode status changes
 // ---------------------------------------------------------------------------
 //
-TInt CDunAtModeListen::Stop()
+void CDunAtModeListen::Stop()
     {
     FTRACE(FPrint( _L("CDunAtModeListen::Stop()" )));
-    if ( iModeListenState != EDunStateModeListening )
-        {
-        FTRACE(FPrint( _L("CDunAtModeListen::Stop() (not ready) complete" ) ));
-        return KErrNotReady;
-        }
-    iAtCmdExtCommon->CancelReceiveModeStatusChange();
     Cancel();
-    iModeListenState = EDunStateIdle;
     FTRACE(FPrint( _L("CDunAtModeListen::Stop() complete" )));
-    return KErrNone;
     }
 
 // ---------------------------------------------------------------------------
@@ -147,7 +137,6 @@ void CDunAtModeListen::Initialize()
     {
     // Don't initialize iAtCmdExtCommon here (it is set through NewL)
     // Don't initialize iCallback here (it is set through NewL)
-    iModeListenState = EDunStateIdle;
     iMode = 0;
     }
 
@@ -159,7 +148,6 @@ void CDunAtModeListen::Initialize()
 void CDunAtModeListen::RunL()
     {
     FTRACE(FPrint( _L("CDunAtModeListen::RunL()") ));
-    iModeListenState = EDunStateIdle;
     TInt retTemp = iStatus.Int();
     if ( retTemp != KErrNone )
         {
@@ -180,5 +168,6 @@ void CDunAtModeListen::RunL()
 void CDunAtModeListen::DoCancel()
     {
     FTRACE(FPrint( _L("CDunAtModeListen::DoCancel()") ));
+    iAtCmdExtCommon->CancelReceiveModeStatusChange();
     FTRACE(FPrint( _L("CDunAtModeListen::DoCancel() complete") ));
     }

@@ -202,34 +202,11 @@ TBool CDunDataPusher::SendQueuedData()
 // Stops sending for write endpoint
 // ---------------------------------------------------------------------------
 //
-TInt CDunDataPusher::Stop()
+void CDunDataPusher::Stop()
     {
     FTRACE(FPrint( _L("CDunDataPusher::Stop()" )));
-    if ( iPushState != EDunStateDataPushing )
-        {
-        FTRACE(FPrint( _L("CDunDataPusher::Stop() (not ready) complete" )));
-        return KErrNotReady;
-        }
-    // As the EDunStateDataPushing can be on even with multiple requests,
-    // cancel the actual operation in DoCancel()
     Cancel();
-    iPushState = EDunStateIdle;
     FTRACE(FPrint( _L("CDunDataPusher::Stop() complete" )));
-    return KErrNone;
-    }
-
-// ---------------------------------------------------------------------------
-// Stops sending for write endpoint and clears event queue
-// ---------------------------------------------------------------------------
-//
-TInt CDunDataPusher::StopAndClearQueue()
-    {
-    FTRACE(FPrint( _L("CDunDataPusher::StopAndClearQueue()" )));
-    TInt retVal = Stop();
-    iEventQueue.Reset();
-    iEventIndex = 0;
-    FTRACE(FPrint( _L("CDunDataPusher::StopAndClearQueue() complete" )));
-    return retVal;
     }
 
 // ---------------------------------------------------------------------------
@@ -309,7 +286,6 @@ void CDunDataPusher::Initialize()
     {
     // Don't initialize iUtility here (it is set through NewL)
     // Don't initialize iStreamCallback here (it is set through NewL)
-    iPushState = EDunStateIdle;
     iEventIndex = 0;
     iSocket = NULL;
     iComm = NULL;
@@ -336,16 +312,12 @@ TInt CDunDataPusher::ManageOneEvent()
     const TDesC8* dataToPush = iEventQueue[iEventIndex].iDataToPush;
     if ( iComm )
         {
-        iStatus = KRequestPending;
-        iPushState = EDunStateDataPushing;
         iComm->Write( iStatus, *dataToPush );
         SetActive();
         FTRACE(FPrint( _L("CDunDataPusher::ManageOneEvent() RComm Write() requested for %d bytes... (buffer=0x%08X)" ), dataToPush->Length(), dataToPush ));
         }
     else if ( iSocket )
         {
-        iStatus = KRequestPending;
-        iPushState = EDunStateDataPushing;
         iSocket->Send( *dataToPush, 0, iStatus );
         SetActive();
         FTRACE(FPrint( _L("CDunDataPusher::ManageOneEvent() RSocket Send() requested for %d bytes... (buffer=0x%08X)" ), dataToPush->Length(), dataToPush ));
@@ -408,13 +380,11 @@ void CDunDataPusher::RunL()
         else
             {
             // Last was served so stop processing and notify
-            iPushState = EDunStateIdle;
             iStreamCallback->NotifyDataPushComplete( ETrue );
             }
         }  // if ( !stop )
     else  // stop -> tear down connection
         {
-        iPushState = EDunStateIdle;
         TDunConnectionReason connReason;
         connReason.iReasonType = EDunReasonTypeRW;
         connReason.iContext = EDunMediaContextLocal;
@@ -448,6 +418,10 @@ void CDunDataPusher::DoCancel()
         {
         iSocket->CancelWrite();
         FTRACE(FPrint( _L("CDunDataPusher::DoCancel() (RSocket) cancelled" )));
+        }
+    else
+        {
+        FTRACE(FPrint( _L("CDunDataPusher::DoCancel() (ERROR) complete" )));
         }
     FTRACE(FPrint( _L("CDunDataPusher::DoCancel() complete" )));
     }

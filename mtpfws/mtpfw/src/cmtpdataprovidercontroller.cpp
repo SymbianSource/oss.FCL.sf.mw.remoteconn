@@ -44,7 +44,7 @@ static const TUint KOpaqueDataLength(64);
 /**
 CMTPDataProviderController panics
 */
-_LIT(KMTPPanicCategory, "CMTPDataProviderController");
+//_LIT(KMTPPanicCategory, "CMTPDataProviderController");
 enum TMTPPanicReasons
     {
     EMTPPanicStorageEnumeration = 0,
@@ -53,10 +53,10 @@ enum TMTPPanicReasons
     EMTPPanicDataProviderEnumeration = 3
     };
     
-LOCAL_C void Panic(TInt aReason)
-    {
-    User::Panic(KMTPPanicCategory, aReason);
-    }
+//LOCAL_C void Panic(TInt aReason)
+//    {
+//    User::Panic(KMTPPanicCategory, aReason);
+//    }
 
 /**
 CMTPDataProviderController factory method. 
@@ -346,7 +346,10 @@ Provides a reference to the data provider with the specified index.
 */
 EXPORT_C CMTPDataProvider& CMTPDataProviderController::DataProviderByIndexL(TUint aIndex)
     {
-    __ASSERT_DEBUG((aIndex < iDataProviders.Count()), User::Invariant());
+    if(aIndex >= iDataProviders.Count())
+    	{
+    	User::Leave(KErrOverflow);
+    	}	
     return *(iDataProviders[aIndex]);
     }  
 
@@ -713,30 +716,29 @@ void CMTPDataProviderController::RunL()
     OstTraceFunctionExit0( CMTPDATAPROVIDERCONTROLLER_RUNL_EXIT );
     }
 
-
+#ifdef OST_TRACE_COMPILER_IN_USE
 TInt CMTPDataProviderController::RunError(TInt aError)
+#else
+TInt CMTPDataProviderController::RunError(TInt /*aError*/)
+#endif
     {
     OstTraceFunctionEntry0( CMTPDATAPROVIDERCONTROLLER_RUNERROR_ENTRY );
-    OstTrace1(TRACE_NORMAL, CMTPDATAPROVIDERCONTROLLER_RUNERROR, "Error = %d", aError);
+    OstTraceExt2(TRACE_NORMAL, CMTPDATAPROVIDERCONTROLLER_RUNERROR, "Error = %d, EnumerationState = %d", aError, iEnumerationState);
     
     // If a RunL error happens, there's no point in trying to continue.
     switch (iEnumerationState)
         {
     case EEnumerationStarting:
+        // fall-through intended here
     case EEnumeratingFrameworkStorages:
-        Panic(EMTPPanicStorageEnumeration);
-        break;
-        
+        // fall-through intended here
     case EEnumeratingFrameworkObjects:
-        Panic(EMTPPanicFrameworkEnumeration);
-        break;
-        
+        // fall-through intended here
     case EEnumeratingDataProviderStorages:
-        Panic(EMTPPanicDataProviderStorageEnumeration);
-        break;
-        
+        // fall-through intended here
     case EEnumeratingDataProviderObjects:
-        Panic(EMTPPanicDataProviderEnumeration);
+    	//handle the panic during the backup-resotre creation
+        User::Exit( KErrNone );
         break;
         
     case EUnenumerated:
@@ -1041,6 +1043,7 @@ TBool CMTPDataProviderController::LoadDataProviderL(const TDesC& aResourceFilena
     TUint aUid(0);
     if ( Uid(aResourceFilename,aUid) != KErrNone )
        	{
+		CleanupStack::PopAndDestroy(config);
         OstTraceFunctionExit0( CMTPDATAPROVIDERCONTROLLER_LOADDATAPROVIDERL_EXIT );
         return success;	
        	}
@@ -1370,7 +1373,7 @@ void CMTPDataProviderController::CMTPPendingReqestTimer::Start(TUint aTimeOut)
 void CMTPDataProviderController::CMTPPendingReqestTimer::RunL()
     {
     OstTraceFunctionEntry0( CMTPPENDINGREQESTTIMER_RUNL_ENTRY );
-
+	//ExecutePendingRequestL will not leave
     iDPController->ExecutePendingRequestL();
     
     OstTraceFunctionExit0( CMTPPENDINGREQESTTIMER_RUNL_EXIT );

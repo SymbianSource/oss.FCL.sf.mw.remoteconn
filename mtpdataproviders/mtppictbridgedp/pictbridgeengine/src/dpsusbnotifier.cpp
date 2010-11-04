@@ -268,12 +268,16 @@ void CDpsUsbNotifier::DoCancel()
 // ---------------------------------------------------------------------------
 // 
 // ---------------------------------------------------------------------------
-//       
+//   
+#ifdef OST_TRACE_COMPILER_IN_USE
 TInt CDpsUsbNotifier::RunError(TInt aErr)
+#else
+TInt CDpsUsbNotifier::RunError(TInt /*aErr*/)
+#endif
     {
     OstTraceDef1( OST_TRACE_CATEGORY_PRODUCTION, TRACE_IMPORTANT, CDPSUSBNOTIFIER_RUNERROR, 
             "error code %d", aErr);
-    return aErr;
+    return KErrNone;
     }
     
 // ---------------------------------------------------------------------------

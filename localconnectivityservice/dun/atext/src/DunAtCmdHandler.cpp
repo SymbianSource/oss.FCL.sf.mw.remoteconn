@@ -307,14 +307,13 @@ EXPORT_C TInt CDunAtCmdHandler::StopUrc()
     {
     FTRACE(FPrint( _L("CDunAtCmdHandler::StopUrc()") ));
     TInt i;
-    TInt retVal = KErrNone;
     TInt count = iUrcHandlers.Count();
     for ( i=0; i<count; i++ )
         {
-        retVal = iUrcHandlers[i]->Stop();
+        iUrcHandlers[i]->Stop();
         }
     FTRACE(FPrint( _L("CDunAtCmdHandler::StopUrc() complete") ));
-    return retVal;
+    return KErrNone;
     }
 
 // ---------------------------------------------------------------------------
@@ -1385,7 +1384,7 @@ TBool CDunAtCmdHandler::FindSubCommandQuotes( TChar aCharacter,
     // We still need to save the iParseInfo.iLimit and skip non-delimiter characters.
     if ( aCharacter == '=' )
         {
-        if ( iParseInfo.iLimit < 0 )  // Only first the first '"'
+        if ( iParseInfo.iLimit < 0 )  // Only the first '"'
             {
             iParseInfo.iLimit = aEndIndex - aStartIndex;
             }

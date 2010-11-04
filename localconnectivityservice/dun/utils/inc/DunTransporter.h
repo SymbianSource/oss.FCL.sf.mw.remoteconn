@@ -74,20 +74,10 @@ enum TDunStreamType
 enum TDunState
     {
     EDunStateIdle,
-    EDunStateTransferring,     // Transporter state for data tranfer (up/downstream)
-    EDunStateSignalCopy,       // Transporter state for signal copying (RComm)
-    EDunStateSignalNotify,     // Transporter state for signal notifying (RSocket)
-    EDunStateDataWaiting,      // Transporter state for data waiting
-    EDunStateSignalWaiting,    // Transporter state for signal waiting
-    EDunStateDataPushing,      // Transporter state for data pushing (multiplexer)
     EDunStateCallListen,       // Transporter state for call state listening
-    EDunStateAtCmdHandling,    // ATEXT state for AT command handling
-    EDunStateAtCmdPushing,     // ATEXT state for AT command reply pushing
-    EDunStateAtCmdEchoing,     // ATEXT state for AT command character echoing (text mode)
-    EDunStateAtUrcHandling,    // ATEXT state for URC handling
-    EDunStateModeListening,    // ATEXT state for mode change listening
-    EDunStateEcomListening,    // ATEXT state for ECOM change listening
-    EDunStateNvramListening,   // ATEXT state for NVRAM change listening
+    EDunStateAtCmdHandling,    // State for AT command handling
+    EDunStateAtCmdPushing,     // State for AT command reply pushing
+    EDunStateAtCmdEchoing,     // State for AT command character echoing (text mode)
     EDunStateUiNoting          // Transporter state for UI note showing
     };
 

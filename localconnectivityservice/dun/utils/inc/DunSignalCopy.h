@@ -88,9 +88,9 @@ public:
      * Stops monitoring the endpoint for line status change
      *
      * @since S60 3.2
-     * @return Symbian error code on error, KErrNone otherwise
+     * @return None
      */
-    TInt Stop();
+    void Stop();
 
 private:
 
@@ -193,11 +193,6 @@ private:  // data
      * Used stream type: upstream or downstream
      */
     TDunStreamType iStreamType;
-
-    /**
-     * Current state of connection monitoring: active or inactive
-     */
-    TDunState iSignalCopyState;
 
     /**
      * Signal to listen with RComm::NotifySignalChange()

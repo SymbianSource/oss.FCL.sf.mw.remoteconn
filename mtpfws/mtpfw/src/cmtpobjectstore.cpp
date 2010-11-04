@@ -89,8 +89,13 @@ void CMTPObjectStore::CSnapshotWorker::DoCancel()
     //nothing to do
     }
 
-TInt CMTPObjectStore::CSnapshotWorker::RunErr()
+#ifdef OST_TRACE_COMPILER_IN_USE
+TInt CMTPObjectStore::CSnapshotWorker::RunError(TInt aErr)
+#else
+TInt CMTPObjectStore::CSnapshotWorker::RunError(TInt /*aErr*/)
+#endif
     {
+	OstTrace1(TRACE_ERROR, CSNAPSHOTWORKER_RUNERROR,"CSnapshotWorker::RunError is %d", aErr );
     return KErrNone;
     }
 

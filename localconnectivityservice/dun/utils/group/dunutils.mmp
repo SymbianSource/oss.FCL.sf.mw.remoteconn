@@ -54,10 +54,24 @@ SOURCE                  DunDataPusher.cpp
 SOURCE                  DunNoteHandler.cpp
 SOURCE                  DunUtils.cpp
 
-MW_LAYER_SYSTEMINCLUDE
+START RESOURCE          ../data/dunutils.rss
+TARGETPATH              RESOURCE_FILES_DIR
+HEADER
+LANGUAGE_IDS
+END // RESOURCE
 
 USERINCLUDE             ../inc ../../atext/inc
 
+MW_LAYER_SYSTEMINCLUDE
+
+// Note:
+// The only other SYSTEMINCLUDE should you shall add are Symbian specific ones.
+// If there is a S60 header in the subdirectory then that should be
+// added into the include statements (like #include <phonebook/header.h>)
+//SYSTEMINCLUDE           /epoc32/include/ecom
+SYSTEMINCLUDE           ../../../inc
+
+LIBRARY                 aknnotify.lib
 LIBRARY                 bafl.lib
 #ifdef PRJ_USE_NETWORK_STUBS
 LIBRARY                 c32comm_stub.lib
@@ -71,6 +85,4 @@ LIBRARY                 esock.lib
 LIBRARY                 dunatext.lib
 LIBRARY                 efsrv.lib
 LIBRARY                 euser.lib
-LIBRARY                 HbWidgets.lib
-
 DEBUGLIBRARY            flogger.lib

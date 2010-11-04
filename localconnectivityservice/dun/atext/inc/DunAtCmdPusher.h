@@ -138,9 +138,9 @@ public:
      * Stops AT command handling
      *
      * @since TB9.2
-     * @return Symbian error code on error, KErrNone otherwise
+     * @return None
      */
-    TInt Stop();
+    void Stop();
 
     /**
      * Manages request to abort command handling

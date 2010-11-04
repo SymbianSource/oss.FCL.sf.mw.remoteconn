@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2006-2008 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2006-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -71,7 +71,7 @@ void CDunUsbConfig::ResetData()
 TInt CDunUsbConfig::GetConfigValidityByIndex( TInt aIndex, TBool& aValidity )
     {
     FTRACE(FPrint( _L("CDunUsbConfig::GetConfigValidityByIndex()" )));
-    if ( iConfigState != EUsbConfigStateIdle )
+    if ( IsActive() )
         {
         FTRACE(FPrint( _L("CDunUsbConfig::GetConfigValidityByIndex() (not ready) complete" )));
         return KErrNotReady;
@@ -111,13 +111,11 @@ TInt CDunUsbConfig::GetConfigValidityByIndex( TInt aIndex, TBool& aValidity )
 TInt CDunUsbConfig::IssueRequest()
     {
     FTRACE(FPrint( _L("CDunUsbConfig::IssueRequest()" )));
-    if ( iConfigState != EUsbConfigStateIdle )
+    if ( IsActive() )
         {
         FTRACE(FPrint( _L("CDunUsbConfig::IssueRequest() (not ready) complete" )));
         return KErrNotReady;
         }
-    iStatus = KRequestPending;
-    iConfigState = EUsbConfigStateWaiting;
     iAcmProperty.Subscribe( iStatus );
     SetActive();
     FTRACE(FPrint( _L("CDunUsbConfig::IssueRequest() complete" )));
@@ -128,19 +126,11 @@ TInt CDunUsbConfig::IssueRequest()
 // Stops listening for ACM configuration changes
 // ---------------------------------------------------------------------------
 //
-TInt CDunUsbConfig::Stop()
+void CDunUsbConfig::Stop()
     {
     FTRACE(FPrint( _L("CDunUsbConfig::Stop()" )));
-    if ( iConfigState != EUsbConfigStateWaiting )
-        {
-        FTRACE(FPrint( _L("CDunUsbConfig::Stop() (not ready) complete" )));
-        return KErrNotReady;
-        }
-    iAcmProperty.Cancel();
     Cancel();
-    iConfigState = EUsbConfigStateIdle;
     FTRACE(FPrint( _L("CDunUsbConfig::Stop() complete" )));
-    return KErrNone;
     }
 
 // ---------------------------------------------------------------------------
@@ -182,7 +172,6 @@ void CDunUsbConfig::Initialize()
     {
     // Don't initialize iCallback here (it is set through NewL)
     // Don't initialize iProtocol here (it is set through NewL)
-    iConfigState = EUsbConfigStateIdle;
     iConfig.iAcmConfigVersion = 0;
     iConfig.iAcmCount = 0;
     iConfigExist = EFalse;
@@ -228,7 +217,6 @@ TInt CDunUsbConfig::GetConfiguration( TPublishedAcmConfigs& aConfig )
 void CDunUsbConfig::RunL()
     {
     FTRACE(FPrint( _L("CDunUsbConfig::RunL()" )));
-    iConfigState = EUsbConfigStateIdle;
 
     TPublishedAcmConfigs newConfig;
     TInt retTemp = GetConfiguration( newConfig );
@@ -289,4 +277,7 @@ void CDunUsbConfig::RunL()
 //
 void CDunUsbConfig::DoCancel()
     {
+    FTRACE(FPrint( _L("CDunUsbConfig::DoCancel()" )));
+    iAcmProperty.Cancel();
+    FTRACE(FPrint( _L("CDunUsbConfig::DoCancel() complete" )));
     }

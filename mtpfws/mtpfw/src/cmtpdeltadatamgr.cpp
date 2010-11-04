@@ -105,7 +105,7 @@ EXPORT_C void CMtpDeltaDataMgr::CreateDeltaDataTableL()
 			}
 		}
 	LEAVEIFERROR(iDeltaTableBatched.Open(iDatabase, KMTPDeltaDataTable, RDbRowSet::EUpdatable),
-			        OstTrace0( TRACE_ERROR, DUP1_CMTPDELTADATAMGR_CREATEDELTADATATABLEL, "MTPDeltaDataTable open error!" ));       
+			        OstTrace0( TRACE_ERROR, DUP2_CMTPDELTADATAMGR_CREATEDELTADATATABLEL, "MTPDeltaDataTable open error!" ));       
 		
 	OstTraceFunctionExit0( CMTPDELTADATAMGR_CREATEDELTADATATABLEL_EXIT );
 	}
@@ -134,7 +134,7 @@ EXPORT_C void CMtpDeltaDataMgr::CreateAnchorIdTableL()
 			}
 		}
 	LEAVEIFERROR(iAnchorTableBatched.Open(iDatabase, KAnchorIdTable, RDbRowSet::EUpdatable),
-		OstTrace0( TRACE_ERROR, DUP1_CMTPDELTADATAMGR_CREATEANCHORIDTABLEL, "AnchorIdTable open error!" ));       
+		OstTrace0( TRACE_ERROR, DUP2_CMTPDELTADATAMGR_CREATEANCHORIDTABLEL, "AnchorIdTable open error!" ));       
 		
 	OstTraceFunctionExit0( CMTPDELTADATAMGR_CREATEANCHORIDTABLEL_EXIT );
 	}

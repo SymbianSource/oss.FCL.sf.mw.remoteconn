@@ -13,7 +13,7 @@
 *
 * Description:  This class implements functions of setting personality to 
 *                MTP. 
-*  Version     : %version: 2 % 
+*  Version     : %version: 3 % 
 *
 */
 
@@ -122,9 +122,13 @@ void CDpsPtpNotifier::DoCancel()
 // 
 // ---------------------------------------------------------------------------
 //
+#ifdef OST_TRACE_COMPILER_IN_USE
 TInt CDpsPtpNotifier::RunError(TInt aErr)
+#else
+TInt CDpsPtpNotifier::RunError(TInt /*aErr*/)
+#endif
     {
     OstTraceDef1( OST_TRACE_CATEGORY_PRODUCTION, TRACE_IMPORTANT, CDPSPTPNOTIFIER_RUNERROR, 
             "error code %d", aErr);
-    return aErr;
+    return KErrNone;
     }

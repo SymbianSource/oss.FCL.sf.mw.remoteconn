@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2008-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -84,13 +84,11 @@ void CDunAtUrcHandler::ResetData()
 TInt CDunAtUrcHandler::IssueRequest()
     {
     FTRACE(FPrint( _L("CDunAtUrcHandler::IssueRequest()") ));
-    if ( iUrcHandleState != EDunStateIdle )
+    if ( IsActive() )
         {
         FTRACE(FPrint( _L("CDunAtUrcHandler::IssueRequest() (not ready) complete") ));
         return KErrNotReady;
         }
-    iStatus = KRequestPending;
-    iUrcHandleState = EDunStateAtUrcHandling;
     iAtCmdExt->ReceiveUnsolicitedResult( iStatus, iRecvBuffer, iOwnerUidPckg );
     SetActive();
     // Next mark ownership
@@ -112,20 +110,12 @@ TInt CDunAtUrcHandler::IssueRequest()
 // Stops waiting for an incoming URC message
 // ---------------------------------------------------------------------------
 //
-TInt CDunAtUrcHandler::Stop()
+void CDunAtUrcHandler::Stop()
     {
     FTRACE(FPrint( _L("CDunAtUrcHandler::Stop()") ));
-    if ( iUrcHandleState != EDunStateAtUrcHandling )
-        {
-        FTRACE(FPrint( _L("CDunAtUrcHandler::Stop() (not ready) complete" )));
-        return KErrNotReady;
-        }
-    iAtCmdExt->CancelReceiveUnsolicitedResult( iOwnerUid );
     Cancel();
-    iUrcHandleState = EDunStateIdle;
     FTRACE(FPrint( _L("CDunAtUrcHandler::Stop() complete") ));
     // Note: Don't mark iStarted to EFalse here as it is used to get the UID
-    return KErrNone;
     }
 
 // ---------------------------------------------------------------------------
@@ -173,7 +163,6 @@ void CDunAtUrcHandler::ConstructL()
 void CDunAtUrcHandler::Initialize()
     {
     // Don't initialize iStreamCallback here (it is set through NewL)
-    iUrcHandleState = EDunStateIdle;
     iOwnerUid = TUid::Null();
     iStarted = EFalse;
     }
@@ -186,7 +175,6 @@ void CDunAtUrcHandler::Initialize()
 void CDunAtUrcHandler::RunL()
     {
     FTRACE(FPrint( _L("CDunAtUrcHandler::RunL()") ));
-    iUrcHandleState = EDunStateIdle;
     TInt retTemp = iStatus.Int();
     if ( retTemp != KErrNone )
         {
@@ -214,6 +202,7 @@ void CDunAtUrcHandler::RunL()
 void CDunAtUrcHandler::DoCancel()
     {
     FTRACE(FPrint( _L("CDunAtUrcHandler::DoCancel()") ));
+    iAtCmdExt->CancelReceiveUnsolicitedResult( iOwnerUid );
     FTRACE(FPrint( _L("CDunAtUrcHandler::DoCancel() complete") ));
     }
 

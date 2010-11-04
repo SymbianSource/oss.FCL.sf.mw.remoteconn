@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2008-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -107,9 +107,9 @@ public:
      * Stops waiting for Ecom plugin install/uninstall/version status changes
      *
      * @since TB9.2
-     * @return Symbian error code on error, KErrNone otherwise
+     * @return None
      */
-    TInt Stop();
+    void Stop();
 
 private:
 
@@ -159,11 +159,6 @@ private:  // data
      * Not own.
      */
     MDunAtEcomListen* iCallback;
-
-    /**
-     * Current state of ECom interface listening: active or inactive
-     */
-    TDunState iEcomListenState;
 
     /**
      * UID of the installed, uninstalled or changed plugin

@@ -81,7 +81,8 @@ CMTPServer::~CMTPServer()
         {
         iFrameworkSingletons.ConnectionMgr().StopTransports();
         iFrameworkSingletons.DpController().UnloadDataProviders();
-        iFrameworkSingletons.Close();	    
+        iFrameworkSingletons.Close();	 
+        iFrameworkSingletonsOpened = EFalse;
         }
     REComSession::FinalClose();
     OstTraceFunctionExit0( CMTPSERVER_CMTPSERVER_DES_EXIT );
@@ -145,7 +146,7 @@ void CMTPServer::DropSession()
     {
     OstTraceFunctionEntry0( CMTPSERVER_DROPSESSION_ENTRY );
          
-    if (--iSessionCount==0 && iFrameworkSingletons.ConnectionMgr().TransportCount() == 0)
+    if (--iSessionCount==0 && iFrameworkSingletonsOpened && iFrameworkSingletons.ConnectionMgr().TransportCount() == 0)
         {
         // No active MTP client API sessions remain, start the shutdown timer.
         if (iShutdown)
@@ -182,7 +183,7 @@ CMTPServer* CMTPServer::NewLC()
 Constructor.
 */    
 CMTPServer::CMTPServer() : 
-    CPolicyServer(CActive::EPriorityStandard, KMTPServerPolicy)
+    CPolicyServer(CActive::EPriorityStandard, KMTPServerPolicy),iFrameworkSingletonsOpened(EFalse)
     {
 
     }

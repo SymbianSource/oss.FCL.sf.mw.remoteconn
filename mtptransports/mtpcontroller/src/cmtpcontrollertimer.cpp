@@ -94,11 +94,19 @@ void CMTPControllerTimer::RunL()
         {
         OstTrace0( TRACE_NORMAL, DUP2_CMTPCONTROLLERTIMER_RUNL, "Start transport to launch mtp server" );
         
-        LEAVEIFERROR(iMTPClient.Connect(),
-				OstTrace1( TRACE_NORMAL, DUP3_CMTPCONTROLLERTIMER_RUNL, "connect to mtp server failed! error code %d", munged_err ));
-        iMTPClient.StartTransport(KMTPBtTransportUid);
-        iStopTransport = EFalse;
-        iMTPOperator->SubscribeConnState();
+		TInt err = iMTPClient.Connect();
+		if ( err == KErrNone )
+			{
+			iMTPClient.StartTransport(KMTPBtTransportUid);
+	        iStopTransport = EFalse;
+		   iMTPOperator->SubscribeConnState();
+			}
+		else
+			{
+			OstTrace1( TRACE_NORMAL, DUP3_CMTPCONTROLLERTIMER_RUNL, "connect to mtp server failed! error code %d", err );
+			}
+        
         }
     OstTraceFunctionExit0( CMTPCONTROLLERTIMER_RUNL_EXIT );
     }
+   

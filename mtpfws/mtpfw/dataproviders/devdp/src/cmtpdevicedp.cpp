@@ -811,8 +811,13 @@ void CMTPDeviceInfoTimer::RunL()
         case EStartTimer:
             OstTrace0(TRACE_NORMAL, DUP1_CMTPDEVICEINFOTIMER_RUNL, "CMTPDeviceInfoTimer::RunL - EStartTimer");
             // Open the USB device interface.
-            LEAVEIFERROR(iLdd.Open(0),
-                    OstTrace0( TRACE_ERROR, DUP4_CMTPDEVICEINFOTIMER_RUNL, "Open the USB device interface error!" ));
+			TInt err;
+			err = iLdd.Open(0);
+			if ( err != KErrNone )
+			{
+				OstTrace0( TRACE_ERROR, DUP4_CMTPDEVICEINFOTIMER_RUNL, "Open the USB device interface error!" );
+				Panic(EMTPDevDpConnectionNotFound);
+			}
             iLdd.ReEnumerate(iStatus);
             iDeviceProvider.SetConnectMac();
             iState = EUSBReEnumerate;
@@ -827,7 +832,7 @@ void CMTPDeviceInfoTimer::RunL()
         }
     OstTraceFunctionExit0( CMTPDEVICEINFOTIMER_RUNL_EXIT );
     }
-    
+
 /** 
 Constructor
 */

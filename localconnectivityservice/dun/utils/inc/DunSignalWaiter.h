@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2006-2007 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2006-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -88,9 +88,9 @@ public:
      * Stops monitoring for new data
      *
      * @since S60 3.2
-     * @return Symbian error code on error, KErrNone otherwise
+     * @return None
      */
-    TInt Stop();
+    void Stop();
 
 private:
 
@@ -139,11 +139,6 @@ private:  // data
      * Not own.
      */
     MDunChannelAllocator* iChannelCallback;
-
-    /**
-     * Current state of data monitoring: active or inactive
-     */
-    TDunState iSignalWaiterState;
 
     /**
      * Signals set when RComm::NotifySignalChange() request completes
