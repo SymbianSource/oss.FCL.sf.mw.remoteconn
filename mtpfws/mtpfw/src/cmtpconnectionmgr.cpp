@@ -495,8 +495,10 @@ Resume suspended transport
 TInt CMTPConnectionMgr::DoResumeSuspendedTransport( TAny* aSelf )
     {
     CMTPConnectionMgr* self = reinterpret_cast< CMTPConnectionMgr* >( aSelf );
-    __ASSERT_DEBUG( ( self->iSuspendedTransports.Count() > 0 ), User::Invariant() );
-    TRAP_IGNORE( self->StartTransportL( self->iSuspendedTransports[self->iSuspendedTransports.Count()-1] ) );
+    if(self->iSuspendedTransports.Count() > 0)
+    	{
+    	TRAP_IGNORE( self->StartTransportL( self->iSuspendedTransports[self->iSuspendedTransports.Count()-1] ) );
+    	}
     return KErrNone;
     }
 

@@ -67,6 +67,11 @@ private: // Owned
     The MTP framework singletons.
     */
     RMTPFramework   iFrameworkSingletons;
+    
+    /**
+    Flag for the MTP framework singletons.
+    **/
+    TBool   iFrameworkSingletonsOpened;
 	
 	/**
 	The active MTP client API session count.

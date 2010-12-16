@@ -41,7 +41,7 @@ static const TUint KOpaqueDataLength(64);
 /**
 CMTPDataProviderController panics
 */
-_LIT(KMTPPanicCategory, "CMTPDataProviderController");
+//_LIT(KMTPPanicCategory, "CMTPDataProviderController");
 enum TMTPPanicReasons
     {
     EMTPPanicStorageEnumeration = 0,
@@ -50,10 +50,10 @@ enum TMTPPanicReasons
     EMTPPanicDataProviderEnumeration = 3
     };
     
-LOCAL_C void Panic(TInt aReason)
-    {
-    User::Panic(KMTPPanicCategory, aReason);
-    }
+//LOCAL_C void Panic(TInt aReason)
+//    {
+//    User::Panic(KMTPPanicCategory, aReason);
+//    }
 
 /**
 CMTPDataProviderController factory method. 
@@ -333,7 +333,10 @@ Provides a reference to the data provider with the specified index.
 */
 EXPORT_C CMTPDataProvider& CMTPDataProviderController::DataProviderByIndexL(TUint aIndex)
     {
-    __ASSERT_DEBUG((aIndex < iDataProviders.Count()), User::Invariant());
+    if(aIndex >= iDataProviders.Count())
+    	{
+    	User::Leave(KErrOverflow);
+    	}	
     return *(iDataProviders[aIndex]);
     }  
 
@@ -700,26 +703,22 @@ TInt CMTPDataProviderController::RunError(TInt /*aError*/)
 #endif
     {
     __FLOG(_L8("RunError - Entry"));
-    __FLOG_VA((_L8("Error = %d"), aError));
+    __FLOG_VA((_L8("Error = %d, iEnumerationState = %d"), aError,iEnumerationState));
     
     // If a RunL error happens, there's no point in trying to continue.
     switch (iEnumerationState)
         {
     case EEnumerationStarting:
+        // fall-through intended here
     case EEnumeratingFrameworkStorages:
-        Panic(EMTPPanicStorageEnumeration);
-        break;
-        
+        // fall-through intended here
     case EEnumeratingFrameworkObjects:
-        Panic(EMTPPanicFrameworkEnumeration);
-        break;
-        
+        // fall-through intended here
     case EEnumeratingDataProviderStorages:
-        Panic(EMTPPanicDataProviderStorageEnumeration);
-        break;
-        
+        // fall-through intended here
     case EEnumeratingDataProviderObjects:
-        Panic(EMTPPanicDataProviderEnumeration);
+    	//handle the panic during the backup-resotre creation
+        User::Exit( KErrNone );
         break;
         
     case EUnenumerated:

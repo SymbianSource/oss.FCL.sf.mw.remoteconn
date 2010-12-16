@@ -74,9 +74,12 @@ CMTPServer::~CMTPServer()
     __FLOG(_L8("~CMTPServer - Entry"));
     delete iShutdown;
     iShutdown = NULL;
-    iFrameworkSingletons.ConnectionMgr().StopTransports();
-    iFrameworkSingletons.DpController().UnloadDataProviders();
-    iFrameworkSingletons.Close();
+    if(iFrameworkSingletonsOpened)
+        {
+        iFrameworkSingletons.ConnectionMgr().StopTransports();
+        iFrameworkSingletons.DpController().UnloadDataProviders();
+        iFrameworkSingletons.Close();	    
+        }
     REComSession::FinalClose();
     __FLOG(_L8("~CMTPServer - Exit"));
     __FLOG_CLOSE;
@@ -188,6 +191,7 @@ void CMTPServer::ConstructL()
     __FLOG(_L8("ConstructL - Entry"));
     StartL(KMTPServerName);
     iFrameworkSingletons.OpenL();
+    iFrameworkSingletonsOpened = ETrue;
     if (!iShutdown)
         {
         TRAPD(error, iShutdown = CMTPShutdown::NewL());

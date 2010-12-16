@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SystemDefinition xmlns:sf="http://www.symbian.org/system-definition" schema="3.0.0" id-namespace="http://www.nokia.com/schema/drd/system-definition">
+ <package id="sf:remoteconn" name="Remote Connectivity" levels="plugin framework server generic specific">
+    <collection id="sf:remoteconn_info" name="Remote Connectivity Info" level="specific">
+      <component id="nokia_remoteconn_metadata" name="Nokia Remote Connectivity Metadata" class="config" introduced="^2" purpose="development" target="desktop">
+      <unit mrp="nokia_remoteconn_metadata.mrp"/>
+     </component>
+     <component id="connectivitydoc" name="Connectivity Documentation" introduced="^2" purpose="optional" class="doc">
+      <unit mrp="../../remoteconn_info/connectivitydoc/group/connectivity_documentation.mrp"/>
+     </component>
+     <component id="mtpdoc" name="MTP Documentation" introduced="^2" purpose="optional" class="doc">
+      <unit mrp="../../remoteconn_info/mtpdoc/group/mtp_documentation.mrp"/>
+     </component>
+  </collection>
+    <collection id="sf:mtptransports" name="MTP Transports" level="plugin">
+     <component id="mtpbttransport" name="MTP Bluetooth Transport" introduced="^3" purpose="optional" class="plugin">
+      <unit bldFile="../../mtptransports/mtpbttransport/group" mrp="../../mtptransports/mtpbttransport/group/mtp_bt.mrp"/>
+     </component>
+    </collection>
+     <collection id="sf:mtpfws" name="MTP Frameworks" level="framework">
+      <component id="mtpintegrationtest" name="MTP Integration Test" introduced="^2" purpose="development" filter="test">
+        <unit bldFile="../../mtpfws/mtpintegrationtest/group" mrp="../../mtpfws/mtpintegrationtest/group/mtp_test.mrp"/>
+      </component>
+    </collection>
+    <collection id="sf:mtpdataproviders" name="MTP Data Providers" level="generic">
+     <component id="mtpwmpextndp" name="WMP Extension Data Provider" introduced="^2" purpose="optional" class="plugin">
+      <unit bldFile="../../mtpdataproviders/mtpwmpextndp/group" mrp="../../mtpdataproviders/mtpwmpextndp/group/mtp_wmpextndp.mrp"/>
+     </component>
+     <component id="mtpimagedp" name="MTP Image Data Provider" filter="gt" introduced="^3" purpose="optional" class="plugin">
+      <unit bldFile="../../mtpdataproviders/mtpimagedp/group" mrp="../../mtpdataproviders/mtpimagedp/group/mtp_imagedp.mrp"/>
+     </component>
+     <component id="mtppictbridgedp" name="MTP PictBridge Data Provider" filter="gt" introduced="^3" purpose="optional" class="plugin">
+      <unit bldFile="../../mtpdataproviders/mtppictbridgedp/group" mrp="../../mtpdataproviders/mtppictbridgedp/group/mtp_pictbridgedp.mrp"/>
+     </component>
+     <component id="mtpmetadatadp" name="MTP Device Metadata Data Provider" introduced="^3" purpose="optional" class="plugin">
+      <unit bldFile="../../mtpdataproviders/mtpmetadatadp/group" mrp="../../mtpdataproviders/mtpmetadatadp/group/mtp_metadatadp.mrp"/>     
+     </component>
+     <component id="mtpstatusdp" name="MTP Status Data Provider" introduced="^3" purpose="optional" class="plugin">
+      <unit bldFile="../../mtpdataproviders/mtpstatusdp/group" mrp="../../mtpdataproviders/mtpstatusdp/group/mtp_statusdp.mrp"/>
+     </component>
+    </collection>
+   </package>
+</SystemDefinition>
